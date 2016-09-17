@@ -3,6 +3,11 @@
     their own module.
 */
 
+mod base;
+pub mod window;
+
+pub use controls::window::Window;
+
 use std::hash::Hash;
 use winapi::HWND;
 
