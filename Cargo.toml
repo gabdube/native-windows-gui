@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Gabriel Dube <gdube.475@gmail.com>"]
 
 [dependencies]
+winapi = "0.2.8"
