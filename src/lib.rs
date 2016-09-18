@@ -8,10 +8,13 @@ extern crate kernel32;
 
 pub mod controls;
 
+use std::ptr;
+use std::mem;
 use std::hash::Hash;
 use std::collections::HashMap;
-use winapi::HWND;
 use controls::ControlTemplate;
+use winapi::{MSG, HWND};
+use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
 type ControlCollection<ID> = HashMap<ID, HWND>;
 
@@ -63,3 +66,22 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     }
 
 }
+
+impl<ID: Eq+Clone+Hash> Drop for Ui<ID> {
+    fn drop(&mut self) {
+        unsafe { Box::from_raw(self.controls); }
+        controls::cleanup();
+    }
+}
+
+/**
+    Wait for system events and dispatch them
+*/
+pub fn dispatch_events() { unsafe{ 
+    let mut msg: MSG = mem::uninitialized();
+    while GetMessageW(&mut msg, ptr::null_mut(), 0, 0) != 0 {
+        TranslateMessage(&msg); 
+        DispatchMessageW(&msg); 
+    }
+}}
+

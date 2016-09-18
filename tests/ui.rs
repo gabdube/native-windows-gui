@@ -15,4 +15,5 @@ fn test_ui() {
 
     ui.new_control("MainWindow", main_window).unwrap();
 
+    nwg::dispatch_events();
 }

@@ -14,7 +14,7 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX};
 use kernel32::{GetModuleHandleW, GetLastError};
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
-  CreateWindowExW};
+  CreateWindowExW, UnregisterClassW};
 
 const CLASS_NAME: &'static str = "RustyWindow";
 
@@ -95,7 +95,7 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
     // Resolve the parent if provided, else return an empty handle
     let parent: HWND = match base.parent {
         Some(id) => {
-            let controls: &mut ::ControlCollection<ID> = unsafe{ &mut *ui.controls };
+            let controls: &mut ::ControlCollection<ID> = &mut *ui.controls;
             match controls.get(&id) {
                 Some(h) => *h,
                 None => { return Err(()); }
@@ -140,4 +140,11 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
     } else {
         Ok(hwnd)
     }
+}
+
+pub unsafe fn cleanup() {
+    let hmod = GetModuleHandleW(ptr::null());
+    let class_name = to_utf16(CLASS_NAME.to_string());
+
+    UnregisterClassW(class_name.as_ptr(), hmod);
 }

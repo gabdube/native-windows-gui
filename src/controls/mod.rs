@@ -21,3 +21,7 @@ pub trait ControlTemplate<ID: Eq+Clone+Hash > {
     */
     fn create(&self,  ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()>;
 }
+
+pub fn cleanup() {
+    unsafe { base::cleanup() }
+}
