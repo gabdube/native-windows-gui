@@ -31,7 +31,7 @@ pub fn set_handle_data<T>(handle: HWND, data: T) {
 }
 
 pub fn get_handle_data<'a, T>(handle: HWND) -> &'a mut T {
-    unsafe { base::get_handle_data(handle) }
+    unsafe { base::get_handle_data(handle).unwrap() }
 }
 
 pub fn free_handle_data<T>(handle: HWND) {

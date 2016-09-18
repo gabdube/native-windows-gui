@@ -3,20 +3,20 @@
 */
 
 use std::hash::Hash;
-use winapi::{UINT};
 
-pub type Eventfunc0<ID> = Box<Fn(::Ui<ID>, &ID)>;
+pub type Ef0<ID> = Box<Fn(&mut ::Ui<ID>, &ID)>;
+pub type Ef4<ID, A, B, C, D> = Box<Fn(&mut ::Ui<ID>, &ID, A, B, C, D)>;
 
 pub enum Event {
-    MouseClick,
+    MouseUp,
     ButtonClick,
     Unknown,
     Last
 }
 
 pub enum EventCallback<ID: Eq+Hash+Clone> {
-    MouseClick(Eventfunc0<ID>),
-    ButtonClick(Eventfunc0<ID>)
+    MouseUp(Ef4<ID, i32, i32, u32, u32>),
+    ButtonClick(Ef0<ID>)
 }
 
 /**
@@ -24,16 +24,7 @@ pub enum EventCallback<ID: Eq+Hash+Clone> {
 */
 pub fn map_callback<ID: Eq+Hash+Clone>(cb: &EventCallback<ID>) -> Event {
     match cb {
-        &EventCallback::MouseClick(_) => Event::MouseClick,
+        &EventCallback::MouseUp(_) => Event::MouseUp,
         &EventCallback::ButtonClick(_) => Event::ButtonClick
-    }
-}
-
-/**
-    Map system events to application events
-*/
-pub fn map_system_event(evt: UINT) -> Event {
-    match evt {
-        _ => Event::Unknown
     }
 }

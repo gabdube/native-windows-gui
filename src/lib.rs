@@ -8,6 +8,7 @@ extern crate kernel32;
 
 pub mod controls;
 pub mod events;
+pub mod constants;
 
 use std::ptr;
 use std::mem;
@@ -15,14 +16,14 @@ use std::hash::Hash;
 use std::collections::HashMap;
 use std::iter::FromIterator;
 use controls::ControlTemplate;
-use winapi::{MSG, HWND, UINT};
+use winapi::{MSG, HWND};
 use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
 type ControlCollection<ID> = HashMap<ID, HWND>;
 type CallbackCollection<ID> = Vec<Vec<events::EventCallback<ID>>>;
 
 /**
-    Structure stored the every window.
+    Structure stored in every window.
 */
 struct WindowData<ID: Eq+Clone+Hash > {
     pub id: ID,
@@ -71,7 +72,7 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
 
             // Store the window data
             let event_range = 0..events::Event::Last as usize;
-            let mut callbacks = Vec::from_iter(event_range.map(|_|
+            let callbacks = Vec::from_iter(event_range.map(|_|
                 Vec::new()
             ));
 

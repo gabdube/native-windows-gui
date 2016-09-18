@@ -8,11 +8,13 @@ use std::ptr;
 use std::mem;
 use std::hash::Hash;
 
+use events::{Event, EventCallback};
+
 use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
   WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
-  GWLP_USERDATA};
+  GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM};
 use kernel32::{GetModuleHandleW, GetLastError};
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW};
@@ -30,9 +32,72 @@ pub struct WindowBase<ID: Eq+Hash+Clone> {
 }
 
 /**
+    Map system events to application events
+*/
+#[inline(always)]
+fn map_system_event(evt: UINT) -> Event {
+    match evt {
+        WM_LBUTTONUP => Event::MouseUp,
+        WM_RBUTTONUP => Event::MouseUp,
+        WM_MBUTTONUP => Event::MouseUp,
+        _ => Event::Unknown
+    }
+}
+
+/**
+    Translate a system button event param's
+*/
+fn handle_btn(msg: UINT, w: WPARAM, l: LPARAM) -> (i32, i32, u32, u32) {
+    use ::constants::*;
+
+    let (x,y): (i32, i32) = (GET_X_LPARAM(l), GET_Y_LPARAM(l));
+    let modifiers = (w as u32) & (MOD_MOUSE_CTRL | MOD_MOUSE_SHIFT);
+    let mut btn = (w as u32) & (BTN_MOUSE_MIDDLE | BTN_MOUSE_RIGHT | BTN_MOUSE_LEFT );
+    btn |= match msg {
+        WM_LBUTTONUP => BTN_MOUSE_LEFT,
+        WM_RBUTTONUP => BTN_MOUSE_RIGHT,
+        WM_MBUTTONUP => BTN_MOUSE_MIDDLE,
+        _ => 0
+    };
+
+    (x, y, btn, modifiers)
+}
+
+/**
+    Execute an event
+*/
+#[inline(always)]
+fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, caller: &ID, msg: UINT, w: WPARAM, l: LPARAM) {
+    
+    match ec {
+        &EventCallback::MouseUp(ref c) => {
+            let (x, y, btn, modifiers) = handle_btn(msg, w, l);
+            c(ui, caller, x, y, btn, modifiers)
+        },
+        _ => {}
+    }
+}
+
+/**
     Custom window procedure for none built-in types
 */
 unsafe extern "system" fn wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
+    // If the window data was initialized, eval callbacks
+    if let Some(data) = get_handle_data::<::WindowData<ID>>(hwnd) {
+
+        // Build a temporary Ui that is then forgetted to pass it to the callbacks.
+        let mut ui = ::Ui{controls: data.controls};
+        
+        // Eval the callbacks
+        let index = map_system_event(msg) as usize;
+        let functions = &data.callbacks[index];
+        for f in functions.iter() {
+            dispatch_event::<ID>(f, &mut ui, &data.id, msg, w, l); 
+        }
+
+        mem::forget(ui);
+    }
+    
     match msg {
         WM_CREATE => 0,
         WM_CLOSE => {PostQuitMessage(0); 0},
@@ -165,10 +230,14 @@ pub unsafe fn set_handle_data<T>(handle: HWND, data: T) {
 /**
     Retrieve data in a window
 */
-pub unsafe fn get_handle_data<'a, T>(handle: HWND) -> &'a mut T {
+pub unsafe fn get_handle_data<'a, T>(handle: HWND) -> Option<&'a mut T> {
     let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
-    let data: *mut T = mem::transmute(data_ptr);
-    &mut *data
+    if data_ptr != 0 {
+        let data: *mut T = mem::transmute(data_ptr);
+        Some(&mut *data)
+    } else {
+        None
+    }
 }
 
 /**
