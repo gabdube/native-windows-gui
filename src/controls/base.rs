@@ -4,6 +4,7 @@
 
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
+use std::os::raw::c_int;
 use std::ptr;
 use std::mem;
 use std::hash::Hash;
@@ -14,10 +15,14 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
   WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
-  GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM};
-use kernel32::{GetModuleHandleW, GetLastError};
+  GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
+  RECT, LONG, SWP_NOMOVE, SWP_NOZORDER, };
+
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
-  CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW};
+  CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
+  GetClientRect, SetWindowPos};
+
+use kernel32::{GetModuleHandleW, GetLastError};
 
 const CLASS_NAME: &'static str = "RustyWindow";
 
@@ -148,6 +153,22 @@ unsafe fn register_custom_class<ID: Eq+Clone+Hash>(hmod: HINSTANCE, name: &Vec<u
     }
 }
 
+/** 
+    Fix: Window size include the non client area. This behaviour is not wanted
+    Resize the client area to match the "true" size. 
+*/
+unsafe fn fix_overlapped_window_size(handle: HWND, size: (u32, u32)) {
+    let mut rect: RECT = mem::uninitialized();
+    GetClientRect(handle, &mut rect);
+
+    let delta_width = size.0 - (rect.right as u32);
+    let delta_height = size.1 - (rect.bottom as u32);
+    
+    SetWindowPos(handle, ptr::null_mut(), 0, 0,
+      (size.0+delta_width) as c_int, (size.1+delta_height) as c_int,
+      SWP_NOMOVE|SWP_NOZORDER);
+}
+
 /**
     Create a new window. The window details is determined by the base 
     parameters passed to the function.
@@ -190,7 +211,7 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
         else { flags |= WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX}
     }
 
-     let hwnd = CreateWindowExW(
+    let hwnd = CreateWindowExW(
         0, class_name.as_ptr(), window_name.as_ptr(),
         flags,
         base.position.0, base.position.1,
@@ -204,6 +225,9 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
     if hwnd.is_null() {
         Err(())
     } else {
+        if flags & WS_OVERLAPPEDWINDOW != 0 {
+            fix_overlapped_window_size(hwnd, base.size);
+        }
         Ok(hwnd)
     }
 }

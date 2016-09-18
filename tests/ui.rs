@@ -7,8 +7,8 @@ fn test_ui() {
     let mut ui: nwg::Ui<&'static str> = nwg::Ui::new();
 
     let main_window = nwg::controls::Window {
-        caption: "Test".to_string(),
-        size: (500, 110),
+        caption: "Hello".to_string(),
+        size: (500, 70),
         position: (100, 100),
         visible: true,
         resizable: false
@@ -16,7 +16,7 @@ fn test_ui() {
 
     let hello_btn = nwg::controls::Button {
         text: "Say hello!".to_string(),
-        size: (465, 50),
+        size: (480, 50),
         position: (10, 10),
         parent: "MainWindow"
     };
