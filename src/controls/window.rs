@@ -21,15 +21,17 @@ pub struct Window {
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
 
     fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
-        let base = WindowBase {
+        let base = WindowBase::<ID> {
             text: self.caption.clone(),
             size: self.size.clone(),
             position: self.position.clone(),
             visible: self.visible,
-            resizable: self.resizable
+            resizable: self.resizable,
+            class: None,
+            parent: None
         };
 
-        unsafe { create_base(base) }
+        unsafe { create_base::<ID>(ui, base) }
     }
 
 }
