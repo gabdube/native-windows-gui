@@ -7,16 +7,19 @@ extern crate user32;
 extern crate kernel32;
 
 pub mod controls;
+pub mod events;
 
 use std::ptr;
 use std::mem;
 use std::hash::Hash;
 use std::collections::HashMap;
+use std::iter::FromIterator;
 use controls::ControlTemplate;
 use winapi::{MSG, HWND, UINT};
 use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
 type ControlCollection<ID> = HashMap<ID, HWND>;
+type CallbackCollection<ID> = Vec<Vec<events::EventCallback<ID>>>;
 
 /**
     Structure stored the every window.
@@ -24,6 +27,7 @@ type ControlCollection<ID> = HashMap<ID, HWND>;
 struct WindowData<ID: Eq+Clone+Hash > {
     pub id: ID,
     pub controls: *mut ControlCollection<ID>,
+    pub callbacks: CallbackCollection<ID>
 }
 
 /**
@@ -66,9 +70,15 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
             }
 
             // Store the window data
+            let event_range = 0..events::Event::Last as usize;
+            let mut callbacks = Vec::from_iter(event_range.map(|_|
+                Vec::new()
+            ));
+
             let data = WindowData{
                 id: cont.clone(),
-                controls: self.controls
+                controls: self.controls,
+                callbacks: callbacks
             };
             controls::set_handle_data(handle, data);
 
@@ -78,6 +88,22 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
             Err(()) // Error: A widget with this id already exists
         }
 
+    }
+
+    /**
+        Add a callback to a control. Return `true` if the callback was added
+        successfully, `false` if `cont` was not found in ui.
+    */
+    pub fn bind(&self, cont: ID, cb: events::EventCallback<ID>) -> bool {
+        let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
+        if let Some(handle) = controls.get(&cont) {
+            let data: &mut WindowData<ID> = controls::get_handle_data(*handle);
+            let index = events::map_callback(&cb) as usize;
+            data.callbacks[index].push(cb);
+            true
+        } else {
+            false
+        }
     }
 
 }

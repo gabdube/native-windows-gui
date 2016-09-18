@@ -12,7 +12,7 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
   WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
-  GWLP_USERDATA, LONG_PTR};
+  GWLP_USERDATA};
 use kernel32::{GetModuleHandleW, GetLastError};
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW};
@@ -163,10 +163,19 @@ pub unsafe fn set_handle_data<T>(handle: HWND, data: T) {
 }
 
 /**
+    Retrieve data in a window
+*/
+pub unsafe fn get_handle_data<'a, T>(handle: HWND) -> &'a mut T {
+    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
+    let data: *mut T = mem::transmute(data_ptr);
+    &mut *data
+}
+
+/**
     Remove and free data from a window
 */
 pub unsafe fn free_handle_data<T>(handle: HWND) {
-    let data_ptr: LONG_PTR = GetWindowLongPtrW(handle, GWLP_USERDATA);
+    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
     let data: *mut T = mem::transmute(data_ptr);
     Box::from_raw(data);
 

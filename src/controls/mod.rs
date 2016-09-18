@@ -30,6 +30,10 @@ pub fn set_handle_data<T>(handle: HWND, data: T) {
     unsafe { base::set_handle_data(handle, data); }
 }
 
+pub fn get_handle_data<'a, T>(handle: HWND) -> &'a mut T {
+    unsafe { base::get_handle_data(handle) }
+}
+
 pub fn free_handle_data<T>(handle: HWND) {
     unsafe { base::free_handle_data::<T>(handle); }
 }

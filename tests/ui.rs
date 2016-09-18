@@ -1,5 +1,5 @@
 extern crate native_windows_gui as nwg;
-
+use nwg::events::EventCallback;
 
 #[test]
 fn test_ui() {
@@ -14,6 +14,10 @@ fn test_ui() {
     };
 
     ui.new_control("MainWindow", main_window).unwrap();
+
+    ui.bind("MainWindow", EventCallback::MouseClick(Box::new( |ui, caller|{
+        println!("{:?}", "Test");
+    })));
 
     nwg::dispatch_events();
 }
