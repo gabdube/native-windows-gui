@@ -5,8 +5,10 @@
 
 mod base;
 pub mod window;
+pub mod button;
 
 pub use controls::window::Window;
+pub use controls::button::Button;
 
 use std::hash::Hash;
 use winapi::HWND;

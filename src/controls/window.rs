@@ -5,10 +5,16 @@
 use std::hash::Hash;
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base};
-use winapi::{CW_USEDEFAULT, HWND};
+use winapi::HWND;
 
 /**
     Configuration properties to create a window
+
+    * caption: Window title (in the upper bar)
+    * size: Window size (width, height) in pixels
+    * position: Starting position (x, y) of the window 
+    * visible: If the window should be visible from the start
+    * resizable: If the window should be resizable by the user
 */
 pub struct Window {
     pub caption: String,
@@ -34,16 +40,4 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
         unsafe { create_base::<ID>(ui, base) }
     }
 
-}
-
-impl Default for Window {
-    fn default() -> Window {
-        Window { 
-            caption: "Control".to_string(),
-            size: (CW_USEDEFAULT as u32, CW_USEDEFAULT as u32),
-            position: (CW_USEDEFAULT, CW_USEDEFAULT),
-            visible: true,
-            resizable: true
-        }
-    }
 }
