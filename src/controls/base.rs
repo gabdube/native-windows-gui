@@ -11,10 +11,11 @@ use std::hash::Hash;
 use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
   WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
-  WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX};
+  WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
+  GWLP_USERDATA, LONG_PTR};
 use kernel32::{GetModuleHandleW, GetLastError};
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
-  CreateWindowExW, UnregisterClassW};
+  CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW};
 
 const CLASS_NAME: &'static str = "RustyWindow";
 
@@ -142,9 +143,32 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
     }
 }
 
+/**
+    Unregister the custom window class. If multiple UI manager were created
+    this function will fail
+*/
 pub unsafe fn cleanup() {
     let hmod = GetModuleHandleW(ptr::null());
     let class_name = to_utf16(CLASS_NAME.to_string());
 
     UnregisterClassW(class_name.as_ptr(), hmod);
+}
+
+/**
+    Store data in a window
+*/
+pub unsafe fn set_handle_data<T>(handle: HWND, data: T) {
+    let data_raw = Box::into_raw(Box::new(data));
+    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(data_raw));
+}
+
+/**
+    Remove and free data from a window
+*/
+pub unsafe fn free_handle_data<T>(handle: HWND) {
+    let data_ptr: LONG_PTR = GetWindowLongPtrW(handle, GWLP_USERDATA);
+    let data: *mut T = mem::transmute(data_ptr);
+    Box::from_raw(data);
+
+    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
 }

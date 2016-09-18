@@ -13,10 +13,18 @@ use std::mem;
 use std::hash::Hash;
 use std::collections::HashMap;
 use controls::ControlTemplate;
-use winapi::{MSG, HWND};
+use winapi::{MSG, HWND, UINT};
 use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
 type ControlCollection<ID> = HashMap<ID, HWND>;
+
+/**
+    Structure stored the every window.
+*/
+struct WindowData<ID: Eq+Clone+Hash > {
+    pub id: ID,
+    pub controls: *mut ControlCollection<ID>,
+}
 
 /**
     A single threaded window manager.
@@ -57,6 +65,13 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
                 }
             }
 
+            // Store the window data
+            let data = WindowData{
+                id: cont.clone(),
+                controls: self.controls
+            };
+            controls::set_handle_data(handle, data);
+
             controls.insert(cont.clone(), handle);
             Ok(cont)
         } else {
@@ -69,6 +84,11 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
 
 impl<ID: Eq+Clone+Hash> Drop for Ui<ID> {
     fn drop(&mut self) {
+        let controls: &ControlCollection<ID> = unsafe{ &mut *self.controls };
+        for handle in controls.values() {
+            controls::free_handle_data::<WindowData<ID>>(*handle);
+        }
+
         unsafe { Box::from_raw(self.controls); }
         controls::cleanup();
     }

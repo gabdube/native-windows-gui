@@ -12,7 +12,7 @@ use std::hash::Hash;
 use winapi::HWND;
 
 /**
-    Trait that his shared by all control templates
+    Trait that is shared by all control templates
 */
 pub trait ControlTemplate<ID: Eq+Clone+Hash > {
 
@@ -23,5 +23,13 @@ pub trait ControlTemplate<ID: Eq+Clone+Hash > {
 }
 
 pub fn cleanup() {
-    unsafe { base::cleanup() }
+    unsafe { base::cleanup(); }
+}
+
+pub fn set_handle_data<T>(handle: HWND, data: T) {
+    unsafe { base::set_handle_data(handle, data); }
+}
+
+pub fn free_handle_data<T>(handle: HWND) {
+    unsafe { base::free_handle_data::<T>(handle); }
 }
