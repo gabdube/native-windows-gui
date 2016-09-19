@@ -16,7 +16,7 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
   GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
-  RECT, LONG, SWP_NOMOVE, SWP_NOZORDER, };
+  RECT, LONG, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, BN_CLICKED, HIWORD};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
@@ -39,13 +39,25 @@ pub struct WindowBase<ID: Eq+Hash+Clone> {
 /**
     Map system events to application events
 */
+fn map_command(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
+    let command = HIWORD(w as u32);
+    match command {
+        BN_CLICKED => (Event::ButtonClick, unsafe{ mem::transmute(l) } ),
+        _ => (Event::Unknown, handle)
+    }
+}
+
+/**
+    Map system events to application events
+*/
 #[inline(always)]
-fn map_system_event(evt: UINT) -> Event {
+fn map_system_event(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
     match evt {
-        WM_LBUTTONUP => Event::MouseUp,
-        WM_RBUTTONUP => Event::MouseUp,
-        WM_MBUTTONUP => Event::MouseUp,
-        _ => Event::Unknown
+        WM_COMMAND => map_command(handle, evt, w, l), // WM_COMMAND is a special snowflake, it can represent hundreds of different commands
+        WM_LBUTTONUP => (Event::MouseUp, handle),
+        WM_RBUTTONUP => (Event::MouseUp, handle),
+        WM_MBUTTONUP => (Event::MouseUp, handle),
+        _ => (Event::Unknown, handle)
     }
 }
 
@@ -77,9 +89,12 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
     match ec {
         &EventCallback::MouseUp(ref c) => {
             let (x, y, btn, modifiers) = handle_btn(msg, w, l);
-            c(ui, caller, x, y, btn, modifiers)
+            c(ui, caller, x, y, btn, modifiers);
         },
-        _ => {}
+        &EventCallback::ButtonClick(ref c) => {
+            c(ui, caller);
+        }
+        //_ => {}
     }
 }
 
@@ -87,15 +102,15 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
     Custom window procedure for none built-in types
 */
 unsafe extern "system" fn wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    // If the window data was initialized, eval callbacks
-    if let Some(data) = get_handle_data::<::WindowData<ID>>(hwnd) {
+    let (event, handle) = map_system_event(hwnd, msg, w, l);
 
+    // If the window data was initialized, eval callbacks
+    if let Some(data) = get_handle_data::<::WindowData<ID>>(handle) {
         // Build a temporary Ui that is then forgetted to pass it to the callbacks.
         let mut ui = ::Ui{controls: data.controls};
         
         // Eval the callbacks
-        let index = map_system_event(msg) as usize;
-        let functions = &data.callbacks[index];
+        let functions = &data.callbacks[event as usize];
         for f in functions.iter() {
             dispatch_event::<ID>(f, &mut ui, &data.id, msg, w, l); 
         }

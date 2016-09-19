@@ -24,11 +24,15 @@ fn test_ui() {
     ui.new_control("MainWindow", main_window).unwrap();
     ui.new_control("HelloBtn", hello_btn).unwrap();
 
-    ui.bind("MainWindow", EventCallback::MouseUp(Box::new(|ui, caller, x, y, btn, modifiers|{
+    ui.bind("MainWindow", EventCallback::MouseUp(Box::new(|ui, caller, x, y, btn, modifiers| {
         println!("Caller: {:?}", caller);
         println!("Left mouse button pressed: {:?}", (btn & nwgc::BTN_MOUSE_LEFT) != 0 );
         println!("Ctrl pressed: {:?}", (modifiers & nwgc::MOD_MOUSE_CTRL) != 0 );
         println!("Mouse position: {:?} {:?}", x, y);
+    })));
+
+    ui.bind("HelloBtn", EventCallback::ButtonClick(Box::new(|ui, caller| {
+        println!("Caller: {:?}", caller);
     })));
 
     nwg::dispatch_events();
