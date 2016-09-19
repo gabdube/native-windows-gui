@@ -21,7 +21,12 @@ pub trait ControlTemplate<ID: Eq+Clone+Hash > {
     /**
         Create a new control from the template data.
     */
-    fn create(&self,  ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()>;
+    fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()>;
+
+    /**
+        Return the function that will be used to evaluates the control actions
+    */
+    fn evaluator(&self) -> ::ActionEvaluator<ID>;
 }
 
 pub fn cleanup() {

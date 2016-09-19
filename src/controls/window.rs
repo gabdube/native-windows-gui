@@ -5,6 +5,7 @@
 use std::hash::Hash;
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base};
+use actions::ActionReturn;
 use winapi::HWND;
 
 /**
@@ -38,6 +39,12 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
         };
 
         unsafe { create_base::<ID>(ui, base) }
+    }
+
+    fn evaluator(&self) -> ::ActionEvaluator<ID> {
+        Box::new( |ui, id, handle, action| {
+            ActionReturn::None
+        })
     }
 
 }

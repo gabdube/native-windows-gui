@@ -199,7 +199,7 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
         Some(id) => {
             let controls: &mut ::ControlCollection<ID> = &mut *ui.controls;
             match controls.get(&id) {
-                Some(h) => *h,
+                Some(&(h,_)) => h,
                 None => { return Err(()); }
             }
         },

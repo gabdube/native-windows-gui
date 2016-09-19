@@ -9,6 +9,7 @@ extern crate kernel32;
 pub mod controls;
 pub mod events;
 pub mod constants;
+pub mod actions;
 
 use std::ptr;
 use std::mem;
@@ -19,7 +20,8 @@ use controls::ControlTemplate;
 use winapi::{MSG, HWND};
 use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
-type ControlCollection<ID> = HashMap<ID, HWND>;
+type ActionEvaluator<ID> = Box<Fn(&Ui<ID>, &ID, HWND, actions::Action) -> actions::ActionReturn>;
+type ControlCollection<ID> = HashMap<ID, (HWND, ActionEvaluator<ID>) >;
 type CallbackCollection<ID> = Vec<Vec<events::EventCallback<ID>>>;
 
 /**
@@ -83,7 +85,7 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
             };
             controls::set_handle_data(handle, data);
 
-            controls.insert(cont.clone(), handle);
+            controls.insert(cont.clone(), (handle, template.evaluator()) );
             Ok(cont)
         } else {
             Err(()) // Error: A widget with this id already exists
@@ -97,8 +99,8 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     */
     pub fn bind(&self, cont: ID, cb: events::EventCallback<ID>) -> bool {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
-        if let Some(handle) = controls.get(&cont) {
-            let data: &mut WindowData<ID> = controls::get_handle_data(*handle);
+        if let Some(&(handle, _)) = controls.get(&cont) {
+            let data: &mut WindowData<ID> = controls::get_handle_data(handle);
             let index = events::map_callback(&cb) as usize;
             data.callbacks[index].push(cb);
             true
@@ -107,13 +109,25 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
         }
     }
 
+    /**
+        Execute an action on the specified control
+    */
+    pub fn exec(&self, cont: ID, action: actions::Action) -> Result<actions::ActionReturn, ()> {
+        let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
+        if let Some(&(handle, ref eval)) = controls.get(&cont) {
+            Ok(eval(self, &cont, handle, action))
+        } else {
+            Err(())
+        }
+    }
+
 }
 
 impl<ID: Eq+Clone+Hash> Drop for Ui<ID> {
     fn drop(&mut self) {
         let controls: &ControlCollection<ID> = unsafe{ &mut *self.controls };
-        for handle in controls.values() {
-            controls::free_handle_data::<WindowData<ID>>(*handle);
+        for &(handle, _) in controls.values() {
+            controls::free_handle_data::<WindowData<ID>>(handle);
         }
 
         unsafe { Box::from_raw(self.controls); }

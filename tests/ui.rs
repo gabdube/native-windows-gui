@@ -1,6 +1,7 @@
 extern crate native_windows_gui as nwg;
 use nwg::events::EventCallback;
 use nwg::constants as nwgc;
+use nwg::actions::helper as nwga;
 
 #[test]
 fn test_ui() {
@@ -33,6 +34,7 @@ fn test_ui() {
 
     ui.bind("HelloBtn", EventCallback::ButtonClick(Box::new(|ui, caller| {
         println!("Caller: {:?}", caller);
+        ui.exec("MainWindow", nwga::message("Hello", "Hello World!", 0)).unwrap();
     })));
 
     nwg::dispatch_events();
