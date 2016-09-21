@@ -114,8 +114,8 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     */
     pub fn exec(&self, cont: ID, action: actions::Action) -> Result<actions::ActionReturn, ()> {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
-        if let Some(&(handle, ref eval)) = controls.get(&cont) {
-            Ok(eval(self, &cont, handle, action))
+        if let Some(&(handle, ref exec)) = controls.get(&cont) {
+            Ok(exec(self, &cont, handle, action))
         } else {
             Err(())
         }

@@ -6,9 +6,9 @@
 */
 
 pub struct ActMessageParams {
-    title: String,
-    content: String,
-    type_: u32
+    pub title: String,
+    pub content: String,
+    pub type_: u32
 }
 
 /**

@@ -2,11 +2,14 @@
     A blank custom control.
 */
 
+use std::ffi::OsStr;
+use std::os::windows::ffi::OsStrExt;
 use std::hash::Hash;
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base};
-use actions::ActionReturn;
-use winapi::HWND;
+use actions::{Action, ActionReturn, ActMessageParams};
+use winapi::{UINT, HWND};
+use user32::{MessageBoxW};
 
 /**
     Configuration properties to create a window
@@ -43,8 +46,29 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {
         Box::new( |ui, id, handle, action| {
-            ActionReturn::None
+            match action {
+                Action::Message(p) => show_message(handle, *p),
+                //_ => ActionReturn::None
+            }            
         })
     }
 
 }
+
+/**
+    String to utf16. Add a trailing null char.
+*/
+#[inline(always)]
+fn to_utf16(n: String) -> Vec<u16> {
+    OsStr::new(n.as_str())
+      .encode_wide()
+      .chain(Some(0u16).into_iter())
+      .collect()
+}
+
+fn show_message(handle: HWND, params: ActMessageParams) -> ActionReturn { unsafe {
+    let text = to_utf16(params.content);
+    let title = to_utf16(params.title);
+    MessageBoxW(handle, text.as_ptr(), title.as_ptr(), params.type_ as UINT);
+    ActionReturn::None
+}}
