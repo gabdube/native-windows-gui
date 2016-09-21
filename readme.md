@@ -12,6 +12,7 @@ Widgets are then exposed as an opaque type choosen by the user himself (example:
 For this POC, I implemented **actions**(what would normally be methods), **callbacks** and **control templates** (what would normally be the widgets). Each of
 these concept is exposed by a single method on the manager object. **The NWG api has only 5 functions/methods**. See `tests/ui.rs` for an example.
 
+![Alt text](/img/ui.PNG "Image")  
 
 ## The manager
 
@@ -34,7 +35,7 @@ Control templates replaces "normal" widgets. They are transparent structures tha
 These structures describe a Windows Control (example: `Windows`, `Buttons`).
 
 Once a template structure has been filled, it can be passed to the Window Manager in order to create the widget in the interface.  
-This is done through the `new_control` methods.
+This is done through the `new_control` method.
 
 Example:
 
@@ -51,18 +52,18 @@ ui.new_control("HelloBtn", hello_btn).unwrap();
 
 ## Actions
 
-Actions replace what would normally be widgets methods. Action is a big enum of pretty much any that can be applied to a widget. When an action is
-sent through an manager, the widget evals the action, and then, if it is supported, it can return an ActionReturn value. ActionReturn, just like action
+Actions replace what would normally be widgets methods. `Action` is a big enum of pretty much anyting that can be applied to a widget. When an action is
+sent through an manager, the widget evals the action, and then, if it is supported, can return an `ActionReturn` value. ActionReturn, just like action
 is a big enum that can return anything.
 
 Notes:
 
-* Some action (ex: `SetText`) could be applied to many widgets.
-* Actions/Action return that are bigger than 8 bytes will be boxed
+* Some future action (ex: `SetText`) could be applied to many widgets.
+* Actions/ActionReturn values that are bigger than 8 bytes will be boxed
 * Big action (ex: `Message`) can have action helper to make the action creation easier
 * If a control receive a unsupported action, it must return `ActionReturn::NotSupported`.
 
-Actions are sont to a control using the `exec` method
+Actions are sent to a control using the `exec` method
 
 Example:
 
@@ -78,7 +79,7 @@ The enum member each take a Boxed `Fn` that will be called internally when syste
 Note:
 
 * Right now, any callback can be bound to any widget. I think it would be best to add a `supported_callback` to the `ControlTemplate` trait and then raise error if someone try to bind an unsupported callback.
-* Right now callback binding is quite ugly, i'd like to change that if possible.
+* Right now callback binding is quite ugly, id like to change that if possible.
 
 Callbacks are bound to a widget using the `bind` method.
 
