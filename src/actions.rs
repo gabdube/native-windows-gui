@@ -22,7 +22,8 @@ pub enum Action {
     Possible values return by message sent to an Ui
 */
 pub enum ActionReturn {
-    None
+    None,
+    NotSupported
 }
 
 
