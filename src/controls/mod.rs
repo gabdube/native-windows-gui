@@ -29,6 +29,7 @@ pub trait ControlTemplate<ID: Eq+Clone+Hash > {
     fn evaluator(&self) -> ::ActionEvaluator<ID>;
 }
 
+
 pub fn cleanup() {
     unsafe { base::cleanup(); }
 }

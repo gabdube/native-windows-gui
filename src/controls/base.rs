@@ -2,14 +2,15 @@
     Low level window creation utilities
 */
 
-use std::ffi::OsStr;
-use std::os::windows::ffi::OsStrExt;
+use std::ffi::{OsStr, OsString};
+use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::os::raw::c_int;
 use std::ptr;
 use std::mem;
 use std::hash::Hash;
 
 use events::{Event, EventCallback};
+use actions::{ActionReturn, ActMessageParams};
 
 use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
@@ -20,7 +21,8 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
-  GetClientRect, SetWindowPos};
+  GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, GetWindowTextLengthW,
+  MessageBoxW};
 
 use kernel32::{GetModuleHandleW, GetLastError};
 
@@ -249,7 +251,7 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
 
 /**
     Unregister the custom window class. If multiple UI manager were created
-    this function will fail
+    this function will fail (silently)
 */
 pub unsafe fn cleanup() {
     let hmod = GetModuleHandleW(ptr::null());
@@ -289,3 +291,42 @@ pub unsafe fn free_handle_data<T>(handle: HWND) {
 
     SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
 }
+
+////
+//// Actions functions shared by multiple controls
+////
+
+
+/**
+    Set the text of a window.
+*/
+pub fn set_window_text(handle: HWND, _text: String) -> ActionReturn { unsafe {
+    let text = to_utf16(_text);
+    SetWindowTextW(handle, text.as_ptr());
+    ActionReturn::None
+}}
+
+/**
+    Get the text of a window.
+*/
+pub fn get_window_text(handle: HWND) -> ActionReturn { unsafe {
+    let text_length = (GetWindowTextLengthW(handle) as usize)+1;
+    let mut buffer: Vec<u16> = Vec::with_capacity(text_length);
+    buffer.set_len(text_length);
+
+    GetWindowTextW(handle, buffer.as_mut_ptr(), text_length as i32);
+
+    let text = OsString::from_wide(&(buffer.as_slice()[0..text_length-1]));
+    let text = text.into_string().unwrap_or("ERROR!".to_string());
+    ActionReturn::Text(Box::new(text))
+}}
+
+/**
+    Create a messagebox from params.
+*/
+pub fn show_message(handle: HWND, params: ActMessageParams) -> ActionReturn { unsafe {
+    let text = to_utf16(params.content);
+    let title = to_utf16(params.title);
+    MessageBoxW(handle, text.as_ptr(), title.as_ptr(), params.type_ as UINT);
+    ActionReturn::None
+}}
