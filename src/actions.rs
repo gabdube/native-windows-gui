@@ -15,6 +15,8 @@ pub struct ActMessageParams {
     Possible message to send to an Ui
 */
 pub enum Action {
+    GetText,
+    SetText(Box<String>),
     Message(Box<ActMessageParams>)
 }
 
@@ -23,6 +25,7 @@ pub enum Action {
 */
 pub enum ActionReturn {
     None,
+    Text(Box<String>),
     NotSupported
 }
 
@@ -31,7 +34,7 @@ pub mod helper {
     use actions::{Action, ActMessageParams};
 
     /**
-        Action helper for the message action.
+        Action helper for the Message action.
     */
     pub fn message<S: Into<String>>(title: S, content: S, type_: u32) -> Action {
         Action::Message(Box::new(ActMessageParams{
@@ -39,6 +42,13 @@ pub mod helper {
             content: content.into(),
             type_: type_
         }))
+    }
+
+    /**
+        Action helper for the SetText action.
+    */
+    pub fn set_text<S: Into<String>>(text: S) -> Action {
+        Action::SetText(Box::new(text.into()))
     }
 
 }

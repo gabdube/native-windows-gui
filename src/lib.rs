@@ -1,6 +1,7 @@
 /*!
     A very high level native gui library for Windows.
 */
+#![allow(unused_variables)]
 
 extern crate winapi;
 extern crate user32;
