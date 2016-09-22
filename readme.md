@@ -7,7 +7,7 @@ decided to try something new:
 
 **Instead of exposing every widget as a complete type to the user, I decided to completely hide the implementation behind a "manager" (UI) object**
 
-Widgets are then exposed as an opaque type choosen by the user himself (example: `i32`, `&'static str`, etc).
+Widgets are then exposed as an opaque type choosen by the user themself (example: `i32`, `&'static str`, etc).
 
 For this POC, I implemented **actions**(what would normally be methods), **callbacks** and **control templates** (what would normally be the widgets). Each of
 these concept is exposed by a single method on the manager object. **The NWG api has only 5 functions/methods**. See `tests/ui.rs` for an example.
