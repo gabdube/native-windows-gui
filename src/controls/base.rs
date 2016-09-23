@@ -17,12 +17,13 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
   GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
-  RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, BN_CLICKED, HIWORD};
+  RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, BN_CLICKED, HIWORD, POINT, LONG,
+  SWP_NOSIZE};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
   GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, GetWindowTextLengthW,
-  MessageBoxW};
+  MessageBoxW, ScreenToClient, GetWindowRect, GetParent};
 
 use kernel32::{GetModuleHandleW, GetLastError};
 
@@ -328,5 +329,30 @@ pub fn show_message(handle: HWND, params: ActMessageParams) -> ActionReturn { un
     let text = to_utf16(params.content);
     let title = to_utf16(params.title);
     MessageBoxW(handle, text.as_ptr(), title.as_ptr(), params.type_ as UINT);
+    ActionReturn::None
+}}
+
+/**
+    Return the position of a window
+*/
+pub fn get_window_pos(handle: HWND, from_parent: bool) -> ActionReturn { unsafe {
+    let mut rect: RECT = mem::uninitialized();
+    GetWindowRect(handle, &mut rect);
+
+    if !from_parent {
+        return ActionReturn::Position(rect.left as i32, rect.top as i32);
+    }
+
+    let mut point: POINT = POINT{x: rect.left as LONG, y: rect.top as LONG};
+    ScreenToClient(GetParent(handle), &mut point);
+    
+    ActionReturn::Position(point.x as i32, point.y as i32)
+}}
+
+/**
+    Set the position of a window
+*/
+pub fn set_window_pos(handle: HWND, x: i32, y:i32) -> ActionReturn { unsafe {
+    SetWindowPos(handle, ptr::null_mut(), x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
     ActionReturn::None
 }}

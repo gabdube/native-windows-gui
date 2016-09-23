@@ -4,7 +4,8 @@
 use std::hash::Hash;
 
 use controls::ControlTemplate;
-use controls::base::{WindowBase, create_base, set_window_text, get_window_text};
+use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
+ get_window_pos, set_window_pos};
 use actions::{Action, ActionReturn};
 
 use winapi::HWND;
@@ -45,6 +46,8 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Button<ID> {
             match action {
                 Action::SetText(t) => set_window_text(handle, *t),
                 Action::GetText => get_window_text(handle),
+                Action::GetPosition => get_window_pos(handle, true),
+                Action::SetPosition(x, y) => set_window_pos(handle, x, y),
                 _ => ActionReturn::NotSupported
             }
         })
