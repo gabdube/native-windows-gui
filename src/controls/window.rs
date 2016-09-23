@@ -8,6 +8,7 @@ use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text, show_message,
   get_window_pos, set_window_pos, get_window_size, set_window_size};
 use actions::{Action, ActionReturn};
+use events::Event;
 
 use winapi::{HWND};
 
@@ -42,6 +43,10 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
         };
 
         unsafe { create_base::<ID>(ui, base) }
+    }
+
+    fn supported_events(&self) -> Vec<Event> {
+        vec![Event::MouseUp, Event::ButtonClick]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {

@@ -113,11 +113,12 @@ unsafe extern "system" fn wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: W
         let mut ui = ::Ui{controls: data.controls};
         
         // Eval the callbacks
-        let functions = &data.callbacks[event as usize];
-        for f in functions.iter() {
-            dispatch_event::<ID>(f, &mut ui, &data.id, msg, w, l); 
+        if let Some(functions) = data.callbacks.get(&event) {
+            for f in functions.iter() {
+                dispatch_event::<ID>(f, &mut ui, &data.id, msg, w, l); 
+            }
         }
-
+        
         mem::forget(ui);
     }
     

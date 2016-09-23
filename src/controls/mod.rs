@@ -27,6 +27,11 @@ pub trait ControlTemplate<ID: Eq+Clone+Hash > {
         Return the function that will be used to evaluates the control actions
     */
     fn evaluator(&self) -> ::ActionEvaluator<ID>;
+
+    /**
+        Return the list of callback supported by this control
+    */
+    fn supported_events(&self) -> Vec<::events::Event>;
 }
 
 

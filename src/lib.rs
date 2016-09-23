@@ -23,7 +23,7 @@ use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
 pub type ActionEvaluator<ID> = Box<Fn(&Ui<ID>, &ID, HWND, actions::Action) -> actions::ActionReturn>;
 type ControlCollection<ID> = HashMap<ID, (HWND, ActionEvaluator<ID>) >;
-type CallbackCollection<ID> = Vec<Vec<events::EventCallback<ID>>>;
+type CallbackCollection<ID> = HashMap<events::Event, Vec<events::EventCallback<ID>>>;
 
 /**
     Structure stored in every window.
@@ -75,9 +75,10 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
 
             // Store the window data
             let event_range = 0..events::Event::Last as usize;
-            let callbacks = Vec::from_iter(event_range.map(|_|
-                Vec::new()
-            ));
+            let mut callbacks = HashMap::new();
+            for e in template.supported_events() {
+                callbacks.insert(e, Vec::new());
+            }
 
             let data = WindowData{
                 id: cont.clone(),
@@ -101,12 +102,16 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     pub fn bind(&self, cont: ID, cb: events::EventCallback<ID>) -> bool {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
         if let Some(&(handle, _)) = controls.get(&cont) {
+            let event = events::map_callback(&cb);
             let data: &mut WindowData<ID> = controls::get_handle_data(handle);
-            let index = events::map_callback(&cb) as usize;
-            data.callbacks[index].push(cb);
-            true
+            if let Some(functions) = data.callbacks.get_mut(&event) {
+                functions.push(cb);
+                true
+            } else {
+                false // Callback not supported
+            }
         } else {
-            false
+            false // Control not supported
         }
     }
 

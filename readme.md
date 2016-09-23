@@ -78,7 +78,6 @@ The enum member each take a Boxed `Fn` that will be called internally when syste
 
 Note:
 
-* Right now, any callback can be bound to any widget. I think it would be best to add a `supported_callback` to the `ControlTemplate` trait and then raise error if someone try to bind an unsupported callback.
 * Right now callback binding is quite ugly, id like to change that if possible.
 
 Callbacks are bound to a widget using the `bind` method.

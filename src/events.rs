@@ -7,6 +7,7 @@ use std::hash::Hash;
 pub type Ef0<ID> = Box<Fn(&mut ::Ui<ID>, &ID)>;
 pub type Ef4<ID, A, B, C, D> = Box<Fn(&mut ::Ui<ID>, &ID, A, B, C, D)>;
 
+#[derive(Hash, PartialEq, Eq)]
 pub enum Event {
     MouseUp,
     ButtonClick,

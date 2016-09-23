@@ -7,7 +7,7 @@ use nwg::actions::helper as nwga;
 use nwg::actions::{Action, ActionReturn};
 
 fn create_controls(ui: &mut nwg::Ui<&'static str>) {
-     let main_window = nwg::controls::Window {
+    let main_window = nwg::controls::Window {
         caption: "Hello".to_string(),
         size: (500, 180),
         position: (100, 100),
