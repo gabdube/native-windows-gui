@@ -15,8 +15,11 @@ pub struct ActMessageParams {
     Possible message to send to an Ui
 */
 pub enum Action {
+    None,
     GetPosition,
     SetPosition(i32, i32),
+    GetSize,
+    SetSize(u32, u32),
     GetText,
     SetText(Box<String>),
     Message(Box<ActMessageParams>)
@@ -28,6 +31,7 @@ pub enum Action {
 pub enum ActionReturn {
     None,
     Position(i32, i32),
+    Size(u32, u32),
     Text(Box<String>),
     NotSupported
 }

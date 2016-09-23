@@ -6,7 +6,7 @@ use std::hash::Hash;
 
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text, show_message,
-  get_window_pos, set_window_pos};
+  get_window_pos, set_window_pos, get_window_size, set_window_size};
 use actions::{Action, ActionReturn};
 
 use winapi::{HWND};
@@ -51,8 +51,10 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
                 Action::SetText(t) => set_window_text(handle, *t),
                 Action::GetText => get_window_text(handle),
                 Action::GetPosition => get_window_pos(handle, false),
-                Action::SetPosition(x, y) => set_window_pos(handle, x, y)
-                //_ => ActionReturn::NotSupported
+                Action::SetPosition(x, y) => set_window_pos(handle, x, y),
+                Action::GetSize => get_window_size(handle),
+                Action::SetSize(w, h) => set_window_size(handle, w, h),
+                _ => ActionReturn::NotSupported
             }            
         })
     }

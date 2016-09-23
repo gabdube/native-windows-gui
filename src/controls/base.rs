@@ -356,3 +356,21 @@ pub fn set_window_pos(handle: HWND, x: i32, y:i32) -> ActionReturn { unsafe {
     SetWindowPos(handle, ptr::null_mut(), x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
     ActionReturn::None
 }}
+
+/**
+    Get the size of a Window
+*/
+pub fn get_window_size(handle: HWND) -> ActionReturn { unsafe {
+    let mut rect: RECT = mem::uninitialized();
+    GetClientRect(handle, &mut rect);
+
+    ActionReturn::Size(rect.right as u32, rect.bottom as u32)
+}}
+
+/**
+    Set the size of a Window
+*/
+pub fn set_window_size(handle: HWND, w: u32, h:u32) -> ActionReturn { unsafe {
+    SetWindowPos(handle, ptr::null_mut(), 0, 0, w as c_int, h as c_int, SWP_NOMOVE|SWP_NOZORDER);
+    ActionReturn::None
+}}
