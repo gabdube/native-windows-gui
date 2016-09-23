@@ -21,7 +21,7 @@ use controls::ControlTemplate;
 use winapi::{MSG, HWND};
 use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
-type ActionEvaluator<ID> = Box<Fn(&Ui<ID>, &ID, HWND, actions::Action) -> actions::ActionReturn>;
+pub type ActionEvaluator<ID> = Box<Fn(&Ui<ID>, &ID, HWND, actions::Action) -> actions::ActionReturn>;
 type ControlCollection<ID> = HashMap<ID, (HWND, ActionEvaluator<ID>) >;
 type CallbackCollection<ID> = Vec<Vec<events::EventCallback<ID>>>;
 
