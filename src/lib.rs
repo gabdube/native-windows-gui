@@ -16,12 +16,11 @@ use std::ptr;
 use std::mem;
 use std::hash::Hash;
 use std::collections::HashMap;
-use std::iter::FromIterator;
 use controls::ControlTemplate;
 use winapi::{MSG, HWND};
 use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
-pub type ActionEvaluator<ID> = Box<Fn(&Ui<ID>, &ID, HWND, actions::Action) -> actions::ActionReturn>;
+pub type ActionEvaluator<ID> = Box<Fn(&Ui<ID>, &ID, HWND, actions::Action<ID>) -> actions::ActionReturn<ID>>;
 type ControlCollection<ID> = HashMap<ID, (HWND, ActionEvaluator<ID>) >;
 type CallbackCollection<ID> = HashMap<events::Event, Vec<events::EventCallback<ID>>>;
 
@@ -118,7 +117,7 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     /**
         Execute an action on the specified control
     */
-    pub fn exec(&self, cont: ID, action: actions::Action) -> Result<actions::ActionReturn, ()> {
+    pub fn exec(&self, cont: ID, action: actions::Action<ID>) -> Result<actions::ActionReturn<ID>, ()> {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
         if let Some(&(handle, ref exec)) = controls.get(&cont) {
             Ok(exec(self, &cont, handle, action))

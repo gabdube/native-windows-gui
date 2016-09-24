@@ -8,8 +8,8 @@ use nwg::actions::{Action, ActionReturn};
 
 fn create_controls(ui: &mut nwg::Ui<&'static str>) {
     let main_window = nwg::controls::Window {
-        caption: "Hello".to_string(),
-        size: (500, 180),
+        caption: "Test".to_string(),
+        size: (500, 235),
         position: (100, 100),
         visible: true,
         resizable: false
@@ -36,10 +36,18 @@ fn create_controls(ui: &mut nwg::Ui<&'static str>) {
         parent: "MainWindow"
     };
 
+    let parent_btn = nwg::controls::Button {
+        text: "Who is my parent?".to_string(),
+        size: (480, 50),
+        position: (10, 175),
+        parent: "MainWindow"
+    };
+
     ui.new_control("MainWindow", main_window).unwrap();
     ui.new_control("HelloBtn", hello_btn).unwrap();
     ui.new_control("MoveBtn", move_btn).unwrap();
     ui.new_control("ResizeBtn", resize_btn).unwrap();
+    ui.new_control("ParentBtn", parent_btn).unwrap();
 }
 
 #[test]
@@ -82,6 +90,15 @@ fn test_ui() {
             } else {
                 ui.exec(caller, Action::SetSize(100, 50)).unwrap();
             }
+        }
+    })));
+
+    ui.bind("ParentBtn", EventCallback::ButtonClick(Box::new(|ui, caller| {
+        if let ActionReturn::Parent(parent) = ui.exec(caller, Action::GetParent).unwrap() {
+            let parent = parent.unwrap();
+            assert!("MainWindow" == parent);
+            let parent = format!("{:?} is my parent!", parent);
+            ui.exec(caller, Action::SetText(Box::new(parent))).unwrap();
         }
     })));
 

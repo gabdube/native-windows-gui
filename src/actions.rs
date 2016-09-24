@@ -4,6 +4,7 @@
 
     No controls implement all Actions.
 */
+use std::hash::Hash;
 
 pub struct ActMessageParams {
     pub title: String,
@@ -14,8 +15,10 @@ pub struct ActMessageParams {
 /**
     Possible message to send to an Ui
 */
-pub enum Action {
+pub enum Action<ID: Eq+Clone+Hash> {
     None,
+    GetParent,
+    SetParent(Box<Option<ID>>),
     GetPosition,
     SetPosition(i32, i32),
     GetSize,
@@ -28,8 +31,9 @@ pub enum Action {
 /**
     Possible values return by message sent to an Ui
 */
-pub enum ActionReturn {
+pub enum ActionReturn<ID: Eq+Clone+Hash> {
     None,
+    Parent(Box<Option<ID>>),
     Position(i32, i32),
     Size(u32, u32),
     Text(Box<String>),
@@ -39,12 +43,13 @@ pub enum ActionReturn {
 
 pub mod helper {
     use actions::{Action, ActMessageParams};
+    use std::hash::Hash;
 
     /**
         Action helper for the Message action.
     */
     #[inline(always)]
-    pub fn message<S: Into<String>>(title: S, content: S, type_: u32) -> Action {
+    pub fn message<ID: Eq+Clone+Hash, S: Into<String>>(title: S, content: S, type_: u32) -> Action<ID> {
         Action::Message(Box::new(ActMessageParams{
             title: title.into(),
             content: content.into(),
@@ -56,7 +61,7 @@ pub mod helper {
         Action helper for the SetText action.
     */
     #[inline(always)]
-    pub fn set_text<S: Into<String>>(text: S) -> Action {
+    pub fn set_text<ID: Eq+Clone+Hash, S: Into<String>>(text: S) -> Action<ID> {
         Action::SetText(Box::new(text.into()))
     }
 

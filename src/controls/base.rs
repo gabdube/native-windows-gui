@@ -302,7 +302,7 @@ pub unsafe fn free_handle_data<T>(handle: HWND) {
 /**
     Set the text of a window.
 */
-pub fn set_window_text(handle: HWND, _text: String) -> ActionReturn { unsafe {
+pub fn set_window_text<ID: Eq+Hash+Clone>(handle: HWND, _text: String) -> ActionReturn<ID> { unsafe {
     let text = to_utf16(_text);
     SetWindowTextW(handle, text.as_ptr());
     ActionReturn::None
@@ -311,7 +311,7 @@ pub fn set_window_text(handle: HWND, _text: String) -> ActionReturn { unsafe {
 /**
     Get the text of a window.
 */
-pub fn get_window_text(handle: HWND) -> ActionReturn { unsafe {
+pub fn get_window_text<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
     let text_length = (GetWindowTextLengthW(handle) as usize)+1;
     let mut buffer: Vec<u16> = Vec::with_capacity(text_length);
     buffer.set_len(text_length);
@@ -326,7 +326,7 @@ pub fn get_window_text(handle: HWND) -> ActionReturn { unsafe {
 /**
     Create a messagebox from params.
 */
-pub fn show_message(handle: HWND, params: ActMessageParams) -> ActionReturn { unsafe {
+pub fn show_message<ID: Eq+Hash+Clone>(handle: HWND, params: ActMessageParams) -> ActionReturn<ID> { unsafe {
     let text = to_utf16(params.content);
     let title = to_utf16(params.title);
     MessageBoxW(handle, text.as_ptr(), title.as_ptr(), params.type_ as UINT);
@@ -336,7 +336,7 @@ pub fn show_message(handle: HWND, params: ActMessageParams) -> ActionReturn { un
 /**
     Return the position of a window
 */
-pub fn get_window_pos(handle: HWND, from_parent: bool) -> ActionReturn { unsafe {
+pub fn get_window_pos<ID: Eq+Hash+Clone>(handle: HWND, from_parent: bool) -> ActionReturn<ID> { unsafe {
     let mut rect: RECT = mem::uninitialized();
     GetWindowRect(handle, &mut rect);
 
@@ -353,7 +353,7 @@ pub fn get_window_pos(handle: HWND, from_parent: bool) -> ActionReturn { unsafe 
 /**
     Set the position of a window
 */
-pub fn set_window_pos(handle: HWND, x: i32, y:i32) -> ActionReturn { unsafe {
+pub fn set_window_pos<ID: Eq+Hash+Clone>(handle: HWND, x: i32, y:i32) -> ActionReturn<ID> { unsafe {
     SetWindowPos(handle, ptr::null_mut(), x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
     ActionReturn::None
 }}
@@ -361,7 +361,7 @@ pub fn set_window_pos(handle: HWND, x: i32, y:i32) -> ActionReturn { unsafe {
 /**
     Get the size of a Window
 */
-pub fn get_window_size(handle: HWND) -> ActionReturn { unsafe {
+pub fn get_window_size<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
     let mut rect: RECT = mem::uninitialized();
     GetClientRect(handle, &mut rect);
 
@@ -371,7 +371,20 @@ pub fn get_window_size(handle: HWND) -> ActionReturn { unsafe {
 /**
     Set the size of a Window
 */
-pub fn set_window_size(handle: HWND, w: u32, h:u32) -> ActionReturn { unsafe {
+pub fn set_window_size<ID: Eq+Hash+Clone>(handle: HWND, w: u32, h:u32) -> ActionReturn<ID> { unsafe {
     SetWindowPos(handle, ptr::null_mut(), 0, 0, w as c_int, h as c_int, SWP_NOMOVE|SWP_NOZORDER);
     ActionReturn::None
+}}
+
+/**
+    Return the ui identifier of a window or None if there is none.
+*/
+pub fn get_window_parent<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
+    let parent = GetParent(handle);
+
+    if let Some(d) = get_handle_data::<::WindowData<ID>>(parent) {
+        ActionReturn::Parent(Box::new(Some(d.id.clone())))
+    } else {
+        ActionReturn::None
+    }
 }}
