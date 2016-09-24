@@ -18,12 +18,12 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
   GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, BN_CLICKED, HIWORD, POINT, LONG,
-  SWP_NOSIZE};
+  SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
   GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, GetWindowTextLengthW,
-  MessageBoxW, ScreenToClient, GetWindowRect, GetParent};
+  MessageBoxW, ScreenToClient, GetWindowRect, GetParent, SetParent};
 
 use kernel32::{GetModuleHandleW, GetLastError};
 
@@ -387,4 +387,58 @@ pub fn get_window_parent<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { 
     } else {
         ActionReturn::None
     }
+}}
+
+
+/**
+    Set or removed window style when a parent is added or removed from a control.
+*/
+fn set_parent_update_style(handle: HWND, parent_removed: bool) { unsafe {
+    let mut style = GetWindowLongPtrW(handle, GWL_STYLE);
+    
+    if parent_removed {
+        // When removing parents, set the window style to overlapped
+        let child = WS_CHILD as LONG_PTR;
+        style |= WS_OVERLAPPEDWINDOW as LONG_PTR;
+        if style & child != 0 { style ^= child; }
+    } else {
+        // Remove any window styles if found
+        style |= WS_CHILD as LONG_PTR;
+        for i in [WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_THICKFRAME, WS_BORDER, WS_MAXIMIZEBOX].iter() {
+            let i = *i as LONG_PTR;
+            if style & i != 0 { 
+                style ^= i; 
+            }
+        }
+    }
+
+    SetWindowLongPtrW(handle, GWL_STYLE, style);
+}}
+
+/**
+    Set or remove the parent of a window. 
+    If the control must have a parent, setting `force_parent` to true will make the function fail if the parent is None.
+    If the parent is removed, apply the WS_OVERLAPPEDWINDOW style to the control and remove the WS_CHILD style.
+
+    TODO ALPHA: Needs tests
+*/
+pub fn set_window_parent<ID: Eq+Hash+Clone>(ui: &::Ui<ID>, handle: HWND, parent: Option<ID>, force_parent: bool) -> ActionReturn<ID> { unsafe {
+    match parent {
+        Some(id) => {
+            let controls: &mut ::ControlCollection<ID> =  &mut *ui.controls;
+            if let Some(&(parent_handle, _)) = controls.get(&id) {
+                set_parent_update_style(handle, false);
+                SetParent(handle, parent_handle);
+            } else {
+                // TODO return something like ActionReturn::Error
+            }
+        },
+        None => {
+            if force_parent { return ActionReturn::None; } // Should return an error
+            set_parent_update_style(handle, true);
+            SetParent(handle, ptr::null_mut()); 
+        }
+    }
+
+    ActionReturn::None
 }}

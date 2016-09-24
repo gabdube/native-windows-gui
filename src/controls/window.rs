@@ -6,7 +6,8 @@ use std::hash::Hash;
 
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text, show_message,
-  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent};
+  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
+  set_window_parent};
 use actions::{Action, ActionReturn};
 use events::Event;
 
@@ -53,13 +54,14 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
         Box::new( |ui, id, handle, action| {
             match action {
                 Action::Message(p) => show_message(handle, *p),
-                Action::SetText(t) => set_window_text(handle, *t),
                 Action::GetText => get_window_text(handle),
+                Action::SetText(t) => set_window_text(handle, *t),
                 Action::GetPosition => get_window_pos(handle, false),
                 Action::SetPosition(x, y) => set_window_pos(handle, x, y),
                 Action::GetSize => get_window_size(handle),
                 Action::SetSize(w, h) => set_window_size(handle, w, h),
                 Action::GetParent => get_window_parent(handle),
+                Action::SetParent(p) => set_window_parent(ui, handle, *p, false),
                 _ => ActionReturn::NotSupported
             }            
         })

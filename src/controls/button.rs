@@ -5,7 +5,8 @@ use std::hash::Hash;
 
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
- get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent};
+ get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
+ set_window_parent};
 use actions::{Action, ActionReturn};
 use events::Event;
 
@@ -56,6 +57,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Button<ID> {
                 Action::GetSize => get_window_size(handle),
                 Action::SetSize(w, h) => set_window_size(handle, w, h),
                 Action::GetParent => get_window_parent(handle),
+                Action::SetParent(p) => set_window_parent(ui, handle, *p, true),
                 _ => ActionReturn::NotSupported
             }
         })

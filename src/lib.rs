@@ -73,7 +73,6 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
             }
 
             // Store the window data
-            let event_range = 0..events::Event::Last as usize;
             let mut callbacks = HashMap::new();
             for e in template.supported_events() {
                 callbacks.insert(e, Vec::new());
