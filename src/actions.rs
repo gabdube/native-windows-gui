@@ -29,7 +29,7 @@ pub enum Action<ID: Eq+Clone+Hash> {
 }
 
 /**
-    Possible values return by message sent to an Ui
+    Possible values returned by message sent to an Ui
 */
 pub enum ActionReturn<ID: Eq+Clone+Hash> {
     None,
@@ -37,6 +37,7 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     Position(i32, i32),
     Size(u32, u32),
     Text(Box<String>),
+    Error(u32),
     NotSupported
 }
 

@@ -76,7 +76,7 @@ fn test_ui() {
     ui.bind("MoveBtn", EventCallback::ButtonClick(Box::new(|ui, caller| {
         if let ActionReturn::Position(x,y) = ui.exec("MoveBtn", Action::GetPosition).unwrap() {
             if x == 10 {
-                ui.exec(caller, Action::SetPosition(380, 65)).unwrap();
+                ui.exec(caller, Action::SetPosition(390, 65)).unwrap();
             } else {
                 ui.exec(caller, Action::SetPosition(10, 65)).unwrap();
             }

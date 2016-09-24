@@ -11,6 +11,7 @@ use std::hash::Hash;
 
 use events::{Event, EventCallback};
 use actions::{ActionReturn, ActMessageParams};
+use constants::{CONTROL_NOT_FOUND, MUST_HAVE_PARENT};
 
 use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
@@ -395,7 +396,7 @@ pub fn get_window_parent<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { 
 */
 fn set_parent_update_style(handle: HWND, parent_removed: bool) { unsafe {
     let mut style = GetWindowLongPtrW(handle, GWL_STYLE);
-    
+
     if parent_removed {
         // When removing parents, set the window style to overlapped
         let child = WS_CHILD as LONG_PTR;
@@ -430,11 +431,13 @@ pub fn set_window_parent<ID: Eq+Hash+Clone>(ui: &::Ui<ID>, handle: HWND, parent:
                 set_parent_update_style(handle, false);
                 SetParent(handle, parent_handle);
             } else {
-                // TODO return something like ActionReturn::Error
+                return ActionReturn::Error( CONTROL_NOT_FOUND );
             }
         },
         None => {
-            if force_parent { return ActionReturn::None; } // Should return an error
+            if force_parent { 
+                return ActionReturn::Error( MUST_HAVE_PARENT );
+            }
             set_parent_update_style(handle, true);
             SetParent(handle, ptr::null_mut()); 
         }
