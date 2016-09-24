@@ -10,24 +10,24 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
 use actions::{Action, ActionReturn};
 use events::Event;
 
-use winapi::HWND;
+use winapi::{HWND, BS_AUTOCHECKBOX};
 
 /**
-    Configuration properties to create simple button
+    Configuration properties to create simple checkbox
 
-    * text: The button text
-    * size: The button size (width, height) in pixels
-    * position: The button position (x, y) in the parent control
+    * text: The checkbox text
+    * size: The checkbox size (width, height) in pixels
+    * position: The checkbox position (x, y) in the parent control
     * parent: The control parent
 */
-pub struct Button<ID: Eq+Clone+Hash> {
+pub struct CheckBox<ID: Eq+Clone+Hash> {
     pub text: String,
     pub size: (u32, u32),
     pub position: (i32, i32),
     pub parent: ID,
 }
 
-impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Button<ID> {
+impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
 
     fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
         let base = WindowBase::<ID> {
@@ -36,7 +36,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Button<ID> {
             position: self.position.clone(),
             visible: true,
             resizable: false,
-            extra_style: 0,
+            extra_style: BS_AUTOCHECKBOX,
             class: Some("BUTTON".to_string()),
             parent: Some(self.parent.clone())
         };

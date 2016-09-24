@@ -36,6 +36,7 @@ pub struct WindowBase<ID: Eq+Hash+Clone> {
     pub position: (i32, i32),
     pub visible: bool,
     pub resizable: bool,
+    pub extra_style: u32,
     pub class: Option<String>,
     pub parent: Option<ID>
 }
@@ -230,6 +231,8 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
         if base.resizable { flags |= WS_OVERLAPPEDWINDOW; }
         else { flags |= WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX}
     }
+
+    flags |= base.extra_style;
 
     let hwnd = CreateWindowExW(
         0, class_name.as_ptr(), window_name.as_ptr(),

@@ -39,6 +39,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
             position: self.position.clone(),
             visible: self.visible,
             resizable: self.resizable,
+            extra_style: 0,
             class: None,
             parent: None
         };

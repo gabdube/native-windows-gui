@@ -9,7 +9,7 @@ use nwg::actions::{Action, ActionReturn};
 fn create_controls(ui: &mut nwg::Ui<&'static str>) {
     let main_window = nwg::controls::Window {
         caption: "Test".to_string(),
-        size: (500, 235),
+        size: (500, 290),
         position: (100, 100),
         visible: true,
         resizable: false
@@ -43,11 +43,19 @@ fn create_controls(ui: &mut nwg::Ui<&'static str>) {
         parent: "MainWindow"
     };
 
+    let checkbox = nwg::controls::CheckBox {
+        text: "A checkbox".to_string(),
+        size: (100, 50),
+        position: (10, 230),
+        parent: "MainWindow"
+    };
+
     ui.new_control("MainWindow", main_window).unwrap();
     ui.new_control("HelloBtn", hello_btn).unwrap();
     ui.new_control("MoveBtn", move_btn).unwrap();
     ui.new_control("ResizeBtn", resize_btn).unwrap();
     ui.new_control("ParentBtn", parent_btn).unwrap();
+    ui.new_control("CheckBox", checkbox).unwrap();
 }
 
 #[test]
