@@ -11,7 +11,7 @@ use std::hash::Hash;
 
 use events::{Event, EventCallback};
 use actions::{ActionReturn, ActMessageParams};
-use constants::{CONTROL_NOT_FOUND, MUST_HAVE_PARENT};
+use constants::Error;
 
 use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
@@ -389,7 +389,7 @@ pub fn get_window_parent<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { 
     if let Some(d) = get_handle_data::<::WindowData<ID>>(parent) {
         ActionReturn::Parent(Box::new(Some(d.id.clone())))
     } else {
-        ActionReturn::None
+        ActionReturn::Parent(Box::new(None))
     }
 }}
 
@@ -423,8 +423,6 @@ fn set_parent_update_style(handle: HWND, parent_removed: bool) { unsafe {
     Set or remove the parent of a window. 
     If the control must have a parent, setting `force_parent` to true will make the function fail if the parent is None.
     If the parent is removed, apply the WS_OVERLAPPEDWINDOW style to the control and remove the WS_CHILD style.
-
-    TODO ALPHA: Needs tests
 */
 pub fn set_window_parent<ID: Eq+Hash+Clone>(ui: &::Ui<ID>, handle: HWND, parent: Option<ID>, force_parent: bool) -> ActionReturn<ID> { unsafe {
     match parent {
@@ -434,12 +432,12 @@ pub fn set_window_parent<ID: Eq+Hash+Clone>(ui: &::Ui<ID>, handle: HWND, parent:
                 set_parent_update_style(handle, false);
                 SetParent(handle, parent_handle);
             } else {
-                return ActionReturn::Error( CONTROL_NOT_FOUND );
+                return ActionReturn::Error( Error::CONTROL_NOT_FOUND );
             }
         },
         None => {
             if force_parent { 
-                return ActionReturn::Error( MUST_HAVE_PARENT );
+                return ActionReturn::Error( Error::MUST_HAVE_PARENT );
             }
             set_parent_update_style(handle, true);
             SetParent(handle, ptr::null_mut()); 

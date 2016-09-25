@@ -48,7 +48,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::MouseUp, Event::ButtonClick]
+        vec![Event::MouseUp]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {

@@ -1,0 +1,86 @@
+#![allow(unused_variables)]
+
+extern crate native_windows_gui as nwg;
+use nwg::constants::Error;
+use nwg::actions::{Action, ActionReturn};
+use nwg::actions::helper;
+
+macro_rules! test_action {
+    ($ui:expr, $a:expr, $b:pat, $c: block) => (
+        match $ui.exec("TEST1", $a).unwrap() {
+            $b => $c,
+            _ => panic!("Bad actionreturn type returned")
+        }
+    );
+
+    ($ui:expr, $a:expr, $b:pat, $c: block, $d: expr) => (
+        match $ui.exec($d, $a).unwrap() {
+            $b => $c,
+            _ => panic!("Bad actionreturn type returned")
+        }
+    )
+}
+
+fn setup_window(ui: &mut nwg::Ui<&'static str>) {
+    let main_window = nwg::controls::Window {
+        caption: "Test".to_string(),
+        size: (200, 200),
+        position: (100, 100),
+        visible: false,
+        resizable: false
+    };
+
+    let sub_window = nwg::controls::Window {
+        caption: "Test".to_string(),
+        size: (200, 200),
+        position: (100, 100),
+        visible: false,
+        resizable: false
+    };
+
+    ui.new_control("MainWindow", main_window).unwrap();
+    ui.new_control("SubWindow", sub_window).unwrap();
+}
+
+#[test]
+fn buttons() {
+    let mut ui: nwg::Ui<&'static str> = nwg::Ui::new();
+    setup_window(&mut ui);
+
+    let b1 = nwg::controls::Button { text: "test".to_string(), size: (102, 102), position: (100, 100), parent: "MainWindow" };
+    let b2 = nwg::controls::Button { text: "test".to_string(), size: (100, 100), position: (100, 100), parent: "Bob" };
+
+    assert!(ui.new_control("TEST1", b1).is_ok());
+
+    // Bad parent
+    let r = ui.new_control("TEST2", b2);
+    assert!(r.is_err());
+    assert!(r.err().unwrap() == Error::TEMPLATE_CREATION);
+
+    // Actions
+    test_action!(ui, Action::None, ActionReturn::NotSupported, {});
+    test_action!(ui, helper::message("A", "A", 0), ActionReturn::NotSupported, {});
+
+    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "MainWindow"); } );
+    test_action!(ui, helper::set_parent("hya!"), ActionReturn::Error(e), { assert!(e == Error::CONTROL_NOT_FOUND); } );
+    test_action!(ui, helper::remove_parent(), ActionReturn::Error(e), { assert!(e == Error::MUST_HAVE_PARENT); } );
+    test_action!(ui, helper::set_parent("SubWindow"), ActionReturn::None, {} );
+    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "SubWindow"); } );
+
+    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(*p == None); }, "SubWindow" );
+    test_action!(ui, helper::set_parent("MainWindow"), ActionReturn::None, {}, "SubWindow");
+    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "MainWindow"); }, "SubWindow" );
+
+    test_action!(ui, Action::GetPosition, ActionReturn::Position(x,y), { assert!((x,y) == (100, 100)); } );
+    test_action!(ui, Action::SetPosition(150, 150), ActionReturn::None, {} );
+    test_action!(ui, Action::GetPosition, ActionReturn::Position(x,y), { assert!((x,y) == (150, 150)); } );
+    
+    test_action!(ui, Action::GetSize, ActionReturn::Size(w,h), { assert!((w,h) == (102, 102)); } );
+    test_action!(ui, Action::SetSize(151, 151), ActionReturn::None, {} );
+    test_action!(ui, Action::GetSize, ActionReturn::Size(w,h), { assert!((w,h) == (151, 151)); } );
+
+    test_action!(ui, Action::GetText, ActionReturn::Text(t), { assert!(*t == "test"); } );
+    test_action!(ui, helper::set_text("Haha"), ActionReturn::None, {} );
+    test_action!(ui, Action::GetText, ActionReturn::Text(t), { assert!(*t == "Haha"); } );
+
+}

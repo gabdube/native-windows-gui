@@ -16,7 +16,10 @@ use std::ptr;
 use std::mem;
 use std::hash::Hash;
 use std::collections::HashMap;
+
 use controls::ControlTemplate;
+use constants::Error;
+
 use winapi::{MSG, HWND};
 use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
@@ -60,7 +63,7 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
 
         If the control creation somehow failed return `Err`
     */
-    pub fn new_control<T:ControlTemplate<ID>>(&mut self, cont: ID, template: T) -> Result<ID, ()> {
+    pub fn new_control<T:ControlTemplate<ID>>(&mut self, cont: ID, template: T) -> Result<ID, Error> {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
         
         if !controls.contains_key(&cont) {
@@ -68,7 +71,7 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
             match template.create(self, cont.clone()) {
                 Ok(h) => handle = h,
                 Err(_) => { 
-                    return Err(());  // Error: Template creation failed: *template error* 
+                    return Err(Error::TEMPLATE_CREATION);  // TODO propagate details about the error
                 }
             }
 
@@ -88,7 +91,7 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
             controls.insert(cont.clone(), (handle, template.evaluator()) );
             Ok(cont)
         } else {
-            Err(()) // Error: A widget with this id already exists
+            Err(Error::CONTROL_EXISTS) // Error: A widget with this id already exists
         }
 
     }
@@ -97,31 +100,31 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
         Add a callback to a control. Return `true` if the callback was added
         successfully, `false` if `cont` was not found in ui.
     */
-    pub fn bind(&self, cont: ID, cb: events::EventCallback<ID>) -> bool {
+    pub fn bind(&self, cont: ID, cb: events::EventCallback<ID>) -> Result<(), Error> {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
         if let Some(&(handle, _)) = controls.get(&cont) {
             let event = events::map_callback(&cb);
             let data: &mut WindowData<ID> = controls::get_handle_data(handle);
             if let Some(functions) = data.callbacks.get_mut(&event) {
                 functions.push(cb);
-                true
+                Ok(())
             } else {
-                false // Callback not supported
+                Err(Error::CALLBACK_NOT_SUPPORTED) // Callback not supported
             }
         } else {
-            false // Control not supported
+            Err(Error::CONTROL_NOT_FOUND) 
         }
     }
 
     /**
         Execute an action on the specified control
     */
-    pub fn exec(&self, cont: ID, action: actions::Action<ID>) -> Result<actions::ActionReturn<ID>, ()> {
+    pub fn exec(&self, cont: ID, action: actions::Action<ID>) -> Result<actions::ActionReturn<ID>, Error> {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
         if let Some(&(handle, ref exec)) = controls.get(&cont) {
             Ok(exec(self, &cont, handle, action))
         } else {
-            Err(())
+            Err(Error::CONTROL_NOT_FOUND)
         }
     }
 
