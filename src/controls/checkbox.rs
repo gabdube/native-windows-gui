@@ -10,7 +10,7 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
 use actions::{Action, ActionReturn};
 use events::Event;
 
-use winapi::{HWND, BS_AUTOCHECKBOX};
+use winapi::{HWND, BS_AUTOCHECKBOX, BS_NOTIFY};
 
 /**
     Configuration properties to create simple checkbox
@@ -36,7 +36,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
             position: self.position.clone(),
             visible: true,
             resizable: false,
-            extra_style: BS_AUTOCHECKBOX,
+            extra_style: BS_AUTOCHECKBOX | BS_NOTIFY,
             class: Some("BUTTON".to_string()),
             parent: Some(self.parent.clone())
         };
@@ -45,7 +45,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::ButtonClick]
+        vec![Event::ButtonClick, Event::Focus]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {

@@ -19,7 +19,8 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
   GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, BN_CLICKED, HIWORD, POINT, LONG,
-  SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME};
+  SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME, BN_SETFOCUS,
+  BN_KILLFOCUS, WM_ACTIVATEAPP};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
@@ -46,8 +47,11 @@ pub struct WindowBase<ID: Eq+Hash+Clone> {
 */
 fn map_command(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
     let command = HIWORD(w as u32);
+    let owner: HWND = unsafe{ mem::transmute(l) };
     match command {
-        BN_CLICKED => (Event::ButtonClick, unsafe{ mem::transmute(l) } ),
+        BN_CLICKED => (Event::ButtonClick, owner),
+        BN_SETFOCUS => (Event::Focus, owner),
+        BN_KILLFOCUS => (Event::Focus, owner),
         _ => (Event::Unknown, handle)
     }
 }
@@ -62,6 +66,7 @@ fn map_system_event(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HW
         WM_LBUTTONUP => (Event::MouseUp, handle),
         WM_RBUTTONUP => (Event::MouseUp, handle),
         WM_MBUTTONUP => (Event::MouseUp, handle),
+        WM_ACTIVATEAPP => (Event::Focus, handle),
         _ => (Event::Unknown, handle)
     }
 }
@@ -94,10 +99,18 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
     match ec {
         &EventCallback::MouseUp(ref c) => {
             let (x, y, btn, modifiers) = handle_btn(msg, w, l);
-            c(ui, caller, x, y, btn, modifiers);
-        },
+            c(ui, caller, x, y, btn, modifiers); 
+         },
         &EventCallback::ButtonClick(ref c) => {
-            c(ui, caller);
+            c(ui, caller); 
+         },
+        &EventCallback::Focus(ref c) => {
+            let focus = match msg {
+                WM_COMMAND => { HIWORD(w as u32) == BN_SETFOCUS },
+                WM_ACTIVATEAPP => w == 1,
+                _ => unreachable!()
+            };
+            c(ui, caller, focus);
         }
         //_ => {}
     }
