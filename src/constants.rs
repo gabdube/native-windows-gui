@@ -16,9 +16,25 @@ pub enum Error {
 }
 
 // Event constants
+
+#[derive(PartialEq, Debug)]
+pub enum CheckState {
+    Checked,
+    Unchecked,
+    Indeterminate, // Tristate only
+}
+
 pub const MOD_MOUSE_CTRL: u32 = MK_CONTROL as u32;
 pub const MOD_MOUSE_SHIFT: u32 = MK_SHIFT as u32;
 
 pub const BTN_MOUSE_MIDDLE: u32 = MK_MBUTTON as u32;
 pub const BTN_MOUSE_RIGHT: u32 = MK_RBUTTON as u32;
 pub const BTN_MOUSE_LEFT: u32 = MK_LBUTTON as u32;
+
+// Constants that are not yet in WINAPI
+
+pub const BM_GETSTATE: u32 = 242;
+
+pub const BST_CHECKED: u32 = 1;
+pub const BST_UNCHECKED: u32 = 0;
+pub const BST_INDETERMINATE: u32 = 2;

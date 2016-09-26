@@ -5,6 +5,7 @@
     No controls implement all Actions.
 */
 use std::hash::Hash;
+use constants::CheckState;
 
 #[derive(PartialEq)]
 pub struct ActMessageParams {
@@ -27,6 +28,8 @@ pub enum Action<ID: Eq+Clone+Hash> {
     SetSize(u32, u32),
     GetText,
     SetText(Box<String>),
+    GetCheckState,
+    SetCheckState(CheckState),
     Message(Box<ActMessageParams>)
 }
 
@@ -41,6 +44,7 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     Size(u32, u32),
     Text(Box<String>),
     Error(::constants::Error),
+    CheckState(CheckState),
     NotSupported
 }
 

@@ -25,7 +25,7 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
   GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, GetWindowTextLengthW,
-  MessageBoxW, ScreenToClient, GetWindowRect, GetParent, SetParent};
+  MessageBoxW, ScreenToClient, GetWindowRect, GetParent, SetParent, SendMessageW};
 
 use kernel32::{GetModuleHandleW, GetLastError};
 
@@ -315,6 +315,12 @@ pub unsafe fn free_handle_data<T>(handle: HWND) {
 //// Actions functions shared by multiple controls
 ////
 
+/**
+    Thin wrapper around SendMessageW
+*/
+pub fn send_message(handle: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT { unsafe {
+    SendMessageW(handle, msg, w, l)
+}}
 
 /**
     Set the text of a window.

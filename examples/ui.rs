@@ -47,7 +47,8 @@ fn create_controls(ui: &mut nwg::Ui<&'static str>) {
         text: "A checkbox".to_string(),
         size: (100, 50),
         position: (10, 230),
-        parent: "MainWindow"
+        parent: "MainWindow",
+        tristate: true
     };
 
     ui.new_control("MainWindow", main_window).unwrap();
