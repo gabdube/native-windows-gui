@@ -20,12 +20,13 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, BN_CLICKED, HIWORD, POINT, LONG,
   SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME, BN_SETFOCUS,
-  BN_KILLFOCUS, WM_ACTIVATEAPP};
+  BN_KILLFOCUS, WM_ACTIVATEAPP, BOOL, SW_SHOW, SW_HIDE};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
   GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, GetWindowTextLengthW,
-  MessageBoxW, ScreenToClient, GetWindowRect, GetParent, SetParent, SendMessageW};
+  MessageBoxW, ScreenToClient, GetWindowRect, GetParent, SetParent, SendMessageW,
+  EnableWindow, IsWindowEnabled, IsWindowVisible, ShowWindow};
 
 use kernel32::{GetModuleHandleW, GetLastError};
 
@@ -463,5 +464,36 @@ pub fn set_window_parent<ID: Eq+Hash+Clone>(ui: &::Ui<ID>, handle: HWND, parent:
         }
     }
 
+    ActionReturn::None
+}}
+
+/**
+    Return True if the window is enabled, else return false.
+*/
+pub fn get_window_enabled<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
+    ActionReturn::Enabled(IsWindowEnabled(handle) == 1)
+}}
+
+/**
+    Enable or disable a window
+*/
+pub fn set_window_enabled<ID: Eq+Hash+Clone>(handle: HWND, enabled: bool) -> ActionReturn<ID> { unsafe {
+    EnableWindow(handle, enabled as BOOL);
+    ActionReturn::None
+}}
+
+/**
+    Return True if the window is visible, else return false.
+*/
+pub fn get_window_visibility<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
+    ActionReturn::Visibility(IsWindowVisible(handle) == 1)
+}}
+
+/**
+    Show or hide a window
+*/
+pub fn set_window_visibility<ID: Eq+Hash+Clone>(handle: HWND, visible: bool) -> ActionReturn<ID> { unsafe {
+    let show = if visible { SW_SHOW } else { SW_HIDE };
+    ShowWindow(handle, visible as BOOL);
     ActionReturn::None
 }}

@@ -30,6 +30,10 @@ pub enum Action<ID: Eq+Clone+Hash> {
     SetText(Box<String>),
     GetCheckState,
     SetCheckState(CheckState),
+    GetEnabled,
+    SetEnabled(bool),
+    GetVisibility,
+    SetVisibility(bool),
     Message(Box<ActMessageParams>)
 }
 
@@ -45,6 +49,8 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     Text(Box<String>),
     Error(::constants::Error),
     CheckState(CheckState),
+    Enabled(bool),
+    Visibility(bool),
     NotSupported
 }
 

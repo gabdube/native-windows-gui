@@ -6,14 +6,15 @@ use std::hash::Hash;
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
- set_window_parent, send_message};
+ set_window_parent, send_message, get_window_enabled, set_window_enabled, 
+ get_window_visibility, set_window_visibility};
 use actions::{Action, ActionReturn};
 use constants::CheckState;
 use events::Event;
 
-use winapi::{HWND, BS_AUTOCHECKBOX, BS_NOTIFY, BS_AUTO3STATE};
+use winapi::{HWND, BS_AUTOCHECKBOX, BS_NOTIFY, BS_AUTO3STATE, WPARAM};
 
-use constants::{BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE};
+use constants::{BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED, BM_SETCHECK};
 
 /**
     Configuration properties to create simple checkbox
@@ -68,7 +69,12 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
                 Action::SetSize(w, h) => set_window_size(handle, w, h),
                 Action::GetParent => get_window_parent(handle),
                 Action::SetParent(p) => set_window_parent(ui, handle, *p, true),
-                Action::GetCheckState => get_check_state::<ID>(handle),
+                Action::GetCheckState => get_check_state(handle),
+                Action::SetCheckState(s) => set_check_state(handle, s),
+                Action::GetEnabled => get_window_enabled(handle),
+                Action::SetEnabled(e) => set_window_enabled(handle, e),
+                Action::GetVisibility => get_window_visibility(handle),
+                Action::SetVisibility(v) => set_window_visibility(handle, v),
                 _ => ActionReturn::NotSupported
             }
         })
@@ -87,4 +93,14 @@ fn get_check_state<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
     };
 
     ActionReturn::CheckState(state)
+}
+
+fn set_check_state<ID: Eq+Clone+Hash >(handle: HWND, state: CheckState) -> ActionReturn<ID> {
+    let state = match state {
+        CheckState::Checked => BST_CHECKED,
+        CheckState::Indeterminate => BST_INDETERMINATE,
+        CheckState::Unchecked => BST_UNCHECKED
+    };
+    send_message(handle, BM_SETCHECK, state as WPARAM, 0);
+    ActionReturn::None
 }
