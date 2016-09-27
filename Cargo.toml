@@ -7,3 +7,4 @@ authors = ["Gabriel Dube <gdube.475@gmail.com>"]
 winapi = "0.2.8"
 kernel32-sys = "0.2.2"
 user32-sys = "0.2.0"
+comctl32-sys = "0.2.0"

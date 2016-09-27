@@ -4,7 +4,7 @@
 
 use std::ffi::{OsStr, OsString};
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use std::os::raw::c_int;
+use std::os::raw::{c_void, c_int};
 use std::ptr;
 use std::mem;
 use std::hash::Hash;
@@ -21,7 +21,7 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, BN_CLICKED, HIWORD, POINT, LONG,
   SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME, BN_SETFOCUS,
   BN_KILLFOCUS, WM_ACTIVATEAPP, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE,
-  SW_RESTORE};
+  SW_RESTORE, GWL_WNDPROC, UINT_PTR, DWORD_PTR};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
@@ -30,6 +30,8 @@ use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   EnableWindow, IsWindowEnabled, IsWindowVisible, ShowWindow, IsZoomed, IsIconic};
 
 use kernel32::{GetModuleHandleW, GetLastError};
+
+use comctl32::{SetWindowSubclass, DefSubclassProc};
 
 const CLASS_NAME: &'static str = "RustyWindow";
 
@@ -119,6 +121,30 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
 }
 
 /**
+    Window proc for subclasses
+*/
+unsafe extern "system" fn sub_wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id_subclass: UINT_PTR, dref: DWORD_PTR) -> LRESULT {
+    let (event, handle) = map_system_event(hwnd, msg, w, l);
+
+    // If the window data was initialized, eval callbacks
+    if let Some(data) = get_handle_data::<::WindowData<ID>>(handle) {
+        // Build a temporary Ui that is then forgetted to pass it to the callbacks.
+        let mut ui = ::Ui{controls: data.controls};
+        
+        // Eval the callbacks
+        if let Some(functions) = data.callbacks.get(&event) {
+            for f in functions.iter() {
+                dispatch_event::<ID>(f, &mut ui, &data.id, msg, w, l); 
+            }
+        }
+        
+        mem::forget(ui);
+    }
+
+    return DefSubclassProc(hwnd, msg, w, l);
+}
+
+/**
     Custom window procedure for none built-in types
 */
 unsafe extern "system" fn wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
@@ -138,11 +164,11 @@ unsafe extern "system" fn wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: W
         
         mem::forget(ui);
     }
-    
+
     match msg {
         WM_CREATE => 0,
         WM_CLOSE => {PostQuitMessage(0); 0},
-        _ => DefWindowProcW(hwnd, msg, w, l)
+        _ =>  DefWindowProcW(hwnd, msg, w, l)
     }
 }
 
@@ -203,6 +229,14 @@ unsafe fn fix_overlapped_window_size(handle: HWND, size: (u32, u32)) {
     SetWindowPos(handle, ptr::null_mut(), 0, 0,
       (size.0+delta_width) as c_int, (size.1+delta_height) as c_int,
       SWP_NOMOVE|SWP_NOZORDER);
+}
+
+
+/**
+    Inject a custom window proc in a native window
+*/ 
+pub unsafe fn hook_native<ID: Eq+Clone+Hash>(handle: HWND) {
+    SetWindowSubclass(handle, Some(sub_wndproc::<ID>), 1, 0);
 }
 
 /**
@@ -266,9 +300,16 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
         if flags & WS_OVERLAPPEDWINDOW != 0 {
             fix_overlapped_window_size(hwnd, base.size);
         }
+
+        if !use_custom_class {
+            hook_native::<ID>(hwnd);
+        }
+
         Ok(hwnd)
     }
 }
+
+
 
 /**
     Unregister the custom window class. If multiple UI manager were created

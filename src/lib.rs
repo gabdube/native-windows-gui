@@ -6,6 +6,7 @@
 extern crate winapi;
 extern crate user32;
 extern crate kernel32;
+extern crate comctl32;
 
 pub mod controls;
 pub mod events;
@@ -20,7 +21,7 @@ use std::collections::HashMap;
 use controls::ControlTemplate;
 use constants::Error;
 
-use winapi::{MSG, HWND};
+use winapi::{MSG, HWND, UINT, WPARAM, LPARAM, LRESULT};
 use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
 pub type ActionEvaluator<ID> = Box<Fn(&Ui<ID>, &ID, HWND, actions::Action<ID>) -> actions::ActionReturn<ID>>;
@@ -81,14 +82,15 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
                 callbacks.insert(e, Vec::new());
             }
 
-            let data = WindowData{
+            let data = WindowData {
                 id: cont.clone(),
                 controls: self.controls,
-                callbacks: callbacks
+                callbacks: callbacks,
             };
             controls::set_handle_data(handle, data);
 
             controls.insert(cont.clone(), (handle, template.evaluator()) );
+            
             Ok(cont)
         } else {
             Err(Error::CONTROL_EXISTS) // Error: A widget with this id already exists
