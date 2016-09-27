@@ -19,28 +19,32 @@ fn create_controls(ui: &mut nwg::Ui<&'static str>) {
         text: "Say hello!".to_string(),
         size: (480, 50),
         position: (10, 10),
-        parent: "MainWindow"
+        parent: "MainWindow",
+        text_align: (nwgc::HTextAlign::Center, nwgc::VTextAlign::Center)
     };
 
     let move_btn = nwg::controls::Button {
         text: "Move me!".to_string(),
         size: (100, 50),
         position: (10, 65),
-        parent: "MainWindow"
+        parent: "MainWindow",
+        text_align: (nwgc::HTextAlign::Center, nwgc::VTextAlign::Center)
     };
 
     let resize_btn = nwg::controls::Button {
         text: "Resize me!".to_string(),
         size: (100, 50),
         position: (10, 120),
-        parent: "MainWindow"
+        parent: "MainWindow",
+        text_align: (nwgc::HTextAlign::Center, nwgc::VTextAlign::Center)
     };
 
     let parent_btn = nwg::controls::Button {
         text: "Who is my parent?".to_string(),
         size: (480, 50),
         position: (10, 175),
-        parent: "MainWindow"
+        parent: "MainWindow",
+        text_align: (nwgc::HTextAlign::Center, nwgc::VTextAlign::Center)
     };
 
     let checkbox = nwg::controls::CheckBox {
@@ -48,7 +52,8 @@ fn create_controls(ui: &mut nwg::Ui<&'static str>) {
         size: (100, 50),
         position: (10, 230),
         parent: "MainWindow",
-        tristate: true
+        tristate: true,
+        text_align: (nwgc::HTextAlign::Center, nwgc::VTextAlign::Center)
     };
 
     ui.new_control("MainWindow", main_window).unwrap();

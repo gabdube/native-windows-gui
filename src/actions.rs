@@ -5,7 +5,7 @@
     No controls implement all Actions.
 */
 use std::hash::Hash;
-use constants::CheckState;
+use constants::{CheckState, WindowDisplay};
 
 #[derive(PartialEq)]
 pub struct ActMessageParams {
@@ -34,6 +34,8 @@ pub enum Action<ID: Eq+Clone+Hash> {
     SetEnabled(bool),
     GetVisibility,
     SetVisibility(bool),
+    GetWindowDisplay,
+    SetWindowDisplay(WindowDisplay),
     Message(Box<ActMessageParams>)
 }
 
@@ -51,6 +53,7 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     CheckState(CheckState),
     Enabled(bool),
     Visibility(bool),
+    WindowDisplay(WindowDisplay),
     NotSupported
 }
 

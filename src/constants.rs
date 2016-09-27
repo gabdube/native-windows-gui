@@ -24,6 +24,27 @@ pub enum CheckState {
     Indeterminate, // Tristate only
 }
 
+#[derive(PartialEq, Debug)]
+pub enum WindowDisplay {
+    Maximised,
+    Minimized,
+    Normal
+}
+
+#[derive(PartialEq, Debug)]
+pub enum HTextAlign {
+    Left,
+    Center,
+    Right
+}
+
+#[derive(PartialEq, Debug)]
+pub enum VTextAlign {
+    Top,
+    Center,
+    Bottom
+}
+
 pub const MOD_MOUSE_CTRL: u32 = MK_CONTROL as u32;
 pub const MOD_MOUSE_SHIFT: u32 = MK_SHIFT as u32;
 

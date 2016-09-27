@@ -9,10 +9,11 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  set_window_parent, send_message, get_window_enabled, set_window_enabled, 
  get_window_visibility, set_window_visibility};
 use actions::{Action, ActionReturn};
-use constants::CheckState;
+use constants::{CheckState, HTextAlign, VTextAlign};
 use events::Event;
 
-use winapi::{HWND, BS_AUTOCHECKBOX, BS_NOTIFY, BS_AUTO3STATE, WPARAM};
+use winapi::{HWND, BS_AUTOCHECKBOX, BS_NOTIFY, BS_AUTO3STATE, WPARAM, BS_LEFT, BS_RIGHT,
+  BS_TOP, BS_CENTER, BS_BOTTOM, BS_RIGHTBUTTON};
 
 use constants::{BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED, BM_SETCHECK};
 
@@ -31,14 +32,27 @@ pub struct CheckBox<ID: Eq+Clone+Hash> {
     pub position: (i32, i32),
     pub parent: ID,
     pub tristate: bool,
+    pub text_align: (HTextAlign, VTextAlign),
 }
 
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
 
     fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
-        let extra;
+        let mut extra;
         if self.tristate { extra = BS_AUTO3STATE | BS_NOTIFY; }
         else { extra = BS_AUTOCHECKBOX | BS_NOTIFY; }
+
+        extra |= match self.text_align.0 {
+            HTextAlign::Left => BS_LEFT,
+            HTextAlign::Right => BS_RIGHT | BS_RIGHTBUTTON,
+            HTextAlign::Center => BS_CENTER
+        };
+
+        extra |= match self.text_align.1 {
+            VTextAlign::Top => BS_TOP,
+            VTextAlign::Bottom => BS_BOTTOM,
+            VTextAlign::Center => BS_CENTER
+        };
 
         let base = WindowBase::<ID> {
             text: self.text.clone(),

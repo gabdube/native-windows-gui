@@ -11,7 +11,7 @@ use std::hash::Hash;
 
 use events::{Event, EventCallback};
 use actions::{ActionReturn, ActMessageParams};
-use constants::Error;
+use constants::{Error, WindowDisplay};
 
 use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
@@ -20,13 +20,14 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, BN_CLICKED, HIWORD, POINT, LONG,
   SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME, BN_SETFOCUS,
-  BN_KILLFOCUS, WM_ACTIVATEAPP, BOOL, SW_SHOW, SW_HIDE};
+  BN_KILLFOCUS, WM_ACTIVATEAPP, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE,
+  SW_RESTORE};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
   GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, GetWindowTextLengthW,
   MessageBoxW, ScreenToClient, GetWindowRect, GetParent, SetParent, SendMessageW,
-  EnableWindow, IsWindowEnabled, IsWindowVisible, ShowWindow};
+  EnableWindow, IsWindowEnabled, IsWindowVisible, ShowWindow, IsZoomed, IsIconic};
 
 use kernel32::{GetModuleHandleW, GetLastError};
 
@@ -495,5 +496,23 @@ pub fn get_window_visibility<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID
 pub fn set_window_visibility<ID: Eq+Hash+Clone>(handle: HWND, visible: bool) -> ActionReturn<ID> { unsafe {
     let show = if visible { SW_SHOW } else { SW_HIDE };
     ShowWindow(handle, visible as BOOL);
+    ActionReturn::None
+}}
+
+
+pub fn get_window_display<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
+    ActionReturn::WindowDisplay(
+        if IsZoomed(handle) == 1 { WindowDisplay::Maximised }
+        else if IsIconic(handle) == 1 { WindowDisplay::Minimized }
+        else { WindowDisplay::Normal }
+    )
+}}
+
+pub fn set_window_display<ID: Eq+Hash+Clone>(handle: HWND, d: WindowDisplay) -> ActionReturn<ID> { unsafe {
+    match d {
+        WindowDisplay::Maximised => ShowWindow(handle, SW_MAXIMIZE),
+        WindowDisplay::Minimized => ShowWindow(handle, SW_MINIMIZE),
+        WindowDisplay::Normal => ShowWindow(handle, SW_RESTORE)
+    };
     ActionReturn::None
 }}

@@ -10,8 +10,9 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  set_window_visibility};
 use actions::{Action, ActionReturn};
 use events::Event;
+use constants::{HTextAlign, VTextAlign};
 
-use winapi::{HWND, BS_NOTIFY};
+use winapi::{HWND, BS_NOTIFY, BS_LEFT, BS_RIGHT, BS_TOP, BS_CENTER, BS_BOTTOM};
 
 /**
     Configuration properties to create simple button
@@ -26,18 +27,31 @@ pub struct Button<ID: Eq+Clone+Hash> {
     pub size: (u32, u32),
     pub position: (i32, i32),
     pub parent: ID,
+    pub text_align: (HTextAlign, VTextAlign),
 }
 
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Button<ID> {
 
     fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
+        let h_align = match self.text_align.0 {
+            HTextAlign::Left => BS_LEFT,
+            HTextAlign::Right => BS_RIGHT,
+            HTextAlign::Center => BS_CENTER
+        };
+
+        let v_align = match self.text_align.1 {
+            VTextAlign::Top => BS_TOP,
+            VTextAlign::Bottom => BS_BOTTOM,
+            VTextAlign::Center => BS_CENTER
+        };
+
         let base = WindowBase::<ID> {
             text: self.text.clone(),
             size: self.size.clone(),
             position: self.position.clone(),
             visible: true,
             resizable: false,
-            extra_style: BS_NOTIFY,
+            extra_style: BS_NOTIFY | h_align | v_align,
             class: Some("BUTTON".to_string()),
             parent: Some(self.parent.clone())
         };

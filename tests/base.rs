@@ -4,6 +4,7 @@ extern crate native_windows_gui as nwg;
 use nwg::constants::Error;
 use nwg::actions::{Action, ActionReturn};
 use nwg::actions::helper;
+use nwg::constants::{HTextAlign, VTextAlign};
 
 macro_rules! test_action {
     ($ui:expr, $a:expr, $b:pat, $c: block) => (
@@ -47,8 +48,8 @@ fn buttons() {
     let mut ui: nwg::Ui<&'static str> = nwg::Ui::new();
     setup_window(&mut ui);
 
-    let b1 = nwg::controls::Button { text: "test".to_string(), size: (102, 102), position: (100, 100), parent: "MainWindow" };
-    let b2 = nwg::controls::Button { text: "test".to_string(), size: (100, 100), position: (100, 100), parent: "Bob" };
+    let b1 = nwg::controls::Button { text: "test".to_string(), size: (102, 102), position: (100, 100), parent: "MainWindow", text_align: (HTextAlign::Center, VTextAlign::Center) };
+    let b2 = nwg::controls::Button { text: "test".to_string(), size: (100, 100), position: (100, 100), parent: "Bob", text_align: (HTextAlign::Center, VTextAlign::Center) };
 
     assert!(ui.new_control("TEST1", b1).is_ok());
 
