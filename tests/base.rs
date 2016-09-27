@@ -4,7 +4,7 @@ extern crate native_windows_gui as nwg;
 use nwg::constants::Error;
 use nwg::actions::{Action, ActionReturn};
 use nwg::actions::helper;
-use nwg::constants::{HTextAlign, VTextAlign};
+use nwg::constants::{HTextAlign, VTextAlign, WindowDisplay};
 
 macro_rules! test_action {
     ($ui:expr, $a:expr, $b:pat, $c: block) => (
@@ -84,4 +84,19 @@ fn buttons() {
     test_action!(ui, helper::set_text("Haha"), ActionReturn::None, {} );
     test_action!(ui, Action::GetText, ActionReturn::Text(t), { assert!(*t == "Haha"); } );
 
+    test_action!(ui, Action::GetEnabled, ActionReturn::Enabled(e), { assert!(e); } );
+    test_action!(ui, Action::SetEnabled(false), ActionReturn::None, {} );
+    test_action!(ui, Action::GetEnabled, ActionReturn::Enabled(e), { assert!(!e); } );
+    test_action!(ui, Action::SetEnabled(true), ActionReturn::None, {} );
+
+    test_action!(ui, Action::GetVisibility, ActionReturn::Visibility(v), { assert!(!v); }, "MainWindow" );
+    test_action!(ui, Action::SetVisibility(true), ActionReturn::None, {}, "MainWindow" );
+    test_action!(ui, Action::GetVisibility, ActionReturn::Visibility(v), { assert!(v); }, "MainWindow" );
+    test_action!(ui, Action::SetVisibility(false), ActionReturn::None, {}, "MainWindow" );
+    
+    test_action!(ui, Action::GetWindowDisplay, ActionReturn::WindowDisplay(d), {d == WindowDisplay::Normal}, "MainWindow" );
+    test_action!(ui, Action::SetWindowDisplay(WindowDisplay::Maximised), ActionReturn::None, {}, "MainWindow");
+    test_action!(ui, Action::GetWindowDisplay, ActionReturn::WindowDisplay(d), {d == WindowDisplay::Maximised}, "MainWindow" );
+    test_action!(ui, Action::SetWindowDisplay(WindowDisplay::Minimized), ActionReturn::None, {}, "MainWindow");
+    test_action!(ui, Action::GetWindowDisplay, ActionReturn::WindowDisplay(d), {d == WindowDisplay::Minimized}, "MainWindow" );
 }
