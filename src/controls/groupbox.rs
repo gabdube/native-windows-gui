@@ -11,8 +11,9 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  set_window_visibility, hook_native};
 use actions::{Action, ActionReturn};
 use events::Event;
+use constants::HTextAlign;
 
-use winapi::{HWND, BS_NOTIFY, BS_GROUPBOX};
+use winapi::{HWND, BS_GROUPBOX, BS_LEFT, BS_RIGHT, BS_CENTER};
 
 /**
     Configuration properties to create simple groupbox
@@ -27,18 +28,25 @@ pub struct GroupBox<ID: Eq+Clone+Hash> {
     pub size: (u32, u32),
     pub position: (i32, i32),
     pub parent: ID,
+    pub text_align: HTextAlign,
 }
 
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for GroupBox<ID> {
 
     fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
+        let h_align = match self.text_align {
+            HTextAlign::Left => BS_LEFT,
+            HTextAlign::Right => BS_RIGHT,
+            HTextAlign::Center => BS_CENTER
+        };
+
         let base = WindowBase::<ID> {
             text: self.text.clone(),
             size: self.size.clone(),
             position: self.position.clone(),
             visible: true,
             resizable: false,
-            extra_style: BS_GROUPBOX,
+            extra_style: BS_GROUPBOX | h_align,
             class: Some("BUTTON".to_string()),
             parent: Some(self.parent.clone())
         };
