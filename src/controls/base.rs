@@ -18,7 +18,7 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
   GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
-  RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, BN_CLICKED, HIWORD, POINT, LONG,
+  RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, HIWORD, POINT, LONG, BN_CLICKED,
   SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME, BN_SETFOCUS,
   BN_KILLFOCUS, WM_ACTIVATEAPP, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE,
   SW_RESTORE, GWL_WNDPROC, UINT_PTR, DWORD_PTR};
@@ -53,9 +53,9 @@ fn map_command(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
     let command = HIWORD(w as u32);
     let owner: HWND = unsafe{ mem::transmute(l) };
     match command {
-        BN_CLICKED => (Event::ButtonClick, owner),
         BN_SETFOCUS => (Event::Focus, owner),
         BN_KILLFOCUS => (Event::Focus, owner),
+        BN_CLICKED => (Event::Click, owner),
         _ => (Event::Unknown, handle)
     }
 }
@@ -105,7 +105,7 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
             let (x, y, btn, modifiers) = handle_btn(msg, w, l);
             c(ui, caller, x, y, btn, modifiers); 
          },
-        &EventCallback::ButtonClick(ref c) => {
+        &EventCallback::Click(ref c) => {
             c(ui, caller); 
          },
         &EventCallback::Focus(ref c) => {
@@ -130,7 +130,7 @@ unsafe extern "system" fn sub_wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, 
     if let Some(data) = get_handle_data::<::WindowData<ID>>(handle) {
         // Build a temporary Ui that is then forgetted to pass it to the callbacks.
         let mut ui = ::Ui{controls: data.controls};
-        
+
         // Eval the callbacks
         if let Some(functions) = data.callbacks.get(&event) {
             for f in functions.iter() {

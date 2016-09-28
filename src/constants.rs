@@ -56,6 +56,7 @@ pub const BTN_MOUSE_LEFT: u32 = MK_LBUTTON as u32;
 
 pub const BM_GETSTATE: u32 = 242;
 pub const BM_SETCHECK: u32 = 241;
+pub const BM_CLICK: u32 = 245;
 
 pub const BST_CHECKED: u32 = 1;
 pub const BST_UNCHECKED: u32 = 0;

@@ -61,7 +61,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Button<ID> {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::ButtonClick, Event::Focus, Event::MouseUp]
+        vec![Event::Click, Event::Focus, Event::MouseUp]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {

@@ -76,7 +76,7 @@ fn main() {
         println!("Mouse position: {:?} {:?}", x, y);
     }))).unwrap();
 
-    ui.bind("HelloBtn", EventCallback::ButtonClick(Box::new(|ui, caller| {
+    ui.bind("HelloBtn", EventCallback::Click(Box::new(|ui, caller| {
         assert!("HelloBtn" == *caller);
         ui.exec("MainWindow", nwga::message("Hello", "Hello World!", 0)).unwrap();
 
@@ -86,7 +86,7 @@ fn main() {
         }
     }))).unwrap();
 
-    ui.bind("MoveBtn", EventCallback::ButtonClick(Box::new(|ui, caller| {
+    ui.bind("MoveBtn", EventCallback::Click(Box::new(|ui, caller| {
         if let ActionReturn::Position(x,y) = ui.exec("MoveBtn", Action::GetPosition).unwrap() {
             if x == 10 {
                 ui.exec(caller, Action::SetPosition(390, 65)).unwrap();
@@ -96,7 +96,7 @@ fn main() {
         }
     }))).unwrap();
 
-    ui.bind("ResizeBtn", EventCallback::ButtonClick(Box::new(|ui, caller| {
+    ui.bind("ResizeBtn", EventCallback::Click(Box::new(|ui, caller| {
         if let ActionReturn::Size(w,h) = ui.exec("ResizeBtn", Action::GetSize).unwrap() {
             if w == 100 {
                 ui.exec(caller, Action::SetSize(480, 50)).unwrap();
@@ -106,7 +106,7 @@ fn main() {
         }
     }))).unwrap();
 
-    ui.bind("ParentBtn", EventCallback::ButtonClick(Box::new(|ui, caller| {
+    ui.bind("ParentBtn", EventCallback::Click(Box::new(|ui, caller| {
         if let ActionReturn::Parent(parent) = ui.exec(caller, Action::GetParent).unwrap() {
             let parent = parent.unwrap();
             assert!("MainWindow" == parent);

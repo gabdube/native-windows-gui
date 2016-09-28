@@ -38,7 +38,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for GroupBox<ID> {
             position: self.position.clone(),
             visible: true,
             resizable: false,
-            extra_style: BS_NOTIFY | BS_GROUPBOX,
+            extra_style: BS_GROUPBOX,
             class: Some("BUTTON".to_string()),
             parent: Some(self.parent.clone())
         };
@@ -47,7 +47,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for GroupBox<ID> {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::ButtonClick, Event::Focus]
+        Vec::new()
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {

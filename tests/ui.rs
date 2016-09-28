@@ -37,12 +37,12 @@ fn buttons() {
     assert!(r.err().unwrap() == Error::CONTROL_EXISTS);
 
     // Cannot bind event to unused names
-    let r = ui.bind("Haha", EventCallback::ButtonClick(Box::new(|ui, caller| {} )));
+    let r = ui.bind("Haha", EventCallback::Click(Box::new(|ui, caller| {} )));
     assert!(r.is_err());
     assert!(r.err().unwrap() == Error::CONTROL_NOT_FOUND);
 
     // Cannot bind unsupported callbacks
-    let r = ui.bind("MainWindow", EventCallback::ButtonClick(Box::new(|ui, caller| {} )));
+    let r = ui.bind("MainWindow", EventCallback::Click(Box::new(|ui, caller| {} )));
     assert!(r.is_err());
     assert!(r.err().unwrap() == Error::CALLBACK_NOT_SUPPORTED);
 
