@@ -11,7 +11,7 @@ use std::hash::Hash;
 
 use events::{Event, EventCallback};
 use actions::{ActionReturn, ActMessageParams};
-use constants::{Error, WindowDisplay};
+use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED, BM_SETCHECK};
 
 use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
@@ -557,3 +557,26 @@ pub fn set_window_display<ID: Eq+Hash+Clone>(handle: HWND, d: WindowDisplay) -> 
     };
     ActionReturn::None
 }}
+
+pub fn get_check_state<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
+    let state = send_message(handle, BM_GETSTATE, 0, 0) as u32;
+    let state = if state & BST_CHECKED != 0 {
+        CheckState::Checked
+    } else if state & BST_INDETERMINATE != 0 {
+        CheckState::Indeterminate
+    } else {
+        CheckState::Unchecked
+    };
+
+    ActionReturn::CheckState(state)
+}
+
+pub fn set_check_state<ID: Eq+Clone+Hash >(handle: HWND, state: CheckState) -> ActionReturn<ID> {
+    let state = match state {
+        CheckState::Checked => BST_CHECKED,
+        CheckState::Indeterminate => BST_INDETERMINATE,
+        CheckState::Unchecked => BST_UNCHECKED
+    };
+    send_message(handle, BM_SETCHECK, state as WPARAM, 0);
+    ActionReturn::None
+}

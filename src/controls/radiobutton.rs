@@ -6,47 +6,42 @@ use std::hash::Hash;
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
- set_window_parent, send_message, get_window_enabled, set_window_enabled, 
- get_window_visibility, set_window_visibility, get_check_state, set_check_state};
+ set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
+ set_window_visibility, get_check_state, set_check_state};
 use actions::{Action, ActionReturn};
-use constants::{HTextAlign, VTextAlign};
 use events::Event;
+use constants::{HTextAlign, VTextAlign};
 
-use winapi::{HWND, BS_AUTOCHECKBOX, BS_NOTIFY, BS_AUTO3STATE, WPARAM, BS_LEFT, BS_RIGHT,
-  BS_TOP, BS_CENTER, BS_BOTTOM, BS_RIGHTBUTTON};
+use winapi::{HWND, BS_NOTIFY, BS_LEFT, BS_RIGHT, BS_TOP, BS_CENTER, BS_BOTTOM,
+  BS_AUTORADIOBUTTON, BS_RIGHTBUTTON};
 
 /**
-    Configuration properties to create simple checkbox
+    Configuration properties to create simple button
 
-    * text: The checkbox text
-    * size: The checkbox size (width, height) in pixels
-    * position: The checkbox position (x, y) in the parent control
+    * text: The button text
+    * size: The button size (width, height) in pixels
+    * position: The button position (x, y) in the parent control
     * parent: The control parent
-    * tristate: If the checkbox should have 3 check instead of 2
+    * text_align: text alignment inside the button
 */
-pub struct CheckBox<ID: Eq+Clone+Hash> {
+pub struct RadioButton<ID: Eq+Clone+Hash> {
     pub text: String,
     pub size: (u32, u32),
     pub position: (i32, i32),
     pub parent: ID,
-    pub tristate: bool,
     pub text_align: (HTextAlign, VTextAlign),
 }
 
-impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
+impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for RadioButton<ID> {
 
     fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
-        let mut extra;
-        if self.tristate { extra = BS_AUTO3STATE | BS_NOTIFY; }
-        else { extra = BS_AUTOCHECKBOX | BS_NOTIFY; }
-
-        extra |= match self.text_align.0 {
+        let h_align = match self.text_align.0 {
             HTextAlign::Left => BS_LEFT,
             HTextAlign::Right => BS_RIGHT | BS_RIGHTBUTTON,
             HTextAlign::Center => BS_CENTER
         };
 
-        extra |= match self.text_align.1 {
+        let v_align = match self.text_align.1 {
             VTextAlign::Top => BS_TOP,
             VTextAlign::Bottom => BS_BOTTOM,
             VTextAlign::Center => BS_CENTER
@@ -58,7 +53,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
             position: self.position.clone(),
             visible: true,
             resizable: false,
-            extra_style: extra,
+            extra_style: BS_AUTORADIOBUTTON | BS_NOTIFY | h_align | v_align,
             class: Some("BUTTON".to_string()),
             parent: Some(self.parent.clone())
         };
@@ -67,7 +62,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::Click, Event::Focus]
+        vec![Event::Click, Event::Focus, Event::MouseUp]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {
@@ -81,12 +76,12 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
                 Action::SetSize(w, h) => set_window_size(handle, w, h),
                 Action::GetParent => get_window_parent(handle),
                 Action::SetParent(p) => set_window_parent(ui, handle, *p, true),
-                Action::GetCheckState => get_check_state(handle),
-                Action::SetCheckState(s) => set_check_state(handle, s),
                 Action::GetEnabled => get_window_enabled(handle),
                 Action::SetEnabled(e) => set_window_enabled(handle, e),
                 Action::GetVisibility => get_window_visibility(handle),
                 Action::SetVisibility(v) => set_window_visibility(handle, v),
+                Action::GetCheckState => get_check_state(handle),
+                Action::SetCheckState(s) => set_check_state(handle, s),
                 _ => ActionReturn::NotSupported
             }
         })
