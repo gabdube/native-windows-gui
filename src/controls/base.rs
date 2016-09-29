@@ -21,7 +21,8 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, HIWORD, POINT, LONG, BN_CLICKED,
   SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME, BN_SETFOCUS,
   BN_KILLFOCUS, WM_ACTIVATEAPP, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE,
-  SW_RESTORE, GWL_WNDPROC, UINT_PTR, DWORD_PTR};
+  SW_RESTORE, GWL_WNDPROC, UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS,
+  EN_CHANGE};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
@@ -53,8 +54,8 @@ fn map_command(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
     let command = HIWORD(w as u32);
     let owner: HWND = unsafe{ mem::transmute(l) };
     match command {
-        BN_SETFOCUS => (Event::Focus, owner),
-        BN_KILLFOCUS => (Event::Focus, owner),
+        BN_SETFOCUS | BN_KILLFOCUS | EN_SETFOCUS | EN_KILLFOCUS  => (Event::Focus, owner),
+        EN_CHANGE => (Event::ValueChanged, owner),
         BN_CLICKED => (Event::Click, owner),
         _ => (Event::Unknown, handle)
     }
@@ -67,9 +68,7 @@ fn map_command(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
 fn map_system_event(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
     match evt {
         WM_COMMAND => map_command(handle, evt, w, l), // WM_COMMAND is a special snowflake, it can represent hundreds of different commands
-        WM_LBUTTONUP => (Event::MouseUp, handle),
-        WM_RBUTTONUP => (Event::MouseUp, handle),
-        WM_MBUTTONUP => (Event::MouseUp, handle),
+        WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => (Event::MouseUp, handle),
         WM_ACTIVATEAPP => (Event::Focus, handle),
         _ => (Event::Unknown, handle)
     }
@@ -115,6 +114,9 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
                 _ => unreachable!()
             };
             c(ui, caller, focus);
+        },
+        &EventCallback::ValueChanged(ref c) => {
+            c(ui, caller); 
         }
         //_ => {}
     }

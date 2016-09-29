@@ -13,6 +13,7 @@ pub enum Event {
     MouseUp,
     Click,
     Focus,
+    ValueChanged,
     Unknown,
     Last
 }
@@ -20,7 +21,8 @@ pub enum Event {
 pub enum EventCallback<ID: Eq+Hash+Clone> {
     MouseUp(Ef4<ID, i32, i32, u32, u32>),
     Click(Ef0<ID>),
-    Focus(Ef1<ID, bool>)
+    Focus(Ef1<ID, bool>),
+    ValueChanged(Ef0<ID>),
 }
 
 /**
@@ -31,5 +33,6 @@ pub fn map_callback<ID: Eq+Hash+Clone>(cb: &EventCallback<ID>) -> Event {
         &EventCallback::MouseUp(_) => Event::MouseUp,
         &EventCallback::Click(_) => Event::Click,
         &EventCallback::Focus(_) => Event::Focus,
+        &EventCallback::ValueChanged(_) => Event::ValueChanged,
     }
 }
