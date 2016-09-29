@@ -14,7 +14,7 @@ use actions::{ActionReturn, ActMessageParams};
 use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED, BM_SETCHECK};
 
 use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
-  COLOR_WINDOWFRAME, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
+  COLOR_WINDOW, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
   WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
   GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
@@ -198,7 +198,7 @@ unsafe fn register_custom_class<ID: Eq+Clone+Hash>(hmod: HINSTANCE, name: &Vec<u
             hInstance: hmod as HINSTANCE,
             hIcon: ptr::null_mut(),
             hCursor: LoadCursorW(ptr::null_mut(), IDC_ARROW),
-            hbrBackground: mem::transmute(COLOR_WINDOWFRAME as i64),
+            hbrBackground: mem::transmute(COLOR_WINDOW as i64),
             lpszMenuName: ptr::null(),
             lpszClassName: name.as_ptr(),
             hIconSm: ptr::null_mut()
