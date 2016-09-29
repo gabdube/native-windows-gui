@@ -12,7 +12,8 @@ pub enum Error {
     MUST_HAVE_PARENT,
     TEMPLATE_CREATION,
     CONTROL_EXISTS,
-    CALLBACK_NOT_SUPPORTED
+    CALLBACK_NOT_SUPPORTED,
+    UNKNOWN
 }
 
 // Event constants

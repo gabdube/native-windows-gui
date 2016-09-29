@@ -21,7 +21,7 @@ use std::collections::HashMap;
 use controls::ControlTemplate;
 use constants::Error;
 
-use winapi::{MSG, HWND, UINT, WPARAM, LPARAM, LRESULT};
+use winapi::{MSG, HWND};
 use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
 pub type ActionEvaluator<ID> = Box<Fn(&Ui<ID>, &ID, HWND, actions::Action<ID>) -> actions::ActionReturn<ID>>;

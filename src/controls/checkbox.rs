@@ -6,13 +6,13 @@ use std::hash::Hash;
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
- set_window_parent, send_message, get_window_enabled, set_window_enabled, 
+ set_window_parent, get_window_enabled, set_window_enabled, 
  get_window_visibility, set_window_visibility, get_check_state, set_check_state};
 use actions::{Action, ActionReturn};
 use constants::{HTextAlign, VTextAlign};
 use events::Event;
 
-use winapi::{HWND, BS_AUTOCHECKBOX, BS_NOTIFY, BS_AUTO3STATE, WPARAM, BS_LEFT, BS_RIGHT,
+use winapi::{HWND, BS_AUTOCHECKBOX, BS_NOTIFY, BS_AUTO3STATE, BS_LEFT, BS_RIGHT,
   BS_TOP, BS_CENTER, BS_BOTTOM, BS_RIGHTBUTTON};
 
 /**

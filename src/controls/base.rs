@@ -4,7 +4,7 @@
 
 use std::ffi::{OsStr, OsString};
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use std::os::raw::{c_void, c_int};
+use std::os::raw::{c_int};
 use std::ptr;
 use std::mem;
 use std::hash::Hash;
@@ -21,7 +21,7 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, HIWORD, POINT, LONG, BN_CLICKED,
   SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME, BN_SETFOCUS,
   BN_KILLFOCUS, WM_ACTIVATEAPP, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE,
-  SW_RESTORE, GWL_WNDPROC, UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS,
+  SW_RESTORE, UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS, EN_MAXTEXT,
   EN_CHANGE};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
@@ -56,6 +56,7 @@ fn map_command(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
     match command {
         BN_SETFOCUS | BN_KILLFOCUS | EN_SETFOCUS | EN_KILLFOCUS  => (Event::Focus, owner),
         EN_CHANGE => (Event::ValueChanged, owner),
+        EN_MAXTEXT => (Event::MaxValue, owner),
         BN_CLICKED => (Event::Click, owner),
         _ => (Event::Unknown, handle)
     }
@@ -104,7 +105,7 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
             let (x, y, btn, modifiers) = handle_btn(msg, w, l);
             c(ui, caller, x, y, btn, modifiers); 
          },
-        &EventCallback::Click(ref c) => {
+        &EventCallback::Click(ref c) | &EventCallback::ValueChanged(ref c) | &EventCallback::MaxValue(ref c) => {
             c(ui, caller); 
          },
         &EventCallback::Focus(ref c) => {
@@ -115,9 +116,6 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
             };
             c(ui, caller, focus);
         },
-        &EventCallback::ValueChanged(ref c) => {
-            c(ui, caller); 
-        }
         //_ => {}
     }
 }
