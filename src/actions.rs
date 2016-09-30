@@ -38,8 +38,10 @@ pub enum Action<ID: Eq+Clone+Hash> {
     SetWindowDisplay(WindowDisplay),
     GetTextLimit,
     SetTextLimit(u32),
-    GetSelectedText,
-    SetSelectedText(Box<String>),
+    GetSelectedBounds,
+    SetSelectedBounds((u32, u32)),
+    GetReadonly,
+    SetReadonly(bool),
     Undo,
     Message(Box<ActMessageParams>)
 }
@@ -60,6 +62,8 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     Visibility(bool),
     WindowDisplay(WindowDisplay),
     TextLimit(u32),
+    SelectBounds((u32, u32)),
+    Readonly(bool),
     NotSupported
 }
 

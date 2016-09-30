@@ -13,7 +13,8 @@ use actions::{Action, ActionReturn};
 use events::Event;
 use constants::{HTextAlign};
 
-use winapi::{HWND, ES_LEFT, ES_RIGHT, ES_CENTER, WS_BORDER, ES_AUTOHSCROLL};
+use winapi::{HWND, ES_LEFT, ES_RIGHT, ES_CENTER, WS_BORDER, ES_AUTOHSCROLL, ES_NOHIDESEL,
+ ES_PASSWORD};
 
 /**
     Configuration properties to create a simple TextInput
@@ -28,7 +29,9 @@ pub struct TextInput<ID: Eq+Clone+Hash> {
     pub size: (u32, u32),
     pub position: (i32, i32),
     pub parent: ID,
-    pub text_align: HTextAlign
+    pub text_align: HTextAlign,
+    pub password: bool,
+    pub readonly: bool
 }
 
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
@@ -40,13 +43,21 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
             HTextAlign::Center => ES_CENTER
         };
 
+        let mut extra = 0;
+        if self.password {
+            extra |= ES_PASSWORD;
+        }
+        if self.readonly {
+            extra |= ES_READONLY;
+        }
+
         let base = WindowBase::<ID> {
             text: self.text.clone(),
             size: self.size.clone(),
             position: self.position.clone(),
             visible: true,
             resizable: false,
-            extra_style: h_align | WS_BORDER | ES_AUTOHSCROLL,
+            extra_style: extra | h_align | WS_BORDER | ES_AUTOHSCROLL | ES_NOHIDESEL,
             class: Some("EDIT".to_string()),
             parent: Some(self.parent.clone())
         };
@@ -76,8 +87,10 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
 
                 Action::GetTextLimit => get_text_limit(handle),
                 Action::SetTextLimit(l) => set_text_limit(handle, l),
-                Action::GetSelectedText => get_select_text(handle),
-                Action::SetSelectedText(t) => set_select_text(handle, *t),
+                Action::GetSelectedBounds => get_select_bounds(handle),
+                Action::SetSelectedBounds(b) => set_select_bounds(handle, b),
+                Action::GetReadonly => get_readonly(handle),
+                Action::SetReadonly(r) => set_readonly(handle, r),
                 Action::Undo => undo_text(handle),
 
                 _ => ActionReturn::NotSupported
@@ -87,9 +100,10 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
 
 }
 
-use winapi::{EM_LIMITTEXT, EM_GETLIMITTEXT, UINT, WPARAM, WM_UNDO, EM_GETSEL, DWORD};
+use winapi::{EM_LIMITTEXT, EM_GETLIMITTEXT, UINT, WPARAM, WM_UNDO, EM_GETSEL, DWORD, EM_SETSEL,
+ LPARAM, EM_SETREADONLY, ES_READONLY, GWL_STYLE, LONG_PTR};
+use user32::GetWindowLongPtrW;
 use controls::base::{send_message};
-use constants::Error;
 use std::mem;
 
 fn get_text_limit<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
@@ -107,21 +121,26 @@ fn undo_text<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
     ActionReturn::None
 }
 
-fn get_select_text<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
+fn get_select_bounds<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
     let mut min: DWORD = 0;
     let mut max: DWORD = 0;
     
     unsafe{ send_message(handle, EM_GETSEL as u32, mem::transmute(&mut min), mem::transmute(&mut max)) };
 
-    if let ActionReturn::Text(t) = get_window_text::<ID>(handle) {
-        let min = if min == !0 { 0usize } else { min as usize };
-        let max = if max == !0 { t.len() } else { max as usize };
-        ActionReturn::None
-    } else {
-        ActionReturn::Error(Error::UNKNOWN)
-    }
+    ActionReturn::SelectBounds((min as u32, max as u32))
 }
 
-fn set_select_text<ID: Eq+Clone+Hash>(handle: HWND, text: String) -> ActionReturn<ID> {
+fn set_select_bounds<ID: Eq+Clone+Hash>(handle: HWND, bounds: (u32, u32)) -> ActionReturn<ID> {
+    send_message(handle, EM_SETSEL as u32, bounds.0 as WPARAM, bounds.1 as LPARAM);
+    ActionReturn::None
+}
+
+fn get_readonly<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> { unsafe{
+    let read_only = ES_READONLY as LONG_PTR;
+    ActionReturn::Readonly( GetWindowLongPtrW(handle, GWL_STYLE) & read_only == read_only )
+}}
+
+fn set_readonly<ID: Eq+Clone+Hash>(handle: HWND, readonly: bool) -> ActionReturn<ID> {
+    send_message(handle, EM_SETREADONLY as u32, readonly as WPARAM, 0);
     ActionReturn::None
 }
