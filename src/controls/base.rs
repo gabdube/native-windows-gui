@@ -22,7 +22,7 @@ use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER, WS_THICKFRAME, BN_SETFOCUS,
   BN_KILLFOCUS, WM_ACTIVATEAPP, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE,
   SW_RESTORE, UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS, EN_MAXTEXT,
-  EN_CHANGE};
+  EN_CHANGE, WS_EX_COMPOSITED};
 
 use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
@@ -273,7 +273,7 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
     }
 
     // Eval the window flags
-    let mut flags = WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+    let mut flags = 0;
     if base.visible { flags |= WS_VISIBLE; }
     if !parent.is_null() { flags |= WS_CHILD; }
     if parent.is_null() { 
@@ -284,7 +284,7 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
     flags |= base.extra_style;
 
     let hwnd = CreateWindowExW(
-        0, class_name.as_ptr(), window_name.as_ptr(),
+        WS_EX_COMPOSITED, class_name.as_ptr(), window_name.as_ptr(),
         flags,
         base.position.0, base.position.1,
         base.size.0 as i32, base.size.1 as i32,
@@ -537,6 +537,7 @@ pub fn get_window_visibility<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID
 pub fn set_window_visibility<ID: Eq+Hash+Clone>(handle: HWND, visible: bool) -> ActionReturn<ID> { unsafe {
     let show = if visible { SW_SHOW } else { SW_HIDE };
     ShowWindow(handle, visible as BOOL);
+
     ActionReturn::None
 }}
 
