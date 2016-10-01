@@ -15,7 +15,7 @@ use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_
 
 use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
   COLOR_WINDOW, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT, IDC_ARROW,
-  WS_CLIPCHILDREN, WS_CLIPSIBLINGS, WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
+  WS_VISIBLE, WS_CHILD, WS_OVERLAPPED,
   WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX,
   GWLP_USERDATA, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   RECT, SWP_NOMOVE, SWP_NOZORDER, WM_COMMAND, HIWORD, POINT, LONG, BN_CLICKED,
@@ -29,7 +29,7 @@ use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, GetWindowTextLengthW,
   MessageBoxW, ScreenToClient, GetWindowRect, GetParent, SetParent, SendMessageW,
   EnableWindow, IsWindowEnabled, IsWindowVisible, ShowWindow, IsZoomed, IsIconic,
-  EnumChildWindows};
+  EnumChildWindows, DestroyWindow};
 
 use kernel32::{GetModuleHandleW, GetLastError};
 
@@ -355,6 +355,16 @@ pub unsafe fn free_handle_data<T>(handle: HWND) {
     SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
 }
 
+/**
+    Remove and free data from a window and destroy the window.
+*/
+pub unsafe fn free_handle<T>(handle: HWND) {
+    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
+    let data: *mut T = mem::transmute(data_ptr);
+    DestroyWindow(handle);
+    Box::from_raw(data);
+}
+
 ////
 //// Actions functions shared by multiple controls
 ////
@@ -511,6 +521,19 @@ pub fn set_window_parent<ID: Eq+Hash+Clone>(ui: &::Ui<ID>, handle: HWND, parent:
 }}
 
 unsafe extern "system" fn get_children_proc<ID: Eq+Hash+Clone>(handle: HWND, param: LPARAM) -> BOOL {
+     let &(parent_handle, children_raw): &(HWND, *mut Vec<ID>) = mem::transmute(param);
+     let children: &mut Vec<ID> = &mut *children_raw;
+
+     if GetParent(handle) == parent_handle {
+         if let Some(d) = get_handle_data::<::WindowData<ID>>(handle) {
+            children.push(d.id.clone());
+        }
+     }
+
+     1
+}
+
+unsafe extern "system" fn get_descendant_proc<ID: Eq+Hash+Clone>(handle: HWND, param: LPARAM) -> BOOL {
      let children_raw: *mut Vec<ID> = mem::transmute(param);
      let children: &mut Vec<ID> = &mut *children_raw;
 
@@ -522,11 +545,21 @@ unsafe extern "system" fn get_children_proc<ID: Eq+Hash+Clone>(handle: HWND, par
 }
 
 /**
-    Return the name of the window children in a Vec.
+    Return the names of the window children in a Vec.
 */
 pub fn get_window_children<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
     let children: *mut Vec<ID> = Box::into_raw(Box::new(Vec::new()));
-    EnumChildWindows(handle, Some(get_children_proc::<ID>), mem::transmute(children));
+    let data = (handle, children);
+    EnumChildWindows(handle, Some(get_children_proc::<ID>), mem::transmute(&data));
+    ActionReturn::Children(Box::from_raw(children))
+}}
+
+/**
+    Return the names of the windows children in a Vec. Recursive.
+*/
+pub fn get_window_descendant<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
+    let children: *mut Vec<ID> = Box::into_raw(Box::new(Vec::new()));
+    EnumChildWindows(handle, Some(get_descendant_proc::<ID>), mem::transmute(children));
     ActionReturn::Children(Box::from_raw(children))
 }}
 
@@ -562,7 +595,9 @@ pub fn set_window_visibility<ID: Eq+Hash+Clone>(handle: HWND, visible: bool) -> 
     ActionReturn::None
 }}
 
-
+/**
+    Get the window display status (maximized, minimized, normal)
+*/
 pub fn get_window_display<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
     ActionReturn::WindowDisplay(
         if IsZoomed(handle) == 1 { WindowDisplay::Maximised }
@@ -571,6 +606,9 @@ pub fn get_window_display<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> {
     )
 }}
 
+/**
+    Set the window display status (maximized, minimized, normal)
+*/
 pub fn set_window_display<ID: Eq+Hash+Clone>(handle: HWND, d: WindowDisplay) -> ActionReturn<ID> { unsafe {
     match d {
         WindowDisplay::Maximised => ShowWindow(handle, SW_MAXIMIZE),
@@ -580,6 +618,9 @@ pub fn set_window_display<ID: Eq+Hash+Clone>(handle: HWND, d: WindowDisplay) -> 
     ActionReturn::None
 }}
 
+/**
+    Get the check state of a control that can be checked
+*/
 pub fn get_check_state<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
     let state = send_message(handle, BM_GETSTATE, 0, 0) as u32;
     let state = if state & BST_CHECKED != 0 {
@@ -593,6 +634,9 @@ pub fn get_check_state<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
     ActionReturn::CheckState(state)
 }
 
+/**
+    Set the check state of a control that can be checked
+*/
 pub fn set_check_state<ID: Eq+Clone+Hash >(handle: HWND, state: CheckState) -> ActionReturn<ID> {
     let state = match state {
         CheckState::Checked => BST_CHECKED,

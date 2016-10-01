@@ -7,7 +7,7 @@ use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility, get_window_children};
+ set_window_visibility};
 use actions::{Action, ActionReturn};
 use events::Event;
 use constants::{HTextAlign, VTextAlign};
@@ -75,7 +75,6 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Button<ID> {
                 Action::SetSize(w, h) => set_window_size(handle, w, h),
                 Action::GetParent => get_window_parent(handle),
                 Action::SetParent(p) => set_window_parent(ui, handle, *p, true),
-                Action::GetChildren => get_window_children(handle),
                 Action::GetEnabled => get_window_enabled(handle),
                 Action::SetEnabled(e) => set_window_enabled(handle, e),
                 Action::GetVisibility => get_window_visibility(handle),

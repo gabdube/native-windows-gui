@@ -23,6 +23,7 @@ pub enum Action<ID: Eq+Clone+Hash> {
     GetParent,
     SetParent(Box<Option<ID>>),
     GetChildren,
+    GetDescendants,
     GetPosition,
     SetPosition(i32, i32),
     GetSize,

@@ -99,6 +99,36 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     }
 
     /**
+        Remove the control and ALL its children from the gui.
+        If successful, return a vector of all deleted IDS.
+
+        Return an error if the control was not found.
+    */
+    pub fn remove_control(&mut self, cont: ID) -> Result<Vec<ID>, Error> {
+        let mut deleted_controls: Vec<ID>;
+        let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
+        if let Some((handle, exec)) = controls.remove(&cont) {
+            if let actions::ActionReturn::Children(c) = exec(self, &cont, handle, actions::Action::GetDescendants) {
+                deleted_controls = *c;
+            } else {
+                deleted_controls = Vec::with_capacity(1); // Control can't have children
+            }
+
+            // Free the control and the control children's handle data.
+            controls::free_handle::<ID>(handle);
+        } else {
+            return Err(Error::CONTROL_NOT_FOUND);
+        }
+
+        for id in deleted_controls.iter() {
+            controls.remove(id).unwrap();
+        }
+
+        deleted_controls.push(cont);
+        Ok(deleted_controls)
+    }
+
+    /**
         Add a callback to a control. Return `true` if the callback was added
         successfully, `false` if `cont` was not found in ui.
     */

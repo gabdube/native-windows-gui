@@ -58,3 +58,7 @@ pub fn get_handle_data<'a, T>(handle: HWND) -> &'a mut T {
 pub fn free_handle_data<T>(handle: HWND) {
     unsafe { base::free_handle_data::<T>(handle); }
 }
+
+pub fn free_handle<T>(handle: HWND) {
+    unsafe { base::free_handle::<T>(handle); }
+}
