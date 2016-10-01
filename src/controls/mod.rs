@@ -3,7 +3,7 @@
     their own module.
 */
 
-mod base;
+pub mod base;
 pub mod window;
 pub mod button;
 pub mod checkbox;

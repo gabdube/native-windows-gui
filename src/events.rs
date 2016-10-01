@@ -15,6 +15,7 @@ pub enum Event {
     Focus,
     ValueChanged,
     MaxValue,
+    Removed,
     Unknown,
     Last
 }
@@ -23,6 +24,7 @@ pub enum EventCallback<ID: Eq+Hash+Clone> {
     MouseUp(Ef4<ID, i32, i32, u32, u32>),
     Click(Ef0<ID>),
     Focus(Ef1<ID, bool>),
+    Removed(Ef0<ID>),
     ValueChanged(Ef0<ID>),
     MaxValue(Ef0<ID>)
 }
@@ -37,5 +39,6 @@ pub fn map_callback<ID: Eq+Hash+Clone>(cb: &EventCallback<ID>) -> Event {
         &EventCallback::Focus(_) => Event::Focus,
         &EventCallback::ValueChanged(_) => Event::ValueChanged,
         &EventCallback::MaxValue(_) => Event::MaxValue,
+        &EventCallback::Removed(_) => Event::Removed,
     }
 }
