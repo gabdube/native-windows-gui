@@ -10,7 +10,7 @@ decided to try something new:
 Widgets are then exposed as an opaque type choosen by the user themself (example: `i32`, `&'static str`, etc).
 
 For this POC, I implemented **actions**(what would normally be methods), **callbacks** and **control templates** (what would normally be the widgets). Each of
-these concept is exposed by a single method on the manager object. **The NWG api has only 5 functions/methods**. See `tests/ui.rs` for an example.
+these concept is exposed by a single method on the manager object. **The NWG api has only 5 functions/methods**. See `examples/ui.rs`.
 
 ![Alt text](/img/ui.PNG "Image")  
 

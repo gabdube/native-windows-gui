@@ -48,9 +48,11 @@ fn buttons() {
     let mut ui: nwg::Ui<&'static str> = nwg::Ui::new();
     setup_window(&mut ui);
 
-    let b1 = nwg::controls::Button { text: "test".to_string(), size: (102, 102), position: (100, 100), parent: "MainWindow", text_align: (HTextAlign::Center, VTextAlign::Center) };
+    let grp = nwg::controls::GroupBox { text: "group".to_string(), size: (200, 200), position: (10, 10), parent: "MainWindow", text_align: HTextAlign::Center };
+    let b1 = nwg::controls::Button { text: "test".to_string(), size: (102, 102), position: (100, 100), parent: "GROUP", text_align: (HTextAlign::Center, VTextAlign::Center) };
     let b2 = nwg::controls::Button { text: "test".to_string(), size: (100, 100), position: (100, 100), parent: "Bob", text_align: (HTextAlign::Center, VTextAlign::Center) };
 
+    assert!(ui.new_control("GROUP", grp).is_ok());
     assert!(ui.new_control("TEST1", b1).is_ok());
 
     // Bad parent
@@ -62,11 +64,15 @@ fn buttons() {
     test_action!(ui, Action::None, ActionReturn::NotSupported, {});
     test_action!(ui, helper::message("A", "A", 0), ActionReturn::NotSupported, {});
 
-    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "MainWindow"); } );
+    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "GROUP"); } );
     test_action!(ui, helper::set_parent("hya!"), ActionReturn::Error(e), { assert!(e == Error::CONTROL_NOT_FOUND); } );
     test_action!(ui, helper::remove_parent(), ActionReturn::Error(e), { assert!(e == Error::MUST_HAVE_PARENT); } );
-    test_action!(ui, helper::set_parent("SubWindow"), ActionReturn::None, {} );
-    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "SubWindow"); } );
+    test_action!(ui, helper::set_parent("MainWindow"), ActionReturn::None, {} );
+    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "MainWindow"); } );
+    test_action!(ui, helper::set_parent("GROUP"), ActionReturn::None, {} );
+
+    test_action!(ui, Action::GetChildren, ActionReturn::Children(c), {assert!(*c == ["GROUP"]);}, "MainWindow");
+    test_action!(ui, Action::GetDescendants, ActionReturn::Children(c), {assert!(*c == ["GROUP", "TEST1"]);}, "MainWindow");
 
     test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(*p == None); }, "SubWindow" );
     test_action!(ui, helper::set_parent("MainWindow"), ActionReturn::None, {}, "SubWindow");

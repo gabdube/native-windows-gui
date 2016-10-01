@@ -3,11 +3,14 @@ use std::hash::Hash;
 
 use controls::base::{get_handle_data};
 use events::{Event, EventCallback};
+use ::constants::{MOD_MOUSE_CTRL, MOD_MOUSE_SHIFT, BTN_MOUSE_MIDDLE, BTN_MOUSE_RIGHT,
+ BTN_MOUSE_LEFT};
 
 use winapi::{HWND, UINT, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT,
   WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   WM_COMMAND, HIWORD, BN_CLICKED, BN_SETFOCUS, BN_KILLFOCUS, WM_ACTIVATEAPP,
-  UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS, EN_MAXTEXT, EN_CHANGE};
+  UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS, EN_MAXTEXT, EN_CHANGE,
+  WM_DESTROY};
 
 use user32::{PostQuitMessage, DefWindowProcW};
 use comctl32::{DefSubclassProc};
@@ -36,6 +39,7 @@ fn map_system_event(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HW
         WM_COMMAND => map_command(handle, evt, w, l), // WM_COMMAND is a special snowflake, it can represent hundreds of different commands
         WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => (Event::MouseUp, handle),
         WM_ACTIVATEAPP => (Event::Focus, handle),
+        WM_DESTROY => (Event::Removed, handle),
         _ => (Event::Unknown, handle)
     }
 }
@@ -44,8 +48,6 @@ fn map_system_event(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HW
     Translate a system button event param's
 */
 fn handle_btn(msg: UINT, w: WPARAM, l: LPARAM) -> (i32, i32, u32, u32) {
-    use ::constants::*;
-
     let (x,y): (i32, i32) = (GET_X_LPARAM(l), GET_Y_LPARAM(l));
     let modifiers = (w as u32) & (MOD_MOUSE_CTRL | MOD_MOUSE_SHIFT);
     let mut btn = (w as u32) & (BTN_MOUSE_MIDDLE | BTN_MOUSE_RIGHT | BTN_MOUSE_LEFT );
@@ -70,7 +72,8 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
             let (x, y, btn, modifiers) = handle_btn(msg, w, l);
             c(ui, caller, x, y, btn, modifiers); 
          },
-        &EventCallback::Click(ref c) | &EventCallback::ValueChanged(ref c) | &EventCallback::MaxValue(ref c) => {
+        &EventCallback::Click(ref c) | &EventCallback::ValueChanged(ref c) | &EventCallback::MaxValue(ref c) | 
+        &EventCallback::Removed(ref c) => {
             c(ui, caller); 
          },
         &EventCallback::Focus(ref c) => {
@@ -81,7 +84,7 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
             };
             c(ui, caller, focus);
         },
-        _ => {}
+        //_ => {}
     }
 }
 
