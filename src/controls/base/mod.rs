@@ -1,155 +1,26 @@
 pub mod helper;
+mod sysproc;
 
 pub use ::controls::base::helper::*;
+use ::controls::base::sysproc::{sub_wndproc, wndproc};
 
 use std::ptr;
 use std::mem;
 use std::hash::Hash;
 
-use events::{Event, EventCallback};
-
-use winapi::{HWND, HINSTANCE, UINT, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT,
+use winapi::{HWND, HINSTANCE, UINT,
   WS_VISIBLE, WS_CHILD, WS_OVERLAPPED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU,
-  WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP,
-  GET_X_LPARAM, GET_Y_LPARAM, WM_COMMAND, HIWORD, BN_CLICKED, BN_SETFOCUS,
-  BN_KILLFOCUS, WM_ACTIVATEAPP, UINT_PTR, DWORD_PTR, EN_SETFOCUS,
-  EN_KILLFOCUS, EN_MAXTEXT, EN_CHANGE, WS_EX_COMPOSITED};
+  WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WNDCLASSEXW, WS_EX_COMPOSITED,
+  CS_HREDRAW, CS_VREDRAW,
+  COLOR_WINDOW, IDC_ARROW, GWLP_USERDATA};
 
-use user32::{PostQuitMessage, DefWindowProcW, CreateWindowExW};
+use user32::{CreateWindowExW, LoadCursorW, RegisterClassExW, UnregisterClassW, 
+  SetWindowLongPtrW, GetWindowLongPtrW, DestroyWindow};
 
-use kernel32::{GetModuleHandleW};
+use kernel32::{GetModuleHandleW, GetLastError};
+use comctl32::{SetWindowSubclass};
 
-use comctl32::{SetWindowSubclass, DefSubclassProc};
-
-/**
-    Map system events to application events
-*/
-fn map_command(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
-    let command = HIWORD(w as u32);
-    let owner: HWND = unsafe{ mem::transmute(l) };
-    match command {
-        BN_SETFOCUS | BN_KILLFOCUS | EN_SETFOCUS | EN_KILLFOCUS  => (Event::Focus, owner),
-        EN_CHANGE => (Event::ValueChanged, owner),
-        EN_MAXTEXT => (Event::MaxValue, owner),
-        BN_CLICKED => (Event::Click, owner),
-        _ => (Event::Unknown, handle)
-    }
-}
-
-/**
-    Map system events to application events
-*/
-#[inline(always)]
-fn map_system_event(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
-    match evt {
-        WM_COMMAND => map_command(handle, evt, w, l), // WM_COMMAND is a special snowflake, it can represent hundreds of different commands
-        WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => (Event::MouseUp, handle),
-        WM_ACTIVATEAPP => (Event::Focus, handle),
-        _ => (Event::Unknown, handle)
-    }
-}
-
-/**
-    Translate a system button event param's
-*/
-fn handle_btn(msg: UINT, w: WPARAM, l: LPARAM) -> (i32, i32, u32, u32) {
-    use ::constants::*;
-
-    let (x,y): (i32, i32) = (GET_X_LPARAM(l), GET_Y_LPARAM(l));
-    let modifiers = (w as u32) & (MOD_MOUSE_CTRL | MOD_MOUSE_SHIFT);
-    let mut btn = (w as u32) & (BTN_MOUSE_MIDDLE | BTN_MOUSE_RIGHT | BTN_MOUSE_LEFT );
-    btn |= match msg {
-        WM_LBUTTONUP => BTN_MOUSE_LEFT,
-        WM_RBUTTONUP => BTN_MOUSE_RIGHT,
-        WM_MBUTTONUP => BTN_MOUSE_MIDDLE,
-        _ => 0
-    };
-
-    (x, y, btn, modifiers)
-}
-
-/**
-    Execute an event
-*/
-#[inline(always)]
-fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, caller: &ID, msg: UINT, w: WPARAM, l: LPARAM) {
-    
-    match ec {
-        &EventCallback::MouseUp(ref c) => {
-            let (x, y, btn, modifiers) = handle_btn(msg, w, l);
-            c(ui, caller, x, y, btn, modifiers); 
-         },
-        &EventCallback::Click(ref c) | &EventCallback::ValueChanged(ref c) | &EventCallback::MaxValue(ref c) => {
-            c(ui, caller); 
-         },
-        &EventCallback::Focus(ref c) => {
-            let focus = match msg {
-                WM_COMMAND => { HIWORD(w as u32) == BN_SETFOCUS },
-                WM_ACTIVATEAPP => w == 1,
-                _ => unreachable!()
-            };
-            c(ui, caller, focus);
-        },
-        _ => {}
-    }
-}
-
-/**
-    Window proc for subclasses
-*/
-pub unsafe extern "system" fn sub_wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id_subclass: UINT_PTR, dref: DWORD_PTR) -> LRESULT {
-    let (event, handle) = map_system_event(hwnd, msg, w, l);
-
-    // If the window data was initialized, eval callbacks
-    if let Some(data) = get_handle_data::<::WindowData<ID>>(handle) {
-        // Build a temporary Ui that is then forgetted to pass it to the callbacks.
-        let mut ui = ::Ui{controls: data.controls};
-
-        // Eval the callbacks
-        if let Some(functions) = data.callbacks.get(&event) {
-            for f in functions.iter() {
-                dispatch_event::<ID>(f, &mut ui, &data.id, msg, w, l); 
-            }
-        }
-        
-        mem::forget(ui);
-    }
-
-    return DefSubclassProc(hwnd, msg, w, l);
-}
-
-/**
-    Custom window procedure for none built-in types
-*/
-pub unsafe extern "system" fn wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    let (event, handle) = map_system_event(hwnd, msg, w, l);
-
-    // If the window data was initialized, eval callbacks
-    if let Some(data) = get_handle_data::<::WindowData<ID>>(handle) {
-        // Build a temporary Ui that is then forgetted to pass it to the callbacks.
-        let mut ui = ::Ui{controls: data.controls};
-        
-        // Eval the callbacks
-        if let Some(functions) = data.callbacks.get(&event) {
-            for f in functions.iter() {
-                dispatch_event::<ID>(f, &mut ui, &data.id, msg, w, l); 
-            }
-        }
-        
-        mem::forget(ui);
-    }
-
-    match msg {
-        WM_CREATE => 0,
-        WM_CLOSE => {PostQuitMessage(0); 0},
-        _ =>  DefWindowProcW(hwnd, msg, w, l)
-    }
-}
-
-
-////////////////////////////////////////////////
-
-pub const CLASS_NAME: &'static str = "RustyWindow";
+const CLASS_NAME: &'static str = "RustyWindow";
 
 pub struct WindowBase<ID: Eq+Hash+Clone> {
     pub text: String,
@@ -161,6 +32,39 @@ pub struct WindowBase<ID: Eq+Hash+Clone> {
     pub class: Option<String>,
     pub parent: Option<ID>
 }
+
+/**
+    Register a new window class. Return true if the class already exists 
+    or the creation was successful and false if it failed.
+*/
+unsafe fn register_custom_class<ID: Eq+Clone+Hash>(hmod: HINSTANCE, name: &Vec<u16>) -> bool {
+    let class =
+        WNDCLASSEXW {
+            cbSize: mem::size_of::<WNDCLASSEXW>() as UINT,
+            style: CS_HREDRAW | CS_VREDRAW,
+            lpfnWndProc: Some(wndproc::<ID>), 
+            cbClsExtra: 0,
+            cbWndExtra: 0,
+            hInstance: hmod as HINSTANCE,
+            hIcon: ptr::null_mut(),
+            hCursor: LoadCursorW(ptr::null_mut(), IDC_ARROW),
+            hbrBackground: mem::transmute(COLOR_WINDOW as i64),
+            lpszMenuName: ptr::null(),
+            lpszClassName: name.as_ptr(),
+            hIconSm: ptr::null_mut()
+        };
+
+
+    let class_token = RegisterClassExW(&class);
+    if class_token == 0 && GetLastError() != 1410 {
+        // If the class registration failed and the reason is not that
+        // the class already exists (1410), return false.
+        false
+    } else {
+        true
+    }
+}
+
 
 /**
     Create a new window. The window details is determined by the base 
@@ -231,4 +135,62 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
 
         Ok(hwnd)
     }
+}
+
+
+////
+//// Window data helper
+////
+
+/**
+    Unregister the custom window class. If multiple UI manager were created
+    this function will fail (silently)
+*/
+pub unsafe fn cleanup() {
+    let hmod = GetModuleHandleW(ptr::null());
+    let class_name = to_utf16(CLASS_NAME.to_string());
+
+    UnregisterClassW(class_name.as_ptr(), hmod);
+}
+
+/**
+    Store data in a window
+*/
+pub unsafe fn set_handle_data<T>(handle: HWND, data: T) {
+    let data_raw = Box::into_raw(Box::new(data));
+    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(data_raw));
+}
+
+/**
+    Retrieve data in a window
+*/
+pub unsafe fn get_handle_data<'a, T>(handle: HWND) -> Option<&'a mut T> {
+    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
+    if data_ptr != 0 {
+        let data: *mut T = mem::transmute(data_ptr);
+        Some(&mut *data)
+    } else {
+        None
+    }
+}
+
+/**
+    Remove and free data from a window
+*/
+pub unsafe fn free_handle_data<T>(handle: HWND) {
+    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
+    let data: *mut T = mem::transmute(data_ptr);
+    Box::from_raw(data);
+
+    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
+}
+
+/**
+    Remove and free data from a window and destroy the window.
+*/
+pub unsafe fn free_handle<T>(handle: HWND) {
+    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
+    let data: *mut T = mem::transmute(data_ptr);
+    DestroyWindow(handle);
+    Box::from_raw(data);
 }

@@ -2,7 +2,7 @@
     Low level window creation utilities
 */
 
-use ::controls::base::{wndproc, CLASS_NAME};
+use controls::base::{get_handle_data};
 
 use std::ffi::{OsStr, OsString};
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
@@ -14,19 +14,15 @@ use std::hash::Hash;
 use actions::{ActionReturn, ActMessageParams};
 use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED, BM_SETCHECK};
 
-use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW,
-  COLOR_WINDOW, WPARAM, LPARAM, LRESULT, IDC_ARROW, WS_CHILD, WS_OVERLAPPEDWINDOW,
-  WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, GWLP_USERDATA, RECT,
+use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
+  WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, RECT, SW_RESTORE,
   SWP_NOMOVE, SWP_NOZORDER, POINT, LONG, SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER,
-  WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, SW_RESTORE};
+    WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE};   
 
-use user32::{LoadCursorW, RegisterClassExW, UnregisterClassW, SetWindowLongPtrW,
-  GetWindowLongPtrW, EnumChildWindows, DestroyWindow, ShowWindow, IsZoomed, IsIconic,
-  GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, GetWindowTextLengthW,
-  MessageBoxW, ScreenToClient, GetWindowRect, GetParent, SetParent, SendMessageW,
-  EnableWindow, IsWindowEnabled, IsWindowVisible};
-
-use kernel32::{GetModuleHandleW, GetLastError};
+use user32::{SetWindowLongPtrW, GetWindowLongPtrW, EnumChildWindows, ShowWindow, 
+  IsZoomed, IsIconic, GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, 
+  GetWindowTextLengthW, MessageBoxW, ScreenToClient, GetWindowRect, GetParent,
+  SetParent, SendMessageW, EnableWindow, IsWindowEnabled, IsWindowVisible};
 
 /**
     String to utf16. Add a trailing null char.
@@ -37,38 +33,6 @@ pub fn to_utf16(n: String) -> Vec<u16> {
       .encode_wide()
       .chain(Some(0u16).into_iter())
       .collect()
-}
-
-/**
-    Register a new window class. Return true if the class already exists 
-    or the creation was successful and false if it failed.
-*/
-pub unsafe fn register_custom_class<ID: Eq+Clone+Hash>(hmod: HINSTANCE, name: &Vec<u16>) -> bool {
-    let class =
-        WNDCLASSEXW {
-            cbSize: mem::size_of::<WNDCLASSEXW>() as UINT,
-            style: CS_HREDRAW | CS_VREDRAW,
-            lpfnWndProc: Some(wndproc::<ID>), 
-            cbClsExtra: 0,
-            cbWndExtra: 0,
-            hInstance: hmod as HINSTANCE,
-            hIcon: ptr::null_mut(),
-            hCursor: LoadCursorW(ptr::null_mut(), IDC_ARROW),
-            hbrBackground: mem::transmute(COLOR_WINDOW as i64),
-            lpszMenuName: ptr::null(),
-            lpszClassName: name.as_ptr(),
-            hIconSm: ptr::null_mut()
-        };
-
-
-    let class_token = RegisterClassExW(&class);
-    if class_token == 0 && GetLastError() != 1410 {
-        // If the class registration failed and the reason is not that
-        // the class already exists (1410), return false.
-        false
-    } else {
-        true
-    }
 }
 
 /** 
@@ -85,64 +49,6 @@ pub unsafe fn fix_overlapped_window_size(handle: HWND, size: (u32, u32)) {
     SetWindowPos(handle, ptr::null_mut(), 0, 0,
       (size.0+delta_width) as c_int, (size.1+delta_height) as c_int,
       SWP_NOMOVE|SWP_NOZORDER);
-}
-
-
-////
-//// Window data helper
-////
-
-/**
-    Unregister the custom window class. If multiple UI manager were created
-    this function will fail (silently)
-*/
-pub unsafe fn cleanup() {
-    let hmod = GetModuleHandleW(ptr::null());
-    let class_name = to_utf16(CLASS_NAME.to_string());
-
-    UnregisterClassW(class_name.as_ptr(), hmod);
-}
-
-/**
-    Store data in a window
-*/
-pub unsafe fn set_handle_data<T>(handle: HWND, data: T) {
-    let data_raw = Box::into_raw(Box::new(data));
-    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(data_raw));
-}
-
-/**
-    Retrieve data in a window
-*/
-pub unsafe fn get_handle_data<'a, T>(handle: HWND) -> Option<&'a mut T> {
-    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
-    if data_ptr != 0 {
-        let data: *mut T = mem::transmute(data_ptr);
-        Some(&mut *data)
-    } else {
-        None
-    }
-}
-
-/**
-    Remove and free data from a window
-*/
-pub unsafe fn free_handle_data<T>(handle: HWND) {
-    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
-    let data: *mut T = mem::transmute(data_ptr);
-    Box::from_raw(data);
-
-    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
-}
-
-/**
-    Remove and free data from a window and destroy the window.
-*/
-pub unsafe fn free_handle<T>(handle: HWND) {
-    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
-    let data: *mut T = mem::transmute(data_ptr);
-    DestroyWindow(handle);
-    Box::from_raw(data);
 }
 
 
