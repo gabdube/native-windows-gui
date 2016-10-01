@@ -22,6 +22,7 @@ pub enum Action<ID: Eq+Clone+Hash> {
     None,
     GetParent,
     SetParent(Box<Option<ID>>),
+    GetChildren,
     GetPosition,
     SetPosition(i32, i32),
     GetSize,
@@ -53,6 +54,7 @@ pub enum Action<ID: Eq+Clone+Hash> {
 pub enum ActionReturn<ID: Eq+Clone+Hash> {
     None,
     Parent(Box<Option<ID>>),
+    Children(Box<Vec<ID>>),
     Position(i32, i32),
     Size(u32, u32),
     Text(Box<String>),

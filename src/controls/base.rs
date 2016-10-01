@@ -28,7 +28,8 @@ use user32::{LoadCursorW, RegisterClassExW, PostQuitMessage, DefWindowProcW,
   CreateWindowExW, UnregisterClassW, SetWindowLongPtrW, GetWindowLongPtrW,
   GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, GetWindowTextLengthW,
   MessageBoxW, ScreenToClient, GetWindowRect, GetParent, SetParent, SendMessageW,
-  EnableWindow, IsWindowEnabled, IsWindowVisible, ShowWindow, IsZoomed, IsIconic};
+  EnableWindow, IsWindowEnabled, IsWindowVisible, ShowWindow, IsZoomed, IsIconic,
+  EnumChildWindows};
 
 use kernel32::{GetModuleHandleW, GetLastError};
 
@@ -507,6 +508,26 @@ pub fn set_window_parent<ID: Eq+Hash+Clone>(ui: &::Ui<ID>, handle: HWND, parent:
     }
 
     ActionReturn::None
+}}
+
+unsafe extern "system" fn get_children_proc<ID: Eq+Hash+Clone>(handle: HWND, param: LPARAM) -> BOOL {
+     let children_raw: *mut Vec<ID> = mem::transmute(param);
+     let children: &mut Vec<ID> = &mut *children_raw;
+
+     if let Some(d) = get_handle_data::<::WindowData<ID>>(handle) {
+         children.push(d.id.clone());
+     }
+
+     1
+}
+
+/**
+    Return the name of the window children in a Vec.
+*/
+pub fn get_window_children<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { unsafe {
+    let children: *mut Vec<ID> = Box::into_raw(Box::new(Vec::new()));
+    EnumChildWindows(handle, Some(get_children_proc::<ID>), mem::transmute(children));
+    ActionReturn::Children(Box::from_raw(children))
 }}
 
 /**
