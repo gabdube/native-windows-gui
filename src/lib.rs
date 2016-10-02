@@ -102,6 +102,8 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
         Remove the control and ALL its children from the gui.
         If successful, return a vector of all deleted IDS.
 
+        The control destruction is delayed.
+
         Return an error if the control was not found.
     */
     pub fn remove_control(&mut self, cont: ID) -> Result<Vec<ID>, Error> {

@@ -10,7 +10,7 @@ use winapi::{HWND, UINT, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT,
   WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   WM_COMMAND, HIWORD, BN_CLICKED, BN_SETFOCUS, BN_KILLFOCUS, WM_ACTIVATEAPP,
   UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS, EN_MAXTEXT, EN_CHANGE,
-  WM_DESTROY};
+  WM_DESTROY, WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN};
 
 use user32::{PostQuitMessage, DefWindowProcW};
 use comctl32::{DefSubclassProc};
@@ -38,6 +38,7 @@ fn map_system_event(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HW
     match evt {
         WM_COMMAND => map_command(handle, evt, w, l), // WM_COMMAND is a special snowflake, it can represent hundreds of different commands
         WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => (Event::MouseUp, handle),
+        WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => (Event::MouseDown, handle),
         WM_ACTIVATEAPP => (Event::Focus, handle),
         WM_DESTROY => (Event::Removed, handle),
         _ => (Event::Unknown, handle)
@@ -52,9 +53,9 @@ fn handle_btn(msg: UINT, w: WPARAM, l: LPARAM) -> (i32, i32, u32, u32) {
     let modifiers = (w as u32) & (MOD_MOUSE_CTRL | MOD_MOUSE_SHIFT);
     let mut btn = (w as u32) & (BTN_MOUSE_MIDDLE | BTN_MOUSE_RIGHT | BTN_MOUSE_LEFT );
     btn |= match msg {
-        WM_LBUTTONUP => BTN_MOUSE_LEFT,
-        WM_RBUTTONUP => BTN_MOUSE_RIGHT,
-        WM_MBUTTONUP => BTN_MOUSE_MIDDLE,
+        WM_LBUTTONUP | WM_LBUTTONDOWN => BTN_MOUSE_LEFT,
+        WM_RBUTTONUP | WM_RBUTTONDOWN => BTN_MOUSE_RIGHT,
+        WM_MBUTTONUP | WM_MBUTTONDOWN => BTN_MOUSE_MIDDLE,
         _ => 0
     };
 
@@ -68,7 +69,7 @@ fn handle_btn(msg: UINT, w: WPARAM, l: LPARAM) -> (i32, i32, u32, u32) {
 fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, caller: &ID, msg: UINT, w: WPARAM, l: LPARAM) {
     
     match ec {
-        &EventCallback::MouseUp(ref c) => {
+        &EventCallback::MouseUp(ref c) | &EventCallback::MouseDown(ref c)  => {
             let (x, y, btn, modifiers) = handle_btn(msg, w, l);
             c(ui, caller, x, y, btn, modifiers); 
          },

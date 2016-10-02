@@ -62,7 +62,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for RadioButton<ID> {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::Click, Event::Focus, Event::MouseUp, Event::Removed]
+        vec![Event::Click, Event::Focus, Event::MouseUp, Event::MouseDown, Event::Removed]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {
