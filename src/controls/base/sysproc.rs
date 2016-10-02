@@ -89,10 +89,8 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
     }
 }
 
-/**
-    Window proc for subclasses
-*/
-pub unsafe extern "system" fn sub_wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id_subclass: UINT_PTR, dref: DWORD_PTR) -> LRESULT {
+#[inline(always)]
+unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) {
     let (event, handle) = map_system_event(hwnd, msg, w, l);
 
     // If the window data was initialized, eval callbacks
@@ -109,7 +107,13 @@ pub unsafe extern "system" fn sub_wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UI
         
         mem::forget(ui);
     }
+}
 
+/**
+    Window proc for subclasses
+*/
+pub unsafe extern "system" fn sub_wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id_subclass: UINT_PTR, dref: DWORD_PTR) -> LRESULT {
+    handle_events::<ID>(hwnd, msg, w, l);
     return DefSubclassProc(hwnd, msg, w, l);
 }
 
@@ -117,23 +121,7 @@ pub unsafe extern "system" fn sub_wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UI
     Custom window procedure for none built-in types
 */
 pub unsafe extern "system" fn wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    let (event, handle) = map_system_event(hwnd, msg, w, l);
-
-    // If the window data was initialized, eval callbacks
-    if let Some(data) = get_handle_data::<::WindowData<ID>>(handle) {
-        // Build a temporary Ui that is then forgetted to pass it to the callbacks.
-        let mut ui = ::Ui{controls: data.controls};
-        
-        // Eval the callbacks
-        if let Some(functions) = data.callbacks.get(&event) {
-            for f in functions.iter() {
-                dispatch_event::<ID>(f, &mut ui, &data.id, msg, w, l); 
-            }
-        }
-        
-        mem::forget(ui);
-    }
-
+    handle_events::<ID>(hwnd, msg, w, l);
     match msg {
         WM_CREATE => 0,
         WM_CLOSE => {PostQuitMessage(0); 0},

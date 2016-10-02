@@ -62,3 +62,6 @@ pub const BM_CLICK: u32 = 245;
 pub const BST_CHECKED: u32 = 1;
 pub const BST_UNCHECKED: u32 = 0;
 pub const BST_INDETERMINATE: u32 = 2;
+
+pub const CBS_AUTOHSCROLL: u32 = 64;
+pub const CBS_DROPDOWNLIST: u32 = 3;
