@@ -7,7 +7,7 @@ use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility, add_string_item};
+ set_window_visibility, add_string_item, remove_item};
 use actions::{Action, ActionReturn};
 use constants::{CBS_AUTOHSCROLL, CBS_DROPDOWNLIST, CBS_HASSTRINGS};
 use events::Event;
@@ -75,6 +75,9 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
                 Action::SetEnabled(e) => set_window_enabled(handle, e),
                 Action::GetVisibility => get_window_visibility(handle),
                 Action::SetVisibility(v) => set_window_visibility(handle, v),
+                Action::AddString(s) => add_string_item(handle, s.as_ref()),
+                Action::RemoveItem(i) => remove_item(handle, i),
+
                 _ => ActionReturn::NotSupported
             }
         })

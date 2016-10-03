@@ -17,7 +17,8 @@ use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
   WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, RECT, SW_RESTORE,
   SWP_NOMOVE, SWP_NOZORDER, POINT, LONG, SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER,
-  WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, CB_ADDSTRING};   
+  WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, CB_ADDSTRING,
+  CB_DELETESTRING};   
 
 use user32::{SetWindowLongPtrW, GetWindowLongPtrW, EnumChildWindows, ShowWindow, 
   IsZoomed, IsIconic, GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, 
@@ -351,4 +352,16 @@ pub fn add_string_item<ID: Eq+Clone+Hash >(handle: HWND, item: &String) -> Actio
     let item_vec_ptr: LPARAM = unsafe { mem::transmute(item_vec.as_ptr()) };
     send_message(handle, CB_ADDSTRING, 0, item_vec_ptr);
     ActionReturn::None
+}
+
+/**
+    Remove an item from a list by using its index as reference
+*/
+pub fn remove_item<ID: Eq+Clone+Hash >(handle: HWND, index: u32) -> ActionReturn<ID> {
+    let ok = send_message(handle, CB_DELETESTRING, index as WPARAM, 0);
+    if ok != CB_ERR{
+        ActionReturn::None
+    } else {
+        ActionReturn::Error(Error::INDEX_OUT_OF_BOUNDS)
+    }
 }

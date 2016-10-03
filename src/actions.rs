@@ -44,6 +44,11 @@ pub enum Action<ID: Eq+Clone+Hash> {
     SetSelectedBounds((u32, u32)),
     GetReadonly,
     SetReadonly(bool),
+    
+    AddString(Box<String>),
+    
+    RemoveItem(u32),
+
     Undo,
     Message(Box<ActMessageParams>)
 }
@@ -109,6 +114,14 @@ pub mod helper {
     #[inline(always)]
     pub fn remove_parent<ID: Eq+Clone+Hash>() -> Action<ID> {
         Action::SetParent(Box::new(None))
+    }
+
+    /**
+        Action helper for AddString
+    */
+    #[inline(always)]
+    pub fn add_string<ID: Eq+Clone+Hash, S: Into<String>>(s: S) -> Action<ID> {
+        Action::AddString(Box::new(s.into()))
     }
 
 }
