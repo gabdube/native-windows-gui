@@ -2,7 +2,7 @@
     Wrapper over the win32 api constants so the user don't have to use winapi-rs
 */
 
-use winapi::{MK_CONTROL, MK_SHIFT, MK_MBUTTON, MK_RBUTTON, MK_LBUTTON};
+use winapi::{MK_CONTROL, MK_SHIFT, MK_MBUTTON, MK_RBUTTON, MK_LBUTTON, LRESULT};
 
 // Error codes
 #[allow(non_camel_case_types)]
@@ -67,3 +67,5 @@ pub const BST_INDETERMINATE: u32 = 2;
 pub const CBS_AUTOHSCROLL: u32 = 64;
 pub const CBS_DROPDOWNLIST: u32 = 3;
 pub const CBS_HASSTRINGS: u32 = 512;
+
+pub const CB_ERR: LRESULT = -1;

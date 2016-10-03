@@ -12,7 +12,8 @@ use std::mem;
 use std::hash::Hash;
 
 use actions::{ActionReturn, ActMessageParams};
-use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED, BM_SETCHECK};
+use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED,
+ BM_SETCHECK, CB_ERR};
 
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
   WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, RECT, SW_RESTORE,
