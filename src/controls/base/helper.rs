@@ -17,7 +17,7 @@ use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
   WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, RECT, SW_RESTORE,
   SWP_NOMOVE, SWP_NOZORDER, POINT, LONG, SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER,
-    WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE};   
+  WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, CB_ADDSTRING};   
 
 use user32::{SetWindowLongPtrW, GetWindowLongPtrW, EnumChildWindows, ShowWindow, 
   IsZoomed, IsIconic, GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, 
@@ -34,6 +34,15 @@ pub fn to_utf16(n: String) -> Vec<u16> {
       .chain(Some(0u16).into_iter())
       .collect()
 }
+
+#[inline(always)]
+pub fn to_utf16_ref(n: &String) -> Vec<u16> {
+    OsStr::new(n.as_str())
+      .encode_wide()
+      .chain(Some(0u16).into_iter())
+      .collect()
+}
+
 
 /** 
     Fix: Window size include the non client area. This behaviour is not wanted
@@ -331,5 +340,15 @@ pub fn set_check_state<ID: Eq+Clone+Hash >(handle: HWND, state: CheckState) -> A
         CheckState::Unchecked => BST_UNCHECKED
     };
     send_message(handle, BM_SETCHECK, state as WPARAM, 0);
+    ActionReturn::None
+}
+
+/**
+    Add a string to a combobox
+*/
+pub fn add_string_item<ID: Eq+Clone+Hash >(handle: HWND, item: &String) -> ActionReturn<ID> {
+    let item_vec = to_utf16_ref(item);
+    let item_vec_ptr: LPARAM = unsafe { mem::transmute(item_vec.as_ptr()) };
+    send_message(handle, CB_ADDSTRING, 0, item_vec_ptr);
     ActionReturn::None
 }

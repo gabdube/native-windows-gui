@@ -7,9 +7,9 @@ use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility};
+ set_window_visibility, add_string_item};
 use actions::{Action, ActionReturn};
-use constants::{CBS_AUTOHSCROLL, CBS_DROPDOWNLIST};
+use constants::{CBS_AUTOHSCROLL, CBS_DROPDOWNLIST, CBS_HASSTRINGS};
 use events::Event;
 
 use winapi::{HWND, BS_NOTIFY};
@@ -20,11 +20,13 @@ use winapi::{HWND, BS_NOTIFY};
     * size: The button size (width, height) in pixels
     * position: The button position (x, y) in the parent control
     * parent: The control parent
+    * collection: List of combobox choice
 */
 pub struct ComboBox<ID: Eq+Clone+Hash> {
     pub size: (u32, u32),
     pub position: (i32, i32),
     pub parent: ID,
+    pub collection: Vec<String>
 }
 
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
@@ -36,12 +38,22 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
             position: self.position.clone(),
             visible: true,
             resizable: false,
-            extra_style: BS_NOTIFY | CBS_AUTOHSCROLL | CBS_DROPDOWNLIST,
+            extra_style: BS_NOTIFY | CBS_AUTOHSCROLL | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
             class: Some("COMBOBOX".to_string()),
             parent: Some(self.parent.clone())
         };
 
-        unsafe { create_base::<ID>(ui, base) }
+        let handle = unsafe { create_base::<ID>(ui, base) };
+
+        match handle {
+            Ok(h) => {
+                 for i in self.collection.iter() {
+                    add_string_item::<ID>(h, i);
+                 }
+                 Ok(h)
+            }
+            e => e
+        }
     }
 
     fn supported_events(&self) -> Vec<Event> {
