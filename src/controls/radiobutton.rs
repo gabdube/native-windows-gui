@@ -10,7 +10,7 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  set_window_visibility, get_check_state, set_check_state};
 use actions::{Action, ActionReturn};
 use events::Event;
-use constants::{HTextAlign, VTextAlign};
+use constants::{HTextAlign, VTextAlign, CheckState};
 
 use winapi::{HWND, BS_NOTIFY, BS_LEFT, BS_RIGHT, BS_TOP, BS_CENTER, BS_BOTTOM,
   BS_AUTORADIOBUTTON, BS_RIGHTBUTTON};
@@ -80,6 +80,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for RadioButton<ID> {
                 Action::SetEnabled(e) => set_window_enabled(handle, e),
                 Action::GetVisibility => get_window_visibility(handle),
                 Action::SetVisibility(v) => set_window_visibility(handle, v),
+                Action::Reset => set_check_state(handle, CheckState::Unchecked),
 
                 Action::GetCheckState => get_check_state(handle),
                 Action::SetCheckState(s) => set_check_state(handle, s),

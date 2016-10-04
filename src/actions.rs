@@ -45,6 +45,8 @@ pub enum Action<ID: Eq+Clone+Hash> {
     GetReadonly,
     SetReadonly(bool),
     GetSelectedIndex,
+    SetSelectedIndex(Option<u32>),
+    Reset,
     
     AddString(Box<String>),
     RemoveString(Box<String>),
@@ -144,6 +146,22 @@ pub mod helper {
     #[inline(always)]
     pub fn remove_string<ID: Eq+Clone+Hash, S: Into<String>>(s: S) -> Action<ID> {
         Action::RemoveString(Box::new(s.into()))
+    }
+
+    /**
+        Action helper for SetSelectedIndex
+    */
+    #[inline(always)]
+    pub fn set_selected_index<ID: Eq+Clone+Hash>(i: u32) -> Action<ID> {
+        Action::SetSelectedIndex(Some(i))
+    }
+
+    /**
+        Action helper for SetSelectedIndex
+    */
+    #[inline(always)]
+    pub fn remove_index<ID: Eq+Clone+Hash, S: Into<String>>(s: S) -> Action<ID> {
+        Action::SetSelectedIndex(None)
     }
 
 }

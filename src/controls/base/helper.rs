@@ -13,13 +13,12 @@ use std::hash::Hash;
 
 use actions::{ActionReturn, ActMessageParams};
 use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED,
- BM_SETCHECK, CB_ERR};
+ BM_SETCHECK};
 
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
   WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, RECT, SW_RESTORE,
   SWP_NOMOVE, SWP_NOZORDER, POINT, LONG, SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER,
-  WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, CB_ADDSTRING,
-  CB_DELETESTRING, CB_FINDSTRINGEXACT, CB_GETCOUNT, CB_GETCURSEL};   
+  WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE};   
 
 use user32::{SetWindowLongPtrW, GetWindowLongPtrW, EnumChildWindows, ShowWindow, 
   IsZoomed, IsIconic, GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, 
@@ -343,79 +342,4 @@ pub fn set_check_state<ID: Eq+Clone+Hash >(handle: HWND, state: CheckState) -> A
     };
     send_message(handle, BM_SETCHECK, state as WPARAM, 0);
     ActionReturn::None
-}
-
-/**
-    Add a string to a combobox
-*/
-pub fn add_string_item<ID: Eq+Clone+Hash >(handle: HWND, item: &String) -> ActionReturn<ID> {
-    let item_vec = to_utf16_ref(item);
-    let item_vec_ptr: LPARAM = unsafe { mem::transmute(item_vec.as_ptr()) };
-    send_message(handle, CB_ADDSTRING, 0, item_vec_ptr);
-    ActionReturn::None
-}
-
-/**
-    Remove an item from a list by using its index as reference
-*/
-pub fn remove_item<ID: Eq+Clone+Hash >(handle: HWND, index: u32) -> ActionReturn<ID> {
-    if send_message(handle, CB_DELETESTRING, index as WPARAM, 0) != CB_ERR {
-        ActionReturn::None
-    } else {
-        ActionReturn::Error(Error::INDEX_OUT_OF_BOUNDS)
-    }
-}
-
-
-/**
-    Find the index of a string item in a combobox
-*/
-pub fn find_string_item<ID: Eq+Clone+Hash >(handle: HWND, s: &String) -> ActionReturn<ID> {
-    let item_vec = to_utf16_ref(s);
-    let item_vec_ptr: LPARAM = unsafe { mem::transmute(item_vec.as_ptr()) };
-    let index = send_message(handle, CB_FINDSTRINGEXACT, 0, item_vec_ptr); 
-    if index != CB_ERR {
-        ActionReturn::ItemIndex(index as u32)
-    } else {
-        ActionReturn::Error(Error::ITEM_NOT_FOUND)
-    }
-}
-
-/**
-    Remove a string from a combobox
-*/
-pub fn remove_string_item<ID: Eq+Clone+Hash >(handle: HWND, s: &String) -> ActionReturn<ID> {
-    let item_vec = to_utf16_ref(s);
-    let item_vec_ptr: LPARAM = unsafe { mem::transmute(item_vec.as_ptr()) };
-    let index = send_message(handle, CB_FINDSTRINGEXACT, 0, item_vec_ptr); 
-    if index != CB_ERR {
-        send_message(handle, CB_DELETESTRING, index as WPARAM, 0);
-        ActionReturn::None
-    } else {
-        ActionReturn::Error(Error::ITEM_NOT_FOUND)
-    }
-}
-
-/**
-    Count the number of item in a combobox
-*/
-pub fn count_item<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
-    let count = send_message(handle, CB_GETCOUNT, 0, 0);
-    if count != CB_ERR {
-        ActionReturn::ItemCount(count as u32)
-    } else {
-        ActionReturn::Error(Error::UNKNOWN)
-    }
-}
-
-/**
-    Return the index of the selected item in a combobox
-*/
-pub fn get_selected_index<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
-    let selected = send_message(handle, CB_GETCURSEL, 0, 0);
-    if selected != CB_ERR {
-        ActionReturn::ItemIndex(selected as u32)
-    } else {
-        ActionReturn::None
-    }
 }

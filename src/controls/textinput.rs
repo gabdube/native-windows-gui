@@ -85,6 +85,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
                 Action::SetEnabled(e) => set_window_enabled(handle, e),
                 Action::GetVisibility => get_window_visibility(handle),
                 Action::SetVisibility(v) => set_window_visibility(handle, v),
+                Action::Reset => set_window_text(handle, "".to_string()),
 
                 Action::GetTextLimit => get_text_limit(handle),
                 Action::SetTextLimit(l) => set_text_limit(handle, l),

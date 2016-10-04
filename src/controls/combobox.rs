@@ -2,18 +2,19 @@
     Designates a control consisting of a list box and a selection field similar to an edit control. 
 */
 use std::hash::Hash;
+use std::mem;
 
 use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility, add_string_item, remove_item, find_string_item, 
- remove_string_item, count_item, get_selected_index};
+ set_window_visibility, send_message, to_utf16_ref};
 use actions::{Action, ActionReturn};
-use constants::{CBS_AUTOHSCROLL, CBS_DROPDOWNLIST, CBS_HASSTRINGS};
+use constants::{CBS_AUTOHSCROLL, CBS_DROPDOWNLIST, CBS_HASSTRINGS, Error, CB_ERR};
 use events::Event;
 
-use winapi::{HWND, BS_NOTIFY};
+use winapi::{HWND, BS_NOTIFY, CB_RESETCONTENT, CB_ADDSTRING, CB_DELETESTRING,
+ CB_FINDSTRINGEXACT, CB_GETCOUNT, CB_GETCURSEL, CB_SETCURSEL, LPARAM, WPARAM};
 
 /**
     Configuration properties to create simple button
@@ -77,6 +78,8 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
                 Action::GetVisibility => get_window_visibility(handle),
                 Action::SetVisibility(v) => set_window_visibility(handle, v),
                 Action::GetSelectedIndex => get_selected_index(handle),
+                Action::SetSelectedIndex(i) => set_selected_index(handle, i), 
+                Action::Reset => reset_combobox(handle),
                 
                 Action::AddString(s) => add_string_item(handle, s.as_ref()),
                 Action::FindString(s) => find_string_item(handle, s.as_ref()),
@@ -90,4 +93,105 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
         })
     }
 
+}
+
+#[inline(always)]
+fn reset_combobox<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
+    send_message(handle, CB_RESETCONTENT, 0, 0);
+    ActionReturn::None
+}
+
+
+/**
+    Add a string to a combobox
+*/
+pub fn add_string_item<ID: Eq+Clone+Hash >(handle: HWND, item: &String) -> ActionReturn<ID> {
+    let item_vec = to_utf16_ref(item);
+    let item_vec_ptr: LPARAM = unsafe { mem::transmute(item_vec.as_ptr()) };
+    send_message(handle, CB_ADDSTRING, 0, item_vec_ptr);
+    ActionReturn::None
+}
+
+/**
+    Remove an item from a list by using its index as reference
+*/
+pub fn remove_item<ID: Eq+Clone+Hash >(handle: HWND, index: u32) -> ActionReturn<ID> {
+    if send_message(handle, CB_DELETESTRING, index as WPARAM, 0) != CB_ERR {
+        ActionReturn::None
+    } else {
+        ActionReturn::Error(Error::INDEX_OUT_OF_BOUNDS)
+    }
+}
+
+
+/**
+    Find the index of a string item in a combobox
+*/
+pub fn find_string_item<ID: Eq+Clone+Hash >(handle: HWND, s: &String) -> ActionReturn<ID> {
+    let item_vec = to_utf16_ref(s);
+    let item_vec_ptr: LPARAM = unsafe { mem::transmute(item_vec.as_ptr()) };
+    let index = send_message(handle, CB_FINDSTRINGEXACT, 0, item_vec_ptr); 
+    if index != CB_ERR {
+        ActionReturn::ItemIndex(index as u32)
+    } else {
+        ActionReturn::Error(Error::ITEM_NOT_FOUND)
+    }
+}
+
+/**
+    Remove a string from a combobox
+*/
+pub fn remove_string_item<ID: Eq+Clone+Hash >(handle: HWND, s: &String) -> ActionReturn<ID> {
+    let item_vec = to_utf16_ref(s);
+    let item_vec_ptr: LPARAM = unsafe { mem::transmute(item_vec.as_ptr()) };
+    let index = send_message(handle, CB_FINDSTRINGEXACT, 0, item_vec_ptr); 
+    if index != CB_ERR {
+        send_message(handle, CB_DELETESTRING, index as WPARAM, 0);
+        ActionReturn::None
+    } else {
+        ActionReturn::Error(Error::ITEM_NOT_FOUND)
+    }
+}
+
+/**
+    Count the number of item in a combobox
+*/
+pub fn count_item<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
+    let count = send_message(handle, CB_GETCOUNT, 0, 0);
+    if count != CB_ERR {
+        ActionReturn::ItemCount(count as u32)
+    } else {
+        ActionReturn::Error(Error::UNKNOWN)
+    }
+}
+
+/**
+    Return the index of the selected item in a combobox
+*/
+pub fn get_selected_index<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
+    let selected = send_message(handle, CB_GETCURSEL, 0, 0);
+    if selected != CB_ERR {
+        ActionReturn::ItemIndex(selected as u32)
+    } else {
+        ActionReturn::None
+    }
+}
+
+/**
+    Set the selected index in a combobox
+    TODO maybe add some validation to check if index is out of bounds as it currently clear the box
+    as if None was passed
+*/
+pub fn set_selected_index<ID: Eq+Clone+Hash>(handle: HWND, index: Option<u32>) -> ActionReturn<ID> {
+    if let Some(i) = index {
+        let result = send_message(handle, CB_SETCURSEL, i as WPARAM, 0);
+        if result != CB_ERR {
+            ActionReturn::None
+        } else {
+            ActionReturn::Error(Error::INDEX_OUT_OF_BOUNDS)
+        }
+    } else {
+        send_message(handle, CB_SETCURSEL, !0, 0);
+        ActionReturn::None
+    }
 }
