@@ -46,7 +46,9 @@ pub enum Action<ID: Eq+Clone+Hash> {
     SetReadonly(bool),
     
     AddString(Box<String>),
-    
+    RemoveString(Box<String>),
+    FindString(Box<String>),
+
     RemoveItem(u32),
 
     Undo,
@@ -72,6 +74,7 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     TextLimit(u32),
     SelectBounds((u32, u32)),
     Readonly(bool),
+    ItemIndex(u32),
     NotSupported
 }
 
@@ -122,6 +125,22 @@ pub mod helper {
     #[inline(always)]
     pub fn add_string<ID: Eq+Clone+Hash, S: Into<String>>(s: S) -> Action<ID> {
         Action::AddString(Box::new(s.into()))
+    }
+
+    /**
+        Action helper for FindString
+    */
+    #[inline(always)]
+    pub fn find_string<ID: Eq+Clone+Hash, S: Into<String>>(s: S) -> Action<ID> {
+        Action::FindString(Box::new(s.into()))
+    }
+
+    /**
+        Action helper for RemoveString
+    */
+    #[inline(always)]
+    pub fn remove_string<ID: Eq+Clone+Hash, S: Into<String>>(s: S) -> Action<ID> {
+        Action::RemoveString(Box::new(s.into()))
     }
 
 }

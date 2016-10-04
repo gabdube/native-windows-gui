@@ -9,6 +9,7 @@ use winapi::{MK_CONTROL, MK_SHIFT, MK_MBUTTON, MK_RBUTTON, MK_LBUTTON, LRESULT};
 #[derive(PartialEq, Debug)]
 pub enum Error {
     CONTROL_NOT_FOUND,
+    ITEM_NOT_FOUND,
     MUST_HAVE_PARENT,
     TEMPLATE_CREATION,
     CONTROL_EXISTS,
