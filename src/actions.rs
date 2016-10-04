@@ -44,11 +44,13 @@ pub enum Action<ID: Eq+Clone+Hash> {
     SetSelectedBounds((u32, u32)),
     GetReadonly,
     SetReadonly(bool),
+    GetSelectedIndex,
     
     AddString(Box<String>),
     RemoveString(Box<String>),
     FindString(Box<String>),
 
+    CountItems,
     RemoveItem(u32),
 
     Undo,
@@ -75,6 +77,7 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     SelectBounds((u32, u32)),
     Readonly(bool),
     ItemIndex(u32),
+    ItemCount(u32),
     NotSupported
 }
 

@@ -19,7 +19,7 @@ use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
   WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, RECT, SW_RESTORE,
   SWP_NOMOVE, SWP_NOZORDER, POINT, LONG, SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER,
   WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, CB_ADDSTRING,
-  CB_DELETESTRING, CB_FINDSTRINGEXACT};   
+  CB_DELETESTRING, CB_FINDSTRINGEXACT, CB_GETCOUNT, CB_GETCURSEL};   
 
 use user32::{SetWindowLongPtrW, GetWindowLongPtrW, EnumChildWindows, ShowWindow, 
   IsZoomed, IsIconic, GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, 
@@ -359,7 +359,7 @@ pub fn add_string_item<ID: Eq+Clone+Hash >(handle: HWND, item: &String) -> Actio
     Remove an item from a list by using its index as reference
 */
 pub fn remove_item<ID: Eq+Clone+Hash >(handle: HWND, index: u32) -> ActionReturn<ID> {
-    if send_message(handle, CB_DELETESTRING, index as WPARAM, 0) != CB_ERR{
+    if send_message(handle, CB_DELETESTRING, index as WPARAM, 0) != CB_ERR {
         ActionReturn::None
     } else {
         ActionReturn::Error(Error::INDEX_OUT_OF_BOUNDS)
@@ -393,5 +393,29 @@ pub fn remove_string_item<ID: Eq+Clone+Hash >(handle: HWND, s: &String) -> Actio
         ActionReturn::None
     } else {
         ActionReturn::Error(Error::ITEM_NOT_FOUND)
+    }
+}
+
+/**
+    Count the number of item in a combobox
+*/
+pub fn count_item<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
+    let count = send_message(handle, CB_GETCOUNT, 0, 0);
+    if count != CB_ERR {
+        ActionReturn::ItemCount(count as u32)
+    } else {
+        ActionReturn::Error(Error::UNKNOWN)
+    }
+}
+
+/**
+    Return the index of the selected item in a combobox
+*/
+pub fn get_selected_index<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
+    let selected = send_message(handle, CB_GETCURSEL, 0, 0);
+    if selected != CB_ERR {
+        ActionReturn::ItemIndex(selected as u32)
+    } else {
+        ActionReturn::None
     }
 }
