@@ -66,7 +66,9 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
         let handle = unsafe { create_base::<ID>(ui, base) };
         match handle {
             Ok(h) => {
-                 set_placeholder::<ID>(h, self.placeholder.clone());
+                 if let Some(placeholder) = self.placeholder.as_ref() {
+                     set_placeholder::<ID>(h, Some(Box::new(placeholder.clone())) );
+                 }
                  Ok(h)
             }
             e => e
@@ -88,7 +90,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
                 Action::GetSize => get_window_size(handle),
                 Action::SetSize(w, h) => set_window_size(handle, w, h),
                 Action::GetParent => get_window_parent(handle),
-                Action::SetParent(p) => set_window_parent(ui, handle, *p, true),
+                Action::SetParent(p) => set_window_parent(ui, handle, p, true),
                 Action::GetEnabled => get_window_enabled(handle),
                 Action::SetEnabled(e) => set_window_enabled(handle, e),
                 Action::GetVisibility => get_window_visibility(handle),
@@ -103,7 +105,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
                 Action::SetReadonly(r) => set_readonly(handle, r),
                 Action::Undo => undo_text(handle),
                 Action::GetPlaceholder => get_placeholder(handle),
-                Action::SetPlaceholder(p) => set_placeholder(handle, *p),
+                Action::SetPlaceholder(p) => set_placeholder(handle, p),
 
                 _ => ActionReturn::NotSupported
             }
@@ -157,10 +159,10 @@ fn set_readonly<ID: Eq+Clone+Hash>(handle: HWND, readonly: bool) -> ActionReturn
     ActionReturn::None
 }
 
-fn set_placeholder<ID: Eq+Clone+Hash>(handle: HWND, placeholder: Option<String>) -> ActionReturn<ID> {
+fn set_placeholder<ID: Eq+Clone+Hash>(handle: HWND, placeholder: Option<Box<String>> ) -> ActionReturn<ID> {
     let ptr: LPARAM;
     if let Some(placeholder) = placeholder {
-        let placeholder_raw = to_utf16(placeholder);
+        let placeholder_raw = to_utf16(*placeholder);
         ptr = unsafe{ mem::transmute(placeholder_raw.as_ptr()) };
         send_message(handle, EM_SETCUEBANNER, 0, ptr);
     } else {

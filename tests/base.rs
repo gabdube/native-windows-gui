@@ -19,7 +19,7 @@ macro_rules! test_action {
             $b => $c,
             _ => panic!("Bad actionreturn type returned")
         }
-    )
+    );
 }
 
 fn setup_window(ui: &mut nwg::Ui<&'static str>) {
@@ -64,19 +64,19 @@ fn buttons() {
     test_action!(ui, Action::None, ActionReturn::NotSupported, {});
     test_action!(ui, helper::message("A", "A", 0), ActionReturn::NotSupported, {});
 
-    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "GROUP"); } );
+    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(*p == "GROUP"); } );
     test_action!(ui, helper::set_parent("hya!"), ActionReturn::Error(e), { assert!(e == Error::CONTROL_NOT_FOUND); } );
     test_action!(ui, helper::remove_parent(), ActionReturn::Error(e), { assert!(e == Error::MUST_HAVE_PARENT); } );
     test_action!(ui, helper::set_parent("MainWindow"), ActionReturn::None, {} );
-    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "MainWindow"); } );
+    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(*p == "MainWindow"); } );
     test_action!(ui, helper::set_parent("GROUP"), ActionReturn::None, {} );
 
     test_action!(ui, Action::GetChildren, ActionReturn::Children(c), {assert!(*c == ["GROUP"]);}, "MainWindow");
     test_action!(ui, Action::GetDescendants, ActionReturn::Children(c), {assert!(*c == ["GROUP", "TEST1"]);}, "MainWindow");
 
-    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(*p == None); }, "SubWindow" );
+    test_action!(ui, Action::GetParent, ActionReturn::None, { }, "SubWindow" );
     test_action!(ui, helper::set_parent("MainWindow"), ActionReturn::None, {}, "SubWindow");
-    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(p.unwrap() == "MainWindow"); }, "SubWindow" );
+    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(*p == "MainWindow"); }, "SubWindow" );
 
     test_action!(ui, Action::GetPosition, ActionReturn::Position(x,y), { assert!((x,y) == (100, 100)); } );
     test_action!(ui, Action::SetPosition(150, 150), ActionReturn::None, {} );

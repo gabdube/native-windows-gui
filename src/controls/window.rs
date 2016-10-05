@@ -64,7 +64,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
                 Action::GetSize => get_window_size(handle),
                 Action::SetSize(w, h) => set_window_size(handle, w, h),
                 Action::GetParent => get_window_parent(handle),
-                Action::SetParent(p) => set_window_parent(ui, handle, *p, false),
+                Action::SetParent(p) => set_window_parent(ui, handle, p, false),
                 Action::GetChildren => get_window_children(handle),
                 Action::GetDescendants => get_window_descendant(handle),
                 Action::GetEnabled => get_window_enabled(handle),

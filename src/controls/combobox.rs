@@ -77,7 +77,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
                 Action::GetSize => get_window_size(handle),
                 Action::SetSize(w, h) => set_window_size(handle, w, h),
                 Action::GetParent => get_window_parent(handle),
-                Action::SetParent(p) => set_window_parent(ui, handle, *p, true),
+                Action::SetParent(p) => set_window_parent(ui, handle, p, true),
                 Action::GetEnabled => get_window_enabled(handle),
                 Action::SetEnabled(e) => set_window_enabled(handle, e),
                 Action::GetVisibility => get_window_visibility(handle),

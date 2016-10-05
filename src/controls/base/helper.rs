@@ -157,9 +157,9 @@ pub fn get_window_parent<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { 
     let parent = GetParent(handle);
 
     if let Some(d) = get_handle_data::<::WindowData<ID>>(parent) {
-        ActionReturn::Parent(Box::new(Some(d.id.clone())))
+        ActionReturn::Parent(Box::new(d.id.clone()))
     } else {
-        ActionReturn::Parent(Box::new(None))
+        ActionReturn::None
     }
 }}
 
@@ -194,7 +194,7 @@ fn set_parent_update_style(handle: HWND, parent_removed: bool) { unsafe {
     If the control must have a parent, setting `force_parent` to true will make the function fail if the parent is None.
     If the parent is removed, apply the WS_OVERLAPPEDWINDOW style to the control and remove the WS_CHILD style.
 */
-pub fn set_window_parent<ID: Eq+Hash+Clone>(ui: &::Ui<ID>, handle: HWND, parent: Option<ID>, force_parent: bool) -> ActionReturn<ID> { unsafe {
+pub fn set_window_parent<ID: Eq+Hash+Clone>(ui: &::Ui<ID>, handle: HWND, parent: Option<Box<ID>>, force_parent: bool) -> ActionReturn<ID> { unsafe {
     match parent {
         Some(id) => {
             let controls: &mut ::ControlCollection<ID> =  &mut *ui.controls;

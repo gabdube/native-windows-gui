@@ -22,7 +22,7 @@ pub enum Action<ID: Eq+Clone+Hash> {
     None,
     
     GetParent,
-    SetParent(Box<Option<ID>>),
+    SetParent(Option<Box<ID>>),
     GetChildren,
     GetDescendants,
     
@@ -60,7 +60,7 @@ pub enum Action<ID: Eq+Clone+Hash> {
     SetSelectedIndex(Option<u32>),
 
     GetPlaceholder,
-    SetPlaceholder(Box<Option<String>>),
+    SetPlaceholder(Option<Box<String>>),
     
     Reset,
 
@@ -88,7 +88,7 @@ pub enum Action<ID: Eq+Clone+Hash> {
 #[derive(PartialEq)]
 pub enum ActionReturn<ID: Eq+Clone+Hash> {
     None,
-    Parent(Box<Option<ID>>),
+    Parent(Box<ID>),
     Children(Box<Vec<ID>>),
     Position(i32, i32),
     Size(u32, u32),
@@ -137,7 +137,7 @@ pub mod helper {
     */
     #[inline(always)]
     pub fn set_parent<ID: Eq+Clone+Hash>(p: ID) -> Action<ID> {
-        Action::SetParent(Box::new(Some(p)))
+        Action::SetParent(Some(Box::new(p)))
     }
 
     /**
@@ -145,7 +145,7 @@ pub mod helper {
     */
     #[inline(always)]
     pub fn remove_parent<ID: Eq+Clone+Hash>() -> Action<ID> {
-        Action::SetParent(Box::new(None))
+        Action::SetParent(None)
     }
 
     /**
@@ -193,7 +193,7 @@ pub mod helper {
     */
     #[inline(always)]
     pub fn set_placeholder<ID: Eq+Clone+Hash, S: Into<String>>(s: S) -> Action<ID> {
-        Action::SetPlaceholder(Box::new(Some(s.into())))
+        Action::SetPlaceholder(Some(Box::new(s.into())))
     }
 
     /**
@@ -201,7 +201,7 @@ pub mod helper {
     */
     #[inline(always)]
     pub fn remove_placeholder<ID: Eq+Clone+Hash>() -> Action<ID> {
-        Action::SetPlaceholder(Box::new(None))
+        Action::SetPlaceholder(None)
     }
 
 }

@@ -108,8 +108,7 @@ fn main() {
 
     ui.bind("ParentBtn", EventCallback::Click(Box::new(|ui, caller| {
         if let ActionReturn::Parent(parent) = ui.exec(caller, Action::GetParent).unwrap() {
-            let parent = parent.unwrap();
-            assert!("MainWindow" == parent);
+            assert!("MainWindow" == *parent);
             let parent = format!("{:?} is my parent!", parent);
             ui.exec(caller, Action::SetText(Box::new(parent))).unwrap();
         }
