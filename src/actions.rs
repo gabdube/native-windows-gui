@@ -58,6 +58,9 @@ pub enum Action<ID: Eq+Clone+Hash> {
     
     GetSelectedIndex,
     SetSelectedIndex(Option<u32>),
+
+    GetPlaceholder,
+    SetPlaceholder(Box<Option<String>>),
     
     Reset,
 
@@ -181,8 +184,24 @@ pub mod helper {
         Action helper for SetSelectedIndex
     */
     #[inline(always)]
-    pub fn remove_index<ID: Eq+Clone+Hash, S: Into<String>>(s: S) -> Action<ID> {
+    pub fn remove_selected<ID: Eq+Clone+Hash>() -> Action<ID> {
         Action::SetSelectedIndex(None)
+    }
+
+    /**
+        Action helper to set a placeholder on a control
+    */
+    #[inline(always)]
+    pub fn set_placeholder<ID: Eq+Clone+Hash, S: Into<String>>(s: S) -> Action<ID> {
+        Action::SetPlaceholder(Box::new(Some(s.into())))
+    }
+
+    /**
+        Action helper to set a placeholder on a control
+    */
+    #[inline(always)]
+    pub fn remove_placeholder<ID: Eq+Clone+Hash>() -> Action<ID> {
+        Action::SetPlaceholder(Box::new(None))
     }
 
 }

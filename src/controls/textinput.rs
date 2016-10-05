@@ -8,13 +8,13 @@ use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility};
+ set_window_visibility, to_utf16};
 use actions::{Action, ActionReturn};
 use events::Event;
 use constants::{HTextAlign};
 
 use winapi::{HWND, ES_LEFT, ES_RIGHT, ES_CENTER, WS_BORDER, ES_AUTOHSCROLL, ES_NOHIDESEL,
- ES_PASSWORD};
+ ES_PASSWORD, ES_READONLY, EM_SETCUEBANNER, EM_GETCUEBANNER};
 
 /**
     Configuration properties to create a simple TextInput
@@ -29,6 +29,7 @@ pub struct TextInput<ID: Eq+Clone+Hash> {
     pub size: (u32, u32),
     pub position: (i32, i32),
     pub parent: ID,
+    pub placeholder: Option<String>,
     pub text_align: HTextAlign,
     pub password: bool,
     pub readonly: bool
@@ -62,7 +63,14 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
             parent: Some(self.parent.clone())
         };
 
-        unsafe { create_base::<ID>(ui, base) }
+        let handle = unsafe { create_base::<ID>(ui, base) };
+        match handle {
+            Ok(h) => {
+                 set_placeholder::<ID>(h, self.placeholder.clone());
+                 Ok(h)
+            }
+            e => e
+        }
     }
 
     fn supported_events(&self) -> Vec<Event> {
@@ -94,6 +102,8 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
                 Action::GetReadonly => get_readonly(handle),
                 Action::SetReadonly(r) => set_readonly(handle, r),
                 Action::Undo => undo_text(handle),
+                Action::GetPlaceholder => get_placeholder(handle),
+                Action::SetPlaceholder(p) => set_placeholder(handle, *p),
 
                 _ => ActionReturn::NotSupported
             }
@@ -103,7 +113,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
 }
 
 use winapi::{EM_LIMITTEXT, EM_GETLIMITTEXT, UINT, WPARAM, WM_UNDO, EM_GETSEL, DWORD, EM_SETSEL,
- LPARAM, EM_SETREADONLY, ES_READONLY, GWL_STYLE, LONG_PTR};
+ LPARAM, EM_SETREADONLY, GWL_STYLE, LONG_PTR};
 use user32::GetWindowLongPtrW;
 use controls::base::{send_message};
 use std::mem;
@@ -145,4 +155,40 @@ fn get_readonly<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> { unsafe{
 fn set_readonly<ID: Eq+Clone+Hash>(handle: HWND, readonly: bool) -> ActionReturn<ID> {
     send_message(handle, EM_SETREADONLY as u32, readonly as WPARAM, 0);
     ActionReturn::None
+}
+
+fn set_placeholder<ID: Eq+Clone+Hash>(handle: HWND, placeholder: Option<String>) -> ActionReturn<ID> {
+    let ptr: LPARAM;
+    if let Some(placeholder) = placeholder {
+        let placeholder_raw = to_utf16(placeholder);
+        ptr = unsafe{ mem::transmute(placeholder_raw.as_ptr()) };
+        send_message(handle, EM_SETCUEBANNER, 0, ptr);
+    } else {
+        let null_string: [u16; 1] = [0];
+        ptr = unsafe{ mem::transmute(null_string.as_ptr()) };
+        send_message(handle, EM_SETCUEBANNER, 0, ptr);
+    }
+    ActionReturn::None
+}
+
+fn get_placeholder<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
+    use std::ffi::OsString;
+    use std::os::windows::ffi::OsStringExt;
+
+    // There are no way to get the placeholder length, so the length must be guessed.
+    // 256 characters should be enough.
+    let mut buffer: [u16; 256] = [0; 256];
+    let ptr: WPARAM = unsafe{ mem::transmute(buffer.as_mut_ptr()) };
+
+    send_message(handle, EM_GETCUEBANNER, ptr, 256);
+
+    let end_index = buffer.iter().enumerate().find(|&(index, i)| *i == 0).unwrap_or((256, &0)).0;
+    if end_index > 1 {
+        let text = OsString::from_wide(&(buffer[0..end_index]));
+        let text = text.into_string().unwrap_or("ERROR!".to_string());
+        ActionReturn::Text(Box::new(text))
+    } else {
+        ActionReturn::None
+    }
+
 }
