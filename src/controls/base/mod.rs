@@ -8,7 +8,7 @@ use std::ptr;
 use std::mem;
 use std::hash::Hash;
 
-use winapi::{HWND, HINSTANCE, UINT,
+use winapi::{HWND, HINSTANCE, UINT, ACTCTXW, ULONG, ULONG_PTR, MAX_PATH,
   WS_VISIBLE, WS_CHILD, WS_OVERLAPPED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU,
   WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WNDCLASSEXW, WS_EX_COMPOSITED,
   CS_HREDRAW, CS_VREDRAW,
@@ -17,7 +17,9 @@ use winapi::{HWND, HINSTANCE, UINT,
 use user32::{CreateWindowExW, LoadCursorW, RegisterClassExW, UnregisterClassW, 
   SetWindowLongPtrW, GetWindowLongPtrW, DestroyWindow};
 
-use kernel32::{GetModuleHandleW, GetLastError};
+use kernel32::{GetModuleHandleW, GetLastError, ActivateActCtx, CreateActCtxW,
+  GetSystemDirectoryW};
+
 use comctl32::{SetWindowSubclass};
 
 const CLASS_NAME: &'static str = "RustyWindow";
@@ -137,6 +139,34 @@ pub unsafe fn create_base<ID: Eq+Clone+Hash>(ui: &mut ::Ui<ID>, base: WindowBase
     }
 }
 
+/**
+    hackish way to enable visual style without a manifest
+*/
+pub unsafe fn enable_visual_styles() {
+    use constants::{ACTCTX_FLAG_RESOURCE_NAME_VALID, ACTCTX_FLAG_SET_PROCESS_DEFAULT, ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID};
+
+    let mut sys_dir: Vec<u16> = Vec::with_capacity(MAX_PATH);
+    sys_dir.set_len(MAX_PATH);
+    GetSystemDirectoryW(sys_dir.as_mut_ptr(), MAX_PATH as u32);
+
+    let mut source = to_utf16("shell32.dll".to_string());
+
+    let mut activation_cookie: ULONG_PTR = 0;
+    let mut act_ctx = ACTCTXW {
+        cbSize: mem::size_of::<ACTCTXW> as ULONG,
+        dwFlags: ACTCTX_FLAG_RESOURCE_NAME_VALID | ACTCTX_FLAG_SET_PROCESS_DEFAULT | ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID,
+        lpSource: source.as_mut_ptr(),
+        wProcessorArchitecture: 0,
+        wLangId: 0,
+        lpAssemblyDirectory: sys_dir.as_mut_ptr(),
+        lpResourceName: mem::transmute(124usize), // ID_MANIFEST
+        lpApplicationName: ptr::null_mut(),
+        hModule: ptr::null_mut()
+    };
+
+    let handle = CreateActCtxW(&mut act_ctx);
+    ActivateActCtx(handle, &mut activation_cookie);
+}
 
 ////
 //// Window data helper

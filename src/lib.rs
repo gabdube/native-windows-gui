@@ -53,6 +53,9 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     pub fn new() -> Ui<ID> {
         let controls = ControlCollection::<ID>::new();
         let controls_raw = Box::into_raw(Box::new(controls));
+
+        unsafe { ::controls::base::enable_visual_styles(); }
+
         Ui{controls: controls_raw}
     }
 
