@@ -20,40 +20,60 @@ pub struct ActMessageParams {
 #[derive(PartialEq)]
 pub enum Action<ID: Eq+Clone+Hash> {
     None,
+    
     GetParent,
     SetParent(Box<Option<ID>>),
     GetChildren,
     GetDescendants,
+    
     GetPosition,
     SetPosition(i32, i32),
+    
     GetSize,
     SetSize(u32, u32),
+    
     GetText,
     SetText(Box<String>),
+    
     GetCheckState,
     SetCheckState(CheckState),
+    
     GetEnabled,
     SetEnabled(bool),
+    
     GetVisibility,
     SetVisibility(bool),
+    
     GetWindowDisplay,
     SetWindowDisplay(WindowDisplay),
+    
     GetTextLimit,
     SetTextLimit(u32),
+    
     GetSelectedBounds,
     SetSelectedBounds((u32, u32)),
+    
     GetReadonly,
     SetReadonly(bool),
+    
     GetSelectedIndex,
     SetSelectedIndex(Option<u32>),
+    
     Reset,
+
+    GetDropdownVisibility,
+    SetDropdownVisibility(bool),
     
     AddString(Box<String>),
     RemoveString(Box<String>),
     FindString(Box<String>),
+    
+    GetStringCollection,
+    SetStringCollection(Box<Vec<String>>),
 
     CountItems,
-    RemoveItem(u32),
+    GetIndexedItem(u32),
+    RemoveIndexedItem(u32),
 
     Undo,
     Message(Box<ActMessageParams>)
@@ -80,6 +100,7 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     Readonly(bool),
     ItemIndex(u32),
     ItemCount(u32),
+    StringCollection(Box<Vec<String>>),
     NotSupported
 }
 

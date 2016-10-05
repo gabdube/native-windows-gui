@@ -68,5 +68,6 @@ pub const BST_INDETERMINATE: u32 = 2;
 pub const CBS_AUTOHSCROLL: u32 = 64;
 pub const CBS_DROPDOWNLIST: u32 = 3;
 pub const CBS_HASSTRINGS: u32 = 512;
+pub const CBS_SORT: u32 = 256;
 
 pub const CB_ERR: LRESULT = -1;
