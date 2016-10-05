@@ -56,9 +56,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
 
         match handle {
             Ok(h) => {
-                 for i in self.collection.iter() {
-                    add_string_item::<ID>(h, i);
-                 }
+                 set_collection::<ID>(h, &self.collection);
                  Ok(h)
             }
             e => e
@@ -95,7 +93,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
                 Action::FindString(s) => find_string_item(handle, s.as_ref()),
                 Action::RemoveString(s) => remove_string_item(handle, s.as_ref()),
                 Action::GetStringCollection => get_collection(handle),
-                Action::SetStringCollection(c) => set_collection(handle, *c),
+                Action::SetStringCollection(c) => set_collection(handle, c.as_ref()),
 
                 Action::GetIndexedItem(i) => get_item(handle, i),
                 Action::RemoveIndexedItem(i) => remove_item(handle, i),
@@ -284,8 +282,8 @@ fn get_collection<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
     if item_count == 0 { return ActionReturn::StringCollection(Box::new(Vec::new())); }
 
     // Get the length of the biggest string in the combobox
-    for i in 0..(item_count as u32) {
-        let size = send_message(handle, CB_GETLBTEXTLEN, i as WPARAM, 0) as usize;
+    for i in 0..(item_count as WPARAM) {
+        let size = send_message(handle, CB_GETLBTEXTLEN, i, 0) as usize;
         if size > buffer_length {
             buffer_length = size;
         }
@@ -300,8 +298,8 @@ fn get_collection<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
 
     // Unpack the items in the collection
     collection = Vec::with_capacity(item_count);
-    for i in 0..item_count {
-        if send_message(handle, CB_GETLBTEXT, i as WPARAM, buffer_addr) != CB_ERR {
+    for i in 0..(item_count as WPARAM) {
+        if send_message(handle, CB_GETLBTEXT, i, buffer_addr) != CB_ERR {
             let end_index = buffer.iter().enumerate().find(|&(index, i)| *i == 0).unwrap_or((buffer_length, &0)).0;
             let text = OsString::from_wide(&(buffer.as_slice()[0..end_index]));
             let text = text.into_string().unwrap_or("ERROR!".to_string());
@@ -316,6 +314,11 @@ fn get_collection<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
 /**
     Set the collection in the combobox list
 */
-fn set_collection<ID: Eq+Clone+Hash>(handle: HWND, new_col: Vec<String>) -> ActionReturn<ID> {
+fn set_collection<ID: Eq+Clone+Hash>(handle: HWND, collection: &Vec<String>) -> ActionReturn<ID> {
+    reset_combobox::<ID>(handle);
+    for i in collection.iter() {
+        add_string_item::<ID>(handle, i);
+    }
+
     ActionReturn::None
 }
