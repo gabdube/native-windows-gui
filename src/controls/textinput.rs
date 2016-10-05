@@ -14,7 +14,7 @@ use events::Event;
 use constants::{HTextAlign};
 
 use winapi::{HWND, ES_LEFT, ES_RIGHT, ES_CENTER, WS_BORDER, ES_AUTOHSCROLL, ES_NOHIDESEL,
- ES_PASSWORD};
+ ES_PASSWORD, ES_MULTILINE};
 
 /**
     Configuration properties to create a simple TextInput
@@ -31,7 +31,8 @@ pub struct TextInput<ID: Eq+Clone+Hash> {
     pub parent: ID,
     pub text_align: HTextAlign,
     pub password: bool,
-    pub readonly: bool
+    pub readonly: bool,
+    pub multiline: bool
 }
 
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
@@ -49,6 +50,9 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
         }
         if self.readonly {
             extra |= ES_READONLY;
+        }
+        if self.multiline {
+            extra |= ES_MULTILINE;
         }
 
         let base = WindowBase::<ID> {
