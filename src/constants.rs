@@ -18,7 +18,19 @@ pub enum Error {
     UNKNOWN
 }
 
-// Event constants
+// Controls enums
+#[derive(PartialEq, Debug, Clone)]
+pub enum ControlType {
+    Button,
+    CheckBox,
+    ComboBox,
+    GroupBox,
+    RadioButton,
+    TextInput,
+    Window
+}
+
+// Event enums
 
 #[derive(PartialEq, Debug)]
 pub enum CheckState {
@@ -48,6 +60,8 @@ pub enum VTextAlign {
     Bottom
 }
 
+// Event constants
+
 pub const MOD_MOUSE_CTRL: u32 = MK_CONTROL as u32;
 pub const MOD_MOUSE_SHIFT: u32 = MK_SHIFT as u32;
 
@@ -75,3 +89,8 @@ pub const CB_ERR: LRESULT = -1;
 pub const ACTCTX_FLAG_RESOURCE_NAME_VALID: u32 = 0x008;
 pub const ACTCTX_FLAG_SET_PROCESS_DEFAULT: u32 = 0x010;
 pub const ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID: u32 = 0x004;
+
+pub const CBN_CLOSEUP: u16 = 8;
+pub const CBN_DROPDOWN: u16 = 7;
+pub const CBN_SETFOCUS: u16 = 3;
+pub const CBN_KILLFOCUS: u16 = 4;

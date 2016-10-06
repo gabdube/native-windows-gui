@@ -23,6 +23,8 @@ pub use controls::combobox::ComboBox;
 use std::hash::Hash;
 use winapi::HWND;
 
+use constants::ControlType;
+
 /**
     Trait that is shared by all control templates
 */
@@ -42,6 +44,13 @@ pub trait ControlTemplate<ID: Eq+Clone+Hash > {
         Return the list of callback supported by this control
     */
     fn supported_events(&self) -> Vec<::events::Event>;
+
+    /**
+        Return the type of the control. This is used for reflecting
+        and because the window proc need to know the control to dispatch
+        the events correctly
+    */
+    fn control_type(&self) -> ControlType;
 }
 
 

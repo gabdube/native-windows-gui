@@ -9,9 +9,10 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text, 
   get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
   set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
   set_window_visibility, get_window_display, set_window_display, get_window_children,
-  get_window_descendant};
+  get_window_descendant, get_control_type};
 use actions::{Action, ActionReturn};
 use events::Event;
+use constants::ControlType;
 
 use winapi::{HWND};
 
@@ -71,6 +72,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
                 Action::SetEnabled(e) => set_window_enabled(handle, e),
                 Action::GetVisibility => get_window_visibility(handle),
                 Action::SetVisibility(v) => set_window_visibility(handle, v),
+                Action::GetControlType => get_control_type(handle),
 
                 Action::GetWindowDisplay => get_window_display(handle),
                 Action::SetWindowDisplay(d) => set_window_display(handle, d),
@@ -78,6 +80,10 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
                 _ => ActionReturn::NotSupported
             }            
         })
+    }
+
+    fn control_type(&self) -> ControlType {
+        ControlType::Window
     }
 
 }

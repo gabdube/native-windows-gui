@@ -7,10 +7,10 @@ use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility, get_check_state, set_check_state};
+ set_window_visibility, get_check_state, set_check_state, get_control_type};
 use actions::{Action, ActionReturn};
 use events::Event;
-use constants::{HTextAlign, VTextAlign, CheckState};
+use constants::{HTextAlign, VTextAlign, CheckState, ControlType};
 
 use winapi::{HWND, BS_NOTIFY, BS_LEFT, BS_RIGHT, BS_TOP, BS_CENTER, BS_BOTTOM,
   BS_AUTORADIOBUTTON, BS_RIGHTBUTTON};
@@ -81,6 +81,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for RadioButton<ID> {
                 Action::GetVisibility => get_window_visibility(handle),
                 Action::SetVisibility(v) => set_window_visibility(handle, v),
                 Action::Reset => set_check_state(handle, CheckState::Unchecked),
+                Action::GetControlType => get_control_type(handle),
 
                 Action::GetCheckState => get_check_state(handle),
                 Action::SetCheckState(s) => set_check_state(handle, s),
@@ -89,5 +90,10 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for RadioButton<ID> {
             }
         })
     }
+
+    fn control_type(&self) -> ControlType {
+        ControlType::RadioButton
+    }
+
 
 }

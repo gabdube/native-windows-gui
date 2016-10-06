@@ -11,9 +11,9 @@ use controls::ControlTemplate;
 use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility, send_message, to_utf16_ref};
+ set_window_visibility, send_message, to_utf16_ref, get_control_type};
 use actions::{Action, ActionReturn};
-use constants::{CBS_AUTOHSCROLL, CBS_DROPDOWNLIST, CBS_HASSTRINGS, Error, CB_ERR, CBS_SORT};
+use constants::{CBS_AUTOHSCROLL, CBS_DROPDOWNLIST, CBS_HASSTRINGS, Error, CB_ERR, CBS_SORT, ControlType};
 use events::Event;
 
 use winapi::{HWND, BS_NOTIFY, CB_RESETCONTENT, CB_ADDSTRING, CB_DELETESTRING,
@@ -64,7 +64,8 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::Focus, Event::MouseUp, Event::MouseDown, Event::Removed]
+        vec![Event::Focus, Event::MouseUp, Event::MouseDown, Event::Removed,
+             Event::MenuClose, Event::MenuOpen]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {
@@ -85,6 +86,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
                 Action::GetSelectedIndex => get_selected_index(handle),
                 Action::SetSelectedIndex(i) => set_selected_index(handle, i), 
                 Action::Reset => reset_combobox(handle),
+                Action::GetControlType => get_control_type(handle),
 
                 Action::GetDropdownVisibility => get_combobox_dropdown_visibility(handle),
                 Action::SetDropdownVisibility(s) => show_combobox_dropdown(handle, s),
@@ -102,6 +104,10 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
                 _ => ActionReturn::NotSupported
             }
         })
+    }
+
+    fn control_type(&self) -> ControlType {
+        ControlType::ComboBox
     }
 
 }

@@ -4,7 +4,7 @@ use std::hash::Hash;
 use controls::base::{get_handle_data};
 use events::{Event, EventCallback};
 use ::constants::{MOD_MOUSE_CTRL, MOD_MOUSE_SHIFT, BTN_MOUSE_MIDDLE, BTN_MOUSE_RIGHT,
- BTN_MOUSE_LEFT};
+ BTN_MOUSE_LEFT, CBN_CLOSEUP, CBN_DROPDOWN, CBN_SETFOCUS, CBN_KILLFOCUS, ControlType};
 
 use winapi::{HWND, UINT, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT,
   WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
@@ -17,16 +17,40 @@ use comctl32::{DefSubclassProc};
 
 /**
     Map system events to application events
+
+    Command ids are not unique, so the type of the control must be passed.
 */
-fn map_command(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
+fn map_command<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
     let command = HIWORD(w as u32);
     let owner: HWND = unsafe{ mem::transmute(l) };
-    match command {
-        BN_SETFOCUS | BN_KILLFOCUS | EN_SETFOCUS | EN_KILLFOCUS  => (Event::Focus, owner),
-        EN_CHANGE => (Event::ValueChanged, owner),
-        EN_MAXTEXT => (Event::MaxValue, owner),
-        BN_CLICKED => (Event::Click, owner),
-        _ => (Event::Unknown, handle)
+    let data = unsafe{ get_handle_data::<::WindowData<ID>>(owner) };
+    
+    match data {
+        Some(data) => 
+        match data._type {
+            ControlType::Button | ControlType::CheckBox | ControlType::GroupBox | ControlType::RadioButton => {
+                match command {
+                    BN_SETFOCUS  | BN_KILLFOCUS => (Event::Focus, owner),
+                    BN_CLICKED => (Event::Click, owner),
+                    _ => (Event::Unknown, handle)
+                }},
+            ControlType::TextInput => {
+                match command {
+                    EN_SETFOCUS  | EN_KILLFOCUS => (Event::Focus, owner),
+                    EN_CHANGE => (Event::ValueChanged, owner),
+                    EN_MAXTEXT => (Event::MaxValue, owner),
+                    _ => (Event::Unknown, handle)
+                }},
+            ControlType::ComboBox => {
+                match command {
+                    CBN_SETFOCUS  | CBN_KILLFOCUS => (Event::Focus, owner),
+                    CBN_CLOSEUP => (Event::MenuClose, owner),
+                    CBN_DROPDOWN => (Event::MenuOpen, owner),
+                    _ => (Event::Unknown, handle)
+                }},
+            _ => (Event::Unknown, handle)
+        },
+        None => (Event::Unknown, handle) // Should never happens, but who knows???
     }
 }
 
@@ -34,9 +58,9 @@ fn map_command(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
     Map system events to application events
 */
 #[inline(always)]
-fn map_system_event(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
+fn map_system_event<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
     match evt {
-        WM_COMMAND => map_command(handle, evt, w, l), // WM_COMMAND is a special snowflake, it can represent hundreds of different commands
+        WM_COMMAND => map_command::<ID>(handle, evt, w, l), // WM_COMMAND is a special snowflake, it can represent hundreds of different commands
         WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => (Event::MouseUp, handle),
         WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => (Event::MouseDown, handle),
         WM_ACTIVATEAPP => (Event::Focus, handle),
@@ -74,12 +98,12 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
             c(ui, caller, x, y, btn, modifiers); 
          },
         &EventCallback::Click(ref c) | &EventCallback::ValueChanged(ref c) | &EventCallback::MaxValue(ref c) | 
-        &EventCallback::Removed(ref c) => {
+        &EventCallback::Removed(ref c) | &EventCallback::MenuClose(ref c) | &EventCallback::MenuOpen(ref c) => {
             c(ui, caller); 
          },
         &EventCallback::Focus(ref c) => {
             let focus = match msg {
-                WM_COMMAND => { HIWORD(w as u32) == BN_SETFOCUS },
+                WM_COMMAND => { let w = HIWORD(w as u32); w == BN_SETFOCUS || w == EN_SETFOCUS || w == CBN_SETFOCUS },
                 WM_ACTIVATEAPP => w == 1,
                 _ => unreachable!()
             };
@@ -91,7 +115,7 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
 
 #[inline(always)]
 unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) {
-    let (event, handle) = map_system_event(hwnd, msg, w, l);
+    let (event, handle) = map_system_event::<ID>(hwnd, msg, w, l);
 
     // If the window data was initialized, eval callbacks
     if let Some(data) = get_handle_data::<::WindowData<ID>>(handle) {

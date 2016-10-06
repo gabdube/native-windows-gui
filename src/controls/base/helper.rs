@@ -343,3 +343,14 @@ pub fn set_check_state<ID: Eq+Clone+Hash >(handle: HWND, state: CheckState) -> A
     send_message(handle, BM_SETCHECK, state as WPARAM, 0);
     ActionReturn::None
 }
+
+/**
+    Get the control type identifier of a control
+*/
+pub fn get_control_type<ID: Eq+Clone+Hash >(handle: HWND ) -> ActionReturn<ID> { unsafe {
+    if let Some(d) = get_handle_data::<::WindowData<ID>>(handle) {
+        ActionReturn::ControlType(d._type.clone())
+    } else {
+        ActionReturn::Error(Error::UNKNOWN)
+    }
+}}

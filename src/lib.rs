@@ -33,6 +33,7 @@ type CallbackCollection<ID> = HashMap<events::Event, Vec<events::EventCallback<I
 */
 struct WindowData<ID: Eq+Clone+Hash > {
     pub id: ID,
+    pub _type: constants::ControlType,
     pub controls: *mut ControlCollection<ID>,
     pub callbacks: CallbackCollection<ID>
 }
@@ -87,6 +88,7 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
 
             let data = WindowData {
                 id: cont.clone(),
+                _type: template.control_type(),
                 controls: self.controls,
                 callbacks: callbacks,
             };

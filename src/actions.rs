@@ -64,6 +64,8 @@ pub enum Action<ID: Eq+Clone+Hash> {
     
     Reset,
 
+    GetControlType,
+
     GetDropdownVisibility,
     SetDropdownVisibility(bool),
     
@@ -104,6 +106,7 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     ItemIndex(u32),
     ItemCount(u32),
     StringCollection(Box<Vec<String>>),
+    ControlType(::constants::ControlType),
     NotSupported
 }
 
