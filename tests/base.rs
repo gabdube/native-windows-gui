@@ -4,7 +4,7 @@ extern crate native_windows_gui as nwg;
 use nwg::constants::Error;
 use nwg::actions::{Action, ActionReturn};
 use nwg::actions::helper;
-use nwg::constants::{HTextAlign, VTextAlign, WindowDisplay};
+use nwg::constants::{HTextAlign, VTextAlign, WindowDisplay, MessageButtons, MessageIcons};
 
 macro_rules! test_action {
     ($ui:expr, $a:expr, $b:pat, $c: block) => (
@@ -62,7 +62,7 @@ fn buttons() {
 
     // Actions
     test_action!(ui, Action::None, ActionReturn::NotSupported, {});
-    test_action!(ui, helper::message("A", "A", 0), ActionReturn::NotSupported, {});
+    test_action!(ui, helper::message("A", "A", MessageButtons::Ok, MessageIcons::Error), ActionReturn::NotSupported, {});
 
     test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(*p == "GROUP"); } );
     test_action!(ui, helper::set_parent("hya!"), ActionReturn::Error(e), { assert!(e == Error::CONTROL_NOT_FOUND); } );

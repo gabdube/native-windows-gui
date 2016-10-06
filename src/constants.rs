@@ -30,6 +30,26 @@ pub enum ControlType {
     Window
 }
 
+#[derive(PartialEq)]
+pub enum MessageButtons {
+    AbortTryIgnore,
+    CancelTryContinue,
+    Ok,
+    OkCancel,
+    RetryCancel,
+    YesNo,
+    YesNoCancel,
+}
+
+#[derive(PartialEq)]
+pub enum MessageIcons {
+    Warning,
+    Info,
+    Question,
+    Error,
+    None
+}
+
 // Event enums
 
 #[derive(PartialEq, Debug)]

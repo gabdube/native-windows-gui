@@ -78,7 +78,9 @@ fn main() {
 
     ui.bind("HelloBtn", EventCallback::Click(Box::new(|ui, caller| {
         assert!("HelloBtn" == *caller);
-        ui.exec("MainWindow", nwga::message("Hello", "Hello World!", 0)).unwrap();
+        ui.exec("MainWindow", 
+                    nwga::message("Hello", "Hello World!", nwgc::MessageButtons::YesNo, nwgc::MessageIcons::Warning)
+                ).unwrap();
 
         if let ActionReturn::Text(old_text) = ui.exec(caller, Action::GetText).unwrap() {
             let new_text = Box::new(*old_text + "!");

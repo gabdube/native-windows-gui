@@ -13,12 +13,14 @@ use std::hash::Hash;
 
 use actions::{ActionReturn, ActMessageParams};
 use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED,
- BM_SETCHECK};
+ BM_SETCHECK, MessageButtons, MessageIcons};
 
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
   WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, RECT, SW_RESTORE,
   SWP_NOMOVE, SWP_NOZORDER, POINT, LONG, SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER,
-  WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE};   
+  WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, MB_ABORTRETRYIGNORE,
+  MB_CANCELTRYCONTINUE, MB_OK, MB_OKCANCEL, MB_RETRYCANCEL, MB_YESNO, MB_YESNOCANCEL,
+  MB_ICONEXCLAMATION, MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONSTOP};   
 
 use user32::{SetWindowLongPtrW, GetWindowLongPtrW, EnumChildWindows, ShowWindow, 
   IsZoomed, IsIconic, GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, 
@@ -103,7 +105,26 @@ pub fn get_window_text<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { un
 pub fn show_message<ID: Eq+Hash+Clone>(handle: HWND, params: ActMessageParams) -> ActionReturn<ID> { unsafe {
     let text = to_utf16(params.content);
     let title = to_utf16(params.title);
-    MessageBoxW(handle, text.as_ptr(), title.as_ptr(), params.type_ as UINT);
+
+    let buttons = match params.buttons {
+        MessageButtons::AbortTryIgnore => MB_ABORTRETRYIGNORE,
+        MessageButtons::CancelTryContinue => MB_CANCELTRYCONTINUE,
+        MessageButtons::Ok => MB_OK,
+        MessageButtons::OkCancel => MB_OKCANCEL,
+        MessageButtons::RetryCancel => MB_RETRYCANCEL,
+        MessageButtons::YesNo => MB_YESNO,
+        MessageButtons::YesNoCancel => MB_YESNOCANCEL
+    };
+
+    let icons = match params.icons {
+        MessageIcons::Error => MB_ICONSTOP,
+        MessageIcons::Info => MB_ICONINFORMATION,
+        MessageIcons::None => 0,
+        MessageIcons::Question => MB_ICONQUESTION,
+        MessageIcons::Warning => MB_ICONEXCLAMATION
+    };
+
+    MessageBoxW(handle, text.as_ptr(), title.as_ptr(), buttons | icons);
     ActionReturn::None
 }}
 

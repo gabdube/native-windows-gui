@@ -5,13 +5,14 @@
     No controls implement all Actions.
 */
 use std::hash::Hash;
-use constants::{CheckState, WindowDisplay};
+use constants::{CheckState, WindowDisplay, MessageButtons, MessageIcons};
 
 #[derive(PartialEq)]
 pub struct ActMessageParams {
     pub title: String,
     pub content: String,
-    pub type_: u32
+    pub buttons: MessageButtons,
+    pub icons: MessageIcons
 }
 
 /**
@@ -113,17 +114,19 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
 
 pub mod helper {
     use actions::{Action, ActMessageParams};
+    use constants::{MessageButtons, MessageIcons};
     use std::hash::Hash;
 
     /**
         Action helper for the Message action.
     */
     #[inline(always)]
-    pub fn message<ID: Eq+Clone+Hash, S: Into<String>>(title: S, content: S, type_: u32) -> Action<ID> {
+    pub fn message<ID: Eq+Clone+Hash, S: Into<String>>(title: S, content: S, buttons: MessageButtons, icons: MessageIcons) -> Action<ID> {
         Action::Message(Box::new(ActMessageParams{
             title: title.into(),
             content: content.into(),
-            type_: type_
+            buttons: buttons,
+            icons: icons
         }))
     }
 
