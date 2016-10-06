@@ -5,7 +5,7 @@
     No controls implement all Actions.
 */
 use std::hash::Hash;
-use constants::{CheckState, WindowDisplay, MessageButtons, MessageIcons};
+use constants::{CheckState, WindowDisplay, MessageButtons, MessageIcons, ControlType, MessageChoice};
 
 #[derive(PartialEq)]
 pub struct ActMessageParams {
@@ -107,7 +107,8 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     ItemIndex(u32),
     ItemCount(u32),
     StringCollection(Box<Vec<String>>),
-    ControlType(::constants::ControlType),
+    ControlType(ControlType),
+    MessageChoice(MessageChoice),
     NotSupported
 }
 

@@ -13,7 +13,8 @@ use std::hash::Hash;
 
 use actions::{ActionReturn, ActMessageParams};
 use constants::{Error, WindowDisplay, CheckState, BM_GETSTATE, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED,
- BM_SETCHECK, MessageButtons, MessageIcons};
+ BM_SETCHECK, MessageButtons, MessageIcons, MessageChoice, IDABORT, IDCANCEL, IDCONTINUE, IDIGNORE, IDNO,
+ IDOK, IDRETRY, IDTRYAGAIN, IDYES};
 
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
   WS_CAPTION, WS_SYSMENU, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, RECT, SW_RESTORE,
@@ -124,8 +125,23 @@ pub fn show_message<ID: Eq+Hash+Clone>(handle: HWND, params: ActMessageParams) -
         MessageIcons::Warning => MB_ICONEXCLAMATION
     };
 
-    MessageBoxW(handle, text.as_ptr(), title.as_ptr(), buttons | icons);
-    ActionReturn::None
+    let answer = MessageBoxW(handle, text.as_ptr(), title.as_ptr(), buttons | icons);
+    if answer == 0 {
+        ActionReturn::Error(Error::UNKNOWN)
+    } else {
+        ActionReturn::MessageChoice( match answer {
+            IDABORT => MessageChoice::Abort,
+            IDCANCEL => MessageChoice::Cancel,
+            IDCONTINUE => MessageChoice::Continue,
+            IDIGNORE => MessageChoice::Ignore,
+            IDNO => MessageChoice::No,
+            IDOK => MessageChoice::Ok,
+            IDRETRY => MessageChoice::Retry,
+            IDTRYAGAIN => MessageChoice::TryAgain,
+            IDYES => MessageChoice::Yes,
+            _ => MessageChoice::Cancel
+        })
+    }
 }}
 
 /**

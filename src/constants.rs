@@ -30,7 +30,7 @@ pub enum ControlType {
     Window
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum MessageButtons {
     AbortTryIgnore,
     CancelTryContinue,
@@ -41,13 +41,26 @@ pub enum MessageButtons {
     YesNoCancel,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum MessageIcons {
     Warning,
     Info,
     Question,
     Error,
     None
+}
+
+#[derive(PartialEq, Debug)]
+pub enum MessageChoice {
+    Abort,
+    Cancel,
+    Continue,
+    Ignore,
+    No,
+    Ok,
+    Retry,
+    TryAgain,
+    Yes
 }
 
 // Event enums
@@ -114,3 +127,13 @@ pub const CBN_CLOSEUP: u16 = 8;
 pub const CBN_DROPDOWN: u16 = 7;
 pub const CBN_SETFOCUS: u16 = 3;
 pub const CBN_KILLFOCUS: u16 = 4;
+
+pub const IDABORT: i32 = 3;
+pub const IDCANCEL: i32 = 2;
+pub const IDCONTINUE: i32 = 11;
+pub const IDIGNORE: i32 = 5;
+pub const IDNO: i32 = 7;
+pub const IDOK: i32 = 1;
+pub const IDRETRY: i32 = 4;
+pub const IDTRYAGAIN: i32 = 10;
+pub const IDYES: i32 = 6;
