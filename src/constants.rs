@@ -27,7 +27,8 @@ pub enum ControlType {
     GroupBox,
     RadioButton,
     TextInput,
-    Window
+    Window,
+    Label,
 }
 
 #[derive(PartialEq, Debug)]
@@ -138,3 +139,9 @@ pub const IDOK: i32 = 1;
 pub const IDRETRY: i32 = 4;
 pub const IDTRYAGAIN: i32 = 10;
 pub const IDYES: i32 = 6;
+
+pub const SS_NOTIFY: u32 = 256;
+pub const SS_LEFT: u32 = 0;
+pub const SS_RIGHT: u32 = 2;
+pub const SS_CENTER: u32 = 1;
+pub const SS_SIMPLE: u32 = 11;
