@@ -18,7 +18,7 @@ use events::Event;
 
 use winapi::{HWND, BS_NOTIFY, CB_RESETCONTENT, CB_ADDSTRING, CB_DELETESTRING,
  CB_FINDSTRINGEXACT, CB_GETCOUNT, CB_GETCURSEL, CB_SETCURSEL, LPARAM, WPARAM,
- CB_SHOWDROPDOWN, CB_GETDROPPEDSTATE, CB_GETLBTEXT, CB_GETLBTEXTLEN};
+ CB_SHOWDROPDOWN, CB_GETDROPPEDSTATE, CB_GETLBTEXT, CB_GETLBTEXTLEN, CB_INSERTSTRING};
 
 /**
     Configuration properties to create simple button
@@ -92,13 +92,15 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
                 Action::GetDropdownVisibility => get_combobox_dropdown_visibility(handle),
                 Action::SetDropdownVisibility(s) => show_combobox_dropdown(handle, s),
                 
-                Action::AddString(s) => add_string_item(handle, s.as_ref()),
-                Action::FindString(s) => find_string_item(handle, s.as_ref()),
-                Action::RemoveString(s) => remove_string_item(handle, s.as_ref()),
-                Action::GetStringCollection => get_collection(handle),
-                Action::SetStringCollection(c) => set_collection(handle, c.as_ref()),
+                Action::AddString(s) => add_string_item(handle, &s),
+                Action::FindString(s) => find_string_item(handle, &s),
+                Action::RemoveString(s) => remove_string_item(handle, &s),
+                Action::InsertString(i) => insert_string_item(handle, i.0, &(*i).1),
+                Action::GetIndexedString(i) => get_item(handle, i),
 
-                Action::GetIndexedItem(i) => get_item(handle, i),
+                Action::GetStringCollection => get_collection(handle),
+                Action::SetStringCollection(c) => set_collection(handle, &c),
+                
                 Action::RemoveIndexedItem(i) => remove_item(handle, i),
                 Action::CountItems => count_item(handle),
 
@@ -326,6 +328,17 @@ fn set_collection<ID: Eq+Clone+Hash>(handle: HWND, collection: &Vec<String>) -> 
     for i in collection.iter() {
         add_string_item::<ID>(handle, i);
     }
+
+    ActionReturn::None
+}
+
+/**
+    Insert a string in the combobox collection
+*/
+fn insert_string_item<ID: Eq+Clone+Hash>(handle: HWND, index: u32, item: &String) -> ActionReturn<ID> {
+    let item = to_utf16_ref(item);
+    let ptr: LPARAM = unsafe{ mem::transmute(item.as_ptr()) };
+    send_message(handle, CB_INSERTSTRING, index as WPARAM, ptr);
 
     ActionReturn::None
 }

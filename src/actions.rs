@@ -73,12 +73,13 @@ pub enum Action<ID: Eq+Clone+Hash> {
     AddString(Box<String>),
     RemoveString(Box<String>),
     FindString(Box<String>),
+    InsertString(Box<(u32, String)>),
+    GetIndexedString(u32),
     
     GetStringCollection,
     SetStringCollection(Box<Vec<String>>),
 
     CountItems,
-    GetIndexedItem(u32),
     RemoveIndexedItem(u32),
 
     Undo,
@@ -209,6 +210,14 @@ pub mod helper {
     #[inline(always)]
     pub fn remove_placeholder<ID: Eq+Clone+Hash>() -> Action<ID> {
         Action::SetPlaceholder(None)
+    }
+
+    /**
+        Action helper for insert string
+    */
+    #[inline(always)]
+    pub fn insert_string<ID: Eq+Clone+Hash, S: Into<String>>(i: u32, s: S) -> Action<ID> {
+        Action::InsertString(Box::new((i, s.into())))
     }
 
 }
