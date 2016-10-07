@@ -65,7 +65,8 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
 
     fn supported_events(&self) -> Vec<Event> {
         vec![Event::Focus, Event::MouseUp, Event::MouseDown, Event::Removed,
-             Event::MenuClose, Event::MenuOpen]
+             Event::MenuClose, Event::MenuOpen, Event::SelectionChanged,
+             Event::ValueChanged]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {

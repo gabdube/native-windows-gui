@@ -1,10 +1,13 @@
 use std::mem;
 use std::hash::Hash;
+use std::ffi::OsString;
+use std::os::windows::ffi::OsStringExt;
 
-use controls::base::{get_handle_data};
+use controls::base::{get_handle_data, send_message};
 use events::{Event, EventCallback};
 use ::constants::{MOD_MOUSE_CTRL, MOD_MOUSE_SHIFT, BTN_MOUSE_MIDDLE, BTN_MOUSE_RIGHT,
- BTN_MOUSE_LEFT, CBN_CLOSEUP, CBN_DROPDOWN, CBN_SETFOCUS, CBN_KILLFOCUS, ControlType};
+ BTN_MOUSE_LEFT, CBN_CLOSEUP, CBN_DROPDOWN, CBN_SETFOCUS, CBN_KILLFOCUS, ControlType,
+ CBN_SELCHANGE};
 
 use winapi::{HWND, UINT, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT,
   WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
@@ -20,7 +23,7 @@ use comctl32::{DefSubclassProc};
 
     Command ids are not unique, so the type of the control must be passed.
 */
-fn map_command<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
+fn map_command<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Vec<Event>, HWND) {
     let command = HIWORD(w as u32);
     let owner: HWND = unsafe{ mem::transmute(l) };
     let data = unsafe{ get_handle_data::<::WindowData<ID>>(owner) };
@@ -30,27 +33,28 @@ fn map_command<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM)
         match data._type {
             ControlType::Button | ControlType::CheckBox | ControlType::GroupBox | ControlType::RadioButton => {
                 match command {
-                    BN_SETFOCUS  | BN_KILLFOCUS => (Event::Focus, owner),
-                    BN_CLICKED => (Event::Click, owner),
-                    _ => (Event::Unknown, handle)
+                    BN_SETFOCUS  | BN_KILLFOCUS => (vec![Event::Focus], owner),
+                    BN_CLICKED => (vec![Event::Click], owner),
+                    _ => (vec![Event::Unknown], handle)
                 }},
             ControlType::TextInput => {
                 match command {
-                    EN_SETFOCUS  | EN_KILLFOCUS => (Event::Focus, owner),
-                    EN_CHANGE => (Event::ValueChanged, owner),
-                    EN_MAXTEXT => (Event::MaxValue, owner),
-                    _ => (Event::Unknown, handle)
+                    EN_SETFOCUS  | EN_KILLFOCUS => (vec![Event::Focus], owner),
+                    EN_CHANGE => (vec![Event::ValueChanged], owner),
+                    EN_MAXTEXT => (vec![Event::MaxValue], owner),
+                    _ => (vec![Event::Unknown], handle)
                 }},
             ControlType::ComboBox => {
                 match command {
-                    CBN_SETFOCUS  | CBN_KILLFOCUS => (Event::Focus, owner),
-                    CBN_CLOSEUP => (Event::MenuClose, owner),
-                    CBN_DROPDOWN => (Event::MenuOpen, owner),
-                    _ => (Event::Unknown, handle)
+                    CBN_SETFOCUS  | CBN_KILLFOCUS => (vec![Event::Focus], owner),
+                    CBN_CLOSEUP => (vec![Event::MenuClose], owner),
+                    CBN_DROPDOWN => (vec![Event::MenuOpen], owner),
+                    CBN_SELCHANGE => (vec![Event::ValueChanged, Event::SelectionChanged], owner),
+                    _ => (vec![Event::Unknown], handle)
                 }},
-            _ => (Event::Unknown, handle)
+            _ => (vec![Event::Unknown], handle)
         },
-        None => (Event::Unknown, handle) // Should never happens, but who knows???
+        None => (vec![Event::Unknown], handle) // Should never happens, but who knows???
     }
 }
 
@@ -58,14 +62,14 @@ fn map_command<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM)
     Map system events to application events
 */
 #[inline(always)]
-fn map_system_event<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Event, HWND) {
+fn map_system_event<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM) -> (Vec<Event>, HWND) {
     match evt {
         WM_COMMAND => map_command::<ID>(handle, evt, w, l), // WM_COMMAND is a special snowflake, it can represent hundreds of different commands
-        WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => (Event::MouseUp, handle),
-        WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => (Event::MouseDown, handle),
-        WM_ACTIVATEAPP => (Event::Focus, handle),
-        WM_DESTROY => (Event::Removed, handle),
-        _ => (Event::Unknown, handle)
+        WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => (vec![Event::MouseUp], handle),
+        WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => (vec![Event::MouseDown], handle),
+        WM_ACTIVATEAPP => (vec![Event::Focus], handle),
+        WM_DESTROY => (vec![Event::Removed], handle),
+        _ => (vec![Event::Unknown], handle)
     }
 }
 
@@ -87,11 +91,34 @@ fn handle_btn(msg: UINT, w: WPARAM, l: LPARAM) -> (i32, i32, u32, u32) {
 }
 
 /**
+    Get the index and the selected text data of a combobox
+*/
+fn get_combobox_selection(handle: HWND) -> (u32, String) {
+    use winapi::{CB_GETCURSEL, CB_GETLBTEXT, CB_GETLBTEXTLEN};
+    let selected = send_message(handle, CB_GETCURSEL, 0, 0) as u32;
+
+    let buffer_length = send_message(handle, CB_GETLBTEXTLEN, selected as WPARAM, 0) as usize;
+    let mut buffer: Vec<u16> = Vec::with_capacity(buffer_length);
+    let ptr: LPARAM;
+    unsafe { 
+        buffer.set_len(buffer_length); 
+        ptr = mem::transmute(buffer.as_mut_ptr());
+    }
+
+    send_message(handle, CB_GETLBTEXT, selected as WPARAM, ptr);
+    let end_index = buffer.iter().enumerate().find(|&(index, i)| *i == 0).unwrap_or((buffer_length, &0)).0;
+    let text = OsString::from_wide(&(buffer.as_slice()[0..end_index]));
+    let text = text.into_string().unwrap_or("ERROR!".to_string());
+
+    (selected, text)
+}
+
+/**
     Execute an event
 */
 #[inline(always)]
-fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, caller: &ID, msg: UINT, w: WPARAM, l: LPARAM) {
-    
+fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, data: &::WindowData<ID>, handle: HWND, msg: UINT, w: WPARAM, l: LPARAM) {
+    let caller = &data.id;
     match ec {
         &EventCallback::MouseUp(ref c) | &EventCallback::MouseDown(ref c)  => {
             let (x, y, btn, modifiers) = handle_btn(msg, w, l);
@@ -109,13 +136,20 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
             };
             c(ui, caller, focus);
         },
+        &EventCallback::SelectionChanged(ref c) => {
+            let (index, value) = match &data._type {
+                &ControlType::ComboBox => get_combobox_selection(handle),
+                _ => unreachable!()
+            };
+            c(ui, caller, index, value);
+        }
         //_ => {}
     }
 }
 
 #[inline(always)]
 unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) {
-    let (event, handle) = map_system_event::<ID>(hwnd, msg, w, l);
+    let (events, handle) = map_system_event::<ID>(hwnd, msg, w, l);
 
     // If the window data was initialized, eval callbacks
     if let Some(data) = get_handle_data::<::WindowData<ID>>(handle) {
@@ -123,11 +157,14 @@ unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: 
         let mut ui = ::Ui{controls: data.controls};
 
         // Eval the callbacks
-        if let Some(functions) = data.callbacks.get(&event) {
-            for f in functions.iter() {
-                dispatch_event::<ID>(f, &mut ui, &data.id, msg, w, l); 
+        for event in events.iter() {
+            if let Some(functions) = data.callbacks.get(&event) {
+                for f in functions.iter() {
+                    dispatch_event::<ID>(f, &mut ui, &data, handle, msg, w, l); 
+                }
             }
         }
+        
         
         mem::forget(ui);
     }

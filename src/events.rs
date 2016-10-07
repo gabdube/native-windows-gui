@@ -6,6 +6,7 @@ use std::hash::Hash;
 
 pub type Ef0<ID> = Box<Fn(&mut ::Ui<ID>, &ID)>;
 pub type Ef1<ID, A> = Box<Fn(&mut ::Ui<ID>, &ID, A)>;
+pub type Ef2<ID, A, B> = Box<Fn(&mut ::Ui<ID>, &ID, A, B)>;
 pub type Ef4<ID, A, B, C, D> = Box<Fn(&mut ::Ui<ID>, &ID, A, B, C, D)>;
 
 #[derive(Hash, PartialEq, Eq, Clone)]
@@ -19,6 +20,7 @@ pub enum Event {
     Removed,
     MenuOpen,
     MenuClose,
+    SelectionChanged,
     Unknown,
     Last
 }
@@ -32,7 +34,8 @@ pub enum EventCallback<ID: Eq+Hash+Clone> {
     ValueChanged(Ef0<ID>),
     MenuOpen(Ef0<ID>),
     MenuClose(Ef0<ID>),
-    MaxValue(Ef0<ID>)
+    MaxValue(Ef0<ID>),
+    SelectionChanged(Ef2<ID, u32, String>),
 }
 
 /**
@@ -49,5 +52,6 @@ pub fn map_callback<ID: Eq+Hash+Clone>(cb: &EventCallback<ID>) -> Event {
         &EventCallback::Removed(_) => Event::Removed,
         &EventCallback::MenuOpen(_) => Event::MenuOpen,
         &EventCallback::MenuClose(_) => Event::MenuClose,
+        &EventCallback::SelectionChanged(_) => Event::SelectionChanged,
     }
 }

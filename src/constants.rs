@@ -127,6 +127,7 @@ pub const CBN_CLOSEUP: u16 = 8;
 pub const CBN_DROPDOWN: u16 = 7;
 pub const CBN_SETFOCUS: u16 = 3;
 pub const CBN_KILLFOCUS: u16 = 4;
+pub const CBN_SELCHANGE: u16 = 1;
 
 pub const IDABORT: i32 = 3;
 pub const IDCANCEL: i32 = 2;
