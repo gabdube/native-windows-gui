@@ -10,7 +10,8 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
  set_window_visibility, get_control_type};
 use actions::{Action, ActionReturn};
-use constants::{ControlType, SS_GRAYRECT, SS_GRAYFRAME, SS_NOTIFY};
+use constants::{ControlType, FrameBorderStyle, FrameBorderColor, SS_NOTIFY,
+ SS_SUNKEN, SS_BLACKFRAME, SS_GRAYFRAME, SS_WHITEFRAME};
 use events::Event;
 
 use winapi::{HWND};
@@ -27,18 +28,33 @@ pub struct Frame<ID: Eq+Clone+Hash> {
     pub size: (u32, u32),
     pub position: (i32, i32),
     pub parent: ID,
+    pub border_style: FrameBorderStyle,
+    pub border_color: FrameBorderColor
 }
 
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Frame<ID> {
 
     fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
+
+        let style = match self.border_style {
+            FrameBorderStyle::Sunken => SS_SUNKEN,
+            FrameBorderStyle::Simple => 0
+        };
+
+        let color = match self.border_color {
+            FrameBorderColor::Parent => 0,
+            FrameBorderColor::Black => SS_BLACKFRAME,
+            FrameBorderColor::Gray => SS_GRAYFRAME,
+            FrameBorderColor::White => SS_WHITEFRAME
+        };
+
         let base = WindowBase::<ID> {
             text: "".to_string(),
             size: self.size.clone(),
             position: self.position.clone(),
             visible: true,
             resizable: false,
-            extra_style: SS_NOTIFY | SS_GRAYFRAME,
+            extra_style: SS_NOTIFY | style | color,
             class: Some("STATIC".to_string()),
             parent: Some(self.parent.clone())
         };

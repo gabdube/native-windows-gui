@@ -65,6 +65,20 @@ pub enum MessageChoice {
     Yes
 }
 
+#[derive(PartialEq, Debug)]
+pub enum FrameBorderStyle {
+    Simple,
+    Sunken
+}
+
+#[derive(PartialEq, Debug)]
+pub enum FrameBorderColor {
+    Parent,
+    Black,
+    White,
+    Gray
+}
+
 // Event enums
 
 #[derive(PartialEq, Debug)]
@@ -146,7 +160,9 @@ pub const SS_LEFT: u32 = 0;
 pub const SS_RIGHT: u32 = 2;
 pub const SS_CENTER: u32 = 1;
 pub const SS_SIMPLE: u32 = 11;
-pub const SS_GRAYRECT: u32 = 5;
+pub const SS_SUNKEN: u32 = 4096;
+pub const SS_BLACKFRAME: u32 = 7;
 pub const SS_GRAYFRAME: u32 = 8;
+pub const SS_WHITEFRAME: u32 = 9;
 
 pub const STN_CLICKED: u16 = 0;

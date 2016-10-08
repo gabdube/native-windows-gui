@@ -10,7 +10,7 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
  set_window_visibility, get_control_type};
 use actions::{Action, ActionReturn};
-use constants::{HTextAlign, ControlType, SS_NOTIFY, SS_LEFT, SS_RIGHT, SS_CENTER, SS_SIMPLE};
+use constants::{HTextAlign, ControlType, SS_NOTIFY, SS_LEFT, SS_RIGHT, SS_CENTER};
 use events::Event;
 
 use winapi::{HWND};
