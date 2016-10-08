@@ -26,7 +26,7 @@ use user32::{GetMessageW, DispatchMessageW, TranslateMessage};
 
 pub type ActionEvaluator<ID> = Box<Fn(&Ui<ID>, &ID, HWND, actions::Action<ID>) -> actions::ActionReturn<ID>>;
 type ControlCollection<ID> = HashMap<ID, (HWND, ActionEvaluator<ID>) >;
-type CallbackCollection<ID> = HashMap<events::Event, Vec<events::EventCallback<ID>>>;
+type CallbackCollection<ID> = HashMap<events::Event, Vec<(ID, events::EventCallback<ID>)>>;
 
 /**
     Structure stored in every window.
@@ -136,19 +136,54 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     }
 
     /**
-        Add a callback to a control. Return `true` if the callback was added
-        successfully, `false` if `cont` was not found in ui.
+        Add a callback to a control. Return Ok if the callback was added
+        successfully, Err(reason) if `cont` was not found in ui.
+
+        * cont : ID of the control to add the event to
+        * name : Name of the event (used for unbinding)
+        * cb   : The callback
     */
-    pub fn bind(&self, cont: ID, cb: events::EventCallback<ID>) -> Result<(), Error> {
+    pub fn bind(&self, cont: ID, name: ID, cb: events::EventCallback<ID>) -> Result<(), Error> {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
         if let Some(&(handle, _)) = controls.get(&cont) {
             let event = events::map_callback(&cb);
             let data: &mut WindowData<ID> = controls::get_handle_data(handle);
             if let Some(functions) = data.callbacks.get_mut(&event) {
-                functions.push(cb);
-                Ok(())
+                if functions.iter().any(|&(ref id, _)| hash(id) == hash(&name)) {
+                    Err(Error::CALLBACK_ID_EXISTS) 
+                } else {
+                    functions.push((name, cb));
+                    Ok(())
+                }
             } else {
-                Err(Error::CALLBACK_NOT_SUPPORTED) // Callback not supported
+                Err(Error::CALLBACK_NOT_SUPPORTED) 
+            }
+        } else {
+            Err(Error::CONTROL_NOT_FOUND) 
+        }
+    }
+
+    /**
+        Remove a callback from a control. Return Ok if the callback was added
+        successfully, Err(reason) if `cont` or `name` were not found in ui.
+
+        * cont  : ID of the control to remove the event from
+        * name  : Name of the event to unbind
+        * event : Event type to unbind
+    */
+    pub fn unbind(&self, cont: ID, name: ID, event: events::Event) -> Result<(), Error> {
+        let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
+        if let Some(&(handle, _)) = controls.get(&cont) {
+            let data: &mut WindowData<ID> = controls::get_handle_data(handle);
+            if let Some(functions) = data.callbacks.get_mut(&event) {
+                if let Some(pos) = functions.iter().position(|&(ref id, _)| hash(id) == hash(&name)) {
+                    functions.remove(pos);
+                    Ok(())
+                } else {
+                    Err(Error::CALLBACK_ID_NOT_FOUND)
+                }
+            } else {
+                Err(Error::CALLBACK_NOT_SUPPORTED) 
             }
         } else {
             Err(Error::CONTROL_NOT_FOUND) 
@@ -192,3 +227,12 @@ pub fn dispatch_events() { unsafe{
     }
 }}
 
+/**
+    Hash a single parameter. Used to compare events name, which do not use a hashmap.
+*/
+fn hash<T: Hash>(t: &T) -> u64 {
+    use std::hash::{SipHasher, Hasher};
+    let mut s = SipHasher::new();
+    t.hash(&mut s);
+    s.finish()
+}

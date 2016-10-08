@@ -164,7 +164,7 @@ unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: 
         // Eval the callbacks
         for event in events.iter() {
             if let Some(functions) = data.callbacks.get(&event) {
-                for f in functions.iter() {
+                for &(_, ref f) in functions.iter() {
                     dispatch_event::<ID>(f, &mut ui, &data, handle, msg, w, l); 
                 }
             }

@@ -2,7 +2,7 @@
 
 extern crate native_windows_gui as nwg;
 use nwg::constants::Error;
-use nwg::events::EventCallback;
+use nwg::events::{EventCallback, Event};
 use nwg::actions::Action;
 
 fn setup_window(ui: &mut nwg::Ui<&'static str>) {
@@ -37,12 +37,12 @@ fn buttons() {
     assert!(r.err().unwrap() == Error::CONTROL_EXISTS);
 
     // Cannot bind event to unused names
-    let r = ui.bind("Haha", EventCallback::Click(Box::new(|ui, caller| {} )));
+    let r = ui.bind("Haha", "...", EventCallback::Click(Box::new(|ui, caller| {} )));
     assert!(r.is_err());
     assert!(r.err().unwrap() == Error::CONTROL_NOT_FOUND);
 
     // Cannot bind unsupported callbacks
-    let r = ui.bind("MainWindow", EventCallback::Click(Box::new(|ui, caller| {} )));
+    let r = ui.bind("MainWindow", "...", EventCallback::Click(Box::new(|ui, caller| {} )));
     assert!(r.is_err());
     assert!(r.err().unwrap() == Error::CALLBACK_NOT_SUPPORTED);
 
@@ -51,4 +51,13 @@ fn buttons() {
     assert!(r.is_err());
     assert!(r.err().unwrap() == Error::CONTROL_NOT_FOUND);
 
+    // Cannot bind two events of the same type  with the same name
+    ui.bind("MainWindow", "...", EventCallback::Removed( Box::new(|ui, caller|{})) ).unwrap();
+    let r = ui.bind("MainWindow", "...", EventCallback::Removed( Box::new(|ui, caller|{})) );
+    assert!(r.is_err());
+    assert!(r.err().unwrap() == Error::CALLBACK_ID_EXISTS);
+
+    // Unbind and rebind should succeed.
+    ui.unbind("MainWindow", "...", Event::Removed).unwrap();
+    ui.bind("MainWindow", "...", EventCallback::Removed( Box::new(|ui, caller|{})) ).unwrap();
 }

@@ -69,14 +69,14 @@ fn main() {
 
     create_controls(&mut ui);
 
-    ui.bind("MainWindow", EventCallback::MouseUp(Box::new(|ui, caller, x, y, btn, modifiers| {
+    ui.bind("MainWindow", "Debug_Mouse_Events", EventCallback::MouseUp(Box::new(|ui, caller, x, y, btn, modifiers| {
         assert!("MainWindow" == *caller);
         println!("Left mouse button pressed: {:?}", (btn & nwgc::BTN_MOUSE_LEFT) != 0 );
         println!("Ctrl pressed: {:?}", (modifiers & nwgc::MOD_MOUSE_CTRL) != 0 );
         println!("Mouse position: {:?} {:?}", x, y);
     }))).unwrap();
 
-    ui.bind("HelloBtn", EventCallback::Click(Box::new(|ui, caller| {
+    ui.bind("HelloBtn", "Say_Hello", EventCallback::Click(Box::new(|ui, caller| {
         assert!("HelloBtn" == *caller);
         ui.exec("MainWindow", 
                     nwga::message("Hello", "Hello World!", nwgc::MessageButtons::YesNo, nwgc::MessageIcons::Warning)
@@ -88,7 +88,7 @@ fn main() {
         }
     }))).unwrap();
 
-    ui.bind("MoveBtn", EventCallback::Click(Box::new(|ui, caller| {
+    ui.bind("MoveBtn", "Move_Button", EventCallback::Click(Box::new(|ui, caller| {
         if let ActionReturn::Position(x,y) = ui.exec("MoveBtn", Action::GetPosition).unwrap() {
             if x == 10 {
                 ui.exec(caller, Action::SetPosition(390, 65)).unwrap();
@@ -98,7 +98,7 @@ fn main() {
         }
     }))).unwrap();
 
-    ui.bind("ResizeBtn", EventCallback::Click(Box::new(|ui, caller| {
+    ui.bind("ResizeBtn", "Resize_Button", EventCallback::Click(Box::new(|ui, caller| {
         if let ActionReturn::Size(w,h) = ui.exec("ResizeBtn", Action::GetSize).unwrap() {
             if w == 100 {
                 ui.exec(caller, Action::SetSize(480, 50)).unwrap();
@@ -108,7 +108,7 @@ fn main() {
         }
     }))).unwrap();
 
-    ui.bind("ParentBtn", EventCallback::Click(Box::new(|ui, caller| {
+    ui.bind("ParentBtn", "Get_Parent", EventCallback::Click(Box::new(|ui, caller| {
         if let ActionReturn::Parent(parent) = ui.exec(caller, Action::GetParent).unwrap() {
             assert!("MainWindow" == *parent);
             let parent = format!("{:?} is my parent!", parent);
