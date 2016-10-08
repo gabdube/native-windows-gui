@@ -29,6 +29,7 @@ pub enum ControlType {
     TextInput,
     Window,
     Label,
+    Frame,
 }
 
 #[derive(PartialEq, Debug)]
@@ -145,3 +146,7 @@ pub const SS_LEFT: u32 = 0;
 pub const SS_RIGHT: u32 = 2;
 pub const SS_CENTER: u32 = 1;
 pub const SS_SIMPLE: u32 = 11;
+pub const SS_GRAYRECT: u32 = 5;
+pub const SS_GRAYFRAME: u32 = 8;
+
+pub const STN_CLICKED: u16 = 0;

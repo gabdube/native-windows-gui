@@ -7,7 +7,7 @@ use controls::base::{get_handle_data, send_message};
 use events::{Event, EventCallback};
 use ::constants::{MOD_MOUSE_CTRL, MOD_MOUSE_SHIFT, BTN_MOUSE_MIDDLE, BTN_MOUSE_RIGHT,
  BTN_MOUSE_LEFT, CBN_CLOSEUP, CBN_DROPDOWN, CBN_SETFOCUS, CBN_KILLFOCUS, ControlType,
- CBN_SELCHANGE};
+ CBN_SELCHANGE, STN_CLICKED};
 
 use winapi::{HWND, UINT, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT,
   WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
@@ -50,6 +50,11 @@ fn map_command<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LPARAM)
                     CBN_CLOSEUP => (vec![Event::MenuClose], owner),
                     CBN_DROPDOWN => (vec![Event::MenuOpen], owner),
                     CBN_SELCHANGE => (vec![Event::ValueChanged, Event::SelectionChanged], owner),
+                    _ => (vec![Event::Unknown], handle)
+                }},
+            ControlType::Label => {
+                match command {
+                    STN_CLICKED => (vec![Event::Click], owner),
                     _ => (vec![Event::Unknown], handle)
                 }},
             _ => (vec![Event::Unknown], handle)

@@ -12,6 +12,7 @@ pub mod radiobutton;
 pub mod textinput;
 pub mod combobox;
 pub mod label;
+pub mod frame;
 
 pub use controls::window::Window;
 pub use controls::button::Button;
@@ -21,6 +22,7 @@ pub use controls::radiobutton::RadioButton;
 pub use controls::textinput::TextInput;
 pub use controls::combobox::ComboBox;
 pub use controls::label::Label;
+pub use controls::frame::Frame;
 
 use std::hash::Hash;
 use winapi::HWND;
