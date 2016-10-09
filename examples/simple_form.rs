@@ -2,8 +2,10 @@ extern crate native_windows_gui as nwg;
 
 use nwg::Ui;
 use nwg::controls::{Label, Window, TextInput, GroupBox, RadioButton, ComboBox, CheckBox, Button};
-use nwg::actions::Action;
-use nwg::constants::{HTextAlign, VTextAlign};
+use nwg::actions::{Action, ActionReturn};
+use nwg::actions::helper as actions_help;
+use nwg::events::EventCallback;
+use nwg::constants::{HTextAlign, VTextAlign, MessageChoice, MessageButtons, MessageIcons, CheckState};
 
 fn col(c: &[&'static str]) -> Vec<String> {
     let mut string_col: Vec<String> = Vec::with_capacity(c.len());
@@ -179,13 +181,72 @@ fn setup_controls(ui: &mut Ui<&'static str>) {
     ui.new_control("Cancel", cancel_button).unwrap();
     ui.new_control("Submit", submit_button).unwrap();
 
+    // Set default values
+    ui.exec("ExpLess", Action::SetCheckState(CheckState::Checked)).unwrap();
+
     ui.exec("MainWindow", Action::SetVisibility(true)).unwrap();
+}
+
+fn is_blank(ui: &Ui<&'static str>, control: &'static str, attr: &'static str) -> bool {
+    if let Ok(ActionReturn::Text(name)) = ui.exec(control, Action::GetText) {
+        if name.len() == 0 {
+            let msg = actions_help::message(
+              "Error!", format!("{} must not be blank", attr),
+              MessageButtons::Ok, MessageIcons::Error);
+
+            ui.exec("MainWindow", msg).unwrap();
+            return true;
+        }
+    }
+
+    false
+}
+
+#[allow(unused_variables)]
+fn submit_form(ui: &mut Ui<&'static str>, caller: &&'static str) {
+
+    // Validate name / profession / gender
+    if is_blank(ui, "NameInput", "Name") || is_blank(ui, "JobInput", "Profession") || is_blank(ui, "GenderChoice", "Gender") {
+        return
+    }
+
+    // Check experience
+    if let Ok(ActionReturn::CheckState(CheckState::Unchecked)) = ui.exec("ExpAlot", Action::GetCheckState) {
+        let msg = actions_help::message(
+              "Error!", "You must have at least 5 years of experience with angular 2.0 sorry",
+              MessageButtons::Ok, MessageIcons::Error);
+
+        ui.exec("MainWindow", msg).unwrap();
+        ui.exec("MainWindow", Action::Close).unwrap();
+        return;
+    }
+
+    let msg = actions_help::message(
+      "Thank you!", "Thank you ❤❤❤!\nWe will contact you shortly if you are selected!",
+      MessageButtons::Ok, MessageIcons::None );
+
+    ui.exec("MainWindow", msg).unwrap();
+    ui.exec("MainWindow", Action::Close).unwrap();
 }
 
 fn main() {
     let mut ui: Ui<&'static str> = Ui::new();
 
     setup_controls(&mut ui);
+
+    ui.bind("Cancel", "Cancel_Form", EventCallback::Click(Box::new(|ui, _|{
+        let msg = actions_help::message(
+            "Warning!", "Do you really want to cancel the application?",
+             MessageButtons::YesNo, MessageIcons::Warning
+        );
+
+        if let Ok(ActionReturn::MessageChoice(MessageChoice::Yes)) = ui.exec("MainWindow", msg) {
+            ui.exec("MainWindow", Action::Close).unwrap();
+        }
+
+    }))).unwrap();
+
+    ui.bind("Submit", "Submit_Form", EventCallback::Click(Box::new(submit_form))).unwrap();
 
     nwg::dispatch_events();
 }

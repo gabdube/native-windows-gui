@@ -9,7 +9,7 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text, 
   get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
   set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
   set_window_visibility, get_window_display, set_window_display, get_window_children,
-  get_window_descendant, get_control_type};
+  get_window_descendant, get_control_type, close_window};
 use actions::{Action, ActionReturn};
 use events::Event;
 use constants::ControlType;
@@ -78,6 +78,8 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
                 Action::GetWindowDisplay => get_window_display(handle),
                 Action::SetWindowDisplay(d) => set_window_display(handle, d),
                 
+                Action::Close => close_window(handle),
+
                 _ => ActionReturn::NotSupported
             }            
         })

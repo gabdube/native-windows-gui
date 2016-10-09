@@ -24,6 +24,7 @@ pub enum Action<ID: Eq+Clone+Hash> {
     Reset,
     GetControlType,
     Undo,
+    Close,
         
     GetParent,
     SetParent(Option<Box<ID>>),
@@ -121,7 +122,7 @@ pub mod helper {
         Action helper for the Message action.
     */
     #[inline(always)]
-    pub fn message<ID: Eq+Clone+Hash, S: Into<String>>(title: S, content: S, buttons: MessageButtons, icons: MessageIcons) -> Action<ID> {
+    pub fn message<ID: Eq+Clone+Hash, S1: Into<String>, S2: Into<String>>(title: S1, content: S2, buttons: MessageButtons, icons: MessageIcons) -> Action<ID> {
         Action::Message(Box::new(ActMessageParams{
             title: title.into(),
             content: content.into(),

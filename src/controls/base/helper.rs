@@ -21,7 +21,7 @@ use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
   SWP_NOMOVE, SWP_NOZORDER, POINT, LONG, SWP_NOSIZE, GWL_STYLE, LONG_PTR, WS_BORDER,
   WS_THICKFRAME, BOOL, SW_SHOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, MB_ABORTRETRYIGNORE,
   MB_CANCELTRYCONTINUE, MB_OK, MB_OKCANCEL, MB_RETRYCANCEL, MB_YESNO, MB_YESNOCANCEL,
-  MB_ICONEXCLAMATION, MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONSTOP};   
+  MB_ICONEXCLAMATION, MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONSTOP, WM_CLOSE};   
 
 use user32::{SetWindowLongPtrW, GetWindowLongPtrW, EnumChildWindows, ShowWindow, 
   IsZoomed, IsIconic, GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, 
@@ -384,10 +384,18 @@ pub fn set_check_state<ID: Eq+Clone+Hash >(handle: HWND, state: CheckState) -> A
 /**
     Get the control type identifier of a control
 */
-pub fn get_control_type<ID: Eq+Clone+Hash >(handle: HWND ) -> ActionReturn<ID> { unsafe {
+pub fn get_control_type<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> { unsafe {
     if let Some(d) = get_handle_data::<::WindowData<ID>>(handle) {
         ActionReturn::ControlType(d._type.clone())
     } else {
         ActionReturn::Error(Error::UNKNOWN)
     }
 }}
+
+/**
+    Close a window
+*/
+pub fn close_window<ID: Eq+Clone+Hash >(handle: HWND) -> ActionReturn<ID> {
+    send_message(handle, WM_CLOSE, 0, 0);
+    ActionReturn::None
+}
