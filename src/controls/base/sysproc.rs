@@ -181,7 +181,7 @@ unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: 
 pub unsafe extern "system" fn sub_wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id_subclass: UINT_PTR, dref: DWORD_PTR) -> LRESULT {
     handle_events::<ID>(hwnd, msg, w, l);
     return DefSubclassProc(hwnd, msg, w, l);
-}
+} 
 
 /**
     Custom window procedure for none built-in types
