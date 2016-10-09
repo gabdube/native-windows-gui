@@ -28,7 +28,8 @@ fn setup_window(ui: &mut nwg::Ui<&'static str>) {
         size: (200, 200),
         position: (100, 100),
         visible: false,
-        resizable: false
+        resizable: false,
+        exit_on_close: true
     };
 
     let sub_window = nwg::controls::Window {
@@ -36,7 +37,8 @@ fn setup_window(ui: &mut nwg::Ui<&'static str>) {
         size: (200, 200),
         position: (100, 100),
         visible: false,
-        resizable: false
+        resizable: false,
+        exit_on_close: false
     };
 
     ui.new_control("MainWindow", main_window).unwrap();

@@ -30,7 +30,8 @@ pub struct Window {
     pub size: (u32, u32),
     pub position: (i32, i32),
     pub visible: bool,
-    pub resizable: bool
+    pub resizable: bool,
+    pub exit_on_close: bool
 }
 
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {

@@ -190,7 +190,10 @@ pub unsafe extern "system" fn wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, 
     handle_events::<ID>(hwnd, msg, w, l);
     match msg {
         WM_CREATE => 0,
-        WM_CLOSE => {PostQuitMessage(0); 0},
+        WM_CLOSE => {
+            PostQuitMessage(0);
+            0
+        },
         _ =>  DefWindowProcW(hwnd, msg, w, l)
     }
 }

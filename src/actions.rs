@@ -21,7 +21,10 @@ pub struct ActMessageParams {
 #[derive(PartialEq)]
 pub enum Action<ID: Eq+Clone+Hash> {
     None,
-    
+    Reset,
+    GetControlType,
+    Undo,
+        
     GetParent,
     SetParent(Option<Box<ID>>),
     GetChildren,
@@ -62,10 +65,6 @@ pub enum Action<ID: Eq+Clone+Hash> {
 
     GetPlaceholder,
     SetPlaceholder(Option<Box<String>>),
-    
-    Reset,
-
-    GetControlType,
 
     GetDropdownVisibility,
     SetDropdownVisibility(bool),
@@ -82,7 +81,6 @@ pub enum Action<ID: Eq+Clone+Hash> {
     CountItems,
     RemoveIndexedItem(u32),
 
-    Undo,
     Message(Box<ActMessageParams>)
 }
 
