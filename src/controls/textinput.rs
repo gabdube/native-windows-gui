@@ -59,7 +59,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
             visible: true,
             resizable: false,
             extra_style: extra | h_align | WS_BORDER | ES_AUTOHSCROLL | ES_NOHIDESEL,
-            class: Some("EDIT".to_string()),
+            class: "EDIT".to_string(),
             parent: Some(self.parent.clone())
         };
 

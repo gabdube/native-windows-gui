@@ -54,7 +54,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for RadioButton<ID> {
             visible: true,
             resizable: false,
             extra_style: BS_AUTORADIOBUTTON | BS_NOTIFY | h_align | v_align,
-            class: Some("BUTTON".to_string()),
+            class: "BUTTON".to_string(),
             parent: Some(self.parent.clone())
         };
 

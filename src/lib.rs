@@ -212,7 +212,6 @@ impl<ID: Eq+Clone+Hash> Drop for Ui<ID> {
         }
 
         unsafe { Box::from_raw(self.controls); }
-        controls::cleanup();
     }
 }
 
@@ -231,8 +230,9 @@ pub fn dispatch_events() { unsafe{
     Hash a single parameter. Used to compare events name, which do not use a hashmap.
 */
 fn hash<T: Hash>(t: &T) -> u64 {
-    use std::hash::{SipHasher, Hasher};
-    let mut s = SipHasher::new();
+    use std::hash::Hasher;
+    use std::collections::hash_map::DefaultHasher;
+    let mut s = DefaultHasher::new();
     t.hash(&mut s);
     s.finish()
 }

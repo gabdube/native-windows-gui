@@ -47,7 +47,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for GroupBox<ID> {
             visible: true,
             resizable: false,
             extra_style: BS_GROUPBOX | h_align,
-            class: Some("BUTTON".to_string()),
+            class: "BUTTON".to_string(),
             parent: Some(self.parent.clone())
         };
 

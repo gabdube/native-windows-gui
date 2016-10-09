@@ -55,7 +55,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Frame<ID> {
             visible: true,
             resizable: false,
             extra_style: SS_NOTIFY | style | color,
-            class: Some("STATIC".to_string()),
+            class: "STATIC".to_string(),
             parent: Some(self.parent.clone())
         };
 

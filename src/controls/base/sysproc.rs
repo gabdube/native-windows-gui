@@ -9,13 +9,12 @@ use ::constants::{MOD_MOUSE_CTRL, MOD_MOUSE_SHIFT, BTN_MOUSE_MIDDLE, BTN_MOUSE_R
  BTN_MOUSE_LEFT, CBN_CLOSEUP, CBN_DROPDOWN, CBN_SETFOCUS, CBN_KILLFOCUS, ControlType,
  CBN_SELCHANGE, STN_CLICKED};
 
-use winapi::{HWND, UINT, WM_CREATE, WM_CLOSE, WPARAM, LPARAM, LRESULT,
+use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT,
   WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   WM_COMMAND, HIWORD, BN_CLICKED, BN_SETFOCUS, BN_KILLFOCUS, WM_ACTIVATEAPP,
   UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS, EN_MAXTEXT, EN_CHANGE,
   WM_DESTROY, WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN};
 
-use user32::{PostQuitMessage, DefWindowProcW};
 use comctl32::{DefSubclassProc};
 
 /**
@@ -153,7 +152,7 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
 }
 
 #[inline(always)]
-unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) {
+pub unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) {
     let (events, handle) = map_system_event::<ID>(hwnd, msg, w, l);
 
     // If the window data was initialized, eval callbacks
@@ -176,24 +175,9 @@ unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: 
 }
 
 /**
-    Window proc for subclasses
+    Window proc for subclassesed native control
 */
 pub unsafe extern "system" fn sub_wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id_subclass: UINT_PTR, dref: DWORD_PTR) -> LRESULT {
     handle_events::<ID>(hwnd, msg, w, l);
     return DefSubclassProc(hwnd, msg, w, l);
 } 
-
-/**
-    Custom window procedure for none built-in types
-*/
-pub unsafe extern "system" fn wndproc<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    handle_events::<ID>(hwnd, msg, w, l);
-    match msg {
-        WM_CREATE => 0,
-        WM_CLOSE => {
-            PostQuitMessage(0);
-            0
-        },
-        _ =>  DefWindowProcW(hwnd, msg, w, l)
-    }
-}

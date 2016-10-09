@@ -183,7 +183,6 @@ fn setup_controls(ui: &mut Ui<&'static str>) {
 
     // Set default values
     ui.exec("ExpLess", Action::SetCheckState(CheckState::Checked)).unwrap();
-
     ui.exec("MainWindow", Action::SetVisibility(true)).unwrap();
 }
 
@@ -247,6 +246,6 @@ fn main() {
     }))).unwrap();
 
     ui.bind("Submit", "Submit_Form", EventCallback::Click(Box::new(submit_form))).unwrap();
-
+    
     nwg::dispatch_events();
 }

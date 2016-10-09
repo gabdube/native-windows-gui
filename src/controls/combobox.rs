@@ -48,7 +48,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
             visible: true,
             resizable: false,
             extra_style: BS_NOTIFY | CBS_AUTOHSCROLL | CBS_DROPDOWNLIST | CBS_HASSTRINGS | sorted,
-            class: Some("COMBOBOX".to_string()),
+            class: "COMBOBOX".to_string(),
             parent: Some(self.parent.clone())
         };
 

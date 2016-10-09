@@ -59,7 +59,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
             visible: true,
             resizable: false,
             extra_style: extra,
-            class: Some("BUTTON".to_string()),
+            class: "BUTTON".to_string(),
             parent: Some(self.parent.clone())
         };
 

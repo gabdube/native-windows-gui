@@ -57,11 +57,6 @@ pub trait ControlTemplate<ID: Eq+Clone+Hash > {
     fn control_type(&self) -> ControlType;
 }
 
-
-pub fn cleanup() {
-    unsafe { base::cleanup(); }
-}
-
 pub fn set_handle_data<T>(handle: HWND, data: T) {
     unsafe { base::set_handle_data(handle, data); }
 }
