@@ -173,8 +173,18 @@ pub unsafe fn free_handle_data<T>(handle: HWND) {
 }
 
 /**
-    Remove and free data from a window and destroy the window. DO NOT trigger the event `removed` or
-    the control free function.
+    Remove and free data from a window using an offset
+*/
+pub unsafe fn free_handle_data_off<T>(handle: HWND, offset: usize) {
+    let data_ptr = GetWindowLongPtrW(handle, (offset*mem::size_of::<usize>()) as i32 );
+    let data: *mut T = mem::transmute(data_ptr);
+    Box::from_raw(data);
+
+    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
+}
+
+/**
+    Remove and free data from a window and destroy the window. DO NOT trigger the event `removed`.
 */
 pub unsafe fn free_handle<ID: Eq+Clone+Hash >(handle: HWND) {
     let data_raw: *mut ::WindowData<ID> = mem::transmute(GetWindowLongPtrW(handle, GWLP_USERDATA));

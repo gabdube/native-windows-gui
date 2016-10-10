@@ -207,7 +207,8 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
 impl<ID: Eq+Clone+Hash> Drop for Ui<ID> {
     fn drop(&mut self) {
         let controls: &ControlCollection<ID> = unsafe{ &mut *self.controls };
-        for &(handle, _) in controls.values() {
+        let handles: Vec<HWND> = controls.values().map(|&(handle, _)| handle).collect();
+        for handle in handles {
             controls::free_handle::<ID>(handle);
         }
 

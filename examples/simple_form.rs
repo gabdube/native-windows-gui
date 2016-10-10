@@ -163,17 +163,6 @@ fn setup_controls(ui: &mut Ui<&'static str>) {
         text_align: (HTextAlign::Center, VTextAlign::Center),
     };
 
-    let sub_window = Window {
-        caption: "Application Form".to_string(),
-        size: (350, 350),
-        position: (100, 100),
-        visible: false,
-        resizable: false,
-        exit_on_close: false
-    };
-
-    ui.new_control("SubWindow", sub_window).unwrap();
-
     ui.new_control("MainWindow", main_window).unwrap();
     ui.new_control("NameLabel", name_label).unwrap();
     ui.new_control("NameInput", name_input).unwrap();
@@ -195,7 +184,6 @@ fn setup_controls(ui: &mut Ui<&'static str>) {
     // Set default values
     ui.exec("ExpLess", Action::SetCheckState(CheckState::Checked)).unwrap();
     ui.exec("MainWindow", Action::SetVisibility(true)).unwrap();
-    ui.exec("SubWindow", Action::SetVisibility(true)).unwrap();
 }
 
 fn is_blank(ui: &Ui<&'static str>, control: &'static str, attr: &'static str) -> bool {
