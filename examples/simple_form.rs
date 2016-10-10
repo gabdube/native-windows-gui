@@ -246,6 +246,6 @@ fn main() {
     }))).unwrap();
 
     ui.bind("Submit", "Submit_Form", EventCallback::Click(Box::new(submit_form))).unwrap();
-    
+
     nwg::dispatch_events();
 }

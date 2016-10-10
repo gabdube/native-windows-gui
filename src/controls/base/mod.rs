@@ -2,7 +2,7 @@ pub mod helper;
 mod sysproc;
 
 pub use ::controls::base::helper::*;
-use ::controls::base::sysproc::sub_wndproc;
+use ::controls::base::sysproc::{sub_wndproc, NWG_DESTROY_NOTICE};
 use constants::Error;
 
 use std::ptr;
@@ -186,6 +186,7 @@ pub unsafe fn free_handle_data_off<T>(handle: HWND, offset: usize) {
 
 /// Proc used to discover a window children
 unsafe extern "system" fn free_child_data<ID: Eq+Hash+Clone>(handle: HWND, param: LPARAM) -> BOOL {
+     send_message(handle, NWG_DESTROY_NOTICE, 0, 0);
      free_handle_data::<::WindowData<ID>>(handle);
      1
 }
@@ -201,6 +202,7 @@ pub unsafe fn free_handle<ID: Eq+Clone+Hash >(handle: HWND) {
         EnumChildWindows(handle, Some(free_child_data::<ID>), 0);
         
         // Destroy the window and free the data
+        send_message(handle, NWG_DESTROY_NOTICE, 0, 0);
         DestroyWindow(handle);
         Box::from_raw(data_raw);
         SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
