@@ -13,6 +13,7 @@ pub mod textinput;
 pub mod combobox;
 pub mod label;
 pub mod frame;
+pub mod textbox;
 
 pub use controls::window::Window;
 pub use controls::button::Button;
@@ -23,6 +24,7 @@ pub use controls::textinput::TextInput;
 pub use controls::combobox::ComboBox;
 pub use controls::label::Label;
 pub use controls::frame::Frame;
+pub use controls::textbox::TextBox;
 
 use std::hash::Hash;
 use winapi::HWND;

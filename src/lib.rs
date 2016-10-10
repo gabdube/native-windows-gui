@@ -173,10 +173,11 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     */
     pub fn unbind(&self, cont: ID, name: ID, event: events::Event) -> Result<(), Error> {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
+        let _hash = hash(&name);
         if let Some(&(handle, _)) = controls.get(&cont) {
             let data: &mut WindowData<ID> = controls::get_handle_data(handle);
             if let Some(functions) = data.callbacks.get_mut(&event) {
-                if let Some(pos) = functions.iter().position(|&(ref id, _)| hash(id) == hash(&name)) {
+                if let Some(pos) = functions.iter().position(|&(ref id, _)| hash(id) == _hash) {
                     functions.remove(pos);
                     Ok(())
                 } else {

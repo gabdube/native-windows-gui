@@ -33,6 +33,7 @@ pub enum ControlType {
     Window,
     Label,
     Frame,
+    TextBox
 }
 
 #[derive(PartialEq, Debug)]

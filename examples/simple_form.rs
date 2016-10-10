@@ -1,7 +1,7 @@
 extern crate native_windows_gui as nwg;
 
 use nwg::Ui;
-use nwg::controls::{Label, Window, TextInput, GroupBox, RadioButton, ComboBox, CheckBox, Button};
+use nwg::controls::{Label, Window, TextInput, GroupBox, RadioButton, ComboBox, CheckBox, Button, TextBox};
 use nwg::actions::{Action, ActionReturn};
 use nwg::actions::helper as actions_help;
 use nwg::events::EventCallback;
@@ -19,7 +19,7 @@ fn col(c: &[&'static str]) -> Vec<String> {
 fn setup_controls(ui: &mut Ui<&'static str>) {
     let main_window = Window {
         caption: "Application Form".to_string(),
-        size: (350, 350),
+        size: (350, 440),
         position: (100, 100),
         visible: false,
         resizable: false,
@@ -147,10 +147,26 @@ fn setup_controls(ui: &mut Ui<&'static str>) {
         text_align: (HTextAlign::Center, VTextAlign::Center),
     };
 
+    let note_label = Label {
+        text: "Note:".to_string(),
+        size: (60, 20),
+        position: (10, 310),
+        parent: "MainWindow",
+        text_align: HTextAlign::Left
+    };
+
+    let note_tb = TextBox {
+        text: "".to_string(),
+        size: (330, 60),
+        position: (10, 330),
+        parent: "MainWindow",
+        readonly: false
+    };
+
     let cancel_button = Button {
         text: "Cancel".to_string(),
         size: (90, 30),
-        position: (140, 310),
+        position: (140, 400),
         parent: "MainWindow",
         text_align: (HTextAlign::Center, VTextAlign::Center),
     };
@@ -158,7 +174,7 @@ fn setup_controls(ui: &mut Ui<&'static str>) {
     let submit_button = Button {
         text: "Submit".to_string(),
         size: (90, 30),
-        position: (250, 310),
+        position: (250, 400),
         parent: "MainWindow",
         text_align: (HTextAlign::Center, VTextAlign::Center),
     };
@@ -178,6 +194,8 @@ fn setup_controls(ui: &mut Ui<&'static str>) {
     ui.new_control("ExpAccess", exp_access).unwrap();
     ui.new_control("ExpVb6", exp_vb6).unwrap();
     ui.new_control("ExpAgile", exp_agile).unwrap();
+    ui.new_control("NoteLabel", note_label).unwrap();
+    ui.new_control("NoteText", note_tb).unwrap();
     ui.new_control("Cancel", cancel_button).unwrap();
     ui.new_control("Submit", submit_button).unwrap();
 
