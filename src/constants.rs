@@ -17,6 +17,7 @@ pub enum Error {
     INDEX_OUT_OF_BOUNDS,
     CALLBACK_ID_EXISTS,
     CALLBACK_ID_NOT_FOUND,
+    NO_UI,
     UNKNOWN
 }
 

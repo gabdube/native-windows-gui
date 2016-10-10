@@ -206,10 +206,19 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
 
 impl<ID: Eq+Clone+Hash> Drop for Ui<ID> {
     fn drop(&mut self) {
-        let controls: &ControlCollection<ID> = unsafe{ &mut *self.controls };
-        let handles: Vec<HWND> = controls.values().map(|&(handle, _)| handle).collect();
-        for handle in handles {
-            controls::free_handle::<ID>(handle);
+        let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
+        let handles: Vec<ID> = controls.keys().map(|k| k.clone()).collect();
+        let mut handles_clone = handles.into_iter();
+
+        // While there are still controls, call remove_control, because remove_control
+        // also remove the children, handles_clone may pass controls that were freed
+        // we can safely ignore them
+        while !controls.is_empty() {
+            if let Some(next_handle) = handles_clone.next() {
+                match self.remove_control(next_handle) {_=>{}} // Ignore the ID not found while cleaning the controls
+            } else {
+                break;
+            }
         }
 
         unsafe { Box::from_raw(self.controls); }

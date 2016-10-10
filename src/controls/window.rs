@@ -12,7 +12,7 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text, 
   set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
   set_window_visibility, get_window_display, set_window_display, get_window_children,
   get_window_descendant, get_control_type, close_window, to_utf16, set_handle_data_off,
-  get_handle_data_off, free_handle, free_handle_data_off};
+  get_handle_data_off, destroy_control, free_handle_data_off};
 use actions::{Action, ActionReturn};
 use events::Event;
 use constants::ControlType;
@@ -159,7 +159,7 @@ unsafe fn handle_close<ID: Eq+Clone+Hash>(handle: HWND) -> LRESULT {
         if d.exit_on_close { 
             PostQuitMessage(0); 
         } else {
-            free_handle::<ID>(handle);
+            destroy_control::<ID>(handle).unwrap();
         }
     }
 

@@ -3,16 +3,17 @@ mod sysproc;
 
 pub use ::controls::base::helper::*;
 use ::controls::base::sysproc::sub_wndproc;
+use constants::Error;
 
 use std::ptr;
 use std::mem;
 use std::hash::Hash;
 
-use winapi::{HWND, ACTCTXW, ULONG, ULONG_PTR, MAX_PATH,
+use winapi::{HWND, ACTCTXW, ULONG, ULONG_PTR, MAX_PATH, LPARAM, BOOL,
   WS_VISIBLE, WS_CHILD, WS_OVERLAPPED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU,
   WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_EX_COMPOSITED, GWLP_USERDATA};
 
-use user32::{CreateWindowExW, SetWindowLongPtrW, GetWindowLongPtrW, DestroyWindow};
+use user32::{CreateWindowExW, SetWindowLongPtrW, GetWindowLongPtrW, DestroyWindow, EnumChildWindows};
 use kernel32::{GetModuleHandleW, ActivateActCtx, CreateActCtxW, GetSystemDirectoryW};
 
 use comctl32::{SetWindowSubclass};
@@ -180,25 +181,46 @@ pub unsafe fn free_handle_data_off<T>(handle: HWND, offset: usize) {
     let data: *mut T = mem::transmute(data_ptr);
     Box::from_raw(data);
 
-    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
+    SetWindowLongPtrW(handle, (offset*mem::size_of::<usize>()) as i32, mem::transmute(ptr::null_mut::<()>()));
+}
+
+/// Proc used to discover a window children
+unsafe extern "system" fn free_child_data<ID: Eq+Hash+Clone>(handle: HWND, param: LPARAM) -> BOOL {
+     free_handle_data::<::WindowData<ID>>(handle);
+     1
 }
 
 /**
-    Remove and free data from a window and destroy the window. DO NOT trigger the event `removed`.
+    Recursively destroy the handle and all its children and free any data attached.
+    This is called by Ui.remove_control. Does NOT remove the ID from the control collection!
 */
 pub unsafe fn free_handle<ID: Eq+Clone+Hash >(handle: HWND) {
     let data_raw: *mut ::WindowData<ID> = mem::transmute(GetWindowLongPtrW(handle, GWLP_USERDATA));
     if !data_raw.is_null() {
-        SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
-
-        // Remove the control from the id list
-        let data: &mut ::WindowData<ID> = &mut *data_raw;
-        let controls: &mut ::ControlCollection<ID> = &mut *data.controls;
-        controls.remove(&data.id);
-
+        // Free the children data
+        EnumChildWindows(handle, Some(free_child_data::<ID>), 0);
+        
         // Destroy the window and free the data
         DestroyWindow(handle);
         Box::from_raw(data_raw);
+        SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
     }
     
+}
+
+/**
+    Remove a control from the ui as if Ui.remove_control was called. Used by custom widgets (ex: Window),
+    when an event must trigger the control destruction.
+*/
+pub unsafe fn destroy_control<ID: Eq+Clone+Hash>(handle: HWND) -> Result<Vec<ID>, Error> {
+    let data_raw: *mut ::WindowData<ID> = mem::transmute(GetWindowLongPtrW(handle, GWLP_USERDATA));
+    if !data_raw.is_null() {
+        let data: &mut ::WindowData<ID> = &mut *data_raw;
+        let mut ui = ::Ui{controls: data.controls};
+        let op = ui.remove_control(data.id.clone());
+        mem::forget(ui);
+        op
+    } else {
+        Err(Error::NO_UI)
+    }
 }
