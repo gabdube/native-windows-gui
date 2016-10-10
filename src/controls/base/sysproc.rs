@@ -169,7 +169,6 @@ pub unsafe fn handle_events<ID: Eq+Hash+Clone>(hwnd: HWND, msg: UINT, w: WPARAM,
             }
         }
         
-        
         mem::forget(ui);
     }
 }

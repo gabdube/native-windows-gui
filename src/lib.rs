@@ -208,7 +208,7 @@ impl<ID: Eq+Clone+Hash> Drop for Ui<ID> {
     fn drop(&mut self) {
         let controls: &ControlCollection<ID> = unsafe{ &mut *self.controls };
         for &(handle, _) in controls.values() {
-            controls::free_handle_data::<WindowData<ID>>(handle);
+            controls::free_handle::<ID>(handle);
         }
 
         unsafe { Box::from_raw(self.controls); }

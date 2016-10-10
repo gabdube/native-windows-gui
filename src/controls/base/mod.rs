@@ -173,11 +173,22 @@ pub unsafe fn free_handle_data<T>(handle: HWND) {
 }
 
 /**
-    Remove and free data from a window and destroy the window.
+    Remove and free data from a window and destroy the window. DO NOT trigger the event `removed` or
+    the control free function.
 */
-pub unsafe fn free_handle<T>(handle: HWND) {
-    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
-    let data: *mut T = mem::transmute(data_ptr);
-    DestroyWindow(handle);
-    Box::from_raw(data);
+pub unsafe fn free_handle<ID: Eq+Clone+Hash >(handle: HWND) {
+    let data_raw: *mut ::WindowData<ID> = mem::transmute(GetWindowLongPtrW(handle, GWLP_USERDATA));
+    if !data_raw.is_null() {
+        SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
+
+        // Remove the control from the id list
+        let data: &mut ::WindowData<ID> = &mut *data_raw;
+        let controls: &mut ::ControlCollection<ID> = &mut *data.controls;
+        controls.remove(&data.id);
+
+        // Destroy the window and free the data
+        DestroyWindow(handle);
+        Box::from_raw(data_raw);
+    }
+    
 }

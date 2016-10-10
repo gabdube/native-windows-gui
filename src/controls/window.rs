@@ -12,7 +12,7 @@ use controls::base::{WindowBase, create_base, set_window_text, get_window_text, 
   set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
   set_window_visibility, get_window_display, set_window_display, get_window_children,
   get_window_descendant, get_control_type, close_window, to_utf16, set_handle_data_off,
-  get_handle_data_off};
+  get_handle_data_off, free_handle};
 use actions::{Action, ActionReturn};
 use events::Event;
 use constants::ControlType;
@@ -50,7 +50,7 @@ struct PrivateWindowData {
 impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
 
     fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> { 
-        if unsafe { !register_custom_class() } {
+        if unsafe { !register_custom_class::<ID>() } {
             return Err(());
         }
 
@@ -118,14 +118,14 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
     Register a new window class. Return true if the class already exists 
     or the creation was successful and false if it failed.
 */
-unsafe fn register_custom_class() -> bool {
+unsafe fn register_custom_class<ID: Eq+Clone+Hash>() -> bool {
     let name = to_utf16(CLASS_NAME.to_string());
     let hmod = GetModuleHandleW(ptr::null());
     let class =
         WNDCLASSEXW {
             cbSize: mem::size_of::<WNDCLASSEXW>() as UINT,
             style: CS_HREDRAW | CS_VREDRAW,
-            lpfnWndProc: Some(wndproc), 
+            lpfnWndProc: Some(wndproc::<ID>), 
             cbClsExtra: 0,
             cbWndExtra: mem::size_of::<usize>() as i32,
             hInstance: hmod as HINSTANCE,
@@ -149,18 +149,29 @@ unsafe fn register_custom_class() -> bool {
 }
 
 /**
-    Custom window procedure for Window types
+    Handle the WM_CLOSE event on a window. If exit_on_close is set,
+    nwg will free all its resources by itself, but if exit_on_close is not
+    set, the window must be manually destroyed.
 */
-unsafe extern "system" fn wndproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
+unsafe fn handle_close<ID: Eq+Clone+Hash>(handle: HWND) -> LRESULT {
+    if let Some(d) = get_handle_data_off::<PrivateWindowData>(handle, 0) {
+        if d.exit_on_close { 
+            PostQuitMessage(0); 
+        } else {
+            free_handle::<ID>(handle);
+        }
+    }
+
+    0 
+} 
+
+/**
+    Custom window procedure for Window types.
+*/
+unsafe extern "system" fn wndproc<ID: Eq+Clone+Hash>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     match msg {
         WM_CREATE => 0,
-        WM_CLOSE => {
-            if let Some(d) = get_handle_data_off::<PrivateWindowData>(hwnd, 0) {
-                if d.exit_on_close { PostQuitMessage(0); }
-            }
-            
-            0
-        },
+        WM_CLOSE => handle_close::<ID>(hwnd),
         _ =>  DefWindowProcW(hwnd, msg, w, l)
     }
 }

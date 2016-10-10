@@ -69,6 +69,6 @@ pub fn free_handle_data<T>(handle: HWND) {
     unsafe { base::free_handle_data::<T>(handle); }
 }
 
-pub fn free_handle<T>(handle: HWND) {
-    unsafe { base::free_handle::<T>(handle); }
+pub fn free_handle<ID: Eq+Clone+Hash>(handle: HWND) {
+    unsafe { base::free_handle::<ID>(handle); }
 }
