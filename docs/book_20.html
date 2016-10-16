@@ -140,7 +140,7 @@
 
 <h1 id="hello-details" class="section-header"><a href="#hello-details">The example details</a></h1>
 
-<h6>UI creation</h6>
+<h3>UI creation</h3>
 The first line executed in the <code>main</code> function creates the <b>Ui</b> object. You can think of it as some
 kind of service. In fact, NWG Ui abstract the whole UI, this means that, as a user, <b>you don't have access to the
 actual controls</b>.</br></br>
@@ -155,12 +155,43 @@ but it has one big inconvenient: <b>you can't create controls on the fly</b>. </
 Yup, with NWG <b>all created controls must have a unique name</b>. Because of this, using <code>int</code> with 
 <code>const</code> is usually a better idea. You could also use enums.<br/><br/>
 
-<b>Ui objects are single threaded</b> <code>(!Send + !Sync)</code>. This is a OS restriction, so it will never go away.
+<u>Note 1</u>: <b>Ui objects are single threaded</b> <code>(!Send + !Sync)</code>. This is a OS restriction, so it will never go away.
 <br/><br/>
 
-Currently, <b>there can only be one Ui object per thread</b>. This MIGHT change in the future in the BETA/STABLE release.
+<u>Note 2</u>: Currently, <b>there can only be one Ui object per thread</b>. This MIGHT change in the future in the BETA/STABLE release.
 
+<h3>Creating controls</h3>
 
+Now that the Ui object is created, it's time to create the controls! Creating controls is done with 
+<b>Control Templates</b>. Control templates are transparent structures that implements the <code>ControlTemplate</code>
+trait. NWG offers a wide variety of built-in controls. For more details see:
+<a href="book_40.html">The Controls dictionnary</a>. <br/><br/>
+
+<b>Once a template is filled, it can be added to the GUI by calling</b> <code>ui.new_control</code>. The first argument
+is the unique control ID and the second is the template. The creation can fail if the ID already exists or if the
+template configurations contains invalid values. <br/><br/>
+
+With the exception of the Window control, <b>all controls must have a parent</b>. A parent must have been created
+before its children. If a children control is created before its parent, a <b>CONTROL_NOT_FOUND</b> error
+will be returned.<br/><br/>
+
+<u>Note 1</u>: As you can see, control templates are very verbose. Because of this it is a good idea to put the controls creation
+in its own function. This is a design choice. Most GUI are now done though some kind of markup language or
+WYSIWYG editors (which I plan to work on once BETA is reached). Templates were designed to make the creation process
+of those tools easier.
+<br/><br/>
+
+<u>Note 3</u>: <b>Templates fields are unstable</b>. I will most likely add new fields before the BETA release. 
+
+<h3>Binding events</h3>
+
+<h3>Executing actions</h3>
+
+<h3>Listening for events</h3>
+Once your setup is completed, you must call <code>nwg::dispatch_events</code> in order to block the thread and 
+process the system events. The function will return once a <b>Quit</b> event is received.<br/><br/>
+
+If you are famliar with the Winapi, this method simply wraps a simple <code>GetMessageW</code> loop.
 
 </div>
 </div>
