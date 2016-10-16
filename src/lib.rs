@@ -242,9 +242,6 @@ impl<ID: Eq+Clone+Hash> Drop for Ui<ID> {
     }
 }
 
-impl<ID: Eq+Clone+Hash> !Send for Ui<ID> {}
-impl<ID: Eq+Clone+Hash> !Sync for Ui<ID> {}
-
 /**
     Wait for system events and dispatch them
 */
