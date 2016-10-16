@@ -69,7 +69,8 @@
         foundations of NWG. The next chapter "Basics" will go deeper into these.
     </p>
     <h1 id="installing-nwg" class="section-header"><a href="#installing-nwg">Installing NWG</a></h1>
-    NWG should work with any recent version of rust. Any channel can be used (stable, beta, nightly).<br/>
+    NWG should work with any recent version of rust (64 bits or 32 bits). Any channel can be used (stable, beta, nightly).
+    NWG was only tested using the <b>MSVC ABI builds.</b><br/>
     To use NWG in your project add it to <code>cargo.toml</code>:
 
 <pre class="rust rust-example-rendered">[<span class="kw">dependencies</span>]
@@ -136,6 +137,31 @@
 <span class="w">    </span><span class="n">nwg</span><span class="o">::</span><span class="n">dispatch_events</span><span class="p">();</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+<h1 id="hello-details" class="section-header"><a href="#hello-details">The example details</a></h1>
+
+<h6>UI creation</h6>
+The first line executed in the <code>main</code> function creates the <b>Ui</b> object. You can think of it as some
+kind of service. In fact, NWG Ui abstract the whole UI, this means that, as a user, <b>you don't have access to the
+actual controls</b>.</br></br>
+
+In order to expose the controls to the user, NWG uses <b>controls IDS</b>. This way, controls can be accessed from
+anywhere in the code without you having drag some kind of data along. <b>The type of ID the is left to the user</b>, but 
+the type must implement the <code>Eq+Clone+Hash</code> traits.</br></br>
+
+For this example the control id type is <code>&'static str</code>. Using <code>str</code> is great for visibility,
+but it has one big inconvenient: <b>you can't create controls on the fly</b>. </br></br>    
+
+Yup, with NWG <b>all created controls must have a unique name</b>. Because of this, using <code>int</code> with 
+<code>const</code> is usually a better idea. You could also use enums.<br/><br/>
+
+<b>Ui objects are single threaded</b> <code>(!Send + !Sync)</code>. This is a OS restriction, so it will never go away.
+<br/><br/>
+
+Currently, <b>there can only be one Ui object per thread</b>. This MIGHT change in the future in the BETA/STABLE release.
+
+
+
 </div>
 </div>
 
