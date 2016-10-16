@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+
+    <div id="nav">
+        <button id="toggle-nav">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+    </div>
+
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='book_10.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='book_20.html'><b>2.</b> Getting Started</a>
+</li>
+<li><a href="30"><b>3.</b> Basics</a>
+<ul class="section">
+<li><a href="31"><b>3.1.</b> Ui objects</a>
+</li>
+<li><a href="32"><b>3.2.</b> Control templates</a>
+</li>
+<li><a href="33"><b>3.3.</b> Actions</a>
+</li>
+<li><a href="34"><b>3.4.</b> Events</a>
+</li>
+</ul>
+</li>
+<li><a href="40"><b>4.</b> Controls</a>
+<ul class="section">
+<li><a href="41"><b>4.1.</b> TODO</a>
+</li>
+</ul>
+</li>
+<li><a href="50"><b>5.</b> User controls</a>
+<ul class="section">
+<li><a href="51"><b>5.1.</b> TODO</a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<div id='page-wrapper'>
+<div id='page'>
+    <h1 class="title">Getting started</h1>
+    <p>In this first chapter, you will install NWG and then look at a very simple application. This tutorial
+        will intoduce the concepts of <b>Control Templates</b>, <b>Actions</b> and <b>Events</b>: the
+        foundations of NWG. The next chapter "Basics" will go deeper into these.
+    </p>
+    <h1 id="installing-nwg" class="section-header"><a href="#installing-nwg">Installing NWG</a></h1>
+    NWG should work with any recent version of rust. Any channel can be used (stable, beta, nightly).<br/>
+    To use NWG in your project add it to <code>cargo.toml</code>:
+
+<pre class="rust rust-example-rendered">[<span class="kw">dependencies</span>]
+<span class="ident">native-windows-gui</span> = <span class="string"><span class="string">"</span>0.1.0<span class="string">"</span></span>
+</pre>
+
+    And then, in <code>main.rs</code> or <code>lib.rs</code> :
+
+<pre class="rust rust-example-rendered">
+<span class="kw">extern crate</span> <span class="ident">native_windows_gui</span> <span class="kw">as</span> <span class="ident">nwg</span>;
+</pre>
+
+
+<h1 id="hello-world" class="section-header"><a href="#hello-world">Hello World!</a></h1>
+    Here is a minimalistic program that display a window with a button. When the button is clicked, a messagebox that
+    says "Hello World!" is created.
+
+<div class="syntax"><pre><span></span><span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">native_windows_gui</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">nwg</span><span class="p">;</span><span class="w"></span>
+
+<span class="kn">use</span><span class="w"> </span><span class="n">nwg</span><span class="o">::</span><span class="n">Ui</span><span class="p">;</span><span class="w"></span>
+<span class="kn">use</span><span class="w"> </span><span class="n">nwg</span><span class="o">::</span><span class="n">events</span><span class="o">::</span><span class="n">EventCallback</span><span class="p">;</span><span class="w"></span>
+<span class="kn">use</span><span class="w"> </span><span class="n">nwg</span><span class="o">::</span><span class="n">controls</span><span class="o">::</span><span class="p">{</span><span class="n">Button</span><span class="p">,</span><span class="w"> </span><span class="n">Window</span><span class="p">};</span><span class="w"></span>
+<span class="kn">use</span><span class="w"> </span><span class="n">nwg</span><span class="o">::</span><span class="n">actions</span><span class="o">::</span><span class="n">helper</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">actions_help</span><span class="p">;</span><span class="w"></span>
+<span class="kn">use</span><span class="w"> </span><span class="n">nwg</span><span class="o">::</span><span class="n">constants</span><span class="o">::</span><span class="p">{</span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"> </span><span class="n">VTextAlign</span><span class="p">,</span><span class="w"> </span><span class="n">MessageButtons</span><span class="p">,</span><span class="w"> </span><span class="n">MessageIcons</span><span class="p">};</span><span class="w"></span>
+
+<span class="k">fn</span><span class="w"> </span><span class="n">setup_controls</span><span class="p">(</span><span class="n">ui</span><span class="o">:</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">Ui</span><span class="o">&lt;&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="kt">str</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">main_window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">caption</span><span class="o">:</span><span class="w"> </span><span class="s">"Hello"</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"></span>
+<span class="w">        </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="n">visible</span><span class="o">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">resizable</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">exit_on_close</span><span class="o">:</span><span class="w"> </span><span class="k">true</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">hello_button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Button</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="s">"Hello World!"</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"></span>
+<span class="w">        </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="mi">180</span><span class="p">,</span><span class="w"> </span><span class="mi">180</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span><span class="w"></span>
+<span class="w">        </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="s">"MainWindow"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">HTextAlign</span><span class="o">::</span><span class="n">Center</span><span class="p">,</span><span class="w"> </span><span class="n">VTextAlign</span><span class="o">::</span><span class="n">Center</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ui</span><span class="p">.</span><span class="n">new_control</span><span class="p">(</span><span class="s">"MainWindow"</span><span class="p">,</span><span class="w"> </span><span class="n">main_window</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="n">ui</span><span class="p">.</span><span class="n">new_control</span><span class="p">(</span><span class="s">"Hello"</span><span class="p">,</span><span class="w"> </span><span class="n">hello_button</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">fn</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="o">:</span><span class="w"> </span><span class="n">Ui</span><span class="o">&lt;&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="kt">str</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Ui</span><span class="o">::</span><span class="n">new</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">setup_controls</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ui</span><span class="p">.</span><span class="n">bind</span><span class="p">(</span><span class="s">"Hello"</span><span class="p">,</span><span class="w"> </span><span class="s">"SayHello"</span><span class="p">,</span><span class="w"> </span><span class="n">EventCallback</span><span class="o">::</span><span class="n">Click</span><span class="p">(</span><span class="nb">Box</span><span class="o">::</span><span class="n">new</span><span class="p">(</span><span class="o">|</span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="o">|</span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">"Caller is: {:?}"</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">actions_help</span><span class="o">::</span><span class="n">message</span><span class="p">(</span><span class="w"></span>
+<span class="w">            </span><span class="s">"Hello!"</span><span class="p">,</span><span class="w"> </span><span class="s">"Hello World!"</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="n">MessageButtons</span><span class="o">::</span><span class="nb">Ok</span><span class="p">,</span><span class="w"> </span><span class="n">MessageIcons</span><span class="o">::</span><span class="nb">None</span><span class="w"></span>
+<span class="w">        </span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">ui</span><span class="p">.</span><span class="n">exec</span><span class="p">(</span><span class="s">"MainWindow"</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}))).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">nwg</span><span class="o">::</span><span class="n">dispatch_events</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+
+<script src='rustbook.js'></script>
+</body>
+</html>
