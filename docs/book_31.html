@@ -34,7 +34,7 @@
 </li>
 <li><a href='book_20.html'><b>2.</b> Getting Started</a>
 </li>
-<li><a href="book_30.html"><b>3.</b> Basics (TODO) </a>
+<li><a href="book_30.html"><b>3.</b> Basics </a>
 <ul class="section">
 <li><a href="book_31.html"><b>3.1.</b> Ui objects (TODO) </a>
 </li>
@@ -63,7 +63,27 @@
 
 <div id='page-wrapper'>
 <div id='page'>
-    TODO
+    <h1 class="title">Ui Objects</h1>
+    As explained in getting started, <code>Ui</code> is an abstraction over the GUI. Anything that touches the GUI must be done though the this object.
+    
+
+
+    <h2 class="title">Methods</h1>
+
+    <h2 class="title">Special Behaviour</h1>
+    <h5 class="title">Multithreading</h5>
+    The object is single threaded. This is a system restriction, and it will not go away. Nothing stops you to
+    to create a different UI on each thread though <b>(NOT TESTED)</b>.
+
+    <h5 class="title">Single threaded limitation</h5>
+    For now, there can only be one Ui object per thread. Technically, it could be possible to have multiple
+    UI with the same ID type on the same thread, but it's not offically supported yet <b>(so don't do it)</b>.</br>
+    Trying to create multiple Ui with different ID type per thread will most likely crash your application fast.<br/><br/>
+
+    Support for multiple UI on the same thread is a feature I'd like to implement in the BETA release. NWG currently
+    lacks encapsulation and this could resolve this issue.
+
+    <br/><br/>
 </div>
 </div>
 
