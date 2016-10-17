@@ -64,20 +64,65 @@
 <div id='page-wrapper'>
 <div id='page'>
     <h1 class="title">Ui Objects</h1>
-    As explained in getting started, <code>Ui</code> is an abstraction over the GUI. Anything that touches the GUI must be done though the this object.
+    As explained in getting started, <code>Ui</code> is an opaque abstraction over the GUI. The controls implementation
+    (methods, callbacks, creation, destruction) is therefore hidden behind generic interfaces. Anything that touches the 
+    GUI must be done though the this object. <br/><br/>
+    
+    <h2 class="title">Usage</h2>
+
+    <h5 class="title">Ui IDs</h5>
+    Ui objects use a generic type <code>ID</code> to expose the created controls to the user. This type choice
+    is left to the developer, but it must implement the <code>Eq+Clone+Hash</code> traits. It is a good idea to use
+    a simple type that don't need to be instanced (ex: u32, &'static str, customs enums) to keep the code clean because
+    the IDs will be used all over your GUI related code.<br/><br/>
+
+    Ids are used to identify controls and events callback. <b>Every control ID defined in a UI must be unique</b>
+    This means that if your iterface has 100 controls, it must define 100 IDS.<br/><br/>
+    Rules over callback IDS are much more lenient:  Two events callback of the same type on the same control cannot have the same identifier. Duplicate are possible in
+    any other combinations (ex: two different events on the same control can have a callback named "foo")<br/><br/>
+
+    <h5 class="title">Creation of controls</h5>
+    To create a control in a Ui, the <code>new_control(ID, template)</code> method must be used.<br/><br/>
+
+    For more informations on control templates see: <a href="book_32.html"><b>3.2.</b> Control templates </a>
+    <br/><br/>
+    
+    <h5 class="title">Destruction of controls</h5>
+
     
 
+    <ul>
+    <li>To remove a control from a Ui, the <code>remove_control(ID)</code> method must be used. The only parameter is
+    a control ID that was previously added to the UI.</li>
+    <li>Removing a control with children also removes the children. </li>
+    <li>For every control removed a <code>Event::Removed</code> event is sent.</li>
+    <li>All controls are guaranteed to be perfectly alive while the removed callbacks are being executed.</li>
+    <li>The only reason this method could fail is that if the ID sent is not currently in the UI (<code>Error::CONTROL_NOT_FOUND</code>).</li>
+    </ul>
+    
+    For more informations on control templates see: <a href="book_32.html"><b>3.2.</b> Control templates </a>
+    <br/><br/>
 
-    <h2 class="title">Methods</h1>
+    <h5 class="title">Adding events to controls</h5>
 
-    <h2 class="title">Special Behaviour</h1>
+    <br/><br/>
+    For more informations on events see: <a href="book_34.html"><b>3.4.</b> Events </a>
+    <br/><br/>
+
+    <h5 class="title">Executing actions</h5>
+
+    <br/><br/>
+    For more informations on actions see: <a href="book_33.html"><b>3.3.</b> Actions </a>
+    <br/><br/>
+    
+    <h2 class="title">Special Behaviour</h2>
     <h5 class="title">Multithreading</h5>
     The object is single threaded. This is a system restriction, and it will not go away. Nothing stops you to
     to create a different UI on each thread though <b>(NOT TESTED)</b>.
 
     <h5 class="title">Single threaded limitation</h5>
     For now, there can only be one Ui object per thread. Technically, it could be possible to have multiple
-    UI with the same ID type on the same thread, but it's not offically supported yet <b>(so don't do it)</b>.</br>
+    UI with the same ID type on the same thread, but it's not offically supported yet <b>(please don't do it)</b>.</br>
     Trying to create multiple Ui with different ID type per thread will most likely crash your application fast.<br/><br/>
 
     Support for multiple UI on the same thread is a feature I'd like to implement in the BETA release. NWG currently
