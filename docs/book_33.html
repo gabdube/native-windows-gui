@@ -36,34 +36,62 @@
 </li>
 <li><a href="book_30.html"><b>3.</b> Basics </a>
 <ul class="section">
-<li><a href="book_31.html"><b>3.1.</b> Ui objects (TODO) </a>
+<li><a href="book_31.html"><b>3.1.</b> Ui objects </a>
 </li>
-<li><a href="book_32.html"><b>3.2.</b> Control templates (TODO) </a>
+<li><a href="book_32.html"><b>3.2.</b> Control templates </a>
 </li>
-<li><a href="book_33.html"><b>3.3.</b> Actions (TODO) </a>
+<li><a href="book_33.html"><b>3.3.</b> Actions </a>
 </li>
 <li><a href="book_34.html"><b>3.4.</b> Events (TODO) </a>
 </li>
 </ul>
 </li>
-<li><a href="book_40.html"><b>4.</b> Controls (TODO) </a>
-<ul class="section">
-<li><a href="book_41.html"><b>4.1.</b> TODO</a>
+<li><a href="book_40.html"><b>4.</b> Built-in Controls (TODO) </a>
 </li>
-</ul>
-</li>
-<li><a href="book_50.html"><b>5.</b> User controls</a>
-<ul class="section">
-<li><a href="book_51.html"><b>5.1.</b> TODO</a>
-</li>
-</ul>
+<li><a href="book_50.html"><b>5.</b> User controls (TODO)</a>
 </li>
 </ul>
 </div>
 
 <div id='page-wrapper'>
 <div id='page'>
-    TODO
+    <h1 class="title">Actions</h1>
+    To execute an action the <code>exec(ID, action) -> Result&lt;ActionReturn, Error&gt;</code> method must be used.
+    The ActionReturn value returned depends on the action sent.<br/><br/>
+
+    The max size of an Action/ActionReturn is 16 bytes. If the action arguments are bigger than 8 bytes, they
+    are boxed. To keep the code readable, NWG has the <code>nwg::actions::helper</code> module to generate
+    these complex actions.<br/><br/>
+
+    <b>Arguments</b><br/>
+    <ul>
+        <li><b>ID</b>: The control id that will execute the action</li>
+        <li><b>action</b>: The action to execute</li>
+    </ul>
+
+    <b>Behaviour</b><br/>
+    <ul>
+        <li>If the action is not supposed to return something <code>ActionReturn::None</code> is returned</li>
+        <li>If the action is not supported on the control, the returned value is a <code>ActionReturn::NotSupported</code></li>
+        <li>If the action was executed, but the result is a failure a <code>ActionReturn::Error</code> is returned</li>
+    </ul>
+
+    <b>Failures</b><br/>
+    <ul>
+        <li>If the control id is not in the Ui a <code>Error::CONTROL_NOT_FOUND</code> is returned. </li>
+    </ul>
+
+    <b>Example</b><br/>
+<div class="syntax"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">ActionReturn</span><span class="o">::</span><span class="n">Text</span><span class="p">(</span><span class="n">name</span><span class="p">))</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">exec</span><span class="p">(</span><span class="s">"Name"</span><span class="p">,</span><span class="w"> </span><span class="n">Action</span><span class="o">::</span><span class="n">GetText</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg</span><span class="o">::</span><span class="n">actions</span><span class="o">::</span><span class="n">helper</span><span class="o">::</span><span class="n">message</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="s">"Hello!"</span><span class="p">,</span><span class="w"> </span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">"Hello {}!"</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">),</span><span class="w"></span>
+<span class="w">         </span><span class="n">MessageButtons</span><span class="o">::</span><span class="nb">Ok</span><span class="p">,</span><span class="w"> </span><span class="n">MessageIcons</span><span class="o">::</span><span class="nb">None</span><span class="w"></span>
+<span class="w">    </span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">ui</span><span class="p">.</span><span class="n">exec</span><span class="p">(</span><span class="s">"MainWindow"</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+    <br/><br/>
 </div>
 </div>
 
