@@ -65,54 +65,131 @@
 <div id='page'>
     <h1 class="title">Ui Objects</h1>
     As explained in getting started, <code>Ui</code> is an opaque abstraction over the GUI. The controls implementation
-    (methods, callbacks, creation, destruction) is therefore hidden behind generic interfaces. Anything that touches the 
+    (methods, callbacks, creation, destruction) are therefore hidden behind generic interfaces. Anything that touches the 
     GUI must be done though the this object. <br/><br/>
     
     <h2 class="title">Usage</h2>
 
-    <h5 class="title">Ui IDs</h5>
+    An ui is created using the <code>new() -> Ui&lt;ID&gt;</code> constructor.<br/><br/>
+
+    <b>About the IDs</b><br/>
     Ui objects use a generic type <code>ID</code> to expose the created controls to the user. This type choice
     is left to the developer, but it must implement the <code>Eq+Clone+Hash</code> traits. It is a good idea to use
     a simple type that don't need to be instanced (ex: u32, &'static str, customs enums) to keep the code clean because
-    the IDs will be used all over your GUI related code.<br/><br/>
+    the IDs will be used all over the place when interacting with the GUI.<br/><br/>
 
     Ids are used to identify controls and events callback. <b>Every control ID defined in a UI must be unique</b>
     This means that if your iterface has 100 controls, it must define 100 IDS.<br/><br/>
     Rules over callback IDS are much more lenient:  Two events callback of the same type on the same control cannot have the same identifier. Duplicate are possible in
     any other combinations (ex: two different events on the same control can have a callback named "foo")<br/><br/>
 
-    <h5 class="title">Creation of controls</h5>
-    To create a control in a Ui, the <code>new_control(ID, template)</code> method must be used.<br/><br/>
-
-    For more informations on control templates see: <a href="book_32.html"><b>3.2.</b> Control templates </a>
+    <b>Freeing</b><br/>
+    Once the Ui goes out of scope, all its controls are removed (see Destruction of controls). The removed callbacks
+    are still called.
     <br/><br/>
-    
-    <h5 class="title">Destruction of controls</h5>
 
-    
+    <b>Failures</b><br/>
+    This constructor cannot fail.<br/><br/>
 
+    <b>Example:</b><br/>
+<div class="syntax"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="o">:</span><span class="w"> </span><span class="n">Ui</span><span class="o">&lt;</span><span class="kt">u32</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Ui</span><span class="o">::</span><span class="n">new</span><span class="p">();</span><span class="w"></span>
+</pre></div>
+
+    <h5 class="title">Creation of controls</h5>
+    To create a control in a Ui, the <code>new_control(ID, template) -> Result&lt;ID, Error&gt;</code> method must be used. If the creation
+    was successful, the ID that was just added is returned otherwise an <code>Err(reason)</code> is returned.<br/><br/>
+
+    <b>Arguments</b><br/>
     <ul>
-    <li>To remove a control from a Ui, the <code>remove_control(ID)</code> method must be used. The only parameter is
-    a control ID that was previously added to the UI.</li>
+        <li><b>ID</b>: The control id that will be used to represent the new control</li>
+        <li><b>template</b>: The control template</li>
+    </ul>
+
+    <b>Behaviour</b><br/>
+    <ul>
+    <li>When the function returns, the control is created and is visible to the user.</li>
+    </ul>
+
+    <b>Failures</b><br/>
+    <ul>
+        <li>If the ID is already taken a <code>Error::CONTROL_EXISTS</code> is returned</li>
+        <li>If there was an error during the template creation a <code>Error::TEMPLATE_CREATION</code> is returned</li>
+    </ul>
+
+    <b>Example:</b><br/>
+<div class="syntax"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="o">:</span><span class="w"> </span><span class="n">Ui</span><span class="o">&lt;&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="kt">str</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Ui</span><span class="o">::</span><span class="n">new</span><span class="p">();</span><span class="w"></span>
+<span class="n">ui</span><span class="p">.</span><span class="n">new_control</span><span class="p">(</span><span class="s">"MainWindow"</span><span class="p">,</span><span class="w"> </span><span class="n">window_template</span><span class="p">).</span><span class="n">expect</span><span class="p">(</span><span class="s">"Something went wrong!"</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+
+    <br/>
+
+    <h5 class="title">Destruction of controls</h5>
+    To remove a control from a Ui, the <code>remove_control(ID) -> Result&ltVec&lt;ID&gt;, Error&gt;</code> method must be used.
+    The method return a <code>Vec</code> of all removed IDS.<br/><br/>
+    
+    <b>Arguments</b><br/>
+    <ul>
+        <li><b>ID</b>: The control id that will be removed</li>
+    </ul>
+
+    <b>Behaviour</b><br/>
+    <ul>
     <li>Removing a control with children also removes the children. </li>
     <li>For every control removed a <code>Event::Removed</code> event is sent.</li>
     <li>All controls are guaranteed to be perfectly alive while the removed callbacks are being executed.</li>
-    <li>The only reason this method could fail is that if the ID sent is not currently in the UI (<code>Error::CONTROL_NOT_FOUND</code>).</li>
     </ul>
-    
-    For more informations on control templates see: <a href="book_32.html"><b>3.2.</b> Control templates </a>
-    <br/><br/>
 
-    <h5 class="title">Adding events to controls</h5>
+    <b>Failures</b><br/>
+    <ul>
+    <li>If the control id is not in the Ui a <code>Error::CONTROL_NOT_FOUND</code> is returned. </li>
+    </ul>
 
-    <br/><br/>
-    For more informations on events see: <a href="book_34.html"><b>3.4.</b> Events </a>
+    <b>Example:</b><br/>
+<div class="syntax"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">removed_ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">remove_control</span><span class="p">(</span><span class="s">"MainWindow"</span><span class="p">).unwrap();</span><span class="w"></span>
+</pre></div>
+
+    <br/>
+    <h5 class="title">Binding/Unbindings events</h5>
+
+
     <br/><br/>
 
     <h5 class="title">Executing actions</h5>
+    To execute an action the <code>exec(ID, action) -> Result&lt;ActionReturn, Error&gt;</code> method must be used.
+    The ActionReturn value returned depends on the action sent.<br/><br/>
 
-    <br/><br/>
-    For more informations on actions see: <a href="book_33.html"><b>3.3.</b> Actions </a>
+    The max size of an Action/ActionReturn is 16 bytes. If the action arguments are bigger than 8 bytes, they
+    are boxed. To keep the code readable, NWG has the <code>nwg::actions::helper</code> module to generate
+    these complex actions.<br/><br/>
+
+    <b>Arguments</b><br/>
+    <ul>
+        <li><b>ID</b>: The control id that will execute the action</li>
+        <li><b>action</b>: The action to execute</li>
+    </ul>
+
+    <b>Behaviour</b><br/>
+    <ul>
+        <li>If the action is not supposed to return something <code>ActionReturn::None</code> is returned</li>
+        <li>If the action is not supported on the control, the returned value is a <code>ActionReturn::NotSupported</code></li>
+        <li>If the action was executed, but the result is a failure a <code>ActionReturn::Error</code> is returned</li>
+    </ul>
+
+    <b>Failures</b><br/>
+    <ul>
+        <li>If the control id is not in the Ui a <code>Error::CONTROL_NOT_FOUND</code> is returned. </li>
+    </ul>
+
+    <b>Example</b><br/>
+<div class="syntax"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">ActionReturn</span><span class="o">::</span><span class="n">Text</span><span class="p">(</span><span class="n">name</span><span class="p">))</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">exec</span><span class="p">(</span><span class="s">"Name"</span><span class="p">,</span><span class="w"> </span><span class="n">Action</span><span class="o">::</span><span class="n">GetText</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg</span><span class="o">::</span><span class="n">actions</span><span class="o">::</span><span class="n">helper</span><span class="o">::</span><span class="n">message</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="s">"Hello!"</span><span class="p">,</span><span class="w"> </span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">"Hello {}!"</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">),</span><span class="w"></span>
+<span class="w">         </span><span class="n">MessageButtons</span><span class="o">::</span><span class="nb">Ok</span><span class="p">,</span><span class="w"> </span><span class="n">MessageIcons</span><span class="o">::</span><span class="nb">None</span><span class="w"></span>
+<span class="w">    </span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">ui</span><span class="p">.</span><span class="n">exec</span><span class="p">(</span><span class="s">"MainWindow"</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
     <br/><br/>
     
     <h2 class="title">Special Behaviour</h2>

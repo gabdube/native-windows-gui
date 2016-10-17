@@ -160,7 +160,7 @@ kind of service. In fact, NWG Ui abstract the whole UI, this means that, as a de
 actual controls</b>.</br></br>
 
 In order to expose the controls to the developer, NWG uses <b>controls IDS</b>. This way, controls can be accessed from
-anywhere in the code without you having drag some kind of data along. <b>The type of the ID is left to the user</b>, but 
+anywhere in the code without you having drag some kind of data along. <b>The type of the ID is choosen by the developer</b>, but 
 the it must implement the <code>Eq+Clone+Hash</code> traits.</br></br>
 
 For this example the control id type is <code>&'static str</code>. Using <code>str</code> is great for visibility,
