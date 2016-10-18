@@ -46,7 +46,7 @@
 </li>
 </ul>
 </li>
-<li><a href="book_40.html"><b>4.</b> List of built-in controls (TODO) </a>
+<li><a href="book_40.html"><b>4.</b> List of built-in controls </a>
 </li>
 <li><a href="book_50.html"><b>5.</b> List of actions (TODO) </a>
 </li>
@@ -73,6 +73,7 @@
         <li><a href="#window">Window</a></li>
     </ul>
     <h2 id="button" class="title"><a href="#contents">Button</a></h2>
+    A rectangle containing an application-defined text label that indicates what the button does when the user selects it. 
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">Button</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
@@ -81,7 +82,28 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"> </span><span class="n">VTextAlign</span><span class="p">),</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>text</b>: The button label</li>
+        <li><b>size</b>: The button size in PX</li>
+        <li><b>position</b>: The button position in its parent</li>
+        <li><b>parent</b>: The button parent</li>
+        <li><b>text_align</b>: The button label alignment</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+        <li><a href="book_60.html#click"><b>Click</b></a></li>
+        <li><a href="book_60.html#focus"><b>Focus</b></a></li>
+        <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
+        <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
+        <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
+
     <h2 id="checkbox" class="title"><a href="#contents">Checkbox</a></h2>
+    A square box and an application-defined label that indicates a choice the user can make by selecting the button. Applications typically display check boxes to enable the user to choose one or more options that are not mutually exclusive.
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">CheckBox</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
@@ -91,7 +113,28 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"> </span><span class="n">VTextAlign</span><span class="p">),</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>text</b>: The checkbox label</li>
+        <li><b>size</b>: The checkbox size in PX</li>
+        <li><b>position</b>: The checkbox position in its parent</li>
+        <li><b>parent</b>: The checkbox parent</li>
+        <li><b>tristate</b>: If the checkbox should have a third state</li>
+        <li><b>text_align</b>: The checkbox label alignment</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+        <li><a href="book_60.html#click"><b>Click</b></a></li>
+        <li><a href="book_60.html#focus"><b>Focus</b></a></li>
+        <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
+        <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
+        <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
     <h2 id="combobox" class="title"><a href="#contents">ComboBox</a></h2>
+    A control consisting of a dropdown menu and a selection field similar to an edit control.
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">ComboBox</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
@@ -100,7 +143,32 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">sorted</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>text</b>: The combobox label</li>
+        <li><b>size</b>: The combobox size in PX</li>
+        <li><b>position</b>: The combobox position in its parent</li>
+        <li><b>parent</b>: The combobox parent</li>
+        <li><b>collection</b>: The items in the combobox dropdown</li>
+        <li><b>sorted</b>: If the dropdown values should be sorted</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+        <li><a href="book_60.html#click"><b>Click</b></a></li>
+        <li><a href="book_60.html#focus"><b>Focus</b></a></li>
+        <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
+        <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
+        <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+        <li><a href="book_60.html#menuclose"><b>MenuClose</b></a></li>
+        <li><a href="book_60.html#menuopen"><b>MenuOpen</b></a></li>
+        <li><a href="book_60.html#selectionchanged"><b>SelectionChanged</b></a></li>
+        <li><a href="book_60.html#valuechanged"><b>ValueChanged</b></a></li>
+    </ul>
+
     <h2 id="frame" class="title"><a href="#contents">Frame</a></h2>
+    A rectangular area with a border. Note: This control will be "enhanced" in future versions.
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">Frame</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
@@ -109,7 +177,27 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">border_color</span><span class="o">:</span><span class="w"> </span><span class="n">FrameBorderColor</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>text</b>: The frame label</li>
+        <li><b>size</b>: The frame size in PX</li>
+        <li><b>position</b>: The frame position in its parent</li>
+        <li><b>parent</b>: The frame parent</li>
+        <li><b>border_style</b>: The style of the frame</li>
+        <li><b>border_color</b>: The color of the frame</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+        <li><a href="book_60.html#click"><b>Click</b></a></li>
+        <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
+        <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
+        <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
     <h2 id="groupbox" class="title"><a href="#contents">GroupBox</a></h2>
+    A rectangle that surrounds a set of controls, such as check boxes or radio buttons, with an application-defined text label in its upper left corner.
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">GroupBox</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
@@ -118,7 +206,22 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>text</b>: The group box label</li>
+        <li><b>size</b>: The group box size in PX</li>
+        <li><b>position</b>: The group box position in its parent</li>
+        <li><b>parent</b>: The group box parent</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+        <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
     <h2 id="label" class="title"><a href="#contents">Label</a></h2>
+    A static text string
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">Label</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
@@ -127,7 +230,26 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>text</b>: The label text</li>
+        <li><b>size</b>: The label size in PX</li>
+        <li><b>position</b>: The label position in its parent</li>
+        <li><b>parent</b>: The label parent</li>
+        <li><b>text_align</b>: Text align of the label</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+    <li><a href="book_60.html#click"><b>Click</b></a></li>
+    <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
+    <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
+    <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
     <h2 id="radiobtn" class="title"><a href="#contents">RadioButton</a></h2>
+    A round button and an application-defined label that indicates a choice the user can make by selecting the button. An application typically uses radio buttons in a group box to enable the user to choose one of a set of related but mutually exclusive options.
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">RadioButton</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
@@ -136,7 +258,27 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"> </span><span class="n">VTextAlign</span><span class="p">),</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>text</b>: The radio button label</li>
+        <li><b>size</b>: The radio button size in PX</li>
+        <li><b>position</b>: The radio button position in its parent</li>
+        <li><b>parent</b>: The radio button parent</li>
+        <li><b>text_align</b>: Text align of the radio button</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+    <li><a href="book_60.html#click"><b>Click</b></a></li>
+    <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
+    <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
+    <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    <li><a href="book_60.html#focus"><b>Focus</b></a></li>
+    </ul>
+
     <h2 id="textbox" class="title"><a href="#contents">TextBox</a></h2>
+    Designates a rectangular child window into which the user can type text from the keyboard. Single line. Multiline.
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">TextBox</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
@@ -145,7 +287,28 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">readonly</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>text</b>: The text box label</li>
+        <li><b>size</b>: The text box in PX</li>
+        <li><b>position</b>: The text box position in its parent</li>
+        <li><b>parent</b>: The text box parent</li>
+        <li><b>readonly</b>: if the control should reject key events</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+    <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
+    <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
+    <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    <li><a href="book_60.html#focus"><b>Focus</b></a></li>
+    <li><a href="book_60.html#maxvalue"><b>MaxValue</b></a></li>
+    <li><a href="book_60.html#valuechanged"><b>ValueChanged</b></a></li>
+    </ul>
+
     <h2 id="textinput" class="title"><a href="#contents">TextInput</a></h2>
+    Designates a rectangular child window into which the user can type text from the keyboard. Single line.
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">TextInput</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
@@ -157,7 +320,32 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">readonly</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>text</b>: The group box label</li>
+        <li><b>size</b>: The group box in PX</li>
+        <li><b>position</b>: The group box position in its parent</li>
+        <li><b>parent</b>: The group box parent</li>
+        <li><b>placeholder</b>: String of text to show when the value is blank</li>
+        <li><b>text_align</b>: Text alignment</li>
+        <li><b>password</b>: Hide the user input</li>
+        <li><b>readonly</b>: if the control should reject key events</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+    <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
+    <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
+    <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    <li><a href="book_60.html#focus"><b>Focus</b></a></li>
+    <li><a href="book_60.html#maxvalue"><b>MaxValue</b></a></li>
+    <li><a href="book_60.html#valuechanged"><b>ValueChanged</b></a></li>
+    </ul>
+
     <h2 id="window" class="title"><a href="#contents">Window</a></h2>
+    A moveable and resizable rectangular area that contains children controls. Has a non-client area with a title and a few options
+    such as closing and minimizing.  
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">caption</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
@@ -167,6 +355,25 @@
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">exit_on_close</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+    <b>Members</b><br/>
+    <ul>
+        <li><b>caption</b>: The group box label</li>
+        <li><b>size</b>: The group box in PX</li>
+        <li><b>position</b>: The group box position in its parent</li>
+        <li><b>visible</b>: If the window should be visible from the start</li>
+        <li><b>resize</b>: If the user should be able to resize the window</li>
+        <li><b>exit_on_close</b>: If the application should close with the window</li>
+    </ul>
+
+    <b>Events</b><br/>
+    <ul>
+    <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
+    <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
+    <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    <li><a href="book_60.html#focus"><b>Focus</b></a></li>
+    </ul>
+
     <br/><br/>
 </div>
 </div>
