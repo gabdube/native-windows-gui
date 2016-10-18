@@ -60,6 +60,113 @@
 <div id='page-wrapper'>
 <div id='page'>
     <h1 class="title">All controls</h1>
+    <ul>
+        <li><a href="#button">Button</a></li>
+        <li><a href="#checkbox">Checkbox</a></li>
+        <li><a href="#combobox">ComboBox</a></li>
+        <li><a href="#frame">Frame</a></li>
+        <li><a href="#groupbox">GroupBox</a></li>
+        <li><a href="#label">Label</a></li>
+        <li><a href="#radiobtn">RadioButton</a></li>
+        <li><a href="#textbox">TextBox</a></li>
+        <li><a href="#textinput">TextInput</a></li>
+        <li><a href="#window">Window</a></li>
+    </ul>
+    <h2 id="button" class="title"><a href="#contents">Button</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">Button</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="n">ID</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"> </span><span class="n">VTextAlign</span><span class="p">),</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+    <h2 id="checkbox" class="title"><a href="#contents">Checkbox</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">CheckBox</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="n">ID</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">tristate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"> </span><span class="n">VTextAlign</span><span class="p">),</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+    <h2 id="combobox" class="title"><a href="#contents">ComboBox</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">ComboBox</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="n">ID</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">collection</span><span class="o">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">sorted</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+    <h2 id="frame" class="title"><a href="#contents">Frame</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">Frame</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="n">ID</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">border_style</span><span class="o">:</span><span class="w"> </span><span class="n">FrameBorderStyle</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">border_color</span><span class="o">:</span><span class="w"> </span><span class="n">FrameBorderColor</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+    <h2 id="groupbox" class="title"><a href="#contents">GroupBox</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">GroupBox</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="n">ID</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+    <h2 id="label" class="title"><a href="#contents">Label</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">Label</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="n">ID</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+    <h2 id="radiobtn" class="title"><a href="#contents">RadioButton</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">RadioButton</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="n">ID</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"> </span><span class="n">VTextAlign</span><span class="p">),</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+    <h2 id="textbox" class="title"><a href="#contents">TextBox</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">TextBox</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="n">ID</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">readonly</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+    <h2 id="textinput" class="title"><a href="#contents">TextInput</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">TextInput</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">parent</span><span class="o">:</span><span class="w"> </span><span class="n">ID</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">placeholder</span><span class="o">:</span><span class="w"> </span><span class="nb">Option</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text_align</span><span class="o">:</span><span class="w"> </span><span class="n">HTextAlign</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">password</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">readonly</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+    <h2 id="window" class="title"><a href="#contents">Window</a></h2>
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">caption</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">position</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">visible</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">resizable</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">exit_on_close</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
     <br/><br/>
 </div>
 </div>
