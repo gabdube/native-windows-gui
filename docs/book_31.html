@@ -52,18 +52,18 @@
 </li>
 <li><a href="book_60.html"><b>6.</b> List of events (TODO) </a>
 </li>
-<li><a href="book_70.html"><b>7.</b> User controls (TODO)</a>
+<li><a href="book_70.html"><b>7.</b> User controls</a>
 </ul>
 </div>
 
 <div id='page-wrapper'>
 <div id='page'>
-    <h1 class="title">Ui Objects</h1>
+    <h1 class="title">About the Ui</h1>
     As explained in getting started, <code>Ui</code> is an opaque abstraction over the GUI. The controls implementation
     (methods, callbacks, creation, destruction) are therefore hidden behind generic interfaces. Anything that touches the 
     GUI must be done though the this object. <br/><br/>
     
-    <h2 class="title">Usage</h2>
+    <h2 id="ui_usage" class="title"><a href="#ui_usage">Usage</a></h2>
 
     An ui is created using the <code>new() -> Ui&lt;ID&gt;</code> constructor.<br/><br/>
 
@@ -92,7 +92,7 @@
 
     <br/>
      
-    <h2 class="title">Special Behaviour</h2><br/>
+    <h2 id="ui_special" class="title"><a href="#ui_special">Special Behaviour</a></h2><br/>
     <h5 class="title">Multithreading</h5>
     The object is single threaded. This is a system restriction, and it will not go away. Nothing stops you to
     to create a different UI on each thread though <b>(NOT TESTED)</b>.

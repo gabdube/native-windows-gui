@@ -52,13 +52,24 @@
 </li>
 <li><a href="book_60.html"><b>6.</b> List of events (TODO) </a>
 </li>
-<li><a href="book_70.html"><b>7.</b> User controls (TODO)</a>
+<li><a href="book_70.html"><b>7.</b> User controls</a>
 </ul>
 </div>
 
 <div id='page-wrapper'>
 <div id='page'>
-    <h1 class="title">Binding events</h1>
+
+    <h1 class="title">About events</h1>
+    Events is what NWG uses to respond to user events. Event callbacks are bound and unbound to controls
+    through the Ui.<br/><br/>
+    
+    The <code>EventCallback</code> enum describe the callback arguments. All callback arguments are guaranteed
+    to start with <code>|ui, caller|</code>. Where ui is the Ui that owns the control and caller is the ID
+    of control the triggered the event.<br/><br/>
+
+    For a list of all built-in events see <a href="book_60.html"><b>6.</b> List of events </a>.
+
+    <h2 id="binding" class="title"><a href="#binding">Binding events</a></h2>
     To bind an event to a control the <code>bind(ID, cb_ID, callback) -> Result&lt;(), Error&gt;</code>
     method must be used. Unlike with actions, trying to bind an event that is not supported by a 
     control will return an Error.
@@ -70,6 +81,11 @@
         <li><b>cb_ID</b>: A callback identifier for unbinding</li>
         <li><b>callback</b>: A EventCallback enum that contains the function or the closure</li>
     </ul>
+
+    <b>Behaviour</b><br/>
+     <ul>
+        <li>Callbacks are executed in the order they where added </li>
+     </ul>
 
     <b>Failure</b><br/>
     <ul>
@@ -85,7 +101,7 @@
 <span class="p">}))).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 
-    <h1 class="title">Unbinding events</h1>
+    <h2 id="unbinding" class="title"><a href="#unbinding">Unbinding events</a></h2>
     To unbind an event to a control the <code>unbind(ID, cb_ID, event) -> Result&lt;(), Error&gt;</code>
     method must be used.<br/><br/>
 
@@ -109,7 +125,7 @@
 <div class="syntax"><pre><span></span><span class="n">ui</span><span class="p">.</span><span class="n">unbind</span><span class="p">(</span><span class="s">"HelloBtn"</span><span class="p">,</span><span class="w"> </span><span class="s">"SayHello"</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span><span class="o">::</span><span class="n">Click</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 
-    <h1 class="title">Listening for events</h1>
+    <h2 id="listening" class="title"><a href="#listening">Listening for events</a></h2>
     Once your setup is completed, the <code>nwg::dispatch_events()</code> function must be called 
     in order to block the thread and process the system events. The function will return
      once a <b>Quit (WM_QUIT)</b> event is received.<br/><br/>

@@ -52,19 +52,26 @@
 </li>
 <li><a href="book_60.html"><b>6.</b> List of events (TODO) </a>
 </li>
-<li><a href="book_70.html"><b>7.</b> User controls (TODO)</a>
+<li><a href="book_70.html"><b>7.</b> User controls</a>
 </ul>
 </div>
 
 <div id='page-wrapper'>
 <div id='page'>
-    <h1 class="title">Actions</h1>
-    To execute an action the <code>exec(ID, action) -> Result&lt;ActionReturn, Error&gt;</code> method must be used.
-    The ActionReturn value returned depends on the action sent.<br/><br/>
+    <h1 class="title">About actions</h1>
+    Actions what NWG uses to do stuff on controls during the execution of the program. Actions are sent
+    through the Ui, then the Ui dispatches the action to the targeted control. After execution of the action
+    by the control, an <b>ActionReturn</b> is returned.<br/><br/>
 
     The max size of an Action/ActionReturn is 16 bytes. If the action arguments are bigger than 8 bytes, they
     are boxed. To keep the code readable, NWG has the <code>nwg::actions::helper</code> module to generate
     these complex actions.<br/><br/>
+
+    For a list of all built-in actions see <a href="book_50.html"><b>5.</b> List of actions </a>.
+
+    <h2 id="exec" class="title"><a href="#exec">Executing actions</a></h2>
+    To execute an action the <code>exec(ID, action) -> Result&lt;ActionReturn, Error&gt;</code> method must be used.
+    The ActionReturn value returned depends on the action sent.<br/><br/>
 
     <b>Arguments</b><br/>
     <ul>

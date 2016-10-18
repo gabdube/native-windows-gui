@@ -52,13 +52,25 @@
 </li>
 <li><a href="book_60.html"><b>6.</b> List of events (TODO) </a>
 </li>
-<li><a href="book_70.html"><b>7.</b> User controls (TODO)</a>
+<li><a href="book_70.html"><b>7.</b> User controls</a>
 </ul>
 </div>
 
 <div id='page-wrapper'>
 <div id='page'>
-   <h1 class="title">Controls creation</h1>
+   <h1 class="title">About control templates</h1>
+
+   Control templates are transparent structures that describe a control in details. A control template must
+   implement the <code>ControlTemplate</code> trait.<br/><br/>
+
+   Unlike other GUI toolkit where it's possible to create controls with very little required informations
+   (aka sane defaults), in NWG every parameter must be defined in the template beforehand. The reason behind
+   that is that nowdays, GUI are mostly done though markup languages or WYSIWYG interfaces and predefined
+   templates make it easier to create those tools.<br/><br/>
+
+   For a list of all built-in control template see <a href="book_40.html"><b>4.</b> List of built-in controls </a>.
+
+   <h2 id="cont1" class="title"><a href="#cont1">Controls creation</a></h2>
     To create a control in a Ui, the <code>new_control(ID, template) -> Result&lt;ID, Error&gt;</code> method must be used. If the creation
     was successful, the ID that was just added is returned otherwise an <code>Error</code> enum is returned.<br/><br/>
 
@@ -86,7 +98,7 @@
 
     <br/>
 
-    <h1 class="title">Controls destruction</h1>
+    <h2 id="cont2" class="title"><a href="#cont2">Controls destruction</a></h2>
     To remove a control from a Ui, the <code>remove_control(ID) -> Result&ltVec&lt;ID&gt;, Error&gt;</code> method must be used.
     The method return a <code>Vec</code> of all removed IDS.<br/><br/>
     
