@@ -89,7 +89,6 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for ComboBox<ID> {
     fn evaluator(&self) -> ::ActionEvaluator<ID> {
         Box::new( |ui, id, handle, action| {
             match action {
-                Action::SetText(t) => set_window_text(handle, *t),
                 Action::GetText => get_window_text(handle),
                 Action::GetPosition => get_window_pos(handle, true),
                 Action::SetPosition(x, y) => set_window_pos(handle, x, y),

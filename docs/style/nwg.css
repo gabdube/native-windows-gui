@@ -1,0 +1,6 @@
+input[id^="spoiler"] + label.arrow::before { content: "▼"; }
+input[id^="spoiler"]:checked + label.arrow::before  { content: "▲"; }
+label.arrow { cursor: pointer; }
+input[id^="spoiler"]{ display: none; }
+input[id^="spoiler"] + label + .spoiler { margin: 5px 0; opacity: 0; height: 0; overflow: hidden; }
+input[id^="spoiler"]:checked + label + .spoiler { opacity: 1; height: auto; }

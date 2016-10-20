@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
     <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
     
 </head>
 <body class="rustdoc">
@@ -83,8 +84,8 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
+    <b>Members</b> <input id='spoiler_cb0' type='checkbox'></input><label class='arrow' for='spoiler_cb0'></label>
+    <ul class="spoiler">
         <li><b>text</b>: The button label</li>
         <li><b>size</b>: The button size in PX</li>
         <li><b>position</b>: The button position in its parent</li>
@@ -92,13 +93,30 @@
         <li><b>text_align</b>: The button label alignment</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb1' type='checkbox'></input><label class='arrow' for='spoiler_cb1'></label>
+    <ul class="spoiler">
         <li><a href="book_60.html#click"><b>Click</b></a></li>
         <li><a href="book_60.html#focus"><b>Focus</b></a></li>
         <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
         <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
         <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
+    <b>Actions</b> <input id='spoiler_cb20' type='checkbox'></input><label class='arrow' for='spoiler_cb20'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#settext"><b>SetText</b></a>: Set the button label text</li>
+        <li><a href="book_50.html#gettext"><b>GetText</b></a>: Return the button label text</li>
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getparent"><b>GetParent</b></a>: Return the id of the parent</li>
+        <li><a href="book_50.html#setparent"><b>SetParent</b></a>: Set the parent of the control</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::Button</code></li>
     </ul>
 
 
@@ -114,8 +132,8 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
+    <b>Members</b> <input id='spoiler_cb2' type='checkbox'></input><label class='arrow' for='spoiler_cb2'></label>
+    <ul class="spoiler">
         <li><b>text</b>: The checkbox label</li>
         <li><b>size</b>: The checkbox size in PX</li>
         <li><b>position</b>: The checkbox position in its parent</li>
@@ -124,13 +142,33 @@
         <li><b>text_align</b>: The checkbox label alignment</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb3' type='checkbox'></input><label class='arrow' for='spoiler_cb3'></label>
+    <ul class="spoiler">
         <li><a href="book_60.html#click"><b>Click</b></a></li>
         <li><a href="book_60.html#focus"><b>Focus</b></a></li>
         <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
         <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
         <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
+    <b>Actions</b> <input id='spoiler_cb21' type='checkbox'></input><label class='arrow' for='spoiler_cb21'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#settext"><b>SetText</b></a>: Set the checkbox label text</li>
+        <li><a href="book_50.html#gettext"><b>GetText</b></a>: Return the checkbox label text</li>
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getparent"><b>GetParent</b></a>: Return the id of the parent</li>
+        <li><a href="book_50.html#setparent"><b>SetParent</b></a>: Set the parent of the control</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::CheckBox</code></li>
+        <li><a href="book_50.html#reset"><b>Reset</b></a>: Set the check state to unchecked</li>
+        <li><a href="book_50.html#getcheckstate"><b>GetCheckState</b></a>: Get the check state of the control</li>
+        <li><a href="book_50.html#setcheckstate"><b>SetCheckState</b></a>: Set the check state of the control</li>
     </ul>
 
     <h2 id="combobox" class="title"><a href="#contents">ComboBox</a></h2>
@@ -144,8 +182,8 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
+    <b>Members</b> <input id='spoiler_cb4' type='checkbox'></input><label class='arrow' for='spoiler_cb4'></label>
+    <ul class="spoiler">
         <li><b>text</b>: The combobox label</li>
         <li><b>size</b>: The combobox size in PX</li>
         <li><b>position</b>: The combobox position in its parent</li>
@@ -154,8 +192,8 @@
         <li><b>sorted</b>: If the dropdown values should be sorted</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb5' type='checkbox'></input><label class='arrow' for='spoiler_cb5'></label>
+    <ul class="spoiler">
         <li><a href="book_60.html#click"><b>Click</b></a></li>
         <li><a href="book_60.html#focus"><b>Focus</b></a></li>
         <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
@@ -165,6 +203,37 @@
         <li><a href="book_60.html#menuopen"><b>MenuOpen</b></a></li>
         <li><a href="book_60.html#selectionchanged"><b>SelectionChanged</b></a></li>
         <li><a href="book_60.html#valuechanged"><b>ValueChanged</b></a></li>
+    </ul>
+
+    <b>Actions</b> <input id='spoiler_cb22' type='checkbox'></input><label class='arrow' for='spoiler_cb22'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#gettext"><b>GetText</b></a>: Return the text of the selected item</li>
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getparent"><b>GetParent</b></a>: Return the id of the parent</li>
+        <li><a href="book_50.html#setparent"><b>SetParent</b></a>: Set the parent of the control</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::ComboBox</code></li>
+        <li><a href="book_50.html#reset"><b>Reset</b></a>: Remove all items from the combobox</li>
+
+        <li><a href="book_50.html#getselectedindex"><b>GetSelectedIndex</b></a>: Return the index of the selected item</li>
+        <li><a href="book_50.html#setselectedindex"><b>SetSelectedIndex</b></a>: Set the selected item identifier by the its index</li>
+        <li><a href="book_50.html#getdropdownvisibility"><b>GetDropdownVisibility</b></a>: Check if the combobox dropdown is visible</li>
+        <li><a href="book_50.html#setdropdownvisibility"><b>SetDropdownVisibility</b></a>: Hide or show the combobox dropdown</li>
+        <li><a href="book_50.html#addstring"><b>AddString</b></a>: Add an item a the end of the dropdown (unless it is sorted)</li>
+        <li><a href="book_50.html#findstring"><b>FindString</b></a>: Find the index of an item in the dropdown</li>
+        <li><a href="book_50.html#removestring"><b>RemoveString</b></a>: Remove the selected string from the dropdown collection</li>
+        <li><a href="book_50.html#insertstring"><b>InsertString</b></a>: Insert an item in the control</li>
+        <li><a href="book_50.html#getindexedstring"><b>GetIndexedString</b></a>: Return the string at the specified index</li>
+        <li><a href="book_50.html#getstringcollection"><b>GetStringCollection</b></a>: Return all the item contained in the dropdown</li>
+        <li><a href="book_50.html#setstringcollection"><b>SetStringCollection</b></a>: Replace the content of the dropdown</li>
+        <li><a href="book_50.html#removeindexitem"><b>RemoveIndexedItem</b></a>: Remove an item at the specified index</li>
+        <li><a href="book_50.html#countitems"><b>CountItems</b></a>: return the number of items in the combobox</li>
     </ul>
 
     <h2 id="frame" class="title"><a href="#contents">Frame</a></h2>
@@ -178,8 +247,8 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
+    <b>Members</b> <input id='spoiler_cb6' type='checkbox'></input><label class='arrow' for='spoiler_cb6'></label>
+    <ul class="spoiler">
         <li><b>text</b>: The frame label</li>
         <li><b>size</b>: The frame size in PX</li>
         <li><b>position</b>: The frame position in its parent</li>
@@ -188,12 +257,27 @@
         <li><b>border_color</b>: The color of the frame</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb7' type='checkbox'></input><label class='arrow' for='spoiler_cb7'></label>
+    <ul class="spoiler">
         <li><a href="book_60.html#click"><b>Click</b></a></li>
         <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
         <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
         <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
+    <b>Actions</b> <input id='spoiler_cb23' type='checkbox'></input><label class='arrow' for='spoiler_cb23'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getparent"><b>GetParent</b></a>: Return the id of the parent</li>
+        <li><a href="book_50.html#setparent"><b>SetParent</b></a>: Set the parent of the control</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::Frame</code></li>
     </ul>
 
     <h2 id="groupbox" class="title"><a href="#contents">GroupBox</a></h2>
@@ -207,17 +291,34 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
+    <b>Members</b> <input id='spoiler_cb8' type='checkbox'></input><label class='arrow' for='spoiler_cb8'></label>
+    <ul class="spoiler">
         <li><b>text</b>: The group box label</li>
         <li><b>size</b>: The group box size in PX</li>
         <li><b>position</b>: The group box position in its parent</li>
         <li><b>parent</b>: The group box parent</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb9' type='checkbox'></input><label class='arrow' for='spoiler_cb9'></label>
+    <ul class="spoiler">
         <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
+    <b>Actions</b> <input id='spoiler_cb24' type='checkbox'></input><label class='arrow' for='spoiler_cb24'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#settext"><b>SetText</b></a>: Set the groupbox label text</li>
+        <li><a href="book_50.html#gettext"><b>GetText</b></a>: Return the groupbox label text</li>
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getparent"><b>GetParent</b></a>: Return the id of the parent</li>
+        <li><a href="book_50.html#setparent"><b>SetParent</b></a>: Set the parent of the control</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::GroupBox</code></li>
     </ul>
 
     <h2 id="label" class="title"><a href="#contents">Label</a></h2>
@@ -231,8 +332,8 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
+    <b>Members</b>  <input id='spoiler_cb10' type='checkbox'></input><label class='arrow' for='spoiler_cb10'></label>
+    <ul class="spoiler">
         <li><b>text</b>: The label text</li>
         <li><b>size</b>: The label size in PX</li>
         <li><b>position</b>: The label position in its parent</li>
@@ -240,12 +341,29 @@
         <li><b>text_align</b>: Text align of the label</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb11' type='checkbox'></input><label class='arrow' for='spoiler_cb11'></label>
+    <ul class="spoiler">
     <li><a href="book_60.html#click"><b>Click</b></a></li>
     <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
     <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
     <li><a href="book_60.html#removed"><b>Removed</b></a></li>
+    </ul>
+
+    <b>Actions</b> <input id='spoiler_cb25' type='checkbox'></input><label class='arrow' for='spoiler_cb25'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#settext"><b>SetText</b></a>: Set the label text</li>
+        <li><a href="book_50.html#gettext"><b>GetText</b></a>: Return the label text</li>
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getparent"><b>GetParent</b></a>: Return the id of the parent</li>
+        <li><a href="book_50.html#setparent"><b>SetParent</b></a>: Set the parent of the control</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::Label</code></li>
     </ul>
 
     <h2 id="radiobtn" class="title"><a href="#contents">RadioButton</a></h2>
@@ -259,8 +377,8 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
+    <b>Members</b> <input id='spoiler_cb12' type='checkbox'></input><label class='arrow' for='spoiler_cb12'></label>
+    <ul class="spoiler"> 
         <li><b>text</b>: The radio button label</li>
         <li><b>size</b>: The radio button size in PX</li>
         <li><b>position</b>: The radio button position in its parent</li>
@@ -268,8 +386,8 @@
         <li><b>text_align</b>: Text align of the radio button</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb13' type='checkbox'></input><label class='arrow' for='spoiler_cb13'></label>
+    <ul class="spoiler">
     <li><a href="book_60.html#click"><b>Click</b></a></li>
     <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
     <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
@@ -277,8 +395,28 @@
     <li><a href="book_60.html#focus"><b>Focus</b></a></li>
     </ul>
 
+    <b>Actions</b> <input id='spoiler_cb26' type='checkbox'></input><label class='arrow' for='spoiler_cb26'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#settext"><b>SetText</b></a>: Set the radiobutton label text</li>
+        <li><a href="book_50.html#gettext"><b>GetText</b></a>: Return the radiobutton label text</li>
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getparent"><b>GetParent</b></a>: Return the id of the parent</li>
+        <li><a href="book_50.html#setparent"><b>SetParent</b></a>: Set the parent of the control</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::RadioButton</code></li>
+        <li><a href="book_50.html#reset"><b>Reset</b></a>: Set the check state to unchecked</li>
+        <li><a href="book_50.html#getcheckstate"><b>GetCheckState</b></a>: Get the check state of the control</li>
+        <li><a href="book_50.html#setcheckstate"><b>SetCheckState</b></a>: Set the check state of the control</li>
+    </ul>
+
     <h2 id="textbox" class="title"><a href="#contents">TextBox</a></h2>
-    Designates a rectangular child window into which the user can type text from the keyboard. Single line. Multiline.
+    Designates a rectangular child window into which the user can type text from the keyboard. Multiline.
 <div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="n">TextBox</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="nb">Eq</span><span class="o">+</span><span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">size</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
@@ -288,23 +426,49 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
-        <li><b>text</b>: The text box label</li>
-        <li><b>size</b>: The text box in PX</li>
+    <b>Members</b> <input id='spoiler_cb14' type='checkbox'></input><label class='arrow' for='spoiler_cb14'></label>
+    <ul class="spoiler">
+        <li><b>text</b>: The textbox default value</li>
+        <li><b>size</b>: The text box size in PX</li>
         <li><b>position</b>: The text box position in its parent</li>
         <li><b>parent</b>: The text box parent</li>
         <li><b>readonly</b>: if the control should reject key events</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb15' type='checkbox'></input><label class='arrow' for='spoiler_cb15'></label>
+    <ul class="spoiler">
     <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
     <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
     <li><a href="book_60.html#removed"><b>Removed</b></a></li>
     <li><a href="book_60.html#focus"><b>Focus</b></a></li>
     <li><a href="book_60.html#maxvalue"><b>MaxValue</b></a></li>
     <li><a href="book_60.html#valuechanged"><b>ValueChanged</b></a></li>
+    </ul>
+
+    <b>Actions</b> <input id='spoiler_cb27' type='checkbox'></input><label class='arrow' for='spoiler_cb27'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#settext"><b>SetText</b></a>: Set the checkbox label text</li>
+        <li><a href="book_50.html#gettext"><b>GetText</b></a>: Return the checkbox label text</li>
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getparent"><b>GetParent</b></a>: Return the id of the parent</li>
+        <li><a href="book_50.html#setparent"><b>SetParent</b></a>: Set the parent of the control</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::TextBox</code></li>
+        <li><a href="book_50.html#reset"><b>Reset</b></a>: Remove the text of the textbox</li>
+
+        <li><a href="book_50.html#gettextlimit"><b>GetTextLimit</b></a>: Get the maximum number of characters that are allowed in the control </li>
+        <li><a href="book_50.html#settextlimit"><b>SetTextLimit</b></a>: Set the maximum number of characters that are allowed in the control</li>
+        <li><a href="book_50.html#getselectedbounds"><b>GetSelectedBounds</b></a>: Get a index range of selected characters</li>
+        <li><a href="book_50.html#setselectedbounds"><b>SetSelectedBounds</b></a>: Set the index range of selected characters</li>
+        <li><a href="book_50.html#getreadonly"><b>GetReadonly</b></a>: Check if the control ignore keypresses</li>
+        <li><a href="book_50.html#setreadonly"><b>SetReadonly</b></a>: Allow or disallow text change for the textbox</li>
+        <li><a href="book_50.html#undo"><b>Undo</b></a>: Undo the last action taken. Executed twice undo the "undo"</li>
     </ul>
 
     <h2 id="textinput" class="title"><a href="#contents">TextInput</a></h2>
@@ -321,26 +485,54 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
-        <li><b>text</b>: The group box label</li>
-        <li><b>size</b>: The group box in PX</li>
-        <li><b>position</b>: The group box position in its parent</li>
-        <li><b>parent</b>: The group box parent</li>
+    <b>Members</b> <input id='spoiler_cb16' type='checkbox'></input><label class='arrow' for='spoiler_cb16'></label>
+    <ul class="spoiler">
+        <li><b>text</b>: The text input default text</li>
+        <li><b>size</b>: The text input size in PX</li>
+        <li><b>position</b>: The text input position in its parent</li>
+        <li><b>parent</b>: The textinput  parent</li>
         <li><b>placeholder</b>: String of text to show when the value is blank</li>
         <li><b>text_align</b>: Text alignment</li>
         <li><b>password</b>: Hide the user input</li>
         <li><b>readonly</b>: if the control should reject key events</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb17' type='checkbox'></input><label class='arrow' for='spoiler_cb17'></label>
+    <ul class="spoiler">
     <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
     <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
     <li><a href="book_60.html#removed"><b>Removed</b></a></li>
     <li><a href="book_60.html#focus"><b>Focus</b></a></li>
     <li><a href="book_60.html#maxvalue"><b>MaxValue</b></a></li>
     <li><a href="book_60.html#valuechanged"><b>ValueChanged</b></a></li>
+    </ul>
+
+    <b>Actions</b> <input id='spoiler_cb28' type='checkbox'></input><label class='arrow' for='spoiler_cb28'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#settext"><b>SetText</b></a>: Set the checkbox label text</li>
+        <li><a href="book_50.html#gettext"><b>GetText</b></a>: Return the checkbox label text</li>
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getparent"><b>GetParent</b></a>: Return the id of the parent</li>
+        <li><a href="book_50.html#setparent"><b>SetParent</b></a>: Set the parent of the control</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::TextInput</code></li>
+        <li><a href="book_50.html#reset"><b>Reset</b></a>: Remove the text of the input</li>
+
+        <li><a href="book_50.html#gettextlimit"><b>GetTextLimit</b></a>: Get the maximum number of characters that are allowed in the control </li>
+        <li><a href="book_50.html#settextlimit"><b>SetTextLimit</b></a>: Set the maximum number of characters that are allowed in the control</li>
+        <li><a href="book_50.html#getselectedbounds"><b>GetSelectedBounds</b></a>: Get a index range of selected characters</li>
+        <li><a href="book_50.html#setselectedbounds"><b>SetSelectedBounds</b></a>: Set the index range of selected characters</li>
+        <li><a href="book_50.html#getreadonly"><b>GetReadonly</b></a>: Check if the control ignore keypresses</li>
+        <li><a href="book_50.html#setreadonly"><b>SetReadonly</b></a>: Allow or disallow text change for the textbox</li>
+        <li><a href="book_50.html#getplaceholder"><b>GetPlaceHolder</b></a>: Get the placeholder text</li>
+        <li><a href="book_50.html#setplaceholder"><b>SetPlaceHolder</b></a>: Set the placeholder text</li>
+        <li><a href="book_50.html#undo"><b>Undo</b></a>: Undo the last action taken. Executed twice undo the "undo"</li>
     </ul>
 
     <h2 id="window" class="title"><a href="#contents">Window</a></h2>
@@ -356,8 +548,8 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
-    <b>Members</b><br/>
-    <ul>
+    <b>Members</b> <input id='spoiler_cb18' type='checkbox'></input><label class='arrow' for='spoiler_cb18'></label>
+    <ul class="spoiler">
         <li><b>caption</b>: The group box label</li>
         <li><b>size</b>: The group box in PX</li>
         <li><b>position</b>: The group box position in its parent</li>
@@ -366,13 +558,32 @@
         <li><b>exit_on_close</b>: If the application should close with the window</li>
     </ul>
 
-    <b>Events</b><br/>
-    <ul>
+    <b>Events</b> <input id='spoiler_cb19' type='checkbox'></input><label class='arrow' for='spoiler_cb19'></label>
+    <ul class="spoiler">
     <li><a href="book_60.html#mouseup"><b>MouseUp</b></a></li>
     <li><a href="book_60.html#mousedown"><b>MouseDown</b></a></li>
     <li><a href="book_60.html#removed"><b>Removed</b></a></li>
     <li><a href="book_60.html#focus"><b>Focus</b></a></li>
     </ul>
+
+    <b>Actions</b> <input id='spoiler_cb29' type='checkbox'></input><label class='arrow' for='spoiler_cb29'></label>
+    <ul class="spoiler">
+        <li><a href="book_50.html#settext"><b>SetText</b></a>: Set the window title</li>
+        <li><a href="book_50.html#gettext"><b>GetText</b></a>: Get the window title</li>
+        <li><a href="book_50.html#getposition"><b>GetPosition</b></a>: Return the position of the control</li>
+        <li><a href="book_50.html#setposition"><b>SetPosition</b></a>: Set the widget position</li>
+        <li><a href="book_50.html#getsize"><b>GetSize</b></a>: Return the size of the control</li>
+        <li><a href="book_50.html#setsize"><b>SetSize</b></a>: Set the control size</li>
+        <li><a href="book_50.html#getenabled"><b>GetEnabled</b></a>: Check if the control is either enabled or not</li>
+        <li><a href="book_50.html#setenabled"><b>SetEnabled</b></a>: Disable or enable the control</li>
+        <li><a href="book_50.html#getvisibility"><b>GetVisibility</b></a>: Check if the control is either visible or not</li>
+        <li><a href="book_50.html#setvisibility"><b>SetVisibility</b></a>: Show or hide the control</li>
+        <li><a href="book_50.html#getcontroltype"><b>GetControlType</b></a>: Returns <code>constants::ControlType::Window</code></li>
+
+        <li><a href="book_50.html#getwindowdisplay"><b>GetWindowDisplay</b></a>: Get the window state (maxized, minimized, normal) </li>
+        <li><a href="book_50.html#setwindowdisplay"><b>SetWindowDisplay</b></a>: Set the window state (maxized, minimized, normal)</li>
+        <li><a href="book_50.html#close"><b>Close</b></a>: Close the window</li>
+    </ul
 
     <br/><br/>
 </div>
