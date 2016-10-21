@@ -71,7 +71,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for GroupBox<ID> {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::Removed]
+        vec![Event::Removed, Event::Resize,]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {

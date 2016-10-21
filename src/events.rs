@@ -29,6 +29,7 @@ pub type Ef4<ID, A, B, C, D> = Box<Fn(&mut ::Ui<ID>, &ID, A, B, C, D)>;
 pub enum Event {
     MouseUp,
     MouseDown,
+    Resize,
     Click,
     Focus,
     ValueChanged,
@@ -44,6 +45,7 @@ pub enum Event {
 pub enum EventCallback<ID: Eq+Hash+Clone> {
     MouseUp(Ef4<ID, i32, i32, u32, u32>),
     MouseDown(Ef4<ID, i32, i32, u32, u32>),
+    Resize(Ef4<ID, i32, i32, u32, u32>),
     Click(Ef0<ID>),
     Focus(Ef1<ID, bool>),
     Removed(Ef0<ID>),
@@ -69,5 +71,6 @@ pub fn map_callback<ID: Eq+Hash+Clone>(cb: &EventCallback<ID>) -> Event {
         &EventCallback::MenuOpen(_) => Event::MenuOpen,
         &EventCallback::MenuClose(_) => Event::MenuClose,
         &EventCallback::SelectionChanged(_) => Event::SelectionChanged,
+        &EventCallback::Resize(_) => Event::Resize,
     }
 }

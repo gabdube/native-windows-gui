@@ -75,11 +75,7 @@ fn buttons() {
 
     test_action!(ui, Action::GetChildren, ActionReturn::Children(c), {assert!(*c == ["GROUP"]);}, "MainWindow");
     test_action!(ui, Action::GetDescendants, ActionReturn::Children(c), {assert!(*c == ["GROUP", "TEST1"]);}, "MainWindow");
-
-    test_action!(ui, Action::GetParent, ActionReturn::None, { }, "SubWindow" );
-    test_action!(ui, helper::set_parent("MainWindow"), ActionReturn::None, {}, "SubWindow");
-    test_action!(ui, Action::GetParent, ActionReturn::Parent(p), { assert!(*p == "MainWindow"); }, "SubWindow" );
-
+    
     test_action!(ui, Action::GetPosition, ActionReturn::Position(x,y), { assert!((x,y) == (100, 100)); } );
     test_action!(ui, Action::SetPosition(150, 150), ActionReturn::None, {} );
     test_action!(ui, Action::GetPosition, ActionReturn::Position(x,y), { assert!((x,y) == (150, 150)); } );

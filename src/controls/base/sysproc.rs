@@ -26,13 +26,14 @@ use ::constants::{MOD_MOUSE_CTRL, MOD_MOUSE_SHIFT, BTN_MOUSE_MIDDLE, BTN_MOUSE_R
  BTN_MOUSE_LEFT, CBN_CLOSEUP, CBN_DROPDOWN, CBN_SETFOCUS, CBN_KILLFOCUS, ControlType,
  CBN_SELCHANGE, STN_CLICKED};
 
-use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WM_USER,
+use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WM_USER, WM_SIZING, RECT,
   WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   WM_COMMAND, HIWORD, BN_CLICKED, BN_SETFOCUS, BN_KILLFOCUS, WM_ACTIVATEAPP,
   UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS, EN_MAXTEXT, EN_CHANGE,
-  WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN};
+  WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN, WM_SIZE};
 
 use comctl32::{DefSubclassProc};
+use user32::{GetWindowRect};
 
 ////////////
 // Native Windows GUI user events
@@ -79,6 +80,25 @@ fn get_combobox_selection(handle: HWND) -> (u32, String) {
 
     (selected, text)
 }
+
+/**
+    Get the sizing rect of a WM_SIZING event
+*/
+#[inline(always)]
+fn handle_sizing(handle: HWND, msg: UINT, rectv: LPARAM) -> (i32, i32, u32, u32) { unsafe {
+    let r: RECT = if msg == WM_SIZING {
+        (*mem::transmute::<LPARAM, *mut RECT>(rectv)).clone()
+    } else if msg == WM_SIZE {
+        let mut r = mem::uninitialized();
+        GetWindowRect(handle, &mut r);
+        r
+    } else {
+        panic!("Tried to handle sizing event for event ID {}", msg);
+    };
+
+    (r.left as i32, r.top as i32, (r.right-r.left) as u32, (r.bottom-r.top) as u32)
+}}
+
 
 /**
     Map system events to application events
@@ -137,6 +157,7 @@ fn map_system_event<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LP
         WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => (vec![Event::MouseUp], handle),
         WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => (vec![Event::MouseDown], handle),
         WM_ACTIVATEAPP => (vec![Event::Focus], handle),
+        WM_SIZING | WM_SIZE => (vec![Event::Resize], handle),
         NWG_DESTROY_NOTICE => (vec![Event::Removed], handle),
         _ => (vec![Event::Unknown], handle)
     }
@@ -152,11 +173,15 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
         &EventCallback::MouseUp(ref c) | &EventCallback::MouseDown(ref c)  => {
             let (x, y, btn, modifiers) = handle_btn(msg, w, l);
             c(ui, caller, x, y, btn, modifiers); 
-         },
+        },
         &EventCallback::Click(ref c) | &EventCallback::ValueChanged(ref c) | &EventCallback::MaxValue(ref c) | 
         &EventCallback::Removed(ref c) | &EventCallback::MenuClose(ref c) | &EventCallback::MenuOpen(ref c) => {
             c(ui, caller); 
-         },
+        },
+        &EventCallback::Resize(ref c) => {
+            let (x, y, w, h) = handle_sizing(handle, msg, l);
+            c(ui, caller, x, y, w, h);
+        },
         &EventCallback::Focus(ref c) => {
             let focus = match msg {
                 WM_COMMAND => { let w = HIWORD(w as u32); w == BN_SETFOCUS || w == EN_SETFOCUS || w == CBN_SETFOCUS },
