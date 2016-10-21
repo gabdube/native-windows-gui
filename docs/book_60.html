@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
     <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
     
 </head>
 <body class="rustdoc">
@@ -48,7 +49,7 @@
 </li>
 <li><a href="book_40.html"><b>4.</b> List of built-in controls </a>
 </li>
-<li><a href="book_50.html"><b>5.</b> List of actions (TODO) </a>
+<li><a href="book_50.html"><b>5.</b> List of actions </a>
 </li>
 <li><a href="book_60.html"><b>6.</b> List of events </a>
 </li>
@@ -59,7 +60,8 @@
 <div id='page-wrapper'>
 <div id='page'>
     <h1 class="title">All events</h1>
-    <ul>
+    Events spoiler <input id='spoiler_cb4' type='checkbox' checked></input><label class='arrow' for='spoiler_cb4'></label>
+    <ul class="spoiler"> 
         <li><a href="#mouseup">MouseUp</a></li>
         <li><a href="#mousedown">MouseDown</a></li>
         <li><a href="#click">Click</a></li>
@@ -72,51 +74,84 @@
         <li><a href="#selectionchanged">SelectionChanged</a></li>
     </ul>
     <h2 id="mouseup" class="title"><a href="#mouseup">MouseUp</a></h2>
+    Triggered when a user release a mouse button
 <div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">MouseUp</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">MouseUp</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="w"></span>
 <span class="w">  </span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">:</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">:</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">btn</span><span class="o">:</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">modifiers</span><span class="o">:</span><span class="w"> </span><span class="kt">u32</span><span class="p">)</span><span class="w"></span>
 <span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
+    <b>Params</b> <input id='spoiler_cb0' type='checkbox'></input><label class='arrow' for='spoiler_cb0'></label>
+    <ul class="spoiler">
+        <li><b>x</b>: X coordinate status</li>
+        <li><b>y</b>: Y coordinate status</li>
+        <li><b>btn</b>: Bitwise combinations of <code>BTN_MOUSE_MIDDLE</code>, <code>BTN_MOUSE_RIGHT</code>, <code>BTN_MOUSE_LEFT</code></li>
+        <li><b>modifiers</b>: Bitwise combinations of <code>MOD_MOUSE_CTRL</code>, <code>MOD_MOUSE_SHIFT</code></li>
+    </ul>
     <h2 id="mousedown" class="title"><a href="#mousedown">MouseDown</a></h2>
+    Triggered when a user press a mouse button
 <div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">MouseDown</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">MouseDown</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="w"></span>
 <span class="w">  </span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">:</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">:</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">btn</span><span class="o">:</span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">modifiers</span><span class="o">:</span><span class="w"> </span><span class="kt">u32</span><span class="p">)</span><span class="w"></span>
 <span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
+    <b>Params</b> <input id='spoiler_cb1' type='checkbox'></input><label class='arrow' for='spoiler_cb1'></label>
+    <ul class="spoiler">
+        <li><b>x</b>: X coordinate status</li>
+        <li><b>y</b>: Y coordinate status</li>
+        <li><b>btn</b>: Bitwise combinations of <code>BTN_MOUSE_MIDDLE</code>, <code>BTN_MOUSE_RIGHT</code>, <code>BTN_MOUSE_LEFT</code></li>
+        <li><b>modifiers</b>: Bitwise combinations of <code>MOD_MOUSE_CTRL</code>, <code>MOD_MOUSE_SHIFT</code></li>
+    </ul>
     <h2 id="click" class="title"><a href="#click">Click</a></h2>
+    Triggered when the user execute a mouse click. Similar to MouseUp
 <div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">Click</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">Click</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
     <h2 id="focus" class="title"><a href="#focus">Focus</a></h2>
+    Triggered when a control receive or loose user focus
 <div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">Focus</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">Focus</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">,</span><span class="w"> </span><span class="n">focused</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
+    <b>Params</b> <input id='spoiler_cb2' type='checkbox'></input><label class='arrow' for='spoiler_cb2'></label>
+    <ul class="spoiler">
+        <li><b>focused</b>: <code>true</code> if the control received the focus or <code>false</code> otherwise. </li>
+    </ul>
     <h2 id="removed" class="title"><a href="#removed">Removed</a></h2>
+    Triggered just before the control destruction
 <div class="syntax"><pre><span></span><span class="n">Removed</span><span class="o">::</span><span class="n">Click</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">Removed</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
     <h2 id="valuechanged" class="title"><a href="#valuechanged">ValueChanged</a></h2>
+    Triggered when the value of the control change
 <div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">ValueChanged</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">ValueChanged</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
     <h2 id="menuopen" class="title"><a href="#menuopen">MenuOpen</a></h2>
+    Triggered when the menu of a control is opened
 <div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">MenuOpen</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">MenuOpen</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
     <h2 id="menuclose" class="title"><a href="#menuclose">MenuClose</a></h2>
+    Triggered when the menu of a control is closed
 <div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">MenuClose</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">MenuClose</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
     <h2 id="maxvalue" class="title"><a href="#maxvalue">MaxValue</a></h2>
+    Triggered when the value of the control exeed the limit. (Will probably be renamed to something like <code>LimitedReached</code>)
 <div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">MaxValue</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">MaxValue</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
     <h2 id="selectionchanged" class="title"><a href="#selectionchanged">SelectionChanged</a></h2>
+    Triggered when the selected item of a control is changed
 <div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">SelectionChanged</span><span class="w"></span>
 <span class="n">EventCallback</span><span class="o">::</span><span class="n">SelectionChanged</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="w"></span>
 <span class="w">  </span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">,</span><span class="w"> </span><span class="n">new_index</span><span class="o">:</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">new_text</span><span class="o">:</span><span class="w"> </span><span class="nb">String</span><span class="p">)</span><span class="w"></span>
 <span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
+    <b>Params</b> <input id='spoiler_cb3' type='checkbox'></input><label class='arrow' for='spoiler_cb3'></label>
+    <ul class="spoiler">
+        <li><b>new_index</b>: New choosen item index in the control collection </li>
+        <li><b>new_text</b>: New choosen item value represented as a string </li>
+    </ul>
     <br/><br/>
 </div>
 </div>
