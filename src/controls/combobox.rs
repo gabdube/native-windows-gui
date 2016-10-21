@@ -25,7 +25,7 @@ use std::os::windows::ffi::OsStringExt;
 
 
 use controls::ControlTemplate;
-use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
+use controls::base::{WindowBase, create_base, get_window_text,
  get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
  set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
  set_window_visibility, send_message, to_utf16_ref, get_control_type};

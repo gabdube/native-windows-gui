@@ -161,11 +161,12 @@ impl<ID: Eq+Clone+Hash> Ui<ID> {
     */
     pub fn bind(&self, cont: ID, name: ID, cb: events::EventCallback<ID>) -> Result<(), Error> {
         let controls: &mut ControlCollection<ID> = unsafe{ &mut *self.controls };
+        let _hash = hash(&name);
         if let Some(&(handle, _)) = controls.get(&cont) {
             let event = events::map_callback(&cb);
             let data: &mut WindowData<ID> = controls::get_handle_data(handle);
             if let Some(functions) = data.callbacks.get_mut(&event) {
-                if functions.iter().any(|&(ref id, _)| hash(id) == hash(&name)) {
+                if functions.iter().any(|&(ref id, _)| hash(id) == _hash) {
                     Err(Error::CALLBACK_ID_EXISTS) 
                 } else {
                     functions.push((name, cb));
