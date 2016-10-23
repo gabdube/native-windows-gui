@@ -84,7 +84,8 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for CheckBox<ID> {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::MouseDown, Event::MouseUp, Event::Click, Event::Focus, Event::Removed, Event::Resize,]
+        vec![Event::MouseDown, Event::MouseUp, Event::Click, Event::Focus, Event::Removed, Event::Resize,
+        Event::Move, Event::KeyDown, Event::KeyUp]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {

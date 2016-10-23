@@ -30,7 +30,8 @@ use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WM_USER, WM_SIZING, RECT,
   WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, GET_X_LPARAM, GET_Y_LPARAM,
   WM_COMMAND, HIWORD, BN_CLICKED, BN_SETFOCUS, BN_KILLFOCUS, WM_ACTIVATEAPP,
   UINT_PTR, DWORD_PTR, EN_SETFOCUS, EN_KILLFOCUS, EN_MAXTEXT, EN_CHANGE,
-  WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN, WM_SIZE};
+  WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN, WM_SIZE, WM_MOVE, LOWORD,
+  DWORD, WM_KEYDOWN, WM_KEYUP};
 
 use comctl32::{DefSubclassProc};
 use user32::{GetWindowRect};
@@ -157,7 +158,10 @@ fn map_system_event<ID: Eq+Hash+Clone>(handle: HWND, evt: UINT, w: WPARAM, l: LP
         WM_LBUTTONUP | WM_RBUTTONUP | WM_MBUTTONUP => (vec![Event::MouseUp], handle),
         WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => (vec![Event::MouseDown], handle),
         WM_ACTIVATEAPP => (vec![Event::Focus], handle),
-        WM_SIZING | WM_SIZE => (vec![Event::Resize], handle),
+        WM_SIZE => (vec![Event::Resize], handle),
+        WM_KEYDOWN => (vec![Event::KeyDown], handle),
+        WM_KEYUP => (vec![Event::KeyUp], handle),
+        WM_MOVE => (vec![Event::Move], handle),
         NWG_DESTROY_NOTICE => (vec![Event::Removed], handle),
         _ => (vec![Event::Unknown], handle)
     }
@@ -181,6 +185,13 @@ fn dispatch_event<ID: Eq+Hash+Clone>(ec: &EventCallback<ID>, ui: &mut ::Ui<ID>, 
         &EventCallback::Resize(ref c) => {
             let (x, y, w, h) = handle_sizing(handle, msg, l);
             c(ui, caller, x, y, w, h);
+        },
+        &EventCallback::Move(ref c) => {
+            let (x, y) = (LOWORD(l as DWORD) as i32, HIWORD(l as DWORD) as i32);
+            c(ui, caller, x, y);
+        },
+        &EventCallback::KeyDown(ref c) | &EventCallback::KeyUp(ref c) => {
+            c(ui, caller, w as u32);
         },
         &EventCallback::Focus(ref c) => {
             let focus = match msg {

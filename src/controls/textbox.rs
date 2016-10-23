@@ -77,7 +77,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextBox<ID> {
 
     fn supported_events(&self) -> Vec<Event> {
         vec![Event::MouseUp, Event::MouseDown, Event::Focus, Event::ValueChanged, Event::MaxValue,
-             Event::Removed, Event::Resize,]
+             Event::Removed, Event::Resize, Event::Move, Event::KeyDown, Event::KeyUp]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {

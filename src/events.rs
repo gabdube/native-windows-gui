@@ -29,7 +29,10 @@ pub type Ef4<ID, A, B, C, D> = Box<Fn(&mut ::Ui<ID>, &ID, A, B, C, D)>;
 pub enum Event {
     MouseUp,
     MouseDown,
+    KeyDown,
+    KeyUp,
     Resize,
+    Move,
     Click,
     Focus,
     ValueChanged,
@@ -45,7 +48,10 @@ pub enum Event {
 pub enum EventCallback<ID: Eq+Hash+Clone> {
     MouseUp(Ef4<ID, i32, i32, u32, u32>),
     MouseDown(Ef4<ID, i32, i32, u32, u32>),
+    KeyDown(Ef1<ID, u32>),
+    KeyUp(Ef1<ID, u32>),
     Resize(Ef4<ID, i32, i32, u32, u32>),
+    Move(Ef2<ID, i32, i32>),
     Click(Ef0<ID>),
     Focus(Ef1<ID, bool>),
     Removed(Ef0<ID>),
@@ -63,6 +69,8 @@ pub fn map_callback<ID: Eq+Hash+Clone>(cb: &EventCallback<ID>) -> Event {
     match cb {
         &EventCallback::MouseUp(_) => Event::MouseUp,
         &EventCallback::MouseDown(_) => Event::MouseDown,
+        &EventCallback::KeyUp(_) => Event::KeyUp,
+        &EventCallback::KeyDown(_) => Event::KeyDown,
         &EventCallback::Click(_) => Event::Click,
         &EventCallback::Focus(_) => Event::Focus,
         &EventCallback::ValueChanged(_) => Event::ValueChanged,
@@ -72,5 +80,6 @@ pub fn map_callback<ID: Eq+Hash+Clone>(cb: &EventCallback<ID>) -> Event {
         &EventCallback::MenuClose(_) => Event::MenuClose,
         &EventCallback::SelectionChanged(_) => Event::SelectionChanged,
         &EventCallback::Resize(_) => Event::Resize,
+        &EventCallback::Move(_) => Event::Move,
     }
 }

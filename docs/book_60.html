@@ -64,7 +64,10 @@
     <ul class="spoiler"> 
         <li><a href="#mouseup">MouseUp</a></li>
         <li><a href="#mousedown">MouseDown</a></li>
+        <li><a href="#keydown">KeyDown</a></li>
+        <li><a href="#keyup">KeyUp</a></li>
         <li><a href="#resize">Resize</a></li>
+        <li><a href="#move">Move</a></li>
         <li><a href="#click">Click</a></li>
         <li><a href="#focus">Focus</a></li>
         <li><a href="#removed">Removed</a></li>
@@ -105,6 +108,26 @@
         <li><b>modifiers</b>: Bitwise combinations of <code>MOD_MOUSE_CTRL</code>, <code>MOD_MOUSE_SHIFT</code></li>
     </ul>
 
+<h2 id="keydown" class="title"><a href="#keydown">KeyDown</a></h2>
+    Triggered when a user press a keyboard button. The currently focused control receive the event.
+<div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">KeyDown</span><span class="w"></span>
+<span class="n">EventCallback</span><span class="o">::</span><span class="n">KeyDown</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">,</span><span class="w"> </span><span class="n">keycode</span><span class="o">:</span><span class="kt">u32</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+    <b>Params</b> <input id='spoiler_cb7' type='checkbox'></input><label class='arrow' for='spoiler_cb7'></label>
+    <ul class="spoiler">
+        <li><b>keycode</b>: The virtual code of the key that was pressed. See: <code>native_windows_gui::constants::keys</code></li>
+    </ul>
+
+<h2 id="keyup" class="title"><a href="#keyup">KeyUp</a></h2>
+    Triggered when a user release a keyboard button. The currently focused control receive the event.
+<div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">KeyUp</span><span class="w"></span>
+<span class="n">EventCallback</span><span class="o">::</span><span class="n">KeyUp</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">,</span><span class="w"> </span><span class="n">keycode</span><span class="o">:</span><span class="kt">u32</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+    <b>Params</b> <input id='spoiler_cb8' type='checkbox'></input><label class='arrow' for='spoiler_cb8'></label>
+    <ul class="spoiler">
+        <li><b>keycode</b>: The virtual code of the key that was pressed. See: <code>native_windows_gui::constants::keys</code></li>
+    </ul>
+
 
     <h2 id="resize" class="title"><a href="#click">Resize</a></h2>
     Triggered when a control is resized by the user or programmatically.
@@ -119,6 +142,18 @@
         <li><b>y</b>: Y coordinate of the window</li>
         <li><b>width</b>: Width of the window</li>
         <li><b>height</b>: Height of the window</li>
+    </ul>
+
+
+    <h2 id="move" class="title"><a href="#move">Move</a></h2>
+    Triggered when a control is moved by the user or programmatically.
+<div class="syntax"><pre><span></span><span class="n">Event</span><span class="o">::</span><span class="n">Move</span><span class="w"></span>
+<span class="n">EventCallback</span><span class="o">::</span><span class="n">Move</span><span class="p">(</span><span class="nb">Box</span><span class="o">&lt;</span><span class="nb">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="n">caller</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">:</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">:</span><span class="kt">i32</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+    <b>Params</b> <input id='spoiler_cb6' type='checkbox'></input><label class='arrow' for='spoiler_cb6'></label>
+    <ul class="spoiler">
+        <li><b>x</b>: X coordinate of the window</li>
+        <li><b>y</b>: Y coordinate of the window</li>
     </ul>
 
     <h2 id="click" class="title"><a href="#click">Click</a></h2>

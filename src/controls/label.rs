@@ -73,7 +73,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Label<ID> {
     }
 
     fn supported_events(&self) -> Vec<Event> {
-        vec![Event::MouseUp, Event::MouseDown, Event::Removed, Event::Resize, Event::Click]
+        vec![Event::MouseUp, Event::MouseDown, Event::Removed, Event::Resize, Event::Move, Event::Click]
     }
 
     fn evaluator(&self) -> ::ActionEvaluator<ID> {
