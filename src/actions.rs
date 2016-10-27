@@ -21,7 +21,7 @@
 
 
 use std::hash::Hash;
-use constants::{CheckState, WindowDisplay, MessageButtons, MessageIcons, ControlType, MessageChoice};
+use constants::{Error, CheckState, WindowDisplay, MessageButtons, MessageIcons, ControlType, MessageChoice};
 
 #[derive(PartialEq)]
 pub struct ActMessageParams {
@@ -112,7 +112,7 @@ pub enum ActionReturn<ID: Eq+Clone+Hash> {
     Position(i32, i32),
     Size(u32, u32),
     Text(Box<String>),
-    Error(::constants::Error),
+    Error(Error),
     CheckState(CheckState),
     Enabled(bool),
     Visibility(bool),

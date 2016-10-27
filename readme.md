@@ -1,94 +1,47 @@
 # Native Windows GUI
 
-Native Window GUI (nwg for short) is a GUI library for Windows. Its current state is a "Proof of concept"
+<b>Native Windows GUI (NWG)</b> is a thin GUI toolkit built over the <b>Microsoft Windows WINAPI</b> for rust. The current version is
+<b>0.1.0 ALPHA</b>. The library is not production ready, but it has enough features implemented in order 
+to create simple GUI applications.
 
-Because current GUI libraries uses OOP in order to work and because these concepts do not translate nicely in rust, i've
-decided to try something new:
+NWG uses [retep998/winapi-rs](https://github.com/retep998/winapi-rs) and works on all rust channels and most
+rust versions. NWG was tested on Windows 8.1 and Windows 10 using the MSVC ABI build but any version of Microsoft Windows supported by Rust is supposed to be
+supported by NWG (vista and up).
 
-**Instead of exposing every widget as a complete type to the user, I decided to completely hide the implementation behind a "manager" (UI) object**
+Native Windows GUI do not work like your average GUI library, it works like some kind of opaque
+service. It's kinda hard to explain it in a few words so you should check the [first chapter of the docs](https://gabdube.github.io/native-windows-gui/book_20.html) .
 
-Widgets are then exposed as an opaque type choosen by the user themself (example: `i32`, `&'static str`, etc).
+# Installation
+To use NWG in your project add it to cargo.toml: 
 
-For this POC, I implemented **actions**(what would normally be methods), **callbacks** and **control templates** (what would normally be the widgets). Each of
-these concept is exposed by a single method on the manager object. **The NWG api has only 5 functions/methods**. See `examples/simple_form.rs`.
-
-![Alt text](/img/simple_form.PNG "Image")  
-
-## The manager
-
-The manager `Ui`, is the object that handle the UI on a single thread. The type passed to the manager define the type of the widgets identifier.
-A widget identifier is unique and can't be used twice.
-
-Also, nwg offers the `dispatch_events` that dispatches events until a quit event is reveived.
-
-Example:
-
-```rust
-let mut ui: nwg::Ui<&'static str> = nwg::Ui::new();
-
-nwg::dispatch_events();
+```toml
+[dependencies]
+native-windows-gui = "0.1.0"
 ```
 
-## Control templates
-
-Control templates replaces "normal" widgets. They are transparent structures that implements the `ControlTemplate` trait.
-These structures describe a Windows Control (example: `Windows`, `Buttons`).
-
-Once a template structure has been filled, it can be passed to the Window Manager in order to create the widget in the interface.  
-This is done through the `new_control` method.
-
-Example:
+And then, in main.rs or lib.rs : 
 
 ```rust
-let hello_btn = nwg::controls::Button {
-        text: "Say hello!".to_string(),
-        size: (480, 50),
-        position: (10, 10),
-        parent: "MainWindow"
-};
-
-ui.new_control("HelloBtn", hello_btn).unwrap();
+extern crate native_windows_gui as nwg;
 ```
 
-## Actions
+# Documentation
 
-Actions replace what would normally be widgets methods. `Action` is a big enum of pretty much anyting that can be applied to a widget. When an action is
-sent through an manager, the widget evals the action, and then, if it is supported, can return an `ActionReturn` value. ActionReturn, just like action
-is a big enum that can return anything.
+NWG has a complete documentation available here:  https://gabdube.github.io/native-windows-gui/
 
-Notes:
+Have I mentionned that you should REALLY read the [first chapter of the docs](https://gabdube.github.io/native-windows-gui/book_20.html) ? I mean, it explains
+the whole API and there's a simple example included.
 
-* Some future action (ex: `SetText`) could be applied to many widgets.
-* Actions/ActionReturn values that are bigger than 8 bytes will be boxed
-* Big action (ex: `Message`) can have action helper to make the action creation easier
-* If a control receive a unsupported action, it must return `ActionReturn::NotSupported`.
+(btw) If English is your first language (it's not mine), it would be super kind to give me feedback about quality of the docs.
 
-Actions are sent to a control using the `exec` method
+# Example
+Having cargo installed and in your PATH, execute the following code to run the included example:
 
-Example:
-
-```rust
-ui.exec("MainWindow", nwga::message("Hello", "Hello World!", 0)).unwrap();
+```bash
+git clone git@github.com:gabdube/native-windows-gui.git
+cd native-windows-gui
+cargo run --example simple_form
 ```
 
-## Callback
 
-Callbacks are defined in a big enum: `EventCallback`. This enum contains any callback that can be applied to a widget.
-The enum member each take a Boxed `Fn` that will be called internally when system events are processed.
-
-Note:
-
-* Right now callback binding is quite ugly, id like to change that if possible.
-
-Callbacks are bound to a widget using the `bind` method.
-
-Example:
-
-```rust
-ui.bind("MainWindow", EventCallback::MouseUp(Box::new(|ui, caller, x, y, btn, modifiers| {
-        println!("Caller: {:?}", caller);
-        println!("Left mouse button pressed: {:?}", (btn & nwgc::BTN_MOUSE_LEFT) != 0 );
-        println!("Ctrl pressed: {:?}", (modifiers & nwgc::MOD_MOUSE_CTRL) != 0 );
-        println!("Mouse position: {:?} {:?}", x, y);
-    })));
-```
+![A GUI](/img/simple_form.PNG "Image")  

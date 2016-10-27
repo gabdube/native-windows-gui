@@ -354,7 +354,11 @@ fn set_collection<ID: Eq+Clone+Hash>(handle: HWND, collection: &Vec<String>) -> 
 fn insert_string_item<ID: Eq+Clone+Hash>(handle: HWND, index: u32, item: &String) -> ActionReturn<ID> {
     let item = to_utf16_ref(item);
     let ptr: LPARAM = unsafe{ mem::transmute(item.as_ptr()) };
-    send_message(handle, CB_INSERTSTRING, index as WPARAM, ptr);
+    let r = send_message(handle, CB_INSERTSTRING, index as WPARAM, ptr);
 
-    ActionReturn::None
+    if r == CB_ERR {
+        ActionReturn::Error(Error::INDEX_OUT_OF_BOUNDS)
+    } else {
+        ActionReturn::None
+    }
 }
