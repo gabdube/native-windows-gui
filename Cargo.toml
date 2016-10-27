@@ -12,7 +12,6 @@ readme = "readme.md"
 
 keywords = ["gui", "ui", "windows"]
 
-license = "GPLv3"
 license-file = "LICENSE.txt"
 
 [dependencies]
