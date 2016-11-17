@@ -33,7 +33,7 @@ use actions::{Action, ActionReturn};
 use events::Event;
 use constants::ControlType;
 
-use winapi::{HWND, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW, IDC_ARROW,
+use winapi::{HWND, HBRUSH, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW, IDC_ARROW,
   COLOR_WINDOW, WPARAM, LPARAM, LRESULT, WM_CLOSE, WM_CREATE};
 
 use user32::{RegisterClassExW, LoadCursorW, PostQuitMessage, DefWindowProcW};
@@ -146,7 +146,7 @@ unsafe fn register_custom_class<ID: Eq+Clone+Hash>() -> bool {
             hInstance: hmod as HINSTANCE,
             hIcon: ptr::null_mut(),
             hCursor: LoadCursorW(ptr::null_mut(), IDC_ARROW),
-            hbrBackground: mem::transmute(COLOR_WINDOW as i64),
+            hbrBackground: mem::transmute(COLOR_WINDOW as HBRUSH),
             lpszMenuName: ptr::null(),
             lpszClassName: name.as_ptr(),
             hIconSm: ptr::null_mut()

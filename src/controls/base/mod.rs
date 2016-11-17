@@ -30,7 +30,7 @@ use winapi::{HWND, ACTCTXW, ULONG, ULONG_PTR, MAX_PATH, LPARAM, BOOL,
   WS_VISIBLE, WS_CHILD, WS_OVERLAPPED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_SYSMENU,
   WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_EX_COMPOSITED, GWLP_USERDATA};
 
-use user32::{CreateWindowExW, SetWindowLongPtrW, GetWindowLongPtrW, DestroyWindow, EnumChildWindows};
+use user32::{CreateWindowExW, DestroyWindow, EnumChildWindows};
 use kernel32::{GetModuleHandleW, ActivateActCtx, CreateActCtxW, GetSystemDirectoryW};
 
 use comctl32::{SetWindowSubclass};
@@ -142,7 +142,7 @@ pub unsafe fn enable_visual_styles() {
 */
 pub unsafe fn set_handle_data<T>(handle: HWND, data: T) {
     let data_raw = Box::into_raw(Box::new(data));
-    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(data_raw));
+    set_window_long(handle, GWLP_USERDATA, mem::transmute(data_raw));
 }
 
 /**
@@ -150,14 +150,14 @@ pub unsafe fn set_handle_data<T>(handle: HWND, data: T) {
 */
 pub unsafe fn set_handle_data_off<T>(handle: HWND, data: T, offset: usize) {
     let data_raw = Box::into_raw(Box::new(data));
-    SetWindowLongPtrW(handle, (offset*mem::size_of::<usize>()) as i32, mem::transmute(data_raw));
+    set_window_long(handle, (offset*mem::size_of::<usize>()) as i32, mem::transmute(data_raw));
 }
 
 /**
     Retrieve data in a window
 */
 pub unsafe fn get_handle_data<'a, T>(handle: HWND) -> Option<&'a mut T> {
-    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
+    let data_ptr = get_window_long(handle, GWLP_USERDATA);
     if data_ptr != 0 {
         let data: *mut T = mem::transmute(data_ptr);
         Some(&mut *data)
@@ -170,7 +170,7 @@ pub unsafe fn get_handle_data<'a, T>(handle: HWND) -> Option<&'a mut T> {
     Retrieve data in a window using an offset. To use to retrieve custom widget private data.
 */
 pub unsafe fn get_handle_data_off<'a, T>(handle: HWND, offset: usize) -> Option<&'a mut T> {
-    let data_ptr = GetWindowLongPtrW(handle, (offset*mem::size_of::<usize>()) as i32);
+    let data_ptr = get_window_long(handle, (offset*mem::size_of::<usize>()) as i32);
     if data_ptr != 0 {
         let data: *mut T = mem::transmute(data_ptr);
         Some(&mut *data)
@@ -183,22 +183,22 @@ pub unsafe fn get_handle_data_off<'a, T>(handle: HWND, offset: usize) -> Option<
     Remove and free data from a window
 */
 pub unsafe fn free_handle_data<T>(handle: HWND) {
-    let data_ptr = GetWindowLongPtrW(handle, GWLP_USERDATA);
+    let data_ptr = get_window_long(handle, GWLP_USERDATA);
     let data: *mut T = mem::transmute(data_ptr);
     Box::from_raw(data);
 
-    SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
+    set_window_long(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
 }
 
 /**
     Remove and free data from a window using an offset
 */
 pub unsafe fn free_handle_data_off<T>(handle: HWND, offset: usize) {
-    let data_ptr = GetWindowLongPtrW(handle, (offset*mem::size_of::<usize>()) as i32 );
+    let data_ptr = get_window_long(handle, (offset*mem::size_of::<usize>()) as i32 );
     let data: *mut T = mem::transmute(data_ptr);
     Box::from_raw(data);
 
-    SetWindowLongPtrW(handle, (offset*mem::size_of::<usize>()) as i32, mem::transmute(ptr::null_mut::<()>()));
+    set_window_long(handle, (offset*mem::size_of::<usize>()) as i32, mem::transmute(ptr::null_mut::<()>()));
 }
 
 /// Proc used to discover a window children
@@ -218,7 +218,7 @@ unsafe extern "system" fn free_child_data<ID: Eq+Hash+Clone>(handle: HWND, param
     This is called by Ui.remove_control. Does NOT remove the ID from the control collection!
 */
 pub unsafe fn free_handle<ID: Eq+Clone+Hash >(handle: HWND) {
-    let data_raw: *mut ::WindowData<ID> = mem::transmute(GetWindowLongPtrW(handle, GWLP_USERDATA));
+    let data_raw: *mut ::WindowData<ID> = mem::transmute(get_window_long(handle, GWLP_USERDATA));
     if !data_raw.is_null() {
         // Noticing
         send_message(handle, NWG_DESTROY_NOTICE, 0, 0);
@@ -228,7 +228,7 @@ pub unsafe fn free_handle<ID: Eq+Clone+Hash >(handle: HWND) {
         EnumChildWindows(handle, Some(free_child_data::<ID>), 0);
         DestroyWindow(handle);
         Box::from_raw(data_raw);
-        SetWindowLongPtrW(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
+        set_window_long(handle, GWLP_USERDATA, mem::transmute(ptr::null_mut::<()>()));
     }
     
 }
@@ -238,7 +238,7 @@ pub unsafe fn free_handle<ID: Eq+Clone+Hash >(handle: HWND) {
     when an event must trigger the control destruction.
 */
 pub unsafe fn destroy_control<ID: Eq+Clone+Hash>(handle: HWND) -> Result<Vec<ID>, Error> {
-    let data_raw: *mut ::WindowData<ID> = mem::transmute(GetWindowLongPtrW(handle, GWLP_USERDATA));
+    let data_raw: *mut ::WindowData<ID> = mem::transmute(get_window_long(handle, GWLP_USERDATA));
     if !data_raw.is_null() {
         let data: &mut ::WindowData<ID> = &mut *data_raw;
         let mut ui = ::Ui{controls: data.controls};

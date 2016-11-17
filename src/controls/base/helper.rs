@@ -39,7 +39,7 @@ use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WS_CHILD, WS_OVERLAPPEDWINDOW,
   MB_CANCELTRYCONTINUE, MB_OK, MB_OKCANCEL, MB_RETRYCANCEL, MB_YESNO, MB_YESNOCANCEL,
   MB_ICONEXCLAMATION, MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONSTOP, WM_CLOSE};   
 
-use user32::{SetWindowLongPtrW, GetWindowLongPtrW, EnumChildWindows, ShowWindow, 
+use user32::{EnumChildWindows, ShowWindow, 
   IsZoomed, IsIconic, GetClientRect, SetWindowPos, SetWindowTextW, GetWindowTextW, 
   GetWindowTextLengthW, MessageBoxW, ScreenToClient, GetWindowRect, GetParent,
   SetParent, SendMessageW, EnableWindow, IsWindowEnabled, IsWindowVisible};
@@ -63,6 +63,30 @@ pub fn to_utf16_ref(n: &String) -> Vec<u16> {
       .collect()
 }
 
+
+#[cfg(target_arch = "x86_64")]
+pub fn get_window_long(handle: HWND, field: c_int) -> LONG_PTR {
+    use user32::GetWindowLongPtrW;
+    unsafe{ GetWindowLongPtrW(handle, field) }
+}
+
+#[cfg(target_arch = "x86")]
+pub fn get_window_long(handle: HWND, field: c_int) -> LONG_PTR {
+    use user32::GetWindowLongW;
+    unsafe { GetWindowLongW(handle, field) as LONG_PTR }
+}
+
+#[cfg(target_arch = "x86_64")]
+pub fn set_window_long(handle: HWND, field: c_int, v: LONG_PTR) {
+    use user32::SetWindowLongPtrW;
+    unsafe{ SetWindowLongPtrW(handle, field, v); }
+}
+
+#[cfg(target_arch = "x86")]
+pub fn set_window_long(handle: HWND, field: c_int, v: LONG_PTR) {
+    use user32::SetWindowLongW;
+    unsafe { SetWindowLongW(handle, field, v as LONG); }
+}
 
 /** 
     Fix: Window size include the non client area. This behaviour is not wanted
@@ -220,8 +244,8 @@ pub fn get_window_parent<ID: Eq+Hash+Clone>(handle: HWND) -> ActionReturn<ID> { 
 /**
     Set or removed window style when a parent is added or removed from a control.
 */
-fn set_parent_update_style(handle: HWND, parent_removed: bool) { unsafe {
-    let mut style = GetWindowLongPtrW(handle, GWL_STYLE);
+fn set_parent_update_style(handle: HWND, parent_removed: bool) {
+    let mut style = get_window_long(handle, GWL_STYLE);
 
     if parent_removed {
         // When removing parents, set the window style to overlapped
@@ -239,8 +263,8 @@ fn set_parent_update_style(handle: HWND, parent_removed: bool) { unsafe {
         }
     }
 
-    SetWindowLongPtrW(handle, GWL_STYLE, style);
-}}
+    set_window_long(handle, GWL_STYLE, style);
+}
 
 /**
     Set or remove the parent of a window. 

@@ -138,8 +138,7 @@ impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
 
 use winapi::{EM_LIMITTEXT, EM_GETLIMITTEXT, UINT, WPARAM, WM_UNDO, EM_GETSEL, DWORD, EM_SETSEL,
  LPARAM, EM_SETREADONLY, GWL_STYLE, LONG_PTR};
-use user32::GetWindowLongPtrW;
-use controls::base::{send_message};
+use controls::base::{send_message, get_window_long};
 use std::mem;
 
 fn get_text_limit<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
@@ -171,10 +170,10 @@ fn set_select_bounds<ID: Eq+Clone+Hash>(handle: HWND, bounds: (u32, u32)) -> Act
     ActionReturn::None
 }
 
-fn get_readonly<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> { unsafe{
+fn get_readonly<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> { 
     let read_only = ES_READONLY as LONG_PTR;
-    ActionReturn::Readonly( GetWindowLongPtrW(handle, GWL_STYLE) & read_only == read_only )
-}}
+    ActionReturn::Readonly( get_window_long(handle, GWL_STYLE) & read_only == read_only )
+}
 
 fn set_readonly<ID: Eq+Clone+Hash>(handle: HWND, readonly: bool) -> ActionReturn<ID> {
     send_message(handle, EM_SETREADONLY as u32, readonly as WPARAM, 0);
