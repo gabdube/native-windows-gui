@@ -1,6 +1,7 @@
 /*!
-    A very high level native gui library for Windows.
+    Low level functionalities of NWG
 */
+
 /*
     Copyright (C) 2016  Gabriel Dubé
 
@@ -18,14 +19,5 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern crate winapi;
-extern crate user32;
-extern crate kernel32;
-extern crate comctl32;
-
-mod low;
-mod error;
-mod ui;
-
-pub use error::{Error, SystemError};
-pub use ui::Ui;
+pub mod message_handler;
+pub mod other;
