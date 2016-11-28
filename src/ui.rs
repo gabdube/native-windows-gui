@@ -21,6 +21,7 @@
 
 use std::hash::Hash;
 use std::ptr;
+use std::collections::HashMap;
 
 use low::message_handler::MessageHandler;
 use error::Error;
@@ -29,19 +30,19 @@ use error::Error;
     Inner window data shared within the thread
 */
 pub struct UiInner<ID: Hash+Clone> {
-    messages: MessageHandler,
-    tmp: Option<ID>
+    pub messages: MessageHandler<ID>,
+    pub ids_map: HashMap<u64, ID>,
 }
 
 impl<ID: Hash+Clone> UiInner<ID> {
 
     pub fn new() -> Result<UiInner<ID>, Error> {
-        let messages = match MessageHandler::new() {
+        let messages: MessageHandler<ID> = match MessageHandler::new() {
             Ok(msg) => msg,
             Err(e) => { return Err(e); }
         };
 
-        Ok(UiInner{ messages: messages, tmp: None })
+        Ok(UiInner{ messages: messages, ids_map: HashMap::with_capacity(64) })
     }
 
 }
@@ -64,6 +65,12 @@ pub struct Ui<ID: Hash+Clone> {
 
 impl<ID:Hash+Clone> Ui<ID> {
 
+    /**
+        Create a new Ui.
+
+        * Returns `Ok(ui)` if the initialization was successful
+        * Returns `Err(Error::System)` if the system could not initialize the ui
+    */
     pub fn new() -> Result<Ui<ID>, Error> {
         let inner = match UiInner::new() {
             Ok(inner) => Box::into_raw(Box::new(inner)),
@@ -71,6 +78,30 @@ impl<ID:Hash+Clone> Ui<ID> {
         };
 
         Ok( Ui{inner: inner} )
+    }
+
+    /**
+        Execute the NWG commands waiting in the Ui command queue in the order they
+        where added.
+
+        * Returns `Ok(())` if everything was executed without Errors
+        * Returns `Err(Error)` if an error was encountered while executing the commands.
+          As soon as an error is found, the function will return. If there are still commands
+          waiting in the queue, they wont be touched.
+    */
+    pub fn commit(&mut self) -> Result<(), Error> {
+        unsafe{ (&mut *self.inner).messages.commit() }
+    }
+
+    /**
+        Add an element to the Ui. 
+        Asynchonous, this only registers the command in the ui message queue. Call `ui.commit` to execute it.
+    */
+    pub fn pack(&mut self) {
+        use low::defs::{NWG_PACK_USER_VALUE};
+        
+        let inner = unsafe{ &mut (&*self.inner) };
+        inner.messages.post(self.inner, NWG_PACK_USER_VALUE)
     }
 
 }

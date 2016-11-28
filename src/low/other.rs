@@ -23,6 +23,19 @@ use std::ptr;
 use winapi::DWORD;
 
 /**
+    Encode a string value into a utf16 string. Adds a null char at the end of the string.
+*/
+pub fn to_utf16<'a>(s: &'a str) -> Vec<u16> {
+    use std::ffi::OsStr;
+    use std::os::windows::ffi::OsStrExt;
+
+    OsStr::new(s)
+      .encode_wide()
+      .chain(Some(0u16).into_iter())
+      .collect()
+}
+
+/**
     Return a formatted output of the last system error that was raised.
 
     (ERROR ID, Error message localized)

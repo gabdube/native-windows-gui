@@ -18,47 +18,230 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use winapi::HWND;
+use std::mem;
+use std::ptr;
+use std::hash::Hash;
+use std::marker::PhantomData;
 
-use error::Error;
+use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT};
+
+use ui::UiInner;
+use low::other::to_utf16;
+use error::{Error, SystemError};
+
+/// Unique class name that identify the nwg message-only windows.
+const MESSAGE_HANDLE_CLASS_NAME: &'static str = "NWG_MESSAGE";
 
 /**
     Object that dispatch events not targeted at any control.
 
     No automatic resources freeing, `MessageHandle.free` must be called before the struct goes out of scope.
 */
-pub struct MessageHandler {
-    hwnd: HWND
+pub struct MessageHandler<ID: Hash+Clone> {
+    hwnd: HWND,
+    last_error: Option<Error>,
+    p: PhantomData<ID>
 }
 
-impl MessageHandler {
+impl<ID: Hash+Clone> MessageHandler<ID> {
 
     /**
         Create a new message handle. 
 
-        * If the window creation was successful, return the new message handler
-        * If the system was not capable to create the window, return a `Error::System`
+        * If the window creation was successful, returns the new message handler
+        * If the system was not capable to create the window, returns a `Error::System`
     */
-    pub fn new() -> Result<MessageHandler, Error> {
-        let hwnd_result = unsafe{ create_message_only_window() };
+    pub fn new() -> Result<MessageHandler<ID>, Error> {
+        let hwnd_result = unsafe{ create_message_only_window::<ID>() };
         match hwnd_result {
-            Ok(h) => Ok( MessageHandler{ hwnd: h } ),
-            Err(e) => Err(e)
+            Ok(h) => 
+            Ok( 
+                MessageHandler::<ID>{ 
+                    hwnd: h, 
+                    last_error: None,
+                    p: PhantomData,
+                } 
+            ),
+            Err(e) => Err(Error::System(e))
+        }
+    }
+
+    /**
+        Execute the waiting custom commands in the message queue.
+
+        * Returns `Ok(())` if everything was executed without errors
+        * Returns `Err(Error)` if an error was encountered while executing the waiting events.
+          The following events will not be touched.
+    */
+    pub fn commit(&mut self) -> Result<(), Error> {
+        use winapi::{MSG, PM_REMOVE};
+        use user32::{PeekMessageW, DispatchMessageW};
+        use low::defs::{NWG_CUSTOM_MAX, NWG_CUSTOM_MIN, COMMIT_FAILED};
+
+        let ok = unsafe{
+            let mut ok = true;
+            let mut msg: MSG = mem::uninitialized();
+            while PeekMessageW(&mut msg, self.hwnd, NWG_CUSTOM_MIN, NWG_CUSTOM_MAX, PM_REMOVE) != 0 {
+                if DispatchMessageW(&msg) == COMMIT_FAILED {
+                    ok = false;
+                    break;
+                }
+            }
+
+            ok
+        };
+
+        if ok {
+            Ok(())
+        } else {
+            // if the commit failed, it is certain that last_error is not null
+            Err(self.last_error.take().unwrap())
+        }
+    }
+
+    /**
+        Post a message to the message only queue.
+    */
+    pub fn post(&self, ui: *mut UiInner<ID>, msg: UINT) {
+        use user32::PostMessageW;
+
+        unsafe {
+            let ui_wparam: WPARAM = mem::transmute(ui);
+            PostMessageW(self.hwnd, msg, ui_wparam, 0);
         }
     }
 
     /**
         Destroy the underlying window and try to free the class. Errors are ignored.
 
-        If multiple UI were created, the class destruction will silently fail and it's ok.
+        If multiple UI were created, the class destruction will silently fail (and it's ok).
         The class will be freed when the last Ui is freed.
     */
     pub fn free(&self) {
-        use user32::DestroyWindow;
+        use kernel32::GetModuleHandleW;
+        use user32::{DestroyWindow, UnregisterClassW};
+
+        let class_name = to_utf16(MESSAGE_HANDLE_CLASS_NAME);
+
         unsafe{ DestroyWindow(self.hwnd); }
+        unsafe{ UnregisterClassW(class_name.as_ptr(), GetModuleHandleW(ptr::null_mut())); }
     }
 }
 
-unsafe fn create_message_only_window() -> Result<HWND, Error> {
-    Err(Error::Unimplemented)
+/** 
+    Proc for the nwg Ui message-only window.
+
+    * `msg` holds the nwg command identifier
+    * `w`   holds a pointer to the Ui
+    * `l`   holds the parameters for the messages
+*/
+#[allow(unused_variables)]
+unsafe extern "system" fn message_window_proc<ID: Clone+Hash>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
+    use user32::{DefWindowProcW};
+    use low::defs::{NWG_PACK_USER_VALUE, COMMIT_SUCCESS, COMMIT_FAILED};
+
+    let ui: &mut UiInner<ID> = mem::transmute(w);
+
+    let (processed, error): (bool, Option<Error>) = match msg {
+        NWG_PACK_USER_VALUE => (true, Some(Error::Unimplemented)),
+        _ => (false, None)
+    };
+
+    if processed {
+        if error.is_some() {
+            ui.messages.last_error = error;
+            COMMIT_FAILED
+        } else {
+            COMMIT_SUCCESS
+        }
+    } else {
+        DefWindowProcW(hwnd, msg, w, l)
+    }
+}
+
+
+/**
+    Create the message handler window class.
+
+    * If the class creation is successful or the class already exists, returns `Ok`
+    * If there was an error while creating the class, returns a `Err(SystemError::UiCreation)`
+*/
+unsafe fn setup_class<ID: Hash+Clone>() -> Result<(), SystemError> {
+    use kernel32::{GetModuleHandleW, GetLastError};
+    use user32::{LoadCursorW, RegisterClassExW};
+    use winapi::{WNDCLASSEXW, CS_HREDRAW, CS_VREDRAW, IDC_ARROW, COLOR_WINDOW, HBRUSH, UINT, ERROR_CLASS_ALREADY_EXISTS};
+
+    let hmod = GetModuleHandleW(ptr::null_mut());
+    if hmod.is_null() { return Err(SystemError::UiCreation); }
+
+    let class_name = to_utf16(MESSAGE_HANDLE_CLASS_NAME);
+
+    let class =
+    WNDCLASSEXW {
+        cbSize: mem::size_of::<WNDCLASSEXW>() as UINT,
+        style: CS_HREDRAW | CS_VREDRAW,
+        lpfnWndProc: Some(message_window_proc::<ID>), 
+        cbClsExtra: 0,
+        cbWndExtra: 0,
+        hInstance: hmod,
+        hIcon: ptr::null_mut(),
+        hCursor: LoadCursorW(ptr::null_mut(), IDC_ARROW),
+        hbrBackground: mem::transmute(COLOR_WINDOW as HBRUSH),
+        lpszMenuName: ptr::null(),
+        lpszClassName: class_name.as_ptr(),
+        hIconSm: ptr::null_mut()
+    };
+
+    let class_token = RegisterClassExW(&class);
+    if class_token == 0 && GetLastError() != ERROR_CLASS_ALREADY_EXISTS { 
+        Err(SystemError::UiCreation)
+    } else {
+        Ok(())
+    }
+}
+
+/**
+    Create a NWG message-only window.
+
+    * If the window creation is successful, returns `Ok(window_handle)`
+    * If the window creation fails, returns `Err(SystemError::UiCreation)`
+*/
+unsafe fn create_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
+    use kernel32::GetModuleHandleW;
+    use user32::CreateWindowExW;
+    use winapi::HWND_MESSAGE;
+
+    let hmod = GetModuleHandleW(ptr::null_mut());
+    if hmod.is_null() { return Err(SystemError::UiCreation); }
+
+    let class_name = to_utf16(MESSAGE_HANDLE_CLASS_NAME);
+    let window_name = to_utf16("");
+
+    let handle = CreateWindowExW (
+        0, 
+        class_name.as_ptr(), window_name.as_ptr(), 
+        0, 0, 0, 0, 0,
+        HWND_MESSAGE,
+        ptr::null_mut(),
+        hmod,
+        ptr::null_mut()
+    );
+
+    if handle.is_null() {
+        Err(SystemError::UiCreation)
+    } else {
+        Ok(handle)
+    }
+}
+
+/**
+    Create a message only window for an UI. See `setup_class` && `create_window` docs for more info.
+*/
+unsafe fn create_message_only_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
+    match setup_class::<ID>() {
+        Ok(_) => {},
+        Err(e) => { return Err(e); }
+    }
+
+    create_window::<ID>()
 }

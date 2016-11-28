@@ -19,5 +19,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+pub mod defs;
 pub mod message_handler;
 pub mod other;
