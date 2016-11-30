@@ -18,6 +18,15 @@ fn test_ui_new() {
 #[test]
 fn test_ui_pack_user_value() {
     let mut ui = setup_ui();
-    ui.pack();
+
+    ui.pack_value(1000, "Test");
+    ui.pack_value(1001, vec![5u32, 6, 7]);
+
+    assert!(!ui.has_id(&1000), "ID 1000 was found in id before commit");
+    assert!(!ui.has_id(&1001), "ID 1001 was found in id before commit");
+
     ui.commit().expect("Commit was not successful");
+    
+    assert!(ui.has_id(&1000), "ID 1000 was not found in id after commit");
+    assert!(ui.has_id(&1001), "ID 1000 was not found in id after commit");
 }

@@ -52,6 +52,7 @@ impl fmt::Debug for SystemError {
 */
 #[derive(Clone)]
 pub enum Error {
+    KeyExists,
     Unimplemented,
     System(SystemError)
 }
@@ -60,6 +61,7 @@ impl Error {
     fn translate(&self) -> String {
 
         match self {
+            &Error::KeyExists => format!("The same key already exists in the UI"),
             &Error::Unimplemented => format!("Feature not yet implemented"),
             &Error::System(ref e) => format!("A system error was raised: {:?}", e),
         }

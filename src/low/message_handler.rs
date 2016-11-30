@@ -22,6 +22,7 @@ use std::mem;
 use std::ptr;
 use std::hash::Hash;
 use std::marker::PhantomData;
+use std::any::Any;
 
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT};
 
@@ -37,13 +38,13 @@ const MESSAGE_HANDLE_CLASS_NAME: &'static str = "NWG_MESSAGE";
 
     No automatic resources freeing, `MessageHandle.free` must be called before the struct goes out of scope.
 */
-pub struct MessageHandler<ID: Hash+Clone> {
+pub struct MessageHandler<ID: Hash+Clone+'static> {
     hwnd: HWND,
     last_error: Option<Error>,
     p: PhantomData<ID>
 }
 
-impl<ID: Hash+Clone> MessageHandler<ID> {
+impl<ID: Hash+Clone+'static> MessageHandler<ID> {
 
     /**
         Create a new message handle. 
@@ -102,12 +103,15 @@ impl<ID: Hash+Clone> MessageHandler<ID> {
     /**
         Post a message to the message only queue.
     */
-    pub fn post(&self, ui: *mut UiInner<ID>, msg: UINT) {
+    pub fn post(&self, ui: *mut UiInner<ID>, msg: UINT, data: Box<Any>) {
         use user32::PostMessageW;
 
         unsafe {
             let ui_wparam: WPARAM = mem::transmute(ui);
-            PostMessageW(self.hwnd, msg, ui_wparam, 0);
+            let data_ptr: *mut Any = Box::into_raw(data);
+            let data_ptr: *mut *mut Any = Box::into_raw(Box::new(data_ptr));
+            let data_lparam: LPARAM = mem::transmute(data_ptr);
+            PostMessageW(self.hwnd, msg, ui_wparam, data_lparam);
         }
     }
 
@@ -136,14 +140,23 @@ impl<ID: Hash+Clone> MessageHandler<ID> {
     * `l`   holds the parameters for the messages
 */
 #[allow(unused_variables)]
-unsafe extern "system" fn message_window_proc<ID: Clone+Hash>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
+unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use user32::{DefWindowProcW};
     use low::defs::{NWG_PACK_USER_VALUE, COMMIT_SUCCESS, COMMIT_FAILED};
+    use user_values::PackUserValueArgs;
 
     let ui: &mut UiInner<ID> = mem::transmute(w);
+    let args: *mut *mut Any = mem::transmute::<LPARAM, *mut *mut Any>(l);
 
     let (processed, error): (bool, Option<Error>) = match msg {
-        NWG_PACK_USER_VALUE => (true, Some(Error::Unimplemented)),
+        NWG_PACK_USER_VALUE => {
+            let args: Box<Any> = Box::from_raw((*Box::from_raw(args)));
+            if let Ok(params) = args.downcast::<PackUserValueArgs<ID>>() {
+                (true, ui.pack_user_value(*params))
+            } else {
+                panic!("Could not downcast command PACK_USER_VALUE args into a PackUserValueArgs struct.");
+            }
+        },
         _ => (false, None)
     };
 
@@ -166,7 +179,7 @@ unsafe extern "system" fn message_window_proc<ID: Clone+Hash>(hwnd: HWND, msg: U
     * If the class creation is successful or the class already exists, returns `Ok`
     * If there was an error while creating the class, returns a `Err(SystemError::UiCreation)`
 */
-unsafe fn setup_class<ID: Hash+Clone>() -> Result<(), SystemError> {
+unsafe fn setup_class<ID: Hash+Clone+'static>() -> Result<(), SystemError> {
     use kernel32::{GetModuleHandleW, GetLastError};
     use user32::{LoadCursorW, RegisterClassExW};
     use winapi::{WNDCLASSEXW, CS_HREDRAW, CS_VREDRAW, IDC_ARROW, COLOR_WINDOW, HBRUSH, UINT, ERROR_CLASS_ALREADY_EXISTS};
@@ -237,7 +250,7 @@ unsafe fn create_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
 /**
     Create a message only window for an UI. See `setup_class` && `create_window` docs for more info.
 */
-unsafe fn create_message_only_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
+unsafe fn create_message_only_window<ID: Hash+Clone+'static>() -> Result<HWND, SystemError> {
     match setup_class::<ID>() {
         Ok(_) => {},
         Err(e) => { return Err(e); }

@@ -1,6 +1,3 @@
-/*!
-    A very high level native gui library for Windows.
-*/
 /*
     Copyright (C) 2016  Gabriel Dubé
 
@@ -18,15 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern crate winapi;
-extern crate user32;
-extern crate kernel32;
-extern crate comctl32;
+use std::hash::Hash;
+use std::any::Any;
 
-mod low;
-mod error;
-mod user_values;
-mod ui;
-
-pub use error::{Error, SystemError};
-pub use ui::Ui;
+pub struct PackUserValueArgs<ID: Hash+Clone> {
+    pub id: ID,
+    pub value: Box<Any>
+}

@@ -22,14 +22,16 @@
 use std::hash::Hash;
 use std::ptr;
 use std::collections::HashMap;
+use std::any::Any;
 
 use low::message_handler::MessageHandler;
+use user_values::PackUserValueArgs;
 use error::Error;
 
 /**
     Inner window data shared within the thread
 */
-pub struct UiInner<ID: Hash+Clone> {
+pub struct UiInner<ID: Hash+Clone+'static> {
     pub messages: MessageHandler<ID>,
     pub ids_map: HashMap<u64, ID>,
 }
@@ -43,6 +45,25 @@ impl<ID: Hash+Clone> UiInner<ID> {
         };
 
         Ok(UiInner{ messages: messages, ids_map: HashMap::with_capacity(64) })
+    }
+
+    pub fn pack_user_value(&mut self, params: PackUserValueArgs<ID>) -> Option<Error> {
+        let inner_id = UiInner::hash_id(&params.id);
+        if self.ids_map.contains_key(&inner_id) {
+            Some(Error::KeyExists)
+        } else {
+            self.ids_map.insert(inner_id, params.id);
+            None
+        }
+    }
+
+    fn hash_id(id: &ID) -> u64 {
+        use std::hash::Hasher;
+        use std::collections::hash_map::{DefaultHasher};
+
+        let mut s = DefaultHasher::new();
+        id.hash(&mut s);
+        s.finish()
     }
 
 }
@@ -59,7 +80,7 @@ impl<ID: Hash+Clone> Drop for UiInner<ID> {
 /**
     Object that manage the GUI elements
 */
-pub struct Ui<ID: Hash+Clone> {
+pub struct Ui<ID: Hash+Clone+'static> {
     inner: *mut UiInner<ID>
 }
 
@@ -94,14 +115,29 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Add an element to the Ui. 
-        Asynchonous, this only registers the command in the ui message queue. Call `ui.commit` to execute it.
+        Add an user valie to the Ui. 
+        Asynchonous, this only registers the command in the ui message queue. 
+        Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
+
+        The executiong will fail if the id already exists in the Ui
     */
-    pub fn pack(&mut self) {
+    pub fn pack_value<T: Into<Box<T>>+'static >(&mut self, id: ID, value: T) {
         use low::defs::{NWG_PACK_USER_VALUE};
         
         let inner = unsafe{ &mut (&*self.inner) };
-        inner.messages.post(self.inner, NWG_PACK_USER_VALUE)
+        let data = PackUserValueArgs{ id: id, value: value.into() as Box<Any> };
+        inner.messages.post(self.inner, NWG_PACK_USER_VALUE, Box::new(data) as Box<Any> );
+    }
+
+    /**
+        Check if an id exists in the ui
+
+        * id -> The ID to check
+    */
+    pub fn has_id(&self, id: &ID) -> bool {
+        let inner = unsafe{ &mut (&*self.inner) };
+        let inner_id = UiInner::hash_id(id);
+        inner.ids_map.contains_key(&inner_id)
     }
 
 }

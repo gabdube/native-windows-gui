@@ -1,5 +1,5 @@
 /*!
-    A very high level native gui library for Windows.
+    Types, constants and extern functions used in the low-level part of NWG
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -18,15 +18,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-extern crate winapi;
-extern crate user32;
-extern crate kernel32;
-extern crate comctl32;
+use winapi::{UINT, LRESULT};
 
-mod low;
-mod error;
-mod user_values;
-mod ui;
+// Custom inner message definitions
 
-pub use error::{Error, SystemError};
-pub use ui::Ui;
+pub const NWG_CUSTOM_MIN:      UINT = 0x400;  /// Minimum custom event value
+pub const NWG_PACK_USER_VALUE: UINT = 0x400;  /// Message sent when packing a user value
+pub const NWG_CUSTOM_MAX:      UINT = 0x401;  /// Maximum custom event value
+
+/// Value returned by a window proc if the message execution failed/succeeded
+pub const COMMIT_SUCCESS: LRESULT = 0;
+pub const COMMIT_FAILED: LRESULT = 5555;
