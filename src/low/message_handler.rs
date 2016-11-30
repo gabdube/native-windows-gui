@@ -143,7 +143,7 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
 unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use user32::{DefWindowProcW};
     use low::defs::{NWG_PACK_USER_VALUE, COMMIT_SUCCESS, COMMIT_FAILED};
-    use user_values::PackUserValueArgs;
+    use args::PackUserValueArgs;
 
     let ui: &mut UiInner<ID> = mem::transmute(w);
     let args: *mut *mut Any = mem::transmute::<LPARAM, *mut *mut Any>(l);

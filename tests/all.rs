@@ -29,4 +29,15 @@ fn test_ui_pack_user_value() {
     
     assert!(ui.has_id(&1000), "ID 1000 was not found in id after commit");
     assert!(ui.has_id(&1001), "ID 1000 was not found in id after commit");
+
+    ui.pack_value(1002, "Test");
+    ui.pack_value(1001, 5u32);
+
+    assert!(ui.commit().is_err(), "Commit was successful");
+
+    assert!(ui.has_id(&1002), "ID 1002 was not found in id after commit");
+
+    let x = ui.get::<Vec<u32>>(&1001);
+    let y = ui.get::<&'static str>(&1000);
+    panic!("{:?} {:?}", x, y);
 }
