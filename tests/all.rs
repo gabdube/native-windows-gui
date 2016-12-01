@@ -37,7 +37,7 @@ fn test_ui_pack_user_value() {
 
     assert!(ui.has_id(&1002), "ID 1002 was not found in id after commit");
 
-    let x = ui.get::<Vec<u32>>(&1001);
+    let x = ui.get::<Vec<u16>>(&1001);
     let y = ui.get::<&'static str>(&1000);
     panic!("{:?} {:?}", x, y);
 }

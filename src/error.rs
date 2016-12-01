@@ -54,6 +54,7 @@ impl fmt::Debug for SystemError {
 pub enum Error {
     KeyExists,
     KeyNotFound,
+    BadType,
     Unimplemented,
     System(SystemError)
 }
@@ -64,6 +65,7 @@ impl Error {
         match self {
             &Error::KeyExists => format!("The same key already exists in the UI"),
             &Error::KeyNotFound => format!("The key was not found in the ui"),
+            &Error::BadType => format!("The key exists in the Ui, but the type requested did not match the type of the underlying object"),
             &Error::Unimplemented => format!("Feature not yet implemented"),
             &Error::System(ref e) => format!("A system error was raised: {:?}", e),
         }

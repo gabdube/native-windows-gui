@@ -22,7 +22,7 @@
 use std::hash::Hash;
 use std::ptr;
 use std::collections::HashMap;
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::cell::{RefCell, Ref};
 
 use low::message_handler::MessageHandler;
@@ -53,23 +53,29 @@ impl<ID: Hash+Clone> UiInner<ID> {
     }
 
     pub fn pack_user_value(&mut self, params: PackUserValueArgs<ID>) -> Option<Error> {
-        let inner_id = UiInner::hash_id(&params.id);
+        let (inner_id, inner_type_id) = UiInner::hash_id(&params.id, &params.tid);
         if self.ids_map.contains_key(&inner_id) {
             Some(Error::KeyExists)
         } else {
             self.ids_map.insert(inner_id, params.id);
-            self.user_values.insert(inner_id, RefCell::new(params.value));
+            self.user_values.insert(inner_type_id, RefCell::new(params.value));
             None
         }
     }
 
-    fn hash_id(id: &ID) -> u64 {
+    fn hash_id(id: &ID, tid: &TypeId) -> (u64, u64) {
         use std::hash::Hasher;
         use std::collections::hash_map::{DefaultHasher};
 
-        let mut s = DefaultHasher::new();
-        id.hash(&mut s);
-        s.finish()
+        let mut s1 = DefaultHasher::new();
+        let mut s2 = DefaultHasher::new();
+
+        id.hash(&mut s2);
+        tid.hash(&mut s2);
+
+        id.hash(&mut s1);
+
+        (s1.finish(), s2.finish())
     }
 
 }
@@ -131,7 +137,7 @@ impl<ID:Hash+Clone> Ui<ID> {
         use low::defs::{NWG_PACK_USER_VALUE};
         
         let inner = unsafe{ &mut (&*self.inner) };
-        let data = PackUserValueArgs{ id: id, value: value.into() as Box<Any> };
+        let data = PackUserValueArgs{ id: id, tid: TypeId::of::<T>(), value: value.into() as Box<Any>};
         inner.messages.post(self.inner, NWG_PACK_USER_VALUE, Box::new(data) as Box<Any> );
     }
 
@@ -139,24 +145,21 @@ impl<ID:Hash+Clone> Ui<ID> {
         Return the element identified by `id` in the Ui.
     */
     pub fn get<T: 'static>(&self, id: &ID) -> Result<Ref<Box<T>>, Error> {
+        use std::mem;
+         
         let inner = unsafe{ &mut (&*self.inner) };
-        let inner_id = UiInner::hash_id(id);
-        
-        if let Some(v) = inner.user_values.get(&inner_id) {
-            if let Ok(v_ref) = v.try_borrow() {
-                if let None = v_ref.as_ref().downcast_ref::<T>() {
-                    return Err(Error::Unimplemented);
-                }
+        let (inner_id, inner_type_id) = UiInner::hash_id(id, &TypeId::of::<T>());
 
-                use std::mem;
-                let x: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
-                return Ok( x.borrow() );
-            } else {
-                return Err(Error::Unimplemented);
-            }
+        if !inner.ids_map.contains_key(&inner_id) {
+            return Err(Error::KeyNotFound);
+        }
+        
+        if let Some(v) = inner.user_values.get(&inner_type_id) {
+            let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
+            return Ok( v_casted.borrow() );
         }
 
-        Err(Error::KeyNotFound)
+        return Err(Error::BadType);
     }
 
     /**
@@ -166,7 +169,7 @@ impl<ID:Hash+Clone> Ui<ID> {
     */
     pub fn has_id(&self, id: &ID) -> bool {
         let inner = unsafe{ &mut (&*self.inner) };
-        let inner_id = UiInner::hash_id(id);
+        let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
         inner.ids_map.contains_key(&inner_id)
     }
 

@@ -16,9 +16,10 @@
 */
 
 use std::hash::Hash;
-use std::any::Any;
+use std::any::{Any, TypeId};
 
 pub struct PackUserValueArgs<ID: Hash+Clone> {
     pub id: ID,
+    pub tid: TypeId,
     pub value: Box<Any>
 }
