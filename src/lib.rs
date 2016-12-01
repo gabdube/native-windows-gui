@@ -26,7 +26,9 @@ extern crate comctl32;
 mod low;
 mod error;
 mod args;
+mod controls;
 mod ui;
 
 pub use error::{Error, SystemError};
+pub use controls::{ControlT, Control, WindowT, Window};
 pub use ui::Ui;

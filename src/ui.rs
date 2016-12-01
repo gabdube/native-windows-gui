@@ -26,7 +26,8 @@ use std::any::{Any, TypeId};
 use std::cell::{RefCell, Ref, RefMut};
 
 use low::message_handler::MessageHandler;
-use args::PackUserValueArgs;
+use args::{PackUserValueArgs, PackControlArgs};
+use controls::{ControlT, Control};
 use error::Error;
 
 /**
@@ -34,6 +35,7 @@ use error::Error;
 */
 pub struct UiInner<ID: Hash+Clone+'static> {
     pub messages: MessageHandler<ID>,
+    pub controls: HashMap<u64, RefCell<Box<Control>>>,
     pub user_values: HashMap<u64, RefCell<Box<Any>>>,
     pub ids_map: HashMap<u64, ID>,
 }
@@ -49,6 +51,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
         Ok(UiInner{
             messages: messages,
             user_values: HashMap::with_capacity(16),
+            controls: HashMap::with_capacity(32),
             ids_map: HashMap::with_capacity(64) })
     }
 
@@ -60,6 +63,22 @@ impl<ID: Hash+Clone> UiInner<ID> {
             self.ids_map.insert(inner_id, params.id);
             self.user_values.insert(inner_type_id, RefCell::new(params.value));
             None
+        }
+    }
+
+    pub fn pack_control(&mut self, params: PackControlArgs<ID>) -> Option<Error> {
+        let (inner_id, inner_type_id) = UiInner::hash_id(&params.id, &params.value.type_id());
+        if self.ids_map.contains_key(&inner_id) {
+            Some(Error::KeyExists)
+        } else {
+            match params.value.build() {
+                Ok(control) => {
+                    self.ids_map.insert(inner_id, params.id);
+                    self.controls.insert(inner_type_id, RefCell::new(control) );
+                    None
+                },
+                Err(e) => Some(e)
+            }
         }
     }
 
@@ -139,6 +158,16 @@ impl<ID:Hash+Clone> Ui<ID> {
         let inner = unsafe{ &mut (&*self.inner) };
         let data = PackUserValueArgs{ id: id, tid: TypeId::of::<T>(), value: value.into() as Box<Any>};
         inner.messages.post(self.inner, NWG_PACK_USER_VALUE, Box::new(data) as Box<Any> );
+    }
+
+    /**
+    */
+    pub fn pack_control<T: ControlT+'static>(&mut self, id: ID, value: T) {
+        use low::defs::{NWG_PACK_CONTROL};
+        
+        let inner = unsafe{ &mut (&*self.inner) };
+        let data = PackControlArgs{ id: id, value: Box::new(value)};
+        inner.messages.post(self.inner, NWG_PACK_CONTROL, Box::new(data) as Box<Any> );
     }
 
     /**

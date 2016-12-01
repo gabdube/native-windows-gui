@@ -25,6 +25,7 @@ use std::fmt;
 */
 #[derive(Clone, PartialEq)]
 pub enum SystemError {
+    SystemClassCreation,
     UiCreation,
 }
 
@@ -34,6 +35,7 @@ impl SystemError {
 
         let (code, code_txt) = unsafe{ get_system_error() };
         let tr = match self {
+            &SystemError::SystemClassCreation => format!("Failed to create a system class for a control"),
             &SystemError::UiCreation => format!("The system could not initialize the Ui"),
         };
 

@@ -21,4 +21,5 @@
 
 pub mod defs;
 pub mod message_handler;
+pub mod window_helper;
 pub mod other;

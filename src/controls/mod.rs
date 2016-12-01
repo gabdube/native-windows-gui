@@ -1,3 +1,6 @@
+/*!
+    Control trait definition. The base control definitions are located in the submodules.
+*/
 /*
     Copyright (C) 2016  Gabriel Dubé
 
@@ -15,18 +18,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use std::hash::Hash;
-use std::any::{Any, TypeId};
+pub mod window;
 
-use controls::ControlT;
+pub use self::window::{WindowT, Window};
 
-pub struct PackUserValueArgs<ID: Hash+Clone> {
-    pub id: ID,
-    pub tid: TypeId,
-    pub value: Box<Any>
+use std::any::TypeId;
+
+use error::Error;
+
+/**
+    Structures implementing this trait can be used by a Ui to build a Control
+*/
+pub trait ControlT {
+
+    fn type_id(&self) -> TypeId;
+
+    fn build(&self) -> Result<Box<Control>, Error>;
 }
 
-pub struct PackControlArgs<ID: Hash+Clone> {
-    pub id: ID,
-    pub value: Box<ControlT>
-}
+/**
+    Structures implementing this trait are visual control that can be stored in a Ui
+*/
+pub trait Control {}

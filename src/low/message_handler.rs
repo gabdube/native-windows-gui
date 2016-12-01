@@ -142,8 +142,8 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
 #[allow(unused_variables)]
 unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use user32::{DefWindowProcW};
-    use low::defs::{NWG_PACK_USER_VALUE, COMMIT_SUCCESS, COMMIT_FAILED};
-    use args::PackUserValueArgs;
+    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, COMMIT_SUCCESS, COMMIT_FAILED};
+    use args::{PackUserValueArgs, PackControlArgs};
 
     let ui: &mut UiInner<ID> = mem::transmute(w);
     let args: *mut *mut Any = mem::transmute::<LPARAM, *mut *mut Any>(l);
@@ -155,6 +155,14 @@ unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND
                 (true, ui.pack_user_value(*params))
             } else {
                 panic!("Could not downcast command PACK_USER_VALUE args into a PackUserValueArgs struct.");
+            }
+        },
+        NWG_PACK_CONTROL => {
+            let args: Box<Any> = Box::from_raw((*Box::from_raw(args)));
+            if let Ok(params) = args.downcast::<PackControlArgs<ID>>() {
+                (true, ui.pack_control(*params))
+            } else {
+                panic!("Could not downcast command PACK_CONTROL args into a PackControlArgs struct.");
             }
         },
         _ => (false, None)
@@ -180,33 +188,10 @@ unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND
     * If there was an error while creating the class, returns a `Err(SystemError::UiCreation)`
 */
 unsafe fn setup_class<ID: Hash+Clone+'static>() -> Result<(), SystemError> {
-    use kernel32::{GetModuleHandleW, GetLastError};
-    use user32::{LoadCursorW, RegisterClassExW};
-    use winapi::{WNDCLASSEXW, CS_HREDRAW, CS_VREDRAW, IDC_ARROW, COLOR_WINDOW, HBRUSH, UINT, ERROR_CLASS_ALREADY_EXISTS};
-
-    let hmod = GetModuleHandleW(ptr::null_mut());
-    if hmod.is_null() { return Err(SystemError::UiCreation); }
-
-    let class_name = to_utf16(MESSAGE_HANDLE_CLASS_NAME);
-
-    let class =
-    WNDCLASSEXW {
-        cbSize: mem::size_of::<WNDCLASSEXW>() as UINT,
-        style: CS_HREDRAW | CS_VREDRAW,
-        lpfnWndProc: Some(message_window_proc::<ID>), 
-        cbClsExtra: 0,
-        cbWndExtra: 0,
-        hInstance: hmod,
-        hIcon: ptr::null_mut(),
-        hCursor: LoadCursorW(ptr::null_mut(), IDC_ARROW),
-        hbrBackground: mem::transmute(COLOR_WINDOW as HBRUSH),
-        lpszMenuName: ptr::null(),
-        lpszClassName: class_name.as_ptr(),
-        hIconSm: ptr::null_mut()
-    };
-
-    let class_token = RegisterClassExW(&class);
-    if class_token == 0 && GetLastError() != ERROR_CLASS_ALREADY_EXISTS { 
+    use low::window_helper::{SysclassParams, build_sysclass};
+    let params = SysclassParams{ class_name: MESSAGE_HANDLE_CLASS_NAME, sysproc: Some(message_window_proc::<ID>) };
+    
+    if let Err(_) = build_sysclass(params) {
         Err(SystemError::UiCreation)
     } else {
         Ok(())

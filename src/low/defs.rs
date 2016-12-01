@@ -24,7 +24,8 @@ use winapi::{UINT, LRESULT};
 
 pub const NWG_CUSTOM_MIN:      UINT = 0x400;  /// Minimum custom event value
 pub const NWG_PACK_USER_VALUE: UINT = 0x400;  /// Message sent when packing a user value
-pub const NWG_CUSTOM_MAX:      UINT = 0x401;  /// Maximum custom event value
+pub const NWG_PACK_CONTROL:    UINT = 0x401;  /// Message sent when packing a control
+pub const NWG_CUSTOM_MAX:      UINT = 0x402;  /// Maximum custom event value
 
 /// Value returned by a window proc if the message execution failed/succeeded
 pub const COMMIT_SUCCESS: LRESULT = 0;
