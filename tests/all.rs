@@ -19,25 +19,63 @@ fn test_ui_new() {
 fn test_ui_pack_user_value() {
     let mut ui = setup_ui();
 
+    // Test simple pack
     ui.pack_value(1000, "Test");
     ui.pack_value(1001, vec![5u32, 6, 7]);
 
+    // Value shouldn't be packed until commit is called
     assert!(!ui.has_id(&1000), "ID 1000 was found in id before commit");
     assert!(!ui.has_id(&1001), "ID 1001 was found in id before commit");
 
     ui.commit().expect("Commit was not successful");
     
+    // Both id should have been added
     assert!(ui.has_id(&1000), "ID 1000 was not found in id after commit");
     assert!(ui.has_id(&1001), "ID 1000 was not found in id after commit");
 
+    // Test partially good pack (the second entry has a key that is already present)
     ui.pack_value(1002, "Test");
     ui.pack_value(1001, 5u32);
 
-    assert!(ui.commit().is_err(), "Commit was successful");
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
 
+    // The first entry should have been executed successfully
     assert!(ui.has_id(&1002), "ID 1002 was not found in id after commit");
 
-    let x = ui.get::<Vec<u16>>(&1001);
-    let y = ui.get::<&'static str>(&1000);
-    panic!("{:?} {:?}", x, y);
+    // Test good get (ids exists and type is correct)
+    {
+        let w = ui.get::<Vec<u32>>(&1001);
+        let x = ui.get::<&'static str>(&1000);
+        assert!(w.is_ok() && (**w.unwrap()) == [5u32, 6, 7]);
+        assert!(x.is_ok() && (**x.unwrap()) == "Test");
+    }
+
+    // Test bad get (ids do not exists and type is not correct)
+    {
+        let y = ui.get::<&'static str>(&1003);
+        let z = ui.get::<bool>(&1000);
+    
+        assert!(y.is_err() && y.err().unwrap() == Error::KeyNotFound);
+        assert!(z.is_err() && z.err().unwrap() == Error::BadType);
+    }
+
+    // Test mutable borrow
+    {
+        { ui.get_mut::<Vec<u32>>(&1001).unwrap().push(1000); }
+        let w = ui.get::<Vec<u32>>(&1001);
+        assert!(w.is_ok() && (**w.unwrap()) == [5u32, 6, 7, 1000]);
+    }
+
+    // Test mutable borrow twice
+    {
+        let x = ui.get_mut::<&'static str>(&1000);
+        let x2 = ui.get_mut::<&'static str>(&1000);
+        let x3 = ui.get::<&'static str>(&1000);
+        assert!(x.is_ok() && (**x.unwrap()) == "Test");
+        assert!(x2.is_err() && x2.err().unwrap() == Error::BorrowError);
+        assert!(x3.is_err() && x3.err().unwrap() == Error::BorrowError);
+    }
+    
+
 }

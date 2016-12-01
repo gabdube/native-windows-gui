@@ -23,7 +23,7 @@ use std::hash::Hash;
 use std::ptr;
 use std::collections::HashMap;
 use std::any::{Any, TypeId};
-use std::cell::{RefCell, Ref};
+use std::cell::{RefCell, Ref, RefMut};
 
 use low::message_handler::MessageHandler;
 use args::PackUserValueArgs;
@@ -142,7 +142,17 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Return the element identified by `id` in the Ui.
+        Return an immutable reference to the element identified by `id` in the Ui.
+        It is required to give a type `T` to this function as it is needed to cast the underlying value.
+        Ex: `ui.get::<u32>(100)`
+
+        Params:  
+        * id: The id that identify the element in the ui
+
+        * Error::KeyNotFound will be returned if the key was not found in the Ui
+        * Error::BadType will be returned if the key exists, but the type do not match
+        * Error::BorrowError will be returned if the element was already borrowed mutably
+
     */
     pub fn get<T: 'static>(&self, id: &ID) -> Result<Ref<Box<T>>, Error> {
         use std::mem;
@@ -150,13 +160,47 @@ impl<ID:Hash+Clone> Ui<ID> {
         let inner = unsafe{ &mut (&*self.inner) };
         let (inner_id, inner_type_id) = UiInner::hash_id(id, &TypeId::of::<T>());
 
-        if !inner.ids_map.contains_key(&inner_id) {
-            return Err(Error::KeyNotFound);
-        }
+        if !inner.ids_map.contains_key(&inner_id) { return Err(Error::KeyNotFound); }
         
         if let Some(v) = inner.user_values.get(&inner_type_id) {
             let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
-            return Ok( v_casted.borrow() );
+            if let Ok(v_ref) = v_casted.try_borrow() {
+                return Ok( v_ref );
+            } else {
+                return Err(Error::BorrowError);
+            }
+        }
+
+        return Err(Error::BadType);
+    }
+
+    /**
+        Return an mutable referemce to element identified by `id` in the Ui.
+        It is required to give a type `T` to this function as it is needed to cast the underlying value.
+        Ex: `ui.get::<u32>(100)`
+
+        Params:  
+        * id: The id that identify the element in the ui
+
+        * Error::KeyNotFound will be returned if the key was not found in the Ui
+        * Error::BadType will be returned if the key exists, but the type do not match
+        * Error::BorrowError will be returned if the element was already borrowed mutably
+    */
+    pub fn get_mut<T: 'static>(&self, id: &ID) -> Result<RefMut<Box<T>>, Error> {
+        use std::mem;
+         
+        let inner = unsafe{ &mut (&*self.inner) };
+        let (inner_id, inner_type_id) = UiInner::hash_id(id, &TypeId::of::<T>());
+
+        if !inner.ids_map.contains_key(&inner_id) { return Err(Error::KeyNotFound); }
+        
+        if let Some(v) = inner.user_values.get(&inner_type_id) {
+            let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
+            if let Ok(v_ref) = v_casted.try_borrow_mut() {
+                return Ok( v_ref );
+            } else {
+                return Err(Error::BorrowError);
+            }
         }
 
         return Err(Error::BadType);
