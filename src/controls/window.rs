@@ -31,31 +31,34 @@ const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
 /**
     A template that will create a window.
 */
-pub struct WindowT<S: Into<String>> {
+pub struct WindowT<S: Clone+Into<String>> {
     pub title: S,
-    pub pos: (i32, i32),
+    pub position: (i32, i32),
     pub size: (u32, u32),
+    pub resizable: bool,
     pub visible: bool,
-    pub enabled: bool,
+    pub disabled: bool,
 }
 
 /**
     A window control.
 */
+#[allow(dead_code)]
 pub struct Window {
     handle: HWND
 }
 
-impl<S: Into<String>> ControlT for WindowT<S> {
+impl<S: Clone+Into<String>> ControlT for WindowT<S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
     fn build(&self) -> Result<Box<Control>, Error> {
-
-        if let Err(e) = unsafe{ build_sysclass() } {
-            return Err(e);
-        }
-
-        Err(Error::BorrowError)
+        unsafe{
+            if let Err(e) = build_sysclass() { return Err(e); }
+            match build_window(&self) {
+                Ok(h) => { Ok( Box::new(Window{handle: h}) as Box<Control> ) },
+                Err(e) => Err(e)
+            }
+        } // unsafe
     }
 }
 
@@ -94,5 +97,30 @@ unsafe fn build_sysclass() -> Result<(), Error> {
         Err(Error::System(e))
     } else {
         Ok(())
+    }
+}
+
+#[inline(always)]
+unsafe fn build_window<S: Clone+Into<String>>(t: &WindowT<S>) -> Result<HWND, Error> {
+    use low::window_helper::{WindowParams, build_window};
+    use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_OVERLAPPED, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU};
+
+    let fixed_window: DWORD = WS_SYSMENU | WS_CAPTION | WS_OVERLAPPED | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+    let flags: DWORD = 
+    if t.visible    { WS_VISIBLE }   else { 0 } |
+    if t.disabled   { WS_DISABLED }  else { 0 } |
+    if !t.resizable { fixed_window } else { WS_OVERLAPPEDWINDOW } ;
+
+    let params = WindowParams {
+        title: t.title.clone().into(),
+        class_name: WINDOW_CLASS_NAME,
+        position: t.position.clone(),
+        size: t.size.clone(),
+        flags: flags
+    };
+
+    match build_window(params) {
+        Ok(h) => Ok(h),
+        Err(e) => Err(Error::System(e))
     }
 }

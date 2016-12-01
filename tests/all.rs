@@ -84,7 +84,7 @@ fn test_ui_pack_user_value() {
 fn test_ui_pack_control() {
     let mut ui = setup_ui();
 
-    //ui.pack_control(1000, WindowT{});
+    ui.pack_control(1000, WindowT{title: "Hello", position:(0,0), size:(0,0), resizable: true, visible:false, disabled: false});
 
     ui.commit().expect("Commit was not successful");
 }
