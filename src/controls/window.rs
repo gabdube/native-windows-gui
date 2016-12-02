@@ -38,6 +38,7 @@ pub struct WindowT<S: Clone+Into<String>> {
     pub resizable: bool,
     pub visible: bool,
     pub disabled: bool,
+    pub exit_on_close: bool
 }
 
 /**
@@ -73,11 +74,21 @@ use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 
 #[allow(unused_variables)]
 unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::{WM_CREATE};
-    use user32::{DefWindowProcW};
+    use winapi::{WM_CREATE, WM_CLOSE};
+    use user32::{DefWindowProcW, PostQuitMessage};
+    use low::window_helper::{get_window_long};
 
     let handled = match msg {
         WM_CREATE => true,
+        WM_CLOSE => {
+            let exit_on_close = get_window_long(hwnd) == 1;
+            if exit_on_close {
+                PostQuitMessage(0);
+                true
+            } else {
+                false
+            }
+        }
         _ => false
     };
 
@@ -102,7 +113,7 @@ unsafe fn build_sysclass() -> Result<(), Error> {
 
 #[inline(always)]
 unsafe fn build_window<S: Clone+Into<String>>(t: &WindowT<S>) -> Result<HWND, Error> {
-    use low::window_helper::{WindowParams, build_window};
+    use low::window_helper::{WindowParams, build_window, set_window_long};
     use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_OVERLAPPED, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU};
 
     let fixed_window: DWORD = WS_SYSMENU | WS_CAPTION | WS_OVERLAPPED | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
@@ -120,7 +131,10 @@ unsafe fn build_window<S: Clone+Into<String>>(t: &WindowT<S>) -> Result<HWND, Er
     };
 
     match build_window(params) {
-        Ok(h) => Ok(h),
+        Ok(h) => {
+            set_window_long(h, t.exit_on_close as usize);
+            Ok(h)
+        },
         Err(e) => Err(Error::System(e))
     }
 }

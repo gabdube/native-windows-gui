@@ -254,3 +254,14 @@ impl<ID: Hash+Clone> Drop for Ui<ID> {
         self.inner = ptr::null_mut();
     }
 }
+
+
+/**
+    Dispatch the messages waiting the the system message queue to the associated Uis. This includes NWG custom messages.
+
+    Return once a quit event was received.
+*/
+pub fn dispatch_events() {
+    // Actual code is located under the low module because that's where most of the unsafe code should be
+    unsafe{ ::low::other::dispatch_events(); }
+}

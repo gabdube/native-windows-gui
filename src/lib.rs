@@ -31,4 +31,4 @@ mod ui;
 
 pub use error::{Error, SystemError};
 pub use controls::{ControlT, Control, WindowT, Window};
-pub use ui::Ui;
+pub use ui::{Ui, dispatch_events};

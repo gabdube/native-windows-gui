@@ -21,7 +21,7 @@
 use std::ptr;
 use std::mem;
 
-use winapi::{HWND, WNDPROC, DWORD};
+use winapi::{HWND, WNDPROC, DWORD, GWL_USERDATA};
 
 use low::other::to_utf16;
 use error::SystemError;
@@ -129,4 +129,36 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
     } else {
         Ok(handle)
     }
+}
+
+
+#[cfg(target_arch = "x86")] use winapi::LONG;
+#[cfg(target_arch = "x86_64")] use winapi::LONG_PTR;
+
+#[inline(always)]
+#[cfg(target_arch = "x86_64")]
+pub fn get_window_long(handle: HWND) -> LONG_PTR {
+    use user32::GetWindowLongPtrW;
+    unsafe{ GetWindowLongPtrW(handle, GWL_USERDATA) }
+}
+
+#[inline(always)]
+#[cfg(target_arch = "x86")]
+pub fn get_window_long(handle: HWND) -> LONG {
+    use user32::GetWindowLongW;
+    unsafe { GetWindowLongW(handle, GWL_USERDATA) }
+}
+
+#[inline(always)]
+#[cfg(target_arch = "x86_64")]
+pub fn set_window_long(handle: HWND, v: usize) {
+    use user32::SetWindowLongPtrW;
+    unsafe{ SetWindowLongPtrW(handle, GWL_USERDATA, v as LONG_PTR); }
+}
+
+#[inline(always)]
+#[cfg(target_arch = "x86")]
+pub fn set_window_long(handle: HWND, v: usize) {
+    use user32::SetWindowLongW;
+    unsafe { SetWindowLongW(handle, GWL_USERDATA, v as LONG); }
 }
