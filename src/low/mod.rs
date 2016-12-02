@@ -20,6 +20,7 @@
 */
 
 pub mod defs;
+pub mod events;
 pub mod message_handler;
 pub mod window_helper;
-pub mod other;
+pub mod other_helper;

@@ -24,6 +24,7 @@ use winapi::HWND;
 
 use controls::{Control, ControlT};
 use error::Error;
+use args::AnyHandle;
 
 /// System class identifier
 const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
@@ -63,7 +64,13 @@ impl<S: Clone+Into<String>> ControlT for WindowT<S> {
     }
 }
 
-impl Control for Window {}
+impl Control for Window {
+
+    fn handle(&self) -> AnyHandle {
+        AnyHandle::HWND(self.handle)
+    }
+
+}
 
 
 /*
@@ -75,7 +82,7 @@ use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 #[allow(unused_variables)]
 unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use winapi::{WM_CREATE, WM_CLOSE};
-    use user32::{DefWindowProcW, PostQuitMessage};
+    use user32::{DefWindowProcW, PostQuitMessage, DestroyWindow};
     use low::window_helper::{get_window_long};
 
     let handled = match msg {
@@ -83,9 +90,11 @@ unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_CLOSE => {
             let exit_on_close = get_window_long(hwnd) == 1;
             if exit_on_close {
+                DestroyWindow(hwnd);
                 PostQuitMessage(0);
                 true
             } else {
+                // DestroyWindow is called by the default behaviour
                 false
             }
         }

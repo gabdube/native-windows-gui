@@ -27,7 +27,7 @@ use std::any::Any;
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT};
 
 use ui::UiInner;
-use low::other::to_utf16;
+use low::other_helper::to_utf16;
 use error::{Error, SystemError};
 
 /// Unique class name that identify the nwg message-only windows.

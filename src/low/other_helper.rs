@@ -20,7 +20,6 @@
 */
 
 use std::ptr;
-use std::mem;
 use winapi::DWORD;
 
 /**
@@ -59,21 +58,4 @@ pub unsafe fn get_system_error() -> (DWORD, String) {
     .unwrap_or("Error while decoding system error message".to_string());
 
   (code, error_message)
-}
-
-/**
-    Dispatch the messages waiting the the system message queue to the associated Uis. This includes NWG custom messages.
-
-    Return once a quit event was received.
-*/
-#[inline(always)]
-pub unsafe fn dispatch_events() {
-    use winapi::MSG;
-    use user32::{GetMessageW, TranslateMessage, DispatchMessageW};
-
-    let mut msg: MSG = mem::uninitialized();
-    while GetMessageW(&mut msg, ptr::null_mut(), 0, 0) != 0 {
-        TranslateMessage(&msg); 
-        DispatchMessageW(&msg); 
-    }
 }

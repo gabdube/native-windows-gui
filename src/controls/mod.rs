@@ -24,6 +24,7 @@ pub use self::window::{WindowT, Window};
 
 use std::any::TypeId;
 
+use args::AnyHandle;
 use error::Error;
 
 /**
@@ -39,4 +40,8 @@ pub trait ControlT {
 /**
     Structures implementing this trait are visual control that can be stored in a Ui
 */
-pub trait Control {}
+pub trait Control {
+
+    fn handle(&self) -> AnyHandle;
+
+}

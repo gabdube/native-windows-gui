@@ -5,12 +5,9 @@ use nwg::{Ui, WindowT, dispatch_events};
 pub fn default_window() -> WindowT<&'static str> {
     WindowT { 
         title: "NWG Showcase",
-        position: (100, 100),
-        size: (500, 400),
-        resizable: true,
-        visible: true,
-        disabled: false,
-        exit_on_close: true 
+        position: (100, 100), size: (500, 400),
+        resizable: true, visible: true,
+        disabled: false, exit_on_close: true 
     }
 }
 

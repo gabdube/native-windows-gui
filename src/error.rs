@@ -32,7 +32,7 @@ pub enum SystemError {
 
 impl SystemError {
     fn translate(&self) -> String {
-        use low::other::get_system_error;
+        use low::other_helper::get_system_error;
 
         let (code, code_txt) = unsafe{ get_system_error() };
         let tr = match self {

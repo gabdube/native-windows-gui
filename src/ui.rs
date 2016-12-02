@@ -26,7 +26,7 @@ use std::any::{Any, TypeId};
 use std::cell::{RefCell, Ref, RefMut};
 
 use low::message_handler::MessageHandler;
-use args::{PackUserValueArgs, PackControlArgs};
+use args::{PackUserValueArgs, PackControlArgs, AnyHandle};
 use controls::{ControlT, Control};
 use error::Error;
 
@@ -67,12 +67,20 @@ impl<ID: Hash+Clone> UiInner<ID> {
     }
 
     pub fn pack_control(&mut self, params: PackControlArgs<ID>) -> Option<Error> {
+        use low::events::hook_window_events;
+            
         let (inner_id, inner_type_id) = UiInner::hash_id(&params.id, &params.value.type_id());
         if self.ids_map.contains_key(&inner_id) {
             Some(Error::KeyExists)
         } else {
             match params.value.build() {
                 Ok(control) => {
+
+                    // Hook the window events if the handle is a HWND
+                    match control.handle() {
+                        AnyHandle::HWND(h) => hook_window_events(self, inner_id, h)
+                    }
+
                     self.ids_map.insert(inner_id, params.id);
                     self.controls.insert(inner_type_id, RefCell::new(control) );
                     None
@@ -161,10 +169,15 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
+        Add a control to the Ui.
+        Asynchonous, this only registers the command in the ui message queue. 
+        Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
+
+        The executiong will fail if the id already exists in the Ui or if the template creation fails.
     */
     pub fn pack_control<T: ControlT+'static>(&mut self, id: ID, value: T) {
         use low::defs::{NWG_PACK_CONTROL};
-        
+
         let inner = unsafe{ &mut (&*self.inner) };
         let data = PackControlArgs{ id: id, value: Box::new(value)};
         inner.messages.post(self.inner, NWG_PACK_CONTROL, Box::new(data) as Box<Any> );
@@ -263,5 +276,5 @@ impl<ID: Hash+Clone> Drop for Ui<ID> {
 */
 pub fn dispatch_events() {
     // Actual code is located under the low module because that's where most of the unsafe code should be
-    unsafe{ ::low::other::dispatch_events(); }
+    unsafe{ ::low::events::dispatch_events(); }
 }

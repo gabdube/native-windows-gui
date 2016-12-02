@@ -18,6 +18,8 @@
 use std::hash::Hash;
 use std::any::{Any, TypeId};
 
+use winapi::HWND;
+
 use controls::ControlT;
 
 pub struct PackUserValueArgs<ID: Hash+Clone> {
@@ -29,4 +31,8 @@ pub struct PackUserValueArgs<ID: Hash+Clone> {
 pub struct PackControlArgs<ID: Hash+Clone> {
     pub id: ID,
     pub value: Box<ControlT>
+}
+
+pub enum AnyHandle {
+    HWND(HWND)
 }

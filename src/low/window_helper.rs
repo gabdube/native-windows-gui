@@ -23,7 +23,7 @@ use std::mem;
 
 use winapi::{HWND, WNDPROC, DWORD, GWL_USERDATA};
 
-use low::other::to_utf16;
+use low::other_helper::to_utf16;
 use error::SystemError;
 
 /**
