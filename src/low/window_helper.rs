@@ -131,6 +131,16 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
     }
 }
 
+/**
+    Remove a window from its Ui. This is called by custom controls if they can be destroyed without having
+    to pass though ui.unpack_control. Ex: When a user close a Window control.
+
+    The user should call DestroyWindow just after calling this function.
+*/
+pub unsafe fn unpack_window_indirect(handle: HWND) {
+
+}
+
 
 #[cfg(target_arch = "x86")] use winapi::LONG;
 #[cfg(target_arch = "x86_64")] use winapi::LONG_PTR;

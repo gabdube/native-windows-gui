@@ -31,3 +31,9 @@ pub const NWG_CUSTOM_MAX:      UINT = 0x402;  /// Maximum custom event value
 
 pub const COMMIT_SUCCESS: LRESULT = 0;
 pub const COMMIT_FAILED: LRESULT = 5555;
+
+// Constants not included in winapi-rs
+
+pub const ACTCTX_FLAG_RESOURCE_NAME_VALID: u32 = 0x008;
+pub const ACTCTX_FLAG_SET_PROCESS_DEFAULT: u32 = 0x010;
+pub const ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID: u32 = 0x004;

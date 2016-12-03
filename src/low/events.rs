@@ -72,9 +72,8 @@ pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, id:
 
 /**
   Remove a subclass and free the associated data
-*/
-/*
-pub fn unhook_window_events<ID: Hash+Clone>(handle: HWND) { unsafe {
+*//*
+pub fn unhook_window_events<ID: Hash+Clone+'static>(handle: HWND) { unsafe {
   use comctl32::{RemoveWindowSubclass, GetWindowSubclass};
   use winapi::{TRUE, DWORD_PTR};
 

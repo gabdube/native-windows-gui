@@ -83,20 +83,18 @@ use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use winapi::{WM_CREATE, WM_CLOSE};
     use user32::{DefWindowProcW, PostQuitMessage, DestroyWindow};
-    use low::window_helper::{get_window_long};
+    use low::window_helper::{get_window_long, unpack_window_indirect};
 
     let handled = match msg {
         WM_CREATE => true,
         WM_CLOSE => {
             let exit_on_close = get_window_long(hwnd) == 1;
+            unpack_window_indirect(hwnd);
+            DestroyWindow(hwnd);
             if exit_on_close {
-                DestroyWindow(hwnd);
                 PostQuitMessage(0);
-                true
-            } else {
-                // DestroyWindow is called by the default behaviour
-                false
             }
+            true
         }
         _ => false
     };

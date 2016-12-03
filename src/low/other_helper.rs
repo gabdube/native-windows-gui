@@ -20,6 +20,8 @@
 */
 
 use std::ptr;
+use std::mem;
+
 use winapi::DWORD;
 
 /**
@@ -58,4 +60,35 @@ pub unsafe fn get_system_error() -> (DWORD, String) {
     .unwrap_or("Error while decoding system error message".to_string());
 
   (code, error_message)
+}
+
+/**
+  Enable the Windows visual style in the application without having to use a manifest
+*/
+pub unsafe fn enable_visual_styles() {
+    use kernel32::{ActivateActCtx, CreateActCtxW, GetSystemDirectoryW};
+    use winapi::{MAX_PATH, ULONG, ACTCTXW, ULONG_PTR};
+    use low::defs::{ACTCTX_FLAG_RESOURCE_NAME_VALID, ACTCTX_FLAG_SET_PROCESS_DEFAULT, ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID};
+
+    let mut sys_dir: Vec<u16> = Vec::with_capacity(MAX_PATH);
+    sys_dir.set_len(MAX_PATH);
+    GetSystemDirectoryW(sys_dir.as_mut_ptr(), MAX_PATH as u32);
+
+    let mut source = to_utf16("shell32.dll");
+
+    let mut activation_cookie: ULONG_PTR = 0;
+    let mut act_ctx = ACTCTXW {
+        cbSize: mem::size_of::<ACTCTXW> as ULONG,
+        dwFlags: ACTCTX_FLAG_RESOURCE_NAME_VALID | ACTCTX_FLAG_SET_PROCESS_DEFAULT | ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID,
+        lpSource: source.as_mut_ptr(),
+        wProcessorArchitecture: 0,
+        wLangId: 0,
+        lpAssemblyDirectory: sys_dir.as_mut_ptr(),
+        lpResourceName: mem::transmute(124usize), // ID_MANIFEST
+        lpApplicationName: ptr::null_mut(),
+        hModule: ptr::null_mut()
+    };
+
+    let handle = CreateActCtxW(&mut act_ctx);
+    ActivateActCtx(handle, &mut activation_cookie);
 }

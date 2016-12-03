@@ -43,10 +43,13 @@ pub struct UiInner<ID: Hash+Clone+'static> {
 impl<ID: Hash+Clone> UiInner<ID> {
 
     pub fn new() -> Result<UiInner<ID>, Error> {
+        use low::other_helper::enable_visual_styles;
         let messages: MessageHandler<ID> = match MessageHandler::new() {
             Ok(msg) => msg,
             Err(e) => { return Err(e); }
         };
+
+        unsafe{ enable_visual_styles(); }
 
         Ok(UiInner{
             messages: messages,
