@@ -132,13 +132,18 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
 }
 
 /**
-    Remove a window from its Ui. This is called by custom controls if they can be destroyed without having
-    to pass though ui.unpack_control. Ex: When a user close a Window control.
+    Remove any NWG data associated to the window handle. This is called by custom controls if
+    they must be unregistered but can't access the Ui. Ex: When a user close a Window control.
 
-    The user should call DestroyWindow just after calling this function.
+    This has the same effect of calling `ui.unpack_control(x)`
+
+    If the window do not belong to NWG or was already freed, nothing is done.
 */
+#[inline(always)]
 pub unsafe fn unpack_window_indirect(handle: HWND) {
-
+    use user32::SendMessageW;
+    use low::defs::NWG_UNPACK_INDIRECT;
+    SendMessageW(handle, NWG_UNPACK_INDIRECT, 0, 0);
 }
 
 

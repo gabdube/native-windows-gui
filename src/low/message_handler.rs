@@ -133,7 +133,7 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
 }
 
 /** 
-    Proc for the nwg Ui message-only window.
+    Proc for the nwg Ui message-only window. Basically, it dispatches async events to the inner ui.
 
     * `msg` holds the nwg command identifier
     * `w`   holds a pointer to the Ui
@@ -142,7 +142,7 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
 #[allow(unused_variables)]
 unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use user32::{DefWindowProcW};
-    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, COMMIT_SUCCESS, COMMIT_FAILED};
+    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, NWG_UNPACK_CONTROL, COMMIT_SUCCESS, COMMIT_FAILED};
     use args::{PackUserValueArgs, PackControlArgs};
 
     let ui: &mut UiInner<ID> = mem::transmute(w);
@@ -163,6 +163,15 @@ unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND
                 (true, ui.pack_control(*params))
             } else {
                 panic!("Could not downcast command PACK_CONTROL args into a PackControlArgs struct.");
+            }
+        },
+        NWG_UNPACK_CONTROL => {
+            let args: Box<Any> = Box::from_raw((*Box::from_raw(args)));
+            if let Ok(params) = args.downcast::<u64>() {
+                unimplemented!();
+                //(true, None)
+            } else {
+                panic!("Could not downcast command NWG_UNPACK_CONTROL args into a inner id.");
             }
         },
         _ => (false, None)

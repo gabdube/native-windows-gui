@@ -6,6 +6,7 @@ extern crate native_windows_gui as nwg;
 use nwg::*;
 
 fn setup_ui() -> Ui<u64> { Ui::new().unwrap() }
+fn window() -> WindowT<&'static str> {  WindowT{title: "", position:(0,0), size:(0,0), resizable:true, visible:false, disabled:false, exit_on_close:true} }
 
 #[test]
 fn test_ui_new() {
@@ -24,14 +25,14 @@ fn test_ui_pack_user_value() {
     ui.pack_value(1001, vec![5u32, 6, 7]);
 
     // Value shouldn't be packed until commit is called
-    assert!(!ui.has_id(&1000), "ID 1000 was found in id before commit");
-    assert!(!ui.has_id(&1001), "ID 1001 was found in id before commit");
+    assert!(!ui.has_id(&1000), "ID 1000 was found in ui before commit");
+    assert!(!ui.has_id(&1001), "ID 1001 was found in ui before commit");
 
     ui.commit().expect("Commit was not successful");
     
     // Both id should have been added
-    assert!(ui.has_id(&1000), "ID 1000 was not found in id after commit");
-    assert!(ui.has_id(&1001), "ID 1000 was not found in id after commit");
+    assert!(ui.has_id(&1000), "ID 1000 was not found in ui after commit");
+    assert!(ui.has_id(&1001), "ID 1001 was not found in ui after commit");
 
     // Test partially good pack (the second entry has a key that is already present)
     ui.pack_value(1002, "Test");
@@ -41,7 +42,7 @@ fn test_ui_pack_user_value() {
     assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
 
     // The first entry should have been executed successfully
-    assert!(ui.has_id(&1002), "ID 1002 was not found in id after commit");
+    assert!(ui.has_id(&1002), "ID 1002 was not found in ui after commit");
 
     // Test good get (ids exists and type is correct)
     {
@@ -84,7 +85,31 @@ fn test_ui_pack_user_value() {
 fn test_ui_pack_control() {
     let mut ui = setup_ui();
 
-    ui.pack_control(1000, WindowT{title: "Hello", position:(0,0), size:(0,0), resizable: true, visible:false, disabled: false, exit_on_close: true});
+    ui.pack_control(1000, window());
 
+    assert!(!ui.has_id(&1000), "ID 1000 was found in ui before commit");
     ui.commit().expect("Commit was not successful");
+    assert!(ui.has_id(&1000), "ID 1000 was not found in ui after commit");
+
+    {
+        let w = ui.get::<Window>(&1000);
+        w.expect("Failed to get control");
+    }
+}
+
+#[test]
+fn test_window_control_user_close() {
+    let mut ui = setup_ui();
+    ui.pack_control(1000, window());
+    ui.commit().expect("Commit was not successful");
+
+    assert!(ui.has_id(&1000), "ID 1000 was not found in id after commit");
+    
+    // Try to close the window
+    { ui.get::<Window>(&1000).unwrap().close(); }
+
+    // Dispatch the waiting close event
+    dispatch_events();
+
+    assert!(!ui.has_id(&1000), "ID 1000 was found in after window close");
 }

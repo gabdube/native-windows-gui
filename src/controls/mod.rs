@@ -44,4 +44,6 @@ pub trait Control {
 
     fn handle(&self) -> AnyHandle;
 
+    fn free(&mut self) {}
+
 }

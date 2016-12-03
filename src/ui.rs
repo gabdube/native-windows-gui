@@ -81,7 +81,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
                     // Hook the window events if the handle is a HWND
                     match control.handle() {
-                        AnyHandle::HWND(h) => hook_window_events(self, inner_id, h)
+                        AnyHandle::HWND(h) => hook_window_events(self, inner_id, inner_type_id, h)
                     }
 
                     self.ids_map.insert(inner_id, params.id);
@@ -91,6 +91,32 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 Err(e) => Some(e)
             }
         }
+    }
+
+    pub fn unpack_control(&mut self, id: u64, tid: u64) -> Option<Error> {
+        // TODO call destroyed callback
+        // TODO destroy children
+
+        // Test if everything is valid
+        if let Some(e) = {
+            if !self.ids_map.contains_key(&id) {
+                Some(Error::KeyNotFound)
+            } else {
+                if let Some(c) = self.controls.get(&tid) {
+                    if let Err(e) = c.try_borrow_mut() { Some(Error::BorrowError) } 
+                    else { None }
+                } else {
+                    Some(Error::BadType)
+                }
+            }
+        } { return Some(e); }
+
+        self.ids_map.remove(&id);
+        let control = self.controls.remove(&tid).unwrap();
+        let mut control = control.into_inner();
+        control.free();
+
+        None
     }
 
     fn hash_id(id: &ID, tid: &TypeId) -> (u64, u64) {
@@ -126,7 +152,7 @@ pub struct Ui<ID: Hash+Clone+'static> {
     inner: *mut UiInner<ID>
 }
 
-impl<ID:Hash+Clone> Ui<ID> {
+impl<ID:Hash+Clone> Ui<ID> { 
 
     /**
         Create a new Ui.
@@ -216,6 +242,15 @@ impl<ID:Hash+Clone> Ui<ID> {
             }
         }
 
+        if let Some(v) = inner.controls.get(&inner_type_id) {
+            let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
+            if let Ok(v_ref) = v_casted.try_borrow() {
+                return Ok( v_ref );
+            } else {
+                return Err(Error::BorrowError);
+            }
+        }
+
         return Err(Error::BadType);
     }
 
@@ -240,6 +275,15 @@ impl<ID:Hash+Clone> Ui<ID> {
         if !inner.ids_map.contains_key(&inner_id) { return Err(Error::KeyNotFound); }
         
         if let Some(v) = inner.user_values.get(&inner_type_id) {
+            let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
+            if let Ok(v_ref) = v_casted.try_borrow_mut() {
+                return Ok( v_ref );
+            } else {
+                return Err(Error::BorrowError);
+            }
+        }
+
+        if let Some(v) = inner.controls.get(&inner_type_id) {
             let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
             if let Ok(v_ref) = v_casted.try_borrow_mut() {
                 return Ok( v_ref );

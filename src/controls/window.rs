@@ -42,14 +42,6 @@ pub struct WindowT<S: Clone+Into<String>> {
     pub exit_on_close: bool
 }
 
-/**
-    A window control.
-*/
-#[allow(dead_code)]
-pub struct Window {
-    handle: HWND
-}
-
 impl<S: Clone+Into<String>> ControlT for WindowT<S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
@@ -64,10 +56,39 @@ impl<S: Clone+Into<String>> ControlT for WindowT<S> {
     }
 }
 
+/**
+    A window control.
+*/
+#[allow(dead_code)]
+pub struct Window {
+    handle: HWND,
+}
+
+impl Window {
+    /**
+        Close the window as if the user clicked on the X button. This also removes
+        the window from its Ui.
+
+        The action is not executed right away, instead it is posted in the system event queue.
+    */
+    pub fn close(&self) {
+        use user32::PostMessageW;
+        use winapi::WM_CLOSE;
+
+        unsafe{ PostMessageW(self.handle, WM_CLOSE, 0, 0) };
+    }
+}
+
 impl Control for Window {
 
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
+    }
+
+    fn free(&mut self) {
+        use user32::DestroyWindow;
+        unsafe{ DestroyWindow(self.handle) };
+        println!("TEST");
     }
 
 }
@@ -82,15 +103,14 @@ use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 #[allow(unused_variables)]
 unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use winapi::{WM_CREATE, WM_CLOSE};
-    use user32::{DefWindowProcW, PostQuitMessage, DestroyWindow};
+    use user32::{DefWindowProcW, PostQuitMessage};
     use low::window_helper::{get_window_long, unpack_window_indirect};
 
     let handled = match msg {
         WM_CREATE => true,
         WM_CLOSE => {
             let exit_on_close = get_window_long(hwnd) == 1;
-            unpack_window_indirect(hwnd);
-            DestroyWindow(hwnd);
+            unpack_window_indirect(hwnd); 
             if exit_on_close {
                 PostQuitMessage(0);
             }
