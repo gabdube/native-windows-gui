@@ -26,13 +26,13 @@ use std::any::{Any, TypeId};
 use std::cell::{RefCell, Ref, RefMut};
 
 use low::message_handler::MessageHandler;
-use args::{PackUserValueArgs, PackControlArgs, UnpackArgs, AnyHandle};
-use controls::{ControlT, Control};
-use events::{Event, EventCallback};
+use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs};
+use controls::{ControlT, Control, AnyHandle};
+use events::{Event, EventCallback, EventArgs, EventCallbackTrait};
 use error::Error;
 
 pub type BoxedCallback<ID> = Box<EventCallback<ID>>;
-pub type CallbackCollection<ID> = Vec<BoxedCallback<ID>>;
+pub type CallbackCollection<ID> = Vec<(u64, BoxedCallback<ID>)>;
 pub type EventCollection<ID> = HashMap<Event, CallbackCollection<ID>>;
 
 /**
@@ -117,6 +117,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
             return Some(Error::BorrowError);
         }
 
+        self.trigger(id, Event::Destroyed, EventArgs::None);
+
         self.ids_map.remove(&id);
         self.control_events.remove(&tid).unwrap();
         let control = self.controls.remove(&tid).unwrap();
@@ -158,6 +160,59 @@ impl<ID: Hash+Clone> UiInner<ID> {
             } else {
                 Some(Error::BadType)
             }
+        }
+    }
+
+    pub fn bind(&mut self, params: BindArgs<ID>) -> Option<Error> {
+        let (id, cb_id, event, cb) = (params.id, params.cb_id, params.event, params.cb);
+
+        let tid = match self.ids_map.get(&id) {
+            Some(&(_, tid)) => tid,
+            None => { return Some(Error::KeyNotFound); }
+        };
+
+        if let Some(events_col) = self.control_events.get_mut(&tid) {
+            match events_col.get_mut(&event) {
+                Some(mut events) => {
+                    // Check if the cb_id already exists for the event
+                    if let Some(_) = events.iter().find(|&&(cb_id2, _)| cb_id2 == cb_id) {
+                        Some(Error::KeyExists)
+                    } else {
+                        events.push((cb_id, cb)); 
+                        None
+                    }
+                },
+                None => Some(Error::EventNotSupported(event))
+            }
+        } else {
+            Some(Error::BadType)
+        }
+    }
+
+    pub fn trigger(&mut self, id: u64, event: Event, args: EventArgs) -> Option<Error> {
+        // TODO find a way to call the callbacks with no borrow on self (RC on callbacks?).
+        let inner_raw = self as *mut UiInner<ID>;
+
+        let (pub_id, tid) = match self.ids_map.get_mut(&id) {
+            Some(&mut (ref pub_id, tid)) => (pub_id, tid),
+            None => { return Some(Error::KeyNotFound); }
+        };
+
+        if let Some(events_col) = self.control_events.get_mut(&tid) {
+            match events_col.get_mut(&event) {
+                Some(mut events) => {
+                    // Eval the callbacks
+                    let tmp_ui: Ui<ID> = Ui{inner: inner_raw };
+                    for &( _, ref callback) in events.iter() {
+                        (callback)(&tmp_ui, pub_id, &event, &args);
+                    }
+                    ::std::mem::forget(tmp_ui);
+                    None
+                },
+                None => Some(Error::EventNotSupported(event))
+            }
+        } else {
+            Some(Error::BadType)
         }
     }
 
@@ -231,7 +286,7 @@ impl<ID:Hash+Clone> Ui<ID> {
 
     /**
         Add an user value to the Ui. 
-        Asynchonous, this only registers the command in the ui message queue. 
+        Asynchronous, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         The execution will fail if the id already exists in the Ui
@@ -246,7 +301,7 @@ impl<ID:Hash+Clone> Ui<ID> {
 
     /**
         Add a control to the Ui.
-        Asynchonous, this only registers the command in the ui message queue. 
+        Asynchronous, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         The executiong will fail if the id already exists in the Ui or if the template creation fails.
@@ -261,7 +316,7 @@ impl<ID:Hash+Clone> Ui<ID> {
 
      /**
         Remove a element from the ui using its ID and its type. The ID can identify a control, a resource or a user value.
-        Asynchonous, this only registers the command in the ui message queue. 
+        Asynchronous, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         The execution will fail if the id is not found or if the type do not match the id.
@@ -356,6 +411,46 @@ impl<ID:Hash+Clone> Ui<ID> {
         }
 
         return Err(Error::BadType);
+    }
+
+    /**
+        Bind/Add a callback to a control event. 
+        Asynchronous, this only registers the command in the ui message queue. 
+        Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
+
+        Params:
+          * id: The id that identify the element in the ui
+          * cb_id: An id the identify the callback (to use with unbind)
+          * event: Type of event to target
+          * cb: The callback
+
+        Commit will return an error if:
+        * `Error::EventNotSupported` if the event is not supported on the callback
+        * `Error::BadType` if the id do not indentify a control
+        * `Error::KeyNotFound` if the id is not in the Ui.
+        * `Error::EventsBindingLocked` if NWG is currently executing the callback of the event (TODO)
+        
+    */
+    pub fn bind<T: EventCallbackTrait<ID>+'static>(&self, id: &ID, cb_id: &ID, event: Event, cb: T) {
+        use low::defs::{NWG_BIND};
+        
+        let inner = unsafe{ &mut *self.inner };
+        let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
+        let (cb_inner_id, _) = UiInner::hash_id(cb_id, &TypeId::of::<()>());
+        let data = BindArgs{ id: inner_id, cb_id: cb_inner_id, event: event, cb: Box::new(cb)};
+        inner.messages.post(self.inner, NWG_BIND, Box::new(data) as Box<Any> );
+    }
+
+    /**
+        Unbind/Remove a callback to a control event.
+        Asynchronous, this only registers the command in the ui message queue. 
+        Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
+    */
+    pub fn unbind(&self, id: &ID, cb_id: &ID, event: Event) {
+        id;
+        cb_id;
+        event;
+        unimplemented!();
     }
 
     /**

@@ -22,9 +22,8 @@ use std::any::TypeId;
 
 use winapi::HWND;
 
-use controls::{Control, ControlT};
+use controls::{Control, ControlT, AnyHandle};
 use error::Error;
-use args::AnyHandle;
 use events::Event;
 
 /// System class identifier

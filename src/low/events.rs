@@ -42,8 +42,7 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::{DefSubclassProc};
-  use low::defs::{NWG_UNPACK_INDIRECT};
-  use args::UnpackArgs;
+  use low::defs::{NWG_UNPACK_INDIRECT, UnpackArgs};
   
   let handled = match msg {
     NWG_UNPACK_INDIRECT => {

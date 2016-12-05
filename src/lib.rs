@@ -25,12 +25,11 @@ extern crate comctl32;
 
 mod low;
 mod error;
-mod args;
 mod events;
 mod controls;
 mod ui;
 
 pub use error::{Error, SystemError};
 pub use events::{EventCallback, Event, EventArgs};
-pub use controls::{ControlT, Control, WindowT, Window};
+pub use controls::{ControlT, Control, WindowT, Window, AnyHandle};
 pub use ui::{Ui, dispatch_events};

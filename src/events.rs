@@ -19,14 +19,17 @@
 */
 
 use ui::Ui;
+use std::hash::Hash;
 
 /// Event callback type
-pub type EventCallback<ID> = Fn(&mut Ui<ID>, &ID, &EventArgs) -> ();
+pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
+
+pub trait EventCallbackTrait<ID: Hash+Clone>: Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> () {}
 
 /**
     Events name definition
 */
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
     Destroyed,
 }

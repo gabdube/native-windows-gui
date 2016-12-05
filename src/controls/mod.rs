@@ -20,13 +20,17 @@
 
 pub mod window;
 
-pub use self::window::{WindowT, Window};
-
 use std::any::TypeId;
 
+use winapi::HWND;
+
+pub use controls::window::{WindowT, Window};
 use events::Event;
-use args::AnyHandle;
 use error::Error;
+
+pub enum AnyHandle {
+    HWND(HWND)
+}
 
 /**
     Structures implementing this trait can be used by a Ui to build a Control
