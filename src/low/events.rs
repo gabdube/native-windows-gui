@@ -48,9 +48,9 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
   let handled = match msg {
     NWG_UNPACK_INDIRECT => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
-      (&mut *ui.inner).unpack( UnpackArgs{id: ui.id} );
-      unhook_window_events::<ID>(hwnd);
-      mem::forget(ui);
+      let (inner, id) = (ui.inner, ui.id);
+      mem::forget(ui); // Forget ui because it will point to freed memory after the unpack result.
+      (&mut *inner).unpack( UnpackArgs{id: id} ); 
       true
     },
     _ => { false }

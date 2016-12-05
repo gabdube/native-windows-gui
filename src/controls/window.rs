@@ -25,6 +25,7 @@ use winapi::HWND;
 use controls::{Control, ControlT};
 use error::Error;
 use args::AnyHandle;
+use events::Event;
 
 /// System class identifier
 const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
@@ -44,6 +45,10 @@ pub struct WindowT<S: Clone+Into<String>> {
 
 impl<S: Clone+Into<String>> ControlT for WindowT<S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
+
+    fn events(&self) -> Vec<Event> {
+        vec![Event::Destroyed]
+    }
 
     fn build(&self) -> Result<Box<Control>, Error> {
         unsafe{

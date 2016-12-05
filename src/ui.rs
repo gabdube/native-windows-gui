@@ -28,7 +28,12 @@ use std::cell::{RefCell, Ref, RefMut};
 use low::message_handler::MessageHandler;
 use args::{PackUserValueArgs, PackControlArgs, UnpackArgs, AnyHandle};
 use controls::{ControlT, Control};
+use events::{Event, EventCallback};
 use error::Error;
+
+pub type BoxedCallback<ID> = Box<EventCallback<ID>>;
+pub type CallbackCollection<ID> = Vec<BoxedCallback<ID>>;
+pub type EventCollection<ID> = HashMap<Event, CallbackCollection<ID>>;
 
 /**
     Inner window data shared within the thread
@@ -36,6 +41,7 @@ use error::Error;
 pub struct UiInner<ID: Hash+Clone+'static> {
     pub messages: MessageHandler<ID>,
     pub controls: HashMap<u64, RefCell<Box<Control>>>,
+    pub control_events: HashMap<u64, EventCollection<ID>>,
     pub user_values: HashMap<u64, RefCell<Box<Any>>>,
     pub ids_map: HashMap<u64, (ID, u64)>,
 }
@@ -55,6 +61,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
             messages: messages,
             user_values: HashMap::with_capacity(16),
             controls: HashMap::with_capacity(32),
+            control_events: HashMap::with_capacity(32),
             ids_map: HashMap::with_capacity(64) })
     }
 
@@ -84,8 +91,16 @@ impl<ID: Hash+Clone> UiInner<ID> {
                         AnyHandle::HWND(h) => hook_window_events(self, inner_id, h)
                     }
 
+                    // Init events
+                    let events = params.value.events();
+                    let mut event_collection: EventCollection<ID> = HashMap::with_capacity(events.len());
+                    for e in events {
+                        event_collection.insert(e, Vec::new());
+                    }
+
                     self.ids_map.insert(inner_id, (params.id, inner_type_id));
                     self.controls.insert(inner_type_id, RefCell::new(control) );
+                    self.control_events.insert(inner_type_id, event_collection);
                     None
                 },
                 Err(e) => Some(e)
@@ -94,6 +109,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
     }
 
     fn unpack_control(&mut self, id: u64, tid: u64) -> Option<Error> {
+        use low::events::unhook_window_events;
         // TODO call destroyed callback
         // TODO destroy children
 
@@ -102,8 +118,14 @@ impl<ID: Hash+Clone> UiInner<ID> {
         }
 
         self.ids_map.remove(&id);
+        self.control_events.remove(&tid).unwrap();
         let control = self.controls.remove(&tid).unwrap();
         let mut control = control.into_inner();
+
+        match control.handle() {
+            AnyHandle::HWND(h) => unhook_window_events::<ID>(h)
+        };
+        
         control.free();
 
         None

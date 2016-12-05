@@ -1,5 +1,5 @@
 /*!
-    Control trait definition. The base control definitions are located in the submodules.
+    High level events definitions
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -18,35 +18,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-pub mod window;
+use ui::Ui;
 
-pub use self::window::{WindowT, Window};
-
-use std::any::TypeId;
-
-use events::Event;
-use args::AnyHandle;
-use error::Error;
+/// Event callback type
+pub type EventCallback<ID> = Fn(&mut Ui<ID>, &ID, &EventArgs) -> ();
 
 /**
-    Structures implementing this trait can be used by a Ui to build a Control
+    Events name definition
 */
-pub trait ControlT {
-
-    fn type_id(&self) -> TypeId;
-
-    fn build(&self) -> Result<Box<Control>, Error>;
-
-    fn events(&self) -> Vec<Event> { Vec::new() }
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub enum Event {
+    Destroyed,
 }
 
 /**
-    Structures implementing this trait are visual control that can be stored in a Ui
+    Events arguments definition. If an event do not have arguments, EventArgs::None is passed.
 */
-pub trait Control {
-
-    fn handle(&self) -> AnyHandle;
-
-    fn free(&mut self) {}
-
+pub enum EventArgs {
+    None
 }
