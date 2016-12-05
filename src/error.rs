@@ -71,7 +71,7 @@ impl Error {
             &Error::KeyExists => format!("The same key already exists in the UI"),
             &Error::KeyNotFound => format!("The key was not found in the ui"),
             &Error::BadType => format!("The key exists in the Ui, but the type requested did not match the type of the underlying object"),
-            &Error::BorrowError => format!("The Ui element was already borrowed mutably"),
+            &Error::BorrowError => format!("The Ui element was already borrowed"),
             &Error::Unimplemented => format!("Feature not yet implemented"),
             &Error::System(ref e) => format!("A system error was raised: {:?}", e),
         }

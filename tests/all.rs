@@ -18,7 +18,7 @@ fn test_ui_new() {
 
 #[test]
 fn test_ui_pack_user_value() {
-    let mut ui = setup_ui();
+    let ui = setup_ui();
 
     // Test simple pack
     ui.pack_value(1000, "Test");
@@ -83,7 +83,7 @@ fn test_ui_pack_user_value() {
 
 #[test]
 fn test_ui_pack_control() {
-    let mut ui = setup_ui();
+    let ui = setup_ui();
 
     ui.pack_control(1000, window());
 
@@ -98,8 +98,27 @@ fn test_ui_pack_control() {
 }
 
 #[test]
+fn test_ui_unpack() {
+    let ui = setup_ui();
+
+    ui.pack_value(1000, 5u32);
+    ui.pack_control(1001, window());
+
+    ui.commit().expect("Commit was not successful");
+
+    ui.unpack(&1000);
+    ui.unpack(&1001);
+
+    ui.commit().expect("Commit was not successful");
+
+    assert!(!ui.has_id(&1000), "ID 1000 was found in ui after commit");
+    assert!(!ui.has_id(&1001), "ID 1001 was found in ui after commit");
+    
+}
+
+#[test]
 fn test_window_control_user_close() {
-    let mut ui = setup_ui();
+    let ui = setup_ui();
     ui.pack_control(1000, window());
     ui.commit().expect("Commit was not successful");
 

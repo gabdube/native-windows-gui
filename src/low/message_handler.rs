@@ -142,15 +142,15 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
 #[allow(unused_variables)]
 unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use user32::{DefWindowProcW};
-    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, NWG_UNPACK_CONTROL, COMMIT_SUCCESS, COMMIT_FAILED};
-    use args::{PackUserValueArgs, PackControlArgs};
+    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, NWG_UNPACK, COMMIT_SUCCESS, COMMIT_FAILED};
+    use args::{PackUserValueArgs, PackControlArgs, UnpackArgs};
 
     let ui: &mut UiInner<ID> = mem::transmute(w);
     let args: *mut *mut Any = mem::transmute::<LPARAM, *mut *mut Any>(l);
 
     let (processed, error): (bool, Option<Error>) = match msg {
         NWG_PACK_USER_VALUE => {
-            let args: Box<Any> = Box::from_raw((*Box::from_raw(args)));
+            let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<PackUserValueArgs<ID>>() {
                 (true, ui.pack_user_value(*params))
             } else {
@@ -158,18 +158,17 @@ unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND
             }
         },
         NWG_PACK_CONTROL => {
-            let args: Box<Any> = Box::from_raw((*Box::from_raw(args)));
+            let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<PackControlArgs<ID>>() {
                 (true, ui.pack_control(*params))
             } else {
                 panic!("Could not downcast command PACK_CONTROL args into a PackControlArgs struct.");
             }
         },
-        NWG_UNPACK_CONTROL => {
-            let args: Box<Any> = Box::from_raw((*Box::from_raw(args)));
-            if let Ok(params) = args.downcast::<u64>() {
-                unimplemented!();
-                //(true, None)
+        NWG_UNPACK => {
+            let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
+            if let Ok(params) = args.downcast::<UnpackArgs>() {
+                (true, ui.unpack(*params))
             } else {
                 panic!("Could not downcast command NWG_UNPACK_CONTROL args into a inner id.");
             }

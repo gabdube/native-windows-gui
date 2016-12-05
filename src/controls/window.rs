@@ -88,7 +88,6 @@ impl Control for Window {
     fn free(&mut self) {
         use user32::DestroyWindow;
         unsafe{ DestroyWindow(self.handle) };
-        println!("TEST");
     }
 
 }

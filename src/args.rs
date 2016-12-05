@@ -28,6 +28,10 @@ pub struct PackUserValueArgs<ID: Hash+Clone> {
     pub value: Box<Any>
 }
 
+pub struct UnpackArgs {
+    pub id: u64
+}
+
 pub struct PackControlArgs<ID: Hash+Clone> {
     pub id: ID,
     pub value: Box<ControlT>

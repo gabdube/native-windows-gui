@@ -34,7 +34,6 @@ const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
 struct UiInnerWithId<ID: Hash+Clone+'static> {
   pub inner: *mut UiInner<ID>,
   pub id: u64,
-  pub tid: u64
 }
 
 /**
@@ -44,11 +43,12 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::{DefSubclassProc};
   use low::defs::{NWG_UNPACK_INDIRECT};
+  use args::UnpackArgs;
   
   let handled = match msg {
     NWG_UNPACK_INDIRECT => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
-      (&mut *ui.inner).unpack_control(ui.id, ui.tid);
+      (&mut *ui.inner).unpack( UnpackArgs{id: ui.id} );
       unhook_window_events::<ID>(hwnd);
       mem::forget(ui);
       true
@@ -66,14 +66,14 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
 /**
     Add a subclass that dispatches the system event to the application callbacks to a window control.
 */
-pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, id: u64, tid: u64, handle: HWND) { unsafe {
+pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, id: u64, handle: HWND) { unsafe {
   use comctl32::SetWindowSubclass;
 
   // While definitely questionable in term of safeness, the reference to the UiInner is actually
   // a raw pointer belonging to a Ui. Also, when the Ui goes out of scope, every window control
   // gets destroyed BEFORE the UiInner, this guarantees that uinner lives long enough.
   let ui_inner_raw: *mut UiInner<ID> = uiinner as *mut UiInner<ID>;
-  let data: *mut UiInnerWithId<ID> = Box::into_raw(Box::new(UiInnerWithId{ inner: ui_inner_raw, id: id, tid: tid }));
+  let data: *mut UiInnerWithId<ID> = Box::into_raw(Box::new(UiInnerWithId{ inner: ui_inner_raw, id: id }));
 
   SetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, mem::transmute(data));
 }}
