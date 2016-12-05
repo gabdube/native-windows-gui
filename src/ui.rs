@@ -28,7 +28,7 @@ use std::cell::{RefCell, Ref, RefMut};
 use low::message_handler::MessageHandler;
 use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs};
 use controls::{ControlT, Control, AnyHandle};
-use events::{Event, EventCallback, EventArgs, EventCallbackTrait};
+use events::{Event, EventCallback, EventArgs};
 use error::Error;
 
 pub type BoxedCallback<ID> = Box<EventCallback<ID>>;
@@ -185,26 +185,25 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 None => Some(Error::EventNotSupported(event))
             }
         } else {
-            Some(Error::BadType)
+            Some(Error::ControlRequired)
         }
     }
 
     pub fn trigger(&mut self, id: u64, event: Event, args: EventArgs) -> Option<Error> {
-        // TODO find a way to call the callbacks with no borrow on self (RC on callbacks?).
-        let inner_raw = self as *mut UiInner<ID>;
-
         let (pub_id, tid) = match self.ids_map.get_mut(&id) {
-            Some(&mut (ref pub_id, tid)) => (pub_id, tid),
+            Some(&mut (ref pub_id, tid)) => (pub_id.clone(), tid),
             None => { return Some(Error::KeyNotFound); }
         };
 
+        // TODO find a way to call the callbacks with no borrow on self (RC on callbacks?).
+        let inner_raw = self as *mut UiInner<ID>;
         if let Some(events_col) = self.control_events.get_mut(&tid) {
             match events_col.get_mut(&event) {
-                Some(mut events) => {
+                Some(events) => {
                     // Eval the callbacks
                     let tmp_ui: Ui<ID> = Ui{inner: inner_raw };
                     for &( _, ref callback) in events.iter() {
-                        (callback)(&tmp_ui, pub_id, &event, &args);
+                        (callback)(&tmp_ui, &pub_id, &event, &args);
                     }
                     ::std::mem::forget(tmp_ui);
                     None
@@ -373,9 +372,9 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Return an mutable referemce to element identified by `id` in the Ui.
+        Return an mutable reference to element identified by `id` in the Ui.
         It is required to give a type `T` to this function as it is needed to cast the underlying value.
-        Ex: `ui.get::<u32>(100)`
+        Ex: `ui.get_mut::<u32>(100)`
 
         Params:  
         * id: The id that identify the element in the ui
@@ -428,10 +427,12 @@ impl<ID:Hash+Clone> Ui<ID> {
         * `Error::EventNotSupported` if the event is not supported on the callback
         * `Error::BadType` if the id do not indentify a control
         * `Error::KeyNotFound` if the id is not in the Ui.
+        * `Error::KeyExists` if the cb_id is not unique for the event type.
         * `Error::EventsBindingLocked` if NWG is currently executing the callback of the event (TODO)
         
     */
-    pub fn bind<T: EventCallbackTrait<ID>+'static>(&self, id: &ID, cb_id: &ID, event: Event, cb: T) {
+    pub fn bind<T>(&self, id: &ID, cb_id: &ID, event: Event, cb: T) where
+      T: Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ()+'static {
         use low::defs::{NWG_BIND};
         
         let inner = unsafe{ &mut *self.inner };
@@ -446,10 +447,8 @@ impl<ID:Hash+Clone> Ui<ID> {
         Asynchronous, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
     */
+    #[allow(unused_variables)]
     pub fn unbind(&self, id: &ID, cb_id: &ID, event: Event) {
-        id;
-        cb_id;
-        event;
         unimplemented!();
     }
 

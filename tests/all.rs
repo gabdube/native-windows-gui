@@ -100,9 +100,12 @@ fn test_ui_pack_control() {
 #[test]
 fn test_ui_unpack() {
     let ui = setup_ui();
+    let mut callback_executed: bool = false;
+    let x = &mut callback_executed as *mut bool;
 
     ui.pack_value(1000, 5u32);
     ui.pack_control(1001, window());
+    ui.bind(&1001, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } } );
 
     ui.commit().expect("Commit was not successful");
 
@@ -113,13 +116,52 @@ fn test_ui_unpack() {
 
     assert!(!ui.has_id(&1000), "ID 1000 was found in ui after commit");
     assert!(!ui.has_id(&1001), "ID 1001 was found in ui after commit");
+    assert!(callback_executed, "Destroy callback was not executed.")
     
+}
+
+#[test]
+fn test_ui_bind() {
+    let ui = setup_ui();
+
+    ui.pack_value(1000, 5u32);
+    ui.pack_control(1001, window());
+
+    // Binding successful
+    ui.bind(&1001, &5000, Event::Destroyed, |_, _, _, _|{});
+
+    ui.commit().expect("Commit was not successful");
+
+    // Cannot bind events to user values
+    ui.bind(&1000, &5000, Event::Destroyed, |_, _, _, _|{});
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::ControlRequired, "Commit was successful");
+
+    // Key not in Ui
+    ui.bind(&1005, &5000, Event::Destroyed, |_, _, _, _|{});
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
+
+    // Event not supported
+    ui.bind(&1001, &5000, Event::Clicked, |_, _, _, _|{});
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::Clicked), "Commit was successful");
+
+    // Callback id already exists
+    ui.bind(&1001, &5000, Event::Destroyed, |_, _, _, _|{});
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
+
 }
 
 #[test]
 fn test_window_control_user_close() {
     let ui = setup_ui();
+    let mut callback_executed: bool = false;
+    let x = &mut callback_executed as *mut bool;
+
     ui.pack_control(1000, window());
+    ui.bind(&1000, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
     ui.commit().expect("Commit was not successful");
 
     assert!(ui.has_id(&1000), "ID 1000 was not found in id after commit");
@@ -131,4 +173,20 @@ fn test_window_control_user_close() {
     dispatch_events();
 
     assert!(!ui.has_id(&1000), "ID 1000 was found in after window close");
+    assert!(callback_executed, "Destroy callback was not executed.")
+}
+
+#[test]
+fn test_drop_callback() {
+    let mut callback_executed: bool = false;
+    
+    {
+        let x = &mut callback_executed as *mut bool;
+        let ui = setup_ui();
+        ui.pack_control(1000, window());
+        ui.bind(&1000, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
+        ui.commit().expect("Commit was not successful");
+    }
+
+    assert!(callback_executed, "Destroy callback was not executed.")
 }
