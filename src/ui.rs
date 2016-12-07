@@ -24,6 +24,7 @@ use std::ptr;
 use std::collections::HashMap;
 use std::any::{Any, TypeId};
 use std::cell::{RefCell, Ref, RefMut};
+use std::rc::Rc;
 
 use low::message_handler::MessageHandler;
 use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs};
@@ -32,7 +33,7 @@ use events::{Event, EventCallback, EventArgs};
 use error::Error;
 
 pub type BoxedCallback<ID> = Box<EventCallback<ID>>;
-pub type CallbackCollection<ID> = Vec<(u64, BoxedCallback<ID>)>;
+pub type CallbackCollection<ID> = Rc<Vec<(u64, BoxedCallback<ID>)>>;
 pub type EventCollection<ID> = HashMap<Event, CallbackCollection<ID>>;
 
 /**
@@ -95,7 +96,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                     let events = params.value.events();
                     let mut event_collection: EventCollection<ID> = HashMap::with_capacity(events.len());
                     for e in events {
-                        event_collection.insert(e, Vec::new());
+                        event_collection.insert(e, Rc::new(Vec::new()));
                     }
 
                     self.ids_map.insert(inner_id, (params.id, inner_type_id));
@@ -110,32 +111,47 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     fn unpack_control(&mut self, id: u64, tid: u64) -> Option<Error> {
         use low::events::unhook_window_events;
-        // TODO call destroyed callback
         // TODO destroy children
 
+        // Check if the control is currently borrowed by the user
         if let Err(_) = self.controls.get(&tid).unwrap().try_borrow_mut() { 
-            return Some(Error::BorrowError);
+            return Some(Error::ControlInUse);
         }
 
+        // Check if one of the control events is currently being executed
+        {
+        let events_collection = self.control_events.get_mut(&tid).unwrap();
+        for mut ec in events_collection.values_mut() {
+            if Rc::get_mut(&mut ec).is_none() {
+                return Some(Error::ControlInUse);
+            }
+        }
+        }
+
+        // Call the destroy callback
         self.trigger(id, Event::Destroyed, EventArgs::None);
 
+        // Removes stuffs
         self.ids_map.remove(&id);
         self.control_events.remove(&tid).unwrap();
         let control = self.controls.remove(&tid).unwrap();
         let mut control = control.into_inner();
 
+        // Unhook the events dispatcher if its a window
         match control.handle() {
             AnyHandle::HWND(h) => unhook_window_events::<ID>(h)
         };
         
+        // Free the control custom resources
         control.free();
 
+        // Control gets dropped here
         None
     }
 
     fn unpack_user_value(&mut self, id: u64, tid: u64) -> Option<Error> {
         if let Err(_) = self.user_values.get(&tid).unwrap().try_borrow_mut() { 
-            return Some(Error::BorrowError);
+            return Some(Error::ControlInUse);
         }
 
         self.ids_map.remove(&id);
@@ -171,21 +187,26 @@ impl<ID: Hash+Clone> UiInner<ID> {
             None => { return Some(Error::KeyNotFound); }
         };
 
-        if let Some(events_col) = self.control_events.get_mut(&tid) {
-            match events_col.get_mut(&event) {
-                Some(mut events) => {
-                    // Check if the cb_id already exists for the event
-                    if let Some(_) = events.iter().find(|&&(cb_id2, _)| cb_id2 == cb_id) {
-                        Some(Error::KeyExists)
-                    } else {
-                        events.push((cb_id, cb)); 
-                        None
-                    }
-                },
-                None => Some(Error::EventNotSupported(event))
-            }
+        // Get the event collection of the control
+        let events_collection = self.control_events.get_mut(&tid);
+        if events_collection.is_none() { return Some(Error::ControlRequired); }
+
+        // Get the callback list for the requested event
+        let callbacks = events_collection.unwrap().get_mut(&event);
+        if callbacks.is_none() { return Some(Error::EventNotSupported(event)); }
+
+        // Get a mutable reference to the callback list
+        let mut callbacks = callbacks.unwrap();
+        let callbacks = Rc::get_mut(&mut callbacks);
+        if callbacks.is_none() { return Some(Error::ControlInUse); }
+
+        // Check if the cb id already exists for the event and if not, push the callback
+        let callbacks = callbacks.unwrap();
+        if let Some(_) = callbacks.iter().find(|&&(cb_id2, _)| cb_id2 == cb_id) {
+            Some(Error::KeyExists)
         } else {
-            Some(Error::ControlRequired)
+            callbacks.push((cb_id, cb)); 
+            None
         }
     }
 
@@ -195,24 +216,27 @@ impl<ID: Hash+Clone> UiInner<ID> {
             None => { return Some(Error::KeyNotFound); }
         };
 
-        // TODO find a way to call the callbacks with no borrow on self (RC on callbacks?).
-        let inner_raw = self as *mut UiInner<ID>;
-        if let Some(events_col) = self.control_events.get_mut(&tid) {
-            match events_col.get_mut(&event) {
-                Some(events) => {
-                    // Eval the callbacks
-                    let tmp_ui: Ui<ID> = Ui{inner: inner_raw };
-                    for &( _, ref callback) in events.iter() {
-                        (callback)(&tmp_ui, &pub_id, &event, &args);
-                    }
-                    ::std::mem::forget(tmp_ui);
-                    None
-                },
-                None => Some(Error::EventNotSupported(event))
-            }
-        } else {
-            Some(Error::BadType)
+        let callback_list = {
+            // Get the event collection of the control
+            let events_collection = self.control_events.get_mut(&tid);
+            if events_collection.is_none() { return Some(Error::ControlRequired); }
+
+            // The the callback list for the requested event
+            let callbacks = events_collection.unwrap().get_mut(&event);
+            if callbacks.is_none() { return Some(Error::EventNotSupported(event)); }
+
+            // Return a reference to the callback list. While the reference exists, it will be impossible
+            // to push new callback into the event.
+            callbacks.unwrap().clone()
+        };
+
+        let tmp_ui: Ui<ID> = Ui{inner: self as *mut UiInner<ID>};
+        for &( _, ref callback) in callback_list.iter() {
+            (callback)(&tmp_ui, &pub_id, &event, &args);
         }
+
+        ::std::mem::forget(tmp_ui);
+        None
     }
 
     fn hash_id(id: &ID, tid: &TypeId) -> (u64, u64) {
@@ -314,11 +338,14 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
      /**
-        Remove a element from the ui using its ID and its type. The ID can identify a control, a resource or a user value.
+        Remove a element from the ui using its ID. The ID can identify a control, a resource or a user value.
         Asynchronous, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        The execution will fail if the id is not found or if the type do not match the id.
+        Possible errors:
+        * Error::ControlInUse if the control callbacks are being executed
+        * Error::ControlInUse if the object is currently borrowed (using ui.get or ui.get_mut)
+        * Error::KeyNotFound if the id do not exists in the Ui
     */
     pub fn unpack(&self, id: &ID) {
         use low::defs::{NWG_UNPACK};
@@ -337,10 +364,10 @@ impl<ID:Hash+Clone> Ui<ID> {
         Params:  
         * id: The id that identify the element in the ui
 
+        An error will be returned if:
         * Error::KeyNotFound will be returned if the key was not found in the Ui
         * Error::BadType will be returned if the key exists, but the type do not match
         * Error::BorrowError will be returned if the element was already borrowed mutably
-
     */
     pub fn get<T: 'static>(&self, id: &ID) -> Result<Ref<Box<T>>, Error> {
         use std::mem;
@@ -379,6 +406,7 @@ impl<ID:Hash+Clone> Ui<ID> {
         Params:  
         * id: The id that identify the element in the ui
 
+        An error will be returned if:
         * Error::KeyNotFound will be returned if the key was not found in the Ui
         * Error::BadType will be returned if the key exists, but the type do not match
         * Error::BorrowError will be returned if the element was already borrowed mutably
@@ -428,7 +456,7 @@ impl<ID:Hash+Clone> Ui<ID> {
         * `Error::BadType` if the id do not indentify a control
         * `Error::KeyNotFound` if the id is not in the Ui.
         * `Error::KeyExists` if the cb_id is not unique for the event type.
-        * `Error::EventsBindingLocked` if NWG is currently executing the callback of the event (TODO)
+        * `Error::ControlInUse` if NWG is currently executing the callback of the event
         
     */
     pub fn bind<T>(&self, id: &ID, cb_id: &ID, event: Event, cb: T) where
@@ -446,6 +474,13 @@ impl<ID:Hash+Clone> Ui<ID> {
         Unbind/Remove a callback to a control event.
         Asynchronous, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
+
+        Commit will return an error if:
+        * `Error::EventNotSupported` if the event is not supported on the callback
+        * `Error::BadType` if the id do not indentify a control
+        * `Error::KeyNotFound` if the id is not in the Ui.
+        * `Error::KeyNotFound` if the cb_id do not exist for the event
+        * `Error::ControlInUse` if NWG is currently executing the callback of the event
     */
     #[allow(unused_variables)]
     pub fn unbind(&self, id: &ID, cb_id: &ID, event: Event) {

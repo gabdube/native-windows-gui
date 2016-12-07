@@ -105,6 +105,7 @@ fn test_ui_unpack() {
 
     ui.pack_value(1000, 5u32);
     ui.pack_control(1001, window());
+    ui.pack_value(1002, true);
     ui.bind(&1001, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } } );
 
     ui.commit().expect("Commit was not successful");
@@ -114,9 +115,21 @@ fn test_ui_unpack() {
 
     ui.commit().expect("Commit was not successful");
 
+    // Unpacked ids shoudn't be present anymore
     assert!(!ui.has_id(&1000), "ID 1000 was found in ui after commit");
     assert!(!ui.has_id(&1001), "ID 1001 was found in ui after commit");
-    assert!(callback_executed, "Destroy callback was not executed.")
+
+    // Destroy callback should have been executed when unpacking
+    assert!(callback_executed, "Destroy callback was not executed.");
+
+    // It should be impossible to unpack a borrowed control
+    {
+        let x = ui.get::<bool>(&1002);
+
+        ui.unpack(&1002);
+        let r = ui.commit();
+        assert!(r.is_err() && r.err().unwrap() == Error::ControlInUse, "Commit was successful");
+    }
     
 }
 
@@ -126,9 +139,26 @@ fn test_ui_bind() {
 
     ui.pack_value(1000, 5u32);
     ui.pack_control(1001, window());
+    ui.pack_control(1002, window());
 
     // Binding successful
-    ui.bind(&1001, &5000, Event::Destroyed, |_, _, _, _|{});
+    ui.bind(&1001, &5000, Event::Destroyed, |ui, id, _, _|{
+        // When event callbacks are being dipatched, it is impossible to bind a new callback on the same control with the same event
+        ui.bind(&1001, &5001, Event::Destroyed, |_, _, _, _|{});
+        let r = ui.commit();
+        assert!(r.is_err() && r.err().unwrap() == Error::ControlInUse, "Commit was successful");
+
+        // Deleting the control while its executing its callback is also prohibited...
+        ui.unpack(id);
+        let r = ui.commit();
+        assert!(r.is_err() && r.err().unwrap() == Error::ControlInUse, "Commit was successful");
+
+        // On other control or on other events, binding new callback is permitted
+        // Still binding new events in a destroy callback is a horrible idea, because, unless specified, the NWG destroy order is random.
+        // For this test, if there wasn't the `close` bit at the end, there would be no way to ensure that the commit would work 100% of the time.
+        ui.bind(&1002, &5001, Event::Destroyed, |_, _, _, _|{ } );
+        ui.commit().expect("Commit was not successful");
+    });
 
     ui.commit().expect("Commit was not successful");
 
@@ -152,6 +182,8 @@ fn test_ui_bind() {
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
 
+    { ui.get::<Window>(&1001).unwrap().close(); }
+    dispatch_events();
 }
 
 #[test]
