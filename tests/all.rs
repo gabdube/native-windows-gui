@@ -21,8 +21,8 @@ fn test_ui_pack_user_value() {
     let ui = setup_ui();
 
     // Test simple pack
-    ui.pack_value(1000, "Test");
-    ui.pack_value(1001, vec![5u32, 6, 7]);
+    ui.pack_value(&1000, "Test");
+    ui.pack_value(&1001, vec![5u32, 6, 7]);
 
     // Value shouldn't be packed until commit is called
     assert!(!ui.has_id(&1000), "ID 1000 was found in ui before commit");
@@ -35,8 +35,8 @@ fn test_ui_pack_user_value() {
     assert!(ui.has_id(&1001), "ID 1001 was not found in ui after commit");
 
     // Test partially good pack (the second entry has a key that is already present)
-    ui.pack_value(1002, "Test");
-    ui.pack_value(1001, 5u32);
+    ui.pack_value(&1002, "Test");
+    ui.pack_value(&1001, 5u32);
 
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
@@ -85,7 +85,7 @@ fn test_ui_pack_user_value() {
 fn test_ui_pack_control() {
     let ui = setup_ui();
 
-    ui.pack_control(1000, window());
+    ui.pack_control(&1000, window());
 
     assert!(!ui.has_id(&1000), "ID 1000 was found in ui before commit");
     ui.commit().expect("Commit was not successful");
@@ -103,9 +103,9 @@ fn test_ui_unpack() {
     let mut callback_executed: bool = false;
     let x = &mut callback_executed as *mut bool;
 
-    ui.pack_value(1000, 5u32);
-    ui.pack_control(1001, window());
-    ui.pack_value(1002, true);
+    ui.pack_value(&1000, 5u32);
+    ui.pack_control(&1001, window());
+    ui.pack_value(&1002, true);
     ui.bind(&1001, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } } );
 
     ui.commit().expect("Commit was not successful");
@@ -137,9 +137,9 @@ fn test_ui_unpack() {
 fn test_ui_bind() {
     let ui = setup_ui();
 
-    ui.pack_value(1000, 5u32);
-    ui.pack_control(1001, window());
-    ui.pack_control(1002, window());
+    ui.pack_value(&1000, 5u32);
+    ui.pack_control(&1001, window());
+    ui.pack_control(&1002, window());
 
     // Binding successful
     ui.bind(&1001, &5000, Event::Destroyed, |ui, id, _, _|{
@@ -192,7 +192,7 @@ fn test_window_control_user_close() {
     let mut callback_executed: bool = false;
     let x = &mut callback_executed as *mut bool;
 
-    ui.pack_control(1000, window());
+    ui.pack_control(&1000, window());
     ui.bind(&1000, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
     ui.commit().expect("Commit was not successful");
 
@@ -215,7 +215,7 @@ fn test_drop_callback() {
     {
         let x = &mut callback_executed as *mut bool;
         let ui = setup_ui();
-        ui.pack_control(1000, window());
+        ui.pack_control(&1000, window());
         ui.bind(&1000, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
         ui.commit().expect("Commit was not successful");
     }

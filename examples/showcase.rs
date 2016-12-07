@@ -14,7 +14,7 @@ pub fn default_window() -> WindowT<&'static str> {
 pub fn main() {
     let app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
     
-    app.pack_control("MainWindow", default_window());
+    app.pack_control(&"MainWindow", default_window());
 
     app.commit().expect("Commit failed");
 

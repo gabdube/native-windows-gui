@@ -312,13 +312,14 @@ impl<ID:Hash+Clone> Ui<ID> {
         Asynchronous, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        The execution will fail if the id already exists in the Ui
+        Possible errors:
+        * Error::KeyExist if the key already exists in the ui
     */
-    pub fn pack_value<T: Into<Box<T>>+'static >(&self, id: ID, value: T) {
+    pub fn pack_value<T: Into<Box<T>>+'static >(&self, id: &ID, value: T) {
         use low::defs::{NWG_PACK_USER_VALUE};
         
         let inner = unsafe{ &mut *self.inner };
-        let data = PackUserValueArgs{ id: id, tid: TypeId::of::<T>(), value: value.into() as Box<Any>};
+        let data = PackUserValueArgs{ id: id.clone(), tid: TypeId::of::<T>(), value: value.into() as Box<Any>};
         inner.messages.post(self.inner, NWG_PACK_USER_VALUE, Box::new(data) as Box<Any> );
     }
 
@@ -327,13 +328,15 @@ impl<ID:Hash+Clone> Ui<ID> {
         Asynchronous, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        The executiong will fail if the id already exists in the Ui or if the template creation fails.
+        Possible errors:
+        * Error::KeyExist if the key already exists in the ui
+        * Error::{Any} if the template creation fails
     */
-    pub fn pack_control<T: ControlT+'static>(&self, id: ID, value: T) {
+    pub fn pack_control<T: ControlT+'static>(&self, id: &ID, value: T) {
         use low::defs::{NWG_PACK_CONTROL};
 
         let inner = unsafe{ &mut *self.inner };
-        let data = PackControlArgs{ id: id, value: Box::new(value)};
+        let data = PackControlArgs{ id: id.clone(), value: Box::new(value)};
         inner.messages.post(self.inner, NWG_PACK_CONTROL, Box::new(data) as Box<Any> );
     }
 
