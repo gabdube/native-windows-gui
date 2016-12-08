@@ -24,11 +24,13 @@ extern crate kernel32;
 extern crate comctl32;
 
 mod low;
+mod defs;
 mod error;
 mod events;
 mod controls;
 mod ui;
 
+pub use defs::*;
 pub use error::{Error, SystemError};
 pub use events::{EventCallback, Event, EventArgs};
 pub use controls::{ControlT, Control, WindowT, Window, AnyHandle};

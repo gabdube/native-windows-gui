@@ -42,14 +42,37 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::{DefSubclassProc};
+  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_CHAR};
   use low::defs::{NWG_UNPACK_INDIRECT, UnpackArgs};
+  use events::{Event, EventArgs};
   
   let handled = match msg {
+    WM_KEYDOWN | WM_KEYUP => {
+      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
+      let (inner, id) = (ui.inner, ui.id);
+
+      let evt = if msg == WM_KEYDOWN { Event::KeyDown } else { Event::KeyUp };
+
+      (&mut *inner).trigger(id, evt, EventArgs::Key(w as u32));
+
+      true
+    },
+    WM_CHAR => {
+      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
+      let (inner, id) = (ui.inner, ui.id);
+
+      (&mut *inner).trigger(id, Event::Char, EventArgs::Char(w as u32));
+
+      true
+    },
     NWG_UNPACK_INDIRECT => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
       let (inner, id) = (ui.inner, ui.id);
+
       mem::forget(ui); // Forget ui because it will point to freed memory after the unpack result.
+
       (&mut *inner).unpack( UnpackArgs{id: id} ); 
+
       true
     },
     _ => { false }

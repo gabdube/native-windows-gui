@@ -46,7 +46,7 @@ impl<S: Clone+Into<String>> ControlT for WindowT<S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed]
+        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char]
     }
 
     fn build(&self) -> Result<Box<Control>, Error> {

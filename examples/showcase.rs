@@ -1,6 +1,6 @@
 extern crate native_windows_gui as nwg;
 
-use nwg::{Ui, WindowT, dispatch_events};
+use nwg::{Ui, Event, EventArgs, WindowT, dispatch_events};
 
 pub fn default_window() -> WindowT<&'static str> {
     WindowT { 
@@ -11,11 +11,12 @@ pub fn default_window() -> WindowT<&'static str> {
     }
 }
 
+
 pub fn main() {
     let app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
     
     app.pack_control(&"MainWindow", default_window());
-
+    
     app.commit().expect("Commit failed");
 
     dispatch_events();

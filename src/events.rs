@@ -29,6 +29,9 @@ pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
     Clicked,
+    KeyDown,
+    KeyUp,
+    Char,
     Destroyed,
 }
 
@@ -36,5 +39,7 @@ pub enum Event {
     Events arguments definition. If an event do not have arguments, EventArgs::None is passed.
 */
 pub enum EventArgs {
+    Key(u32),
+    Char(String),
     None
 }
