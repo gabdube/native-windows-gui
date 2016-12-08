@@ -18,8 +18,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Windows virtual key code
+
 pub mod keys {
+    //! Windows virtual key code
+    
     pub const BACK: u32 = 0x08;
     pub const TAB: u32 = 0x09;
     pub const CLEAR: u32 = 0x0C;

@@ -222,3 +222,15 @@ fn test_drop_callback() {
 
     assert!(callback_executed, "Destroy callback was not executed.")
 }
+
+#[test]
+fn test_menus() {
+    let ui = setup_ui();
+    
+    //ui.pack_control(&1000, window());
+    ui.pack_control(&1001, MenuT{ text: "", parent: None  });
+    ui.pack_control(&1002, MenuT{ text: "", parent: Some(1001)  });
+
+    ui.commit().expect("Commit was not successful");
+
+}

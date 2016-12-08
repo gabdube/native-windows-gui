@@ -1,6 +1,7 @@
 extern crate native_windows_gui as nwg;
 
-use nwg::{Ui, Event, EventArgs, WindowT, dispatch_events};
+use nwg::{Ui, WindowT, dispatch_events};
+//use nwg::{Event, EventArgs};
 
 pub fn default_window() -> WindowT<&'static str> {
     WindowT { 
@@ -13,7 +14,6 @@ pub fn default_window() -> WindowT<&'static str> {
 
 
 pub fn main() {
-    use std::io::{self, Write};
     let app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
     
     app.pack_control(&"MainWindow", default_window());

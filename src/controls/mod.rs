@@ -19,27 +19,32 @@
 */
 
 pub mod window;
+pub mod menu;
 
 use std::any::TypeId;
+use std::hash::Hash;
 
-use winapi::HWND;
+use winapi::{HWND, HMENU};
 
 pub use controls::window::{WindowT, Window};
+pub use controls::menu::{MenuT, Menu};
+use ui::Ui;
 use events::Event;
 use error::Error;
 
 pub enum AnyHandle {
-    HWND(HWND)
+    HWND(HWND),
+    HMENU(HMENU),
 }
 
 /**
     Structures implementing this trait can be used by a Ui to build a Control
 */
-pub trait ControlT {
+pub trait ControlT<ID: Clone+Hash> {
 
     fn type_id(&self) -> TypeId;
 
-    fn build(&self) -> Result<Box<Control>, Error>;
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error>;
 
     fn events(&self) -> Vec<Event> { Vec::new() }
 }

@@ -21,7 +21,7 @@
 use std::hash::Hash;
 use std::any::{Any, TypeId};
 
-use winapi::{UINT, LRESULT};
+use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL};
 
 use events::{Event, EventCallback};
 use controls::ControlT;
@@ -46,10 +46,36 @@ pub const NWG_UNPACK_INDIRECT:   UINT = 0x81FF;  /// Message sent when removing 
 
 // Constants not included in winapi-rs
 
+//pub const MIM_MENUDATA: DWORD = 0x00000008;
+pub const MIM_STYLE: DWORD = 0x00000010;
+
+pub const MNS_NOTIFYBYPOS: DWORD = 0x08000000;
+
 pub const ACTCTX_FLAG_RESOURCE_NAME_VALID: u32 = 0x008;
 pub const ACTCTX_FLAG_SET_PROCESS_DEFAULT: u32 = 0x010;
 pub const ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID: u32 = 0x004;
 
+
+// System structs
+#[repr(C)]
+#[allow(non_snake_case)]
+pub struct MENUINFO {
+    pub cbSize: DWORD,
+    pub fMask: DWORD,
+    pub dwStyle: DWORD,
+    pub cyMax: UINT,
+    pub hbrBack: HBRUSH,
+    pub dwContextHelpID: DWORD,
+    pub dwMenuData: ULONG_PTR
+}
+
+// System extern
+#[allow(dead_code)]
+extern "system" {
+    //pub fn GetMenuItemCount(menu: HMENU) -> c_int;
+    pub fn SetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
+    //pub fn GetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
+}
 
 // Arguments passed to the NWG custom events 
 
@@ -65,7 +91,7 @@ pub struct UnpackArgs {
 
 pub struct PackControlArgs<ID: Hash+Clone> {
     pub id: ID,
-    pub value: Box<ControlT>
+    pub value: Box<ControlT<ID>>
 }
 
 pub struct BindArgs<ID: Hash+Clone+'static> {

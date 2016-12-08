@@ -19,9 +19,11 @@
 */
 
 use std::any::TypeId;
+use std::hash::Hash;
 
 use winapi::HWND;
 
+use ui::Ui;
 use controls::{Control, ControlT, AnyHandle};
 use error::Error;
 use events::Event;
@@ -42,14 +44,15 @@ pub struct WindowT<S: Clone+Into<String>> {
     pub exit_on_close: bool
 }
 
-impl<S: Clone+Into<String>> ControlT for WindowT<S> {
+impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char]
     }
 
-    fn build(&self) -> Result<Box<Control>, Error> {
+    #[allow(unused_variables)]
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         unsafe{
             if let Err(e) = build_sysclass() { return Err(e); }
             match build_window(&self) {

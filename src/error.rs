@@ -64,6 +64,7 @@ pub enum Error {
     BorrowError,
     EventNotSupported(Event),
     ControlRequired,
+    ControlOrResourceRequired,
     ControlInUse,
     Unimplemented,
     System(SystemError)
@@ -79,7 +80,8 @@ impl Error {
             &Error::BorrowError => format!("The Ui element was already borrowed"),
             &Error::EventNotSupported(ref e) => format!("The event of type {:?} is not supported on this control", e),
             &Error::ControlRequired => format!("The key passed to the command must identify a control"),
-            &Error::ControlInUse => format!("Impossible to modify the control, it is currently in use (most likely in the callback evaluator)."),
+            &Error::ControlOrResourceRequired => format!("The key passed to the command must identify a control or a resource", ),
+            &Error::ControlInUse => format!("Impossible to modify the control, it is currently in use."),
             &Error::Unimplemented => format!("Feature not yet implemented"),
             &Error::System(ref e) => format!("A system error was raised: {:?}", e),
         }

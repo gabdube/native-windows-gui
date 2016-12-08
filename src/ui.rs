@@ -84,12 +84,14 @@ impl<ID: Hash+Clone> UiInner<ID> {
         if self.ids_map.contains_key(&inner_id) {
             Some(Error::KeyExists)
         } else {
-            match params.value.build() {
+            let tmp_ui: Ui<ID> = Ui{inner: self as *mut UiInner<ID>};
+            match params.value.build(&tmp_ui) {
                 Ok(control) => {
 
                     // Hook the window events if the handle is a HWND
                     match control.handle() {
-                        AnyHandle::HWND(h) => hook_window_events(self, inner_id, h)
+                        AnyHandle::HWND(h) => hook_window_events(self, inner_id, h),
+                        AnyHandle::HMENU(_) => {/* Nothing to do here */}
                     }
 
                     // Init events
@@ -102,9 +104,12 @@ impl<ID: Hash+Clone> UiInner<ID> {
                     self.ids_map.insert(inner_id, (params.id, inner_type_id));
                     self.controls.insert(inner_type_id, RefCell::new(control) );
                     self.control_events.insert(inner_type_id, event_collection);
+
+                    ::std::mem::forget(tmp_ui);
+
                     None
                 },
-                Err(e) => Some(e)
+                Err(e) => { ::std::mem::forget(tmp_ui); Some(e)}
             }
         }
     }
@@ -139,7 +144,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
         // Unhook the events dispatcher if its a window
         match control.handle() {
-            AnyHandle::HWND(h) => unhook_window_events::<ID>(h)
+            AnyHandle::HWND(h) => unhook_window_events::<ID>(h),
+            AnyHandle::HMENU(_) => { /* nothing to do here */ }
         };
         
         // Free the control custom resources
@@ -332,7 +338,7 @@ impl<ID:Hash+Clone> Ui<ID> {
         * Error::KeyExist if the key already exists in the ui
         * Error::{Any} if the template creation fails
     */
-    pub fn pack_control<T: ControlT+'static>(&self, id: &ID, value: T) {
+    pub fn pack_control<T: ControlT<ID>+'static>(&self, id: &ID, value: T) {
         use low::defs::{NWG_PACK_CONTROL};
 
         let inner = unsafe{ &mut *self.inner };
@@ -488,6 +494,36 @@ impl<ID:Hash+Clone> Ui<ID> {
     #[allow(unused_variables)]
     pub fn unbind(&self, id: &ID, cb_id: &ID, event: Event) {
         unimplemented!();
+    }
+
+    /**
+        Return the underlying handle of a control or a resource.
+        While this method is safe, anything done with the returned handle definitely won't be.
+
+        Return an error if:
+        * `Error::KeyNotFound` if the id is not in the Ui.
+        * `Error::ControlOrResourceRequired` if the id indentify a user value
+        * `Error::BorrowError` if the element was already borrowed mutably
+    */
+    pub fn handle_of(&self, id: &ID) -> Result<AnyHandle, Error> {
+        let inner = unsafe{ &mut *self.inner };
+        let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
+
+        let inner_type_id = if let Some(v) = inner.ids_map.get(&inner_id) {
+            v.1
+        } else {
+            return Err(Error::KeyNotFound);
+        };
+        
+        if let Some(v) = inner.controls.get(&inner_type_id) {
+            if let Ok(v_ref) = v.try_borrow() {
+                return Ok( v_ref.handle() );
+            } else {
+                return Err(Error::BorrowError);
+            }
+        }
+
+        Err(Error::ControlOrResourceRequired)
     }
 
     /**
