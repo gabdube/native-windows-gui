@@ -27,7 +27,7 @@ use std::cell::{RefCell, Ref, RefMut};
 use std::rc::Rc;
 
 use low::message_handler::MessageHandler;
-use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs};
+use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs, UnbindArgs};
 use controls::{ControlT, Control, AnyHandle};
 use events::{Event, EventCallback, EventArgs};
 use error::Error;
@@ -213,6 +213,37 @@ impl<ID: Hash+Clone> UiInner<ID> {
         } else {
             callbacks.push((cb_id, cb)); 
             None
+        }
+    }
+
+    pub fn unbind(&mut self, params: UnbindArgs) -> Option<Error> {
+        let (id, cb_id, event) = (params.id, params.cb_id, params.event);
+
+        let tid = match self.ids_map.get(&id) {
+            Some(&(_, tid)) => tid,
+            None => { return Some(Error::KeyNotFound); }
+        };
+
+        // Get the event collection of the control
+        let events_collection = self.control_events.get_mut(&tid);
+        if events_collection.is_none() { return Some(Error::ControlRequired); }
+
+        // Get the callback list for the requested event
+        let callbacks = events_collection.unwrap().get_mut(&event);
+        if callbacks.is_none() { return Some(Error::EventNotSupported(event)); }
+
+        // Get a mutable reference to the callback list
+        let mut callbacks = callbacks.unwrap();
+        let callbacks = Rc::get_mut(&mut callbacks);
+        if callbacks.is_none() { return Some(Error::ControlInUse); }
+
+        // Check if the cb id exists for the event and if it is, remove the callback
+        let callbacks = callbacks.unwrap();
+        if let Some(index) = callbacks.iter().position(|&(cb_id2, _)| cb_id2 == cb_id) {
+            callbacks.remove(index);
+            None
+        } else {
+            Some(Error::KeyNotFound)
         }
     }
 
@@ -462,7 +493,7 @@ impl<ID:Hash+Clone> Ui<ID> {
 
         Commit will return an error if:
         * `Error::EventNotSupported` if the event is not supported on the callback
-        * `Error::BadType` if the id do not indentify a control
+        * `Error::ControlRequired` if the id do not indentify a control
         * `Error::KeyNotFound` if the id is not in the Ui.
         * `Error::KeyExists` if the cb_id is not unique for the event type.
         * `Error::ControlInUse` if NWG is currently executing the callback of the event
@@ -486,14 +517,20 @@ impl<ID:Hash+Clone> Ui<ID> {
 
         Commit will return an error if:
         * `Error::EventNotSupported` if the event is not supported on the callback
-        * `Error::BadType` if the id do not indentify a control
+        * `Error::ControlRequired` if the id do not indentify a control
         * `Error::KeyNotFound` if the id is not in the Ui.
         * `Error::KeyNotFound` if the cb_id do not exist for the event
         * `Error::ControlInUse` if NWG is currently executing the callback of the event
     */
     #[allow(unused_variables)]
     pub fn unbind(&self, id: &ID, cb_id: &ID, event: Event) {
-        unimplemented!();
+        use low::defs::{NWG_UNBIND};
+        
+        let inner = unsafe{ &mut *self.inner };
+        let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
+        let (cb_inner_id, _) = UiInner::hash_id(cb_id, &TypeId::of::<()>());
+        let data = UnbindArgs{ id: inner_id, cb_id: cb_inner_id, event: event};
+        inner.messages.post(self.inner, NWG_UNBIND, Box::new(data) as Box<Any> );
     }
 
     /**

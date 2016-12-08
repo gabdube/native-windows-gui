@@ -33,7 +33,8 @@ pub const NWG_PACK_USER_VALUE:   UINT = 0x400;  /// Message sent when packing a 
 pub const NWG_PACK_CONTROL:      UINT = 0x401;  /// Message sent when packing a control
 pub const NWG_UNPACK:            UINT = 0x402;  /// Message sent when removing an element from the ui
 pub const NWG_BIND:              UINT = 0x403;  /// Message sent when binding an event to a control
-pub const NWG_CUSTOM_MAX:        UINT = 0x404;  /// Maximum custom event value
+pub const NWG_UNBIND:            UINT = 0x404;  /// Message sent when unbinding an event from a control
+pub const NWG_CUSTOM_MAX:        UINT = 0x405;  /// Maximum custom event value
 
 // Value returned by a window proc if the message execution failed/succeeded
 
@@ -99,4 +100,10 @@ pub struct BindArgs<ID: Hash+Clone+'static> {
     pub cb_id: u64,
     pub event: Event,
     pub cb: Box<EventCallback<ID>>
+}
+
+pub struct UnbindArgs {
+    pub id: u64,
+    pub cb_id: u64,
+    pub event: Event
 }

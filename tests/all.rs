@@ -187,6 +187,55 @@ fn test_ui_bind() {
 }
 
 #[test]
+fn test_ui_unbind() {
+    let ui = setup_ui();
+    
+    ui.pack_control(&1000, window());
+    ui.pack_value(&1001, 5u32);
+
+    ui.bind(&1000, &5000, Event::Destroyed, |_, _, _, _|{});
+    ui.commit().expect("Commit was not successful");
+
+    ui.unbind(&1000, &5000, Event::Destroyed);
+    ui.commit().expect("Commit was not successful");
+
+    // Should be able to rebind destroyed callbacks
+    ui.bind(&1000, &5000, Event::Destroyed, |_, _, _, _|{});
+    ui.commit().expect("Commit was not successful");
+
+    // Cannot unbind events to user values
+    ui.unbind(&1001, &5000, Event::Destroyed);
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::ControlRequired, "Commit was successful");
+
+    // Key not in Ui
+    ui.unbind(&1005, &5000, Event::Destroyed);
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
+
+    // Event not supported
+    ui.unbind(&1000, &5000, Event::Clicked);
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::Clicked), "Commit was successful");
+
+    // Callback do not exists
+    ui.unbind(&1000, &5001, Event::Destroyed);
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
+
+    ui.bind(&1000, &5001, Event::Destroyed, |ui, id, _, _|{
+        // When event callbacks are being dipatched, it is impossible to unbind a callbacks on the same control with the same event
+        ui.unbind(&1000, &5000, Event::Destroyed);
+        let r = ui.commit();
+        assert!(r.is_err() && r.err().unwrap() == Error::ControlInUse, "Commit was successful");
+    });
+    ui.commit().expect("Commit was not successful");
+
+    { ui.get::<Window>(&1000).unwrap().close(); }
+    dispatch_events();
+}
+
+#[test]
 fn test_window_control_user_close() {
     let ui = setup_ui();
     let mut callback_executed: bool = false;
