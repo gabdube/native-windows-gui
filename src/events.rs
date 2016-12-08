@@ -40,6 +40,6 @@ pub enum Event {
 */
 pub enum EventArgs {
     Key(u32),
-    Char(String),
+    Char(char),
     None
 }

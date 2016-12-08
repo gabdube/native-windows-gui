@@ -42,7 +42,7 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::{DefSubclassProc};
-  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_CHAR};
+  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR};
   use low::defs::{NWG_UNPACK_INDIRECT, UnpackArgs};
   use events::{Event, EventArgs};
   
@@ -54,14 +54,20 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       let evt = if msg == WM_KEYDOWN { Event::KeyDown } else { Event::KeyUp };
 
       (&mut *inner).trigger(id, evt, EventArgs::Key(w as u32));
-
+      
       true
     },
-    WM_CHAR => {
+    WM_UNICHAR | WM_CHAR => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
       let (inner, id) = (ui.inner, ui.id);
 
-      (&mut *inner).trigger(id, Event::Char, EventArgs::Char(w as u32));
+      if w == UNICODE_NOCHAR {
+        return 1;
+      } 
+
+      if let Some(c) = ::std::char::from_u32(w as u32) {
+        (&mut *inner).trigger(id, Event::Char, EventArgs::Char( c ));
+      }
 
       true
     },

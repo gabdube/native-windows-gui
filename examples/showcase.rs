@@ -13,10 +13,11 @@ pub fn default_window() -> WindowT<&'static str> {
 
 
 pub fn main() {
+    use std::io::{self, Write};
     let app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
     
     app.pack_control(&"MainWindow", default_window());
-    
+
     app.commit().expect("Commit failed");
 
     dispatch_events();
