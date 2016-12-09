@@ -26,6 +26,20 @@ pub enum MenuInfo {
     Style(DWORD),
 }
 
+pub fn list_menu_children(menu: HMENU) -> Vec<u64> {
+    use low::defs::GetMenuItemCount;
+
+    let mut children = Vec::new();
+    let children_count = unsafe{ GetMenuItemCount(menu) };
+
+    for i in 0..children_count {
+        
+    }
+
+
+    children
+}
+
 pub unsafe fn set_menu_info(h: HMENU, info: &[MenuInfo]) {
     use low::defs::{SetMenuInfo, MENUINFO, MIM_STYLE};
 

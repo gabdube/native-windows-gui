@@ -32,6 +32,8 @@ pub enum Event {
     KeyDown,
     KeyUp,
     Char,
+    MenuOpen,
+    MenuClose,
     Destroyed,
 }
 

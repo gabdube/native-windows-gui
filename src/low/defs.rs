@@ -21,7 +21,7 @@
 use std::hash::Hash;
 use std::any::{Any, TypeId};
 
-use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL};
+use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int};
 
 use events::{Event, EventCallback};
 use controls::ControlT;
@@ -73,7 +73,7 @@ pub struct MENUINFO {
 // System extern
 #[allow(dead_code)]
 extern "system" {
-    //pub fn GetMenuItemCount(menu: HMENU) -> c_int;
+    pub fn GetMenuItemCount(menu: HMENU) -> c_int;
     pub fn SetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
     //pub fn GetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
 }

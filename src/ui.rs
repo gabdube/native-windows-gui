@@ -116,6 +116,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     fn unpack_control(&mut self, id: u64, tid: u64) -> Option<Error> {
         use low::events::unhook_window_events;
+        use low::menu_helper::list_menu_children;
         // TODO destroy children
 
         // Check if the control is currently borrowed by the user
@@ -125,16 +126,31 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
         // Check if one of the control events is currently being executed
         {
-        let events_collection = self.control_events.get_mut(&tid).unwrap();
-        for mut ec in events_collection.values_mut() {
-            if Rc::get_mut(&mut ec).is_none() {
-                return Some(Error::ControlInUse);
+            let events_collection = self.control_events.get_mut(&tid).unwrap();
+            for mut ec in events_collection.values_mut() {
+                if Rc::get_mut(&mut ec).is_none() {
+                    return Some(Error::ControlInUse);
+                }
             }
         }
-        }
 
-        // Call the destroy callback
-        self.trigger(id, Event::Destroyed, EventArgs::None);
+        // Unpack the children
+        let handle = self.handle_of(id);
+        if handle.is_err() { return Some(handle.err().unwrap()); }
+
+        let children_ids: Vec<u64> = match self.handle_of(id).unwrap() {
+            AnyHandle::HMENU(h) => {
+                let mut children = vec![id];
+                children.append( &mut list_menu_children(h) );
+                children
+            },
+            AnyHandle::HWND(_) => { /* TODO */ vec![id] }
+        };
+
+        // Call the destroy callbacks
+        for id in children_ids.iter() {
+            self.trigger(*id, Event::Destroyed, EventArgs::None);
+        }
 
         // Removes stuffs
         self.ids_map.remove(&id);
@@ -274,6 +290,24 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
         ::std::mem::forget(tmp_ui);
         None
+    }
+
+    pub fn handle_of(&self, id: u64) -> Result<AnyHandle, Error> {
+        let tid = if let Some(v) = self.ids_map.get(&id) {
+            v.1
+        } else {
+            return Err(Error::KeyNotFound);
+        };
+        
+        if let Some(v) = self.controls.get(&tid) {
+            if let Ok(v_ref) = v.try_borrow() {
+                return Ok( v_ref.handle() );
+            } else {
+                return Err(Error::BorrowError);
+            }
+        }
+
+        Err(Error::ControlOrResourceRequired)
     }
 
     fn hash_id(id: &ID, tid: &TypeId) -> (u64, u64) {
@@ -545,22 +579,7 @@ impl<ID:Hash+Clone> Ui<ID> {
     pub fn handle_of(&self, id: &ID) -> Result<AnyHandle, Error> {
         let inner = unsafe{ &mut *self.inner };
         let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
-
-        let inner_type_id = if let Some(v) = inner.ids_map.get(&inner_id) {
-            v.1
-        } else {
-            return Err(Error::KeyNotFound);
-        };
-        
-        if let Some(v) = inner.controls.get(&inner_type_id) {
-            if let Ok(v_ref) = v.try_borrow() {
-                return Ok( v_ref.handle() );
-            } else {
-                return Err(Error::BorrowError);
-            }
-        }
-
-        Err(Error::ControlOrResourceRequired)
+        inner.handle_of(inner_id)
     }
 
     /**

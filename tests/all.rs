@@ -276,10 +276,35 @@ fn test_drop_callback() {
 fn test_menus() {
     let ui = setup_ui();
     
-    //ui.pack_control(&1000, window());
-    ui.pack_control(&1001, MenuT{ text: "", parent: None  });
-    ui.pack_control(&1002, MenuT{ text: "", parent: Some(1001)  });
+    let mut free_count: u8 = 0;
+    let x = &mut free_count as *mut u8;
+
+    ui.pack_control(&1000, window());
+    
+    ui.pack_control(&1001, MenuT{ text: "Test1", parent: Some(1000)  });
+    ui.bind(&1001, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    
+    ui.pack_control(&1002, MenuT{ text: "Test2", parent: Some(1000)  });
+    ui.pack_control(&1003, MenuT{ text: "Test3", parent: Some(1002)  });
+    ui.pack_control(&1004, MenuT{ text: "Test4", parent: Some(1002)  });
+    ui.bind(&1002, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1003, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1004, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
     ui.commit().expect("Commit was not successful");
+
+    // Removing a menu without items
+    ui.unpack(&1001);
+    ui.commit().expect("Commit was not successful");
+    assert!(ui.has_id(&1001) == false, "Destroyed menu key '1001' was found in ui");
+    assert!(free_count == 1, "Freecount was not increased!");
+
+    // Removing a menu with subitems
+    ui.unpack(&1002);
+    ui.commit().expect("Commit was not successful");
+    //assert!(ui.has_id(&1002) == false, "Destroyed menu key '1002' was found in ui");
+    //assert!(ui.has_id(&1003) == false, "Destroyed menu key '1003' was found in ui");
+    //assert!(ui.has_id(&1004) == false, "Destroyed menu key '1004' was found in ui");
+    assert!(free_count == 4, "Freecount was not increased by 3!");
 
 }

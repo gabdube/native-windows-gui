@@ -56,7 +56,6 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuT<S, ID> {
 /**
     A menu control
 */
-#[allow(dead_code)]
 pub struct Menu {
     handle: HMENU,
 }
@@ -74,13 +73,46 @@ impl Control for Menu {
 
 }
 
+
+/**
+    A template to create menuitems
+*/
+pub struct MenuItemT<S: Clone+Into<String>, ID: Hash+Clone> {
+    pub text: S,
+    pub parent: ID,
+}
+
+impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
+    fn type_id(&self) -> TypeId { TypeId::of::<MenuItem>() }
+
+    fn events(&self) -> Vec<Event> {
+        vec![Event::Destroyed]
+    }
+
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
+        Err(Error::Unimplemented)
+    }
+}
+
+/**
+    A menu item control
+*/
+#[allow(dead_code)]
+pub struct MenuItem;
+
+
+/**
+    A menu item control
+*/
+
+
 /*
-    Private unsafe menu methods
+    Private unsafe menu/menuitem methods
 */
 
 #[inline(always)]
 unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &MenuT<S, ID>) -> Result<HMENU, Error> {
-    use user32::{CreatePopupMenu, CreateMenu, AppendMenuW};
+    use user32::{CreatePopupMenu, CreateMenu, AppendMenuW, GetMenu, SetMenu, DrawMenuBar};
     use winapi::{MF_STRING, MF_POPUP};
     use low::menu_helper::use_menu_command;
     use low::other_helper::to_utf16;
@@ -91,7 +123,21 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
             if ph_result.is_err() { return Err(ph_result.err().unwrap()); }
 
             match ph_result.unwrap() {
-                AnyHandle::HWND(_) => Err(Error::Unimplemented),
+                AnyHandle::HWND(parent_h) => {
+                    let mut menubar = GetMenu(parent_h);
+                    if menubar.is_null() {
+                        // If the window do not have a menu bar, create one
+                        menubar = CreateMenu();
+                        SetMenu(parent_h, menubar);
+                    }
+
+                    let h = CreateMenu();
+                    let text = to_utf16(t.text.clone().into().as_ref());
+                    AppendMenuW(menubar, MF_STRING|MF_POPUP, mem::transmute(h), text.as_ptr());
+
+                    DrawMenuBar(parent_h); // Draw the menu bar to make sure the changes are visible
+                    Ok(h)
+                },
                 AnyHandle::HMENU(parent_h) => {
                     let h = CreateMenu();
                     let text = to_utf16(t.text.clone().into().as_ref());
@@ -101,7 +147,7 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
             }
         },
         None => {
-            // Create a popup menu without parents, t.text is ignored
+            // Create a popup menu without a parent, t.text is ignored
             let h = CreatePopupMenu();
             use_menu_command(h);
             Ok(h)
