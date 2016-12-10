@@ -96,8 +96,6 @@ pub unsafe fn list_menu_children(menu: HMENU) -> Vec<u64> {
     let mut children = Vec::new();
     let children_count = GetMenuItemCount(menu);
 
-    println!("{:?}", children_count);
-
     let mut info = MenuInfo::Data(ptr::null_mut());
     let mut sub_menu: HMENU;
 
@@ -131,7 +129,7 @@ pub unsafe fn menu_index_in_parent(h: HMENU, parent_h: HMENU) -> UINT {
 
     let children_count = GetMenuItemCount(parent_h);
     let mut sub_menu: HMENU;
-    
+
     for i in 0..children_count {
         sub_menu = GetSubMenu(parent_h, i as c_int);
         if sub_menu.is_null() {

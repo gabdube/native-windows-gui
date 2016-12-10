@@ -145,7 +145,6 @@ pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInne
 
     let menu = GetMenu(handle);
     if !menu.is_null() {
-        println!("{:?}", "About to free the window children");
         children.append(&mut list_menu_children(menu) );
     }
 
