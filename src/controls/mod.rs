@@ -34,7 +34,7 @@ use error::Error;
 
 pub enum AnyHandle {
     HWND(HWND),
-    HMENU(HMENU),
+    HMENU(HMENU)
 }
 
 /**

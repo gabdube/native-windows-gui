@@ -20,9 +20,11 @@
 
 use std::ptr;
 use std::mem;
+use std::hash::Hash;
 
 use winapi::{HWND, WNDPROC, DWORD, GWL_USERDATA};
 
+use ui::UiInner;
 use low::other_helper::to_utf16;
 use error::SystemError;
 
@@ -96,7 +98,7 @@ pub unsafe fn build_sysclass<S: Into<String>>(p: SysclassParams<S>) -> Result<()
 /**
     Try to create a system class using the parameters provided in `WindowParams`.
     
-    Returns `Ok(HWND)` where HWND is the cewly created window handle
+    Returns `Ok(HWND)` where HWND is the newly created window handle
     Returns `Err(SystemError::WindowCreationFail)` if the system window creation failed.
 
     Note that if the system class window proc used is malformed, the program will most likely segfault.
@@ -129,6 +131,27 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
     } else {
         Ok(handle)
     }
+}
+
+/**
+    Return the children control found in the window. Includes the window menubar if one is present.
+*/
+#[allow(unused_variables)]
+pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInner<ID>) -> Vec<u64> {
+    use user32::GetMenu;
+    use low::menu_helper::list_menu_children;
+
+    let mut children = Vec::new();
+
+    let menu = GetMenu(handle);
+    if !menu.is_null() {
+        println!("{:?}", "About to free the window children");
+        children.append(&mut list_menu_children(menu) );
+    }
+
+    // TODO to window children
+
+    children
 }
 
 /**

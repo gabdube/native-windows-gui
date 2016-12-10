@@ -280,6 +280,7 @@ fn test_menus() {
     let x = &mut free_count as *mut u8;
 
     ui.pack_control(&1000, window());
+    ui.bind(&1000, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     
     ui.pack_control(&1001, MenuT{ text: "Test1", parent: Some(1000)  });
     ui.bind(&1001, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
@@ -290,6 +291,18 @@ fn test_menus() {
     ui.bind(&1002, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1003, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1004, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+
+    ui.pack_control(&1005, MenuT{ text: "Test5", parent: Some(1000)  });
+    ui.pack_control(&1006, MenuT{ text: "Test6", parent: Some(1005)  });
+    ui.pack_control(&1007, MenuT{ text: "Test7", parent: Some(1006)  });
+    ui.bind(&1005, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1006, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1007, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+
+    ui.pack_control(&1008, MenuT{ text: "Test8", parent: Some(1000)  });
+    ui.pack_control(&1009, MenuT{ text: "Test9", parent: Some(1008)  });
+    ui.bind(&1008, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1009, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
     ui.commit().expect("Commit was not successful");
 
@@ -302,9 +315,24 @@ fn test_menus() {
     // Removing a menu with subitems
     ui.unpack(&1002);
     ui.commit().expect("Commit was not successful");
-    //assert!(ui.has_id(&1002) == false, "Destroyed menu key '1002' was found in ui");
-    //assert!(ui.has_id(&1003) == false, "Destroyed menu key '1003' was found in ui");
-    //assert!(ui.has_id(&1004) == false, "Destroyed menu key '1004' was found in ui");
+    assert!(ui.has_id(&1002) == false, "Destroyed menu key '1002' was found in ui");
+    assert!(ui.has_id(&1003) == false, "Destroyed menu key '1003' was found in ui");
+    assert!(ui.has_id(&1004) == false, "Destroyed menu key '1004' was found in ui");
     assert!(free_count == 4, "Freecount was not increased by 3!");
 
+    // Removing a menu with subitems that have subitems
+    ui.unpack(&1005);
+    ui.commit().expect("Commit was not successful");
+    assert!(ui.has_id(&1005) == false, "Destroyed menu key '1005' was found in ui");
+    assert!(ui.has_id(&1006) == false, "Destroyed menu key '1006' was found in ui");
+    assert!(ui.has_id(&1007) == false, "Destroyed menu key '1007' was found in ui");
+    assert!(free_count == 7, "Freecount was not increased by 3!");
+
+    // Removing a window should also free its menus
+    ui.unpack(&1000);
+    ui.commit().expect("Commit was not successful");
+    assert!(ui.has_id(&1000) == false, "Destroyed menu key '1000' was found in ui");
+    assert!(ui.has_id(&1008) == false, "Destroyed menu key '1008' was found in ui");
+    assert!(ui.has_id(&1009) == false, "Destroyed menu key '1009' was found in ui");
+    assert!(free_count == 10, "Freecount was not increased by 3!");
 }

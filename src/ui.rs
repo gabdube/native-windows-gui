@@ -79,6 +79,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     pub fn pack_control(&mut self, params: PackControlArgs<ID>) -> Option<Error> {
         use low::events::hook_window_events;
+        use low::menu_helper::init_menu_data;
             
         let (inner_id, inner_type_id) = UiInner::hash_id(&params.id, &params.value.type_id());
         if self.ids_map.contains_key(&inner_id) {
@@ -87,11 +88,10 @@ impl<ID: Hash+Clone> UiInner<ID> {
             let tmp_ui: Ui<ID> = Ui{inner: self as *mut UiInner<ID>};
             match params.value.build(&tmp_ui) {
                 Ok(control) => {
-
-                    // Hook the window events if the handle is a HWND
+                    
                     match control.handle() {
-                        AnyHandle::HWND(h) => hook_window_events(self, inner_id, h),
-                        AnyHandle::HMENU(_) => {/* Nothing to do here */}
+                        AnyHandle::HWND(h) => hook_window_events(self, inner_id, h), // Hook the window events if the handle is a HWND
+                        AnyHandle::HMENU(h) => init_menu_data(h, inner_id)           // Save the id in the menu
                     }
 
                     // Init events
@@ -116,8 +116,9 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     fn unpack_control(&mut self, id: u64, tid: u64) -> Option<Error> {
         use low::events::unhook_window_events;
-        use low::menu_helper::list_menu_children;
-        // TODO destroy children
+        use low::menu_helper::{list_menu_children, free_menu_data};
+        use low::window_helper::list_window_children;
+       
 
         // Check if the control is currently borrowed by the user
         if let Err(_) = self.controls.get(&tid).unwrap().try_borrow_mut() { 
@@ -135,37 +136,44 @@ impl<ID: Hash+Clone> UiInner<ID> {
         }
 
         // Unpack the children
+        // TODO destroy children
         let handle = self.handle_of(id);
         if handle.is_err() { return Some(handle.err().unwrap()); }
 
         let children_ids: Vec<u64> = match self.handle_of(id).unwrap() {
-            AnyHandle::HMENU(h) => {
+            AnyHandle::HMENU(h) => unsafe {
                 let mut children = vec![id];
                 children.append( &mut list_menu_children(h) );
                 children
             },
-            AnyHandle::HWND(_) => { /* TODO */ vec![id] }
+            AnyHandle::HWND(h) => unsafe { 
+                let mut children = vec![id];
+                children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
+                children
+            }
         };
 
-        // Call the destroy callbacks
-        for id in children_ids.iter() {
-            self.trigger(*id, Event::Destroyed, EventArgs::None);
-        }
-
-        // Removes stuffs
-        self.ids_map.remove(&id);
-        self.control_events.remove(&tid).unwrap();
-        let control = self.controls.remove(&tid).unwrap();
-        let mut control = control.into_inner();
-
-        // Unhook the events dispatcher if its a window
-        match control.handle() {
-            AnyHandle::HWND(h) => unhook_window_events::<ID>(h),
-            AnyHandle::HMENU(_) => { /* nothing to do here */ }
-        };
         
-        // Free the control custom resources
-        control.free();
+        for id in children_ids.iter().rev() {
+
+            // Call the destroy callbacks
+            self.trigger(*id, Event::Destroyed, EventArgs::None);
+
+            // Removes stuffs
+            let (_, tid) = self.ids_map.remove(&id).unwrap();
+            self.control_events.remove(&tid).unwrap();
+            let control = self.controls.remove(&tid).unwrap();
+            let mut control = control.into_inner();
+
+            // Unhook the events dispatcher if its a window
+            match control.handle() {
+                AnyHandle::HWND(h) => unhook_window_events::<ID>(h),
+                AnyHandle::HMENU(h) => { free_menu_data(h) }
+            };
+            
+            // Free the control custom resources
+            control.free();
+        }
 
         // Control gets dropped here
         None

@@ -47,10 +47,12 @@ pub const NWG_UNPACK_INDIRECT:   UINT = 0x81FF;  /// Message sent when removing 
 
 // Constants not included in winapi-rs
 
-//pub const MIM_MENUDATA: DWORD = 0x00000008;
+pub const MIM_MENUDATA: DWORD = 0x00000008;
 pub const MIM_STYLE: DWORD = 0x00000010;
 
 pub const MNS_NOTIFYBYPOS: DWORD = 0x08000000;
+
+pub const MF_BYPOSITION: UINT = 0x00000400;
 
 pub const ACTCTX_FLAG_RESOURCE_NAME_VALID: u32 = 0x008;
 pub const ACTCTX_FLAG_SET_PROCESS_DEFAULT: u32 = 0x010;
@@ -74,8 +76,10 @@ pub struct MENUINFO {
 #[allow(dead_code)]
 extern "system" {
     pub fn GetMenuItemCount(menu: HMENU) -> c_int;
+    pub fn GetSubMenu(hMenu: HMENU, nPos: c_int) -> HMENU;
     pub fn SetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
-    //pub fn GetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
+    pub fn GetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
+    pub fn RemoveMenu(menu: HMENU, pos: UINT, flags: UINT) -> BOOL;
 }
 
 // Arguments passed to the NWG custom events 
