@@ -91,7 +91,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
                     
                     match control.handle() {
                         AnyHandle::HWND(h) => hook_window_events(self, inner_id, h), // Hook the window events if the handle is a HWND
-                        AnyHandle::HMENU(h) => init_menu_data(h, inner_id)           // Save the id in the menu
+                        AnyHandle::HMENU(h) => init_menu_data(h, inner_id),          // Save the id in the menu
+                        AnyHandle::HMENU_ITEM(_) => {/*TODO*/}
                     }
 
                     // Init events
@@ -150,7 +151,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 let mut children = vec![id];
                 children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
                 children
-            }
+            },
+            AnyHandle::HMENU_ITEM(_) => vec![id], // menu items can't have children
         };
 
         
@@ -168,7 +170,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
             // Unhook the events dispatcher if its a window
             match control.handle() {
                 AnyHandle::HWND(h) => unhook_window_events::<ID>(h),
-                AnyHandle::HMENU(h) => { free_menu_data(h) }
+                AnyHandle::HMENU(h) => free_menu_data(h),
+                AnyHandle::HMENU_ITEM(_) => { /* TODO */ }
             };
             
             // Free the control custom resources
@@ -564,7 +567,6 @@ impl<ID:Hash+Clone> Ui<ID> {
         * `Error::KeyNotFound` if the cb_id do not exist for the event
         * `Error::ControlInUse` if NWG is currently executing the callback of the event
     */
-    #[allow(unused_variables)]
     pub fn unbind(&self, id: &ID, cb_id: &ID, event: Event) {
         use low::defs::{NWG_UNBIND};
         

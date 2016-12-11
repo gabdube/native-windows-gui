@@ -282,25 +282,27 @@ fn test_menus() {
     ui.pack_control(&1000, window());
     ui.bind(&1000, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     
-    ui.pack_control(&1001, MenuT{ text: "Test1", parent: Some(1000)  });
+    ui.pack_control(&1001, MenuT{ text: "Test1", parent: 1000  });
     ui.bind(&1001, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     
-    ui.pack_control(&1002, MenuT{ text: "Test2", parent: Some(1000)  });
-    ui.pack_control(&1003, MenuT{ text: "Test3", parent: Some(1002)  });
-    ui.pack_control(&1004, MenuT{ text: "Test4", parent: Some(1002)  });
+    ui.pack_control(&1002, MenuT{ text: "Test2", parent: 1000  });
+    ui.pack_control(&1003, MenuT{ text: "Test3", parent: 1002  });
+    ui.pack_control(&1004, MenuT{ text: "Test4", parent: 1002  });
+    ui.pack_control(&2000, MenuItemT{ text: "TestItem1", parent: 1002  });
     ui.bind(&1002, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1003, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1004, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&2000, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
-    ui.pack_control(&1005, MenuT{ text: "Test5", parent: Some(1000)  });
-    ui.pack_control(&1006, MenuT{ text: "Test6", parent: Some(1005)  });
-    ui.pack_control(&1007, MenuT{ text: "Test7", parent: Some(1006)  });
+    ui.pack_control(&1005, MenuT{ text: "Test5", parent: 1000 });
+    ui.pack_control(&1006, MenuT{ text: "Test6", parent: 1005 });
+    ui.pack_control(&1007, MenuT{ text: "Test7", parent: 1006 });
     ui.bind(&1005, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1006, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1007, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
-    ui.pack_control(&1008, MenuT{ text: "Test8", parent: Some(1000)  });
-    ui.pack_control(&1009, MenuT{ text: "Test9", parent: Some(1008)  });
+    ui.pack_control(&1008, MenuT{ text: "Test8", parent: 1000 });
+    ui.pack_control(&1009, MenuT{ text: "Test9", parent: 1008 });
     ui.bind(&1008, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1009, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
@@ -318,7 +320,8 @@ fn test_menus() {
     assert!(ui.has_id(&1002) == false, "Destroyed menu key '1002' was found in ui");
     assert!(ui.has_id(&1003) == false, "Destroyed menu key '1003' was found in ui");
     assert!(ui.has_id(&1004) == false, "Destroyed menu key '1004' was found in ui");
-    assert!(free_count == 4, "Freecount was not increased by 3!");
+    assert!(ui.has_id(&2000) == false, "Destroyed menu item key '2000' was found in ui");
+    assert!(free_count == 5, "Freecount was not increased by 3!");
 
     // Removing a menu with subitems that have subitems
     ui.unpack(&1005);

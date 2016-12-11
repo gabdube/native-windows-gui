@@ -148,7 +148,7 @@ pub unsafe fn menu_index_in_parent(h: HMENU, parent_h: HMENU) -> UINT {
     Remove a menu item from its parent.
 */
 pub unsafe fn remove_menu_from_parent(h: HMENU, parent: &AnyHandle) {
-    use user32::GetMenu;
+    use user32::{GetMenu, DrawMenuBar};
     use low::defs::{RemoveMenu, MF_BYPOSITION};
 
     match parent {
@@ -158,11 +158,13 @@ pub unsafe fn remove_menu_from_parent(h: HMENU, parent: &AnyHandle) {
 
             let index = menu_index_in_parent(h, menubar);
             RemoveMenu(menubar, index, MF_BYPOSITION);
+            DrawMenuBar(parent_h);
         },
         &AnyHandle::HMENU(parent_h) => {
             let index = menu_index_in_parent(h, parent_h);
             RemoveMenu(parent_h, index, MF_BYPOSITION);
         }
+        _ => { unreachable!(); /* A menu can only be added to another menu or a window */ }
     }
 }
 

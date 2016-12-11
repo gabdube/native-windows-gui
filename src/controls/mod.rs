@@ -27,14 +27,17 @@ use std::hash::Hash;
 use winapi::{HWND, HMENU};
 
 pub use controls::window::{WindowT, Window};
-pub use controls::menu::{MenuT, Menu};
+pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem};
 use ui::Ui;
 use events::Event;
 use error::Error;
 
+#[derive(Clone)]
+#[allow(non_camel_case_types)]
 pub enum AnyHandle {
     HWND(HWND),
-    HMENU(HMENU)
+    HMENU(HMENU),
+    HMENU_ITEM(HMENU), //  Menuitem
 }
 
 /**

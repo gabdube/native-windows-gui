@@ -73,7 +73,6 @@ pub struct MENUINFO {
 }
 
 // System extern
-#[allow(dead_code)]
 extern "system" {
     pub fn GetMenuItemCount(menu: HMENU) -> c_int;
     pub fn GetSubMenu(hMenu: HMENU, nPos: c_int) -> HMENU;
