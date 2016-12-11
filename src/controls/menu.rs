@@ -93,7 +93,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<MenuItem>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed]
+        vec![Event::Destroyed, Event::Clicked]
     }
 
    #[allow(unused_variables)]
@@ -150,6 +150,7 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
             if menubar.is_null() {
                 // If the window do not have a menu bar, create one
                 menubar = CreateMenu();
+                use_menu_command(menubar);
                 SetMenu(parent_h, menubar);
             }
 

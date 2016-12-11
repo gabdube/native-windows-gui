@@ -42,7 +42,7 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::{DefSubclassProc};
-  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR};
+  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, c_int};
   use low::defs::{NWG_UNPACK_INDIRECT, UnpackArgs};
   use events::{Event, EventArgs};
   
@@ -54,6 +54,15 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       let evt = if msg == WM_KEYDOWN { Event::KeyDown } else { Event::KeyUp };
 
       (&mut *inner).trigger(id, evt, EventArgs::Key(w as u32));
+      
+      true
+    },
+    WM_MENUCOMMAND => {
+      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
+      let inner = ui.inner;
+      let id = ::low::menu_helper::get_menu_id( mem::transmute(l), w as c_int );
+
+      (&mut *inner).trigger(id, Event::Clicked, EventArgs::None);
       
       true
     },
@@ -97,7 +106,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
 pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, id: u64, handle: HWND) { unsafe {
   use comctl32::SetWindowSubclass;
 
-  // While definitely questionable in term of safeness, the reference to the UiInner is actually
+  // While definitely questionable in term of safeness, the reference to the UiInner is actually (always)
   // a raw pointer belonging to a Ui. Also, when the Ui goes out of scope, every window control
   // gets destroyed BEFORE the UiInner, this guarantees that uinner lives long enough.
   let ui_inner_raw: *mut UiInner<ID> = uiinner as *mut UiInner<ID>;
@@ -105,8 +114,6 @@ pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, id:
 
   SetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, mem::transmute(data));
 }}
-
-
 
 /**
   Remove a subclass and free the associated data
@@ -129,12 +136,23 @@ pub fn unhook_window_events<ID: Hash+Clone+'static>(handle: HWND) { unsafe {
 */
 #[inline(always)]
 pub unsafe fn dispatch_events() {
-    use winapi::MSG;
-    use user32::{GetMessageW, TranslateMessage, DispatchMessageW};
+  use winapi::MSG;
+  use user32::{GetMessageW, TranslateMessage, DispatchMessageW};
 
-    let mut msg: MSG = mem::uninitialized();
-    while GetMessageW(&mut msg, ptr::null_mut(), 0, 0) != 0 {
-        TranslateMessage(&msg); 
-        DispatchMessageW(&msg); 
-    }
+  let mut msg: MSG = mem::uninitialized();
+  while GetMessageW(&mut msg, ptr::null_mut(), 0, 0) != 0 {
+      TranslateMessage(&msg); 
+      DispatchMessageW(&msg); 
+  }
+}
+
+/**
+    Send a WM_QUIT to the system queue. Breaks the dispatch_events loop.
+*/
+#[inline(always)]
+pub unsafe fn exit() {
+  use user32::PostMessageW;
+  use winapi::WM_QUIT;
+
+  PostMessageW(ptr::null_mut(), WM_QUIT, 0, 0);
 }

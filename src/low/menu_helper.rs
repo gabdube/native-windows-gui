@@ -291,3 +291,19 @@ pub fn use_menu_command(h: HMENU) {
     use low::defs::MNS_NOTIFYBYPOS;
     unsafe{ set_menu_info(h, &[MenuInfo::Style(MNS_NOTIFYBYPOS)]) }
 }
+
+/**
+    Used in the events proc to return the inner id of a menuitem when triggering the clicked action
+*/
+pub unsafe fn get_menu_id(parent_h: HMENU, index: c_int) -> u64 {
+    use low::defs::GetMenuItemID;
+    let uid = GetMenuItemID(parent_h, index);
+    let mut data = MenuItemInfo::Data(ptr::null_mut());
+
+    get_menu_item_info(parent_h, uid, &mut data);
+
+    match data {
+        MenuItemInfo::Data(d) => (&mut *d).id,
+        //_ => unreachable!()
+    }
+}

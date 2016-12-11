@@ -620,3 +620,11 @@ pub fn dispatch_events() {
     // Actual code is located under the low module because that's where most of the unsafe code should be
     unsafe{ ::low::events::dispatch_events(); }
 }
+
+/**
+    Send a WM_QUIT to the system queue. Breaks the dispatch_events loop.
+*/
+pub fn exit() {
+    // Actual code is located under the low module because that's where most of the unsafe code should be
+    unsafe{ ::low::events::exit(); }
+}
