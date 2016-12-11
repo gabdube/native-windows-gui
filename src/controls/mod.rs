@@ -24,7 +24,7 @@ pub mod menu;
 use std::any::TypeId;
 use std::hash::Hash;
 
-use winapi::{HWND, HMENU};
+use winapi::{HWND, HMENU, UINT};
 
 pub use controls::window::{WindowT, Window};
 pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem};
@@ -37,7 +37,7 @@ use error::Error;
 pub enum AnyHandle {
     HWND(HWND),
     HMENU(HMENU),
-    HMENU_ITEM(HMENU), //  Menuitem
+    HMENU_ITEM(HMENU, UINT),
 }
 
 /**
@@ -45,6 +45,9 @@ pub enum AnyHandle {
 */
 pub trait ControlT<ID: Clone+Hash> {
 
+    /**
+        Should return the TypeId of the generated control
+    */
     fn type_id(&self) -> TypeId;
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error>;
@@ -53,7 +56,7 @@ pub trait ControlT<ID: Clone+Hash> {
 }
 
 /**
-    Structures implementing this trait are visual control that can be stored in a Ui
+    Structures implementing this trait are controls that can be stored in a Ui
 */
 pub trait Control {
 

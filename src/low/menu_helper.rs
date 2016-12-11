@@ -24,13 +24,21 @@ use winapi::{HMENU, DWORD, HBRUSH, c_int, UINT};
 
 use controls::AnyHandle;
 
+/**
+    Struct stored in menu and menuitems by NWG to identify the menu when disptaching events
+*/
 struct MenuData {
     id: u64
 }
+type MenuItemData = MenuData;
 
 enum MenuInfo {
     Style(DWORD),
     Data(*mut MenuData)
+}
+
+enum MenuItemInfo {
+    Data(*mut MenuItemData)
 }
 
 unsafe fn get_menu_info(h: HMENU, info: &mut MenuInfo) {
@@ -86,37 +94,93 @@ unsafe fn set_menu_info(h: HMENU, info: &[MenuInfo]) {
     SetMenuInfo(h, &mut info);
 }
 
+unsafe fn get_menu_item_info(parent_h: HMENU, uid: UINT, info: &mut MenuItemInfo) {
+    use low::defs::{MENUITEMINFO, MIIM_DATA, GetMenuItemInfoW};
+
+    let mut info_ = MENUITEMINFO {
+        cbSize: mem::size_of::<MENUITEMINFO>() as UINT,
+        fMask: MIIM_DATA,
+        fType: 0, fState: 0, wID: 0, hSubMenu: ptr::null_mut(),
+        hbmpChecked: ptr::null_mut(), hbmpUnchecked: ptr::null_mut(),
+        dwItemData: 0,
+        dwTypeData: ptr::null_mut(), cch: 0, hbmpItem: ptr::null_mut()
+    };
+
+    GetMenuItemInfoW(parent_h, uid, 0, &mut info_);
+
+    *info = MenuItemInfo::Data(mem::transmute(info_.dwItemData));
+}
+
+unsafe fn set_menu_item_info(parent_h: HMENU, uid: UINT, info: &[MenuItemInfo]) {
+    use low::defs::{MENUITEMINFO, MIIM_DATA, SetMenuItemInfoW};
+
+    let (mask, data) = {
+        let mut mask = 0;
+        let mut data = 0;
+        for i in info.iter() {
+            match i {
+                &MenuItemInfo::Data(d) => {
+                    mask |= MIIM_DATA;
+                    data = mem::transmute(d);
+                }
+            }
+        }
+        (mask, data)
+    };
+
+    let mut info = MENUITEMINFO {
+        cbSize: mem::size_of::<MENUITEMINFO>() as UINT,
+        fMask: mask,
+        fType: 0, fState: 0, wID: 0, hSubMenu: ptr::null_mut(),
+        hbmpChecked: ptr::null_mut(), hbmpUnchecked: ptr::null_mut(),
+        dwItemData: data,
+        dwTypeData: ptr::null_mut(), cch: 0, hbmpItem: ptr::null_mut()
+    };
+
+    SetMenuItemInfoW(parent_h, uid, 0, &mut info);
+}
+
 /**
     List the children of a menu and return a list of their IDs. The function is recursive and so 
-    list the id for the whole menus tree.
+    it list the ids for the whole menu tree.
 */
-pub unsafe fn list_menu_children(menu: HMENU) -> Vec<u64> {
-    use low::defs::{GetMenuItemCount, GetSubMenu};
+pub unsafe fn list_menu_children(menu: HMENU) -> Vec<u64> { 
+    use low::defs::{GetMenuItemCount, GetSubMenu, GetMenuItemID};
 
     let mut children = Vec::new();
     let children_count = GetMenuItemCount(menu);
 
     let mut info = MenuInfo::Data(ptr::null_mut());
+    let mut item_info = MenuItemInfo::Data(ptr::null_mut());
     let mut sub_menu: HMENU;
 
     for i in 0..children_count {
         sub_menu = GetSubMenu(menu, i as c_int);
         if sub_menu.is_null() {
-            continue; // TODO MENUIEMS
+
+            // Get a menu item ID
+            get_menu_item_info(menu, GetMenuItemID(menu, i), &mut item_info);
+            match item_info {
+                MenuItemInfo::Data(info_ptr) => {
+                    if info_ptr.is_null() { continue; }
+                    children.push((&mut *info_ptr).id)
+                },
+                //_ => unreachable!()
+            };
+
+            continue;
         }
 
+        // Get the menu ID
         get_menu_info(sub_menu, &mut info);
         match info {
-            MenuInfo::Data(info_ptr) => { 
-                if !info_ptr.is_null() {
-                    children.push((&mut *info_ptr).id);
-                    children.append(&mut list_menu_children(sub_menu));
-                }
+            MenuInfo::Data(info_ptr) => {
+                children.push((&mut *info_ptr).id);
+                children.append(&mut list_menu_children(sub_menu));
             },
             _ => unreachable!()
         }
     }
-
 
     children
 }
@@ -124,6 +188,7 @@ pub unsafe fn list_menu_children(menu: HMENU) -> Vec<u64> {
 /**
     Return the index of a children menu/menuitem in a parent menu.
 */
+#[inline(always)]
 pub unsafe fn menu_index_in_parent(h: HMENU, parent_h: HMENU) -> UINT {
     use low::defs::{GetMenuItemCount, GetSubMenu};
 
@@ -132,20 +197,15 @@ pub unsafe fn menu_index_in_parent(h: HMENU, parent_h: HMENU) -> UINT {
 
     for i in 0..children_count {
         sub_menu = GetSubMenu(parent_h, i as c_int);
-        if sub_menu.is_null() {
-            continue; // TODO MENUIEMS
-        }
-
-        if sub_menu == h {
-            return i as UINT;
-        }
+        if sub_menu.is_null() { continue; }
+        else if sub_menu == h { return i as UINT; }
     }
 
     panic!("Menu/MenuItem not found in parent!")
 }
 
 /**
-    Remove a menu item from its parent.
+    Remove a submenu from its parent.
 */
 pub unsafe fn remove_menu_from_parent(h: HMENU, parent: &AnyHandle) {
     use user32::{GetMenu, DrawMenuBar};
@@ -169,6 +229,14 @@ pub unsafe fn remove_menu_from_parent(h: HMENU, parent: &AnyHandle) {
 }
 
 /**
+    Remove a menu item from its parent.
+*/
+pub unsafe fn remove_menu_item_from_parent(parent_h: HMENU, uid: UINT) {
+    use low::defs::RemoveMenu;
+    RemoveMenu(parent_h, uid, 0);
+}
+
+/**
     Init the private NWG menu data
 */
 pub fn init_menu_data(h: HMENU, id: u64) {
@@ -177,7 +245,15 @@ pub fn init_menu_data(h: HMENU, id: u64) {
 }
 
 /**
-    Init the private NWG menu data
+    Init the private NWG menu item data.
+*/
+pub fn init_menu_item_data(parent_h: HMENU, uid: UINT, id: u64) {
+    let data: Box<MenuItemData> = Box::new(MenuItemData{id: id});
+    unsafe{ set_menu_item_info(parent_h, uid, &[MenuItemInfo::Data(Box::into_raw(data))] ); }
+}
+
+/**
+    Free the NWG data from the menu
 */
 pub fn free_menu_data(h: HMENU) {
     let mut info = MenuInfo::Data(ptr::null_mut());
@@ -189,6 +265,21 @@ pub fn free_menu_data(h: HMENU) {
     }
 
     unsafe{ set_menu_info(h, &[MenuInfo::Data(ptr::null_mut())]); }
+}
+
+/**
+    Free the NWG data from the menu item
+*/
+pub fn free_menu_item_data(parent_h: HMENU, uid: UINT) {
+     let mut info = MenuItemInfo::Data(ptr::null_mut());
+    
+    unsafe{ get_menu_item_info(parent_h, uid, &mut info) };
+    match info {
+        MenuItemInfo::Data(info_ptr) => unsafe { mem::forget(Box::from_raw(info_ptr)) },
+        //_ => unreachable!()
+    }
+
+    unsafe{ set_menu_item_info(parent_h, uid, &[MenuItemInfo::Data(ptr::null_mut())]); }
 }
 
 /**

@@ -21,7 +21,7 @@
 use std::hash::Hash;
 use std::any::{Any, TypeId};
 
-use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int};
+use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, HBITMAP, LPWSTR};
 
 use events::{Event, EventCallback};
 use controls::ControlT;
@@ -50,6 +50,8 @@ pub const NWG_UNPACK_INDIRECT:   UINT = 0x81FF;  /// Message sent when removing 
 pub const MIM_MENUDATA: DWORD = 0x00000008;
 pub const MIM_STYLE: DWORD = 0x00000010;
 
+pub const MIIM_DATA: DWORD = 0x00000020;
+
 pub const MNS_NOTIFYBYPOS: DWORD = 0x08000000;
 
 pub const MF_BYPOSITION: UINT = 0x00000400;
@@ -72,6 +74,24 @@ pub struct MENUINFO {
     pub dwMenuData: ULONG_PTR
 }
 
+#[repr(C)]
+#[allow(non_snake_case)]
+pub struct MENUITEMINFO {
+    pub cbSize: UINT,
+    pub fMask: UINT,
+    pub fType: UINT,
+    pub fState: UINT,
+    pub wID: UINT,
+    pub hSubMenu: HMENU,
+    pub hbmpChecked: HBITMAP,
+    pub hbmpUnchecked: HBITMAP,
+    pub dwItemData: ULONG_PTR,
+    pub dwTypeData: LPWSTR,
+    pub cch: UINT,
+    pub hbmpItem: HBITMAP
+}
+
+
 // System extern
 extern "system" {
     pub fn GetMenuItemCount(menu: HMENU) -> c_int;
@@ -79,6 +99,9 @@ extern "system" {
     pub fn SetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
     pub fn GetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
     pub fn RemoveMenu(menu: HMENU, pos: UINT, flags: UINT) -> BOOL;
+    pub fn SetMenuItemInfoW(menu: HMENU, item: UINT, by_position: BOOL, lpmii: *mut MENUITEMINFO) -> BOOL;
+    pub fn GetMenuItemInfoW(menu: HMENU, item: UINT, by_position: BOOL, lpmii: *mut MENUITEMINFO) -> BOOL;
+    pub fn GetMenuItemID(menu: HMENU, index: c_int) -> UINT;
 }
 
 // Arguments passed to the NWG custom events 

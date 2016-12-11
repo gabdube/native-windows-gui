@@ -79,7 +79,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     pub fn pack_control(&mut self, params: PackControlArgs<ID>) -> Option<Error> {
         use low::events::hook_window_events;
-        use low::menu_helper::init_menu_data;
+        use low::menu_helper::{init_menu_data, init_menu_item_data};
             
         let (inner_id, inner_type_id) = UiInner::hash_id(&params.id, &params.value.type_id());
         if self.ids_map.contains_key(&inner_id) {
@@ -92,7 +92,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                     match control.handle() {
                         AnyHandle::HWND(h) => hook_window_events(self, inner_id, h), // Hook the window events if the handle is a HWND
                         AnyHandle::HMENU(h) => init_menu_data(h, inner_id),          // Save the id in the menu
-                        AnyHandle::HMENU_ITEM(_) => {/*TODO*/}
+                        AnyHandle::HMENU_ITEM(parent_h, uid) => init_menu_item_data(parent_h, uid, inner_id),
                     }
 
                     // Init events
@@ -117,7 +117,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     fn unpack_control(&mut self, id: u64, tid: u64) -> Option<Error> {
         use low::events::unhook_window_events;
-        use low::menu_helper::{list_menu_children, free_menu_data};
+        use low::menu_helper::{list_menu_children, free_menu_data, free_menu_item_data};
         use low::window_helper::list_window_children;
        
 
@@ -137,11 +137,10 @@ impl<ID: Hash+Clone> UiInner<ID> {
         }
 
         // Unpack the children
-        // TODO destroy children
         let handle = self.handle_of(id);
         if handle.is_err() { return Some(handle.err().unwrap()); }
 
-        let children_ids: Vec<u64> = match self.handle_of(id).unwrap() {
+        let children_ids: Vec<u64> = match handle.unwrap() {
             AnyHandle::HMENU(h) => unsafe {
                 let mut children = vec![id];
                 children.append( &mut list_menu_children(h) );
@@ -152,10 +151,9 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
                 children
             },
-            AnyHandle::HMENU_ITEM(_) => vec![id], // menu items can't have children
+            AnyHandle::HMENU_ITEM(_, _) => vec![id], // menu items can't have children
         };
-
-        
+       
         for id in children_ids.iter().rev() {
 
             // Call the destroy callbacks
@@ -171,7 +169,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
             match control.handle() {
                 AnyHandle::HWND(h) => unhook_window_events::<ID>(h),
                 AnyHandle::HMENU(h) => free_menu_data(h),
-                AnyHandle::HMENU_ITEM(_) => { /* TODO */ }
+                AnyHandle::HMENU_ITEM(parent_h, uid) => { free_menu_item_data(parent_h, uid) }
             };
             
             // Free the control custom resources

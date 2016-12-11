@@ -22,12 +22,14 @@ use std::hash::Hash;
 use std::any::TypeId;
 use std::mem;
 
-use winapi::HMENU;
+use winapi::{HMENU, UINT};
 
 use ui::Ui;
 use controls::{Control, ControlT, AnyHandle};
 use error::Error;
 use events::Event;
+
+static mut menu_items_id: UINT = 0; 
 
 /**
     A template to create menu controls
@@ -98,7 +100,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         let handle_result = unsafe { build_menu_item(ui, self) };
         match handle_result {
-            Ok(parent) => { Ok( Box::new(MenuItem{parent: parent}) as Box<Control> ) },
+            Ok((parent, uid)) => { Ok( Box::new(MenuItem{parent: parent, unique_id: uid}) as Box<Control> ) },
             Err(e) => Err(e)
         }
     }
@@ -107,8 +109,9 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
 /**
     A menu item control
 */ 
-pub struct MenuItem{
-    parent: AnyHandle
+pub struct MenuItem {
+    parent: HMENU,
+    unique_id: UINT
 }
 
 
@@ -118,11 +121,12 @@ pub struct MenuItem{
 impl Control for MenuItem {
 
     fn handle(&self) -> AnyHandle {
-        self.parent.clone()
+        AnyHandle::HMENU_ITEM(self.parent, self.unique_id)
     }
 
     fn free(&mut self) {
-        // TODO
+        use low::menu_helper::remove_menu_item_from_parent;
+        unsafe{ remove_menu_item_from_parent(self.parent, self.unique_id) };
     }
 }
 
@@ -166,16 +170,16 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
             AppendMenuW(parent_h, MF_STRING|MF_POPUP, mem::transmute(h), text.as_ptr());
             Ok( ( h, AnyHandle::HMENU(parent_h) ) )
         },
-        AnyHandle::HMENU_ITEM(_) => {
+        AnyHandle::HMENU_ITEM(_, _) => {
             Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string()))
         }
    }
 }
 
 #[inline(always)]
-unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &MenuItemT<S, ID>) -> Result<AnyHandle, Error> {
+unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &MenuItemT<S, ID>) -> Result<(HMENU, UINT), Error> {
     use user32::{AppendMenuW, CreateMenu, GetMenu, SetMenu, DrawMenuBar};
-    use winapi::MF_STRING;
+    use winapi::{MF_STRING, UINT_PTR};
     use low::other_helper::to_utf16;
 
     let ph_result = ui.handle_of(&t.parent);
@@ -191,17 +195,20 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
             }
 
             let text = to_utf16(t.text.clone().into().as_ref());
-            AppendMenuW(menubar, MF_STRING, 0, text.as_ptr());
+            menu_items_id += 1;
+            AppendMenuW(menubar, MF_STRING, menu_items_id as UINT_PTR, text.as_ptr());
 
             DrawMenuBar(parent_h); // Draw the menu bar to make sure the changes are visible
-            Ok( AnyHandle::HWND(parent_h) )
+        
+            Ok( (menubar, menu_items_id) )
         },
         AnyHandle::HMENU(parent_h) => {
             let text = to_utf16(t.text.clone().into().as_ref());
-            AppendMenuW(parent_h, MF_STRING, 0, text.as_ptr());
-            Ok( AnyHandle::HMENU(parent_h) )
+            menu_items_id += 1;
+            AppendMenuW(parent_h, MF_STRING, menu_items_id as UINT_PTR, text.as_ptr());
+            Ok( (parent_h, menu_items_id) )
         },
-        AnyHandle::HMENU_ITEM(_) => {
+        AnyHandle::HMENU_ITEM(_, _) => {
             Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string()))
         }
     }
