@@ -153,22 +153,6 @@ pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInne
     children
 }
 
-/**
-    Remove any NWG data associated to the window handle. This is called by custom controls if
-    they must be unregistered but can't access the Ui. Ex: When a user close a Window control.
-
-    This has the same effect of calling `ui.unpack_control(x)`
-
-    If the window do not belong to NWG or was already freed, nothing is done.
-*/
-#[inline(always)]
-pub unsafe fn unpack_window_indirect(handle: HWND) {
-    use user32::SendMessageW;
-    use low::defs::NWG_UNPACK_INDIRECT;
-    SendMessageW(handle, NWG_UNPACK_INDIRECT, 0, 0);
-}
-
-
 #[cfg(target_arch = "x86")] use winapi::LONG;
 #[cfg(target_arch = "x86_64")] use winapi::LONG_PTR;
 

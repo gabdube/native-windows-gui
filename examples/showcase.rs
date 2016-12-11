@@ -1,6 +1,6 @@
 extern crate native_windows_gui as nwg;
 
-use nwg::{Ui, WindowT, Window, MenuT, MenuItemT, dispatch_events, exit as nwg_exit};
+use nwg::{Ui, WindowT, MenuT, MenuItemT, dispatch_events, exit as nwg_exit};
 use nwg::{Event};
 
 pub fn default_window() -> WindowT<&'static str> {
@@ -19,7 +19,7 @@ pub fn main() {
     app.pack_control(&"MainWindow", default_window());
     app.pack_control(&"FileMenu", MenuT{ text: "&File", parent: "MainWindow" });
     app.pack_control(&"QuitItem", MenuItemT{ text: "&Quit", parent: "FileMenu" });
-
+    
     app.bind(&"QuitItem", &"Quit", Event::Clicked, |_,_,_,_|{
         nwg_exit()
     });

@@ -41,10 +41,6 @@ pub const NWG_CUSTOM_MAX:        UINT = 0x405;  /// Maximum custom event value
 pub const COMMIT_SUCCESS: LRESULT = 0;
 pub const COMMIT_FAILED: LRESULT = 5555;
 
-// Unique event used in the event dispatching subclass
-
-pub const NWG_UNPACK_INDIRECT:   UINT = 0x81FF;  /// Message sent when removing the event dispatch subclass from a control
-
 // Constants not included in winapi-rs
 
 pub const MIM_MENUDATA: DWORD = 0x00000008;

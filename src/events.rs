@@ -34,6 +34,7 @@ pub enum Event {
     Char,
     MenuOpen,
     MenuClose,
+    Closed,
     Destroyed,
 }
 

@@ -48,7 +48,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char]
+        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed]
     }
 
     #[allow(unused_variables)]
@@ -109,14 +109,15 @@ use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 #[allow(unused_variables)]
 unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use winapi::{WM_CREATE, WM_CLOSE};
-    use user32::{DefWindowProcW, PostQuitMessage};
-    use low::window_helper::{get_window_long, unpack_window_indirect};
+    use user32::{DefWindowProcW, PostQuitMessage, ShowWindow};
+    use low::window_helper::get_window_long;
 
     let handled = match msg {
         WM_CREATE => true,
         WM_CLOSE => {
-            let exit_on_close = get_window_long(hwnd) == 1;
-            unpack_window_indirect(hwnd); 
+            ShowWindow(hwnd, 0);
+
+            let exit_on_close = get_window_long(hwnd) & 0x01 == 1;
             if exit_on_close {
                 PostQuitMessage(0);
             }

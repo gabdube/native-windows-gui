@@ -42,8 +42,7 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::{DefSubclassProc};
-  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, c_int};
-  use low::defs::{NWG_UNPACK_INDIRECT, UnpackArgs};
+  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, c_int};
   use events::{Event, EventArgs};
   
   let handled = match msg {
@@ -80,15 +79,13 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
 
       true
     },
-    NWG_UNPACK_INDIRECT => {
+    WM_CLOSE => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
       let (inner, id) = (ui.inner, ui.id);
 
-      mem::forget(ui); // Forget ui because it will point to freed memory after the unpack result.
-
-      (&mut *inner).unpack( UnpackArgs{id: id} ); 
-
-      true
+      (&mut *inner).trigger(id, Event::Closed, EventArgs::None);
+      
+      false
     },
     _ => { false }
   }; 
