@@ -25,6 +25,7 @@ use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, HBITMA
 
 use events::{Event, EventCallback};
 use controls::ControlT;
+use resources::ResourceT;
 
 // Custom message proc definitions
 
@@ -34,7 +35,8 @@ pub const NWG_PACK_CONTROL:      UINT = 0x401;  /// Message sent when packing a 
 pub const NWG_UNPACK:            UINT = 0x402;  /// Message sent when removing an element from the ui
 pub const NWG_BIND:              UINT = 0x403;  /// Message sent when binding an event to a control
 pub const NWG_UNBIND:            UINT = 0x404;  /// Message sent when unbinding an event from a control
-pub const NWG_CUSTOM_MAX:        UINT = 0x405;  /// Maximum custom event value
+pub const NWG_PACK_RESOURCE:     UINT = 0x405;  /// Message sent when packing a resource
+pub const NWG_CUSTOM_MAX:        UINT = 0x406;  /// Maximum custom event value
 
 // Value returned by a window proc if the message execution failed/succeeded
 
@@ -115,6 +117,11 @@ pub struct UnpackArgs {
 pub struct PackControlArgs<ID: Hash+Clone> {
     pub id: ID,
     pub value: Box<ControlT<ID>>
+}
+
+pub struct PackResourceArgs<ID: Hash+Clone> {
+    pub id: ID,
+    pub value: Box<ResourceT<ID>>
 }
 
 pub struct BindArgs<ID: Hash+Clone+'static> {

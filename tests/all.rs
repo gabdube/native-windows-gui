@@ -4,6 +4,7 @@
 extern crate native_windows_gui as nwg;
 
 use nwg::*;
+use nwg::constants::*;
 
 fn setup_ui() -> Ui<u64> { Ui::new().unwrap() }
 fn window() -> WindowT<&'static str> {  WindowT{title: "", position:(0,0), size:(0,0), resizable:true, visible:false, disabled:false, exit_on_close:true} }
@@ -99,6 +100,28 @@ fn test_ui_pack_control() {
     ui.pack_control(&1002, MenuT{text: "", parent: 1001});
     match ui.commit() { Err(Error::BadParent(_)) => {}, _ => panic!("Should have returned Error::BadParent") }
 
+    // Id already exists
+    ui.pack_control(&1000, MenuItemT{text: "", parent: 1000});
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
+
+}
+
+#[test]
+fn test_ui_pack_resource() {
+    let ui = setup_ui();
+
+    ui.pack_resource(&1000, FontT{ family: "Arial", size: 10, weight: FONT_WEIGHT_BOLD, decoration: FONT_DECO_ITALIC|FONT_DECO_STRIKEOUT });
+    ui.commit().expect("Commit was not successful");
+
+    // Check if the added control are accessible
+    assert!(ui.has_id(&1000), "ID 1000 was not found in ui after commit");
+    { let f = ui.get::<Font>(&1000); f.expect("Failed to get control"); }
+
+    // Id already exists
+    ui.pack_resource(&1000, FontT{ family: "Arial", size: 10, weight: FONT_WEIGHT_BOLD, decoration: FONT_DECO_ITALIC|FONT_DECO_STRIKEOUT });
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
 }
 
 #[test]
@@ -110,29 +133,39 @@ fn test_ui_unpack() {
     ui.pack_value(&1000, 5u32);
     ui.pack_control(&1001, window());
     ui.pack_value(&1002, true);
+    ui.pack_resource(&1003, FontT{ family: "Arial", size: 10, weight: FONT_WEIGHT_BOLD, decoration: FONT_DECO_ITALIC|FONT_DECO_STRIKEOUT });
+    ui.pack_resource(&1004, FontT{ family: "Arial", size: 10, weight: FONT_WEIGHT_BOLD, decoration: FONT_DECO_ITALIC|FONT_DECO_STRIKEOUT });
     ui.bind(&1001, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } } );
 
     ui.commit().expect("Commit was not successful");
 
     ui.unpack(&1000);
     ui.unpack(&1001);
+    ui.unpack(&1003);
 
     ui.commit().expect("Commit was not successful");
 
     // Unpacked ids shoudn't be present anymore
     assert!(!ui.has_id(&1000), "ID 1000 was found in ui after commit");
     assert!(!ui.has_id(&1001), "ID 1001 was found in ui after commit");
+    assert!(!ui.has_id(&1003), "ID 1003 was found in ui after commit");
 
     // Destroy callback should have been executed when unpacking
     assert!(callback_executed, "Destroy callback was not executed.");
 
-    // It should be impossible to unpack a borrowed control
+    // It should be impossible to unpack a borrowed control/resource
     {
         let x = ui.get::<bool>(&1002);
 
         ui.unpack(&1002);
         let r = ui.commit();
         assert!(r.is_err() && r.err().unwrap() == Error::ControlInUse, "Commit was successful");
+
+        let y = ui.get::<Font>(&1004);
+
+        ui.unpack(&1004);
+        let r = ui.commit();
+        assert!(r.is_err() && r.err().unwrap() == Error::ResourceInUse, "Commit was successful");
     }
     
 }

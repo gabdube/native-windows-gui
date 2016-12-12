@@ -27,8 +27,9 @@ use std::cell::{RefCell, Ref, RefMut};
 use std::rc::Rc;
 
 use low::message_handler::MessageHandler;
-use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs, UnbindArgs};
+use low::defs::{PackUserValueArgs, PackControlArgs, PackResourceArgs, UnpackArgs, BindArgs, UnbindArgs};
 use controls::{ControlT, Control, AnyHandle};
+use resources::{ResourceT, Resource};
 use events::{Event, EventCallback, EventArgs};
 use error::Error;
 
@@ -43,6 +44,7 @@ pub struct UiInner<ID: Hash+Clone+'static> {
     pub messages: MessageHandler<ID>,
     pub controls: HashMap<u64, RefCell<Box<Control>>>,
     pub control_events: HashMap<u64, EventCollection<ID>>,
+    pub resources: HashMap<u64, RefCell<Box<Resource>>>,
     pub user_values: HashMap<u64, RefCell<Box<Any>>>,
     pub ids_map: HashMap<u64, (ID, u64)>,
 }
@@ -63,6 +65,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
             user_values: HashMap::with_capacity(16),
             controls: HashMap::with_capacity(32),
             control_events: HashMap::with_capacity(32),
+            resources: HashMap::with_capacity(16),
             ids_map: HashMap::with_capacity(64) })
     }
 
@@ -109,6 +112,24 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
                     ::std::mem::forget(tmp_ui);
 
+                    None
+                },
+                Err(e) => { ::std::mem::forget(tmp_ui); Some(e)}
+            }
+        }
+    }
+
+    pub fn pack_resource(&mut self, params: PackResourceArgs<ID>) -> Option<Error> {
+        let (inner_id, inner_type_id) = UiInner::hash_id(&params.id, &params.value.type_id());
+        if self.ids_map.contains_key(&inner_id) {
+            Some(Error::KeyExists)
+        } else {
+            let tmp_ui: Ui<ID> = Ui{inner: self as *mut UiInner<ID>};
+            match params.value.build(&tmp_ui) {
+                Ok(resource) => {
+                    self.ids_map.insert(inner_id, (params.id, inner_type_id));
+                    self.resources.insert(inner_type_id, RefCell::new(resource) );
+                    ::std::mem::forget(tmp_ui);
                     None
                 },
                 Err(e) => { ::std::mem::forget(tmp_ui); Some(e)}
@@ -182,6 +203,23 @@ impl<ID: Hash+Clone> UiInner<ID> {
         None
     }
 
+    fn unpack_resource(&mut self, id: u64, tid: u64) -> Option<Error> {
+        // Check if the resource is currently borrowed by the user
+        if let Err(_) = self.resources.get(&tid).unwrap().try_borrow_mut() { 
+            return Some(Error::ResourceInUse);
+        }
+
+         // Removes stuffs
+        self.ids_map.remove(&id).unwrap();
+        let resource = self.resources.remove(&tid).unwrap();
+        let mut resource = resource.into_inner();
+        
+        // Free the control custom resources
+        resource.free();
+
+        None
+    }
+
     fn unpack_user_value(&mut self, id: u64, tid: u64) -> Option<Error> {
         if let Err(_) = self.user_values.get(&tid).unwrap().try_borrow_mut() { 
             return Some(Error::ControlInUse);
@@ -206,6 +244,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 self.unpack_control(id, tid)
             } else if self.user_values.contains_key(&tid) {
                 self.unpack_user_value(id, tid)
+            } else if self.resources.contains_key(&tid) {
+                self.unpack_resource(id, tid)
             } else {
                 Some(Error::BadType)
             }
@@ -421,6 +461,23 @@ impl<ID:Hash+Clone> Ui<ID> {
         inner.messages.post(self.inner, NWG_PACK_CONTROL, Box::new(data) as Box<Any> );
     }
 
+    /**
+        Add a resource to the Ui.  
+        Asynchronous, this only registers the command in the ui message queue.  
+        Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
+
+        Commit returns
+          • `Error::KeyExist` if the key already exists in the ui  
+          • `Error::{Any}` if the template creation fails
+    */
+    pub fn pack_resource<T: ResourceT<ID>+'static>(&self, id: &ID, value: T) {
+        use low::defs::{NWG_PACK_RESOURCE};
+
+        let inner = unsafe{ &mut *self.inner };
+        let data = PackResourceArgs{ id: id.clone(), value: Box::new(value)};
+        inner.messages.post(self.inner, NWG_PACK_RESOURCE, Box::new(data) as Box<Any> );
+    }
+
      /**
         Remove a element from the ui using its ID. The ID can identify a control, a resource or a user value.  
         Asynchronous, this only registers the command in the ui message queue.   
@@ -479,6 +536,15 @@ impl<ID:Hash+Clone> Ui<ID> {
             }
         }
 
+        if let Some(v) = inner.resources.get(&inner_type_id) {
+            let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
+            if let Ok(v_ref) = v_casted.try_borrow() {
+                return Ok( v_ref );
+            } else {
+                return Err(Error::BorrowError);
+            }
+        }
+
         return Err(Error::BadType);
     }
 
@@ -513,6 +579,15 @@ impl<ID:Hash+Clone> Ui<ID> {
         }
 
         if let Some(v) = inner.controls.get(&inner_type_id) {
+            let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
+            if let Ok(v_ref) = v_casted.try_borrow_mut() {
+                return Ok( v_ref );
+            } else {
+                return Err(Error::BorrowError);
+            }
+        }
+
+        if let Some(v) = inner.resources.get(&inner_type_id) {
             let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
             if let Ok(v_ref) = v_casted.try_borrow_mut() {
                 return Ok( v_ref );

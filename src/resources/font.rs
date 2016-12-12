@@ -53,10 +53,10 @@ pub const FONT_DECO_STRIKEOUT: DWORD = 0x04;
     • `decoration`: Extra style for the font. A bitwise combination of the FONT_DECO_* constants. Ex: FONT_DECO_ITALIC | FONT_DECO_UNDERLINE | FONT_DECO_STRIKEOUT  
 */
 pub struct FontT<S: Clone+Into<String>> {
-    family: S,
-    size: i32,
-    weight: u32,
-    decoration: u32,
+    pub family: S,
+    pub size: c_int,
+    pub weight: c_int,
+    pub decoration: u32,
 }
 
 impl<ID: Clone+Hash, S: Clone+Into<String>> ResourceT<ID> for FontT<S> {

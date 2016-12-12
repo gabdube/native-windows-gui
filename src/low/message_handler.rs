@@ -142,8 +142,8 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
 #[allow(unused_variables)]
 unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use user32::{DefWindowProcW};
-    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, NWG_UNPACK, NWG_BIND, NWG_UNBIND, COMMIT_SUCCESS, COMMIT_FAILED};
-    use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs, UnbindArgs};
+    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, NWG_UNPACK, NWG_BIND, NWG_UNBIND, NWG_PACK_RESOURCE, COMMIT_SUCCESS, COMMIT_FAILED};
+    use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs, UnbindArgs, PackResourceArgs};
 
     let ui: &mut UiInner<ID> = mem::transmute(w);
     let args: *mut *mut Any = mem::transmute::<LPARAM, *mut *mut Any>(l);
@@ -163,6 +163,14 @@ unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND
                 (true, ui.pack_control(*params))
             } else {
                 panic!("Could not downcast command PACK_CONTROL args into a PackControlArgs struct.");
+            }
+        },
+        NWG_PACK_RESOURCE => {
+            let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
+            if let Ok(params) = args.downcast::<PackResourceArgs<ID>>() {
+                (true, ui.pack_resource(*params))
+            } else {
+                panic!("Could not downcast command NWG_UNBIND args into a UnbindArgs struct.");
             }
         },
         NWG_UNPACK => {

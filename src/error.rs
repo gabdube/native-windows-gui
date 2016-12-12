@@ -69,6 +69,7 @@ pub enum Error {
     ControlRequired,
     ControlOrResourceRequired,
     ControlInUse,
+    ResourceInUse,
     Unimplemented,
     System(SystemError)
 }
@@ -86,6 +87,7 @@ impl Error {
             &Error::ControlRequired => format!("The key passed to the command must identify a control"),
             &Error::ControlOrResourceRequired => format!("The key passed to the command must identify a control or a resource", ),
             &Error::ControlInUse => format!("Impossible to modify the control, it is currently in use."),
+            &Error::ResourceInUse => format!("Impossible to modify the resource, it is currently in use."),
             &Error::Unimplemented => format!("Feature not yet implemented"),
             &Error::System(ref e) => format!("A system error was raised: {:?}", e),
         }
