@@ -86,15 +86,19 @@ fn test_ui_pack_control() {
     let ui = setup_ui();
 
     ui.pack_control(&1000, window());
+    ui.pack_control(&1001, MenuItemT{text: "", parent: 1000});
 
     assert!(!ui.has_id(&1000), "ID 1000 was found in ui before commit");
     ui.commit().expect("Commit was not successful");
-    assert!(ui.has_id(&1000), "ID 1000 was not found in ui after commit");
 
-    {
-        let w = ui.get::<Window>(&1000);
-        w.expect("Failed to get control");
-    }
+    // Check if the added control are accessible
+    assert!(ui.has_id(&1000), "ID 1000 was not found in ui after commit");
+    { let w = ui.get::<Window>(&1000); w.expect("Failed to get control"); }
+
+    // Pack menu / Bad parent
+    ui.pack_control(&1002, MenuT{text: "", parent: 1001});
+    match ui.commit() { Err(Error::BadParent(_)) => {}, _ => panic!("Should have returned Error::BadParent") }
+
 }
 
 #[test]
@@ -155,9 +159,9 @@ fn test_ui_bind() {
 
         // On other control or on other events, binding new callback is permitted
         // Still binding new events in a destroy callback is a horrible idea, because, unless specified, the NWG destroy order is random.
-        // For this test, if there wasn't the `close` bit at the end, there would be no way to ensure that the commit would work 100% of the time.
-        ui.bind(&1002, &5001, Event::Destroyed, |_, _, _, _|{ } );
+        ui.bind(&1002, &5001, Event::KeyDown, |_, _, _, _|{ } );
         ui.commit().expect("Commit was not successful");
+        exit();
     });
 
     ui.commit().expect("Commit was not successful");
@@ -182,7 +186,8 @@ fn test_ui_bind() {
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
 
-    { ui.get::<Window>(&1001).unwrap().close(); }
+    ui.unpack(&1001);
+
     dispatch_events();
 }
 

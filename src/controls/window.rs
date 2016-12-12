@@ -168,7 +168,8 @@ unsafe fn build_window<S: Clone+Into<String>>(t: &WindowT<S>) -> Result<HWND, Er
         class_name: WINDOW_CLASS_NAME,
         position: t.position.clone(),
         size: t.size.clone(),
-        flags: flags
+        flags: flags,
+        parent: ::std::ptr::null_mut()
     };
 
     match build_window(params) {

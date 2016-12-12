@@ -33,5 +33,5 @@ mod ui;
 pub use defs::*;
 pub use error::{Error, SystemError};
 pub use events::{EventCallback, Event, EventArgs};
-pub use controls::{ControlT, Control, WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, AnyHandle};
+pub use controls::{ControlT, Control, WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, AnyHandle};
 pub use ui::{Ui, dispatch_events, exit};

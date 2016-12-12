@@ -50,7 +50,8 @@ pub struct WindowParams<S1: Into<String>, S2: Into<String>> {
     pub class_name: S2,
     pub position: (i32, i32),
     pub size: (u32, u32),
-    pub flags: DWORD
+    pub flags: DWORD,
+    pub parent: HWND
 }
 
 /**
@@ -120,7 +121,7 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
         p.flags,
         p.position.0, p.position.1,
         p.size.0 as i32, p.size.1 as i32,
-        ptr::null_mut(),
+        p.parent,
         ptr::null_mut(),
         hmod,
         ptr::null_mut()

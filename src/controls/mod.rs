@@ -20,6 +20,7 @@
 
 pub mod window;
 pub mod menu;
+pub mod button;
 
 use std::any::TypeId;
 use std::hash::Hash;
@@ -28,6 +29,7 @@ use winapi::{HWND, HMENU, UINT};
 
 pub use controls::window::{WindowT, Window};
 pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem};
+pub use controls::button::{ButtonT, Button};
 use ui::Ui;
 use events::Event;
 use error::Error;
