@@ -179,9 +179,8 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
             AppendMenuW(parent_h, MF_STRING|MF_POPUP, mem::transmute(h), text.as_ptr());
             Ok( ( h, AnyHandle::HMENU(parent_h) ) )
         },
-        AnyHandle::HMENU_ITEM(_, _) => {
-            Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string()))
-        }
+        AnyHandle::HMENU_ITEM(_, _) => Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string())),
+        AnyHandle::HFONT(_) =>  Err(Error::BadParent("Window or menu parent required, got Font".to_string())),
    }
 }
 
@@ -217,8 +216,7 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
             AppendMenuW(parent_h, MF_STRING, menu_items_id as UINT_PTR, text.as_ptr());
             Ok( (parent_h, menu_items_id) )
         },
-        AnyHandle::HMENU_ITEM(_, _) => {
-            Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string()))
-        }
+        AnyHandle::HMENU_ITEM(_, _) => Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string())),
+        AnyHandle::HFONT(_) =>  Err(Error::BadParent("Window or menu parent required, got Font".to_string())),
     }
 }

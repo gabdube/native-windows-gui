@@ -93,6 +93,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                         AnyHandle::HWND(h) => hook_window_events(self, inner_id, h), // Hook the window events if the handle is a HWND
                         AnyHandle::HMENU(h) => init_menu_data(h, inner_id),          // Save the id in the menu
                         AnyHandle::HMENU_ITEM(parent_h, uid) => init_menu_item_data(parent_h, uid, inner_id),
+                        AnyHandle::HFONT(_) => {/* Nothing to initialize for resources */}
                     }
 
                     // Init events
@@ -151,7 +152,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
                 children
             },
-            AnyHandle::HMENU_ITEM(_, _) => vec![id], // menu items can't have children
+            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) => vec![id], // menu items / resources can't have children
         };
        
         for id in children_ids.iter().rev() {
@@ -169,7 +170,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
             match control.handle() {
                 AnyHandle::HWND(h) => unhook_window_events::<ID>(h),
                 AnyHandle::HMENU(h) => free_menu_data(h),
-                AnyHandle::HMENU_ITEM(parent_h, uid) => { free_menu_item_data(parent_h, uid) }
+                AnyHandle::HMENU_ITEM(parent_h, uid) => { free_menu_item_data(parent_h, uid) },
+                AnyHandle::HFONT(_) => {/* Nothing to free in resources */}
             };
             
             // Free the control custom resources

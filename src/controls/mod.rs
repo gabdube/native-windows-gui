@@ -25,7 +25,7 @@ pub mod button;
 use std::any::TypeId;
 use std::hash::Hash;
 
-use winapi::{HWND, HMENU, UINT};
+use winapi::{HWND, HMENU, UINT, HFONT};
 
 pub use controls::window::{WindowT, Window};
 pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem};
@@ -43,6 +43,7 @@ pub enum AnyHandle {
     HWND(HWND),
     HMENU(HMENU),
     HMENU_ITEM(HMENU, UINT),
+    HFONT(HFONT),
 }
 
 /**

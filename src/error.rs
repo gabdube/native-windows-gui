@@ -30,6 +30,7 @@ pub enum SystemError {
     SystemClassCreation,
     WindowCreationFail,
     UiCreation,
+    FontCreation,
 }
 
 impl SystemError {
@@ -41,6 +42,7 @@ impl SystemError {
             &SystemError::SystemClassCreation => format!("Failed to create a system class for a control"),
             &SystemError::WindowCreationFail => format!("Failed to create a system window for a control"),
             &SystemError::UiCreation => format!("The system could not initialize the Ui"),
+            &SystemError::FontCreation => format!("Failed to create a system font"),
         };
 
         format!("{}.\nID {:?} - {}", tr, code, code_txt)

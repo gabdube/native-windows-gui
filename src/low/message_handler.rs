@@ -225,7 +225,7 @@ unsafe fn setup_class<ID: Hash+Clone+'static>() -> Result<(), SystemError> {
 /**
     Create a NWG message-only window.
 
-    * If the window creation is successful, returns `Ok(window_handle)`
+    * If the window creation is successful, returns `Ok(window_handle)`  
     * If the window creation fails, returns `Err(SystemError::UiCreation)`
 */
 unsafe fn create_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
@@ -261,9 +261,7 @@ unsafe fn create_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
 */
 unsafe fn create_message_only_window<ID: Hash+Clone+'static>() -> Result<HWND, SystemError> {
     match setup_class::<ID>() {
-        Ok(_) => {},
-        Err(e) => { return Err(e); }
+        Ok(_) => create_window::<ID>(),
+        Err(e) => Err(e)
     }
-
-    create_window::<ID>()
 }
