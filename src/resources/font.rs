@@ -40,6 +40,7 @@ pub const FONT_WEIGHT_EXTRABOLD: c_int = 800;
 pub const FONT_WEIGHT_BLACK: c_int = 900;
 
 // Font decoration constants
+pub const FONT_DECO_NORMAL: DWORD = 0x00;
 pub const FONT_DECO_ITALIC: DWORD = 0x01;
 pub const FONT_DECO_UNDERLINE: DWORD = 0x02;
 pub const FONT_DECO_STRIKEOUT: DWORD = 0x04;
@@ -52,6 +53,7 @@ pub const FONT_DECO_STRIKEOUT: DWORD = 0x04;
     • `weight`: The weight of the font in the range 0 through 1000. For example, 400 is normal and 700 is bold. See the FONT_WEIGHT_* constants for convenience  
     • `decoration`: Extra style for the font. A bitwise combination of the FONT_DECO_* constants. Ex: FONT_DECO_ITALIC | FONT_DECO_UNDERLINE | FONT_DECO_STRIKEOUT  
 */
+#[derive(Clone)]
 pub struct FontT<S: Clone+Into<String>> {
     pub family: S,
     pub size: c_int,
@@ -77,7 +79,7 @@ impl<ID: Clone+Hash, S: Clone+Into<String>> ResourceT<ID> for FontT<S> {
         let handle = unsafe{ CreateFontW(
             self.size as c_int,       // nHeight
             0, 0, 0,                  // nWidth, nEscapement, nOrientation
-            self.weight as c_int,     // fnWeight
+            self.weight,              // fnWeight
             use_italic,               // fdwItalic
             use_underline,            // fdwUnderline
             use_strikeout,            // fdwStrikeOut

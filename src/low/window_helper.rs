@@ -22,7 +22,7 @@ use std::ptr;
 use std::mem;
 use std::hash::Hash;
 
-use winapi::{HWND, WNDPROC, DWORD, GWL_USERDATA};
+use winapi::{HWND, HFONT, WNDPROC, DWORD, GWL_USERDATA};
 
 use ui::UiInner;
 use low::other_helper::to_utf16;
@@ -152,6 +152,18 @@ pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInne
     // TODO to window children
 
     children
+}
+
+/**
+    Set the font of a window
+*/
+pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: bool) {
+    use user32::SendMessageW;
+    use winapi::{WM_SETFONT, LPARAM};
+
+    let font_handle = font_handle.unwrap_or(ptr::null_mut());
+
+    SendMessageW(handle, WM_SETFONT, mem::transmute(font_handle), redraw as LPARAM);
 }
 
 #[cfg(target_arch = "x86")] use winapi::LONG;

@@ -21,20 +21,22 @@
 use std::hash::Hash;
 use std::any::TypeId;
 
-use winapi::HWND;
+use winapi::{HWND, HFONT};
 
 use ui::Ui;
 use controls::{Control, ControlT, AnyHandle};
 use error::Error;
 use events::Event;
 
+#[derive(Clone)]
 pub struct ButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub text: S,
     pub position: (i32, i32),
     pub size: (u32, u32),
     pub visible: bool,
     pub disabled: bool,
-    pub parent: ID
+    pub parent: ID,
+    pub font: Option<ID>,
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
@@ -45,17 +47,29 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        use low::window_helper::{WindowParams, build_window};
+        use low::window_helper::{WindowParams, build_window, set_window_font};
         use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY};
 
         let flags: DWORD = WS_CHILD | BS_NOTIFY |
         if self.visible    { WS_VISIBLE }   else { 0 } |
         if self.disabled   { WS_DISABLED }  else { 0 };
 
+        // Get the parent handle
         let parent: HWND = match ui.handle_of(&self.parent) {
             Ok(AnyHandle::HWND(h)) => h,
             Ok(_) => { return Err(Error::BadParent("The parent of a button must be a window-like control.".to_string()) ); },
             Err(e) => { return Err(e); }
+        };
+
+        // Get the font handle (if any)
+        let font_handle: Option<HFONT> = match self.font.as_ref() {
+            Some(font_id) => 
+                match ui.handle_of(font_id) {
+                    Ok(AnyHandle::HFONT(h)) => Some(h),
+                    Ok(_) => { return Err(Error::BadResource("The font value of a button must be a font resource.".to_string()) ); },
+                    Err(e) => { return Err(e); }
+                },
+            None => None
         };
 
         let params = WindowParams {
@@ -68,7 +82,10 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
         };
 
         match unsafe{ build_window(params) } {
-            Ok(h) => Ok( Box::new(Button{handle: h}) ),
+            Ok(h) => {
+                unsafe{ set_window_font(h, font_handle, true); }
+                Ok( Box::new(Button{handle: h}) )
+            },
             Err(e) => Err(Error::System(e))
         }
     }

@@ -38,6 +38,7 @@ static mut menu_items_id: UINT = 0;
       • `text` : The menu text
       • `parent` : ID of the parent control to add the menu to
 */
+#[derive(Clone)]
 pub struct MenuT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub text: S,
     pub parent: ID,
@@ -92,6 +93,7 @@ impl Control for Menu {
       • `text` : The menu text
       • `parent` : ID of the parent control to add the menu to
 */
+#[derive(Clone)]
 pub struct MenuItemT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub text: S,
     pub parent: ID,

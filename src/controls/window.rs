@@ -43,6 +43,7 @@ const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
       • `disabled` : If the window is enabled or not. A disabled window do not process events  
       • `exit_on_close` : If NWG should break the event processing loop when this window is closed  
 */
+#[derive(Clone)]
 pub struct WindowT<S: Clone+Into<String>> {
     pub title: S,
     pub position: (i32, i32),

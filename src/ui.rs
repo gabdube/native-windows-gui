@@ -358,6 +358,14 @@ impl<ID: Hash+Clone> UiInner<ID> {
             }
         }
 
+        if let Some(v) = self.resources.get(&tid) {
+            if let Ok(v_ref) = v.try_borrow() {
+                return Ok( v_ref.handle() );
+            } else {
+                return Err(Error::BorrowError);
+            }
+        }
+
         Err(Error::ControlOrResourceRequired)
     }
 
