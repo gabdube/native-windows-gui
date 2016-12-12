@@ -32,6 +32,9 @@ use ui::Ui;
 use events::Event;
 use error::Error;
 
+/**
+    A type that expose the different underlying handle into one type
+*/
 #[derive(Clone)]
 #[allow(non_camel_case_types)]
 pub enum AnyHandle {
@@ -46,12 +49,18 @@ pub enum AnyHandle {
 pub trait ControlT<ID: Clone+Hash> {
 
     /**
-        Should return the TypeId of the generated control
+        Should return the TypeId of the generated control. For example a `WindowT` struct returns the TypeId of a `Window` struct.
     */
     fn type_id(&self) -> TypeId;
 
+    /**
+        Should instance the control and return it as a Box<Control>. If an error is raised, it will be returned by `ui.commit`.
+    */
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error>;
 
+    /**
+        Should return the events supported by the control.
+    */
     fn events(&self) -> Vec<Event> { Vec::new() }
 }
 
@@ -60,8 +69,14 @@ pub trait ControlT<ID: Clone+Hash> {
 */
 pub trait Control {
 
+    /**
+        Should return the underlying handle to the object
+    */
     fn handle(&self) -> AnyHandle;
 
+    /**
+        If specified, should free any ressource allocated in the template `build` function. This includes functions like `DestroyWindow`.
+    */
     fn free(&mut self) {}
 
 }

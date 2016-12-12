@@ -33,6 +33,15 @@ const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
 
 /**
     A template that will create a window.
+
+    Members:  
+      • `title` : The title of the window (in the title bar)  
+      • `position` : Starting posiion of the window after it is created  
+      • `size` : Starting size of the window after it is created  
+      • `resizable` : If the user can resize the window or not  
+      • `visible` : If the user can see the window or not  
+      • `disabled` : If the window is enabled or not. A disabled window do not process events  
+      • `exit_on_close` : If NWG should break the event processing loop when this window is closed  
 */
 pub struct WindowT<S: Clone+Into<String>> {
     pub title: S,
@@ -73,10 +82,8 @@ pub struct Window {
 
 impl Window {
     /**
-        Close the window as if the user clicked on the X button. This also removes
-        the window from its Ui.
-
-        The action is not executed right away, instead it is posted in the system event queue.
+        Close the window as if the user clicked on the X button. This do **NOT** remove the window from the ui,
+        it only set it hidden. In order to also destroy the window, add an unpack statement on the **Closed** event.
     */
     pub fn close(&self) {
         use user32::PostMessageW;

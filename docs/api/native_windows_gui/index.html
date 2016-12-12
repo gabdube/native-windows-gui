@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `native_windows_gui` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, native_windows_gui">
+
+    <title>native_windows_gui - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'native_windows_gui', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>native_windows_gui</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/native_windows_gui/src/lib.rs.html#1-37' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>A very high level native gui library for Windows.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='keys/index.html'
+                                  title='native_windows_gui::keys'>keys</a></td>
+                           <td class='docblock-short'>
+                                <p>Windows virtual key code</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Menu.html'
+                                  title='native_windows_gui::Menu'>Menu</a></td>
+                           <td class='docblock-short'>
+                                <p>A menu control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.MenuItem.html'
+                                  title='native_windows_gui::MenuItem'>MenuItem</a></td>
+                           <td class='docblock-short'>
+                                <p>A menu item control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.MenuItemT.html'
+                                  title='native_windows_gui::MenuItemT'>MenuItemT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template to create menuitems</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.MenuT.html'
+                                  title='native_windows_gui::MenuT'>MenuT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template to create menu controls</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Ui.html'
+                                  title='native_windows_gui::Ui'>Ui</a></td>
+                           <td class='docblock-short'>
+                                <p>Object that manage the GUI elements</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Window.html'
+                                  title='native_windows_gui::Window'>Window</a></td>
+                           <td class='docblock-short'>
+                                <p>A window control.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.WindowT.html'
+                                  title='native_windows_gui::WindowT'>WindowT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that will create a window.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.AnyHandle.html'
+                                  title='native_windows_gui::AnyHandle'>AnyHandle</a></td>
+                           <td class='docblock-short'>
+                                <p>A type that expose the different underlying handle into one type</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.Error.html'
+                                  title='native_windows_gui::Error'>Error</a></td>
+                           <td class='docblock-short'>
+                                <p>Error class that regroup errors generated by NWG</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.Event.html'
+                                  title='native_windows_gui::Event'>Event</a></td>
+                           <td class='docblock-short'>
+                                <p>Events name definition</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.EventArgs.html'
+                                  title='native_windows_gui::EventArgs'>EventArgs</a></td>
+                           <td class='docblock-short'>
+                                <p>Events arguments definition. If an event do not have arguments, EventArgs::None is passed.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.SystemError.html'
+                                  title='native_windows_gui::SystemError'>SystemError</a></td>
+                           <td class='docblock-short'>
+                                <p>Error class that regroups errors generated by the system</p>
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Control.html'
+                                  title='native_windows_gui::Control'>Control</a></td>
+                           <td class='docblock-short'>
+                                <p>Structures implementing this trait are controls that can be stored in a Ui</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.ControlT.html'
+                                  title='native_windows_gui::ControlT'>ControlT</a></td>
+                           <td class='docblock-short'>
+                                <p>Structures implementing this trait can be used by a Ui to build a Control</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.dispatch_events.html'
+                                  title='native_windows_gui::dispatch_events'>dispatch_events</a></td>
+                           <td class='docblock-short'>
+                                <p>Dispatch the messages waiting the the system message queue to the associated Uis. This includes NWG custom messages.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.exit.html'
+                                  title='native_windows_gui::exit'>exit</a></td>
+                           <td class='docblock-short'>
+                                <p>Send a WM_QUIT to the system queue. Breaks the dispatch_events loop.</p>
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.EventCallback.html'
+                                  title='native_windows_gui::EventCallback'>EventCallback</a></td>
+                           <td class='docblock-short'>
+                                <p>Event callback type</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "native_windows_gui";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

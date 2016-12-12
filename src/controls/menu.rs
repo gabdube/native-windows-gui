@@ -33,6 +33,10 @@ static mut menu_items_id: UINT = 0;
 
 /**
     A template to create menu controls
+
+    Members:  
+      • `text` : The menu text
+      • `parent` : ID of the parent control to add the menu to
 */
 pub struct MenuT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub text: S,
@@ -83,6 +87,10 @@ impl Control for Menu {
 
 /**
     A template to create menuitems
+
+    Members:  
+      • `text` : The menu text
+      • `parent` : ID of the parent control to add the menu to
 */
 pub struct MenuItemT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub text: S,

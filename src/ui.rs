@@ -362,8 +362,8 @@ impl<ID:Hash+Clone> Ui<ID> {
     /**
         Create a new Ui.
 
-        * Returns `Ok(ui)` if the initialization was successful
-        * Returns `Err(Error::System)` if the system could not initialize the ui
+        Returns `Ok(ui)` if the initialization was successful  
+        Returns `Err(Error::System)` if the system could not initialize the ui
     */
     pub fn new() -> Result<Ui<ID>, Error> {
         let inner = match UiInner::new() {
@@ -375,25 +375,24 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Execute the NWG commands waiting in the Ui command queue in the order they
-        where added.
+        Execute the NWG commands waiting in the Ui command queue in the order they where added.
 
-        * Returns `Ok(())` if everything was executed without Errors
-        * Returns `Err(Error)` if an error was encountered while executing the commands.
-          As soon as an error is found, the function will return. If there are still commands
-          waiting in the queue, they wont be touched.
+        Returns `Ok(())` if everything was executed without Errors  
+        Returns `Err(Error)` if an error was encountered while executing the commands.  
+        As soon as an error is found, the function will return. If there are still commands  
+        waiting in the queue, they wont be touched.
     */
     pub fn commit(&self) -> Result<(), Error> {
         unsafe{ (&mut *self.inner).messages.commit() }
     }
 
     /**
-        Add an user value to the Ui. 
-        Asynchronous, this only registers the command in the ui message queue. 
-        Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
+        Add an user value to the Ui.  
+        Asynchronous, this only registers the command in the ui message queue.  
+        Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.  
 
-        Possible errors:
-        * Error::KeyExist if the key already exists in the ui
+        Commit returns  
+        • `Error::KeyExist` if the key already exists in the ui
     */
     pub fn pack_value<T: Into<Box<T>>+'static >(&self, id: &ID, value: T) {
         use low::defs::{NWG_PACK_USER_VALUE};
@@ -404,13 +403,13 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Add a control to the Ui.
-        Asynchronous, this only registers the command in the ui message queue. 
+        Add a control to the Ui.  
+        Asynchronous, this only registers the command in the ui message queue.  
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        Possible errors:
-        * Error::KeyExist if the key already exists in the ui
-        * Error::{Any} if the template creation fails
+        Commit returns
+          • `Error::KeyExist` if the key already exists in the ui  
+          • `Error::{Any}` if the template creation fails
     */
     pub fn pack_control<T: ControlT<ID>+'static>(&self, id: &ID, value: T) {
         use low::defs::{NWG_PACK_CONTROL};
@@ -421,14 +420,14 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
      /**
-        Remove a element from the ui using its ID. The ID can identify a control, a resource or a user value.
-        Asynchronous, this only registers the command in the ui message queue. 
+        Remove a element from the ui using its ID. The ID can identify a control, a resource or a user value.  
+        Asynchronous, this only registers the command in the ui message queue.   
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        Possible errors:
-        * Error::ControlInUse if the control callbacks are being executed
-        * Error::ControlInUse if the object is currently borrowed (using ui.get or ui.get_mut)
-        * Error::KeyNotFound if the id do not exists in the Ui
+        Commit returns:  
+          • `Error::ControlInUse` if the control callbacks are being executed  
+          • `Error::ControlInUse` if the object is currently borrowed (using ui.get or ui.get_mut)  
+          • `Error::KeyNotFound` if the id do not exists in the Ui
     */
     pub fn unpack(&self, id: &ID) {
         use low::defs::{NWG_UNPACK};
@@ -440,17 +439,17 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Return an immutable reference to the element identified by `id` in the Ui.
+        Return an immutable reference to the element identified by `id` in the Ui.  
         It is required to give a type `T` to this function as it is needed to cast the underlying value.
         Ex: `ui.get::<u32>(100)`
 
         Params:  
-        * id: The id that identify the element in the ui
+          • id: The id that identify the element in the ui
 
-        An error will be returned if:
-        * Error::KeyNotFound will be returned if the key was not found in the Ui
-        * Error::BadType will be returned if the key exists, but the type do not match
-        * Error::BorrowError will be returned if the element was already borrowed mutably
+        Commit returns:  
+          • `Error::KeyNotFound` will be returned if the key was not found in the Ui  
+          • `Error::BadType` will be returned if the key exists, but the type do not match  
+          • `Error::BorrowError` will be returned if the element was already borrowed mutably
     */
     pub fn get<T: 'static>(&self, id: &ID) -> Result<Ref<Box<T>>, Error> {
         use std::mem;
@@ -487,12 +486,12 @@ impl<ID:Hash+Clone> Ui<ID> {
         Ex: `ui.get_mut::<u32>(100)`
 
         Params:  
-        * id: The id that identify the element in the ui
+          • id: The id that identify the element in the ui
 
-        An error will be returned if:
-        * Error::KeyNotFound will be returned if the key was not found in the Ui
-        * Error::BadType will be returned if the key exists, but the type do not match
-        * Error::BorrowError will be returned if the element was already borrowed mutably
+        Commit returns:  
+          • `Error::KeyNotFound` will be returned if the key was not found in the Ui  
+          • `Error::BadType` will be returned if the key exists, but the type do not match  
+          • `Error::BorrowError` will be returned if the element was already borrowed mutably
     */
     pub fn get_mut<T: 'static>(&self, id: &ID) -> Result<RefMut<Box<T>>, Error> {
         use std::mem;
@@ -529,17 +528,17 @@ impl<ID:Hash+Clone> Ui<ID> {
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         Params:
-          * id: The id that identify the element in the ui
-          * cb_id: An id the identify the callback (to use with unbind)
-          * event: Type of event to target
-          * cb: The callback
+          • id: The id that identify the element in the ui  
+          • cb_id: An id the identify the callback (to use with unbind)  
+          • event: Type of event to target  
+          • cb: The callback  
 
-        Commit will return an error if:
-        * `Error::EventNotSupported` if the event is not supported on the callback
-        * `Error::ControlRequired` if the id do not indentify a control
-        * `Error::KeyNotFound` if the id is not in the Ui.
-        * `Error::KeyExists` if the cb_id is not unique for the event type.
-        * `Error::ControlInUse` if NWG is currently executing the callback of the event
+        Commit returns:  
+          • `Error::EventNotSupported` if the event is not supported on the callback  
+          • `Error::ControlRequired` if the id do not indentify a control  
+          • `Error::KeyNotFound` if the id is not in the Ui.  
+          • `Error::KeyExists` if the cb_id is not unique for the event type.  
+          • `Error::ControlInUse` if NWG is currently executing the callback of the event
         
     */
     pub fn bind<T>(&self, id: &ID, cb_id: &ID, event: Event, cb: T) where
@@ -558,12 +557,12 @@ impl<ID:Hash+Clone> Ui<ID> {
         Asynchronous, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        Commit will return an error if:
-        * `Error::EventNotSupported` if the event is not supported on the callback
-        * `Error::ControlRequired` if the id do not indentify a control
-        * `Error::KeyNotFound` if the id is not in the Ui.
-        * `Error::KeyNotFound` if the cb_id do not exist for the event
-        * `Error::ControlInUse` if NWG is currently executing the callback of the event
+        Commit returns:  
+          • `Error::EventNotSupported` if the event is not supported on the callback  
+          • `Error::ControlRequired` if the id do not indentify a control  
+          • `Error::KeyNotFound` if the id is not in the Ui.  
+          • `Error::KeyNotFound` if the cb_id do not exist for the event  
+          • `Error::ControlInUse` if NWG is currently executing the callback of the event
     */
     pub fn unbind(&self, id: &ID, cb_id: &ID, event: Event) {
         use low::defs::{NWG_UNBIND};
@@ -579,10 +578,11 @@ impl<ID:Hash+Clone> Ui<ID> {
         Return the underlying handle of a control or a resource.
         While this method is safe, anything done with the returned handle definitely won't be.
 
-        Return an error if:
-        * `Error::KeyNotFound` if the id is not in the Ui.
-        * `Error::ControlOrResourceRequired` if the id indentify a user value
-        * `Error::BorrowError` if the element was already borrowed mutably
+        Returns:  
+          • `Ok(AnyHandle)` if the control or the resource is found
+          • `Error::KeyNotFound` if the id is not in the Ui.  
+          • `Error::ControlOrResourceRequired` if the id indentify a user value  
+          • `Error::BorrowError` if the element was already borrowed mutably  
     */
     pub fn handle_of(&self, id: &ID) -> Result<AnyHandle, Error> {
         let inner = unsafe{ &mut *self.inner };
@@ -593,7 +593,8 @@ impl<ID:Hash+Clone> Ui<ID> {
     /**
         Check if an id exists in the ui
 
-        * id -> The ID to check
+        Params:  
+          • id -> The ID to check  
     */
     pub fn has_id(&self, id: &ID) -> bool {
         let inner = unsafe{ &mut (&*self.inner) };
