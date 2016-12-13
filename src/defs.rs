@@ -18,6 +18,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+pub enum MouseButton {
+    Left,
+    Right,
+    Middle
+}
+
 
 pub mod keys {
     //! Windows virtual key code

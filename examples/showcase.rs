@@ -16,7 +16,7 @@ pub fn main() {
     let app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
     
     // Always create the resources first because they will be used in the controls.
-    app.pack_resource(&"MainFont", FontT{ family: "Calibri", size: 20, weight: FONT_WEIGHT_BLACK, decoration: 0 });
+    app.pack_resource(&"MainFont", FontT{ family: "Calibri", size: 20, weight: FONT_WEIGHT_BLACK, decoration: FONT_DECO_ITALIC });
 
     // Pack the controls
     app.pack_control(&"MainWindow", default_window());

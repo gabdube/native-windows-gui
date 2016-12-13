@@ -174,6 +174,7 @@ fn test_ui_bind() {
     ui.pack_value(&1000, 5u32);
     ui.pack_control(&1001, window());
     ui.pack_control(&1002, window());
+    ui.pack_control(&1003, MenuItemT{text: "", parent: 1001});
 
     // Binding successful
     ui.bind(&1001, &5000, Event::Destroyed, |ui, id, _, _|{
@@ -207,9 +208,9 @@ fn test_ui_bind() {
     assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
 
     // Event not supported
-    ui.bind(&1001, &5000, Event::Clicked, |_, _, _, _|{});
+    ui.bind(&1003, &5000, Event::MouseUp, |_, _, _, _|{});
     let r = ui.commit();
-    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::Clicked), "Commit was successful");
+    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::MouseUp), "Commit was successful");
 
     // Callback id already exists
     ui.bind(&1001, &5000, Event::Destroyed, |_, _, _, _|{});
@@ -226,6 +227,7 @@ fn test_ui_unbind() {
     let ui = setup_ui();
     
     ui.pack_control(&1000, window());
+    ui.pack_control(&1002, MenuItemT{text: "", parent: 1000});
     ui.pack_value(&1001, 5u32);
 
     ui.bind(&1000, &5000, Event::Destroyed, |_, _, _, _|{});
@@ -249,9 +251,9 @@ fn test_ui_unbind() {
     assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
 
     // Event not supported
-    ui.unbind(&1000, &5000, Event::Clicked);
+    ui.unbind(&1002, &5000, Event::MouseUp);
     let r = ui.commit();
-    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::Clicked), "Commit was successful");
+    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::MouseUp), "Commit was successful");
 
     // Callback do not exists
     ui.unbind(&1000, &5001, Event::Destroyed);

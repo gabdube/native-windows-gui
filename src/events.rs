@@ -19,6 +19,7 @@
 */
 
 use ui::Ui;
+use defs::MouseButton;
 
 /// Event callback type
 pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
@@ -36,6 +37,8 @@ pub enum Event {
     MenuClose,
     Closed,
     Destroyed,
+    MouseUp,
+    MouseDown,
 }
 
 /**
@@ -44,5 +47,6 @@ pub enum Event {
 pub enum EventArgs {
     Key(u32),
     Char(char),
+    MouseClick{btn: MouseButton, pos: (i32, i32)},
     None
 }

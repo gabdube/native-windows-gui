@@ -110,6 +110,7 @@ impl Resource for Font {
     fn handle(&self) -> AnyHandle { AnyHandle::HFONT(self.handle) }
 
     fn free(&mut self) {
-
+        use gdi32::DeleteObject;
+        unsafe{ DeleteObject(::std::mem::transmute(self.handle)); }
     }
 }

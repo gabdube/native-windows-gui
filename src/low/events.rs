@@ -21,11 +21,11 @@
 use std::mem;
 use std::ptr;
 use std::hash::Hash;
-//use std::any::Any;
 
 use winapi::{HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT};
 
 use ui::UiInner;
+use events::EventArgs;
 
 /// A magic number to identify the NWG subclass that dispatches events
 const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
@@ -36,16 +36,34 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
   pub id: u64,
 }
 
+
 /**
   Proc that dispatches the NWG events
 */
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::{DefSubclassProc};
-  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, c_int};
+  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, WM_LBUTTONUP, WM_LBUTTONDOWN, 
+    WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, c_int};
   use events::{Event, EventArgs};
-  
-  let handled = match msg {
+
+  match msg {
+    WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP => {
+      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
+      let (inner, id) = (ui.inner, ui.id);
+
+      (&mut *inner).trigger(id, Event::MouseUp, parse_mouse_click(msg, l));
+
+      if msg == WM_LBUTTONUP {
+        (&mut *inner).trigger(id, Event::Clicked, EventArgs::None);
+      }
+    },
+    WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => {
+      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
+      let (inner, id) = (ui.inner, ui.id);
+
+      (&mut *inner).trigger(id, Event::MouseDown, parse_mouse_click(msg, l));
+    },
     WM_KEYDOWN | WM_KEYUP => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
       let (inner, id) = (ui.inner, ui.id);
@@ -53,8 +71,6 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       let evt = if msg == WM_KEYDOWN { Event::KeyDown } else { Event::KeyUp };
 
       (&mut *inner).trigger(id, evt, EventArgs::Key(w as u32));
-      
-      true
     },
     WM_MENUCOMMAND => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
@@ -62,8 +78,6 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       let id = ::low::menu_helper::get_menu_id( mem::transmute(l), w as c_int );
 
       (&mut *inner).trigger(id, Event::Clicked, EventArgs::None);
-      
-      true
     },
     WM_UNICHAR | WM_CHAR => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
@@ -76,25 +90,17 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       if let Some(c) = ::std::char::from_u32(w as u32) {
         (&mut *inner).trigger(id, Event::Char, EventArgs::Char( c ));
       }
-
-      true
     },
     WM_CLOSE => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
       let (inner, id) = (ui.inner, ui.id);
 
       (&mut *inner).trigger(id, Event::Closed, EventArgs::None);
-      
-      false
     },
-    _ => { false }
-  }; 
-
-  if handled {
-    0
-  } else {
-    DefSubclassProc(hwnd, msg, w, l)
+    _ => { }
   }
+
+  DefSubclassProc(hwnd, msg, w, l)
 }
 
 /**
@@ -152,4 +158,22 @@ pub unsafe fn exit() {
   use winapi::WM_QUIT;
 
   PostMessageW(ptr::null_mut(), WM_QUIT, 0, 0);
+}
+
+fn parse_mouse_click(msg: UINT, l: LPARAM) -> EventArgs {
+  use defs::MouseButton;
+  use winapi::{WM_LBUTTONUP, WM_LBUTTONDOWN, WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, 
+    GET_X_LPARAM, GET_Y_LPARAM};
+
+  let btn = match msg {
+    WM_LBUTTONUP | WM_LBUTTONDOWN => MouseButton::Left,
+    WM_RBUTTONUP | WM_RBUTTONDOWN => MouseButton::Right,
+    WM_MBUTTONUP | WM_MBUTTONDOWN => MouseButton::Middle,
+    _ => MouseButton::Left
+  };
+
+  let x = GET_X_LPARAM(l) as i32; 
+  let y = GET_Y_LPARAM(l) as i32;
+
+  EventArgs::MouseClick{btn: btn, pos: (x, y)}
 }
