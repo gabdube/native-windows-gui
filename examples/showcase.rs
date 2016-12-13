@@ -33,4 +33,9 @@ pub fn main() {
     app.commit().expect("Commit failed");
 
     dispatch_events();
+
+    // Although not required, its always better to explicitly destroy the controls first.
+    // This will also unpack the window children
+    app.unpack(&"MainWindow");
+    app.commit().expect("Commit failed");
 }

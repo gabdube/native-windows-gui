@@ -34,7 +34,7 @@ mod ui;
 
 pub use error::{Error, SystemError};
 pub use events::{EventCallback, Event, EventArgs};
-pub use controls::{ControlT, Control, WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, AnyHandle};
+pub use controls::{ControlT, Control, WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, AnyHandle};
 pub use resources::{ResourceT, Resource, FontT, Font};
 pub use ui::{Ui, dispatch_events, exit};
 

@@ -22,7 +22,7 @@ use std::ptr;
 use std::mem;
 use std::hash::Hash;
 
-use winapi::{HWND, HFONT, WNDPROC, DWORD, GWL_USERDATA};
+use winapi::{HWND, HFONT, WNDPROC, DWORD, LPARAM, BOOL, GWL_USERDATA};
 
 use ui::UiInner;
 use low::other_helper::to_utf16;
@@ -134,12 +134,24 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
     }
 }
 
+
+unsafe extern "system" fn list_children_window<ID: Clone+Hash+'static>(handle: HWND, params: LPARAM) -> BOOL {
+    let &mut (inner, ref mut ids): &mut (*mut UiInner<ID>, Vec<u64>) = mem::transmute(params);
+
+    // Check if the window belongs to the ui
+    if let Some(id) = ::low::events::window_id(handle, inner) {
+        ids.push(id)
+    }
+
+    1
+}
+
 /**
     Return the children control found in the window. Includes the window menubar if one is present.
 */
 #[allow(unused_variables)]
 pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInner<ID>) -> Vec<u64> {
-    use user32::GetMenu;
+    use user32::{GetMenu, EnumChildWindows};
     use low::menu_helper::list_menu_children;
 
     let mut children = Vec::new();
@@ -149,9 +161,10 @@ pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInne
         children.append(&mut list_menu_children(menu) );
     }
 
-    // TODO to window children
+    let mut params: (*mut UiInner<ID>, Vec<u64>) = (ui, children);
+    EnumChildWindows(handle, Some(list_children_window::<ID>), mem::transmute(&mut params));
 
-    children
+    params.1
 }
 
 /**

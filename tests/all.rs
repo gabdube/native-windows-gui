@@ -124,15 +124,18 @@ fn test_ui_pack_resource() {
 #[test]
 fn test_ui_unpack() {
     let ui = setup_ui();
-    let mut callback_executed: bool = false;
-    let x = &mut callback_executed as *mut bool;
+    let mut free_count: u8 = 0;
+    let x = &mut free_count as *mut u8;
 
     ui.pack_value(&1000, 5u32);
     ui.pack_control(&1001, window());
     ui.pack_value(&1002, true);
-    ui.pack_resource(&1003, FontT{ family: "Arial", size: 10, weight: FONT_WEIGHT_BOLD, decoration: FONT_DECO_ITALIC|FONT_DECO_STRIKEOUT });
-    ui.pack_resource(&1004, FontT{ family: "Arial", size: 10, weight: FONT_WEIGHT_BOLD, decoration: FONT_DECO_ITALIC|FONT_DECO_STRIKEOUT });
-    ui.bind(&1001, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } } );
+    ui.pack_resource(&1003, default_font());
+    ui.pack_resource(&1004, default_font());
+    ui.pack_control(&1005, ButtonT{text: "TEST", position:(10, 10), size: (100, 30), visible: true, disabled: false, parent: 1001, font: None});
+    
+    ui.bind(&1001, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) += 1; } } );
+    ui.bind(&1005, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) += 1; } } );
 
     ui.commit().expect("Commit was not successful");
 
@@ -146,9 +149,10 @@ fn test_ui_unpack() {
     assert!(!ui.has_id(&1000), "ID 1000 was found in ui after commit");
     assert!(!ui.has_id(&1001), "ID 1001 was found in ui after commit");
     assert!(!ui.has_id(&1003), "ID 1003 was found in ui after commit");
+    assert!(!ui.has_id(&1005), "ID 1005 was found in ui after commit");
 
     // Destroy callback should have been executed when unpacking
-    assert!(callback_executed, "Destroy callback was not executed.");
+    assert!(free_count==2, "Destroy callback was not executed.");
 
     // It should be impossible to unpack a borrowed control/resource
     {

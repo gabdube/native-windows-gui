@@ -1,5 +1,5 @@
 /*!
-    Button control definition
+    Simple listbox control definition
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -28,21 +28,10 @@ use controls::{Control, ControlT, AnyHandle};
 use error::Error;
 use events::Event;
 
-/**
-    A template that creates a standard button
 
-    Members:  
-    • text: The text of the button
-    • position: The start position of the button
-    • size: The start size of the button
-    • visible: If the button should be visible to the user32
-    • disabled: If the user can or can't click on the button
-    • parent: The button parent
-    • font: The button font. If None, the the system default
-*/
 #[derive(Clone)]
-pub struct ButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
-    pub text: S,
+pub struct ListBoxT<S: Clone+Into<String>, ID: Hash+Clone> {
+    pub collection: Vec<S>,
     pub position: (i32, i32),
     pub size: (u32, u32),
     pub visible: bool,
@@ -51,11 +40,11 @@ pub struct ButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub font: Option<ID>,
 }
 
-impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<Button>() }
+impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ListBoxT<S, ID> {
+    fn type_id(&self) -> TypeId { TypeId::of::<ListBox>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Clicked]
+        vec![Event::Destroyed]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
@@ -85,8 +74,8 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
         };
 
         let params = WindowParams {
-            title: self.text.clone().into(),
-            class_name: "BUTTON",
+            title: "",
+            class_name: "WC_LISTBOX",
             position: self.position.clone(),
             size: self.size.clone(),
             flags: flags,
@@ -96,7 +85,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
         match unsafe{ build_window(params) } {
             Ok(h) => {
                 unsafe{ set_window_font(h, font_handle, true); }
-                Ok( Box::new(Button{handle: h}) )
+                Ok( Box::new(ListBox{handle: h}) )
             },
             Err(e) => Err(Error::System(e))
         }
@@ -106,11 +95,11 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
 /**
     A standard button
 */
-pub struct Button {
+pub struct ListBox {
     handle: HWND
 }
 
-impl Control for Button {
+impl Control for ListBox {
 
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)

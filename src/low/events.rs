@@ -133,6 +133,26 @@ pub fn unhook_window_events<ID: Hash+Clone+'static>(handle: HWND) { unsafe {
 }}
 
 /**
+  Check if a window is hooked by nwg. If it is, return its ID, if not return None
+*/
+pub unsafe fn window_id<ID: Clone+Hash>(handle: HWND, inner_ref: *mut UiInner<ID>) -> Option<u64> {
+  use comctl32::GetWindowSubclass;
+  use winapi::{TRUE, DWORD_PTR};
+
+  let mut data: DWORD_PTR = 0;
+  if GetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, &mut data) == TRUE {
+    let data: &mut UiInnerWithId<ID> = mem::transmute(data);
+    if data.inner == inner_ref {
+      Some(data.id)
+    } else {
+      None
+    }
+  } else {
+    None
+  }
+}
+
+/**
     Dispatch the messages waiting the the system message queue to the associated Uis. This includes NWG custom messages.
 
     Return once a quit event was received.
