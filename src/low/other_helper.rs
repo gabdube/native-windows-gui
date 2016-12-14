@@ -68,6 +68,7 @@ pub unsafe fn get_system_error() -> (DWORD, String) {
 pub unsafe fn enable_visual_styles() {
     use kernel32::{ActivateActCtx, CreateActCtxW, GetSystemDirectoryW};
     use winapi::{MAX_PATH, ULONG, ACTCTXW, ULONG_PTR};
+    use comctl32::InitCommonControls;
     use low::defs::{ACTCTX_FLAG_RESOURCE_NAME_VALID, ACTCTX_FLAG_SET_PROCESS_DEFAULT, ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID};
 
     let mut sys_dir: Vec<u16> = Vec::with_capacity(MAX_PATH);
@@ -91,4 +92,7 @@ pub unsafe fn enable_visual_styles() {
 
     let handle = CreateActCtxW(&mut act_ctx);
     ActivateActCtx(handle, &mut activation_cookie);
+
+    // Init common controls
+    InitCommonControls();
 }

@@ -59,7 +59,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        use low::window_helper::{WindowParams, build_window, set_window_font};
+        use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
         use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY};
 
         let flags: DWORD = WS_CHILD | BS_NOTIFY |
@@ -67,18 +67,17 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
         if self.disabled   { WS_DISABLED }  else { 0 };
 
         // Get the parent handle
-        let parent: HWND = match ui.handle_of(&self.parent) {
-            Ok(AnyHandle::HWND(h)) => h,
-            Ok(_) => { return Err(Error::BadParent("The parent of a button must be a window-like control.".to_string()) ); },
+        let parent = match handle_of_window(ui, &self.parent, "The parent of a button must be a window-like control.") {
+            Ok(h) => h,
             Err(e) => { return Err(e); }
         };
 
         // Get the font handle (if any)
+        // Get the font handle (if any)
         let font_handle: Option<HFONT> = match self.font.as_ref() {
             Some(font_id) => 
-                match ui.handle_of(font_id) {
-                    Ok(AnyHandle::HFONT(h)) => Some(h),
-                    Ok(_) => { return Err(Error::BadResource("The font value of a button must be a font resource.".to_string()) ); },
+                match handle_of_font(ui, &font_id, "The font of a button must be a font resource.") {
+                    Ok(h) => Some(h),
                     Err(e) => { return Err(e); }
                 },
             None => None

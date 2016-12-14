@@ -24,9 +24,10 @@ use std::hash::Hash;
 
 use winapi::{HWND, HFONT, WNDPROC, DWORD, LPARAM, BOOL, GWL_USERDATA};
 
-use ui::UiInner;
+use ui::{UiInner, Ui};
+use controls::{AnyHandle};
 use low::other_helper::to_utf16;
-use error::SystemError;
+use error::{Error, SystemError};
 
 /**
     Params used to build a system class
@@ -178,6 +179,24 @@ pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: 
 
     SendMessageW(handle, WM_SETFONT, mem::transmute(font_handle), redraw as LPARAM);
 }
+
+#[inline(always)]
+pub fn handle_of_window<ID: Clone+Hash>(ui: &Ui<ID>, id: &ID, err: &'static str) -> Result<HWND, Error> {
+    match ui.handle_of(id) {
+        Ok(AnyHandle::HWND(h)) => Ok(h),
+        Ok(_) => Err(Error::BadParent(err.to_string())),
+        Err(e) => Err(e)
+    }
+}
+
+#[inline(always)]
+pub fn handle_of_font<ID: Clone+Hash>(ui: &Ui<ID>, id: &ID, err: &'static str) -> Result<HFONT, Error> {
+    match ui.handle_of(id) {
+        Ok(AnyHandle::HFONT(h)) => Ok(h),
+        Ok(_) => Err(Error::BadResource(err.to_string())),
+        Err(e) => Err(e)
+    }
+} 
 
 #[cfg(target_arch = "x86")] use winapi::LONG;
 #[cfg(target_arch = "x86_64")] use winapi::LONG_PTR;

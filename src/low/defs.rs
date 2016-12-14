@@ -58,6 +58,8 @@ pub const ACTCTX_FLAG_RESOURCE_NAME_VALID: u32 = 0x008;
 pub const ACTCTX_FLAG_SET_PROCESS_DEFAULT: u32 = 0x010;
 pub const ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID: u32 = 0x004;
 
+pub const LB_ADDSTRING: UINT = 384;
+pub const LBS_HASSTRINGS: UINT = 64;
 
 // System structs
 #[repr(C)]
