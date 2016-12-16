@@ -31,7 +31,6 @@ macro_rules! test_position {
         {
             let x = $ui.get::<$t>($id).expect("Failed to get the control");
             x.set_position(-600, -600);
-            println!("{:?}", x.get_position());
             assert!(x.get_position() == (-600, -600), "Window position do not match");
         }
     )
@@ -52,6 +51,19 @@ macro_rules! test_size {
             x.set_size(200, 200);
             println!("{:?}", x.get_size());
             assert!(x.get_size() == $d, "Window size do not match");
+        }
+    )
+}
+
+macro_rules! test_enabled {
+    ($ui:expr, $id:expr, $t:ty) => (
+        {
+            let x = $ui.get::<$t>($id).expect("Failed to get the control");
+            x.set_enabled(false);
+            assert!(x.get_enabled() == false, "Window enabled state do not match");
+
+            x.set_enabled(true);
+            assert!(x.get_enabled() == true, "Window enabled state do not match");
         }
     )
 }
@@ -451,6 +463,7 @@ fn test_window() {
     test_visibility!(ui, &1000, Window);
     test_position!(ui, &1000, Window);
     test_size!(ui, &1000, Window);
+    test_enabled!(ui, &1000, Window);
 }
 
 #[test]
@@ -487,6 +500,7 @@ fn test_buttons() {
     test_visibility!(ui, &1002, Button);
     test_position!(ui, &1002, Button);
     test_size!(ui, &1002, Button);
+    test_enabled!(ui, &1002, Button);
 }
 
 #[test]
@@ -495,10 +509,8 @@ fn test_listbox() {
 
     let lb_t = ListBoxT{
         collection: vec!["Test1", "Test2", "Test3"],
-        position:(10, 50),
-        size: (100, 90),
-        visible: true,
-        disabled: false,
+        position:(10, 50), size: (100, 90),
+        visible: true, disabled: false,  readonly: false, multi_select: false,
         parent: 1000,
         font: None 
     };
@@ -515,4 +527,5 @@ fn test_listbox() {
     test_visibility!(ui, &1002, ListBox<&'static str>);
     test_position!(ui, &1002, ListBox<&'static str>);
     test_size!(ui, &1002, ListBox<&'static str>, (200, 192)); // Listbox height is forced to be rounded to match the items height.
+    test_enabled!(ui, &1002, ListBox<&'static str>);
 }

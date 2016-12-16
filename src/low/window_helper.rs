@@ -107,8 +107,8 @@ pub unsafe fn build_sysclass<S: Into<String>>(p: SysclassParams<S>) -> Result<()
 */
 pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S1, S2>) -> Result<HWND, SystemError>{
     use kernel32::GetModuleHandleW;
-    use user32::{CreateWindowExW, GetClientRect};
-    use winapi::{WS_EX_COMPOSITED, RECT, c_int};
+    use user32::CreateWindowExW;
+    use winapi::WS_EX_COMPOSITED;
 
     let hmod = GetModuleHandleW(ptr::null_mut());
     if hmod.is_null() { return Err(SystemError::WindowCreationFail); }
@@ -250,6 +250,58 @@ pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {
     GetClientRect(handle, &mut r);
 
     (r.right as u32, r.bottom as u32)
+}
+
+/// Get the window enabled state
+#[inline(always)]
+#[cfg(target_arch = "x86_64")]
+pub unsafe fn get_window_enabled(handle: HWND) -> bool {
+    use user32::GetWindowLongPtrW;
+    use winapi::{GWL_STYLE, WS_DISABLED, UINT};
+
+    let style = GetWindowLongPtrW(handle, GWL_STYLE) as UINT;
+    (style & WS_DISABLED) != WS_DISABLED
+}
+
+/// Set the window enabled state
+#[inline(always)]
+#[cfg(target_arch = "x86_64")]
+pub unsafe fn set_window_enabled(handle: HWND, enabled: bool) {
+    use user32::{SetWindowLongPtrW, GetWindowLongPtrW};
+    use winapi::{GWL_STYLE, WS_DISABLED, LONG_PTR};
+
+    let old_style = GetWindowLongPtrW(handle, GWL_STYLE);
+    if enabled {
+        SetWindowLongPtrW(handle, GWL_STYLE, (old_style&(!WS_DISABLED as LONG_PTR)) );
+    } else {
+        SetWindowLongPtrW(handle, GWL_STYLE, (old_style|WS_DISABLED as LONG_PTR));
+    }
+}
+
+/// Get the window enabled state
+#[inline(always)]
+#[cfg(target_arch = "x86")]
+pub unsafe fn get_window_enabled(handle: HWND) -> bool {
+    use user32::GetWindowLongW;
+    use winapi::{GWL_STYLE, WS_DISABLED, UINT};
+
+    let style = GetWindowLongW(handle, GWL_STYLE) as UINT;
+    (style & WS_DISABLED) != WS_DISABLED
+}
+
+/// Set the window enabled state
+#[inline(always)]
+#[cfg(target_arch = "x86")]
+pub unsafe fn set_window_enabled(handle: HWND, enabled: bool) {
+    use user32::{SetWindowLongW, GetWindowLongPtrW};
+    use winapi::{GWL_STYLE, WS_DISABLED, LONG_PTR};
+
+    let old_style = GetWindowLongW(handle, GWL_STYLE);
+    if enabled {
+        SetWindowLongW(handle, GWL_STYLE, (old_style&(!WS_DISABLED as LONG_PTR)) );
+    } else {
+        SetWindowLongW(handle, GWL_STYLE, (old_style|WS_DISABLED as LONG_PTR));
+    }
 }
 
 /// Set window visibility

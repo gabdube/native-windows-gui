@@ -32,13 +32,13 @@ use events::Event;
     A template that creates a standard button
 
     Members:  
-    • text: The text of the button
-    • position: The start position of the button
-    • size: The start size of the button
-    • visible: If the button should be visible to the user32
-    • disabled: If the user can or can't click on the button
-    • parent: The button parent
-    • font: The button font. If None, the the system default
+    • `text`: The text of the button  
+    • `position`: The start position of the button  
+    • `size`: The start size of the button  
+    • `visible`: If the button should be visible to the user32  
+    • `disabled`: If the user can or can't click on the button  
+    • `parent`: The button parent  
+    • `font`: The button font. If None, use the system default  
 */
 #[derive(Clone)]
 pub struct ButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
@@ -116,6 +116,8 @@ impl Button {
     pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
     pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
     pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, false); } }
+    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
+    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
 }
 
 impl Control for Button {

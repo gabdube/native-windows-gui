@@ -26,10 +26,8 @@ pub fn main() {
 
     app.pack_control(&"TestList", ListBoxT{
         collection: vec!["Test1", "Test2", "Test3", "Test1", "Test2", "Test3"],
-        position:(10, 50),
-        size: (100, 60),
-        visible: true,
-        disabled: false,
+        position:(10, 50), size: (100, 60),
+        visible: true, disabled: false, readonly: false, multi_select: false,
         parent: "MainWindow",
         font: None 
     });
@@ -39,17 +37,13 @@ pub fn main() {
         nwg_exit()
     });
 
+    app.bind(&"TestButton", &"Test2", Event::Clicked, |app,_,_,_|{
+        let mut lb = app.get_mut::<nwg::ListBox<&'static str>>(&"TestList").unwrap();
+        println!("{:?}", lb.set_current_index(0));
+    });
+
     // Execute the commands
     app.commit().expect("Commit failed");
-
-    {
-        let x = app.get::<::nwg::Window>(&"MainWindow").unwrap();
-        println!("{:?}", x.get_position());
-    
-        let y = app.get::<::nwg::ListBox<&'static str>>(&"TestList").unwrap();
-        y.set_size(200, 52);
-        println!("{:?}", y.get_size());
-    }
 
     dispatch_events();
 

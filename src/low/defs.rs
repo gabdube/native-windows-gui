@@ -59,9 +59,18 @@ pub const ACTCTX_FLAG_SET_PROCESS_DEFAULT: u32 = 0x010;
 pub const ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID: u32 = 0x004;
 
 pub const LB_ADDSTRING: UINT = 384;
-pub const LBS_HASSTRINGS: UINT = 64;
+pub const LB_INSERTSTRING: UINT = 385;
+pub const LB_RESETCONTENT: UINT = 388;
+pub const LB_SETSEL: UINT = 389;
+pub const LB_SETCURSEL: UINT = 390;
+pub const LB_GETCURSEL: UINT = 392;
+pub const LB_GETSEL: UINT = 391;
+pub const LB_GETSELCOUNT: UINT = 400;
+pub const LB_GETSELITEMS: UINT = 401;
 
-pub const GA_PARENT: UINT = 1;
+pub const LBS_NOSEL: UINT = 0x4000;
+pub const LBS_HASSTRINGS: UINT = 64;
+pub const LBS_MULTIPLESEL: UINT = 8;
 
 // System structs
 #[repr(C)]
