@@ -24,7 +24,15 @@ pub fn main() {
     app.pack_control(&"QuitItem", MenuItemT{ text: "&Quit", parent: "FileMenu" });
     app.pack_control(&"TestButton", ButtonT{text: "TEST", position:(10, 10), size: (100, 30), visible: true, disabled: false, parent: "MainWindow", font: Some("MainFont") });
 
-    app.pack_control(&"TestList", ListBoxT{collection: vec!["Test1", "Test2", "Test3"], position:(10, 50), size: (100, 90), visible: true, disabled: false, parent: "MainWindow", font: None });
+    app.pack_control(&"TestList", ListBoxT{
+        collection: vec!["Test1", "Test2", "Test3", "Test1", "Test2", "Test3"],
+        position:(10, 50),
+        size: (100, 60),
+        visible: true,
+        disabled: false,
+        parent: "MainWindow",
+        font: None 
+    });
 
     // Bind the events
     app.bind(&"QuitItem", &"Quit", Event::Clicked, |_,_,_,_|{
@@ -33,6 +41,15 @@ pub fn main() {
 
     // Execute the commands
     app.commit().expect("Commit failed");
+
+    {
+        let x = app.get::<::nwg::Window>(&"MainWindow").unwrap();
+        println!("{:?}", x.get_position());
+    
+        let y = app.get::<::nwg::ListBox<&'static str>>(&"TestList").unwrap();
+        y.set_size(200, 52);
+        println!("{:?}", y.get_size());
+    }
 
     dispatch_events();
 

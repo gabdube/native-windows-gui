@@ -61,6 +61,8 @@ pub const ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID: u32 = 0x004;
 pub const LB_ADDSTRING: UINT = 384;
 pub const LBS_HASSTRINGS: UINT = 64;
 
+pub const GA_PARENT: UINT = 1;
+
 // System structs
 #[repr(C)]
 #[allow(non_snake_case)]

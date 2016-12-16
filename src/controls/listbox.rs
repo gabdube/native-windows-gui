@@ -52,10 +52,10 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
         use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
         use low::other_helper::to_utf16;
         use low::defs::{LB_ADDSTRING, LBS_HASSTRINGS};
-        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER, WS_VSCROLL, WS_HSCROLL};
         use user32::{SendMessageW};
 
-        let flags: DWORD = WS_CHILD | WS_BORDER | LBS_HASSTRINGS |
+        let flags: DWORD = WS_CHILD | WS_BORDER | LBS_HASSTRINGS | WS_VSCROLL | WS_HSCROLL |
         if self.visible    { WS_VISIBLE }   else { 0 } |
         if self.disabled   { WS_DISABLED }  else { 0 };
 
@@ -110,6 +110,16 @@ pub struct ListBox<D: Clone+Display> {
     handle: HWND,
     collection: Vec<D>
 }
+
+impl<D: Clone+Display> ListBox<D> {
+    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
+    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
+    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
+    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
+    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
+    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, true); } }
+}
+
 
 impl<D: Clone+Display> Control for ListBox<D> {
 

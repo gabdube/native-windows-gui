@@ -7,8 +7,54 @@ use nwg::*;
 use nwg::constants::*;
 
 fn setup_ui() -> Ui<u64> { Ui::new().unwrap() }
-fn window() -> WindowT<&'static str> {  WindowT{title: "", position:(0,0), size:(0,0), resizable:true, visible:false, disabled:false, exit_on_close:true} }
+fn window() -> WindowT<&'static str> {  WindowT{title: "", position:(-600,-600), size:(100, 100), resizable:true, visible:true, disabled:false, exit_on_close:true} }
 fn default_font() -> FontT<&'static str> { FontT{ family: "Arial", size: 10, weight: FONT_WEIGHT_BOLD, decoration: FONT_DECO_ITALIC|FONT_DECO_STRIKEOUT } }
+
+macro_rules! test_visibility {
+    ($ui:expr, $id:expr, $t:ty) => (
+        {
+            let x = $ui.get::<$t>($id).expect("Failed to get the control");
+
+            x.set_visibility(true);
+            assert!(x.get_visibility() == true, "Window is not visible");
+
+            x.set_visibility(false);
+            assert!(x.get_visibility() == false, "Window is visible");
+
+            x.set_visibility(true);
+        }
+    )
+}
+
+macro_rules! test_position {
+    ($ui:expr, $id:expr, $t:ty) => (
+        {
+            let x = $ui.get::<$t>($id).expect("Failed to get the control");
+            x.set_position(-600, -600);
+            println!("{:?}", x.get_position());
+            assert!(x.get_position() == (-600, -600), "Window position do not match");
+        }
+    )
+}
+
+macro_rules! test_size {
+    ($ui:expr, $id:expr, $t:ty) => (
+        {
+            let x = $ui.get::<$t>($id).expect("Failed to get the control");
+            x.set_size(200, 200);
+            println!("{:?}", x.get_size());
+            assert!(x.get_size() == (200, 200), "Window size do not match");
+        }
+    );
+    ($ui:expr, $id:expr, $t:ty, $d: expr) => (
+        {
+            let x = $ui.get::<$t>($id).expect("Failed to get the control");
+            x.set_size(200, 200);
+            println!("{:?}", x.get_size());
+            assert!(x.get_size() == $d, "Window size do not match");
+        }
+    )
+}
 
 #[test]
 fn test_ui_new() {
@@ -394,6 +440,20 @@ fn test_menus() {
 }
 
 #[test]
+fn test_window() {
+    let ui = setup_ui();
+
+    // pack test
+    ui.pack_control(&1000, window());
+    ui.commit().expect("Commit was not successful");
+
+    // methods test
+    test_visibility!(ui, &1000, Window);
+    test_position!(ui, &1000, Window);
+    test_size!(ui, &1000, Window);
+}
+
+#[test]
 fn test_buttons() {
     let ui = setup_ui();
 
@@ -402,7 +462,10 @@ fn test_buttons() {
     ui.pack_resource(&10_000, default_font());
     ui.pack_control(&1000, window());
     ui.pack_control(&1001, MenuItemT{text: "", parent: 1000});
-    ui.pack_control(&1002, btn_t.clone() );
+
+    // pack test
+    ui.pack_control(&1002, btn_t.clone());
+
     btn_t.font = Some(10_000);
     ui.pack_control(&1003, btn_t.clone() );
     ui.commit().expect("Commit was not successful");
@@ -420,4 +483,36 @@ fn test_buttons() {
     ui.pack_control(&1004, btn_t.clone() );
     match ui.commit() { Err(Error::BadResource(_)) => {}, r => panic!("Should have returned Error::BadResource, got {:?}", r) }
 
+    // methods test
+    test_visibility!(ui, &1002, Button);
+    test_position!(ui, &1002, Button);
+    test_size!(ui, &1002, Button);
+}
+
+#[test]
+fn test_listbox() {
+    let ui = setup_ui();
+
+    let lb_t = ListBoxT{
+        collection: vec!["Test1", "Test2", "Test3"],
+        position:(10, 50),
+        size: (100, 90),
+        visible: true,
+        disabled: false,
+        parent: 1000,
+        font: None 
+    };
+
+    ui.pack_resource(&10_000, default_font());
+    ui.pack_control(&1000, window());
+    ui.pack_control(&1001, MenuItemT{text: "", parent: 1000});
+
+    // pack test
+    ui.pack_control(&1002, lb_t.clone());
+    ui.commit().expect("Commit was not successful");
+
+    // methods test
+    test_visibility!(ui, &1002, ListBox<&'static str>);
+    test_position!(ui, &1002, ListBox<&'static str>);
+    test_size!(ui, &1002, ListBox<&'static str>, (200, 192)); // Listbox height is forced to be rounded to match the items height.
 }

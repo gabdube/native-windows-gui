@@ -107,8 +107,8 @@ pub unsafe fn build_sysclass<S: Into<String>>(p: SysclassParams<S>) -> Result<()
 */
 pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S1, S2>) -> Result<HWND, SystemError>{
     use kernel32::GetModuleHandleW;
-    use user32::CreateWindowExW;
-    use winapi::{WS_EX_COMPOSITED};
+    use user32::{CreateWindowExW, GetClientRect};
+    use winapi::{WS_EX_COMPOSITED, RECT, c_int};
 
     let hmod = GetModuleHandleW(ptr::null_mut());
     if hmod.is_null() { return Err(SystemError::WindowCreationFail); }
@@ -131,8 +131,29 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
     if handle.is_null() {
         Err(SystemError::WindowCreationFail)
     } else {
+        fix_overlapped_window_size(handle, p.size);
         Ok(handle)
     }
+}
+
+/** 
+    Fix: Window size include the non client area. This behaviour is not wanted
+    Resize the client area to match the "true" size. 
+*/
+unsafe fn fix_overlapped_window_size(handle: HWND, size: (u32, u32)) {
+    use winapi::{RECT, SWP_NOMOVE, SWP_NOZORDER, c_int};
+    use user32::{GetClientRect, SetWindowPos};
+
+    let mut rect: RECT = mem::uninitialized();
+    GetClientRect(handle, &mut rect);
+
+    let (w, h) = (size.0 as c_int, size.1 as c_int);
+    let delta_width = w - rect.right;
+    let delta_height = h - rect.bottom;
+    
+    SetWindowPos(handle, ptr::null_mut(), 0, 0,
+      w+delta_width, h+delta_height,
+      SWP_NOMOVE|SWP_NOZORDER);
 }
 
 
@@ -168,9 +189,8 @@ pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInne
     params.1
 }
 
-/**
-    Set the font of a window
-*/
+
+/// Set the font of a window
 pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: bool) {
     use user32::SendMessageW;
     use winapi::{WM_SETFONT, LPARAM};
@@ -179,6 +199,78 @@ pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: 
 
     SendMessageW(handle, WM_SETFONT, mem::transmute(font_handle), redraw as LPARAM);
 }
+
+
+/// Set window position
+#[inline(always)]
+pub unsafe fn set_window_position(handle: HWND, x: i32, y: i32) {
+    use user32::SetWindowPos;
+    use winapi::{c_int, SWP_NOZORDER, SWP_NOSIZE, SWP_NOACTIVATE};
+
+    SetWindowPos(handle, ptr::null_mut(), x as c_int, y as c_int, 0, 0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
+}
+
+/// Get window position
+#[inline(always)]
+pub unsafe fn get_window_position(handle: HWND) -> (i32, i32) {
+    use user32::{GetWindowRect, ScreenToClient, GetParent};
+    use winapi::{RECT, POINT};
+    
+    let mut r: RECT = mem::uninitialized();
+    GetWindowRect(handle, &mut r);
+
+    let parent = GetParent(handle);
+    if !parent.is_null() {
+        let mut pt = POINT{x: r.left, y: r.top};
+        ScreenToClient(parent, &mut pt);
+        (pt.x as i32, pt.y as i32)
+    } else {
+        (r.left as i32, r.top as i32)
+    }
+}
+
+/// Set window size
+#[inline(always)]
+pub unsafe fn set_window_size(handle: HWND, w: u32, h: u32, fix: bool) {
+    use user32::SetWindowPos;
+    use winapi::{c_int, SWP_NOZORDER, SWP_NOMOVE, SWP_NOACTIVATE};
+
+    SetWindowPos(handle, ptr::null_mut(), 0, 0, w as c_int, h as c_int, SWP_NOZORDER|SWP_NOMOVE|SWP_NOACTIVATE);
+
+    if fix { fix_overlapped_window_size(handle, (w, h)); }
+}
+
+/// Get window size
+#[inline(always)]
+pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {
+    use user32::GetClientRect;
+    use winapi::RECT;
+    
+    let mut r: RECT = mem::uninitialized();
+    GetClientRect(handle, &mut r);
+
+    (r.right as u32, r.bottom as u32)
+}
+
+/// Set window visibility
+#[inline(always)]
+pub unsafe fn set_window_visibility(handle: HWND, visible: bool) {
+    use user32::ShowWindow;
+    use winapi::{SW_HIDE, SW_SHOW};
+
+    let visible = if visible { SW_SHOW } else { SW_HIDE };
+    ShowWindow(handle, visible);
+}
+
+/**
+    Get window visibility
+*/
+#[inline(always)]
+pub unsafe fn get_window_visibility(handle: HWND) -> bool {
+    use user32::IsWindowVisible;
+    IsWindowVisible(handle) != 0
+}
+
 
 #[inline(always)]
 pub fn handle_of_window<ID: Clone+Hash>(ui: &Ui<ID>, id: &ID, err: &'static str) -> Result<HWND, Error> {
