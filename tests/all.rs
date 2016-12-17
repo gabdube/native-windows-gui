@@ -507,8 +507,9 @@ fn test_buttons() {
 fn test_listbox() {
     let ui = setup_ui();
 
-    let lb_t = ListBoxT{
-        collection: vec!["Test1", "Test2", "Test3"],
+    let col = vec!["Foo", "FooBar", "Excelsior", "wOOsh"];
+    let mut lb_t = ListBoxT {
+        collection: col.clone(),
         position:(10, 50), size: (100, 90),
         visible: true, disabled: false,  readonly: false, multi_select: false,
         parent: 1000,
@@ -521,6 +522,8 @@ fn test_listbox() {
 
     // pack test
     ui.pack_control(&1002, lb_t.clone());
+    lb_t.multi_select = true;
+    ui.pack_control(&1003, lb_t);
     ui.commit().expect("Commit was not successful");
 
     // methods test
@@ -528,4 +531,78 @@ fn test_listbox() {
     test_position!(ui, &1002, ListBox<&'static str>);
     test_size!(ui, &1002, ListBox<&'static str>, (200, 192)); // Listbox height is forced to be rounded to match the items height.
     test_enabled!(ui, &1002, ListBox<&'static str>);
+
+    {
+        let mut lb = ui.get_mut::<ListBox<&'static str>>(&1002).expect("Control not found!");
+        assert!(lb.collection() == &col, "Collection do not match");
+        assert!(lb.collection_mut() == &col, "Collection do not match");
+        assert!(lb.len() == 4, "Collection length should be 4");
+
+        lb.push("Foohoy!");
+        assert!(lb.collection() == &["Foo", "FooBar", "Excelsior", "wOOsh", "Foohoy!"], "Collection do not match");
+        assert!(lb.get_string(4).unwrap().as_str() == "Foohoy!", "Item text do not match");
+        assert!(lb.len() == 5, "Collection length should be 5");
+
+        lb.remove(0);
+        assert!(lb.collection() == &["FooBar", "Excelsior", "wOOsh", "Foohoy!"], "Collection do not match");
+        assert!(lb.get_string(0).unwrap().as_str() == "FooBar", "Item text do not match");
+
+        assert!(lb.get_selected_index().is_none(), "No index should be selected");
+        assert!(lb.get_selected_indexes().len() == 0, "Indexes vector length should be 0");
+
+        lb.set_current_index(1);
+
+        assert!(lb.get_selected_index() == Some(1), "Current index is not 1");
+        assert!(lb.get_selected_indexes().len() == 0, "Indexes vector length should be 0");
+        assert!(lb.index_selected(1), "Index 1 is not selected");
+        assert!(lb.index_selected(2) == false, "Index 2 is selected");
+        assert!(lb.index_selected(665) == false, "Index 665 is selected");
+        assert!(lb.len_selected() == 1, "Selected length is not 1");
+
+        lb.set_current_index(usize::max_value());
+        assert!(lb.get_selected_index().is_none(), "No index should be selected");
+
+        assert!(lb.find_string("foo", false) == Some(0), "find_string shoud have returned 0");
+        assert!(lb.find_string("foo", true) == None, "find_string shoud have returned None");
+        assert!(lb.find_string("Foohoy!", true) == Some(3), "find_string shoud have returned None");
+
+        assert!(lb.get_string(100) == None, "Item text should be None");
+
+        lb.collection_mut().remove(0);
+        assert!(lb.get_string(0).unwrap().as_str() == "FooBar", "Item text do not match"); // Ui and inner collection not synced
+        lb.sync();
+        assert!(lb.get_string(0).unwrap().as_str() == "Excelsior", "Item text do not match"); // Ui and inner collection synced
+
+        lb.clear();
+
+        assert!(lb.len() == 0, "Length is not 0");
+    }
+
+    {
+        let lb = ui.get::<ListBox<&'static str>>(&1003).expect("Control not found!");
+
+        assert!(lb.get_selected_indexes().len() == 0, "Indexes vector length should be 0");
+
+        lb.set_index_selected(0, true);
+        lb.set_index_selected(2, true);
+        assert!(lb.len_selected() == 2, "Selected length is not 2");
+
+        assert!(lb.get_selected_indexes() == [0, 2], "Selected indexes do not match");
+
+        lb.set_index_selected(0, false);
+        assert!(lb.len_selected() == 1, "Selected length is not 1");
+        assert!(lb.get_selected_indexes() == [2], "Selected indexes do not match");
+
+        lb.set_index_selected(usize::max_value(), true);
+        assert!(lb.len_selected() == 4, "Selected length is not 4");
+        assert!(lb.get_selected_indexes() == [0,1,2,3], "Selected indexes do not match");
+
+        lb.set_range_selected(0, 2, false);
+        assert!(lb.len_selected() == 1, "Selected length is not 1");
+        
+        lb.set_range_selected(0, 6, true);
+        assert!(lb.len_selected() == 4, "Selected length is not 4");
+        assert!(lb.get_selected_indexes() == [0,1,2,3], "Selected indexes do not match");
+    }
+    
 }

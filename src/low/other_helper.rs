@@ -38,6 +38,19 @@ pub fn to_utf16<'a>(s: &'a str) -> Vec<u16> {
 }
 
 /**
+    Decode a raw utf16 string. Should be null terminated.
+*/
+pub fn from_utf16(s: &[u16]) -> String {
+    use std::ffi::OsString;
+    use std::os::windows::ffi::OsStringExt;
+
+    let null_index = s.iter().position(|&i| i==0).unwrap_or(s.len());
+    let os_string = OsString::from_wide(&s[0..null_index]);
+
+    os_string.into_string().unwrap_or("Decoding error".to_string())
+}
+
+/**
     Return a formatted output of the last system error that was raised.
 
     (ERROR ID, Error message localized)

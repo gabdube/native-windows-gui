@@ -36,12 +36,7 @@ pub fn main() {
     app.bind(&"QuitItem", &"Quit", Event::Clicked, |_,_,_,_|{
         nwg_exit()
     });
-
-    app.bind(&"TestButton", &"Test2", Event::Clicked, |app,_,_,_|{
-        let mut lb = app.get_mut::<nwg::ListBox<&'static str>>(&"TestList").unwrap();
-        println!("{:?}", lb.set_current_index(0));
-    });
-
+    
     // Execute the commands
     app.commit().expect("Commit failed");
 

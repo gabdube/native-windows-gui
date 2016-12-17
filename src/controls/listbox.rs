@@ -23,13 +23,14 @@ use std::any::TypeId;
 use std::fmt::Display;
 use std::mem;
 
-use winapi::{HWND, HFONT};
+use user32::SendMessageW;
+use winapi::{HWND, HFONT, WPARAM};
 
 use ui::Ui;
 use controls::{Control, ControlT, AnyHandle};
 use error::Error;
 use events::Event;
-use low::other_helper::to_utf16;
+use low::other_helper::{to_utf16, from_utf16};
 
 /**
     Template that creates a listbox control
@@ -40,7 +41,7 @@ use low::other_helper::to_utf16;
     • `size`: The start size of the listbox  
     • `visible`: If the listbox should be visible to the user32  
     • `disabled`: If the user can or can't use the listbox  
-    • `readonly` : If true, the user won't be able to select items in the listbox
+    • `readonly` : If true, the user won't be able to select items in the listbox  
     • `multi_select`: If true, allow the user to select more than one item  
     • `parent`: The listbox parent  
     • `font`: The listbox font. If None, use the system default  
@@ -141,7 +142,6 @@ impl<D: Clone+Display> ListBox<D> {
     /// Reload the content of the listbox
     pub fn sync(&self) {
         use low::defs::{LB_RESETCONTENT, LB_ADDSTRING};
-        use user32::SendMessageW;
 
         unsafe{ SendMessageW(self.handle, LB_RESETCONTENT, 0, 0); }
 
@@ -153,7 +153,6 @@ impl<D: Clone+Display> ListBox<D> {
 
     /// Add an item at the end of the listbox. Updates both the inner collection and the ui.
     pub fn push(&mut self, item: D) {
-        use user32::SendMessageW;
         use low::defs::LB_ADDSTRING;
 
         let text = to_utf16(format!("{}", item).as_str());
@@ -162,12 +161,18 @@ impl<D: Clone+Display> ListBox<D> {
         self.collection.push(item);
     }
 
+    /// Remove an item from the inner collection and the listbox. Return the removed item.  
+    /// `Panics` if index is out of bounds.
+    pub fn remove(&mut self, index: usize) -> D {
+        use low::defs::LB_DELETESTRING;
+        unsafe{ SendMessageW(self.handle, LB_DELETESTRING, index as WPARAM, 0); }
+        self.collection.remove(index)
+    }
+
     /// Insert an item at the selected position in the lisbox and the inner collection.  
     /// If index is -1, the item is added at the end of the list.
     pub fn insert(&mut self, index: usize, item: D) {
-        use user32::SendMessageW;
         use low::defs::LB_INSERTSTRING;
-        use winapi::WPARAM;
 
         let text = to_utf16(format!("{}", item).as_str());
         unsafe{ SendMessageW(self.handle, LB_INSERTSTRING, index as WPARAM, mem::transmute(text.as_ptr())); }
@@ -179,7 +184,6 @@ impl<D: Clone+Display> ListBox<D> {
     /// Return None if there are no item selected  
     /// If the listbox can have more than one selected item, use `get_selected_indexes`
     pub fn get_selected_index(&self) -> Option<usize> {
-        use user32::SendMessageW;
         use low::defs::LB_GETCURSEL;
 
         let index = unsafe{ SendMessageW(self.handle, LB_GETCURSEL, 0, 0) };
@@ -190,9 +194,7 @@ impl<D: Clone+Display> ListBox<D> {
     /// Return a vector filled with the selected indexes of the listbox.
     /// If nothing is selected or the listbox do not support multiple selection, the returned vector will be empty.
     pub fn get_selected_indexes(&self) -> Vec<usize> {
-        use user32::SendMessageW;
         use low::defs::{LB_GETSELCOUNT, LB_GETSELITEMS};
-        use winapi::WPARAM;
 
         let selected_count = unsafe{ SendMessageW(self.handle, LB_GETSELCOUNT, 0, 0) };
         if selected_count == 0 || selected_count == -1 {
@@ -209,49 +211,96 @@ impl<D: Clone+Display> ListBox<D> {
 
     /// Return true if `index` is currently selected in the listbox
     pub fn index_selected(&self, index: usize) -> bool {
-        use user32::SendMessageW;
-        use low::defs::LB_GETSEL;
-        use winapi::WPARAM;
-
+       use low::defs::LB_GETSEL;
        unsafe{ SendMessageW(self.handle, LB_GETSEL, index as WPARAM, 0) > 0 }
     }
 
     /// Set the selected index in a single choice listbox.  
     /// For multi-select listbox use `set_index_selected` or `set_range_selected`  
-    /// If `index` is -1, remove the selected index from the listbox
+    /// If `index` is `usize::max_value`, remove the selected index from the listbox
     pub fn set_current_index(&self, index: usize) {
-        use user32::SendMessageW;
         use low::defs::LB_SETCURSEL;
-        use winapi::WPARAM;
         unsafe{ SendMessageW(self.handle, LB_SETCURSEL, index as WPARAM, 0); }
     }
 
     /// Set the selected state of the item located at index. Only work for multi-select listbox
     /// For single listbox, use `set_current_index`
-    /// If index is -1, the change is applied to every item.
+    /// If index is `usize::max_value`, the change is applied to every item.
     pub fn set_index_selected(&self, index: usize, selected: bool) {
-        use user32::SendMessageW;
         use low::defs::LB_SETSEL;
-        use winapi::{WPARAM, LPARAM};
+        use winapi::LPARAM;
 
         let selected: WPARAM = (selected == true) as WPARAM;
         unsafe { SendMessageW(self.handle, LB_SETSEL, selected, index as LPARAM); }
     }
 
-    /// Return the number of selected items
+    /// Select or unselect a range of index in the list box. The range is inclusive. Only works if the listbox can have multiple items selected.  
+    /// For single listbox, use `set_current_index`
+    pub fn set_range_selected(&self, index_min: usize, index_max: usize, selected: bool) {
+        use low::defs::LB_SELITEMRANGEEX;
+        use winapi::LPARAM;
+
+        let (min, max) = if selected {
+            (index_min as WPARAM, index_max as LPARAM)
+        } else {
+            (index_max as WPARAM, index_min as LPARAM)
+        };
+
+        unsafe{ SendMessageW(self.handle, LB_SELITEMRANGEEX, min, max); }
+    }
+
+    /// Return the number of selected items.
     pub fn len_selected(&self) -> usize {
-        use user32::SendMessageW;
         use low::defs::LB_GETSELCOUNT;
-        unsafe{ SendMessageW(self.handle, LB_GETSELCOUNT, 0, 0) as usize }
+        let index = unsafe{ SendMessageW(self.handle, LB_GETSELCOUNT, 0, 0) };
+        if index == -1 {
+            1
+        } else {
+            index as usize
+        }
     }
 
     /// Remove every item in the inner collection and in the listbox
     pub fn clear(&mut self) {
-        use user32::SendMessageW;
         use low::defs::LB_RESETCONTENT;
 
         unsafe{ SendMessageW(self.handle, LB_RESETCONTENT, 0, 0) };
         self.collection.clear();
+    }
+
+    /// Try to find an item with the text `text` in the collection. If one is found, return its index else, returns None.  
+    /// If `full_match` is true, the text must match exactly otherwise it only needs to match the beginning.
+    /// The search is NOT case sensitive.
+    pub fn find_string<'a>(&self, text: &'a str, full_match: bool) -> Option<usize> {
+        use low::defs::{LB_FINDSTRING, LB_FINDSTRINGEXACT};
+
+        let text = to_utf16(text);
+        let msg = if full_match { LB_FINDSTRINGEXACT } else { LB_FINDSTRING };
+        let index = unsafe{ SendMessageW(self.handle, msg, -1isize as WPARAM, mem::transmute(text.as_ptr()) ) };
+
+        if index == -1 {
+            None
+        } else {
+            Some(index as usize)
+        }
+    }
+
+    /// Return the item text at the provided index. Returns None if the index is not valid.
+    pub fn get_string(&self, index: usize) -> Option<String> {
+        use low::defs::{LB_GETTEXT, LB_GETTEXTLEN};
+
+        let length = unsafe{ SendMessageW(self.handle, LB_GETTEXTLEN, index as WPARAM, 0) };
+        if length == -1 { return None; }
+
+        let length = (length+1) as usize;
+        let mut buffer: Vec<u16> = Vec::with_capacity(length);
+        unsafe {
+            buffer.set_len(length);
+            let err = SendMessageW(self.handle, LB_GETTEXT, index as WPARAM, mem::transmute( buffer.as_mut_ptr() ));
+            if err == -1 { return None; }
+        }
+
+       Some( from_utf16(&buffer[..]) )
     }
 
     /// Return the number of items in the inner collection
