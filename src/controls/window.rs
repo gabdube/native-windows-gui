@@ -24,7 +24,7 @@ use std::hash::Hash;
 use winapi::HWND;
 
 use ui::Ui;
-use controls::{Control, ControlT, AnyHandle};
+use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::Event;
 
@@ -107,6 +107,10 @@ impl Control for Window {
 
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
+    }
+
+    fn control_type(&self) -> ControlType {
+        ControlType::Window 
     }
 
     fn free(&mut self) {

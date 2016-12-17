@@ -36,6 +36,13 @@ pub fn main() {
     app.bind(&"QuitItem", &"Quit", Event::Clicked, |_,_,_,_|{
         nwg_exit()
     });
+
+    app.bind(&"TestList", &"Sel", Event::SelectionChanged, |app,_,_,_| {
+        let lb = app.get::<nwg::ListBox<&'static str>>(&"TestList").expect("Could not find the control");
+        if let Some(index) = lb.get_selected_index() {
+            println!("{:?}", lb.get_string(index).unwrap());
+        }
+    });
     
     // Execute the commands
     app.commit().expect("Commit failed");

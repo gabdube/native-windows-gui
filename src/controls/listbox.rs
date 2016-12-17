@@ -27,7 +27,7 @@ use user32::SendMessageW;
 use winapi::{HWND, HFONT, WPARAM};
 
 use ui::Ui;
-use controls::{Control, ControlT, AnyHandle};
+use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::Event;
 use low::other_helper::{to_utf16, from_utf16};
@@ -63,16 +63,16 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
     fn type_id(&self) -> TypeId { TypeId::of::<ListBox<D>>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed]
+        vec![Event::Destroyed, Event::SelectionChanged]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
-        use low::defs::{LB_ADDSTRING, LBS_HASSTRINGS, LBS_MULTIPLESEL, LBS_NOSEL};
+        use low::defs::{LB_ADDSTRING, LBS_HASSTRINGS, LBS_MULTIPLESEL, LBS_NOSEL, LBS_NOTIFY};
         use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER, WS_VSCROLL, WS_HSCROLL};
         use user32::{SendMessageW};
 
-        let flags: DWORD = WS_CHILD | WS_BORDER | LBS_HASSTRINGS | WS_VSCROLL | WS_HSCROLL |
+        let flags: DWORD = WS_CHILD | WS_BORDER | LBS_HASSTRINGS | WS_VSCROLL | WS_HSCROLL | LBS_NOTIFY |
         if self.visible      { WS_VISIBLE }      else { 0 } |
         if self.disabled     { WS_DISABLED }     else { 0 } |
         if self.multi_select { LBS_MULTIPLESEL } else { 0 } |
@@ -365,11 +365,14 @@ impl<D: Clone+Display> ListBox<D> {
     pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
 }
 
-
 impl<D: Clone+Display> Control for ListBox<D> {
 
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
+    }
+
+    fn control_type(&self) -> ControlType { 
+        ControlType::ListBox 
     }
 
     fn free(&mut self) {

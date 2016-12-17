@@ -74,9 +74,12 @@ pub const LB_GETSELCOUNT: UINT = 400;
 pub const LB_GETSELITEMS: UINT = 401;
 pub const LB_FINDSTRINGEXACT: UINT = 418;
 
+pub const LBS_NOTIFY: UINT = 1;
 pub const LBS_NOSEL: UINT = 0x4000;
 pub const LBS_HASSTRINGS: UINT = 64;
 pub const LBS_MULTIPLESEL: UINT = 8;
+
+pub const LBN_SELCHANGE: UINT = 1;
 
 // System structs
 #[repr(C)]

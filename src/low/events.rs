@@ -22,10 +22,11 @@ use std::mem;
 use std::ptr;
 use std::hash::Hash;
 
-use winapi::{HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT};
+use winapi::{HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, DWORD};
 
 use ui::UiInner;
-use events::EventArgs;
+use events::{Event, EventArgs};
+use controls::{Control, ControlType};
 
 /// A magic number to identify the NWG subclass that dispatches events
 const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
@@ -37,6 +38,40 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
 }
 
 
+unsafe fn parse_listbox_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, id: u64, ncode: u32) {
+  use low::defs::{LBN_SELCHANGE};
+
+  match ncode {
+    LBN_SELCHANGE => {
+      ui.trigger(id, Event::SelectionChanged, EventArgs::None);
+    },
+    _ => {}
+  }
+}
+
+/**
+  Parse the common controls notification passed through the `WM_COMMAND` message.
+*/
+#[inline(always)]
+unsafe fn parse_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, w: WPARAM, l: LPARAM) {
+  use winapi::HIWORD;
+
+  if l == 0 { return; }
+  
+  // Extract data from params
+  let ncode = HIWORD(w as DWORD) as u32;
+  let nhandle: HWND = mem::transmute(l);
+
+  let id = match window_id(nhandle, ui) { Some(id) => id, _ => { return; } };
+  let tid = ui.ids_map.get(&id).expect("A window ID was not found in its Ui").1;
+  let control: *mut Box<Control> = ui.controls.get(&tid).expect("Could not find a control with with the specified type ID").as_ptr();
+  
+  match (&mut *control).control_type() {
+    ControlType::ListBox => parse_listbox_command(ui, id, ncode),
+    _ => {}
+  }
+}
+
 /**
   Proc that dispatches the NWG events
 */
@@ -44,10 +79,13 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::{DefSubclassProc};
   use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, WM_LBUTTONUP, WM_LBUTTONDOWN, 
-    WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, c_int};
-  use events::{Event, EventArgs};
+    WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, WM_COMMAND, c_int};
 
   match msg {
+    WM_COMMAND => {
+      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
+      parse_command((&mut *ui.inner), w, l);
+    },
     WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
       let (inner, id) = (ui.inner, ui.id);

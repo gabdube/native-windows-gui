@@ -39,6 +39,7 @@ pub enum Event {
     Destroyed,
     MouseUp,
     MouseDown,
+    SelectionChanged
 }
 
 /**

@@ -25,7 +25,7 @@ use std::mem;
 use winapi::{HMENU, UINT};
 
 use ui::Ui;
-use controls::{Control, ControlT, AnyHandle};
+use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::Event;
 
@@ -72,6 +72,10 @@ impl Control for Menu {
 
     fn handle(&self) -> AnyHandle {
         AnyHandle::HMENU(self.handle)
+    }
+
+    fn control_type(&self) -> ControlType {
+        ControlType::Menu
     }
 
     fn free(&mut self) {
@@ -132,6 +136,10 @@ impl Control for MenuItem {
 
     fn handle(&self) -> AnyHandle {
         AnyHandle::HMENU_ITEM(self.parent, self.unique_id)
+    }
+
+    fn control_type(&self) -> ControlType { 
+        ControlType::MenuItem 
     }
 
     fn free(&mut self) {

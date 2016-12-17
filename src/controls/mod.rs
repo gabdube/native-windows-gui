@@ -49,6 +49,21 @@ pub enum AnyHandle {
 }
 
 /**
+    An enum that list type names for the common controls.
+
+    This is used internally to differentiate the common control notification codes.
+*/
+#[derive(Clone, Debug)]
+pub enum ControlType {
+    Window,
+    Button,
+    ListBox,
+    Menu,
+    MenuItem,
+    Undefined  // Control is not a common control
+}
+
+/**
     Structures implementing this trait can be used by a Ui to build a Control
 */
 pub trait ControlT<ID: Clone+Hash> {
@@ -78,6 +93,11 @@ pub trait Control {
         Should return the underlying handle to the object
     */
     fn handle(&self) -> AnyHandle;
+
+    /**
+        Should return the type of the control. For custom controls, the return value should be `Undefined` (the default).
+    */
+    fn control_type(&self) -> ControlType { ControlType::Undefined }
 
     /**
         If specified, should free any ressource allocated in the template `build` function. This includes functions like `DestroyWindow`.

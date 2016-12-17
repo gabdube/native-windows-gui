@@ -24,7 +24,7 @@ use std::any::TypeId;
 use winapi::{HWND, HFONT};
 
 use ui::Ui;
-use controls::{Control, ControlT, AnyHandle};
+use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::Event;
 
@@ -124,6 +124,10 @@ impl Control for Button {
 
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
+    }
+
+    fn control_type(&self) -> ControlType { 
+        ControlType::Button 
     }
 
     fn free(&mut self) {
