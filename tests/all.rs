@@ -534,6 +534,18 @@ fn test_listbox() {
 
     {
         let mut lb = ui.get_mut::<ListBox<&'static str>>(&1002).expect("Control not found!");
+
+        assert!(lb.get_readonly() == false, "Listbox should not be readonly");
+        assert!(lb.get_multi_select() == false, "Listbox should not be multi select");
+
+        lb.set_readonly(true);
+        assert!(lb.get_readonly() == true, "Listbox should be readonly");
+        lb.set_readonly(false);
+
+        lb.set_multi_select(true);
+        assert!(lb.get_multi_select() == true, "Listbox should be multi-select");
+        lb.set_multi_select(false);
+
         assert!(lb.collection() == &col, "Collection do not match");
         assert!(lb.collection_mut() == &col, "Collection do not match");
         assert!(lb.len() == 4, "Collection length should be 4");
@@ -580,6 +592,8 @@ fn test_listbox() {
 
     {
         let lb = ui.get::<ListBox<&'static str>>(&1003).expect("Control not found!");
+
+        assert!(lb.get_multi_select() == true, "Listbox should not be multi select");
 
         assert!(lb.get_selected_indexes().len() == 0, "Indexes vector length should be 0");
 

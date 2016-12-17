@@ -125,7 +125,7 @@ use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 
 #[allow(unused_variables)]
 unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::{WM_CREATE, WM_CLOSE};
+    use winapi::{WM_CREATE, WM_CLOSE, GWL_USERDATA};
     use user32::{DefWindowProcW, PostQuitMessage, ShowWindow};
     use low::window_helper::get_window_long;
 
@@ -134,7 +134,7 @@ unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_CLOSE => {
             ShowWindow(hwnd, 0);
 
-            let exit_on_close = get_window_long(hwnd) & 0x01 == 1;
+            let exit_on_close = get_window_long(hwnd, GWL_USERDATA) & 0x01 == 1;
             if exit_on_close {
                 PostQuitMessage(0);
             }
@@ -165,7 +165,7 @@ unsafe fn build_sysclass() -> Result<(), Error> {
 #[inline(always)]
 unsafe fn build_window<S: Clone+Into<String>>(t: &WindowT<S>) -> Result<HWND, Error> {
     use low::window_helper::{WindowParams, build_window, set_window_long};
-    use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_OVERLAPPED, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU};
+    use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_OVERLAPPED, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, GWL_USERDATA};
 
     let fixed_window: DWORD = WS_SYSMENU | WS_CAPTION | WS_OVERLAPPED | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
     let flags: DWORD = 
@@ -184,7 +184,7 @@ unsafe fn build_window<S: Clone+Into<String>>(t: &WindowT<S>) -> Result<HWND, Er
 
     match build_window(params) {
         Ok(h) => {
-            set_window_long(h, t.exit_on_close as usize);
+            set_window_long(h, GWL_USERDATA, t.exit_on_close as usize);
             Ok(h)
         },
         Err(e) => Err(Error::System(e))

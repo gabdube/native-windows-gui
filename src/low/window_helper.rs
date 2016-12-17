@@ -22,7 +22,7 @@ use std::ptr;
 use std::mem;
 use std::hash::Hash;
 
-use winapi::{HWND, HFONT, WNDPROC, DWORD, LPARAM, BOOL, GWL_USERDATA};
+use winapi::{HWND, HFONT, WNDPROC, DWORD, LPARAM, BOOL, c_int};
 
 use ui::{UiInner, Ui};
 use controls::{AnyHandle};
@@ -254,53 +254,23 @@ pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {
 
 /// Get the window enabled state
 #[inline(always)]
-#[cfg(target_arch = "x86_64")]
 pub unsafe fn get_window_enabled(handle: HWND) -> bool {
-    use user32::GetWindowLongPtrW;
     use winapi::{GWL_STYLE, WS_DISABLED, UINT};
 
-    let style = GetWindowLongPtrW(handle, GWL_STYLE) as UINT;
+    let style = get_window_long(handle, GWL_STYLE) as UINT;
     (style & WS_DISABLED) != WS_DISABLED
 }
 
 /// Set the window enabled state
 #[inline(always)]
-#[cfg(target_arch = "x86_64")]
 pub unsafe fn set_window_enabled(handle: HWND, enabled: bool) {
-    use user32::{SetWindowLongPtrW, GetWindowLongPtrW};
-    use winapi::{GWL_STYLE, WS_DISABLED, LONG_PTR};
+    use winapi::{GWL_STYLE, WS_DISABLED};
 
-    let old_style = GetWindowLongPtrW(handle, GWL_STYLE);
+    let old_style = get_window_long(handle, GWL_STYLE) as usize;
     if enabled {
-        SetWindowLongPtrW(handle, GWL_STYLE, (old_style&(!WS_DISABLED as LONG_PTR)) );
+        set_window_long(handle, GWL_STYLE, old_style&(!WS_DISABLED as usize) );
     } else {
-        SetWindowLongPtrW(handle, GWL_STYLE, (old_style|WS_DISABLED as LONG_PTR));
-    }
-}
-
-/// Get the window enabled state
-#[inline(always)]
-#[cfg(target_arch = "x86")]
-pub unsafe fn get_window_enabled(handle: HWND) -> bool {
-    use user32::GetWindowLongW;
-    use winapi::{GWL_STYLE, WS_DISABLED, UINT};
-
-    let style = GetWindowLongW(handle, GWL_STYLE) as UINT;
-    (style & WS_DISABLED) != WS_DISABLED
-}
-
-/// Set the window enabled state
-#[inline(always)]
-#[cfg(target_arch = "x86")]
-pub unsafe fn set_window_enabled(handle: HWND, enabled: bool) {
-    use user32::{SetWindowLongW, GetWindowLongPtrW};
-    use winapi::{GWL_STYLE, WS_DISABLED, LONG_PTR};
-
-    let old_style = GetWindowLongW(handle, GWL_STYLE);
-    if enabled {
-        SetWindowLongW(handle, GWL_STYLE, (old_style&(!WS_DISABLED as LONG_PTR)) );
-    } else {
-        SetWindowLongW(handle, GWL_STYLE, (old_style|WS_DISABLED as LONG_PTR));
+        set_window_long(handle, GWL_STYLE, old_style|(WS_DISABLED as usize));
     }
 }
 
@@ -347,28 +317,28 @@ pub fn handle_of_font<ID: Clone+Hash>(ui: &Ui<ID>, id: &ID, err: &'static str) -
 
 #[inline(always)]
 #[cfg(target_arch = "x86_64")]
-pub fn get_window_long(handle: HWND) -> LONG_PTR {
+pub fn get_window_long(handle: HWND, index: c_int) -> LONG_PTR {
     use user32::GetWindowLongPtrW;
-    unsafe{ GetWindowLongPtrW(handle, GWL_USERDATA) }
+    unsafe{ GetWindowLongPtrW(handle, index) }
 }
 
 #[inline(always)]
 #[cfg(target_arch = "x86")]
-pub fn get_window_long(handle: HWND) -> LONG {
+pub fn get_window_long(handle: HWND, index: c_int) -> LONG {
     use user32::GetWindowLongW;
-    unsafe { GetWindowLongW(handle, GWL_USERDATA) }
+    unsafe { GetWindowLongW(handle, index) }
 }
 
 #[inline(always)]
 #[cfg(target_arch = "x86_64")]
-pub fn set_window_long(handle: HWND, v: usize) {
+pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
     use user32::SetWindowLongPtrW;
-    unsafe{ SetWindowLongPtrW(handle, GWL_USERDATA, v as LONG_PTR); }
+    unsafe{ SetWindowLongPtrW(handle, index, v as LONG_PTR); }
 }
 
 #[inline(always)]
 #[cfg(target_arch = "x86")]
-pub fn set_window_long(handle: HWND, v: usize) {
+pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
     use user32::SetWindowLongW;
-    unsafe { SetWindowLongW(handle, GWL_USERDATA, v as LONG); }
+    unsafe { SetWindowLongW(handle, index, v as LONG); }
 }

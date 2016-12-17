@@ -132,6 +132,9 @@ pub struct ListBox<D: Clone+Display> {
 
 impl<D: Clone+Display> ListBox<D> {
 
+    /// Return the number of items in the inner collection
+    pub fn len(&self) -> usize { self.collection.len() }
+
     /// Return the inner collection of the listbox
     pub fn collection(&self) -> &Vec<D> { &self.collection }
 
@@ -263,7 +266,6 @@ impl<D: Clone+Display> ListBox<D> {
     /// Remove every item in the inner collection and in the listbox
     pub fn clear(&mut self) {
         use low::defs::LB_RESETCONTENT;
-
         unsafe{ SendMessageW(self.handle, LB_RESETCONTENT, 0, 0) };
         self.collection.clear();
     }
@@ -303,8 +305,55 @@ impl<D: Clone+Display> ListBox<D> {
        Some( from_utf16(&buffer[..]) )
     }
 
-    /// Return the number of items in the inner collection
-    pub fn len(&self) -> usize { self.collection.len() }
+    /// Return true if the listbox is currently in a readonly mode, false otherwise.
+    pub fn get_readonly(&self) -> bool {
+        use low::window_helper::get_window_long;
+        use low::defs::LBS_NOSEL;
+        use winapi::GWL_STYLE;
+
+        let style = get_window_long(self.handle, GWL_STYLE) as u32;
+
+        (style & LBS_NOSEL) == LBS_NOSEL
+    }
+
+    /// Set or unset the listbox readonly flag
+    pub fn set_readonly(&self, readonly: bool) {
+        use low::window_helper::{set_window_long, get_window_long};
+        use low::defs::LBS_NOSEL;
+        use winapi::GWL_STYLE;
+
+        let old_style = get_window_long(self.handle, GWL_STYLE) as usize;
+        if readonly {
+            set_window_long(self.handle, GWL_STYLE, old_style|(LBS_NOSEL as usize));
+        } else {
+            set_window_long(self.handle, GWL_STYLE, old_style&(!LBS_NOSEL as usize) );
+        }
+    }
+
+    /// Return true if the listbox accepts multiple selected items, false otherwise.
+    pub fn get_multi_select(&self) -> bool {
+        use low::window_helper::get_window_long;
+        use low::defs::LBS_MULTIPLESEL;
+        use winapi::GWL_STYLE;
+
+        let style = get_window_long(self.handle, GWL_STYLE) as u32;
+
+        (style & LBS_MULTIPLESEL) == LBS_MULTIPLESEL
+    }
+
+    /// Set or unset the listbox multiple selected flag
+    pub fn set_multi_select(&self, multi: bool) {
+        use low::window_helper::{set_window_long, get_window_long};
+        use low::defs::LBS_MULTIPLESEL;
+        use winapi::GWL_STYLE;
+
+        let old_style = get_window_long(self.handle, GWL_STYLE) as usize;
+        if multi {
+            set_window_long(self.handle, GWL_STYLE, old_style|(LBS_MULTIPLESEL as usize));
+        } else {
+            set_window_long(self.handle, GWL_STYLE, old_style&(!LBS_MULTIPLESEL as usize) );
+        }
+    }
 
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
     pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
