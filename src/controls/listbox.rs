@@ -63,7 +63,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
     fn type_id(&self) -> TypeId { TypeId::of::<ListBox<D>>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::SelectionChanged]
+        vec![Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

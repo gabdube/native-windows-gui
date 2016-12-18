@@ -39,12 +39,22 @@ struct UiInnerWithId<ID: Hash+Clone+'static> {
 
 
 unsafe fn parse_listbox_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, id: u64, ncode: u32) {
-  use low::defs::{LBN_SELCHANGE};
+  use low::defs::{LBN_SELCHANGE, LBN_DBLCLK, LBN_SETFOCUS, LBN_KILLFOCUS};
 
   match ncode {
-    LBN_SELCHANGE => {
-      ui.trigger(id, Event::SelectionChanged, EventArgs::None);
-    },
+    LBN_SELCHANGE => { ui.trigger(id, Event::SelectionChanged, EventArgs::None); },
+    LBN_DBLCLK => { ui.trigger(id, Event::DoubleClick, EventArgs::None); },
+    LBN_SETFOCUS | LBN_KILLFOCUS => { ui.trigger(id, Event::Focus, EventArgs::Focus(ncode==LBN_SETFOCUS)); },
+    _ => {}
+  }
+}
+
+unsafe fn parse_button_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, id: u64, ncode: u32) {
+  use low::defs::{BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS};
+  match ncode {
+    BN_CLICKED => { ui.trigger(id, Event::Click, EventArgs::None); },
+    BN_DBLCLK => { ui.trigger(id, Event::DoubleClick, EventArgs::None); },
+    BN_SETFOCUS | BN_KILLFOCUS => { ui.trigger(id, Event::Focus, EventArgs::Focus(ncode==BN_SETFOCUS)); },
     _ => {}
   }
 }
@@ -68,6 +78,7 @@ unsafe fn parse_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, w: WPARAM,
   
   match (&mut *control).control_type() {
     ControlType::ListBox => parse_listbox_command(ui, id, ncode),
+    ControlType::Button => parse_button_command(ui, id, ncode),
     _ => {}
   }
 }
@@ -91,10 +102,6 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       let (inner, id) = (ui.inner, ui.id);
 
       (&mut *inner).trigger(id, Event::MouseUp, parse_mouse_click(msg, l));
-
-      if msg == WM_LBUTTONUP {
-        (&mut *inner).trigger(id, Event::Clicked, EventArgs::None);
-      }
     },
     WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
@@ -115,7 +122,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       let inner = ui.inner;
       let id = ::low::menu_helper::get_menu_id( mem::transmute(l), w as c_int );
 
-      (&mut *inner).trigger(id, Event::Clicked, EventArgs::None);
+      (&mut *inner).trigger(id, Event::Click, EventArgs::None);
     },
     WM_UNICHAR | WM_CHAR => {
       let ui: &mut UiInnerWithId<ID> = mem::transmute(data);

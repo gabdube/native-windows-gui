@@ -29,7 +29,8 @@ pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
 */
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
-    Clicked,
+    Click,
+    DoubleClick,
     KeyDown,
     KeyUp,
     Char,
@@ -39,7 +40,8 @@ pub enum Event {
     Destroyed,
     MouseUp,
     MouseDown,
-    SelectionChanged
+    SelectionChanged,
+    Focus
 }
 
 /**
@@ -49,5 +51,6 @@ pub enum EventArgs {
     Key(u32),
     Char(char),
     MouseClick{btn: MouseButton, pos: (i32, i32)},
+    Focus(bool),
     None
 }

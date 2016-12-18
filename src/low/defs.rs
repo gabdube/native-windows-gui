@@ -80,6 +80,20 @@ pub const LBS_HASSTRINGS: UINT = 64;
 pub const LBS_MULTIPLESEL: UINT = 8;
 
 pub const LBN_SELCHANGE: UINT = 1;
+pub const LBN_DBLCLK: UINT = 2;
+pub const LBN_SETFOCUS: UINT = 4;
+pub const LBN_KILLFOCUS: UINT = 5;
+
+pub const BN_CLICKED: UINT = 0;
+pub const BN_DBLCLK: UINT = 5;
+pub const BN_SETFOCUS: UINT = 6;
+pub const BN_KILLFOCUS: UINT = 7;
+
+pub const BM_SETCHECK: UINT = 241;
+
+pub const BST_CHECKED: UINT = 1;
+pub const BST_INDETERMINATE: UINT = 2;
+pub const BST_UNCHECKED: UINT = 0;
 
 // System structs
 #[repr(C)]

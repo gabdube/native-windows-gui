@@ -58,7 +58,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::Clicked, Event::MouseDown, Event::MouseUp]
+        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp]
     }
 
     #[allow(unused_variables)]
@@ -93,6 +93,8 @@ impl Window {
         unsafe{ PostMessageW(self.handle, WM_CLOSE, 0, 0) };
     }
 
+    pub fn get_title(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
+    pub fn set_title<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
     pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
     pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }

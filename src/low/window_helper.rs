@@ -200,6 +200,36 @@ pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: 
     SendMessageW(handle, WM_SETFONT, mem::transmute(font_handle), redraw as LPARAM);
 }
 
+/// Get the window text
+#[inline(always)]
+pub unsafe fn get_window_text(handle: HWND) -> String {
+    use user32::{GetWindowTextW, GetWindowTextLengthW};
+    use low::other_helper::from_utf16;
+
+    let mut buffer_size = GetWindowTextLengthW(handle) as usize;
+    if buffer_size == 0 { return String::new(); }
+
+    buffer_size += 1;
+    let mut buffer: Vec<u16> = Vec::with_capacity(buffer_size);
+    buffer.set_len(buffer_size);
+
+    if GetWindowTextW(handle, buffer.as_mut_ptr(), buffer_size as c_int) == 0 {
+        String::new()
+    } else {
+        from_utf16(&buffer[..])
+    }
+}
+
+/// Set the window text
+#[inline(always)]
+pub unsafe fn set_window_text<'a>(handle: HWND, text: &'a str) {
+    use user32::SetWindowTextW;
+    use low::other_helper::to_utf16;
+
+    let text = to_utf16(text);
+    SetWindowTextW(handle, text.as_ptr());
+}
+
 
 /// Set window position
 #[inline(always)]

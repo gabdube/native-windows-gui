@@ -34,7 +34,7 @@ mod ui;
 
 pub use error::{Error, SystemError};
 pub use events::{EventCallback, Event, EventArgs};
-pub use controls::{ControlT, Control, WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, AnyHandle};
+pub use controls::{ControlT, Control, WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox, AnyHandle};
 pub use resources::{ResourceT, Resource, FontT, Font};
 pub use ui::{Ui, dispatch_events, exit};
 
@@ -45,6 +45,8 @@ pub mod constants {
     pub use defs::*;
 
     pub use controls::ControlType;
+
+    pub use controls::checkbox::CheckState;
 
     pub use resources::font::{FONT_DECO_NORMAL, FONT_DECO_ITALIC, FONT_DECO_UNDERLINE, FONT_DECO_STRIKEOUT, FONT_WEIGHT_DONTCARE, FONT_WEIGHT_THIN, FONT_WEIGHT_EXTRALIGHT,
     FONT_WEIGHT_LIGHT, FONT_WEIGHT_NORMAL, FONT_WEIGHT_MEDIUM, FONT_WEIGHT_SEMIBOLD, FONT_WEIGHT_BOLD, FONT_WEIGHT_EXTRABOLD, FONT_WEIGHT_BLACK};
