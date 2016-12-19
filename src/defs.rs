@@ -18,6 +18,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+    Checkbox checkstate
+*/
+#[derive(Clone, Debug, PartialEq)]
+pub enum CheckState {
+    Checked,
+    Unchecked,
+    Indeterminate // Tristate only
+}
+
+/**
+    Mouse buttons
+*/
 pub enum MouseButton {
     Left,
     Right,

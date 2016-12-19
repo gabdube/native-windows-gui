@@ -1,6 +1,7 @@
 extern crate native_windows_gui as nwg;
 
-use nwg::{Ui, Event, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, dispatch_events, exit as nwg_exit};
+use nwg::{Ui, Event, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, 
+  RadioButtonT, dispatch_events, exit as nwg_exit};
 use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, FONT_DECO_NORMAL, FONT_WEIGHT_NORMAL, CheckState};
 
 pub fn default_window() -> WindowT<&'static str> {
@@ -29,12 +30,13 @@ fn setup_controls(app: &Ui<&'static str>) {
 
     app.pack_control(&"TestCheckBox1", CheckBoxT{
         text: "A checkbox",
-        position:(120, 10), size: (100, 30),
+        position:(120, 10), size: (110, 30),
         visible: true, disabled: false,
         parent: "MainWindow",
         checkstate: CheckState::Checked,
         tristate: false,
-        font: Some("Font1") });
+        font: Some("Font1") 
+    });
 
     app.pack_control(&"TestCheckBox2", CheckBoxT{
         text: "A trisate checkbox",
@@ -43,10 +45,20 @@ fn setup_controls(app: &Ui<&'static str>) {
         parent: "MainWindow",
         checkstate: CheckState::Indeterminate,
         tristate: true,
-        font: Some("Font1") });
+        font: Some("Font1") 
+    });
+
+    app.pack_control(&"TestRad1", RadioButtonT{
+        text: "A radiobutton",
+        position:(120, 50), size: (110, 30),
+        visible: true, disabled: false,
+        parent: "MainWindow",
+        checkstate: CheckState::Checked,
+        font: Some("Font1") 
+    });
 
     app.pack_control(&"TestList", ListBoxT{
-        collection: vec!["Jimmy", "Sam", "Coconut", "Waldo", "David", "John"],
+        collection: vec!["A Listbox", "Jimmy", "Sam", "Coconut", "Waldo", "David", "John"],
         position:(10, 50), size: (100, 60),
         visible: true, disabled: false, readonly: false, multi_select: false,
         parent: "MainWindow",
@@ -56,6 +68,11 @@ fn setup_controls(app: &Ui<&'static str>) {
 
 
 fn setup_callbacks(app: &Ui<&'static str>) {
+
+    app.bind(&"TestButton", &"...", Event::Click, |app,_,_,_|{
+        
+        println!("{:?}", app.get::<nwg::CheckBox>(&"TestCheckBox2").unwrap().get_checkstate());
+    });
 
     app.bind(&"QuitItem", &"Quit", Event::Click, |_,_,_,_|{
         nwg_exit()

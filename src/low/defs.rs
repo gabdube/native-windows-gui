@@ -90,6 +90,7 @@ pub const BN_SETFOCUS: UINT = 6;
 pub const BN_KILLFOCUS: UINT = 7;
 
 pub const BM_SETCHECK: UINT = 241;
+pub const BM_GETCHECK: UINT = 240;
 
 pub const BST_CHECKED: UINT = 1;
 pub const BST_INDETERMINATE: UINT = 2;

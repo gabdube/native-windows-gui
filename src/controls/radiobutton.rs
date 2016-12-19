@@ -1,5 +1,5 @@
 /*!
-    Checkbox control definition
+    Radio button control definition
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -31,21 +31,21 @@ use events::Event;
 use defs::CheckState;
 
 /**
-    A template that creates a standard checkbox
+    A template that creates a standard radio button
 
     Members:  
-    • `text`: The text of the checkbox  
-    • `position`: The start position of the checkbox  
-    • `size`: The start size of the checkbox  
-    • `visible`: If the checkbox should be visible to the user32  
-    • `disabled`: If the user can or can't click on the checkbox  
-    • `parent`: The checkbox parent  
+    • `text`: The text of the radio button  
+    • `position`: The start position of the radio button  
+    • `size`: The start size of the radio button  
+    • `visible`: If the radio button should be visible to the user32  
+    • `disabled`: If the user can or can't click on the radio button  
+    • `parent`: The radio button parent  
     • `checkstate`: The starting checkstate  
-    • `tristate`: If the checkbox should have three states  
-    • `font`: The checkbox font. If None, use the system default  
+    • `tristate`: If the radio button should have three states  
+    • `font`: The radio button font. If None, use the system default  
 */
 #[derive(Clone)]
-pub struct CheckBoxT<S: Clone+Into<String>, ID: Hash+Clone> {
+pub struct RadioButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub text: S,
     pub position: (i32, i32),
     pub size: (u32, u32),
@@ -53,12 +53,11 @@ pub struct CheckBoxT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub disabled: bool,
     pub parent: ID,
     pub checkstate: CheckState,
-    pub tristate: bool,
     pub font: Option<ID>,
 }
 
-impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for CheckBoxT<S, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<CheckBox>() }
+impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for RadioButtonT<S, ID> {
+    fn type_id(&self) -> TypeId { TypeId::of::<RadioButton>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus]
@@ -66,12 +65,11 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for CheckBoxT<S, ID> {
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
-        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY, BS_AUTO3STATE, BS_AUTOCHECKBOX, BS_TEXT};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY, BS_AUTORADIOBUTTON, BS_TEXT};
 
-        let flags: DWORD = WS_CHILD | BS_NOTIFY | BS_TEXT |
+        let flags: DWORD = WS_CHILD | BS_NOTIFY | BS_TEXT | BS_AUTORADIOBUTTON |
         if self.visible    { WS_VISIBLE }   else { 0 } |
-        if self.disabled   { WS_DISABLED }  else { 0 } |
-        if self.tristate   { BS_AUTO3STATE } else { BS_AUTOCHECKBOX };
+        if self.disabled   { WS_DISABLED }  else { 0 } ;
 
         // Get the parent handle
         let parent = match handle_of_window(ui, &self.parent, "The parent of a checkbox must be a window-like control.") {
@@ -104,7 +102,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for CheckBoxT<S, ID> {
                     set_window_font(h, font_handle, true); 
                     set_checkstate(h, &self.checkstate);
                 }
-                Ok( Box::new(CheckBox{handle: h}) )
+                Ok( Box::new(RadioButton{handle: h}) )
             },
             Err(e) => Err(Error::System(e))
         }
@@ -112,30 +110,31 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for CheckBoxT<S, ID> {
 }
 
 /**
-    A standard checkbox
+    A standard radio button
 */
-pub struct CheckBox {
+pub struct RadioButton {
     handle: HWND
 }
 
-impl CheckBox {
+impl RadioButton {
 
     /**
-        Get the checkstate of the checkbox
+        Get the checkstate of the radio button
     */
     pub fn get_checkstate(&self) -> CheckState {
-        use low::defs::{BM_GETCHECK, BST_CHECKED, BST_UNCHECKED};
+        use low::defs::{BM_GETCHECK, BST_CHECKED};
         match unsafe{ SendMessageW(self.handle, BM_GETCHECK, 0 , 0) as u32 } {
             BST_CHECKED => CheckState::Checked,
-            BST_UNCHECKED => CheckState::Unchecked,
-            _ => CheckState::Indeterminate
+            _ => CheckState::Unchecked
         }
     }
 
     /**
-        Set the checkstate of the checkbox
+        Set the checkstate of the radio button. A radio button control cannot have an `Indeterminate` check state.
+        If one is passed, it is evaluated as checked.
     */
     pub fn set_checkstate(&self, check: CheckState) {
+        let check = if check == CheckState::Indeterminate { CheckState::Checked } else { check }; 
         unsafe{ set_checkstate(self.handle, &check); }
     }
 
@@ -151,14 +150,14 @@ impl CheckBox {
     pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
 }
 
-impl Control for CheckBox {
+impl Control for RadioButton {
 
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
     }
 
     fn control_type(&self) -> ControlType { 
-        ControlType::CheckBox 
+        ControlType::RadioButton 
     }
 
     fn free(&mut self) {
