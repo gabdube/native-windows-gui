@@ -24,6 +24,7 @@ pub mod button;
 pub mod checkbox;
 pub mod radiobutton;
 pub mod listbox;
+pub mod timer;
 
 use std::any::TypeId;
 use std::hash::Hash;
@@ -36,6 +37,7 @@ pub use controls::button::{ButtonT, Button};
 pub use controls::checkbox::{CheckBoxT, CheckBox};
 pub use controls::radiobutton::{RadioButtonT, RadioButton};
 pub use controls::listbox::{ListBoxT, ListBox};
+pub use controls::timer::{TimerT, Timer};
 use ui::Ui;
 use events::Event;
 use error::Error;
@@ -50,6 +52,7 @@ pub enum AnyHandle {
     HMENU(HMENU),
     HMENU_ITEM(HMENU, UINT),
     HFONT(HFONT),
+    None
 }
 
 /**
@@ -66,6 +69,7 @@ pub enum ControlType {
     ListBox,
     Menu,
     MenuItem,
+    Timer,
     Undefined  // Control is not a common control
 }
 

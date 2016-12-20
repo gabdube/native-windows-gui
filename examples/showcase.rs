@@ -70,7 +70,6 @@ fn setup_controls(app: &Ui<&'static str>) {
 fn setup_callbacks(app: &Ui<&'static str>) {
 
     app.bind(&"TestButton", &"...", Event::Click, |app,_,_,_|{
-        
         println!("{:?}", app.get::<nwg::CheckBox>(&"TestCheckBox2").unwrap().get_checkstate());
     });
 

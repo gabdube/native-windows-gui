@@ -39,9 +39,9 @@ const MESSAGE_HANDLE_CLASS_NAME: &'static str = "NWG_MESSAGE";
     No automatic resources freeing, `MessageHandle.free` must be called before the struct goes out of scope.
 */
 pub struct MessageHandler<ID: Hash+Clone+'static> {
-    hwnd: HWND,
-    last_error: Option<Error>,
-    p: PhantomData<ID>
+    pub hwnd: HWND,
+    pub last_error: Option<Error>,
+    pub p: PhantomData<ID>
 }
 
 impl<ID: Hash+Clone+'static> MessageHandler<ID> {

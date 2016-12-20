@@ -34,10 +34,18 @@ mod ui;
 
 pub use error::{Error, SystemError};
 pub use events::{EventCallback, Event, EventArgs};
-pub use controls::{ControlT, Control, WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
- RadioButtonT, RadioButton, AnyHandle};
-pub use resources::{ResourceT, Resource, FontT, Font};
+pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
+ RadioButtonT, RadioButton, TimerT, Timer};
+pub use resources::{FontT, Font};
 pub use ui::{Ui, dispatch_events, exit};
+
+pub mod customs {
+    /*!
+        Custom creation module
+    */
+    pub use controls::{ControlT, Control, AnyHandle};
+    pub use resources::{ResourceT, Resource};
+}
 
 pub mod constants {
     /*!
