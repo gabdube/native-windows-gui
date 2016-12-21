@@ -191,6 +191,7 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
         },
         AnyHandle::HMENU_ITEM(_, _) => Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string())),
         AnyHandle::HFONT(_) =>  Err(Error::BadParent("Window or menu parent required, got Font".to_string())),
+        AnyHandle::None =>  Err(Error::BadParent("Window or menu parent required, got control with no defined handle".to_string())),
    }
 }
 
@@ -228,5 +229,6 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
         },
         AnyHandle::HMENU_ITEM(_, _) => Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string())),
         AnyHandle::HFONT(_) =>  Err(Error::BadParent("Window or menu parent required, got Font".to_string())),
+        AnyHandle::None =>  Err(Error::BadParent("Window or menu parent required, got control with no defined handle".to_string())),
     }
 }

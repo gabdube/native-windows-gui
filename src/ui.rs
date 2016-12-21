@@ -97,6 +97,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                         AnyHandle::HMENU(h) => init_menu_data(h, inner_id),          // Save the id in the menu
                         AnyHandle::HMENU_ITEM(parent_h, uid) => init_menu_item_data(parent_h, uid, inner_id),
                         AnyHandle::HFONT(_) => {/* Nothing to initialize for resources */}
+                        AnyHandle::None =>  {/* Nothing to initialize for control with no handle */}
                     }
 
                     // Init events
@@ -173,7 +174,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
                 children
             },
-            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) => vec![id], // menu items / resources can't have children
+            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) | AnyHandle::None => vec![id], // menu items / resources can't have children
         };
        
         for id in children_ids.iter().rev() {
@@ -192,7 +193,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 AnyHandle::HWND(h) => unhook_window_events::<ID>(h),
                 AnyHandle::HMENU(h) => free_menu_data(h),
                 AnyHandle::HMENU_ITEM(parent_h, uid) => { free_menu_item_data(parent_h, uid) },
-                AnyHandle::HFONT(_) => {/* Nothing to free in resources */}
+                AnyHandle::HFONT(_) | AnyHandle::None => {/* Nothing to free in resources */}
             };
             
             // Free the control custom resources
@@ -685,6 +686,15 @@ impl<ID:Hash+Clone> Ui<ID> {
         let inner = unsafe{ &mut (&*self.inner) };
         let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
         inner.ids_map.contains_key(&inner_id)
+    }
+
+    /**
+        Return the message window handle of the ui. Useful for controls or functions that requires a window (such as timers)
+
+        Note: This might get removed if `Control` gets implemented for Uis *wink* *wink*
+    */
+    pub unsafe fn message_handle(&self) -> ::winapi::HWND {
+        self.messages.hwnd
     }
 
 }
