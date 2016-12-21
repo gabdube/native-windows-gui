@@ -23,6 +23,7 @@ pub mod menu;
 pub mod button;
 pub mod checkbox;
 pub mod radiobutton;
+pub mod label;
 pub mod listbox;
 
 use std::any::TypeId;
@@ -35,6 +36,7 @@ pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem};
 pub use controls::button::{ButtonT, Button};
 pub use controls::checkbox::{CheckBoxT, CheckBox};
 pub use controls::radiobutton::{RadioButtonT, RadioButton};
+pub use controls::label::{LabelT, Label};
 pub use controls::listbox::{ListBoxT, ListBox};
 use ui::Ui;
 use events::Event;
@@ -64,6 +66,7 @@ pub enum ControlType {
     CheckBox,
     RadioButton,
     ListBox,
+    Label,
     Menu,
     MenuItem,
     Undefined  // Control is not a common control

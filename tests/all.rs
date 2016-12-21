@@ -471,6 +471,7 @@ fn test_buttons() {
     let ui = setup_ui();
 
     let mut btn_t = ButtonT{text: "TEST", position:(10, 10), size: (100, 30), visible: true, disabled: false, parent: 1000, font: None};
+    let btn_t2 = CheckBoxT{text: "TEST", position:(10, 10), size: (100, 30), visible: true, disabled: false, checkstate: CheckState::Checked, tristate: false, parent: 1000, font: None};
 
     ui.pack_resource(&10_000, default_font());
     ui.pack_control(&1000, window());
@@ -478,6 +479,7 @@ fn test_buttons() {
 
     // pack test
     ui.pack_control(&1002, btn_t.clone());
+    ui.pack_control(&1010, btn_t2.clone());
 
     btn_t.font = Some(10_000);
     ui.pack_control(&1003, btn_t.clone() );
@@ -501,6 +503,18 @@ fn test_buttons() {
     test_position!(ui, &1002, Button);
     test_size!(ui, &1002, Button);
     test_enabled!(ui, &1002, Button);
+
+    {
+        let checkbox = ui.get::<CheckBox>(&1010).expect("Control not found");
+
+        assert!(checkbox.get_checkstate() == CheckState::Checked);
+        checkbox.set_checkstate(CheckState::Unchecked);
+        assert!(checkbox.get_checkstate() == CheckState::Unchecked);
+
+        assert!(checkbox.get_text().as_str() == "TEST");
+        checkbox.set_text("Waloo");
+        assert!(checkbox.get_text().as_str() == "Waloo");
+    }
 }
 
 #[test]

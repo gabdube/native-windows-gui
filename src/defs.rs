@@ -37,6 +37,25 @@ pub enum MouseButton {
     Middle
 }
 
+/**
+    Text align constant on the horizontal axis
+*/
+#[derive(PartialEq, Debug, Clone)]
+pub enum HTextAlign {
+    Left,
+    Center,
+    Right
+}
+
+/**
+    Text align constant on the vertical axis
+*/
+#[derive(PartialEq, Debug, Clone)]
+pub enum VTextAlign {
+    Top,
+    Center,
+    Bottom
+}
 
 pub mod keys {
     //! Windows virtual key code

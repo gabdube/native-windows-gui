@@ -1,8 +1,9 @@
 extern crate native_windows_gui as nwg;
 
 use nwg::{Ui, Event, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, 
-  RadioButtonT, dispatch_events, exit as nwg_exit};
-use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, FONT_DECO_NORMAL, FONT_WEIGHT_NORMAL, CheckState};
+  RadioButtonT, LabelT, dispatch_events, exit as nwg_exit};
+use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, FONT_DECO_NORMAL, FONT_WEIGHT_NORMAL,
+  CheckState, HTextAlign};
 
 pub fn default_window() -> WindowT<&'static str> {
     WindowT { 
@@ -40,7 +41,7 @@ fn setup_controls(app: &Ui<&'static str>) {
 
     app.pack_control(&"TestCheckBox2", CheckBoxT{
         text: "A trisate checkbox",
-        position:(230, 10), size: (150, 30),
+        position:(240, 10), size: (150, 30),
         visible: true, disabled: false,
         parent: "MainWindow",
         checkstate: CheckState::Indeterminate,
@@ -57,6 +58,15 @@ fn setup_controls(app: &Ui<&'static str>) {
         font: Some("Font1") 
     });
 
+    app.pack_control(&"TestRad2", RadioButtonT{
+        text: "A radiobutton",
+        position:(240, 50), size: (110, 30),
+        visible: true, disabled: false,
+        parent: "MainWindow",
+        checkstate: CheckState::Unchecked,
+        font: Some("Font1") 
+    });
+
     app.pack_control(&"TestList", ListBoxT{
         collection: vec!["A Listbox", "Jimmy", "Sam", "Coconut", "Waldo", "David", "John"],
         position:(10, 50), size: (100, 60),
@@ -64,13 +74,21 @@ fn setup_controls(app: &Ui<&'static str>) {
         parent: "MainWindow",
         font: None 
     });
+
+    app.pack_control(&"", LabelT{
+       text: "Current time: 00:00",
+        position:(120, 90), size: (150, 100),
+        visible: true, disabled: false,
+        align: HTextAlign::Left,
+        parent: "MainWindow",
+        font: Some("Font1")
+    });
 }
 
 
 fn setup_callbacks(app: &Ui<&'static str>) {
 
     app.bind(&"TestButton", &"...", Event::Click, |app,_,_,_|{
-        
         println!("{:?}", app.get::<nwg::CheckBox>(&"TestCheckBox2").unwrap().get_checkstate());
     });
 
