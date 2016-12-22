@@ -106,9 +106,9 @@ impl<ID: Hash+Clone> UiInner<ID> {
             let tmp_ui: Ui<ID> = Ui{inner: self as *mut UiInner<ID>};
             match params.value.build(&tmp_ui) {
                 Ok(control) => {
-                    
+                    let handle_hash = UiInner::<ID>::hash_handle(&control.handle());
                     match control.handle() {
-                        AnyHandle::HWND(h) => hook_window_events(self, inner_id, h), // Hook the window events if the handle is a HWND
+                        AnyHandle::HWND(h) => hook_window_events(self, h), // Hook the window events if the handle is a HWND
                         AnyHandle::HMENU(h) => init_menu_data(h, inner_id),          // Save the id in the menu
                         AnyHandle::HMENU_ITEM(parent_h, uid) => init_menu_item_data(parent_h, uid, inner_id),
                         AnyHandle::HFONT(_) => {/* Nothing to initialize for resources */}
@@ -125,6 +125,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                     self.inner_public_map.insert(inner_id, (params.id, params.value.type_id()));
                     self.controls.insert(inner_id, RefCell::new(control) );
                     self.control_events.insert(inner_id, event_collection);
+                    self.handle_inner_map.insert(handle_hash, inner_id);
 
                     ::std::mem::forget(tmp_ui);
 
@@ -143,8 +144,12 @@ impl<ID: Hash+Clone> UiInner<ID> {
             let tmp_ui: Ui<ID> = Ui{inner: self as *mut UiInner<ID>};
             match params.value.build(&tmp_ui) {
                 Ok(resource) => {
+                    let handle_hash = UiInner::<ID>::hash_handle(&resource.handle());
+
                     self.inner_public_map.insert(inner_id, (params.id, params.value.type_id()));
                     self.resources.insert(inner_id, RefCell::new(resource) );
+                    self.handle_inner_map.insert(handle_hash, inner_id);
+
                     ::std::mem::forget(tmp_ui);
                     None
                 },
@@ -153,7 +158,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
         }
     }
 
-    fn unpack_control(&mut self, id: u64) -> Option<Error> {
+    fn unpack_control(&mut self, id: InnerId) -> Option<Error> {
         use low::events::unhook_window_events;
         use low::menu_helper::{list_menu_children, free_menu_data, free_menu_item_data};
         use low::window_helper::list_window_children;
@@ -197,11 +202,14 @@ impl<ID: Hash+Clone> UiInner<ID> {
             // Call the destroy callbacks
             self.trigger(*id, Event::Destroyed, EventArgs::None);
 
-            // Removes stuffs
-            let (_, tid) = self.inner_public_map.remove(&id).unwrap();
+            // Removes stuff
+            self.inner_public_map.remove(&id).unwrap();
             self.control_events.remove(&id).unwrap();
             let control = self.controls.remove(&id).unwrap();
             let mut control = control.into_inner();
+
+            let handle_hash = *self.handle_inner_map.iter().find(|&(_, ref v)| *v == id).expect("Could not match handle while unpacking control").0;
+            self.handle_inner_map.remove(&handle_hash);
 
             // Unhook the events dispatcher if its a window
             match control.handle() {
@@ -219,7 +227,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
         None
     }
 
-    fn unpack_resource(&mut self, id: u64) -> Option<Error> {
+    fn unpack_resource(&mut self, id: InnerId) -> Option<Error> {
         // Check if the resource is currently borrowed by the user
         if let Err(_) = self.resources.get(&id).unwrap().try_borrow_mut() { 
             return Some(Error::ResourceInUse);
@@ -236,7 +244,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
         None
     }
 
-    fn unpack_user_value(&mut self, id: u64) -> Option<Error> {
+    fn unpack_user_value(&mut self, id: InnerId) -> Option<Error> {
         if let Err(_) = self.user_values.get(&id).unwrap().try_borrow_mut() { 
             return Some(Error::ControlInUse);
         }
@@ -327,7 +335,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
         }
     }
 
-    pub fn trigger(&mut self, id: u64, event: Event, args: EventArgs) -> Option<Error> {
+    pub fn trigger(&mut self, id: InnerId, event: Event, args: EventArgs) -> Option<Error> {
 
         let pub_id = match self.inner_public_map.get_mut(&id) {
             Some(&mut (ref pub_id, _)) => pub_id.clone(),
@@ -357,9 +365,9 @@ impl<ID: Hash+Clone> UiInner<ID> {
         None
     }
 
-    pub fn handle_of(&self, id: u64) -> Result<AnyHandle, Error> {
+    pub fn handle_of(&self, id: InnerId) -> Result<AnyHandle, Error> {
         if !self.inner_public_map.contains_key(&id) {
-            return Some(Error::KeyNotFound);
+            return Err(Error::KeyNotFound);
         }
         
         if let Some(v) = self.controls.get(&id) {
@@ -382,16 +390,30 @@ impl<ID: Hash+Clone> UiInner<ID> {
     }
 
     #[inline(always)]
-    pub fn types_matches(&self, &id: u64, tid: TypeId) -> bool {
+    pub fn inner_id_from_handle(&self, handle: &AnyHandle) -> InnerId {
+        *self.handle_inner_map.get(&UiInner::<ID>::hash_handle(handle)).expect("Could not find ID while matching Windows handle")
+    }
+
+    #[inline(always)]
+    pub fn types_matches(&self, id: &InnerId, tid: TypeId) -> bool {
         self.inner_public_map.get(id).unwrap().1 == tid
     }
 
     #[inline(always)]
-    fn hash_id(id: &ID) -> u64 {
+    fn hash_id(id: &ID) -> InnerId {
         use std::hash::Hasher;
         use std::collections::hash_map::{DefaultHasher};
         let mut s1 = DefaultHasher::new();
         id.hash(&mut s1);
+        s1.finish()
+    }
+
+    #[inline(always)]
+    fn hash_handle(handle: &AnyHandle) -> InnerId {
+        use std::hash::Hasher;
+        use std::collections::hash_map::{DefaultHasher};
+        let mut s1 = DefaultHasher::new();
+        handle.hash(&mut s1);
         s1.finish()
     }
 
@@ -512,7 +534,7 @@ impl<ID:Hash+Clone> Ui<ID> {
         use low::defs::{NWG_UNPACK};
         
         let inner = unsafe{ &mut *self.inner };
-        let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
+        let inner_id = UiInner::hash_id(id);
         let data = UnpackArgs{ id: inner_id };
         inner.messages.post(self.inner, NWG_UNPACK, Box::new(data) as Box<Any> );
     }

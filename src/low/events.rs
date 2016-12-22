@@ -26,36 +26,29 @@ use winapi::{HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, DWORD};
 
 use ui::UiInner;
 use events::{Event, EventArgs};
-use controls::{Control, ControlType};
+use controls::{ControlType, AnyHandle};
 
 /// A magic number to identify the NWG subclass that dispatches events
 const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
 
-/// A structure saved in a subclass to retrieve the ui in the callback
-struct UiInnerWithId<ID: Hash+Clone+'static> {
-  pub inner: *mut UiInner<ID>,
-  pub id: u64,
-}
-
-
-unsafe fn parse_listbox_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, id: u64, ncode: u32) {
+unsafe fn parse_listbox_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
   use low::defs::{LBN_SELCHANGE, LBN_DBLCLK, LBN_SETFOCUS, LBN_KILLFOCUS};
 
   match ncode {
-    LBN_SELCHANGE => { ui.trigger(id, Event::SelectionChanged, EventArgs::None); },
-    LBN_DBLCLK => { ui.trigger(id, Event::DoubleClick, EventArgs::None); },
-    LBN_SETFOCUS | LBN_KILLFOCUS => { ui.trigger(id, Event::Focus, EventArgs::Focus(ncode==LBN_SETFOCUS)); },
-    _ => {}
+    LBN_SELCHANGE => Some((id, Event::SelectionChanged, EventArgs::None)),
+    LBN_DBLCLK => Some((id, Event::DoubleClick, EventArgs::None)),
+    LBN_SETFOCUS | LBN_KILLFOCUS => Some((id, Event::Focus, EventArgs::Focus(ncode==LBN_SETFOCUS))),
+    _ => None
   }
 }
 
-unsafe fn parse_button_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, id: u64, ncode: u32) {
+unsafe fn parse_button_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
   use low::defs::{BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS};
   match ncode {
-    BN_CLICKED => { ui.trigger(id, Event::Click, EventArgs::None); },
-    BN_DBLCLK => { ui.trigger(id, Event::DoubleClick, EventArgs::None); },
-    BN_SETFOCUS | BN_KILLFOCUS => { ui.trigger(id, Event::Focus, EventArgs::Focus(ncode==BN_SETFOCUS)); },
-    _ => {}
+    BN_CLICKED => Some((id, Event::Click, EventArgs::None)),
+    BN_DBLCLK => Some((id, Event::DoubleClick, EventArgs::None)),
+    BN_SETFOCUS | BN_KILLFOCUS => Some((id, Event::Focus, EventArgs::Focus(ncode==BN_SETFOCUS))),
+    _ => None
   }
 }
 
@@ -63,23 +56,14 @@ unsafe fn parse_button_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, id:
   Parse the common controls notification passed through the `WM_COMMAND` message.
 */
 #[inline(always)]
-unsafe fn parse_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, w: WPARAM, l: LPARAM) {
+unsafe fn parse_command(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, Event, EventArgs)> {
   use winapi::HIWORD;
 
-  if l == 0 { return; }
-  
-  // Extract data from params
   let ncode = HIWORD(w as DWORD) as u32;
-  let nhandle: HWND = mem::transmute(l);
-
-  let id = match window_id(nhandle, ui) { Some(id) => id, _ => { return; } };
-  let tid = ui.inner_public_map.get(&id).expect("A window ID was not found in its Ui").1;
-  let control: *mut Box<Control> = ui.controls.get(&tid).expect("Could not find a control with with the specified type ID").as_ptr();
-  
-  match (&mut *control).control_type() {
-    ControlType::ListBox => parse_listbox_command(ui, id, ncode),
-    ControlType::Button => parse_button_command(ui, id, ncode),
-    _ => {}
+  match control_type {
+    ControlType::ListBox => parse_listbox_command(id, ncode),
+    ControlType::Button => parse_button_command(id, ncode),
+    _ => None
   }
 }
 
@@ -92,57 +76,55 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
   use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, WM_LBUTTONUP, WM_LBUTTONDOWN, 
     WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, WM_COMMAND, c_int};
 
-  match msg {
+  let inner: &mut UiInner<ID> = mem::transmute(data);
+  let inner_id: u64;
+
+  let callback_data = match msg {
     WM_COMMAND => {
-      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
-      parse_command((&mut *ui.inner), w, l);
+      if l == 0 { None }
+      else {
+        let nhandle: HWND = mem::transmute(l);
+        let id = inner.inner_id_from_handle( &AnyHandle::HWND(nhandle) );
+        let control_type = (&mut *inner.controls.get(&id).expect("Could not find a control with with the specified type ID").as_ptr()).control_type();
+        parse_command(id, control_type, w)
+      }
     },
     WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP => {
-      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
-      let (inner, id) = (ui.inner, ui.id);
-
-      (&mut *inner).trigger(id, Event::MouseUp, parse_mouse_click(msg, l));
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
+      Some( (inner_id, Event::MouseUp, parse_mouse_click(msg, l)) )
     },
     WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => {
-      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
-      let (inner, id) = (ui.inner, ui.id);
-
-      (&mut *inner).trigger(id, Event::MouseDown, parse_mouse_click(msg, l));
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
+      Some( (inner_id, Event::MouseDown, parse_mouse_click(msg, l)) )
     },
     WM_KEYDOWN | WM_KEYUP => {
-      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
-      let (inner, id) = (ui.inner, ui.id);
-
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
       let evt = if msg == WM_KEYDOWN { Event::KeyDown } else { Event::KeyUp };
-
-      (&mut *inner).trigger(id, evt, EventArgs::Key(w as u32));
+      Some( (inner_id, evt, EventArgs::Key(w as u32)) )
     },
     WM_MENUCOMMAND => {
-      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
-      let inner = ui.inner;
-      let id = ::low::menu_helper::get_menu_id( mem::transmute(l), w as c_int );
-
-      (&mut *inner).trigger(id, Event::Click, EventArgs::None);
+      panic!("TODO EVENTS MENU!");
+      inner_id = ::low::menu_helper::get_menu_id( mem::transmute(l), w as c_int );
+      Some( (inner_id, Event::Click, EventArgs::None) )
     },
     WM_UNICHAR | WM_CHAR => {
-      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
-      let (inner, id) = (ui.inner, ui.id);
-
-      if w == UNICODE_NOCHAR {
-        return 1;
-      } 
-
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
+      if w == UNICODE_NOCHAR { return 1; } 
       if let Some(c) = ::std::char::from_u32(w as u32) {
-        (&mut *inner).trigger(id, Event::Char, EventArgs::Char( c ));
+        Some( (inner_id, Event::Char, EventArgs::Char( c )) )
+      } else {
+        None
       }
     },
     WM_CLOSE => {
-      let ui: &mut UiInnerWithId<ID> = mem::transmute(data);
-      let (inner, id) = (ui.inner, ui.id);
-
-      (&mut *inner).trigger(id, Event::Closed, EventArgs::None);
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
+      Some( (inner_id, Event::Closed, EventArgs::None) )
     },
-    _ => { }
+    _ => { None }
+  };
+
+  if let Some((inner_id, evt, params)) = callback_data {
+    inner.trigger(inner_id, evt, params);
   }
 
   DefSubclassProc(hwnd, msg, w, l)
@@ -151,16 +133,14 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
 /**
     Add a subclass that dispatches the system event to the application callbacks to a window control.
 */
-pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, id: u64, handle: HWND) { unsafe {
+pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, handle: HWND) { unsafe {
   use comctl32::SetWindowSubclass;
 
   // While definitely questionable in term of safeness, the reference to the UiInner is actually (always)
   // a raw pointer belonging to a Ui. Also, when the Ui goes out of scope, every window control
   // gets destroyed BEFORE the UiInner, this guarantees that uinner lives long enough.
   let ui_inner_raw: *mut UiInner<ID> = uiinner as *mut UiInner<ID>;
-  let data: *mut UiInnerWithId<ID> = Box::into_raw(Box::new(UiInnerWithId{ inner: ui_inner_raw, id: id }));
-
-  SetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, mem::transmute(data));
+  SetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, mem::transmute(ui_inner_raw));
 }}
 
 /**
@@ -172,7 +152,6 @@ pub fn unhook_window_events<ID: Hash+Clone+'static>(handle: HWND) { unsafe {
 
   let mut data: DWORD_PTR = 0;
   if GetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, &mut data) == TRUE {
-    Box::from_raw(mem::transmute::<_, *mut UiInnerWithId<ID>>(data));
     RemoveWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID);
   }
 }}
@@ -186,9 +165,9 @@ pub unsafe fn window_id<ID: Clone+Hash>(handle: HWND, inner_ref: *mut UiInner<ID
 
   let mut data: DWORD_PTR = 0;
   if GetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, &mut data) == TRUE {
-    let data: &mut UiInnerWithId<ID> = mem::transmute(data);
-    if data.inner == inner_ref {
-      Some(data.id)
+    let data: *mut UiInner<ID> = mem::transmute(data);
+    if data == inner_ref {
+      panic!("TODO");
     } else {
       None
     }
