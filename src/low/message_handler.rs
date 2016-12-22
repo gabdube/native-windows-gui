@@ -144,11 +144,13 @@ unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND
     use user32::{DefWindowProcW};
     use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, NWG_UNPACK, NWG_BIND, NWG_UNBIND, NWG_PACK_RESOURCE, COMMIT_SUCCESS, COMMIT_FAILED};
     use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs, UnbindArgs, PackResourceArgs};
+    use winapi::WM_TIMER;
 
     let ui: &mut UiInner<ID> = mem::transmute(w);
     let args: *mut *mut Any = mem::transmute::<LPARAM, *mut *mut Any>(l);
 
-    let (processed, error): (bool, Option<Error>) = match msg {
+    // Eval NWG messages
+    let (mut processed, error): (bool, Option<Error>) = match msg {
         NWG_PACK_USER_VALUE => {
             let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<PackUserValueArgs<ID>>() {
@@ -199,6 +201,16 @@ unsafe extern "system" fn message_window_proc<ID: Clone+Hash+'static>(hwnd: HWND
         },
         _ => (false, None)
     };
+
+    // Evaluates other messages
+    processed |= match msg {
+        WM_TIMER => {
+            
+            true
+        },
+        _ => {false}
+    };
+
 
     if processed {
         if error.is_some() {

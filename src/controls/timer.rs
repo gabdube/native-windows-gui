@@ -19,7 +19,8 @@
 */
 use std::hash::Hash;
 use std::any::TypeId;
-use std::time::Duration;
+
+use winapi::{HWND, UINT_PTR, UINT, DWORD};
 
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
@@ -27,38 +28,74 @@ use error::Error;
 use events::Event;
 
 /**
-    A template that creates a timer.
+    A template that creates a timer. Note that because the timer callbacks must be added AFTER
+    its creation, it cannot start automatically.
 
     Members:  
-    • `interval`: The timer interval
-    • `running`: If the timer should starts right away
-    • `once`: If the timer should stop itself after ticking
+    • `interval`: The timer interval in miliseconds
+    • `repeat`: If the timer should automatically restart after the interval
 */
 #[derive(Clone)]
 pub struct TimerT {
-    pub interval: Duration,
-    pub running: bool,
-    pub once: bool
+    pub interval: u32,
+    pub repeat: bool
 }
 
 impl<ID: Hash+Clone> ControlT<ID> for TimerT {
     fn type_id(&self) -> TypeId { TypeId::of::<Timer>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Click]
+        vec![Event::Destroyed, Event::Tick]
     }
 
-    #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        //if self.running & self.once
-        Ok(Box::new(Timer))
+        Ok(Box::new(Timer{
+            watcher: unsafe{ ui.message_handle() },
+            interval: self.interval,
+            id: None,
+            //repeat: self.repeat
+        }))
     }
 }
 
 /**
     A timer control
 */
-pub struct Timer;
+pub struct Timer {
+    pub watcher: HWND,         // The watcher of a built-in timer is always its Ui. This way, the watcher cannot be freed before the timer.
+    pub id: Option<UINT_PTR>,  // If the timer is not running, id is None.
+    pub interval: u32,
+    //pub repeat: bool
+}
+
+impl Timer {
+
+    /**
+        Start the timer
+    */
+    pub fn start(&mut self) {
+        use user32::SetTimer;
+        self.id = unsafe{ Some( SetTimer(self.watcher, 0, self.interval, Some(timer_callback)) ) };
+    }
+
+    /**
+        Stop the timer
+    */
+    pub fn stop(&mut self) {
+        use user32::KillTimer;
+        if let Some(id) = self.id.take() {
+            unsafe{ KillTimer(self.watcher, id); }
+        }
+    }
+
+    /**
+        Check if the timer is running. Return `true` if it is or `false` otherwise
+    */
+    pub fn running(&self) -> bool {
+        self.id.is_some()
+    }
+
+}
 
 impl Control for Timer {
 
@@ -71,7 +108,15 @@ impl Control for Timer {
     }
 
     fn free(&mut self) {
-        /* TODO */
+        use user32::KillTimer;
+        if let Some(id) = self.id.take() {
+            unsafe{ KillTimer(self.watcher, id); }
+        }
     }
+
+}
+
+#[allow(unused_variables, non_snake_case)]
+unsafe extern "system" fn timer_callback(hwnd: HWND, uMsg: UINT, idEvent: UINT_PTR, dwTime: DWORD) {
 
 }

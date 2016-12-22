@@ -694,7 +694,8 @@ impl<ID:Hash+Clone> Ui<ID> {
         Note: This might get removed if `Control` gets implemented for Uis *wink* *wink*
     */
     pub unsafe fn message_handle(&self) -> ::winapi::HWND {
-        self.messages.hwnd
+        let inner = &mut (&*self.inner);
+        inner.messages.hwnd
     }
 
 }

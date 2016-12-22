@@ -1,7 +1,7 @@
 extern crate native_windows_gui as nwg;
 
 use nwg::{Ui, Event, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, 
-  RadioButtonT, LabelT, dispatch_events, exit as nwg_exit};
+  RadioButtonT, LabelT, TimerT, dispatch_events, exit as nwg_exit};
 use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, FONT_DECO_NORMAL, FONT_WEIGHT_NORMAL,
   CheckState, HTextAlign};
 
@@ -22,7 +22,7 @@ fn setup_controls(app: &Ui<&'static str>) {
     app.pack_control(&"QuitItem", MenuItemT{ text: "&Quit", parent: "FileMenu" });
 
     app.pack_control(&"TestButton", ButtonT{
-        text: "A button",
+        text: "Start timer",
         position:(10, 10), size: (100, 30),
         visible: true, disabled: false,
         parent: "MainWindow",
@@ -75,21 +75,33 @@ fn setup_controls(app: &Ui<&'static str>) {
         font: None 
     });
 
-    app.pack_control(&"", LabelT{
-       text: "Current time: 00:00",
+    app.pack_control(&"TimeLabel", LabelT{
+        text: "Current time: 00:00",
         position:(120, 90), size: (150, 100),
         visible: true, disabled: false,
         align: HTextAlign::Left,
         parent: "MainWindow",
         font: Some("Font1")
     });
+
+    app.pack_control(&"UpdateTimeLabel", TimerT {
+        interval: 1000,
+        repeat: false
+    });
+
 }
 
 
 fn setup_callbacks(app: &Ui<&'static str>) {
 
     app.bind(&"TestButton", &"...", Event::Click, |app,_,_,_|{
-        println!("{:?}", app.get::<nwg::CheckBox>(&"TestCheckBox2").unwrap().get_checkstate());
+        let mut timer = app.get_mut::<nwg::Timer>(&"UpdateTimeLabel").unwrap();
+        timer.start();
+    });
+
+    app.bind(&"UpdateTimeLabel", &"...", Event::Tick, |app,_,_,_|{
+        let label = app.get::<nwg::Label>(&"TimeLabel").unwrap();
+        label.set_text("TEST");
     });
 
     app.bind(&"QuitItem", &"Quit", Event::Click, |_,_,_,_|{

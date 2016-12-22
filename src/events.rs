@@ -41,7 +41,8 @@ pub enum Event {
     MouseUp,
     MouseDown,
     SelectionChanged,
-    Focus
+    Focus,
+    Tick
 }
 
 /**
