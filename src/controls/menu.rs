@@ -216,12 +216,15 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
             }
 
             let text = to_utf16(t.text.clone().into().as_ref());
-            let new_id = menu_items_id;
+            let ensure_id_stays_the_same = menu_items_id;
 
-            AppendMenuW(menubar, MF_STRING, new_id as UINT_PTR, text.as_ptr());
+            AppendMenuW(menubar, MF_STRING, ensure_id_stays_the_same as UINT_PTR, text.as_ptr());
             DrawMenuBar(parent_h); // Draw the menu bar to make sure the changes are visible
 
-            Ok( (menubar, new_id) )
+            // WATCH OUT HERE!!! Calling `DrawMenuBar` (or maybe AppendMenuW) made the menu_items_id value corrupted (which in turn f* the whole menuitem system)
+            // Saving the id in its own little variable saved the day
+
+            Ok( (menubar, ensure_id_stays_the_same) )
         },
         AnyHandle::HMENU(parent_h) => {
             let text = to_utf16(t.text.clone().into().as_ref());
