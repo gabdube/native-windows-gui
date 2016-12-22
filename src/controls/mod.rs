@@ -47,7 +47,7 @@ use error::Error;
 /**
     A type that expose the different underlying handle into one type
 */
-#[derive(Clone, Hash)]
+#[derive(Clone, Hash, Debug)]
 #[allow(non_camel_case_types)]
 pub enum AnyHandle {
     HWND(HWND),

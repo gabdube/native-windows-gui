@@ -41,7 +41,6 @@ macro_rules! test_size {
         {
             let x = $ui.get::<$t>($id).expect("Failed to get the control");
             x.set_size(200, 200);
-            println!("{:?}", x.get_size());
             assert!(x.get_size() == (200, 200), "Window size do not match");
         }
     );
@@ -49,7 +48,6 @@ macro_rules! test_size {
         {
             let x = $ui.get::<$t>($id).expect("Failed to get the control");
             x.set_size(200, 200);
-            println!("{:?}", x.get_size());
             assert!(x.get_size() == $d, "Window size do not match");
         }
     )

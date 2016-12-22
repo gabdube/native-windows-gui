@@ -97,7 +97,6 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     pub fn pack_control(&mut self, params: PackControlArgs<ID>) -> Option<Error> {
         use low::events::hook_window_events;
-        use low::menu_helper::{init_menu_data, init_menu_item_data};
 
         let inner_id = UiInner::hash_id(&params.id);
         if self.inner_public_map.contains_key(&inner_id) {
@@ -107,12 +106,10 @@ impl<ID: Hash+Clone> UiInner<ID> {
             match params.value.build(&tmp_ui) {
                 Ok(control) => {
                     let handle_hash = UiInner::<ID>::hash_handle(&control.handle());
+                    //println!("BUILT item {:?}", control.handle());
                     match control.handle() {
                         AnyHandle::HWND(h) => hook_window_events(self, h), // Hook the window events if the handle is a HWND
-                        AnyHandle::HMENU(h) => init_menu_data(h, inner_id),          // Save the id in the menu
-                        AnyHandle::HMENU_ITEM(parent_h, uid) => init_menu_item_data(parent_h, uid, inner_id),
-                        AnyHandle::HFONT(_) => {/* Nothing to initialize for resources */}
-                        AnyHandle::None | AnyHandle::Custom(_) =>  {/* Nothing to initialize for custom controls*/}
+                        _ => { /* Nothing to do for the other controls */}
                     }
 
                     // Init events
@@ -160,7 +157,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     fn unpack_control(&mut self, id: InnerId) -> Option<Error> {
         use low::events::unhook_window_events;
-        use low::menu_helper::{list_menu_children, free_menu_data, free_menu_item_data};
+        use low::menu_helper::{list_menu_children};
         use low::window_helper::list_window_children;
        
 
@@ -186,7 +183,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
         let children_ids: Vec<u64> = match handle.unwrap() {
             AnyHandle::HMENU(h) => unsafe {
                 let mut children = vec![id];
-                children.append( &mut list_menu_children(h) );
+                children.append( &mut list_menu_children(self, h) );
                 children
             },
             AnyHandle::HWND(h) => unsafe { 
@@ -214,9 +211,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
             // Unhook the events dispatcher if its a window
             match control.handle() {
                 AnyHandle::HWND(h) => unhook_window_events::<ID>(h),
-                AnyHandle::HMENU(h) => free_menu_data(h),
-                AnyHandle::HMENU_ITEM(parent_h, uid) => { free_menu_item_data(parent_h, uid) },
-                AnyHandle::HFONT(_) | AnyHandle::None | AnyHandle::Custom(_) => {/* Nothing to free in resources */}
+                _ => {/* Nothing to free here */}
             };
             
             // Free the control custom resources
@@ -391,7 +386,12 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     #[inline(always)]
     pub fn inner_id_from_handle(&self, handle: &AnyHandle) -> InnerId {
-        *self.handle_inner_map.get(&UiInner::<ID>::hash_handle(handle)).expect("Could not find ID while matching Windows handle")
+
+        if let Some(id) = self.handle_inner_map.get(&UiInner::<ID>::hash_handle(handle)) {
+            *id 
+        } else {
+            panic!("Couldn't match the handle {:?} to a inner ID", handle);
+        }
     }
 
     #[inline(always)]

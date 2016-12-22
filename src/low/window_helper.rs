@@ -180,7 +180,7 @@ pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInne
 
     let menu = GetMenu(handle);
     if !menu.is_null() {
-        children.append(&mut list_menu_children(menu) );
+        children.append(&mut list_menu_children((&*ui), menu) );
     }
 
     let mut params: (*mut UiInner<ID>, Vec<u64>) = (ui, children);

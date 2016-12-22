@@ -204,6 +204,8 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
     let ph_result = ui.handle_of(&t.parent);
     if ph_result.is_err() { return Err(ph_result.err().unwrap()); }
 
+    menu_items_id += 1;
+
     match ph_result.unwrap() {
         AnyHandle::HWND(parent_h) => {
             let mut menubar = GetMenu(parent_h);
@@ -214,12 +216,12 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
             }
 
             let text = to_utf16(t.text.clone().into().as_ref());
-            menu_items_id += 1;
-            AppendMenuW(menubar, MF_STRING, menu_items_id as UINT_PTR, text.as_ptr());
+            let new_id = menu_items_id;
 
+            AppendMenuW(menubar, MF_STRING, new_id as UINT_PTR, text.as_ptr());
             DrawMenuBar(parent_h); // Draw the menu bar to make sure the changes are visible
-        
-            Ok( (menubar, menu_items_id) )
+
+            Ok( (menubar, new_id) )
         },
         AnyHandle::HMENU(parent_h) => {
             let text = to_utf16(t.text.clone().into().as_ref());

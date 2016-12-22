@@ -22,7 +22,7 @@ use std::mem;
 use std::ptr;
 use std::hash::Hash;
 
-use winapi::{HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, DWORD};
+use winapi::{HWND, HMENU, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, DWORD};
 
 use ui::UiInner;
 use events::{Event, EventArgs};
@@ -75,6 +75,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
   use comctl32::{DefSubclassProc};
   use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, WM_LBUTTONUP, WM_LBUTTONDOWN, 
     WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, WM_COMMAND, c_int};
+  use low::menu_helper::get_menu_id;
 
   let inner: &mut UiInner<ID> = mem::transmute(data);
   let inner_id: u64;
@@ -103,8 +104,9 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       Some( (inner_id, evt, EventArgs::Key(w as u32)) )
     },
     WM_MENUCOMMAND => {
-      panic!("TODO EVENTS MENU!");
-      inner_id = ::low::menu_helper::get_menu_id( mem::transmute(l), w as c_int );
+      let parent_menu: HMENU = mem::transmute(l);
+      let handle = AnyHandle::HMENU_ITEM(parent_menu, get_menu_id(parent_menu, w as c_int));
+      inner_id = inner.inner_id_from_handle( &handle );
       Some( (inner_id, Event::Click, EventArgs::None) )
     },
     WM_UNICHAR | WM_CHAR => {
@@ -167,7 +169,7 @@ pub unsafe fn window_id<ID: Clone+Hash>(handle: HWND, inner_ref: *mut UiInner<ID
   if GetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, &mut data) == TRUE {
     let data: *mut UiInner<ID> = mem::transmute(data);
     if data == inner_ref {
-      panic!("TODO");
+      Some( (&*data).inner_id_from_handle( &AnyHandle::HWND(handle) ) )
     } else {
       None
     }
