@@ -33,20 +33,34 @@ use resources::{ResourceT, Resource};
 use events::{Event, EventCallback, EventArgs};
 use error::Error;
 
+type InnerId = u64;
+type HandleHash = u64;
+
 pub type BoxedCallback<ID> = Box<EventCallback<ID>>;
-pub type CallbackCollection<ID> = Rc<Vec<(u64, BoxedCallback<ID>)>>;
+pub type CallbackCollection<ID> = Rc<Vec<(InnerId, BoxedCallback<ID>)>>;
 pub type EventCollection<ID> = HashMap<Event, CallbackCollection<ID>>;
+
 
 /**
     Inner window data shared within the thread
 */
 pub struct UiInner<ID: Hash+Clone+'static> {
+    // Underlying message only window that process the Ui events and some other windows events not tied to windows (ex: WM_TIMER)
     pub messages: MessageHandler<ID>,
-    pub controls: HashMap<u64, RefCell<Box<Control>>>,
-    pub control_events: HashMap<u64, EventCollection<ID>>,
-    pub resources: HashMap<u64, RefCell<Box<Resource>>>,
-    pub user_values: HashMap<u64, RefCell<Box<Any>>>,
-    pub ids_map: HashMap<u64, (ID, u64)>,
+
+    // Map of inner id to a cell containing the control. TODO remove box (cell are ?sized)
+    pub controls: HashMap<InnerId, RefCell<Box<Control>>>,
+    pub resources: HashMap<InnerId, RefCell<Box<Resource>>>,
+    pub user_values: HashMap<InnerId, RefCell<Box<Any>>>,
+
+    // Map the a control events.
+    pub control_events: HashMap<InnerId, EventCollection<ID>>,
+
+    // Map the ui inner id to a tuple of (Public ID, TypeID). Used triggering callbacks and with `get` for type checking
+    pub inner_public_map: HashMap<InnerId, (ID, TypeId)>,
+
+    // Map the handle of the controls to its ui inner id. Used when matching controls from within the events proc
+    pub handle_inner_map: HashMap<HandleHash, InnerId>
 }
 
 impl<ID: Hash+Clone> UiInner<ID> {
@@ -66,16 +80,17 @@ impl<ID: Hash+Clone> UiInner<ID> {
             controls: HashMap::with_capacity(32),
             control_events: HashMap::with_capacity(32),
             resources: HashMap::with_capacity(16),
-            ids_map: HashMap::with_capacity(64) })
+            inner_public_map: HashMap::with_capacity(64),
+            handle_inner_map: HashMap::with_capacity(32) })
     }
 
     pub fn pack_user_value(&mut self, params: PackUserValueArgs<ID>) -> Option<Error> {
-        let (inner_id, inner_type_id) = UiInner::hash_id(&params.id, &params.tid);
-        if self.ids_map.contains_key(&inner_id) {
+        let inner_id = UiInner::hash_id(&params.id);
+        if self.inner_public_map.contains_key(&inner_id) {
             Some(Error::KeyExists)
         } else {
-            self.ids_map.insert(inner_id, (params.id, inner_type_id) );
-            self.user_values.insert(inner_type_id, RefCell::new(params.value));
+            self.inner_public_map.insert(inner_id, (params.id, params.tid) );
+            self.user_values.insert(inner_id, RefCell::new(params.value));
             None
         }
     }
@@ -83,9 +98,9 @@ impl<ID: Hash+Clone> UiInner<ID> {
     pub fn pack_control(&mut self, params: PackControlArgs<ID>) -> Option<Error> {
         use low::events::hook_window_events;
         use low::menu_helper::{init_menu_data, init_menu_item_data};
-            
-        let (inner_id, inner_type_id) = UiInner::hash_id(&params.id, &params.value.type_id());
-        if self.ids_map.contains_key(&inner_id) {
+
+        let inner_id = UiInner::hash_id(&params.id);
+        if self.inner_public_map.contains_key(&inner_id) {
             Some(Error::KeyExists)
         } else {
             let tmp_ui: Ui<ID> = Ui{inner: self as *mut UiInner<ID>};
@@ -97,7 +112,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                         AnyHandle::HMENU(h) => init_menu_data(h, inner_id),          // Save the id in the menu
                         AnyHandle::HMENU_ITEM(parent_h, uid) => init_menu_item_data(parent_h, uid, inner_id),
                         AnyHandle::HFONT(_) => {/* Nothing to initialize for resources */}
-                        AnyHandle::None =>  {/* Nothing to initialize for control with no handle */}
+                        AnyHandle::None | AnyHandle::Custom(_) =>  {/* Nothing to initialize for custom controls*/}
                     }
 
                     // Init events
@@ -107,9 +122,9 @@ impl<ID: Hash+Clone> UiInner<ID> {
                         event_collection.insert(e, Rc::new(Vec::new()));
                     }
 
-                    self.ids_map.insert(inner_id, (params.id, inner_type_id));
-                    self.controls.insert(inner_type_id, RefCell::new(control) );
-                    self.control_events.insert(inner_type_id, event_collection);
+                    self.inner_public_map.insert(inner_id, (params.id, params.value.type_id()));
+                    self.controls.insert(inner_id, RefCell::new(control) );
+                    self.control_events.insert(inner_id, event_collection);
 
                     ::std::mem::forget(tmp_ui);
 
@@ -121,15 +136,15 @@ impl<ID: Hash+Clone> UiInner<ID> {
     }
 
     pub fn pack_resource(&mut self, params: PackResourceArgs<ID>) -> Option<Error> {
-        let (inner_id, inner_type_id) = UiInner::hash_id(&params.id, &params.value.type_id());
-        if self.ids_map.contains_key(&inner_id) {
+        let inner_id = UiInner::hash_id(&params.id);
+        if self.inner_public_map.contains_key(&inner_id) {
             Some(Error::KeyExists)
         } else {
             let tmp_ui: Ui<ID> = Ui{inner: self as *mut UiInner<ID>};
             match params.value.build(&tmp_ui) {
                 Ok(resource) => {
-                    self.ids_map.insert(inner_id, (params.id, inner_type_id));
-                    self.resources.insert(inner_type_id, RefCell::new(resource) );
+                    self.inner_public_map.insert(inner_id, (params.id, params.value.type_id()));
+                    self.resources.insert(inner_id, RefCell::new(resource) );
                     ::std::mem::forget(tmp_ui);
                     None
                 },
@@ -138,20 +153,20 @@ impl<ID: Hash+Clone> UiInner<ID> {
         }
     }
 
-    fn unpack_control(&mut self, id: u64, tid: u64) -> Option<Error> {
+    fn unpack_control(&mut self, id: u64) -> Option<Error> {
         use low::events::unhook_window_events;
         use low::menu_helper::{list_menu_children, free_menu_data, free_menu_item_data};
         use low::window_helper::list_window_children;
        
 
         // Check if the control is currently borrowed by the user
-        if let Err(_) = self.controls.get(&tid).unwrap().try_borrow_mut() { 
+        if let Err(_) = self.controls.get(&id).unwrap().try_borrow_mut() { 
             return Some(Error::ControlInUse);
         }
 
         // Check if one of the control events is currently being executed
         {
-            let events_collection = self.control_events.get_mut(&tid).unwrap();
+            let events_collection = self.control_events.get_mut(&id).unwrap();
             for mut ec in events_collection.values_mut() {
                 if Rc::get_mut(&mut ec).is_none() {
                     return Some(Error::ControlInUse);
@@ -174,7 +189,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
                 children
             },
-            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) | AnyHandle::None => vec![id], // menu items / resources can't have children
+            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) | AnyHandle::None | AnyHandle::Custom(_) => vec![id], // menu items / resources can't have children
         };
        
         for id in children_ids.iter().rev() {
@@ -183,9 +198,9 @@ impl<ID: Hash+Clone> UiInner<ID> {
             self.trigger(*id, Event::Destroyed, EventArgs::None);
 
             // Removes stuffs
-            let (_, tid) = self.ids_map.remove(&id).unwrap();
-            self.control_events.remove(&tid).unwrap();
-            let control = self.controls.remove(&tid).unwrap();
+            let (_, tid) = self.inner_public_map.remove(&id).unwrap();
+            self.control_events.remove(&id).unwrap();
+            let control = self.controls.remove(&id).unwrap();
             let mut control = control.into_inner();
 
             // Unhook the events dispatcher if its a window
@@ -193,7 +208,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 AnyHandle::HWND(h) => unhook_window_events::<ID>(h),
                 AnyHandle::HMENU(h) => free_menu_data(h),
                 AnyHandle::HMENU_ITEM(parent_h, uid) => { free_menu_item_data(parent_h, uid) },
-                AnyHandle::HFONT(_) | AnyHandle::None => {/* Nothing to free in resources */}
+                AnyHandle::HFONT(_) | AnyHandle::None | AnyHandle::Custom(_) => {/* Nothing to free in resources */}
             };
             
             // Free the control custom resources
@@ -204,15 +219,15 @@ impl<ID: Hash+Clone> UiInner<ID> {
         None
     }
 
-    fn unpack_resource(&mut self, id: u64, tid: u64) -> Option<Error> {
+    fn unpack_resource(&mut self, id: u64) -> Option<Error> {
         // Check if the resource is currently borrowed by the user
-        if let Err(_) = self.resources.get(&tid).unwrap().try_borrow_mut() { 
+        if let Err(_) = self.resources.get(&id).unwrap().try_borrow_mut() { 
             return Some(Error::ResourceInUse);
         }
 
          // Removes stuffs
-        self.ids_map.remove(&id).unwrap();
-        let resource = self.resources.remove(&tid).unwrap();
+        self.inner_public_map.remove(&id).unwrap();
+        let resource = self.resources.remove(&id).unwrap();
         let mut resource = resource.into_inner();
         
         // Free the control custom resources
@@ -221,13 +236,13 @@ impl<ID: Hash+Clone> UiInner<ID> {
         None
     }
 
-    fn unpack_user_value(&mut self, id: u64, tid: u64) -> Option<Error> {
-        if let Err(_) = self.user_values.get(&tid).unwrap().try_borrow_mut() { 
+    fn unpack_user_value(&mut self, id: u64) -> Option<Error> {
+        if let Err(_) = self.user_values.get(&id).unwrap().try_borrow_mut() { 
             return Some(Error::ControlInUse);
         }
 
-        self.ids_map.remove(&id);
-        let value = self.user_values.remove(&tid).unwrap();
+        self.inner_public_map.remove(&id);
+        let value = self.user_values.remove(&id).unwrap();
         value.into_inner();
     
         None
@@ -237,16 +252,15 @@ impl<ID: Hash+Clone> UiInner<ID> {
         let id = params.id;
 
         // Test if everything is valid
-        if !self.ids_map.contains_key(&id) {
+        if !self.inner_public_map.contains_key(&id) {
             Some(Error::KeyNotFound)
         } else {
-            let tid = self.ids_map.get(&id).unwrap().1;
-            if self.controls.contains_key(&tid) {
-                self.unpack_control(id, tid)
-            } else if self.user_values.contains_key(&tid) {
-                self.unpack_user_value(id, tid)
-            } else if self.resources.contains_key(&tid) {
-                self.unpack_resource(id, tid)
+            if self.controls.contains_key(&id) {
+                self.unpack_control(id)
+            } else if self.user_values.contains_key(&id) {
+                self.unpack_user_value(id)
+            } else if self.resources.contains_key(&id) {
+                self.unpack_resource(id)
             } else {
                 Some(Error::BadType)
             }
@@ -256,13 +270,12 @@ impl<ID: Hash+Clone> UiInner<ID> {
     pub fn bind(&mut self, params: BindArgs<ID>) -> Option<Error> {
         let (id, cb_id, event, cb) = (params.id, params.cb_id, params.event, params.cb);
 
-        let tid = match self.ids_map.get(&id) {
-            Some(&(_, tid)) => tid,
-            None => { return Some(Error::KeyNotFound); }
-        };
+        if !self.inner_public_map.contains_key(&id) {
+            return Some(Error::KeyNotFound);
+        }
 
         // Get the event collection of the control
-        let events_collection = self.control_events.get_mut(&tid);
+        let events_collection = self.control_events.get_mut(&id);
         if events_collection.is_none() { return Some(Error::ControlRequired); }
 
         // Get the callback list for the requested event
@@ -287,13 +300,12 @@ impl<ID: Hash+Clone> UiInner<ID> {
     pub fn unbind(&mut self, params: UnbindArgs) -> Option<Error> {
         let (id, cb_id, event) = (params.id, params.cb_id, params.event);
 
-        let tid = match self.ids_map.get(&id) {
-            Some(&(_, tid)) => tid,
-            None => { return Some(Error::KeyNotFound); }
-        };
+        if !self.inner_public_map.contains_key(&id) {
+            return Some(Error::KeyNotFound);
+        }
 
         // Get the event collection of the control
-        let events_collection = self.control_events.get_mut(&tid);
+        let events_collection = self.control_events.get_mut(&id);
         if events_collection.is_none() { return Some(Error::ControlRequired); }
 
         // Get the callback list for the requested event
@@ -316,14 +328,15 @@ impl<ID: Hash+Clone> UiInner<ID> {
     }
 
     pub fn trigger(&mut self, id: u64, event: Event, args: EventArgs) -> Option<Error> {
-        let (pub_id, tid) = match self.ids_map.get_mut(&id) {
-            Some(&mut (ref pub_id, tid)) => (pub_id.clone(), tid),
+
+        let pub_id = match self.inner_public_map.get_mut(&id) {
+            Some(&mut (ref pub_id, _)) => pub_id.clone(),
             None => { return Some(Error::KeyNotFound); }
         };
 
         let callback_list = {
             // Get the event collection of the control
-            let events_collection = self.control_events.get_mut(&tid);
+            let events_collection = self.control_events.get_mut(&id);
             if events_collection.is_none() { return Some(Error::ControlRequired); }
 
             // The the callback list for the requested event
@@ -345,13 +358,11 @@ impl<ID: Hash+Clone> UiInner<ID> {
     }
 
     pub fn handle_of(&self, id: u64) -> Result<AnyHandle, Error> {
-        let tid = if let Some(v) = self.ids_map.get(&id) {
-            v.1
-        } else {
-            return Err(Error::KeyNotFound);
-        };
+        if !self.inner_public_map.contains_key(&id) {
+            return Some(Error::KeyNotFound);
+        }
         
-        if let Some(v) = self.controls.get(&tid) {
+        if let Some(v) = self.controls.get(&id) {
             if let Ok(v_ref) = v.try_borrow() {
                 return Ok( v_ref.handle() );
             } else {
@@ -359,7 +370,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
             }
         }
 
-        if let Some(v) = self.resources.get(&tid) {
+        if let Some(v) = self.resources.get(&id) {
             if let Ok(v_ref) = v.try_borrow() {
                 return Ok( v_ref.handle() );
             } else {
@@ -370,19 +381,18 @@ impl<ID: Hash+Clone> UiInner<ID> {
         Err(Error::ControlOrResourceRequired)
     }
 
-    fn hash_id(id: &ID, tid: &TypeId) -> (u64, u64) {
+    #[inline(always)]
+    pub fn types_matches(&self, &id: u64, tid: TypeId) -> bool {
+        self.inner_public_map.get(id).unwrap().1 == tid
+    }
+
+    #[inline(always)]
+    fn hash_id(id: &ID) -> u64 {
         use std::hash::Hasher;
         use std::collections::hash_map::{DefaultHasher};
-
         let mut s1 = DefaultHasher::new();
-        let mut s2 = DefaultHasher::new();
-
-        id.hash(&mut s2);
-        tid.hash(&mut s2);
-
         id.hash(&mut s1);
-
-        (s1.finish(), s2.finish())
+        s1.finish()
     }
 
 }
@@ -390,7 +400,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
 impl<ID: Hash+Clone> Drop for UiInner<ID> {
 
     fn drop(&mut self) {
-        let controls_ids: Vec<u64> = self.ids_map.keys().map(|k| *k).collect();
+        // TODO DROP RESSOURCES LAST
+        let controls_ids: Vec<u64> = self.inner_public_map.keys().map(|k| *k).collect();
         for id in controls_ids {
             self.unpack(UnpackArgs{id: id});
         }
@@ -523,11 +534,12 @@ impl<ID:Hash+Clone> Ui<ID> {
         use std::mem;
          
         let inner = unsafe{ &mut *self.inner };
-        let (inner_id, inner_type_id) = UiInner::hash_id(id, &TypeId::of::<T>());
+        let inner_id = UiInner::hash_id(id);
 
-        if !inner.ids_map.contains_key(&inner_id) { return Err(Error::KeyNotFound); }
+        if !inner.inner_public_map.contains_key(&inner_id) { return Err(Error::KeyNotFound); }
+        if !inner.types_matches(&inner_id, TypeId::of::<T>()) { return Err(Error::BadType); }
         
-        if let Some(v) = inner.user_values.get(&inner_type_id) {
+        if let Some(v) = inner.user_values.get(&inner_id) {
             let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
             if let Ok(v_ref) = v_casted.try_borrow() {
                 return Ok( v_ref );
@@ -536,7 +548,7 @@ impl<ID:Hash+Clone> Ui<ID> {
             }
         }
 
-        if let Some(v) = inner.controls.get(&inner_type_id) {
+        if let Some(v) = inner.controls.get(&inner_id) {
             let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
             if let Ok(v_ref) = v_casted.try_borrow() {
                 return Ok( v_ref );
@@ -545,7 +557,7 @@ impl<ID:Hash+Clone> Ui<ID> {
             }
         }
 
-        if let Some(v) = inner.resources.get(&inner_type_id) {
+        if let Some(v) = inner.resources.get(&inner_id) {
             let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
             if let Ok(v_ref) = v_casted.try_borrow() {
                 return Ok( v_ref );
@@ -554,7 +566,7 @@ impl<ID:Hash+Clone> Ui<ID> {
             }
         }
 
-        return Err(Error::BadType);
+        unreachable!()
     }
 
     /**
@@ -574,11 +586,12 @@ impl<ID:Hash+Clone> Ui<ID> {
         use std::mem;
          
         let inner = unsafe{ &mut *self.inner };
-        let (inner_id, inner_type_id) = UiInner::hash_id(id, &TypeId::of::<T>());
+        let inner_id = UiInner::hash_id(id);
 
-        if !inner.ids_map.contains_key(&inner_id) { return Err(Error::KeyNotFound); }
+        if !inner.inner_public_map.contains_key(&inner_id) { return Err(Error::KeyNotFound); }
+        if !inner.types_matches(&inner_id, TypeId::of::<T>()) { return Err(Error::BadType); }
         
-        if let Some(v) = inner.user_values.get(&inner_type_id) {
+        if let Some(v) = inner.user_values.get(&inner_id) {
             let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
             if let Ok(v_ref) = v_casted.try_borrow_mut() {
                 return Ok( v_ref );
@@ -587,7 +600,7 @@ impl<ID:Hash+Clone> Ui<ID> {
             }
         }
 
-        if let Some(v) = inner.controls.get(&inner_type_id) {
+        if let Some(v) = inner.controls.get(&inner_id) {
             let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
             if let Ok(v_ref) = v_casted.try_borrow_mut() {
                 return Ok( v_ref );
@@ -596,7 +609,7 @@ impl<ID:Hash+Clone> Ui<ID> {
             }
         }
 
-        if let Some(v) = inner.resources.get(&inner_type_id) {
+        if let Some(v) = inner.resources.get(&inner_id) {
             let v_casted: &RefCell<Box<T>> = unsafe{mem::transmute(v)};
             if let Ok(v_ref) = v_casted.try_borrow_mut() {
                 return Ok( v_ref );
@@ -605,7 +618,7 @@ impl<ID:Hash+Clone> Ui<ID> {
             }
         }
 
-        return Err(Error::BadType);
+        unreachable!()
     }
 
     /**
@@ -632,8 +645,7 @@ impl<ID:Hash+Clone> Ui<ID> {
         use low::defs::{NWG_BIND};
         
         let inner = unsafe{ &mut *self.inner };
-        let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
-        let (cb_inner_id, _) = UiInner::hash_id(cb_id, &TypeId::of::<()>());
+        let (inner_id, cb_inner_id) = (UiInner::hash_id(id), UiInner::hash_id(cb_id));
         let data = BindArgs{ id: inner_id, cb_id: cb_inner_id, event: event, cb: Box::new(cb)};
         inner.messages.post(self.inner, NWG_BIND, Box::new(data) as Box<Any> );
     }
@@ -654,8 +666,7 @@ impl<ID:Hash+Clone> Ui<ID> {
         use low::defs::{NWG_UNBIND};
         
         let inner = unsafe{ &mut *self.inner };
-        let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
-        let (cb_inner_id, _) = UiInner::hash_id(cb_id, &TypeId::of::<()>());
+        let (inner_id, cb_inner_id) = (UiInner::hash_id(id), UiInner::hash_id(cb_id));
         let data = UnbindArgs{ id: inner_id, cb_id: cb_inner_id, event: event};
         inner.messages.post(self.inner, NWG_UNBIND, Box::new(data) as Box<Any> );
     }
@@ -672,8 +683,7 @@ impl<ID:Hash+Clone> Ui<ID> {
     */
     pub fn handle_of(&self, id: &ID) -> Result<AnyHandle, Error> {
         let inner = unsafe{ &mut *self.inner };
-        let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
-        inner.handle_of(inner_id)
+        inner.handle_of(UiInner::hash_id(id))
     }
 
     /**
@@ -684,8 +694,7 @@ impl<ID:Hash+Clone> Ui<ID> {
     */
     pub fn has_id(&self, id: &ID) -> bool {
         let inner = unsafe{ &mut (&*self.inner) };
-        let (inner_id, _) = UiInner::hash_id(id, &TypeId::of::<()>());
-        inner.ids_map.contains_key(&inner_id)
+        inner.inner_public_map.contains_key(&UiInner::hash_id(id))
     }
 
     /**

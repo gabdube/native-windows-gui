@@ -73,7 +73,7 @@ unsafe fn parse_command<ID: Hash+Clone+'static>(ui: &mut UiInner<ID>, w: WPARAM,
   let nhandle: HWND = mem::transmute(l);
 
   let id = match window_id(nhandle, ui) { Some(id) => id, _ => { return; } };
-  let tid = ui.ids_map.get(&id).expect("A window ID was not found in its Ui").1;
+  let tid = ui.inner_public_map.get(&id).expect("A window ID was not found in its Ui").1;
   let control: *mut Box<Control> = ui.controls.get(&tid).expect("Could not find a control with with the specified type ID").as_ptr();
   
   match (&mut *control).control_type() {

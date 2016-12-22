@@ -47,13 +47,14 @@ use error::Error;
 /**
     A type that expose the different underlying handle into one type
 */
-#[derive(Clone)]
+#[derive(Clone, Hash)]
 #[allow(non_camel_case_types)]
 pub enum AnyHandle {
     HWND(HWND),
     HMENU(HMENU),
     HMENU_ITEM(HMENU, UINT),
     HFONT(HFONT),
+    Custom(usize),
     None
 }
 
