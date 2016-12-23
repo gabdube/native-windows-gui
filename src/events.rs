@@ -18,6 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use std::time::Duration;
+
 use ui::Ui;
 use defs::MouseButton;
 
@@ -53,5 +55,6 @@ pub enum EventArgs {
     Char(char),
     MouseClick{btn: MouseButton, pos: (i32, i32)},
     Focus(bool),
+    Tick(Duration),
     None
 }

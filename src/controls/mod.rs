@@ -54,8 +54,7 @@ pub enum AnyHandle {
     HMENU(HMENU),
     HMENU_ITEM(HMENU, UINT),
     HFONT(HFONT),
-    Custom(usize),
-    None
+    Custom(TypeId, usize)
 }
 
 /**

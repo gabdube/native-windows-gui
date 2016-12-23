@@ -21,12 +21,13 @@
 use std::mem;
 use std::ptr;
 use std::hash::Hash;
+use std::any::TypeId;
 
 use winapi::{HWND, HMENU, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, DWORD};
 
 use ui::UiInner;
 use events::{Event, EventArgs};
-use controls::{ControlType, AnyHandle};
+use controls::{ControlType, AnyHandle, Timer};
 
 /// A magic number to identify the NWG subclass that dispatches events
 const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
@@ -74,7 +75,7 @@ unsafe fn parse_command(id: u64, control_type: ControlType, w: WPARAM) -> Option
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::{DefSubclassProc};
   use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, WM_LBUTTONUP, WM_LBUTTONDOWN, 
-    WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, WM_COMMAND, c_int};
+    WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, WM_COMMAND, WM_TIMER, c_int};
   use low::menu_helper::get_menu_id;
 
   let inner: &mut UiInner<ID> = mem::transmute(data);
@@ -117,6 +118,12 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       } else {
         None
       }
+    },
+    WM_TIMER => {
+      // Here I assume WM_TIMER will only be sent by built-in timers. Using a user event might be a better idea.
+      inner_id = inner.inner_id_from_handle( &AnyHandle::Custom(TypeId::of::<Timer>(), w as usize) );
+      let timer: &mut Box<Timer> = mem::transmute( inner.controls.get(&inner_id).unwrap().as_ptr() );
+      Some( (inner_id, Event::Tick, EventArgs::Tick(timer.elapsed())) )
     },
     WM_CLOSE => {
       inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
@@ -192,6 +199,7 @@ pub unsafe fn dispatch_events() {
   while GetMessageW(&mut msg, ptr::null_mut(), 0, 0) != 0 {
       TranslateMessage(&msg); 
       DispatchMessageW(&msg); 
+      // TODO dispatch events sent from other thread / other processes ( after first stable release )
   }
 }
 

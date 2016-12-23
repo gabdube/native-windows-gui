@@ -48,7 +48,7 @@ pub struct UiInner<ID: Hash+Clone+'static> {
     // Underlying message only window that process the Ui events and some other windows events not tied to windows (ex: WM_TIMER)
     pub messages: MessageHandler<ID>,
 
-    // Map of inner id to a cell containing the control. TODO remove box (cell are ?sized)
+    // Map of inner id to a cell containing the control.
     pub controls: HashMap<InnerId, RefCell<Box<Control>>>,
     pub resources: HashMap<InnerId, RefCell<Box<Resource>>>,
     pub user_values: HashMap<InnerId, RefCell<Box<Any>>>,
@@ -106,7 +106,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
             match params.value.build(&tmp_ui) {
                 Ok(control) => {
                     let handle_hash = UiInner::<ID>::hash_handle(&control.handle());
-                    //println!("BUILT item {:?}", control.handle());
+
                     match control.handle() {
                         AnyHandle::HWND(h) => hook_window_events(self, h), // Hook the window events if the handle is a HWND
                         _ => { /* Nothing to do for the other controls */}
@@ -191,7 +191,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
                 children
             },
-            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) | AnyHandle::None | AnyHandle::Custom(_) => vec![id], // menu items / resources can't have children
+            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) | AnyHandle::Custom(_, _) => vec![id], // These handle can't children
         };
        
         for id in children_ids.iter().rev() {
@@ -386,11 +386,11 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     #[inline(always)]
     pub fn inner_id_from_handle(&self, handle: &AnyHandle) -> InnerId {
-
         if let Some(id) = self.handle_inner_map.get(&UiInner::<ID>::hash_handle(handle)) {
             *id 
         } else {
-            panic!("Couldn't match the handle {:?} to a inner ID", handle);
+            println!("Couldn't match the handle {:?} to a inner ID", handle);
+            panic!();
         }
     }
 
@@ -422,11 +422,15 @@ impl<ID: Hash+Clone> UiInner<ID> {
 impl<ID: Hash+Clone> Drop for UiInner<ID> {
 
     fn drop(&mut self) {
+        use low::events::unhook_window_events;
+
         // TODO DROP RESSOURCES LAST
         let controls_ids: Vec<u64> = self.inner_public_map.keys().map(|k| *k).collect();
         for id in controls_ids {
             self.unpack(UnpackArgs{id: id});
         }
+
+        unhook_window_events::<ID>(self.messages.hwnd);
 
         self.messages.free();
     }
@@ -450,10 +454,20 @@ impl<ID:Hash+Clone> Ui<ID> {
         Returns `Err(Error::System)` if the system could not initialize the ui
     */
     pub fn new() -> Result<Ui<ID>, Error> {
+        use low::events::hook_window_events;
+
         let inner = match UiInner::new() {
             Ok(inner) => Box::into_raw(Box::new(inner)),
             Err(e) => { return Err(e); }
         };
+
+        // Hook the inner message window. This is basically a SAFE hack to process non nwg events that are sent to ui (ie: WM_TIMER)
+        // Window gets unhooked just before inner gets dropped.
+        unsafe{
+            let inner = &mut *inner;
+            let hwnd = inner.messages.hwnd;
+            hook_window_events(inner, hwnd);
+        }
 
         Ok( Ui{inner: inner} )
     }

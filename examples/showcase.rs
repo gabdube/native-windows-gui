@@ -1,7 +1,8 @@
 extern crate native_windows_gui as nwg;
 
-use nwg::{Ui, Event, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, 
+use nwg::{Ui, Event, EventArgs, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, 
   RadioButtonT, LabelT, TimerT, dispatch_events, exit as nwg_exit};
+
 use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, FONT_DECO_NORMAL, FONT_WEIGHT_NORMAL,
   CheckState, HTextAlign};
 
@@ -23,7 +24,7 @@ fn setup_controls(app: &Ui<&'static str>) {
 
     app.pack_control(&"TestButton", ButtonT{
         text: "Start timer",
-        position:(10, 10), size: (100, 30),
+        position:(10, 85), size: (100, 30),
         visible: true, disabled: false,
         parent: "MainWindow",
         font: Some("Font2") 
@@ -69,15 +70,15 @@ fn setup_controls(app: &Ui<&'static str>) {
 
     app.pack_control(&"TestList", ListBoxT{
         collection: vec!["A Listbox", "Jimmy", "Sam", "Coconut", "Waldo", "David", "John"],
-        position:(10, 50), size: (100, 60),
+        position:(10, 10), size: (100, 60),
         visible: true, disabled: false, readonly: false, multi_select: false,
         parent: "MainWindow",
         font: None 
     });
 
     app.pack_control(&"TimeLabel", LabelT{
-        text: "Current time: 00:00",
-        position:(120, 90), size: (150, 100),
+        text: "Time elapsed: 0 seconds",
+        position:(120, 90), size: (200, 100),
         visible: true, disabled: false,
         align: HTextAlign::Left,
         parent: "MainWindow",
@@ -96,12 +97,26 @@ fn setup_callbacks(app: &Ui<&'static str>) {
 
     app.bind(&"TestButton", &"...", Event::Click, |app,_,_,_|{
         let mut timer = app.get_mut::<nwg::Timer>(&"UpdateTimeLabel").unwrap();
-        timer.start();
+        let btn = app.get_mut::<nwg::Button>(&"TestButton").unwrap();
+
+        if timer.running() {
+            btn.set_text("Start Timer");
+            timer.stop();
+        } else {
+            btn.set_text("Stop Timer");
+            timer.start();
+        }
+        
     });
 
-    app.bind(&"UpdateTimeLabel", &"...", Event::Tick, |app,_,_,_|{
+    app.bind(&"UpdateTimeLabel", &"...", Event::Tick, |app,_,_,args|{
         let label = app.get::<nwg::Label>(&"TimeLabel").unwrap();
-        label.set_text("TEST");
+        let elapsed = match args{ 
+            &EventArgs::Tick(ref d) => d.clone(),
+            _ => unreachable!()
+        };
+
+        label.set_text(format!("Time elapsed: {:?} seconds", elapsed.as_secs()).as_ref());
     });
 
     app.bind(&"QuitItem", &"Quit", Event::Click, |_,_,_,_|{
