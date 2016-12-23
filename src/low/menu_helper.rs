@@ -33,7 +33,7 @@ use controls::AnyHandle;
 pub unsafe fn list_menu_children<ID: Hash+Clone>(ui: &UiInner<ID>, menu: HMENU) -> Vec<u64> { 
     use low::defs::{GetMenuItemCount, GetSubMenu, GetMenuItemID};
 
-    let mut children = Vec::new();
+    let mut children: Vec<u64> = Vec::new();
     let children_count = GetMenuItemCount(menu);
 
     for i in 0..children_count {
@@ -41,10 +41,13 @@ pub unsafe fn list_menu_children<ID: Hash+Clone>(ui: &UiInner<ID>, menu: HMENU) 
         if sub_menu.is_null() {
             // Get a menu item ID
             let handle = AnyHandle::HMENU_ITEM(menu, GetMenuItemID(menu, i));
-            children.push( ui.inner_id_from_handle(&handle) );
+            let id = ui.inner_id_from_handle(&handle) .expect("Could not match menu handle to menu control");
+            children.push( id );
         } else {
             // Get the menu ID
-            children.push( ui.inner_id_from_handle(&AnyHandle::HMENU(sub_menu)) );
+            let handle = AnyHandle::HMENU(sub_menu);
+            let id = ui.inner_id_from_handle(&handle).expect("Could not match menu handle to menu control");
+            children.push( id );
             children.append( &mut list_menu_children(ui, sub_menu) );
         }
     }

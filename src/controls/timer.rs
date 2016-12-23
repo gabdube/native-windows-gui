@@ -41,7 +41,6 @@ static mut timers_id: UINT_PTR = 0;
 #[derive(Clone)]
 pub struct TimerT {
     pub interval: u32,
-    pub repeat: bool
 }
 
 impl<ID: Hash+Clone> ControlT<ID> for TimerT {
@@ -58,7 +57,6 @@ impl<ID: Hash+Clone> ControlT<ID> for TimerT {
             id_event: unsafe{ timers_id+=1; timers_id },
             handle: None,
             time: 0,
-            //repeat: self.repeat
         }))
     }
 }
@@ -68,18 +66,14 @@ impl<ID: Hash+Clone> ControlT<ID> for TimerT {
 */
 pub struct Timer {
     time: u32,
+    interval: u32,
 
     watcher: HWND,             // The watcher of a built-in timer is always its Ui. This way, the watcher cannot be freed before the timer.
     id_event: ULONG_PTR,       // A unique timer id to identify the time
     handle: Option<UINT_PTR>,  // If the timer is not running, handle is None.
-    
-    interval: u32,
-    
-    //pub repeat: bool
 }
 
 impl Timer {
-
 
     /// Start the timer. If the timer was already running, it is restarted.
     pub fn start(&mut self) {
@@ -110,6 +104,12 @@ impl Timer {
         let elapsed = unsafe{ (GetTickCount() - self.time) as u64 };
         Duration::from_millis( elapsed )
     }
+
+    /// Set the interval of the timer. If the timer is running, it will be applied when the timer is restarted
+    pub fn set_interval(&mut self, interval: u32) { self.interval = interval; }
+
+    /// Return the interval of the timer
+    pub fn get_interval(&self) -> u32 { self.interval }
 
 }
 

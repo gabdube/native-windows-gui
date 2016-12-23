@@ -86,8 +86,7 @@ fn setup_controls(app: &Ui<&'static str>) {
     });
 
     app.pack_control(&"UpdateTimeLabel", TimerT {
-        interval: 1000,
-        repeat: false
+        interval: 500,
     });
 
 }
@@ -112,7 +111,7 @@ fn setup_callbacks(app: &Ui<&'static str>) {
     app.bind(&"UpdateTimeLabel", &"...", Event::Tick, |app,_,_,args|{
         let label = app.get::<nwg::Label>(&"TimeLabel").unwrap();
         let elapsed = match args{ 
-            &EventArgs::Tick(ref d) => d.clone(),
+            &EventArgs::Tick(ref d) => d,
             _ => unreachable!()
         };
 
@@ -130,7 +129,7 @@ pub fn main() {
     
     // Always create the resources first because they will be used in the controls.
     app.pack_resource(&"Font1", FontT{ family: "Calibri", size: 20, weight: FONT_WEIGHT_NORMAL, decoration: FONT_DECO_NORMAL });
-    app.pack_resource(&"Font2", FontT{ family: "Calibri", size: 20, weight: FONT_WEIGHT_BLACK, decoration: FONT_DECO_ITALIC });
+    app.pack_resource(&"Font2", FontT{ family: "Arial", size: 17, weight: FONT_WEIGHT_BLACK, decoration: FONT_DECO_ITALIC });
 
     /// Pack the control in the application
     setup_controls(&app);

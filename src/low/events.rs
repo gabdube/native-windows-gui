@@ -83,35 +83,40 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
 
   let callback_data = match msg {
     WM_COMMAND => {
-      if l == 0 { None }
-      else {
+      if l == 0 { 
+        None 
+      } else {
+        /// Somehow, WM_COMMAND messages get sent while freeing and so inner_id_from_handle can fail...
         let nhandle: HWND = mem::transmute(l);
-        let id = inner.inner_id_from_handle( &AnyHandle::HWND(nhandle) );
-        let control_type = (&mut *inner.controls.get(&id).expect("Could not find a control with with the specified type ID").as_ptr()).control_type();
-        parse_command(id, control_type, w)
+        if let Some(id) = inner.inner_id_from_handle( &AnyHandle::HWND(nhandle) ) {
+          let control_type = (&mut *inner.controls.get(&id).expect("Could not find a control with with the specified type ID").as_ptr()).control_type();
+          parse_command(id, control_type, w)
+        } else {
+          None
+        }
       }
     },
     WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP)");;
       Some( (inner_id, Event::MouseUp, parse_mouse_click(msg, l)) )
     },
     WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN)");;
       Some( (inner_id, Event::MouseDown, parse_mouse_click(msg, l)) )
     },
     WM_KEYDOWN | WM_KEYUP => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_KEYDOWN | WM_KEYUP)");;
       let evt = if msg == WM_KEYDOWN { Event::KeyDown } else { Event::KeyUp };
       Some( (inner_id, evt, EventArgs::Key(w as u32)) )
     },
     WM_MENUCOMMAND => {
       let parent_menu: HMENU = mem::transmute(l);
       let handle = AnyHandle::HMENU_ITEM(parent_menu, get_menu_id(parent_menu, w as c_int));
-      inner_id = inner.inner_id_from_handle( &handle );
+      inner_id = inner.inner_id_from_handle( &handle ).expect("Could not match system handle to ui control (msg: WM_MENUCOMMAND)");;
       Some( (inner_id, Event::Click, EventArgs::None) )
     },
     WM_UNICHAR | WM_CHAR => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_UNICHAR | WM_CHAR)");;
       if w == UNICODE_NOCHAR { return 1; } 
       if let Some(c) = ::std::char::from_u32(w as u32) {
         Some( (inner_id, Event::Char, EventArgs::Char( c )) )
@@ -121,12 +126,13 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
     },
     WM_TIMER => {
       // Here I assume WM_TIMER will only be sent by built-in timers. Using a user event might be a better idea.
-      inner_id = inner.inner_id_from_handle( &AnyHandle::Custom(TypeId::of::<Timer>(), w as usize) );
+      let handle = AnyHandle::Custom(TypeId::of::<Timer>(), w as usize);
+      inner_id = inner.inner_id_from_handle( &handle ).expect("Could not match system handle to ui control (msg: WM_TIMER)");
       let timer: &mut Box<Timer> = mem::transmute( inner.controls.get(&inner_id).unwrap().as_ptr() );
       Some( (inner_id, Event::Tick, EventArgs::Tick(timer.elapsed())) )
     },
     WM_CLOSE => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) );
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_CLOSE)");
       Some( (inner_id, Event::Closed, EventArgs::None) )
     },
     _ => { None }
@@ -176,7 +182,7 @@ pub unsafe fn window_id<ID: Clone+Hash>(handle: HWND, inner_ref: *mut UiInner<ID
   if GetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, &mut data) == TRUE {
     let data: *mut UiInner<ID> = mem::transmute(data);
     if data == inner_ref {
-      Some( (&*data).inner_id_from_handle( &AnyHandle::HWND(handle) ) )
+      (&*data).inner_id_from_handle( &AnyHandle::HWND(handle) )
     } else {
       None
     }

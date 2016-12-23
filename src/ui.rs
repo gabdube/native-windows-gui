@@ -385,12 +385,12 @@ impl<ID: Hash+Clone> UiInner<ID> {
     }
 
     #[inline(always)]
-    pub fn inner_id_from_handle(&self, handle: &AnyHandle) -> InnerId {
+    pub fn inner_id_from_handle(&self, handle: &AnyHandle) -> Option<InnerId> {
         if let Some(id) = self.handle_inner_map.get(&UiInner::<ID>::hash_handle(handle)) {
-            *id 
+            Some(*id) 
         } else {
-            println!("Couldn't match the handle {:?} to a inner ID", handle);
-            panic!();
+            None 
+            //println!("Couldn't match the handle {:?} to a inner ID", handle); // Debug
         }
     }
 
@@ -423,13 +423,17 @@ impl<ID: Hash+Clone> Drop for UiInner<ID> {
 
     fn drop(&mut self) {
         use low::events::unhook_window_events;
-
-        // TODO DROP RESSOURCES LAST
-        let controls_ids: Vec<u64> = self.inner_public_map.keys().map(|k| *k).collect();
+        
+        let controls_ids: Vec<u64> = self.controls.keys().map(|k| *k).collect();
         for id in controls_ids {
             self.unpack(UnpackArgs{id: id});
         }
 
+        let resources_ids: Vec<u64> = self.resources.keys().map(|k| *k).collect();
+        for id in resources_ids {
+            self.unpack(UnpackArgs{id: id});
+        }
+        
         unhook_window_events::<ID>(self.messages.hwnd);
 
         self.messages.free();
