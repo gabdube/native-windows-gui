@@ -528,9 +528,7 @@ fn test_listbox() {
         font: None 
     };
 
-    ui.pack_resource(&10_000, default_font());
     ui.pack_control(&1000, window());
-    ui.pack_control(&1001, MenuItemT{text: "", parent: 1000});
 
     // pack test
     ui.pack_control(&1002, lb_t.clone());
@@ -574,7 +572,7 @@ fn test_listbox() {
         assert!(lb.get_selected_index().is_none(), "No index should be selected");
         assert!(lb.get_selected_indexes().len() == 0, "Indexes vector length should be 0");
 
-        lb.set_current_index(1);
+        lb.set_selected_index(1);
 
         assert!(lb.get_selected_index() == Some(1), "Current index is not 1");
         assert!(lb.get_selected_indexes().len() == 0, "Indexes vector length should be 0");
@@ -583,7 +581,7 @@ fn test_listbox() {
         assert!(lb.index_selected(665) == false, "Index 665 is selected");
         assert!(lb.len_selected() == 1, "Selected length is not 1");
 
-        lb.set_current_index(usize::max_value());
+        lb.set_selected_index(usize::max_value());
         assert!(lb.get_selected_index().is_none(), "No index should be selected");
 
         assert!(lb.find_string("foo", false) == Some(0), "find_string shoud have returned 0");
@@ -598,7 +596,6 @@ fn test_listbox() {
         assert!(lb.get_string(0).unwrap().as_str() == "Excelsior", "Item text do not match"); // Ui and inner collection synced
 
         lb.clear();
-
         assert!(lb.len() == 0, "Length is not 0");
     }
 
@@ -631,4 +628,76 @@ fn test_listbox() {
         assert!(lb.get_selected_indexes() == [0,1,2,3], "Selected indexes do not match");
     }
     
+}
+
+#[test]
+fn test_timer() {
+    // TODO
+}
+
+#[test]
+fn test_combobox() {
+    let ui = setup_ui();
+
+    let col = vec!["Foo", "FooBar", "Excelsior", "wOOsh"];
+    let cb_t = ComboBoxT {
+        collection: col.clone(),
+        position:(10, 50), size: (100, 90),
+        visible: true, disabled: false,
+        placeholder: Some("TEST"),
+        parent: 1000,
+        font: None 
+    };
+
+    ui.pack_control(&1000, window());
+
+    // pack test
+    ui.pack_control(&1002, cb_t);
+    ui.commit().expect("Commit was not successful");
+
+    // methods test
+    test_visibility!(ui, &1002, ComboBox<&'static str>);
+    test_position!(ui, &1002, ComboBox<&'static str>);
+    test_enabled!(ui, &1002, ComboBox<&'static str>);
+
+    {
+        let mut cb = ui.get_mut::<ComboBox<&'static str>>(&1002).expect("Control not found!");
+
+        assert!(cb.collection() == &col, "Collection do not match");
+        assert!(cb.collection_mut() == &col, "Collection do not match");
+        assert!(cb.len() == 4, "Collection length should be 4");
+
+        cb.push("Foohoy!");
+        assert!(cb.collection() == &["Foo", "FooBar", "Excelsior", "wOOsh", "Foohoy!"], "Collection do not match");
+        assert!(cb.get_string(4).unwrap().as_str() == "Foohoy!", "Item text do not match");
+        assert!(cb.len() == 5, "Collection length should be 5");
+
+        cb.remove(0);
+        assert!(cb.collection() == &["FooBar", "Excelsior", "wOOsh", "Foohoy!"], "Collection do not match");
+        assert!(cb.get_string(0).unwrap().as_str() == "FooBar", "Item text do not match");
+
+        assert!(cb.get_selected_index().is_none(), "No index should be selected");
+        assert!(cb.get_selected_text().as_str() == "");
+
+        cb.set_selected_index(1);
+        assert!(cb.get_selected_text().as_str() == "Excelsior");
+        assert!(cb.get_selected_index() == Some(1), "Current index is not 1");
+
+        cb.set_selected_index(usize::max_value());
+        assert!(cb.get_selected_index().is_none(), "No index should be selected");
+
+        assert!(cb.find_string("foo", false) == Some(0), "find_string shoud have returned 0");
+        assert!(cb.find_string("foo", true) == None, "find_string shoud have returned None");
+        assert!(cb.find_string("Foohoy!", true) == Some(3), "find_string shoud have returned None");
+
+        assert!(cb.get_string(100) == None, "Item text should be None");
+
+        cb.collection_mut().remove(0);
+        assert!(cb.get_string(0).unwrap().as_str() == "FooBar", "Item text do not match"); // Ui and inner collection not synced
+        cb.sync();
+        assert!(cb.get_string(0).unwrap().as_str() == "Excelsior", "Item text do not match"); // Ui and inner collection synced
+
+        cb.clear();
+        assert!(cb.len() == 0, "Length is not 0");
+    }
 }

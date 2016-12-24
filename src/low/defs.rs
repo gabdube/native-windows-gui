@@ -103,6 +103,19 @@ pub const CBS_DROPDOWNLIST: UINT = 3;
 pub const CBS_HASSTRINGS: UINT = 512;
 
 pub const CB_ADDSTRING: UINT = 323;
+pub const CB_RESETCONTENT: UINT = 331;
+pub const CB_DELETESTRING: UINT = 324;
+pub const CB_INSERTSTRING: UINT = 330;
+pub const CB_FINDSTRING: UINT = 332;
+pub const CB_FINDSTRINGEXACT: UINT = 344;
+pub const CB_GETCURSEL: UINT = 327;
+pub const CB_GETDROPPEDSTATE: UINT = 343;
+pub const CB_GETLBTEXT: UINT = 328;
+pub const CB_GETLBTEXTLEN: UINT = 329;
+pub const CB_SETCURSEL: UINT = 334;
+pub const CB_SHOWDROPDOWN: UINT = 335;
+pub const CB_SETCUEBANNER: UINT = 5891;
+pub const CB_GETCUEBANNER: UINT = 5892;
 
 // System structs
 #[repr(C)]

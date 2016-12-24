@@ -10,7 +10,7 @@ pub fn default_window() -> WindowT<&'static str> {
     WindowT { 
         title: "NWG Showcase",
         position: (100, 100), size: (500, 400),
-        resizable: true, visible: true,
+        resizable: false, visible: true,
         disabled: false, exit_on_close: true 
     }
 }
@@ -93,6 +93,7 @@ fn setup_controls(app: &Ui<&'static str>) {
         collection: vec!["Pencil", "Eraser", "Scissor", "Calculator", "Notebook"],
         position:(10, 125), size: (100, 30),
         visible: true, disabled: false,
+        placeholder: Some("Choose plz"),
         parent: "MainWindow",
         font: Some("Font1") 
     })
@@ -106,19 +107,21 @@ fn setup_callbacks(app: &Ui<&'static str>) {
         let mut timer = app.get_mut::<nwg::Timer>(&"UpdateTimeLabel").unwrap();
         let btn = app.get_mut::<nwg::Button>(&"TestButton").unwrap();
 
-        if timer.running() {
+        /*if timer.running() {
             btn.set_text("Start Timer");
             timer.stop();
         } else {
             btn.set_text("Stop Timer");
             timer.start();
-        }
-        
+        }*/
+
+        let cb = app.get_mut::<nwg::ComboBox<&'static str>>(&"SchoolSupplyComboBox").unwrap();
+        println!("{:?}", cb.get_size());
     });
 
     app.bind(&"UpdateTimeLabel", &"...", Event::Tick, |app,_,_,args|{
         let label = app.get::<nwg::Label>(&"TimeLabel").unwrap();
-        let elapsed = match args{ 
+        let elapsed = match args { 
             &EventArgs::Tick(ref d) => d,
             _ => unreachable!()
         };

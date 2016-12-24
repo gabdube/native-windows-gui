@@ -105,8 +105,11 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
 
         match unsafe{ build_window(params) } {
             Ok(h) => {
-                unsafe{ 
+                unsafe{
+                    // Set font 
                     set_window_font(h, font_handle, true); 
+
+                    // Init collection
                     let collection: Vec<D> = self.collection.iter().map(
                         |s|{  
                             let text = to_utf16(format!("{}", s).as_str());
@@ -114,6 +117,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
                             s.clone() 
                         } 
                     ).collect();
+
                     Ok( Box::new(ListBox{handle: h, collection: collection}) )
                 }
             },
@@ -184,7 +188,7 @@ impl<D: Clone+Display> ListBox<D> {
     }
 
     /// Return the index of currently selected item.  
-    /// Return None if there are no item selected  
+    /// Return None if there is no selected item
     /// If the listbox can have more than one selected item, use `get_selected_indexes`
     pub fn get_selected_index(&self) -> Option<usize> {
         use low::defs::LB_GETCURSEL;
@@ -221,13 +225,13 @@ impl<D: Clone+Display> ListBox<D> {
     /// Set the selected index in a single choice listbox.  
     /// For multi-select listbox use `set_index_selected` or `set_range_selected`  
     /// If `index` is `usize::max_value`, remove the selected index from the listbox
-    pub fn set_current_index(&self, index: usize) {
+    pub fn set_selected_index(&self, index: usize) {
         use low::defs::LB_SETCURSEL;
         unsafe{ SendMessageW(self.handle, LB_SETCURSEL, index as WPARAM, 0); }
     }
 
     /// Set the selected state of the item located at index. Only work for multi-select listbox
-    /// For single listbox, use `set_current_index`
+    /// For single listbox, use `set_selected_index`
     /// If index is `usize::max_value`, the change is applied to every item.
     pub fn set_index_selected(&self, index: usize, selected: bool) {
         use low::defs::LB_SETSEL;
@@ -237,8 +241,8 @@ impl<D: Clone+Display> ListBox<D> {
         unsafe { SendMessageW(self.handle, LB_SETSEL, selected, index as LPARAM); }
     }
 
-    /// Select or unselect a range of index in the list box. The range is inclusive. Only works if the listbox can have multiple items selected.  
-    /// For single listbox, use `set_current_index`
+    /// Select or unselect a range of index in the list box. The range is inclusive. Only work if the listbox can have multiple items selected.  
+    /// For single listbox, use `set_selected_index`
     pub fn set_range_selected(&self, index_min: usize, index_max: usize, selected: bool) {
         use low::defs::LB_SELITEMRANGEEX;
         use winapi::LPARAM;
