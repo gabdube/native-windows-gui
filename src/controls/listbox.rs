@@ -36,10 +36,10 @@ use low::other_helper::{to_utf16, from_utf16};
     Template that creates a listbox control
 
     Members:  
-    • `collection`: Item collection of the listbox. The item type must implement Display  
+    • `collection`: Item collection of the listbox. The item type must implement `Display`  
     • `position`: The start position of the listbox  
     • `size`: The start size of the listbox  
-    • `visible`: If the listbox should be visible to the user32  
+    • `visible`: If the listbox should be visible to the user  
     • `disabled`: If the user can or can't use the listbox  
     • `readonly` : If true, the user won't be able to select items in the listbox  
     • `multi_select`: If true, allow the user to select more than one item  
@@ -70,7 +70,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
         use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
         use low::defs::{LB_ADDSTRING, LBS_HASSTRINGS, LBS_MULTIPLESEL, LBS_NOSEL, LBS_NOTIFY};
         use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER, WS_VSCROLL, WS_HSCROLL};
-        use user32::{SendMessageW};
+        use user32::SendMessageW;
 
         let flags: DWORD = WS_CHILD | WS_BORDER | LBS_HASSTRINGS | WS_VSCROLL | WS_HSCROLL | LBS_NOTIFY |
         if self.visible      { WS_VISIBLE }      else { 0 } |

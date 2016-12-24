@@ -1,7 +1,7 @@
 extern crate native_windows_gui as nwg;
 
 use nwg::{Ui, Event, EventArgs, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, 
-  RadioButtonT, LabelT, TimerT, dispatch_events, exit as nwg_exit};
+  RadioButtonT, LabelT, TimerT, ComboBoxT, dispatch_events, exit as nwg_exit};
 
 use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, FONT_DECO_NORMAL, FONT_WEIGHT_NORMAL,
   CheckState, HTextAlign};
@@ -68,7 +68,7 @@ fn setup_controls(app: &Ui<&'static str>) {
         font: Some("Font1") 
     });
 
-    app.pack_control(&"TestList", ListBoxT{
+    app.pack_control(&"NameList", ListBoxT{
         collection: vec!["A Listbox", "Jimmy", "Sam", "Coconut", "Waldo", "David", "John"],
         position:(10, 10), size: (100, 60),
         visible: true, disabled: false, readonly: false, multi_select: false,
@@ -88,6 +88,14 @@ fn setup_controls(app: &Ui<&'static str>) {
     app.pack_control(&"UpdateTimeLabel", TimerT {
         interval: 500,
     });
+
+    app.pack_control(&"SchoolSupplyComboBox", ComboBoxT {
+        collection: vec!["Pencil", "Eraser", "Scissor", "Calculator", "Notebook"],
+        position:(10, 125), size: (100, 30),
+        visible: true, disabled: false,
+        parent: "MainWindow",
+        font: Some("Font1") 
+    })
 
 }
 

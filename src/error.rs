@@ -1,5 +1,5 @@
 /*!
-    Errors and exceptions that can be raise by the crate
+    Errors and exceptions that can be raise by nwg
 */
 /*
     Copyright (C) 2016  Gabriel Dubé

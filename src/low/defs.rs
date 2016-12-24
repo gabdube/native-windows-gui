@@ -99,6 +99,11 @@ pub const SS_LEFT: UINT = 0;
 pub const SS_CENTER: UINT = 1;   
 pub const SS_NOPREFIX: UINT = 128;
 
+pub const CBS_DROPDOWNLIST: UINT = 3;
+pub const CBS_HASSTRINGS: UINT = 512;
+
+pub const CB_ADDSTRING: UINT = 323;
+
 // System structs
 #[repr(C)]
 #[allow(non_snake_case)]
