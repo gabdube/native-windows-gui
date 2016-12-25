@@ -113,7 +113,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       let parent_menu: HMENU = mem::transmute(l);
       let handle = AnyHandle::HMENU_ITEM(parent_menu, get_menu_id(parent_menu, w as c_int));
       inner_id = inner.inner_id_from_handle( &handle ).expect("Could not match system handle to ui control (msg: WM_MENUCOMMAND)");;
-      Some( (inner_id, Event::Click, EventArgs::None) )
+      Some( (inner_id, Event::Triggered, EventArgs::None) )
     },
     WM_UNICHAR | WM_CHAR => {
       inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_UNICHAR | WM_CHAR)");;

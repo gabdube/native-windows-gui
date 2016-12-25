@@ -118,6 +118,16 @@ pub const CB_SETCURSEL: UINT = 334;
 pub const CB_SHOWDROPDOWN: UINT = 335;
 pub const CB_SETCUEBANNER: UINT = 5891;
 
+pub const IDABORT: i32 = 3;
+pub const IDCANCEL: i32 = 2;
+pub const IDCONTINUE: i32 = 11;
+pub const IDIGNORE: i32 = 5;
+pub const IDNO: i32 = 7;
+pub const IDOK: i32 = 1;
+pub const IDRETRY: i32 = 4;
+pub const IDTRYAGAIN: i32 = 10;
+pub const IDYES: i32 = 6;
+
 // System structs
 #[repr(C)]
 #[allow(non_snake_case)]

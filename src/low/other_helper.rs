@@ -24,6 +24,8 @@ use std::mem;
 
 use winapi::DWORD;
 
+use defs::{MessageParams, MessageButtons, MessageIcons, MessageChoice};
+
 /**
     Encode a string value into a utf16 string. Adds a null char at the end of the string.
 */
@@ -106,6 +108,73 @@ pub unsafe fn enable_visual_styles() {
     let handle = CreateActCtxW(&mut act_ctx);
     ActivateActCtx(handle, &mut activation_cookie);
 
-    // Init common controls
     InitCommonControls();
+}
+
+/**
+    Create an application wide message box
+
+    Parameters:  
+    * params: A `MessageParams` structure that defines how the message box should look
+*/
+pub fn message<'a>(params: &MessageParams) -> MessageChoice {
+    use winapi::{MB_ABORTRETRYIGNORE, MB_CANCELTRYCONTINUE, MB_OK, MB_OKCANCEL, MB_RETRYCANCEL, MB_YESNO,
+     MB_YESNOCANCEL, MB_ICONSTOP, MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONEXCLAMATION};
+    use low::defs::{IDABORT, IDCANCEL, IDCONTINUE, IDIGNORE, IDNO, IDOK, IDRETRY, IDTRYAGAIN, IDYES};
+    use user32::MessageBoxW;
+
+    let text = to_utf16(params.content);
+    let title = to_utf16(params.title);
+
+    let buttons = match params.buttons {
+        MessageButtons::AbortTryIgnore => MB_ABORTRETRYIGNORE,
+        MessageButtons::CancelTryContinue => MB_CANCELTRYCONTINUE,
+        MessageButtons::Ok => MB_OK,
+        MessageButtons::OkCancel => MB_OKCANCEL,
+        MessageButtons::RetryCancel => MB_RETRYCANCEL,
+        MessageButtons::YesNo => MB_YESNO,
+        MessageButtons::YesNoCancel => MB_YESNOCANCEL
+    };
+
+    let icons = match params.icons {
+        MessageIcons::Error => MB_ICONSTOP,
+        MessageIcons::Info => MB_ICONINFORMATION,
+        MessageIcons::None => 0,
+        MessageIcons::Question => MB_ICONQUESTION,
+        MessageIcons::Warning => MB_ICONEXCLAMATION
+    };
+
+    let answer = unsafe{ MessageBoxW(ptr::null_mut(), text.as_ptr(), title.as_ptr(), buttons | icons) };
+    match answer {
+        IDABORT => MessageChoice::Abort,
+        IDCANCEL => MessageChoice::Cancel,
+        IDCONTINUE => MessageChoice::Continue,
+        IDIGNORE => MessageChoice::Ignore,
+        IDNO => MessageChoice::No,
+        IDOK => MessageChoice::Ok,
+        IDRETRY => MessageChoice::Retry,
+        IDTRYAGAIN => MessageChoice::TryAgain,
+        IDYES => MessageChoice::Yes,
+        _ => MessageChoice::Cancel
+    }
+}
+
+/**
+    Display a message box and then panic. The message box has for style `MessageButtons::Ok` and `MessageIcons::Error` .
+
+    Parameters:
+    * title: The message box title
+    * content: The message box message
+*/
+pub fn fatal_message<'a>(title: &'a str, content: &'a str) -> ! {
+    let params = MessageParams {
+        title: title,
+        content: content,
+        buttons: MessageButtons::Ok,
+        icons: MessageIcons::Error
+    };
+
+    message(&params);
+
+    panic!("{} - {}", title, content);
 }

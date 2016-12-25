@@ -57,6 +57,67 @@ pub enum VTextAlign {
     Bottom
 }
 
+/**
+    Enum of message box buttons (to use with `MessageParams` )
+*/
+#[derive(Clone, PartialEq, Debug)]
+pub enum MessageButtons {
+    AbortTryIgnore,
+    CancelTryContinue,
+    Ok,
+    OkCancel,
+    RetryCancel,
+    YesNo,
+    YesNoCancel,
+}
+
+/**
+    Enum of message box icons (to use with `MessageParams` )
+*/
+#[derive(Clone, PartialEq, Debug)]
+pub enum MessageIcons {
+    Warning,
+    Info,
+    Question,
+    Error,
+    None
+}
+
+/**
+    Return value of `message`. Define the button that the user clicked. If the user 
+    cancelled the message box by clicking on X button of the window, `MessageChoice::Cancel` is returned.
+*/
+#[derive(Clone, PartialEq, Debug)]
+pub enum MessageChoice {
+    Abort,
+    Cancel,
+    Continue,
+    Ignore,
+    No,
+    Ok,
+    Retry,
+    TryAgain,
+    Yes
+}
+
+/**
+    A structure that defines how a messagebox should look and behave. 
+
+    Members:  
+    * title: The title of the message box
+    * content: The message of the message box
+    * buttons: The button of the message box
+    * icons: The message box icon
+*/
+#[derive(Clone, PartialEq, Debug)]
+pub struct MessageParams<'a> {
+    pub title: &'a str,
+    pub content: &'a str,
+    pub buttons: MessageButtons,
+    pub icons: MessageIcons
+}
+
+
 pub mod keys {
     //! Windows virtual key code
     

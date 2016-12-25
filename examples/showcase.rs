@@ -4,7 +4,7 @@ use nwg::{Ui, Event, EventArgs, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListB
   RadioButtonT, LabelT, TimerT, ComboBoxT, SeparatorT, dispatch_events, exit as nwg_exit};
 
 use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, FONT_DECO_NORMAL, FONT_WEIGHT_NORMAL,
-  CheckState, HTextAlign};
+  CheckState, HTextAlign, MessageParams, MessageButtons, MessageIcons};
 
 pub fn default_window() -> WindowT<&'static str> {
     WindowT { 
@@ -131,7 +131,18 @@ fn setup_callbacks(app: &Ui<&'static str>) {
         label.set_text(format!("Time elapsed: {:?} seconds", elapsed.as_secs()).as_ref());
     });
 
-    app.bind(&"QuitItem", &"Quit", Event::Click, |_,_,_,_|{
+    app.bind(&"NestedAction", &"SayHello", Event::Triggered, |_,_,_,_| {
+        let params = MessageParams {
+            title: "Hello",
+            content: "Hello World!",
+            buttons: MessageButtons::Ok,
+            icons: MessageIcons::Info
+        };
+        
+        nwg::message(&params);
+    });
+
+    app.bind(&"QuitItem", &"Quit", Event::Triggered, |_,_,_,_|{
         nwg_exit()
     });
 
