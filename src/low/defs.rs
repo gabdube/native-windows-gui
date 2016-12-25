@@ -21,7 +21,7 @@
 use std::hash::Hash;
 use std::any::{Any, TypeId};
 
-use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int};
+use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, MENUITEMINFOW};
 
 use events::{Event, EventCallback};
 use controls::ControlT;
@@ -46,10 +46,12 @@ pub const COMMIT_FAILED: LRESULT = 5555;
 // Constants not included in winapi-rs
 
 pub const MIM_STYLE: DWORD = 0x00000010;
+pub const MIIM_ID: DWORD = 0x00000002;
 
 pub const MNS_NOTIFYBYPOS: DWORD = 0x08000000;
 
 pub const MF_BYPOSITION: UINT = 0x00000400;
+pub const MF_SEPARATOR: UINT = 0x00000800;
 
 pub const ACTCTX_FLAG_RESOURCE_NAME_VALID: u32 = 0x008;
 pub const ACTCTX_FLAG_SET_PROCESS_DEFAULT: u32 = 0x010;
@@ -115,7 +117,6 @@ pub const CB_GETLBTEXTLEN: UINT = 329;
 pub const CB_SETCURSEL: UINT = 334;
 pub const CB_SHOWDROPDOWN: UINT = 335;
 pub const CB_SETCUEBANNER: UINT = 5891;
-pub const CB_GETCUEBANNER: UINT = 5892;
 
 // System structs
 #[repr(C)]
@@ -137,6 +138,7 @@ extern "system" {
     pub fn SetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
     pub fn RemoveMenu(menu: HMENU, pos: UINT, flags: UINT) -> BOOL;
     pub fn GetMenuItemID(menu: HMENU, index: c_int) -> UINT;
+    pub fn SetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: bool, lpmii: &mut MENUITEMINFOW) -> BOOL;
 }
 
 // Arguments passed to the NWG custom events 

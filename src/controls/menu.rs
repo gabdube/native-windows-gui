@@ -29,7 +29,7 @@ use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::Event;
 
-static mut menu_items_id: UINT = 0; 
+static mut MENU_ITEMS_ID: UINT = 0; 
 
 /**
     A template to create menu controls
@@ -148,6 +148,61 @@ impl Control for MenuItem {
     }
 }
 
+
+/**
+    A menu item separator.
+
+    Member:  
+    * parent: The parent. Must point to a `Menu` control
+*/
+#[derive(Clone)]
+pub struct SeparatorT<ID: Hash+Clone> {
+    pub parent: ID
+}
+
+impl<ID: Hash+Clone> ControlT<ID> for SeparatorT<ID> {
+    fn type_id(&self) -> TypeId { TypeId::of::<Separator>() }
+
+    fn events(&self) -> Vec<Event> {
+        vec![Event::Destroyed]
+    }
+
+   #[allow(unused_variables)]
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
+        let handle_result = unsafe { build_separator(ui, self) };
+        match handle_result {
+            Ok((parent, uid)) => { Ok( Box::new(Separator{parent: parent, unique_id: uid}) as Box<Control> ) },
+            Err(e) => Err(e)
+        }
+    }
+}
+
+/**
+    A separator control.
+*/
+pub struct Separator {
+    parent: HMENU,
+    unique_id: UINT
+}
+
+
+impl Control for Separator {
+
+    fn handle(&self) -> AnyHandle {
+        AnyHandle::HMENU_ITEM(self.parent, self.unique_id)
+    }
+
+    fn control_type(&self) -> ControlType { 
+        ControlType::MenuItem 
+    }
+
+    fn free(&mut self) {
+        use low::menu_helper::remove_menu_item_from_parent;
+        unsafe{ remove_menu_item_from_parent(self.parent, self.unique_id) };
+    }
+}
+
+
 /*
     Private unsafe menu/menuitem methods
 */
@@ -200,11 +255,9 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
     use user32::{AppendMenuW, CreateMenu, GetMenu, SetMenu, DrawMenuBar};
     use winapi::{MF_STRING, UINT_PTR};
     use low::other_helper::to_utf16;
-
+    
     let ph_result = ui.handle_of(&t.parent);
     if ph_result.is_err() { return Err(ph_result.err().unwrap()); }
-
-    menu_items_id += 1;
 
     match ph_result.unwrap() {
         AnyHandle::HWND(parent_h) => {
@@ -215,25 +268,61 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
                 SetMenu(parent_h, menubar);
             }
 
+            MENU_ITEMS_ID += 1;
             let text = to_utf16(t.text.clone().into().as_ref());
-            let ensure_id_stays_the_same = menu_items_id;
+            let ensure_id_stays_the_same = MENU_ITEMS_ID;
 
             AppendMenuW(menubar, MF_STRING, ensure_id_stays_the_same as UINT_PTR, text.as_ptr());
             DrawMenuBar(parent_h); // Draw the menu bar to make sure the changes are visible
 
-            // WATCH OUT HERE!!! Calling `DrawMenuBar` (or maybe AppendMenuW) made the menu_items_id value corrupted (which in turn f* the whole menuitem system)
+            // WATCH OUT HERE!!! Calling `DrawMenuBar` (or maybe AppendMenuW) corrupted the MENU_ITEMS_ID value (which in turn f* the whole menuitem system)
             // Saving the id in its own little variable saved the day
 
             Ok( (menubar, ensure_id_stays_the_same) )
         },
         AnyHandle::HMENU(parent_h) => {
             let text = to_utf16(t.text.clone().into().as_ref());
-            menu_items_id += 1;
-            AppendMenuW(parent_h, MF_STRING, menu_items_id as UINT_PTR, text.as_ptr());
-            Ok( (parent_h, menu_items_id) )
+            MENU_ITEMS_ID += 1;
+            AppendMenuW(parent_h, MF_STRING, MENU_ITEMS_ID as UINT_PTR, text.as_ptr());
+            Ok( (parent_h, MENU_ITEMS_ID) )
         },
-        AnyHandle::HMENU_ITEM(_, _) => Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string())),
-        AnyHandle::HFONT(_) =>  Err(Error::BadParent("Window or menu parent required, got Font".to_string())),
-        AnyHandle::Custom(_, _) =>  Err(Error::BadParent("Window or menu parent required, got custom control".to_string())),
+        h => Err( Error::BadParent(format!("A menu item parent must be a Menu or a Window. Got {:?}", h)) )
+    }
+}
+
+#[inline(always)]
+unsafe fn build_separator<ID: Clone+Hash>(ui: &Ui<ID>, t: &SeparatorT<ID>) -> Result<(HMENU, UINT), Error> {
+    use user32::AppendMenuW;
+    use winapi::MENUITEMINFOW;
+    use low::defs::{MF_SEPARATOR, SetMenuItemInfoW, GetMenuItemCount, MIIM_ID};
+    use std::ptr;
+    
+    let ph_result = ui.handle_of(&t.parent);
+    if ph_result.is_err() { return Err(ph_result.err().unwrap()); }
+
+    match ph_result.unwrap() {
+        AnyHandle::HMENU(parent_h) => {
+            MENU_ITEMS_ID += 1;
+            let ensure_id_stays_the_same = MENU_ITEMS_ID;
+
+            // MF_SEPARATOR ignore the lpNewItem and uIDNewItem parameters, so they must be setted using SetMenuItemInfo
+            AppendMenuW(parent_h, MF_SEPARATOR, 0, ptr::null());
+
+            // Set the unique id of the separator
+            let pos = GetMenuItemCount(parent_h) - 1;
+            let mut info = MENUITEMINFOW{ 
+                cbSize: mem::size_of::<MENUITEMINFOW>() as UINT,
+                fMask: MIIM_ID, fType: 0, fState: 0,
+                wID: ensure_id_stays_the_same as UINT,
+                hSubMenu: ptr::null_mut(), hbmpChecked: ptr::null_mut(),
+                hbmpUnchecked: ptr::null_mut(), dwItemData: 0, dwTypeData: ptr::null_mut(),
+                cch: 0, hbmpItem: ptr::null_mut()
+            };
+
+            SetMenuItemInfoW(parent_h, pos as UINT, true, &mut info);
+
+            Ok( (parent_h, ensure_id_stays_the_same) )
+        },
+        h => Err( Error::BadParent(format!("A separator parent must be a Menu. Got {:?}", h)) )
     }
 }

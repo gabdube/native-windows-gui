@@ -1,7 +1,7 @@
 extern crate native_windows_gui as nwg;
 
 use nwg::{Ui, Event, EventArgs, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, 
-  RadioButtonT, LabelT, TimerT, ComboBoxT, dispatch_events, exit as nwg_exit};
+  RadioButtonT, LabelT, TimerT, ComboBoxT, SeparatorT, dispatch_events, exit as nwg_exit};
 
 use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, FONT_DECO_NORMAL, FONT_WEIGHT_NORMAL,
   CheckState, HTextAlign};
@@ -20,7 +20,12 @@ fn setup_controls(app: &Ui<&'static str>) {
 
     app.pack_control(&"MainWindow", default_window());
     app.pack_control(&"FileMenu", MenuT{ text: "&File", parent: "MainWindow" });
+    app.pack_control(&"TestSubmenu1", MenuT{ text: "&Submenu", parent: "FileMenu" });
+    app.pack_control(&"TestSubmenu2", MenuT{ text: "&Another submenu", parent: "TestSubmenu1" });
+    app.pack_control(&"NestedAction", MenuItemT{ text: "H&ello", parent: "TestSubmenu2" }); 
+    app.pack_control(&"S1", SeparatorT{ parent: "FileMenu" });
     app.pack_control(&"QuitItem", MenuItemT{ text: "&Quit", parent: "FileMenu" });
+    app.pack_control(&"WindowAction", MenuItemT{ text: "&Action", parent: "MainWindow" });
 
     app.pack_control(&"TestButton", ButtonT{
         text: "Start timer",
@@ -107,16 +112,13 @@ fn setup_callbacks(app: &Ui<&'static str>) {
         let mut timer = app.get_mut::<nwg::Timer>(&"UpdateTimeLabel").unwrap();
         let btn = app.get_mut::<nwg::Button>(&"TestButton").unwrap();
 
-        /*if timer.running() {
+        if timer.running() {
             btn.set_text("Start Timer");
             timer.stop();
         } else {
             btn.set_text("Stop Timer");
             timer.start();
-        }*/
-
-        let cb = app.get_mut::<nwg::ComboBox<&'static str>>(&"SchoolSupplyComboBox").unwrap();
-        println!("{:?}", cb.get_size());
+        }
     });
 
     app.bind(&"UpdateTimeLabel", &"...", Event::Tick, |app,_,_,args|{

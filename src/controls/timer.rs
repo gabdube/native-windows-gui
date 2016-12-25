@@ -28,7 +28,7 @@ use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::Event;
 
-static mut timers_id: UINT_PTR = 0; 
+static mut TIMERS_ID: UINT_PTR = 0; 
 
 /**
     A template that creates a timer. Note that because the timer callbacks must be added AFTER
@@ -54,7 +54,7 @@ impl<ID: Hash+Clone> ControlT<ID> for TimerT {
         Ok(Box::new(Timer{
             watcher: unsafe{ ui.message_handle() },
             interval: self.interval,
-            id_event: unsafe{ timers_id+=1; timers_id },
+            id_event: unsafe{ TIMERS_ID+=1; TIMERS_ID },
             handle: None,
             time: 0,
         }))
