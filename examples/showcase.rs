@@ -1,3 +1,8 @@
+/**
+    Example that show every control implemented in NWG
+    This example do not use templates because it predates them.
+*/
+
 extern crate native_windows_gui as nwg;
 
 use nwg::{Ui, Event, EventArgs, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, 
@@ -14,7 +19,6 @@ pub fn default_window() -> WindowT<&'static str> {
         disabled: false, exit_on_close: true 
     }
 }
-
 
 fn setup_controls(app: &Ui<&'static str>) {
 
@@ -104,7 +108,6 @@ fn setup_controls(app: &Ui<&'static str>) {
     })
 
 }
-
 
 fn setup_callbacks(app: &Ui<&'static str>) {
 

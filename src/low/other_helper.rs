@@ -178,3 +178,21 @@ pub fn fatal_message<'a>(title: &'a str, content: &'a str) -> ! {
 
     panic!("{} - {}", title, content);
 }
+
+/**
+    Display a simple message box. The message box has for style `MessageButtons::Ok` and `MessageIcons::None` .
+
+    Parameters:
+    * title: The message box title
+    * content: The message box message
+*/
+pub fn message_box<'a>(title: &'a str, content: &'a str) -> MessageChoice {
+    let params = MessageParams {
+        title: title,
+        content: content,
+        buttons: MessageButtons::Ok,
+        icons: MessageIcons::None
+    };
+
+    message(&params)
+}
