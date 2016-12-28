@@ -21,6 +21,7 @@
 pub mod window;
 pub mod menu;
 pub mod button;
+pub mod textinput;
 pub mod checkbox;
 pub mod radiobutton;
 pub mod label;
@@ -36,6 +37,7 @@ use winapi::{HWND, HMENU, UINT, HFONT};
 pub use controls::window::{WindowT, Window};
 pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem, SeparatorT, Separator};
 pub use controls::button::{ButtonT, Button};
+pub use controls::textinput::{TextInputT, TextInput};
 pub use controls::checkbox::{CheckBoxT, CheckBox};
 pub use controls::radiobutton::{RadioButtonT, RadioButton};
 pub use controls::label::{LabelT, Label};
@@ -68,6 +70,7 @@ pub enum AnyHandle {
 pub enum ControlType {
     Window,
     Button,
+    TextInput,
     CheckBox,
     RadioButton,
     ListBox,

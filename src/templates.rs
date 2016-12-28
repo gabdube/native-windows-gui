@@ -66,7 +66,7 @@ macro_rules! nwg_button {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::ButtonT{ 
-            text: "A button", 
+            text: "", 
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, 
             parent: $p, font: None
@@ -83,7 +83,7 @@ macro_rules! nwg_checkbox {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::CheckBoxT{ 
-            text: "A checkbox", 
+            text: "", 
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, 
             checkstate: $crate::constants::CheckState::Unchecked,
@@ -155,7 +155,7 @@ macro_rules! nwg_listbox {
 macro_rules! nwg_menu {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
-        $crate::MenuT{  text: "A Menu", parent: $p  };
+        $crate::MenuT{  text: "Menu", parent: $p  };
         $( t.$i = $v; );*
         t
     }}
@@ -164,7 +164,7 @@ macro_rules! nwg_menu {
 #[macro_export]
 macro_rules! nwg_menuitem {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
-        let mut t =  $crate::MenuItemT{  text: "A Menuitem", parent: $p };
+        let mut t =  $crate::MenuItemT{  text: "Menuitem", parent: $p };
         $( t.$i = $v; );*
         t
     }}
@@ -182,7 +182,7 @@ macro_rules! nwg_radiobutton {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::RadioButtonT{
-            text: "A Radiobutton",
+            text: "",
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, 
             parent: $p,
@@ -200,6 +200,22 @@ macro_rules! nwg_timer {
         let mut t = 
         $crate::TimerT{
             interval: 1000
+        };
+        $( t.$i = $v; );*
+        t
+    }}
+}
+
+#[macro_export]
+macro_rules! nwg_textinput {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::TextInputT{
+            text: "",
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false, readonly: false, password: false,
+            parent: $p,
+            font: None
         };
         $( t.$i = $v; );*
         t

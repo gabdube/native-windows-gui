@@ -6,7 +6,8 @@
 extern crate native_windows_gui as nwg;
 
 use nwg::{Ui, Event, EventArgs, WindowT, MenuT, MenuItemT, ButtonT, FontT, ListBoxT, CheckBoxT, 
-  RadioButtonT, LabelT, TimerT, ComboBoxT, SeparatorT, dispatch_events, exit as nwg_exit};
+  RadioButtonT, LabelT, TimerT, ComboBoxT, SeparatorT, TextInputT, dispatch_events,
+  exit as nwg_exit};
 
 use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, FONT_DECO_NORMAL, FONT_WEIGHT_NORMAL,
   CheckState, HTextAlign, MessageParams, MessageButtons, MessageIcons};
@@ -87,7 +88,7 @@ fn setup_controls(app: &Ui<&'static str>) {
 
     app.pack_control(&"TimeLabel", LabelT{
         text: "Time elapsed: 0 seconds",
-        position:(120, 90), size: (200, 100),
+        position:(120, 90), size: (200, 25),
         visible: true, disabled: false,
         align: HTextAlign::Left,
         parent: "MainWindow",
@@ -105,7 +106,16 @@ fn setup_controls(app: &Ui<&'static str>) {
         placeholder: Some("Choose plz"),
         parent: "MainWindow",
         font: Some("Font1") 
-    })
+    });
+
+    app.pack_control(&"TextInput", TextInputT {
+        text: "Hello World!",
+        position: (10, 160),
+        size: (200, 22),
+        visible: true, disabled: false, readonly: false, password: false,
+        parent: "MainWindow",
+        font: None,
+    });
 
 }
 

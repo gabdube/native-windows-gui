@@ -66,6 +66,7 @@ macro_rules! test_enabled {
     )
 }
 
+
 #[test]
 fn test_ui_new() {
     match Ui::<u64>::new() {
@@ -699,5 +700,46 @@ fn test_combobox() {
 
         cb.clear();
         assert!(cb.len() == 0, "Length is not 0");
+    }
+}
+
+#[test]
+fn text_textinput() {
+    let ui = setup_ui();
+
+    let ti_t = TextInputT {
+        text: "TEST",
+        position: (0, 0), size: (100, 30), 
+        visible: true, disabled: false, readonly: false, password: false,
+        parent: 1000,
+        font: None
+    };
+
+    ui.pack_control(&1000, window());
+
+    // pack test
+    ui.pack_control(&1001, ti_t);
+    ui.commit().expect("Commit was not successful");
+
+    // methods test
+    test_visibility!(ui, &1001, TextInput);
+    test_position!(ui, &1001, TextInput);
+    test_size!(ui, &1001, TextInput);
+    test_enabled!(ui, &1001, TextInput);
+
+    {
+        let tinput = ui.get::<TextInput>(&1001).expect("Control not found");
+
+        assert!(tinput.get_text().as_str() == "TEST");
+        tinput.set_text("Waloo");
+        assert!(tinput.get_text().as_str() == "Waloo");
+
+        assert!(tinput.get_readonly() == false);
+        tinput.set_readonly(true);
+        assert!(tinput.get_readonly() == true);
+
+        assert!(tinput.get_password() == false);
+        tinput.set_password(true);
+        assert!(tinput.get_password() == true);
     }
 }

@@ -118,6 +118,10 @@ pub const CB_SETCURSEL: UINT = 334;
 pub const CB_SHOWDROPDOWN: UINT = 335;
 pub const CB_SETCUEBANNER: UINT = 5891;
 
+pub const ES_AUTOHSCROLL: UINT = 128;
+pub const ES_PASSWORD: UINT = 32;
+pub const ES_READONLY: UINT = 0x800;
+
 pub const IDABORT: i32 = 3;
 pub const IDCANCEL: i32 = 2;
 pub const IDCONTINUE: i32 = 11;
