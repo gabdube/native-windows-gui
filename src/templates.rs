@@ -210,10 +210,12 @@ macro_rules! nwg_timer {
 macro_rules! nwg_textinput {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
-        $crate::TextInputT{
+        $crate::TextInputT::<_, &'static str, _> {
             text: "",
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, readonly: false, password: false,
+            limit: 32_767,
+            placeholder: None,
             parent: $p,
             font: None
         };

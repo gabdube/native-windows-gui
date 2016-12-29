@@ -707,10 +707,12 @@ fn test_combobox() {
 fn text_textinput() {
     let ui = setup_ui();
 
-    let ti_t = TextInputT {
+    let ti_t = TextInputT::<_, &'static str, _> {
         text: "TEST",
         position: (0, 0), size: (100, 30), 
         visible: true, disabled: false, readonly: false, password: false,
+        limit: 10,
+        placeholder: None,
         parent: 1000,
         font: None
     };
@@ -741,5 +743,9 @@ fn text_textinput() {
         assert!(tinput.get_password() == false);
         tinput.set_password(true);
         assert!(tinput.get_password() == true);
+
+        assert!(tinput.get_limit() == 10);
+        tinput.set_limit(10_000);
+        assert!(tinput.get_limit() == 10_000);
     }
 }

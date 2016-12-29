@@ -32,7 +32,7 @@ use controls::{ControlType, AnyHandle, Timer};
 /// A magic number to identify the NWG subclass that dispatches events
 const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
 
-unsafe fn parse_listbox_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
+fn parse_listbox_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
   use low::defs::{LBN_SELCHANGE, LBN_DBLCLK, LBN_SETFOCUS, LBN_KILLFOCUS};
 
   match ncode {
@@ -43,7 +43,7 @@ unsafe fn parse_listbox_command(id: u64, ncode: u32) -> Option<(u64, Event, Even
   }
 }
 
-unsafe fn parse_button_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
+fn parse_button_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
   use low::defs::{BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS};
   match ncode {
     BN_CLICKED => Some((id, Event::Click, EventArgs::None)),
@@ -53,17 +53,38 @@ unsafe fn parse_button_command(id: u64, ncode: u32) -> Option<(u64, Event, Event
   }
 }
 
+fn parse_edit_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
+  use low::defs::{EN_SETFOCUS, EN_KILLFOCUS, EN_UPDATE, EN_MAXTEXT};
+  match ncode {
+    EN_UPDATE => Some((id, Event::ValueChanged, EventArgs::None)),
+    EN_MAXTEXT => Some((id, Event::LimitReached, EventArgs::None)),
+    EN_SETFOCUS | EN_KILLFOCUS => Some((id, Event::Focus, EventArgs::Focus(ncode==EN_SETFOCUS))),
+    _ => None
+  }
+}
+
+fn parse_static_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
+  use low::defs::{STN_CLICKED, STN_DBLCLK};
+  match ncode {
+    STN_CLICKED => Some((id, Event::Click, EventArgs::None)),
+    STN_DBLCLK => Some((id, Event::DoubleClick, EventArgs::None)),
+    _ => None
+  }
+}
+
 /**
   Parse the common controls notification passed through the `WM_COMMAND` message.
 */
 #[inline(always)]
-unsafe fn parse_command(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, Event, EventArgs)> {
+fn parse_command(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, Event, EventArgs)> {
   use winapi::HIWORD;
 
   let ncode = HIWORD(w as DWORD) as u32;
   match control_type {
     ControlType::ListBox => parse_listbox_command(id, ncode),
     ControlType::Button => parse_button_command(id, ncode),
+    ControlType::TextInput => parse_edit_command(id, ncode),
+    ControlType::Label => parse_static_command(id, ncode),
     _ => None
   }
 }
@@ -86,7 +107,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       if l == 0 { 
         None 
       } else {
-        /// Somehow, WM_COMMAND messages get sent while freeing and so inner_id_from_handle can fail...
+        // Somehow, WM_COMMAND messages get sent while freeing and so inner_id_from_handle can fail...
         let nhandle: HWND = mem::transmute(l);
         if let Some(id) = inner.inner_id_from_handle( &AnyHandle::HWND(nhandle) ) {
           let control_type = (&mut *inner.controls.get(&id).expect("Could not find a control with with the specified type ID").as_ptr()).control_type();
@@ -112,8 +133,13 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
     WM_MENUCOMMAND => {
       let parent_menu: HMENU = mem::transmute(l);
       let handle = AnyHandle::HMENU_ITEM(parent_menu, get_menu_id(parent_menu, w as c_int));
-      inner_id = inner.inner_id_from_handle( &handle ).expect("Could not match system handle to ui control (msg: WM_MENUCOMMAND)");;
-      Some( (inner_id, Event::Triggered, EventArgs::None) )
+
+      // Custom controls might have their own way to handle the message
+      if let Some(inner_id) = inner.inner_id_from_handle( &handle ) { 
+        Some( (inner_id, Event::Triggered, EventArgs::None) )
+      } else {
+        None
+      }  
     },
     WM_UNICHAR | WM_CHAR => {
       inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_UNICHAR | WM_CHAR)");;
@@ -125,11 +151,16 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       }
     },
     WM_TIMER => {
-      // Here I assume WM_TIMER will only be sent by built-in timers. Using a user event might be a better idea.
       let handle = AnyHandle::Custom(TypeId::of::<Timer>(), w as usize);
-      inner_id = inner.inner_id_from_handle( &handle ).expect("Could not match system handle to ui control (msg: WM_TIMER)");
-      let timer: &mut Box<Timer> = mem::transmute( inner.controls.get(&inner_id).unwrap().as_ptr() );
-      Some( (inner_id, Event::Tick, EventArgs::Tick(timer.elapsed())) )
+
+      // Here I assume WM_TIMER will only be sent by built-in timers. Using a user event might be a better idea.
+      // Custom controls might have their own way to handle the message
+      if let Some(inner_id) = inner.inner_id_from_handle( &handle ) {
+        let timer: &mut Box<Timer> = mem::transmute( inner.controls.get(&inner_id).unwrap().as_ptr() );
+        Some( (inner_id, Event::Tick, EventArgs::Tick(timer.elapsed())) )
+      } else {
+        None
+      }
     },
     WM_CLOSE => {
       inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_CLOSE)");

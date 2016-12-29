@@ -113,6 +113,8 @@ fn setup_controls(app: &Ui<&'static str>) {
         position: (10, 160),
         size: (200, 22),
         visible: true, disabled: false, readonly: false, password: false,
+        limit: 20,
+        placeholder: Some("Placeholder"),
         parent: "MainWindow",
         font: None,
     });
@@ -153,6 +155,14 @@ fn setup_callbacks(app: &Ui<&'static str>) {
         };
         
         nwg::message(&params);
+    });
+
+    app.bind(&"TextInput", &"test", Event::ValueChanged, |app,control,_,_| {
+        println!("{:?}", app.get::<nwg::TextInput>(control).unwrap().get_text());
+    });
+
+    app.bind(&"TimeLabel", &"...", Event::DoubleClick, |_,_,_,_| {
+        println!("TEST");
     });
 
     app.bind(&"QuitItem", &"Quit", Event::Triggered, |_,_,_,_|{

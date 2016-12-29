@@ -31,21 +31,29 @@ pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
 */
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
-    Click,
-    DoubleClick,
+
+    // NWG special events
+    Destroyed,
+
+    // System events
     KeyDown,
     KeyUp,
     Char,
-    MenuOpen,
-    MenuClose,
     Closed,
-    Destroyed,
     MouseUp,
     MouseDown,
+
+    // Default control specific events
+    Click,
+    DoubleClick,
+    MenuOpen,
+    MenuClose,
     SelectionChanged,
+    ValueChanged,
+    LimitReached,
     Focus,
     Tick,
-    Triggered
+    Triggered,
 }
 
 /**

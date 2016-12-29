@@ -122,6 +122,17 @@ pub const ES_AUTOHSCROLL: UINT = 128;
 pub const ES_PASSWORD: UINT = 32;
 pub const ES_READONLY: UINT = 0x800;
 
+pub const EM_LIMITTEXT: UINT = 197;
+pub const EM_GETLIMITTEXT: UINT = 213;
+
+pub const EN_SETFOCUS: UINT = 256;
+pub const EN_KILLFOCUS: UINT = 512;
+pub const EN_UPDATE: UINT = 1024;
+pub const EN_MAXTEXT: UINT = 1281;
+
+pub const STN_CLICKED: UINT = 0;
+pub const STN_DBLCLK: UINT = 1;
+
 pub const IDABORT: i32 = 3;
 pub const IDCANCEL: i32 = 2;
 pub const IDCONTINUE: i32 = 11;
@@ -131,6 +142,7 @@ pub const IDOK: i32 = 1;
 pub const IDRETRY: i32 = 4;
 pub const IDTRYAGAIN: i32 = 10;
 pub const IDYES: i32 = 6;
+
 
 // System structs
 #[repr(C)]

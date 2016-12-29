@@ -58,7 +58,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for LabelT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Label>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus]
+        vec![Event::Destroyed, Event::Click, Event::DoubleClick]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

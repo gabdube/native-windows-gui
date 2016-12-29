@@ -21,11 +21,14 @@
 
 use std::hash::Hash;
 use std::any::TypeId;
+use std::mem;
 
-use winapi::{HWND, HFONT};
+use winapi::{HWND, HFONT, WPARAM};
+use user32::SendMessageW;
 
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
+use low::other_helper::to_utf16;
 use error::Error;
 use events::Event;
 
@@ -33,28 +36,31 @@ use events::Event;
     A template that creates a single line textinput control
 */
 #[derive(Clone)]
-pub struct TextInputT<S: Clone+Into<String>, ID: Hash+Clone> {
-    pub text: S,
+pub struct TextInputT<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+Clone> {
+    pub text: S1,
     pub position: (i32, i32),
     pub size: (u32, u32),
     pub visible: bool,
     pub disabled: bool,
     pub readonly: bool,
     pub password: bool,
+    pub placeholder: Option<S2>,
+    pub limit: u32,
     pub parent: ID,
     pub font: Option<ID>,
 }
 
-impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextInputT<S, ID> {
+impl<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextInputT<S1, S2, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<TextInput>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed]
+        vec![Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp,
+             Event::ValueChanged]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
-        use low::defs::{ES_AUTOHSCROLL, ES_READONLY, ES_PASSWORD};
+        use low::defs::{ES_AUTOHSCROLL, ES_READONLY, ES_PASSWORD, EM_LIMITTEXT};
         use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER};
 
         let flags: DWORD = WS_CHILD | WS_BORDER | ES_AUTOHSCROLL | 
@@ -90,7 +96,15 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextInputT<S, ID> {
 
         match unsafe{ build_window(params) } {
             Ok(h) => {
-                unsafe{ set_window_font(h, font_handle, true); }
+                unsafe{ 
+                    set_window_font(h, font_handle, true); 
+                    SendMessageW(h, EM_LIMITTEXT, self.limit as WPARAM, 0);
+                    
+                    if let Some(placeholder) = self.placeholder.as_ref() {
+                        set_placeholder(h, placeholder.clone());
+                    }
+                };
+
                 Ok( Box::new(TextInput{handle: h}) )
             },
             Err(e) => Err(Error::System(e))
@@ -153,6 +167,40 @@ impl TextInput {
         (style & ES_PASSWORD) == ES_PASSWORD
     }
 
+    pub fn set_limit(&self, limit: u32) {
+        use low::defs::EM_LIMITTEXT;
+        unsafe{ SendMessageW(self.handle, EM_LIMITTEXT, limit as WPARAM, 0); }
+    }
+
+    pub fn get_limit(&self) -> u32 {
+        use low::defs::EM_GETLIMITTEXT;
+        unsafe{ SendMessageW(self.handle, EM_GETLIMITTEXT, 0, 0) as u32 }
+    }
+
+    /// Set a new placeholder for the TextInput. To remove the current placeholder, send `""`  
+    /// The maximum length of the placeholder is 255 characters
+    pub fn set_placeholder<'a>(&self, placeholder: &'a str) {
+        set_placeholder(self.handle, placeholder);
+    }
+
+    /// Return the current placeholder for the TextInput. If there are no placeholder set, returns None.
+    /// EM_GETCUEBANNER IS NOT RELIABLE (blame Windows for the one).
+    /*pub fn get_placeholder(&self) -> Option<String> {
+        use winapi::EM_GETCUEBANNER;
+
+        let mut buffer: [u16; 256] = [0; 256];
+        let mut buffer_size = 256;
+
+        let placeholder_found = unsafe{ SendMessageW(self.handle, EM_GETCUEBANNER, mem::transmute(buffer.as_mut_ptr()), mem::transmute(&mut buffer_size)) };
+
+        if placeholder_found == 1 {
+            Some(from_utf16(&buffer))
+        } else {
+            None
+        }
+    }*/
+    
+
     pub fn get_text(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
     pub fn set_text<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
@@ -180,4 +228,11 @@ impl Control for TextInput {
         unsafe{ DestroyWindow(self.handle) };
     }
 
+}
+
+
+fn set_placeholder<S: Into<String>>(handle: HWND, placeholder: S) {
+    use winapi::EM_SETCUEBANNER;
+    let text = to_utf16(placeholder.into().as_str());
+    unsafe{ SendMessageW(handle, EM_SETCUEBANNER, 0, mem::transmute(text.as_ptr()) ); }
 }
