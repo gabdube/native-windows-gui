@@ -42,6 +42,8 @@ pub enum Event {
     Closed,
     MouseUp,
     MouseDown,
+    Moved,
+    Resized,
 
     // Default control specific events
     Click,
@@ -65,5 +67,7 @@ pub enum EventArgs {
     MouseClick{btn: MouseButton, pos: (i32, i32)},
     Focus(bool),
     Tick(Duration),
+    Position(i32, i32),
+    Size(u32, u32),
     None
 }

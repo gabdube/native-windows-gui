@@ -34,12 +34,16 @@ mod ui;
 
 pub mod templates;
 
-pub mod customs {
+pub mod custom {
     /*!
         Custom control creation resources
     */
     pub use controls::{ControlT, Control, AnyHandle};
     pub use resources::{ResourceT, Resource};
+    pub use low::window_helper::{build_window, build_sysclass, SysclassParams, WindowParams, set_window_long, get_window_long,
+    get_window_text, set_window_text, get_window_visibility, set_window_visibility, get_window_position, set_window_position,
+    get_window_size, set_window_size, get_window_enabled, set_window_enabled};
+
 }
 
 pub mod constants {
@@ -56,7 +60,7 @@ pub mod constants {
 
 pub use error::{Error, SystemError};
 pub use events::{EventCallback, Event, EventArgs};
-pub use low::other_helper::{message, message_box, fatal_message};
+pub use low::other_helper::{message, simple_message, fatal_message};
 pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
  RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput};
 pub use resources::{FontT, Font};

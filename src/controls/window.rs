@@ -58,7 +58,8 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp]
+        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp,
+             Event::Moved, Event::Resized]
     }
 
     #[allow(unused_variables)]
@@ -159,7 +160,11 @@ unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
 #[inline(always)]
 unsafe fn build_sysclass() -> Result<(), Error> {
     use low::window_helper::{SysclassParams, build_sysclass};
-    let params = SysclassParams{ class_name: WINDOW_CLASS_NAME, sysproc: Some(window_sysproc) };
+    let params = SysclassParams { 
+        class_name: WINDOW_CLASS_NAME,
+        sysproc: Some(window_sysproc),
+        background: None, style: None
+    };
     
     if let Err(e) = build_sysclass(params) {
         Err(Error::System(e))

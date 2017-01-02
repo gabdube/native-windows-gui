@@ -55,7 +55,7 @@ impl<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+Clone> ControlT<ID
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp,
-             Event::ValueChanged]
+             Event::ValueChanged, Event::Moved, Event::Resized]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
@@ -184,7 +184,7 @@ impl TextInput {
     }
 
     /// Return the current placeholder for the TextInput. If there are no placeholder set, returns None.
-    /// EM_GETCUEBANNER IS NOT RELIABLE (blame Windows for the one).
+    /// EM_GETCUEBANNER IS NOT RELIABLE (blame Windows for this one).
     /*pub fn get_placeholder(&self) -> Option<String> {
         use winapi::EM_GETCUEBANNER;
 

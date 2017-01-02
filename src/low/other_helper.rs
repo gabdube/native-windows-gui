@@ -186,7 +186,7 @@ pub fn fatal_message<'a>(title: &'a str, content: &'a str) -> ! {
     * title: The message box title
     * content: The message box message
 */
-pub fn message_box<'a>(title: &'a str, content: &'a str) -> MessageChoice {
+pub fn simple_message<'a>(title: &'a str, content: &'a str) -> MessageChoice {
     let params = MessageParams {
         title: title,
         content: content,

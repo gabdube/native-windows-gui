@@ -4,7 +4,7 @@
 
 #[macro_use] extern crate native_windows_gui as nwg;
 
-use nwg::{Event, Ui, message_box, fatal_message, dispatch_events};
+use nwg::{Event, Ui, simple_message, fatal_message, dispatch_events};
 
 nwg_template!(
     head: setup_ui<&'static str>,
@@ -14,7 +14,7 @@ nwg_template!(
     ];
     events: [
         ("HelloButton", "SaySomething", Event::Click, |_,_,_,_| {
-            message_box("Hello", "Hello World!");
+            simple_message("Hello", "Hello World!");
         })
     ];
     resources: [

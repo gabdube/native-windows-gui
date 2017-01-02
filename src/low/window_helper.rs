@@ -22,7 +22,7 @@ use std::ptr;
 use std::mem;
 use std::hash::Hash;
 
-use winapi::{HWND, HFONT, WNDPROC, DWORD, LPARAM, BOOL, c_int};
+use winapi::{HWND, HFONT, HBRUSH, WNDPROC, DWORD, LPARAM, BOOL, c_int};
 
 use ui::{UiInner, Ui};
 use controls::{AnyHandle};
@@ -37,7 +37,9 @@ use error::{Error, SystemError};
 */
 pub struct SysclassParams<S: Into<String>> {
     pub class_name: S,
-    pub sysproc: WNDPROC
+    pub sysproc: WNDPROC,
+    pub background: Option<HBRUSH>,
+    pub style: Option<u32>
 }
 
 /**
@@ -66,24 +68,34 @@ pub struct WindowParams<S1: Into<String>, S2: Into<String>> {
 pub unsafe fn build_sysclass<S: Into<String>>(p: SysclassParams<S>) -> Result<(), SystemError> {
     use kernel32::{GetModuleHandleW, GetLastError};
     use user32::{LoadCursorW, RegisterClassExW};
-    use winapi::{WNDCLASSEXW, CS_HREDRAW, CS_VREDRAW, IDC_ARROW, COLOR_WINDOW, HBRUSH, UINT, ERROR_CLASS_ALREADY_EXISTS};
+    use winapi::{WNDCLASSEXW, CS_HREDRAW, CS_VREDRAW, IDC_ARROW, COLOR_WINDOW, UINT, ERROR_CLASS_ALREADY_EXISTS};
 
     let hmod = GetModuleHandleW(ptr::null_mut());
     if hmod.is_null() { return Err(SystemError::SystemClassCreation); }
 
     let class_name = to_utf16(p.class_name.into().as_ref());
 
+    let background: HBRUSH = match p.background {
+        Some(bg) => bg,
+        None => mem::transmute(COLOR_WINDOW)
+    };
+
+    let style: UINT = match p.style {
+        Some(s) => s as UINT,
+        None=> CS_HREDRAW | CS_VREDRAW
+    };
+
     let class =
     WNDCLASSEXW {
         cbSize: mem::size_of::<WNDCLASSEXW>() as UINT,
-        style: CS_HREDRAW | CS_VREDRAW,
+        style: style,
         lpfnWndProc: p.sysproc, 
         cbClsExtra: 0,
         cbWndExtra: 0,
         hInstance: hmod,
         hIcon: ptr::null_mut(),
         hCursor: LoadCursorW(ptr::null_mut(), IDC_ARROW),
-        hbrBackground: mem::transmute(COLOR_WINDOW as HBRUSH),
+        hbrBackground: background,
         lpszMenuName: ptr::null(),
         lpszClassName: class_name.as_ptr(),
         hIconSm: ptr::null_mut()
@@ -188,7 +200,6 @@ pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInne
 
     params.1
 }
-
 
 /// Set the font of a window
 pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: bool) {

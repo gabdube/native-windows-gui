@@ -233,7 +233,11 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
 */
 unsafe fn setup_class<ID: Hash+Clone+'static>() -> Result<(), SystemError> {
     use low::window_helper::{SysclassParams, build_sysclass};
-    let params = SysclassParams{ class_name: MESSAGE_HANDLE_CLASS_NAME, sysproc: Some(message_window_proc::<ID>) };
+    let params = SysclassParams{ 
+        class_name: MESSAGE_HANDLE_CLASS_NAME, 
+        sysproc: Some(message_window_proc::<ID>),
+        background: Some(ptr::null_mut()), style: None
+    };
     
     if let Err(_) = build_sysclass(params) {
         Err(SystemError::UiCreation)

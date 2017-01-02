@@ -135,10 +135,10 @@ macro_rules! nwg_label {
 
 #[macro_export]
 macro_rules! nwg_listbox {
-    (data=$t:ty, parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+    (data=$t:ty; parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
-        $crate::ListBoxT::<$t>{ 
-            collection: [],
+        $crate::ListBoxT::<$t, _>{ 
+            collection: vec![],
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, readonly: false, multi_select: false,
             parent: $p, font: None
