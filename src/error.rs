@@ -72,7 +72,8 @@ pub enum Error {
     ControlInUse,
     ResourceInUse,
     Unimplemented,
-    System(SystemError)
+    System(SystemError),
+    UserError(String)
 }
 
 impl Error {
@@ -92,6 +93,7 @@ impl Error {
             &Error::ResourceInUse => format!("Impossible to modify the resource, it is currently in use."),
             &Error::Unimplemented => format!("Feature not yet implemented"),
             &Error::System(ref e) => format!("A system error was raised: {:?}", e),
+            &Error::UserError(ref e) => format!("{}", e),
         }
 
     }

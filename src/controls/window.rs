@@ -94,6 +94,11 @@ impl Window {
         unsafe{ PostMessageW(self.handle, WM_CLOSE, 0, 0) };
     }
 
+    pub fn activate(&self) { unsafe{ 
+        use user32::SetForegroundWindow;
+        SetForegroundWindow(self.handle); 
+    } }
+
     pub fn get_title(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
     pub fn set_title<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }

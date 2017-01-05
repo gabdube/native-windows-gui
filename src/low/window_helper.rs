@@ -77,7 +77,7 @@ pub unsafe fn build_sysclass<S: Into<String>>(p: SysclassParams<S>) -> Result<()
 
     let background: HBRUSH = match p.background {
         Some(bg) => bg,
-        None => mem::transmute(COLOR_WINDOW)
+        None => mem::transmute(COLOR_WINDOW as usize)
     };
 
     let style: UINT = match p.style {

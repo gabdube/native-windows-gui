@@ -20,7 +20,10 @@ nwg_template!(
     resources: [
         ("MainFont", nwg_font!(family="Arial"; size=27))
     ];
-    values: []
+    values: [
+        ("CustomValue", 1234),
+        ("HelloBuddy", Vec::<u32>::new())
+    ]
 );
 
 fn main() {

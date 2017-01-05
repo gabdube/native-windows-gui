@@ -167,6 +167,18 @@ pub fn message<'a>(params: &MessageParams) -> MessageChoice {
     * content: The message box message
 */
 pub fn fatal_message<'a>(title: &'a str, content: &'a str) -> ! {
+    error_message(title, content);
+    panic!("{} - {}", title, content);
+}
+
+/**
+    Display a simple error message box. The message box has for style `MessageButtons::Ok` and `MessageIcons::Error` .
+
+    Parameters:
+    * title: The message box title
+    * content: The message box message
+*/
+pub fn error_message<'a>(title: &'a str, content: &'a str) -> MessageChoice {
     let params = MessageParams {
         title: title,
         content: content,
@@ -174,9 +186,7 @@ pub fn fatal_message<'a>(title: &'a str, content: &'a str) -> ! {
         icons: MessageIcons::Error
     };
 
-    message(&params);
-
-    panic!("{} - {}", title, content);
+    message(&params)
 }
 
 /**

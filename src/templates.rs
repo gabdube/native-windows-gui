@@ -20,6 +20,32 @@
 */
 
 #[macro_export]
+macro_rules! nwg_get {
+    ( $ui:ident; ($n:expr, $t:ty) ) => {
+        $ui.get::<$t>(&$n).expect("Failed to find a control")
+    };
+
+    ( $ui:ident; [ $( ($n:expr, $t:ty) ),* ] ) => {
+        (
+            $( $ui.get::<$t>(&$n).expect("Failed to find a control") ),*
+        )
+    }
+}
+
+#[macro_export]
+macro_rules! nwg_get_mut {
+    ( $ui:ident; ($n:expr, $t:ty) ) => {
+        $ui.get_mut::<$t>(&$n).expect("Failed to find a control")
+    };
+
+    ( $ui:ident; [ $( ($n:expr, $t:ty) ),* ] ) => {
+        (
+            $( $ui.get_mut::<$t>(&$n).expect("Failed to find a control") ),*
+        )
+    }
+}
+
+#[macro_export]
 macro_rules! nwg_template {
     (
         head: $n:ident<$t:ty>,
@@ -31,11 +57,14 @@ macro_rules! nwg_template {
     {
 
 pub fn $n(ui: &$crate::Ui<$t>) -> Result<(), $crate::Error> {
+
+    $( ui.pack_value(&$i3, $v); );*
+
     $( ui.pack_resource(&$i2, $r); );*
+
     $( ui.pack_control(&$i1, $c); );*
     $( ui.bind(&$i4, &$i5, $e, $b); );*
-    $( ui.pack_value(&$i3, $v); ),*
-
+   
     ui.commit()
 }
        

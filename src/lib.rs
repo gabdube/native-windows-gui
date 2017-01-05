@@ -60,7 +60,7 @@ pub mod constants {
 
 pub use error::{Error, SystemError};
 pub use events::{EventCallback, Event, EventArgs};
-pub use low::other_helper::{message, simple_message, fatal_message};
+pub use low::other_helper::{message, simple_message, fatal_message, error_message};
 pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
  RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput};
 pub use resources::{FontT, Font};
