@@ -1,6 +1,6 @@
 /**
     Example that show every control implemented in NWG
-    This example do not use templates because it predates them.
+    TODO use templates
 */
 
 extern crate native_windows_gui as nwg;
@@ -24,13 +24,15 @@ pub fn default_window() -> WindowT<&'static str> {
 fn setup_controls(app: &Ui<&'static str>) {
 
     app.pack_control(&"MainWindow", default_window());
-    app.pack_control(&"FileMenu", MenuT{ text: "&File", parent: "MainWindow" });
-    app.pack_control(&"TestSubmenu1", MenuT{ text: "&Submenu", parent: "FileMenu" });
-    app.pack_control(&"TestSubmenu2", MenuT{ text: "&Another submenu", parent: "TestSubmenu1" });
-    app.pack_control(&"NestedAction", MenuItemT{ text: "H&ello", parent: "TestSubmenu2" }); 
+    app.pack_control(&"FileMenu", MenuT{ text: "&File", parent: "MainWindow", disabled: false });
+    app.pack_control(&"TestSubmenu1", MenuT{ text: "&Submenu", parent: "FileMenu", disabled: false });
+    app.pack_control(&"TestDisabledSubmenu", MenuT{ text: "Disabled Submenu", parent: "FileMenu", disabled: true });
+    app.pack_control(&"TestSubmenu2", MenuT{ text: "&Another submenu", parent: "TestSubmenu1", disabled: false });
+    app.pack_control(&"NestedAction", MenuItemT{ text: "H&ello", parent: "TestSubmenu2", disabled: false }); 
+    app.pack_control(&"DisabledNestedAction", MenuItemT{ text: "Disabled", parent: "TestSubmenu2", disabled: true }); 
     app.pack_control(&"S1", SeparatorT{ parent: "FileMenu" });
-    app.pack_control(&"QuitItem", MenuItemT{ text: "&Quit", parent: "FileMenu" });
-    app.pack_control(&"WindowAction", MenuItemT{ text: "&Action", parent: "MainWindow" });
+    app.pack_control(&"QuitItem", MenuItemT{ text: "&Quit", parent: "FileMenu", disabled: false });
+    app.pack_control(&"WindowAction", MenuItemT{ text: "&Action", parent: "MainWindow", disabled: false });
 
     app.pack_control(&"TestButton", ButtonT{
         text: "Start timer",

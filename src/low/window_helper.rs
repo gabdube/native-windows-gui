@@ -306,6 +306,7 @@ pub unsafe fn get_window_enabled(handle: HWND) -> bool {
 #[inline(always)]
 pub unsafe fn set_window_enabled(handle: HWND, enabled: bool) {
     use winapi::{GWL_STYLE, WS_DISABLED};
+    use user32::{UpdateWindow, InvalidateRect};
 
     let old_style = get_window_long(handle, GWL_STYLE) as usize;
     if enabled {
@@ -313,6 +314,10 @@ pub unsafe fn set_window_enabled(handle: HWND, enabled: bool) {
     } else {
         set_window_long(handle, GWL_STYLE, old_style|(WS_DISABLED as usize));
     }
+
+    // Tell the control to redraw itself to show the new style.
+    InvalidateRect(handle, ptr::null(), 1);
+    UpdateWindow(handle);
 }
 
 /// Set window visibility

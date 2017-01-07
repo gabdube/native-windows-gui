@@ -253,7 +253,7 @@ impl<D: Clone+Display> ComboBox<D> {
 
     /* Return the current placeholder for the combobox. If there are no placeholder set, returns None.
 
-    CB_GETCUEBANNER IS NOT RELIABLE (blame Windows for the one).
+    CB_GETCUEBANNER IS NOT RELIABLE (blame Windows for this one).
 
     pub fn get_placeholder(&self) -> Option<String> {
         use winapi::CB_GETCUEBANNER;

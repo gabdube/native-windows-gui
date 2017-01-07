@@ -22,7 +22,7 @@ use std::hash::Hash;
 use std::any::TypeId;
 use std::mem;
 
-use winapi::{HMENU, UINT};
+use winapi::{HMENU, UINT, BOOL};
 
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
@@ -42,6 +42,7 @@ static mut MENU_ITEMS_ID: UINT = 0;
 pub struct MenuT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub text: S,
     pub parent: ID,
+    pub disabled: bool
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuT<S, ID> {
@@ -66,6 +67,19 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuT<S, ID> {
 pub struct Menu {
     handle: HMENU,
     parent: AnyHandle
+}
+
+impl Menu {
+
+    /// Return true if the menu is enabled or false otherwise
+    pub fn get_enabled(&self) -> bool {
+        unsafe{ ::low::menu_helper::is_menu_enabled(self.handle, &self.parent) }
+    }
+
+    /// Enable or disable the menu
+    pub fn set_enabled(&self, enabled: bool) {
+        unsafe{ ::low::menu_helper::enable_menu(self.handle, &self.parent, enabled); }
+    }
 }
 
 impl Control for Menu {
@@ -101,6 +115,7 @@ impl Control for Menu {
 pub struct MenuItemT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub text: S,
     pub parent: ID,
+    pub disabled: bool
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
@@ -126,6 +141,20 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
 pub struct MenuItem {
     parent: HMENU,
     unique_id: UINT
+}
+
+impl MenuItem {
+
+    /// Return true if the menuitem is enabled or false otherwise
+    pub fn get_enabled(&self) -> bool {
+        unsafe{ ::low::menu_helper::is_menuitem_enabled(self.parent, None, Some(self.unique_id)) }
+    }
+
+    /// Enable or disable the menuitem
+    pub fn set_enabled(&self, enabled: bool) {
+        unsafe{ ::low::menu_helper::enable_menuitem(self.parent, None, Some(self.unique_id), enabled); }
+    }
+
 }
 
 
@@ -211,7 +240,7 @@ impl Control for Separator {
 unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &MenuT<S, ID>) -> Result<(HMENU, AnyHandle), Error> {
     use user32::{CreateMenu, AppendMenuW, GetMenu, SetMenu, DrawMenuBar};
     use winapi::{MF_STRING, MF_POPUP};
-    use low::menu_helper::use_menu_command;
+    use low::menu_helper::{use_menu_command, enable_menuitem};
     use low::other_helper::to_utf16;
 
     let ph_result = ui.handle_of(&t.parent);
@@ -232,8 +261,9 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
 
             let text = to_utf16(t.text.clone().into().as_ref());
             AppendMenuW(menubar, MF_STRING|MF_POPUP, mem::transmute(h), text.as_ptr());
-
+            enable_menuitem(menubar, None, None, !t.disabled);
             DrawMenuBar(parent_h); // Draw the menu bar to make sure the changes are visible
+
             Ok( ( h, AnyHandle::HWND(parent_h)) )
         },
         AnyHandle::HMENU(parent_h) => {
@@ -242,6 +272,8 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
 
             let text = to_utf16(t.text.clone().into().as_ref());
             AppendMenuW(parent_h, MF_STRING|MF_POPUP, mem::transmute(h), text.as_ptr());
+            enable_menuitem(parent_h, None, None, !t.disabled);
+
             Ok( ( h, AnyHandle::HMENU(parent_h) ) )
         },
         AnyHandle::HMENU_ITEM(_, _) => Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string())),
@@ -255,6 +287,7 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
     use user32::{AppendMenuW, CreateMenu, GetMenu, SetMenu, DrawMenuBar};
     use winapi::{MF_STRING, UINT_PTR};
     use low::other_helper::to_utf16;
+    use low::menu_helper::enable_menuitem;
     
     let ph_result = ui.handle_of(&t.parent);
     if ph_result.is_err() { return Err(ph_result.err().unwrap()); }
@@ -273,6 +306,8 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
             let ensure_id_stays_the_same = MENU_ITEMS_ID;
 
             AppendMenuW(menubar, MF_STRING, ensure_id_stays_the_same as UINT_PTR, text.as_ptr());
+            enable_menuitem(menubar, None, None, !t.disabled);
+
             DrawMenuBar(parent_h); // Draw the menu bar to make sure the changes are visible
 
             // WATCH OUT HERE!!! Calling `DrawMenuBar` (or maybe AppendMenuW) corrupted the MENU_ITEMS_ID value (which in turn f* the whole menuitem system)
@@ -284,6 +319,7 @@ unsafe fn build_menu_item<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t:
             let text = to_utf16(t.text.clone().into().as_ref());
             MENU_ITEMS_ID += 1;
             AppendMenuW(parent_h, MF_STRING, MENU_ITEMS_ID as UINT_PTR, text.as_ptr());
+            enable_menuitem(parent_h, None, None, !t.disabled);
             Ok( (parent_h, MENU_ITEMS_ID) )
         },
         h => Err( Error::BadParent(format!("A menu item parent must be a Menu or a Window. Got {:?}", h)) )
@@ -319,7 +355,7 @@ unsafe fn build_separator<ID: Clone+Hash>(ui: &Ui<ID>, t: &SeparatorT<ID>) -> Re
                 cch: 0, hbmpItem: ptr::null_mut()
             };
 
-            SetMenuItemInfoW(parent_h, pos as UINT, true, &mut info);
+            SetMenuItemInfoW(parent_h, pos as UINT, true as BOOL, &mut info);
 
             Ok( (parent_h, ensure_id_stays_the_same) )
         },

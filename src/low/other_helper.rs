@@ -190,7 +190,7 @@ pub fn error_message<'a>(title: &'a str, content: &'a str) -> MessageChoice {
 }
 
 /**
-    Display a simple message box. The message box has for style `MessageButtons::Ok` and `MessageIcons::None` .
+    Display a simple message box. The message box has for style `MessageButtons::Ok` and `MessageIcons::Info` .
 
     Parameters:
     * title: The message box title
@@ -201,7 +201,7 @@ pub fn simple_message<'a>(title: &'a str, content: &'a str) -> MessageChoice {
         title: title,
         content: content,
         buttons: MessageButtons::Ok,
-        icons: MessageIcons::None
+        icons: MessageIcons::Info
     };
 
     message(&params)

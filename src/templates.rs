@@ -184,7 +184,7 @@ macro_rules! nwg_listbox {
 macro_rules! nwg_menu {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
-        $crate::MenuT{  text: "Menu", parent: $p  };
+        $crate::MenuT{  text: "Menu", parent: $p, disabled: false  };
         $( t.$i = $v; );*
         t
     }}
@@ -193,7 +193,7 @@ macro_rules! nwg_menu {
 #[macro_export]
 macro_rules! nwg_menuitem {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
-        let mut t =  $crate::MenuItemT{  text: "Menuitem", parent: $p };
+        let mut t =  $crate::MenuItemT{  text: "Menuitem", parent: $p, disabled: false };
         $( t.$i = $v; );*
         t
     }}
@@ -202,7 +202,7 @@ macro_rules! nwg_menuitem {
 #[macro_export]
 macro_rules! nwg_separator {
     (parent=$p:expr) => { {
-        $crate::MenuItemT{ parent: $p }
+        $crate::SeparatorT{ parent: $p }
     }}
 }
 

@@ -145,7 +145,7 @@ fn test_ui_pack_control() {
     let ui = setup_ui();
 
     ui.pack_control(&1000, window());
-    ui.pack_control(&1001, MenuItemT{text: "", parent: 1000});
+    ui.pack_control(&1001, MenuItemT{text: "", parent: 1000, disabled: false});
 
     assert!(!ui.has_id(&1000), "ID 1000 was found in ui before commit");
     ui.commit().expect("Commit was not successful");
@@ -155,7 +155,7 @@ fn test_ui_pack_control() {
     { let w = ui.get::<Window>(&1000); w.expect("Failed to get control"); }
 
     // Id already exists
-    ui.pack_control(&1000, MenuItemT{text: "", parent: 1000});
+    ui.pack_control(&1000, MenuItemT{text: "", parent: 1000, disabled: false});
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
 
@@ -235,7 +235,7 @@ fn test_ui_bind() {
     ui.pack_value(&1000, 5u32);
     ui.pack_control(&1001, window());
     ui.pack_control(&1002, window());
-    ui.pack_control(&1003, MenuItemT{text: "", parent: 1001});
+    ui.pack_control(&1003, MenuItemT{text: "", parent: 1001, disabled: false});
 
     // Binding successful
     ui.bind(&1001, &5000, Event::Destroyed, |ui, id, _, _|{
@@ -288,7 +288,7 @@ fn test_ui_unbind() {
     let ui = setup_ui();
     
     ui.pack_control(&1000, window());
-    ui.pack_control(&1002, MenuItemT{text: "", parent: 1000});
+    ui.pack_control(&1002, MenuItemT{text: "", parent: 1000, disabled: false});
     ui.pack_value(&1001, 5u32);
 
     ui.bind(&1000, &5000, Event::Destroyed, |_, _, _, _|{});
@@ -377,38 +377,51 @@ fn test_menus() {
     ui.pack_control(&1000, window());
     ui.bind(&1000, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     
-    ui.pack_control(&1001, MenuT{ text: "Test1", parent: 1000  });
+    ui.pack_control(&1001, MenuT{ text: "Test1", parent: 1000, disabled: false  });
     ui.bind(&1001, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
-    ui.pack_control(&2003, MenuItemT{ text: "TestItem4", parent: 1000  });
+    ui.pack_control(&2003, MenuItemT{ text: "TestItem4", parent: 1000, disabled: false  });
     ui.bind(&2003, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     
-    ui.pack_control(&1002, MenuT{ text: "Test2", parent: 1000  });
-    ui.pack_control(&1003, MenuT{ text: "Test3", parent: 1002  });
-    ui.pack_control(&1004, MenuT{ text: "Test4", parent: 1002  });
-    ui.pack_control(&2000, MenuItemT{ text: "TestItem1", parent: 1002  });
+    ui.pack_control(&1002, MenuT{ text: "Test2", parent: 1000, disabled: false  });
+    ui.pack_control(&1003, MenuT{ text: "Test3", parent: 1002, disabled: false  });
+    ui.pack_control(&1004, MenuT{ text: "Test4", parent: 1002, disabled: false  });
+    ui.pack_control(&2000, MenuItemT{ text: "TestItem1", parent: 1002, disabled: false  });
     ui.bind(&1002, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1003, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1004, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&2000, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
-    ui.pack_control(&1005, MenuT{ text: "Test5", parent: 1000 });
-    ui.pack_control(&1006, MenuT{ text: "Test6", parent: 1005 });
-    ui.pack_control(&1007, MenuT{ text: "Test7", parent: 1006 });
-    ui.pack_control(&2001, MenuItemT{ text: "TestItem2", parent: 1007  });
+    ui.pack_control(&1005, MenuT{ text: "Test5", parent: 1000, disabled: false });
+    ui.pack_control(&1006, MenuT{ text: "Test6", parent: 1005, disabled: false });
+    ui.pack_control(&1007, MenuT{ text: "Test7", parent: 1006, disabled: false });
+    ui.pack_control(&2001, MenuItemT{ text: "TestItem2", parent: 1007, disabled: false  });
     ui.bind(&1005, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1006, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1007, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&2001, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
-    ui.pack_control(&1008, MenuT{ text: "Test8", parent: 1000 });
-    ui.pack_control(&1009, MenuT{ text: "Test9", parent: 1008 });
-    ui.pack_control(&2002, MenuItemT{ text: "TestItem3", parent: 1000  });
+    ui.pack_control(&1008, MenuT{ text: "Test8", parent: 1000, disabled: false });
+    ui.pack_control(&1009, MenuT{ text: "Test9", parent: 1008, disabled: false });
+    ui.pack_control(&2002, MenuItemT{ text: "TestItem3", parent: 1000, disabled: false  });
     ui.bind(&1008, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&1009, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     ui.bind(&2002, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
     ui.commit().expect("Commit was not successful");
+
+    {
+        // Menu should be enabled
+        let (menu, menuitem) = (ui.get::<Menu>(&1001).unwrap(), ui.get::<MenuItem>(&2002).unwrap());
+        assert!(menu.get_enabled() == true, "Menu is not enabled");
+        assert!(menuitem.get_enabled() == true, "Menu is not enabled");
+
+        menu.set_enabled(false);
+        menuitem.set_enabled(false);
+
+        assert!(menu.get_enabled() == false, "Menu is enabled");
+        assert!(menuitem.get_enabled() == false, "Menu is enabled");
+    }
 
     // Removing a menu without items
     ui.unpack(&1001);
@@ -474,7 +487,7 @@ fn test_buttons() {
 
     ui.pack_resource(&10_000, default_font());
     ui.pack_control(&1000, window());
-    ui.pack_control(&1001, MenuItemT{text: "", parent: 1000});
+    ui.pack_control(&1001, MenuItemT{text: "", parent: 1000, disabled: false});
 
     // pack test
     ui.pack_control(&1002, btn_t.clone());

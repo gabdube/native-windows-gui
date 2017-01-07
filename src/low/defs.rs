@@ -46,9 +46,14 @@ pub const COMMIT_FAILED: LRESULT = 5555;
 // Constants not included in winapi-rs
 
 pub const MIM_STYLE: DWORD = 0x00000010;
+
+pub const MIIM_STATE: DWORD = 0x00000001;
 pub const MIIM_ID: DWORD = 0x00000002;
 
 pub const MNS_NOTIFYBYPOS: DWORD = 0x08000000;
+
+pub const MFS_DISABLED: DWORD = 0x00000003;
+pub const MFS_ENABLED: DWORD = 0x00000000;
 
 pub const MF_BYPOSITION: UINT = 0x00000400;
 pub const MF_SEPARATOR: UINT = 0x00000800;
@@ -164,7 +169,8 @@ extern "system" {
     pub fn SetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
     pub fn RemoveMenu(menu: HMENU, pos: UINT, flags: UINT) -> BOOL;
     pub fn GetMenuItemID(menu: HMENU, index: c_int) -> UINT;
-    pub fn SetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: bool, lpmii: &mut MENUITEMINFOW) -> BOOL;
+    pub fn SetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
+    pub fn GetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
 }
 
 // Arguments passed to the NWG custom events 

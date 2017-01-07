@@ -260,7 +260,7 @@ impl<D: Clone+Display> ListBox<D> {
     pub fn len_selected(&self) -> usize {
         use low::defs::LB_GETSELCOUNT;
         let index = unsafe{ SendMessageW(self.handle, LB_GETSELCOUNT, 0, 0) };
-        if index == -1 {
+        if index == -1 { 
             1
         } else {
             index as usize
