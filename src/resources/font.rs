@@ -26,24 +26,7 @@ use ui::Ui;
 use controls::AnyHandle;
 use resources::{ResourceT, Resource};
 use error::{Error, SystemError};
-
-// Font weight enum
-pub const FONT_WEIGHT_DONTCARE: c_int = 0;
-pub const FONT_WEIGHT_THIN: c_int = 100;
-pub const FONT_WEIGHT_EXTRALIGHT: c_int = 200;
-pub const FONT_WEIGHT_LIGHT: c_int = 300;
-pub const FONT_WEIGHT_NORMAL: c_int = 400;
-pub const FONT_WEIGHT_MEDIUM: c_int = 500;
-pub const FONT_WEIGHT_SEMIBOLD: c_int = 600;
-pub const FONT_WEIGHT_BOLD: c_int = 700;
-pub const FONT_WEIGHT_EXTRABOLD: c_int = 800;
-pub const FONT_WEIGHT_BLACK: c_int = 900;
-
-// Font decoration constants
-pub const FONT_DECO_NORMAL: DWORD = 0x00;
-pub const FONT_DECO_ITALIC: DWORD = 0x01;
-pub const FONT_DECO_UNDERLINE: DWORD = 0x02;
-pub const FONT_DECO_STRIKEOUT: DWORD = 0x04;
+use defs::{FONT_DECO_ITALIC, FONT_DECO_UNDERLINE, FONT_DECO_STRIKEOUT};
 
 /**
     A template that can create a font resource

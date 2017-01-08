@@ -27,6 +27,7 @@ pub mod radiobutton;
 pub mod label;
 pub mod listbox;
 pub mod combobox;
+pub mod file_dialog;
 pub mod timer;
 
 use std::any::TypeId;
@@ -43,6 +44,7 @@ pub use controls::radiobutton::{RadioButtonT, RadioButton};
 pub use controls::label::{LabelT, Label};
 pub use controls::listbox::{ListBoxT, ListBox};
 pub use controls::combobox::{ComboBoxT, ComboBox};
+pub use controls::file_dialog::{FileDialogT, FileDialog};
 pub use controls::timer::{TimerT, Timer};
 use ui::Ui;
 use events::Event;

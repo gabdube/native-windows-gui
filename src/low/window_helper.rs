@@ -119,8 +119,8 @@ pub unsafe fn build_sysclass<S: Into<String>>(p: SysclassParams<S>) -> Result<()
 */
 pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S1, S2>) -> Result<HWND, SystemError>{
     use kernel32::GetModuleHandleW;
-    use user32::CreateWindowExW;
-    use winapi::WS_EX_COMPOSITED;
+    use user32::{CreateWindowExW, GetDesktopWindow, GetWindowRect};
+    use winapi::{WS_EX_COMPOSITED, RECT};
 
     let hmod = GetModuleHandleW(ptr::null_mut());
     if hmod.is_null() { return Err(SystemError::WindowCreationFail); }
@@ -128,11 +128,31 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
     let class_name = to_utf16(p.class_name.into().as_ref());
     let window_name = to_utf16(p.title.into().as_ref());
 
+    let px = match p.position.0 { 
+        ::defs::CENTER_POSITION => {
+            let mut rect: RECT = mem::uninitialized();
+            let parent = if p.parent.is_null() { GetDesktopWindow() } else {p.parent};
+            GetWindowRect(parent, &mut rect);
+            (rect.right/2) - ((p.size.0/2) as i32)
+        },
+        x => x
+    };
+
+    let py = match p.position.1 { 
+        ::defs::CENTER_POSITION => {
+            let mut rect: RECT = mem::uninitialized();
+            let parent = if p.parent.is_null() { GetDesktopWindow() } else {p.parent};
+            GetWindowRect(parent, &mut rect);
+            (rect.bottom/2) - ((p.size.1/2) as i32)
+        },
+        y => y
+    };
+
     let handle = CreateWindowExW (
         WS_EX_COMPOSITED,
         class_name.as_ptr(), window_name.as_ptr(),
         p.flags,
-        p.position.0, p.position.1,
+        px, py,
         p.size.0 as i32, p.size.1 as i32,
         p.parent,
         ptr::null_mut(),

@@ -23,6 +23,7 @@ extern crate user32;
 extern crate kernel32;
 extern crate comctl32;
 extern crate gdi32;
+extern crate ole32;
 
 mod low;
 mod defs;
@@ -51,11 +52,7 @@ pub mod constants {
         Re-exported controls constants
     */
     pub use defs::*;
-
     pub use controls::ControlType;
-
-    pub use resources::font::{FONT_DECO_NORMAL, FONT_DECO_ITALIC, FONT_DECO_UNDERLINE, FONT_DECO_STRIKEOUT, FONT_WEIGHT_DONTCARE, FONT_WEIGHT_THIN, FONT_WEIGHT_EXTRALIGHT,
-    FONT_WEIGHT_LIGHT, FONT_WEIGHT_NORMAL, FONT_WEIGHT_MEDIUM, FONT_WEIGHT_SEMIBOLD, FONT_WEIGHT_BOLD, FONT_WEIGHT_EXTRABOLD, FONT_WEIGHT_BLACK};
 }
 
 pub use error::{Error, SystemError};
