@@ -81,6 +81,7 @@ pub enum ControlType {
     MenuItem,
     Timer,
     ComboBox,
+    FileDialog,
     Undefined  // Control is not a common control
 }
 

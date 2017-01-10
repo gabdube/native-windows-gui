@@ -20,6 +20,7 @@
 */
 
 pub mod defs;
+pub mod clsid;
 pub mod events;
 pub mod message_handler;
 pub mod menu_helper;

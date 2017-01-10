@@ -130,8 +130,22 @@ macro_rules! nwg_checkbox {
 macro_rules! nwg_combobox {
     (data=$t:ty, parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
-        $crate::CheckBoxT::<$t>{ 
+        $crate::ComboBoxT::<$t>{ 
             collection: [],
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false, 
+            placeholder: None,
+            parent: $p, font: None
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }};
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::ComboBoxT{ 
+            collection: vec![],
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, 
             placeholder: None,
@@ -167,6 +181,20 @@ macro_rules! nwg_listbox {
     (data=$t:ty; parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::ListBoxT::<$t, _>{ 
+            collection: vec![],
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false, readonly: false, multi_select: false,
+            parent: $p, font: None
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }};
+
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::ListBoxT::<_, _>{ 
             collection: vec![],
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, readonly: false, multi_select: false,
