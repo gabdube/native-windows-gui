@@ -25,8 +25,8 @@ nwg_template!(
         ("TimerLabel", nwg_label!(parent="MainWindow"; text="Time elapsed: 0 seconds"; position=(120, 90); size=(200, 25); font=Some("Font2"))),
         ("Timer", nwg_timer!(interval=500)),
         ("FileDialogButton", nwg_button!(parent="MainWindow"; text="Browse File"; position=(10,120); size=(100, 30); font=Some("Font1"))),
-        ("FilePathInput", nwg_textinput!(parent="MainWindow"; position=(120, 125); size=(200, 20); readonly=true)),
-        ("FileDialog", nwg_filedialog!()),
+        ("FilePathInput", nwg_textinput!(parent="MainWindow"; position=(120, 125); size=(300, 20); readonly=true)),
+        ("FileDialog", nwg_filedialog!(parent=Some("MainWindow") )),
         ("NameList", nwg_listbox!(parent="MainWindow"; position=(10, 10); size=(100, 60); collection=vec!["A Listbox", "Jimmy", "Sam", "Coconut", "Waldo", "David", "John"])),
         ("HappyCheckBox", nwg_checkbox!(parent="MainWindow"; text="I am happy"; position=(120, 10); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
         ("TriCheckBox", nwg_checkbox!(parent="MainWindow"; text="Three states"; position=(240, 10); size=(110, 30); tristate=true; checkstate=CheckState::Indeterminate; font=Some("Font1"))),
@@ -66,6 +66,17 @@ nwg_template!(
             };
 
             label.set_text(format!("Time elapsed: {:?} seconds", elapsed.as_secs()).as_ref());
+        }),
+
+        ("FileDialogButton", "ChooseFile", Event::Click, |app,_,_,_|{
+            let (dialog, file_path) = nwg_get_mut!(app; [
+                ("FileDialog", nwg::FileDialog),
+                ("FilePathInput", nwg::TextInput)
+            ]);
+
+            if let Ok(p) = dialog.run() {
+                file_path.set_text(&p);
+            }
         })
     ];
     resources: [

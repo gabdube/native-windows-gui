@@ -21,12 +21,14 @@
 use std::hash::Hash;
 use std::any::TypeId;
 use std::ptr;
+use std::mem;
 
-use winapi::{HWND, HFONT};
+use winapi::HWND;
+use winapi::shobjidl::IFileDialog;
 
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
-use error::Error;
+use error::{Error, SystemError};
 use events::Event;
 
 /**
@@ -37,8 +39,8 @@ use events::Event;
 */
 #[derive(Clone)]
 pub struct FileDialogT<S: Clone+Into<String>, ID: Hash+Clone> {
-    title: S,
-    parent: Option<ID>,
+    pub title: S,
+    pub parent: Option<ID>,
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for FileDialogT<S, ID> {
@@ -63,11 +65,11 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for FileDialogT<S, ID> 
             None => ptr::null_mut()
         };
         
-        /*
+        
         let mut handle: *mut IFileDialog = ptr::null_mut();
         let r = unsafe { CoCreateInstance(&CLSID_FileOpenDialog(), ptr::null_mut(), CLSCTX_INPROC_SERVER, &UUIDOF_IFileDialog(), mem::transmute(&mut handle) ) };
         if r != S_OK {
-            return Err(Error::System(SystemError::DialogCreation));
+            return Err(Error::System(SystemError::ComInstanceCreation("FileDialog".to_string())));
         }
 
         unsafe {
@@ -75,16 +77,17 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for FileDialogT<S, ID> 
             let mut flags: FILEOPENDIALOGOPTIONS = FILEOPENDIALOGOPTIONS(0);
 
             if pfd.GetOptions(&mut flags) != S_OK {
-                return Err(Error::System(SystemError::DialogCreation));
+                return Err(Error::System(SystemError::ComError("Failed to get the file dialog options".to_string())));
             }
 
             if pfd.SetOptions(flags | FOS_FORCEFILESYSTEM) != S_OK {
-                return Err(Error::System(SystemError::DialogCreation));
+                return Err(Error::System(SystemError::ComError("Failed to set the file dialog options".to_string())));
             }
+
+            pfd.SetDefaultExtension(::low::other_helper::to_utf16("doc;docx").as_ptr());
         }
         
-        Ok(Box::new(FileDialog{handle: handle, parent: parent}) as Box<AnyControlBase>)
-    */
+        Ok(Box::new(FileDialog{handle: handle, parent: parent}) as Box<Control>)
 
     }
 }
@@ -93,43 +96,43 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for FileDialogT<S, ID> 
     A file dialog control
 */
 pub struct FileDialog {
-    parent: HWND
+    parent: HWND,
+    handle: *mut IFileDialog
 }
 
 
-// impl FileDialog {
-//     pub fn open(&self) -> Result<String, Error> {
-//         unsafe{
-//             use winapi::{S_OK, IShellItem, SIGDN_FILESYSPATH, PWSTR};
-//             use ole32::CoTaskMemFree;
-//             use std::mem;
-//             use base::string_from_wide_ptr;
+impl FileDialog {
+    pub fn run(&self) -> Result<String, Error> {
+        unsafe{
+            use winapi::{S_OK, IShellItem, SIGDN_FILESYSPATH, PWSTR};
+            use ole32::CoTaskMemFree;
+            use low::other_helper::from_wide_ptr;
 
-//             let handle = &mut *self.handle;
-//             if handle.Show(self.parent) != S_OK {
-//                 return Ok("".to_string());
-//             }
+            let handle = &mut *self.handle;
+            if handle.Show(self.parent) != S_OK {
+                return Ok("".to_string());
+            }
 
-//             let mut _item: *mut IShellItem = ptr::null_mut();
-//             if handle.GetResult(&mut _item) != S_OK {
-//                 return Err(Error::Unknown);
-//             }
+            let mut _item: *mut IShellItem = ptr::null_mut();
+            if handle.GetResult(&mut _item) != S_OK {
+                return Err(Error::System(SystemError::ComError("Failed to get result".to_string())));
+            }
 
-//             let item = &mut *_item;
-//             let mut item_path: PWSTR = ptr::null_mut();
-//             if item.GetDisplayName(SIGDN_FILESYSPATH, &mut item_path) != S_OK {
-//                 return Err(Error::Unknown);
-//             }
+            let item = &mut *_item;
+            let mut item_path: PWSTR = ptr::null_mut();
+            if item.GetDisplayName(SIGDN_FILESYSPATH, &mut item_path) != S_OK {
+                return Err(Error::System(SystemError::ComError("Failed to get display name".to_string())));
+            }
 
-//             let text = string_from_wide_ptr(item_path);
+            let text = from_wide_ptr(item_path);
 
-//             CoTaskMemFree(mem::transmute(item_path));
-//             item.Release();
+            CoTaskMemFree(mem::transmute(item_path));
+            item.Release();
 
-//             Ok(text)
-//         }
-//     }
-// }
+            Ok(text)
+        }
+    }
+}
 
 impl Control for FileDialog {
 
@@ -142,10 +145,10 @@ impl Control for FileDialog {
     }
 
     fn free(&mut self) {
-        unsafe{ 
+        unsafe{
             let handle = &mut*self.handle;
             handle.Release(); 
-        } 
+        }
     }
 
 }

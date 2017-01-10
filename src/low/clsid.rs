@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 use winapi::GUID;
 
 #[macro_export]

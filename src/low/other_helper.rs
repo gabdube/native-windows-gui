@@ -53,6 +53,21 @@ pub fn from_utf16(s: &[u16]) -> String {
 }
 
 /**
+    Read a string from a wide char pointer. Undefined behaviour if [ptr] is not null terminated.
+*/
+pub unsafe fn from_wide_ptr(ptr: *mut u16) -> String {
+    use std::slice::from_raw_parts;
+
+    let mut length: isize = 0;
+    while *&*ptr.offset(length) != 0 {
+        length += 1;
+    }
+
+    let array: &[u16] = from_raw_parts(ptr, length as usize);
+    from_utf16(array)
+}
+
+/**
     Return a formatted output of the last system error that was raised.
 
     (ERROR ID, Error message localized)
@@ -109,6 +124,15 @@ pub unsafe fn enable_visual_styles() {
     ActivateActCtx(handle, &mut activation_cookie);
 
     InitCommonControls();
+}
+
+/**
+   Initializes the COM library for use by the calling thread,
+*/
+pub unsafe fn enable_com() {
+    use ole32::CoInitializeEx;
+    use winapi::{COINIT_APARTMENTTHREADED, COINIT_DISABLE_OLE1DDE};
+    CoInitializeEx(ptr::null_mut(), COINIT_APARTMENTTHREADED|COINIT_DISABLE_OLE1DDE);
 }
 
 /**

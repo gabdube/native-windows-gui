@@ -281,6 +281,21 @@ macro_rules! nwg_textinput {
     }}
 }
 
+#[macro_export]
+macro_rules! nwg_filedialog {
+    ($( $i:ident=$v:expr );*) => { {
+        let mut t = 
+        $crate::FileDialogT::<_, _>{ 
+            parent: None,
+            title: "Open file"
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }}
+}
+
 //---- Resources ----//
 
 #[macro_export]
