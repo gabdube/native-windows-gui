@@ -287,7 +287,9 @@ macro_rules! nwg_filedialog {
         let mut t = 
         $crate::FileDialogT::<_, _>{ 
             parent: None,
-            title: "Open file"
+            title: "Open file",
+            action: $crate::constants::FileDialogAction::Open,
+            multiselect: false
         };
         
         $( t.$i = $v; );*

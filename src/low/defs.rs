@@ -17,6 +17,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#![allow(non_snake_case)]
+#![allow(dead_code)]
 
 use std::hash::Hash;
 use std::any::{Any, TypeId};
@@ -161,6 +163,107 @@ pub struct MENUINFO {
     pub dwContextHelpID: DWORD,
     pub dwMenuData: ULONG_PTR
 }
+
+// COM interfaces
+// Unused functions have an empty signature
+use winapi::{IShellItem, HRESULT, IUnknownVtbl, IUnknown};
+use std::ops::{Deref, DerefMut};
+
+// MACRO taken from winapi. Original author: Peter Atashian (retep998)
+macro_rules! RIDL {
+    (interface $interface:ident ($vtbl:ident) {$(
+        fn $method:ident(&mut self $(,$p:ident : $t:ty)*) -> $rtr:ty
+    ),+}) => (
+        #[repr(C)] #[allow(missing_copy_implementations)]
+        pub struct $vtbl {
+            $(pub $method: unsafe extern "system" fn(
+                This: *mut $interface
+                $(,$p: $t)*
+            ) -> $rtr),+
+        }
+        #[repr(C)] #[allow(missing_copy_implementations)]
+        pub struct $interface {
+            pub lpVtbl: *const $vtbl
+        }
+        RIDL!{@impl $interface {$(fn $method(&mut self $(,$p: $t)*) -> $rtr),+}}
+    );
+    (interface $interface:ident ($vtbl:ident) : $pinterface:ident ($pvtbl:ident) {
+    }) => (
+        #[repr(C)] #[allow(missing_copy_implementations)]
+        pub struct $vtbl {
+            pub parent: $pvtbl
+        }
+        #[repr(C)] #[allow(missing_copy_implementations)]
+        pub struct $interface {
+            pub lpVtbl: *const $vtbl
+        }
+        impl Deref for $interface {
+            type Target = $pinterface;
+            #[inline]
+            fn deref(&self) -> &$pinterface {
+                unsafe { &*(self as *const _ as *const _) }
+            }
+        }
+        impl DerefMut for $interface {
+            #[inline]
+            fn deref_mut(&mut self) -> &mut $pinterface {
+                unsafe { &mut *(self as *mut _ as *mut _) }
+            }
+        }
+    );
+    (interface $interface:ident ($vtbl:ident) : $pinterface:ident ($pvtbl:ident) {$(
+        fn $method:ident(&mut self $(,$p:ident : $t:ty)*) -> $rtr:ty
+    ),+}) => (
+        #[repr(C)] #[allow(missing_copy_implementations)]
+        pub struct $vtbl {
+            pub parent: $pvtbl
+            $(,pub $method: unsafe extern "system" fn(
+                This: *mut $interface
+                $(,$p: $t)*
+            ) -> $rtr)+
+        }
+        #[repr(C)] #[allow(missing_copy_implementations)]
+        pub struct $interface {
+            pub lpVtbl: *const $vtbl
+        }
+        RIDL!{@impl $interface {$(fn $method(&mut self $(,$p: $t)*) -> $rtr),+}}
+        impl Deref for $interface {
+            type Target = $pinterface;
+            #[inline]
+            fn deref(&self) -> &$pinterface {
+                unsafe { &*(self as *const _ as *const _) }
+            }
+        }
+        impl DerefMut for $interface {
+            #[inline]
+            fn deref_mut(&mut self) -> &mut $pinterface {
+                unsafe { &mut *(self as *mut _ as *mut _) }
+            }
+        }
+    );
+    (@impl $interface:ident {$(
+        fn $method:ident(&mut self $(,$p:ident : $t:ty)*) -> $rtr:ty
+    ),+}) => (
+        impl $interface {
+            #[inline]
+            $(pub unsafe fn $method(&mut self $(,$p: $t)*) -> $rtr {
+                ((*self.lpVtbl).$method)(self $(,$p)*)
+            })+
+        }
+    );
+}
+
+RIDL!(
+interface IShellItemArray(IShellItemArrayVtbl): IUnknown(IUnknownVtbl) {
+    fn BindToHandler(&mut self) -> (),
+    fn GetPropertyStore(&mut self) -> (),
+    fn GetPropertyDescriptionList(&mut self) -> (),
+    fn GetAttributes(&mut self) -> (),
+    fn GetCount(&mut self, pdwNumItems: *mut DWORD) -> HRESULT,
+    fn GetItemAt(&mut self, dwIndex: DWORD, ppsi: *mut *mut IShellItem) -> HRESULT,
+    fn EnumItems(&mut self) -> ()
+}
+);
 
 // System extern
 extern "system" {
