@@ -1,6 +1,5 @@
 /**
     Example that show every control implemented in NWG
-    TODO use templates
 */
 
 #[macro_use] extern crate native_windows_gui as nwg;

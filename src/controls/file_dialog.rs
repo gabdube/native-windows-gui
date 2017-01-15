@@ -38,9 +38,9 @@ use low::other_helper::to_utf16;
 
     Members:  
     • `title`: The title of the dialog  
-    • `parent`: The dialog parent window. While thwe dialog is running, the parent will be disabled.  
+    • `parent`: The dialog parent window. While the dialog is running, the parent will be disabled.  
     • `action`: The action that the dialog will execute. It can be `Open`, `OpenDirectory` or `Save`  
-    • `multiselect`: The user can select more than one choice.
+    • `multiselect`: The user can select more than one choice.  
     • `default_folder`: If defined, this defines the default folder that is openened when `run` is called  
     • `filters`: If defined, filter the files that the user can select (In a `Open` dialog) or which extension to add to the saved file (in a `Save` dialog)
 
@@ -158,8 +158,8 @@ impl FileDialog {
         
         Failures:  
         • `Error::System` if the dialog was not called  
-        • `Error::System` if there was a system error while reading the selected item
-        • `Error::UserError` if the dialog has the `multiselect` flag
+        • `Error::System` if there was a system error while reading the selected item  
+        • `Error::UserError` if the dialog has the `multiselect` flag  
     */
     pub fn get_selected_item(&self) -> Result<String, Error> { unsafe {
         if self.multiselect {
@@ -184,8 +184,8 @@ impl FileDialog {
 
         Failures:  
         • `Error::System` if the dialog was not called  
-        • `Error::System` if there was a system error while reading the selected items
-        • `Error::UserError` if the dialog has `Save` for action
+        • `Error::System` if there was a system error while reading the selected items  
+        • `Error::UserError` if the dialog has `Save` for action  
     */
     pub fn get_selected_items(&self) -> Result<Vec<String>, Error> { unsafe{
         use winapi::{DWORD, IFileOpenDialog};
@@ -235,8 +235,8 @@ impl FileDialog {
         Set the multiselect flag of the dialog. 
 
         Failures:  
-        • `Error::System` if there was a system error while setting the new flag value
-        • `Error::UserError` if the dialog has `Save` for action
+        • `Error::System` if there was a system error while setting the new flag value  
+        • `Error::UserError` if the dialog has `Save` for action  
     */
     pub fn set_multiselect(&mut self, multiselect: bool) -> Result<(), Error> {
         use winapi::FOS_ALLOWMULTISELECT;

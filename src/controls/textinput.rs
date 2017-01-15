@@ -121,6 +121,7 @@ pub struct TextInput {
 
 impl TextInput {
 
+    /// Set or unset the readonly status on the control
     pub fn set_readonly(&self, readonly: bool) {
         use low::window_helper::{set_window_long, get_window_long};
         use low::defs::ES_READONLY;
@@ -134,6 +135,7 @@ impl TextInput {
         }
     }
     
+    /// Return `true` if the user cannot edit the content of the control or `false` if the user can
     pub fn get_readonly(&self) -> bool {
         use low::window_helper::get_window_long;
         use low::defs::ES_READONLY;
@@ -144,6 +146,7 @@ impl TextInput {
         (style & ES_READONLY) == ES_READONLY
     }
 
+    /// Add or remove a password mask on the control
     pub fn set_password(&self, password: bool) {
         use low::window_helper::{set_window_long, get_window_long};
         use low::defs::ES_PASSWORD;
@@ -157,6 +160,7 @@ impl TextInput {
         }
     }
 
+    /// Return `true` if the control has a password mask or `false` otherwise
     pub fn get_password(&self) -> bool {
         use low::window_helper::get_window_long;
         use low::defs::ES_PASSWORD;
@@ -167,11 +171,13 @@ impl TextInput {
         (style & ES_PASSWORD) == ES_PASSWORD
     }
 
+    /// Set the maximum number of characters that the control can hold
     pub fn set_limit(&self, limit: u32) {
         use low::defs::EM_LIMITTEXT;
         unsafe{ SendMessageW(self.handle, EM_LIMITTEXT, limit as WPARAM, 0); }
     }
 
+    /// Return the maximum number of characters that the control can hold
     pub fn get_limit(&self) -> u32 {
         use low::defs::EM_GETLIMITTEXT;
         unsafe{ SendMessageW(self.handle, EM_GETLIMITTEXT, 0, 0) as u32 }
@@ -183,8 +189,8 @@ impl TextInput {
         set_placeholder(self.handle, placeholder);
     }
 
-    /// Return the current placeholder for the TextInput. If there are no placeholder set, returns None.
-    /// EM_GETCUEBANNER IS NOT RELIABLE (blame Windows for this one).
+    // Return the current placeholder for the TextInput. If there are no placeholder set, returns None.
+    // EM_GETCUEBANNER IS NOT RELIABLE.
     /*pub fn get_placeholder(&self) -> Option<String> {
         use winapi::EM_GETCUEBANNER;
 

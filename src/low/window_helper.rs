@@ -32,8 +32,11 @@ use error::{Error, SystemError};
 /**
     Params used to build a system class
 
-    class_name: System class name
-    sysproc: The system class procedure
+    Members:  
+    • `class_name`: System class name  
+    • `sysproc`: The system class procedure  
+    • `background`: If specified, the background color of the created window  
+    • `style`: System class style  
 */
 pub struct SysclassParams<S: Into<String>> {
     pub class_name: S,
@@ -45,8 +48,13 @@ pub struct SysclassParams<S: Into<String>> {
 /**
     Params used to build a system window
 
-    class_name: System class name
-    sysproc: The system class procedure
+    Members:  
+    • `title`: The window title  
+    • `class_name`: The system class to use  
+    • `position`: The window starting position  
+    • `size`: The window starting size  
+    • `flags`: Window creation flags  
+    • `parent`: Window parent. Can be null.  
 */
 pub struct WindowParams<S1: Into<String>, S2: Into<String>> {
     pub title: S1,

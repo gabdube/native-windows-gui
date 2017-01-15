@@ -1,6 +1,5 @@
 #![allow(non_snake_case)]
 
-#[macro_export]
 macro_rules! define_guid {
     ($n1:ident, $d1:expr, $d2:expr, $d3:expr, $d4:expr) => (
 

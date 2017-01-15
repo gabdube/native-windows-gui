@@ -106,10 +106,10 @@ pub enum MessageChoice {
     A structure that defines how a messagebox should look and behave. 
 
     Members:  
-    * title: The title of the message box  
-    * content: The message of the message box  
-    * buttons: The button of the message box  
-    * icons: The message box icon  
+    * `title`: The title of the message box  
+    * `content`: The message of the message box  
+    * `buttons`: The button of the message box  
+    * `icons`: The message box icon  
 */
 #[derive(Clone, PartialEq, Debug)]
 pub struct MessageParams<'a> {
@@ -123,9 +123,9 @@ pub struct MessageParams<'a> {
     A enum that dictates how a file dialog should behave
 
     Members:  
-    * Open: User can select a file that is not a directory  
-    * OpenDirectory: User can select a directory
-    * Save: User select the name of a file. If it already exists, a confirmation message will be raised
+    * `Open`: User can select a file that is not a directory  
+    * `OpenDirectory`: User can select a directory  
+    * `Save`: User select the name of a file. If it already exists, a confirmation message will be raised  
 */
 #[derive(Clone, PartialEq, Debug)]
 pub enum FileDialogAction {
