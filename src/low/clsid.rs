@@ -21,3 +21,4 @@ define_guid!(CLSID_FileOpenDialog, 3692845724, 59530, 19934, [165, 161, 96, 248,
 define_guid!(CLSID_FileSaveDialog, 3233080051, 47649, 18291, [141, 186, 51, 94, 201, 70, 235, 139]);
 define_guid!(UUIDOF_IFileDialog, 1123569974, 56190, 17308, [133, 241, 228, 7, 93, 19, 95, 200]);
 define_guid!(UUIDOF_IFileOpenDialog, 3581702792, 54445, 18280, [190, 2, 157, 150, 149, 50, 217, 96]);
+define_guid!(IID_IShellItem, 1132621086, 59160, 17134, [188, 85, 161, 226, 97, 195, 123, 254]);

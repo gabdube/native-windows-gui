@@ -26,7 +26,7 @@ nwg_template!(
         ("Timer", nwg_timer!(interval=500)),
         ("FileDialogButton", nwg_button!(parent="MainWindow"; text="Browse File"; position=(10,120); size=(100, 30); font=Some("Font1"))),
         ("FilePathInput", nwg_textinput!(parent="MainWindow"; position=(118, 125); size=(300, 24); readonly=true; font=Some("Font1"))),
-        ("FileDialog", nwg_filedialog!(parent=Some("MainWindow"); action=FileDialogAction::Open;)),
+        ("FileDialog", nwg_filedialog!(parent=Some("MainWindow"); action=FileDialogAction::Open; filters=Some("Test(*.txt;*.rs)|Any(*.*)"))),
         ("NameList", nwg_listbox!(parent="MainWindow"; position=(10, 10); size=(100, 60); collection=vec!["A Listbox", "Jimmy", "Sam", "Coconut", "Waldo", "David", "John"])),
         ("HappyCheckBox", nwg_checkbox!(parent="MainWindow"; text="I am happy"; position=(120, 10); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
         ("TriCheckBox", nwg_checkbox!(parent="MainWindow"; text="Three states"; position=(240, 10); size=(110, 30); tristate=true; checkstate=CheckState::Indeterminate; font=Some("Font1"))),

@@ -289,7 +289,9 @@ macro_rules! nwg_filedialog {
             parent: None,
             title: "Open file",
             action: $crate::constants::FileDialogAction::Open,
-            multiselect: false
+            multiselect: false,
+            default_folder: None,
+            filters: None
         };
         
         $( t.$i = $v; );*

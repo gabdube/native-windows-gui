@@ -23,7 +23,10 @@
 use std::hash::Hash;
 use std::any::{Any, TypeId};
 
-use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, MENUITEMINFOW};
+use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, MENUITEMINFOW, IShellItem, HRESULT, IUnknownVtbl,
+ IUnknown, PCWSTR, IBindCtx, REFIID, c_void};
+use std::ops::{Deref, DerefMut};
+
 
 use events::{Event, EventCallback};
 use controls::ControlT;
@@ -150,6 +153,7 @@ pub const IDRETRY: i32 = 4;
 pub const IDTRYAGAIN: i32 = 10;
 pub const IDYES: i32 = 6;
 
+pub const SFGAO_FOLDER: u32 = 0x20000000;
 
 // System structs
 #[repr(C)]
@@ -166,8 +170,6 @@ pub struct MENUINFO {
 
 // COM interfaces
 // Unused functions have an empty signature
-use winapi::{IShellItem, HRESULT, IUnknownVtbl, IUnknown};
-use std::ops::{Deref, DerefMut};
 
 // MACRO taken from winapi. Original author: Peter Atashian (retep998)
 macro_rules! RIDL {
@@ -274,6 +276,8 @@ extern "system" {
     pub fn GetMenuItemID(menu: HMENU, index: c_int) -> UINT;
     pub fn SetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
     pub fn GetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
+
+    pub fn SHCreateItemFromParsingName(pszPath: PCWSTR, pbc: *mut IBindCtx, riid: REFIID, ppv: *mut *mut c_void) -> HRESULT;
 }
 
 // Arguments passed to the NWG custom events 
