@@ -24,7 +24,7 @@ use std::hash::Hash;
 use std::any::{Any, TypeId};
 
 use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, MENUITEMINFOW, IShellItem, HRESULT, IUnknownVtbl,
- IUnknown, PCWSTR, IBindCtx, REFIID, c_void};
+ IUnknown, PCWSTR, IBindCtx, REFIID, D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory,c_void};
 use std::ops::{Deref, DerefMut};
 
 
@@ -278,6 +278,13 @@ extern "system" {
     pub fn GetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
 
     pub fn SHCreateItemFromParsingName(pszPath: PCWSTR, pbc: *mut IBindCtx, riid: REFIID, ppv: *mut *mut c_void) -> HRESULT;
+
+    pub fn D2D1CreateFactory(
+        factoryType: D2D1_FACTORY_TYPE,
+		riid: REFIID, 
+		pFactoryOptions: *const D2D1_FACTORY_OPTIONS,
+        ppIFactory: *mut *mut ID2D1Factory
+    ) -> HRESULT;
 }
 
 // Arguments passed to the NWG custom events 

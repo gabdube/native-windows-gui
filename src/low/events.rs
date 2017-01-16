@@ -98,13 +98,17 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
   use user32::GetClientRect;
   use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, WM_LBUTTONUP, WM_LBUTTONDOWN, 
     WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, WM_COMMAND, WM_TIMER, WM_MOVE, WM_SIZING, WM_EXITSIZEMOVE, WM_SIZE,
-    c_int, LOWORD, HIWORD, RECT};
+    WM_PAINT, c_int, LOWORD, HIWORD, RECT};
   use low::menu_helper::get_menu_id;
 
   let inner: &mut UiInner<ID> = mem::transmute(data);
   let inner_id: u64;
 
   let callback_data = match msg {
+    WM_PAINT => {
+      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_PAINT)");;
+      Some( (inner_id, Event::Paint, EventArgs::None) )
+    },
     WM_COMMAND => {
       if l == 0 { 
         None 
@@ -169,7 +173,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       let (x, y) = (LOWORD(l as u32), HIWORD(l as u32));
       Some( (inner_id, Event::Moved, EventArgs::Position(x as i32, y as i32)) )
     },
-    WM_SIZING | WM_SIZE=> {
+    WM_SIZING | WM_SIZE => {
       inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_SIZING)");
       let mut r: RECT = mem::uninitialized();
       GetClientRect(hwnd, &mut r);

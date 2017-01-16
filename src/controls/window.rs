@@ -94,6 +94,7 @@ impl Window {
         unsafe{ PostMessageW(self.handle, WM_CLOSE, 0, 0) };
     }
 
+    /// Activate the window and set it above the other windows
     pub fn activate(&self) { unsafe{ 
         use user32::SetForegroundWindow;
         SetForegroundWindow(self.handle); 

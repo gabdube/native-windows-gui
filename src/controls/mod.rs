@@ -29,6 +29,7 @@ pub mod listbox;
 pub mod combobox;
 pub mod file_dialog;
 pub mod timer;
+pub mod canvas;
 
 use std::any::TypeId;
 use std::hash::Hash;
@@ -46,6 +47,7 @@ pub use controls::listbox::{ListBoxT, ListBox};
 pub use controls::combobox::{ComboBoxT, ComboBox};
 pub use controls::file_dialog::{FileDialogT, FileDialog};
 pub use controls::timer::{TimerT, Timer};
+pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
 use ui::Ui;
 use events::Event;
 use error::Error;
@@ -82,6 +84,7 @@ pub enum ControlType {
     Timer,
     ComboBox,
     FileDialog,
+    Canvas,
     Undefined  // Control is not a common control
 }
 

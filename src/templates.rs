@@ -300,6 +300,21 @@ macro_rules! nwg_filedialog {
     }}
 }
 
+#[macro_export]
+macro_rules! nwg_canvas {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::CanvasT {
+            position: (0, 0), size: (100, 100), 
+            visible: true, disabled: false,
+            parent: $p,
+        };
+        $( t.$i = $v; );*
+        t
+    }}
+}
+
+
 //---- Resources ----//
 
 #[macro_export]

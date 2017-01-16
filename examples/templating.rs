@@ -1,5 +1,5 @@
 /**
-    How to use the nwg template system.
+    Simple example on how to use the nwg template system.
 */
 
 #[macro_use] extern crate native_windows_gui as nwg;

@@ -3,12 +3,13 @@ name = "native-windows-gui"
 version = "0.1.1"
 authors = ["Gabriel Dube <gdube.475@gmail.com>"]
 
-description = "A thin GUI toolkit built over the Microsoft Windows WINAPI for rust"
+description = "A thin GUI toolkit built over the Microsoft Windows WINAPI"
 documentation = "https://gabdube.github.io/native-windows-gui/book_10.html"
 homepage = "https://gabdube.github.io/native-windows-gui/"
 repository = "https://github.com/gabdube/native-windows-gui"
 
 readme = "readme.md"
+build = "build.rs"
 
 keywords = ["gui", "ui", "windows"]
 
@@ -21,3 +22,6 @@ user32-sys = "0.2.0"
 comctl32-sys = "0.2.0"
 gdi32-sys = "0.2.0"
 ole32-sys = "0.2.0"
+
+[build-dependencies]
+winapi-build = "0.1.1"

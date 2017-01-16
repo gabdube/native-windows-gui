@@ -44,6 +44,7 @@ pub enum Event {
     MouseDown,
     Moved,
     Resized,
+    Paint,
 
     // Default control specific events
     Click,
