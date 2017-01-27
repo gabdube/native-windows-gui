@@ -403,7 +403,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
     #[inline(always)]
     fn hash_id(id: &ID) -> InnerId {
         use std::hash::Hasher;
-        use std::collections::hash_map::{DefaultHasher};
+        use std::collections::hash_map::DefaultHasher;
         let mut s1 = DefaultHasher::new();
         id.hash(&mut s1);
         s1.finish()
@@ -412,7 +412,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
     #[inline(always)]
     fn hash_handle(handle: &AnyHandle) -> InnerId {
         use std::hash::Hasher;
-        use std::collections::hash_map::{DefaultHasher};
+        use std::collections::hash_map::DefaultHasher;
         let mut s1 = DefaultHasher::new();
         handle.hash(&mut s1);
         s1.finish()

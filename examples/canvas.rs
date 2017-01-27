@@ -14,10 +14,10 @@ nwg_template!(
     ];
     events: [
         ("Canvas", "Paint", Event::Paint, |app, _, _, _| {
-            let mut canvas = nwg_get_mut!(app; ("Canvas", nwg::Canvas));
+            let mut canvas = nwg_get_mut!(app; ("Canvas", nwg::Canvas<&'static str>));
             let mut renderer = canvas.renderer().unwrap();
 
-            let render_size = renderer.render_size();
+            let render_size = renderer.get_render_size();
 
             renderer.clear(1.0, 1.0, 1.0, 1.0);
         }),
@@ -25,7 +25,7 @@ nwg_template!(
         ("MainWindow", "ResizeCanvas", Event::Resized, |app, _, _, args| {
             match args {
                 &EventArgs::Size(w, h) => {
-                    let canvas = nwg_get!(app; ("Canvas", nwg::Canvas));
+                    let canvas = nwg_get!(app; ("Canvas", nwg::Canvas<&'static str>));
                     canvas.set_size(w, h);
                 },
                 _ => unreachable!()

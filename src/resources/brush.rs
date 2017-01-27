@@ -23,34 +23,52 @@ use std::hash::Hash;
 use ui::Ui;
 use controls::AnyHandle;
 use resources::{ResourceT, Resource};
-use error::{Error, SystemError};
+use error::Error;
 
+/**
+    A template that creates a solid brush
+
+    Members:  
+    • `color`: The 
+*/
 #[derive(Clone)]
 pub struct SolidBrushT {
-
+    pub color: (f32, f32, f32, f32)
 }
 
+impl<ID: Clone+Hash> ResourceT<ID> for SolidBrushT {
+    fn type_id(&self) -> TypeId { TypeId::of::<SolidBrush>() }
+
+    #[allow(unused_variables)]
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Resource>, Error> {
+        let brush = SolidBrush{ color: self.color.clone() };
+        Ok(Box::new(brush) as Box<Resource>)
+    }
+}
+
+
+/**
+    A solid color brush that can be imported in a canvas
+*/
 #[derive(Clone)]
 pub struct SolidBrush {
-
+    pub color: (f32, f32, f32, f32)
 }
+
+impl Resource for SolidBrush {
+    fn handle(&self) -> AnyHandle { AnyHandle::Custom(TypeId::of::<SolidBrush>(), 0) }
+    fn free(&mut self) {}
+}
+
 
 #[derive(Clone)]
-pub struct LinearGradientBrushT {
-
-}
+pub struct LinearGradientBrushT;
 
 #[derive(Clone)]
-pub struct LinearGradientBrush {
-
-}
+pub struct LinearGradientBrush;
 
 #[derive(Clone)]
-pub struct RadialGradientBrushT {
-
-}
+pub struct RadialGradientBrushT;
 
 #[derive(Clone)]
-pub struct RadialGradientBrush {
-
-}
+pub struct RadialGradientBrush;
