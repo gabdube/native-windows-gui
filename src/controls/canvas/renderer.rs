@@ -21,23 +21,17 @@
 
 use std::hash::Hash;
 use std::ptr;
+use std::mem;
 use std::ops::{Deref, DerefMut};
 
-use winapi::ID2D1SolidColorBrush;
+use winapi::{FLOAT, D2D1_RECT_F, D2D1_ROUNDED_RECT, D2D1_MATRIX_3X2_F};
 
 use error::Error;
-use super::{Canvas, CanvasProtected};
-
-/**
-    D2d resources held by a canvas
-*/
-pub enum CanvasResources {
-    SolidBrush(*mut ID2D1SolidColorBrush)
-}
+use defs::Rectangle;
+use super::{Canvas, CanvasProtected, CanvasResources};
 
 /**
     Object that offers a light wrapper over the D2D1 api.
-    For now most of the functions are unsafe
 */
 pub struct CanvasRenderer<'a, ID: Clone+Hash+'a> {
     canvas: &'a mut Canvas<ID>
@@ -58,6 +52,66 @@ impl<'a, ID: Clone+Hash> CanvasRenderer<'a, ID> {
         unsafe{ self.GetSize(&mut render_size); }
         
         (render_size.width as f32, render_size.height as f32)
+    }
+
+    /// Set the transformation matrix of the renderer
+    pub fn set_transform(&mut self, m: [[FLOAT; 2]; 3]) {
+        unsafe{ self.SetTransform( &D2D1_MATRIX_3X2_F{ matrix: m } ); }
+    }
+
+    /// Set the transformation matrix of the renderer
+    pub fn get_transform(&mut self) -> [[FLOAT; 2]; 3] {
+        unsafe{ 
+            let mut m: D2D1_MATRIX_3X2_F = mem::uninitialized();
+            self.GetTransform( &mut m );
+            m.matrix
+        }
+    }
+
+    /// Fill a rectangle in the render target with the brush identified by `brush`
+    pub fn fill_rectangle(&mut self, brush: &ID, r: &Rectangle) -> Result<(), Error> {
+        let rect = D2D1_RECT_F{left: r.left, top: r.top, bottom: r.bottom, right: r.right};
+        let brush = match self.get_resource(brush) {
+            Ok(b) => b,
+            Err(e) => { return Err(e); }
+        };
+
+        match brush {
+            CanvasResources::SolidBrush(b) => { unsafe{ self.FillRectangle(&rect, mem::transmute(b) ); } }
+        }
+
+        Ok(())
+    }
+
+    /// Fill a rounded rectangle in the render target with the brush identified by `brush`
+    pub fn fill_rounded_rectangle(&mut self, brush: &ID, r: &Rectangle, radius: (f32, f32)) -> Result<(), Error> {
+        let rect = D2D1_RECT_F{left: r.left, top: r.top, bottom: r.bottom, right: r.right};
+        let rect = D2D1_ROUNDED_RECT{ rect: rect, radiusX: radius.0, radiusY: radius.1 };
+        let brush = match self.get_resource(brush) {
+            Ok(b) => b,
+            Err(e) => { return Err(e); }
+        };
+
+        match brush {
+            CanvasResources::SolidBrush(b) => { unsafe{ self.FillRoundedRectangle(&rect, mem::transmute(b) ); } }
+        }
+
+        Ok(())
+    }
+
+    /// Draw the outlines of a rectangle in the render target with the brush identified by `brush`
+    pub fn draw_rectangle(&mut self, brush: &ID, r: &Rectangle) -> Result<(), Error> {
+        let rect = D2D1_RECT_F{left: r.left, top: r.top, bottom: r.bottom, right: r.right};
+        let brush = match self.get_resource(brush) {
+            Ok(b) => b,
+            Err(e) => { return Err(e); }
+        };
+
+        match brush {
+            CanvasResources::SolidBrush(b) => { unsafe{ self.DrawRectangle(&rect, mem::transmute(b), 1.0, ptr::null_mut()); } }
+        }
+
+        Ok(())
     }
 
 }
@@ -92,8 +146,6 @@ impl<'a, ID: Clone+Hash> RendererProtected<'a, ID> for CanvasRenderer<'a, ID> {
 
     fn prepare(canvas: &'a mut Canvas<ID>) -> Result<CanvasRenderer<'a, ID>, Error> {
         unsafe{ 
-            use winapi::D2D1_MATRIX_3X2_F;
-
             if canvas.get_must_recreate_target() {
                 if let Err(e) = canvas.rebuild() {
                     return Err(Error::System(e));
@@ -101,9 +153,9 @@ impl<'a, ID: Clone+Hash> RendererProtected<'a, ID> for CanvasRenderer<'a, ID> {
             }
 
             let identity = D2D1_MATRIX_3X2_F {
-                matrix: [[0.0, 0.0],
-                         [1.0, 0.0],
-                         [1.0, 1.0]]
+                matrix: [[1.0, 0.0],
+                         [0.0, 1.0],
+                         [0.0, 0.0]]
             };
 
             canvas.BeginDraw(); 

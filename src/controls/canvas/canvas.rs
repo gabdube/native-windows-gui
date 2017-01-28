@@ -30,7 +30,16 @@ use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget, ID2D1SolidColorBrush, S_
 use controls::{Control, ControlType, AnyHandle};
 use resources;
 use error::{Error, SystemError};
-use super::{CanvasResources, CanvasRenderer, RendererProtected, build_render_target};
+use super::{CanvasRenderer, RendererProtected, build_render_target};
+
+
+/**
+    D2d resources held by a canvas
+*/
+#[derive(Clone)]
+pub enum CanvasResources {
+    SolidBrush(*mut ID2D1SolidColorBrush)
+}
 
 /**
     A blank control that can be painted to
@@ -70,7 +79,7 @@ impl<ID: Clone+Hash> Canvas<ID> {
 
         let c = &brush.color;
         let color = D2D1_COLOR_F{r: c.0, g: c.1, b: c.2, a: c.3};
-        let identity = D2D1_MATRIX_3X2_F {matrix: [[0.0, 0.0],[1.0, 0.0],[1.0, 1.0]]};
+        let identity = D2D1_MATRIX_3X2_F {matrix: [[1.0, 0.0],[0.0, 1.0],[0.0, 0.0]]};
         let property = D2D1_BRUSH_PROPERTIES { opacity: 1.0, transform: identity};
         let mut brush: *mut ID2D1SolidColorBrush = ptr::null_mut();
         let result = unsafe{ self.CreateSolidColorBrush(&color, &property, &mut brush) };
@@ -81,6 +90,27 @@ impl<ID: Clone+Hash> Canvas<ID> {
         } else {
             Err(Error::System(SystemError::ComError("Failed to import brush".to_string())))
         }
+    }
+
+    /**
+        Redraw the canvas
+    */
+    pub fn redraw(&self) {
+        use user32::RedrawWindow;
+        use winapi::{RDW_ERASE, RDW_INVALIDATE};
+        unsafe { 
+            RedrawWindow(self.handle, ptr::null(), ptr::null_mut(), RDW_ERASE|RDW_INVALIDATE);
+        }
+    }
+    
+    /**
+        Set the render target resolution.  
+        If the control size do not match the render target size, the result will be upscaled or downscaled
+    */
+    pub fn set_render_size(&mut self, w: u32, h: u32) {
+        use winapi::D2D_SIZE_U;
+        let render_size = D2D_SIZE_U{width: w, height: h};
+        unsafe{ self.Resize(&render_size); }
     }
 
     /// Hash an ID before inserting it in the canvas resources
@@ -119,6 +149,12 @@ impl<ID: Clone+Hash> Control for Canvas<ID> {
             let factory = &mut *self.factory;
             let render_target = &mut *self.render_target;
 
+            for (_, v) in self.resources.drain() {
+                match v {
+                    CanvasResources::SolidBrush(r) => { (&mut *r).Release(); }
+                }
+            }
+
             render_target.Release();
             factory.Release();
             DestroyWindow(self.handle);
@@ -154,6 +190,7 @@ pub trait CanvasProtected<ID: Clone+Hash>  {
     fn set_must_recreate_target(&mut self, recreate: bool);
     fn create(h: HWND, f: *mut ID2D1Factory, r: *mut ID2D1HwndRenderTarget) -> Canvas<ID>;
     fn rebuild(&mut self) -> Result<(), SystemError>;
+    fn get_resource(&mut self, id: &ID) -> Result<CanvasResources, Error>;
 }
 
 impl<ID: Clone+Hash> CanvasProtected<ID> for Canvas<ID> {
@@ -187,6 +224,15 @@ impl<ID: Clone+Hash> CanvasProtected<ID> for Canvas<ID> {
                 Ok(())
             }
             Err(e) => Err(e)
+        }
+    }
+
+    fn get_resource(&mut self, id: &ID) -> Result<CanvasResources, Error> {
+        let id = Canvas::hash_id(id);
+        if let Some(r) = self.resources.get(&id) {
+             Ok( r.clone() )
+        } else {
+            Err(Error::KeyNotFound)
         }
     }
 

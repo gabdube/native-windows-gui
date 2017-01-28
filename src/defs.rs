@@ -134,6 +134,16 @@ pub enum FileDialogAction {
     Save,
 }
 
+/**
+    Define a rectangle shape that can be used with canvases
+*/
+pub struct Rectangle {
+    pub left: f32,
+    pub top: f32,
+    pub right: f32,
+    pub bottom: f32
+}
+
 // Special window position constants
 pub const DEFAULT_POSITION: c_int = CW_USEDEFAULT;
 pub const CENTER_POSITION: c_int = CW_USEDEFAULT + 1;
