@@ -332,17 +332,3 @@ macro_rules! nwg_font {
         t
     }}
 }
-
-#[macro_export]
-macro_rules! nwg_solid_brush {
-    ($( $i:ident=$v:expr );*) => { {
-        let mut t = 
-        $crate::SolidBrushT{ 
-            color: (0.0, 0.0, 0.0, 1.0)
-        };
-        
-        $( t.$i = $v; );*
-
-        t
-    }}
-}

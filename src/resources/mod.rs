@@ -19,7 +19,6 @@
 */
 
 pub mod font;
-pub mod brush;
 
 use std::any::TypeId;
 use std::hash::Hash;
@@ -29,7 +28,6 @@ use controls::AnyHandle;
 use error::Error;
 
 pub use resources::font::{FontT, Font};
-pub use resources::brush::{SolidBrushT, SolidBrush, LinearGradientBrushT, LinearGradientBrush, RadialGradientBrushT, RadialGradientBrush};
 
 /**
     Structures implementing this trait can be used by a Ui to build a Resource

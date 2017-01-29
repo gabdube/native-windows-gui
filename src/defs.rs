@@ -137,12 +137,76 @@ pub enum FileDialogAction {
 /**
     Define a rectangle shape that can be used with canvases
 */
+#[derive(Clone)]
 pub struct Rectangle {
     pub left: f32,
     pub top: f32,
     pub right: f32,
     pub bottom: f32
 }
+
+/**
+    Define a ellipse shape that can be used with canvases
+*/
+#[derive(Clone)]
+pub struct Ellipse {
+    pub center: (f32, f32),
+    pub radius: (f32, f32),
+}
+
+/**
+    A brush using a single solid color. Used when painting in a canvas
+
+    Members:  
+    • `color`: The brush color (red, green, blue, alpha)
+*/
+#[derive(Clone)]
+pub struct SolidBrush {
+    pub color: (f32, f32, f32, f32)
+}
+
+#[derive(Clone)]
+pub enum CapStyle {
+    Flat = 0,
+    SQUARE = 1,
+    ROUND = 2,
+    TRIANGLE = 3
+}
+
+#[derive(Clone)]
+pub enum LineJoin {
+
+}
+
+#[derive(Clone)]
+pub enum DashStyle {
+
+}
+
+/**
+    Describe how lines should be painted. Used when painting in a canvas
+    
+    Members:  
+    • `start_cap`: The cap applied to the start of all the open figures in a stroked geometry. 
+    • `end_cap`: The cap applied to the end of all the open figures in a stroked geometry.
+    • `dash_cap`: The shape at either end of each dash segment.
+    • `line_join`: A value that describes how segments are joined. This value is ignored for a vertex if the segment flags specify that the segment should have a smooth join. 
+    • `miter_limit`: The limit of the thickness of the join on a mitered corner. This value is always treated as though it is greater than or equal to 1.0f. 
+    • `dash_style`: A value that specifies whether the stroke has a dash pattern and, if so, the dash style. 
+    • `dash_offset`: A value that specifies an offset in the dash sequence. A positive dash offset value shifts the dash pattern, in units of stroke width,  
+       toward the start of the stroked geometry. A negative dash offset value shifts the dash pattern, in units of stroke width, toward the end of the stroked geometry.
+*/
+#[derive(Clone)]
+pub struct PenT {
+    pub start_cap: CapStyle,
+    pub end_cap: CapStyle,
+    pub dash_cap: CapStyle,
+    pub line_join: LineJoin,
+    pub miter_limit: f32,
+    pub dash_style: DashStyle,
+    pub dash_offset: f32,
+}
+
 
 // Special window position constants
 pub const DEFAULT_POSITION: c_int = CW_USEDEFAULT;

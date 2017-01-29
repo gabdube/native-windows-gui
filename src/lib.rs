@@ -62,6 +62,5 @@ pub use low::other_helper::{message, simple_message, fatal_message, error_messag
 pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
  RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput,
  FileDialogT, FileDialog, CanvasT, Canvas, CanvasRenderer};
-pub use resources::{FontT, Font, SolidBrushT, SolidBrush, LinearGradientBrushT, LinearGradientBrush, RadialGradientBrushT,
-  RadialGradientBrush};
+pub use resources::{FontT, Font};
 pub use ui::{Ui, dispatch_events, exit};

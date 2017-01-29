@@ -28,9 +28,9 @@ use std::collections::HashMap;
 use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget, ID2D1SolidColorBrush, S_OK, D2D1_MATRIX_3X2_F};
 
 use controls::{Control, ControlType, AnyHandle};
-use resources;
 use error::{Error, SystemError};
 use super::{CanvasRenderer, RendererProtected, build_render_target};
+use defs;
 
 
 /**
@@ -54,7 +54,7 @@ pub struct Canvas<ID: Clone+Hash> {
 }
 
 impl<ID: Clone+Hash> Canvas<ID> {
-    /* 
+    /**
         Make the canvas "paint ready" and return an object to paint to it.
         In very very **very** rare case, the renderer creation can fail.
     */
@@ -63,13 +63,13 @@ impl<ID: Clone+Hash> Canvas<ID> {
     }
 
     /**
-        Import a solid brush into the canvas and add it under the selected `name`.
+        Create a solid brush into the canvas and add it under the selected `name`.
 
         Errors:
-        • `Error::System` if the canvas could not import the brush.
+        • `Error::System` if the canvas could not create the brush.
         • `Error::KeyExists` if the a resource with the specified name already exists
     */
-    pub fn import_solid_brush(&mut self, name: &ID, brush: &resources::brush::SolidBrush) -> Result<(), Error> {
+    pub fn create_solid_brush(&mut self, name: &ID, brush: &defs::SolidBrush) -> Result<(), Error> {
         use winapi::{D2D1_COLOR_F, D2D1_BRUSH_PROPERTIES};
 
         let id = Canvas::hash_id(name);

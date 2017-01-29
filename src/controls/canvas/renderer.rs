@@ -24,10 +24,11 @@ use std::ptr;
 use std::mem;
 use std::ops::{Deref, DerefMut};
 
-use winapi::{FLOAT, D2D1_RECT_F, D2D1_ROUNDED_RECT, D2D1_MATRIX_3X2_F};
+use winapi::{FLOAT, D2D1_RECT_F, D2D1_ROUNDED_RECT, D2D1_ELLIPSE, D2D1_POINT_2F, 
+  D2D1_MATRIX_3X2_F};
 
 use error::Error;
-use defs::Rectangle;
+use defs::{Rectangle, Ellipse};
 use super::{Canvas, CanvasProtected, CanvasResources};
 
 /**
@@ -99,8 +100,23 @@ impl<'a, ID: Clone+Hash> CanvasRenderer<'a, ID> {
         Ok(())
     }
 
+    /// Fill an ellipse in the render target with the brush identifier by `brush`
+    pub fn fill_ellipse(&mut self, brush: &ID, e: &Ellipse) -> Result<(), Error> {
+        let ellipse = D2D1_ELLIPSE{point: D2D1_POINT_2F{ x: e.center.0, y: e.center.1 } , radiusX: e.radius.0, radiusY: e.radius.1};
+        let brush = match self.get_resource(brush) {
+            Ok(b) => b,
+            Err(e) => { return Err(e); }
+        };
+
+        match brush {
+            CanvasResources::SolidBrush(b) => { unsafe{ self.FillEllipse(&ellipse, mem::transmute(b) ); } }
+        }
+
+        Ok(())
+    }
+
     /// Draw the outlines of a rectangle in the render target with the brush identified by `brush`
-    pub fn draw_rectangle(&mut self, brush: &ID, r: &Rectangle) -> Result<(), Error> {
+    pub fn draw_rectangle(&mut self, brush: &ID, r: &Rectangle, width: f32, style: Option<()>) -> Result<(), Error> {
         let rect = D2D1_RECT_F{left: r.left, top: r.top, bottom: r.bottom, right: r.right};
         let brush = match self.get_resource(brush) {
             Ok(b) => b,
@@ -108,7 +124,7 @@ impl<'a, ID: Clone+Hash> CanvasRenderer<'a, ID> {
         };
 
         match brush {
-            CanvasResources::SolidBrush(b) => { unsafe{ self.DrawRectangle(&rect, mem::transmute(b), 1.0, ptr::null_mut()); } }
+            CanvasResources::SolidBrush(b) => { unsafe{ self.DrawRectangle(&rect, mem::transmute(b), width, ptr::null_mut()); } }
         }
 
         Ok(())
