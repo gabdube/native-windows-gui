@@ -25,7 +25,8 @@ use std::ops::{Deref, DerefMut};
 use std::marker::PhantomData;
 use std::collections::HashMap;
 
-use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget, ID2D1SolidColorBrush, S_OK, D2D1_MATRIX_3X2_F};
+use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget, ID2D1SolidColorBrush, ID2D1StrokeStyle, 
+  S_OK, D2D1_MATRIX_3X2_F};
 
 use controls::{Control, ControlType, AnyHandle};
 use error::{Error, SystemError};
@@ -38,7 +39,8 @@ use defs;
 */
 #[derive(Clone)]
 pub enum CanvasResources {
-    SolidBrush(*mut ID2D1SolidColorBrush)
+    SolidBrush(*mut ID2D1SolidColorBrush),
+    StrokeStyle(*mut ID2D1StrokeStyle)
 }
 
 /**
@@ -90,6 +92,49 @@ impl<ID: Clone+Hash> Canvas<ID> {
         } else {
             Err(Error::System(SystemError::ComError("Failed to import brush".to_string())))
         }
+    }
+
+    /**
+        Create a pen into the canvas and add it under the selected `name`.
+
+        Errors:
+        • `Error::System` if the canvas could not create the brush.
+        • `Error::KeyExists` if the a resource with the specified name already exists
+    */
+    pub fn create_pen(&mut self, name: &ID, pen: &defs::Pen) -> Result<(), Error> {
+        use winapi::{D2D1_STROKE_STYLE_PROPERTIES, D2D1_CAP_STYLE, D2D1_LINE_JOIN, D2D1_DASH_STYLE};
+
+        let id = Canvas::hash_id(name);
+        if self.resources.contains_key(&id) {
+            return Err(Error::KeyExists);
+        }
+
+        let pen = pen.clone();
+        let start_cap = D2D1_CAP_STYLE(pen.start_cap as u32);
+        let end_cap = D2D1_CAP_STYLE(pen.end_cap as u32);
+        let dash_cap = D2D1_CAP_STYLE(pen.dash_cap as u32);
+        let line_join = D2D1_LINE_JOIN(pen.line_join as u32);
+        let dash_style = D2D1_DASH_STYLE(pen.dash_style as u32);
+        let stroke_style_prop = D2D1_STROKE_STYLE_PROPERTIES {
+            startCap: start_cap,
+            endCap: end_cap,
+            dashCap: dash_cap,
+            lineJoin: line_join,
+            miterLimit: pen.miter_limit,
+            dashStyle: dash_style,
+            dashOffset: pen.dash_offset
+        };
+
+        let mut stroke_style: *mut ID2D1StrokeStyle = ptr::null_mut();
+        let result = unsafe{ (&mut *self.factory).CreateStrokeStyle(&stroke_style_prop, ptr::null(), 0, &mut stroke_style) };
+
+        if result == S_OK {
+            self.resources.insert(id, CanvasResources::StrokeStyle(stroke_style));
+            Ok(())
+        } else {
+            Err(Error::System(SystemError::ComError("Failed to import brush".to_string())))
+        }
+
     }
 
     /**
@@ -151,7 +196,8 @@ impl<ID: Clone+Hash> Control for Canvas<ID> {
 
             for (_, v) in self.resources.drain() {
                 match v {
-                    CanvasResources::SolidBrush(r) => { (&mut *r).Release(); }
+                    CanvasResources::SolidBrush(r) => { (&mut *r).Release(); },
+                    CanvasResources::StrokeStyle(s) => { (&mut *s).Release(); },
                 }
             }
 

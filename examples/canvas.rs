@@ -23,15 +23,17 @@ nwg_template!(
             
             // Drawing setup
             let (w, h) = renderer.get_render_size();
-            renderer.set_transform( [[1.0, 0.0], [0.0, 1.0], [w/2.0, h/2.0]] );
+            renderer.set_transform( &[[1.0, 0.0], [0.0, 1.0], [w/2.0, h/2.0]] );
 
             let r1 = nwgc::Rectangle{left: -50.0, right: 50.0, top: -50.0, bottom: 50.0};
             let r2 = nwgc::Rectangle{left: -100.0, right: 100.0, top: -100.0, bottom: 100.0};
             let r3 = nwgc::Rectangle{left: -200.0, right: 200.0, top: -200.0, bottom: 200.0};
             let e1 = nwgc::Ellipse{ center: (0.0, 0.0), radius: (25.0, 25.0) };
+            let e2 = nwgc::Ellipse{ center: (0.0, 0.0), radius: (190.0, 190.0) };
 
             // Draw the shapes
-            renderer.draw_rectangle(&"SolidBrush3", &r3, 3.0, None).unwrap();
+            renderer.draw_ellipse(&"SolidBrush2", Some(&"DashedPen"), &e2, 6.0).unwrap();
+            renderer.draw_rectangle(&"SolidBrush3", None, &r3, 3.0).unwrap();
             renderer.fill_rectangle(&"SolidBrush2", &r2).unwrap();
             renderer.fill_rounded_rectangle(&"SolidBrush1", &r1, (15.0, 15.0)).unwrap();
             renderer.fill_ellipse(&"SolidBrush3", &e1).unwrap();
@@ -58,10 +60,20 @@ fn setup_canvas_resources(app: &Ui<&'static str>) {
     let b1 = nwgc::SolidBrush{color:(0.0, 0.7, 1.0, 1.0)};
     let b2 = nwgc::SolidBrush{color:(0.0, 1.0, 0.5, 1.0)};
     let b3 = nwgc::SolidBrush{color:(1.0, 1.0, 0.0, 1.0)};
+    let p1 = nwgc::Pen {
+        start_cap: nwgc::CapStyle::Round,
+        end_cap: nwgc::CapStyle::Round,
+        dash_cap: nwgc::CapStyle::Round,
+        line_join: nwgc::LineJoin::D2d1LineJoinRound,
+        miter_limit: 0.0,
+        dash_style: nwgc::DashStyle::D2d1DashStyleDash,
+        dash_offset: 5.0
+    };
 
-    canvas.create_solid_brush(&"SolidBrush1", &b1).expect("Failed to import brush 1");
-    canvas.create_solid_brush(&"SolidBrush2", &b2).expect("Failed to import brush 2");
-    canvas.create_solid_brush(&"SolidBrush3", &b3).expect("Failed to import brush 3");
+    canvas.create_solid_brush(&"SolidBrush1", &b1).expect("Failed to create brush 1");
+    canvas.create_solid_brush(&"SolidBrush2", &b2).expect("Failed to create brush 2");
+    canvas.create_solid_brush(&"SolidBrush3", &b3).expect("Failed to create brush 3");
+    canvas.create_pen(&"DashedPen", &p1).expect("Failed to create pen");
 }
 
 fn main() {

@@ -165,22 +165,38 @@ pub struct SolidBrush {
     pub color: (f32, f32, f32, f32)
 }
 
-#[derive(Clone)]
+/**
+    Cap style used when creating a Pen
+*/
+#[derive(Clone, Debug)]
 pub enum CapStyle {
     Flat = 0,
-    SQUARE = 1,
-    ROUND = 2,
-    TRIANGLE = 3
+    Square = 1,
+    Round = 2,
+    Triangle = 3
 }
 
-#[derive(Clone)]
+/**
+    Line join type used when creating a Pen
+*/
+#[derive(Clone, Debug)]
 pub enum LineJoin {
-
+    D2d1LineJoinMiter = 0,
+    D2d1LineJoinBevel = 1,
+    D2d1LineJoinRound = 2,
+    D2d1LineJoinMiterOrBevel = 3
 }
 
-#[derive(Clone)]
+/**
+    Dash style used when creating a Pen
+*/
+#[derive(Clone, Debug)]
 pub enum DashStyle {
-
+    D2d1DashStyleSolid = 0,
+    D2d1DashStyleDash = 1,
+    D2d1DashStyleDot = 2,
+    D2d1DashStyleDashDot = 3,
+    D2d1DashStyleDashDotDot = 4,
 }
 
 /**
@@ -196,8 +212,8 @@ pub enum DashStyle {
     • `dash_offset`: A value that specifies an offset in the dash sequence. A positive dash offset value shifts the dash pattern, in units of stroke width,  
        toward the start of the stroked geometry. A negative dash offset value shifts the dash pattern, in units of stroke width, toward the end of the stroked geometry.
 */
-#[derive(Clone)]
-pub struct PenT {
+#[derive(Clone, Debug)]
+pub struct Pen {
     pub start_cap: CapStyle,
     pub end_cap: CapStyle,
     pub dash_cap: CapStyle,
