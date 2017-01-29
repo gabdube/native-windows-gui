@@ -282,6 +282,23 @@ macro_rules! nwg_textinput {
 }
 
 #[macro_export]
+macro_rules! nwg_numericinput {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::NumericInputT::<_> {
+            value: 0,
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false, readonly: false,
+            range: (i64::min_value(), i64::max_value()),
+            parent: $p,
+            font: None
+        };
+        $( t.$i = $v; );*
+        t
+    }}
+}
+
+#[macro_export]
 macro_rules! nwg_filedialog {
     ($( $i:ident=$v:expr );*) => { {
         let mut t = 

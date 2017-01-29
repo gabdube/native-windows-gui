@@ -30,7 +30,7 @@ use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget, ID2D1SolidColorBrush, ID
 
 use controls::{Control, ControlType, AnyHandle};
 use error::{Error, SystemError};
-use super::{CanvasRenderer, RendererProtected, build_render_target};
+use super::{CanvasRenderer, RendererProtected, build_render_target, CANVAS_CLASS_NAME};
 use defs;
 
 
@@ -158,6 +158,27 @@ impl<ID: Clone+Hash> Canvas<ID> {
         unsafe{ self.Resize(&render_size); }
     }
 
+    /**
+        Return the render target's dots per inch (DPI).
+    */
+    pub fn get_dpi(&mut self) -> (f32, f32) {
+        let mut x = 0.0f32;
+        let mut y = 0.0f32;
+        unsafe { self.GetDpi(&mut x, &mut y); }
+        (x, y)
+    }
+
+    /**
+        Sets the dots per inch (DPI) of the render target.   
+
+        Arguments:
+        • `dpix`:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.  
+        • `dpiy`:  A value greater than or equal to zero that specifies the vertical DPI of the render target.
+    */
+    pub fn set_dpi(&mut self, dpix: f32, fpiy: f32) {
+        unsafe { self.SetDpi(dpix, fpiy); }
+    }
+
     /// Hash an ID before inserting it in the canvas resources
     #[inline(always)]
     fn hash_id(id: &ID) -> u64 {
@@ -190,7 +211,10 @@ impl<ID: Clone+Hash> Control for Canvas<ID> {
 
     fn free(&mut self) {
         unsafe{
-            use user32::DestroyWindow;
+            use user32::{DestroyWindow, UnregisterClassW};
+            use kernel32::GetModuleHandleW;
+            use low::other_helper::to_utf16;
+
             let factory = &mut *self.factory;
             let render_target = &mut *self.render_target;
 
@@ -204,6 +228,10 @@ impl<ID: Clone+Hash> Control for Canvas<ID> {
             render_target.Release();
             factory.Release();
             DestroyWindow(self.handle);
+
+            let cls = to_utf16(CANVAS_CLASS_NAME);
+            let hmod = GetModuleHandleW(ptr::null_mut());
+            UnregisterClassW(cls.as_ptr(), hmod);
         };
     }
 

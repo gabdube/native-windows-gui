@@ -20,7 +20,7 @@
 */
 
 /// System class identifier
-const CANVAS_CLASS_NAME: &'static str = "NWG_BUILTIN_D2DCANVAS";
+pub const CANVAS_CLASS_NAME: &'static str = "NWG_BUILTIN_D2DCANVAS";
 
 use std::hash::Hash;
 use std::any::TypeId;

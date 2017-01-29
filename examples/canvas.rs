@@ -10,7 +10,7 @@ use nwg::constants as nwgc;
 nwg_template!(
     head: setup_ui<&'static str>,
     controls: [
-        ("MainWindow", nwg_window!( title="Template Example"; size=(500, 500); resizable=true )),
+        ("MainWindow", nwg_window!( title="Canvas Example"; size=(500, 500); resizable=true )),
         ("Canvas", nwg_canvas!( parent="MainWindow"; size=(500,500)))
     ];
     events: [

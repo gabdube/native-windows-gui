@@ -35,7 +35,7 @@ use events::Event;
     • `text`: The text of the button  
     • `position`: The start position of the button  
     • `size`: The start size of the button  
-    • `visible`: If the button should be visible to the user32  
+    • `visible`: If the button should be visible to the user   
     • `disabled`: If the user can or can't click on the button  
     • `parent`: The button parent  
     • `font`: The button font. If None, use the system default  

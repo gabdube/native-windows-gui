@@ -61,6 +61,6 @@ pub use events::{EventCallback, Event, EventArgs};
 pub use low::other_helper::{message, simple_message, fatal_message, error_message};
 pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
  RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput,
- FileDialogT, FileDialog, CanvasT, Canvas, CanvasRenderer};
+ NumericInputT, NumericInput, FileDialogT, FileDialog, CanvasT, Canvas, CanvasRenderer};
 pub use resources::{FontT, Font};
 pub use ui::{Ui, dispatch_events, exit};
