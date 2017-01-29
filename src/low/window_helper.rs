@@ -62,6 +62,7 @@ pub struct WindowParams<S1: Into<String>, S2: Into<String>> {
     pub position: (i32, i32),
     pub size: (u32, u32),
     pub flags: DWORD,
+    pub ex_flags: Option<DWORD>,
     pub parent: HWND
 }
 
@@ -156,8 +157,13 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
         y => y
     };
 
+    let ex_flags = match p.ex_flags {
+        Some(ex) => ex,
+        None => WS_EX_COMPOSITED
+    };
+
     let handle = CreateWindowExW (
-        WS_EX_COMPOSITED,
+        ex_flags,
         class_name.as_ptr(), window_name.as_ptr(),
         p.flags,
         px, py,

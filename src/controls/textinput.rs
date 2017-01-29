@@ -91,6 +91,7 @@ impl<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+Clone> ControlT<ID
             position: self.position.clone(),
             size: self.size.clone(),
             flags: flags,
+            ex_flags: Some(0),
             parent: parent
         };
 

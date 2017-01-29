@@ -88,6 +88,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
             position: self.position.clone(),
             size: self.size.clone(),
             flags: flags,
+            ex_flags: Some(0),
             parent: parent
         };
 

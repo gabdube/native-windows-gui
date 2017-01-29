@@ -94,6 +94,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> ControlT<I
             position: self.position.clone(),
             size: self.size.clone(),
             flags: flags,
+            ex_flags: Some(0),
             parent: parent
         };
 

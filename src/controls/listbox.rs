@@ -100,6 +100,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
             position: self.position.clone(),
             size: self.size.clone(),
             flags: flags,
+            ex_flags: Some(0),
             parent: parent
         };
 

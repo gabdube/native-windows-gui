@@ -19,10 +19,9 @@
 */
 use std::hash::Hash;
 use std::any::TypeId;
-use std::mem;
 use std::ptr;
 
-use winapi::{HWND, HFONT, UINT, WPARAM, LPARAM, LRESULT};
+use winapi::{HWND, HFONT, UINT, WPARAM, LPARAM, LRESULT, UINT_PTR, DWORD_PTR};
 
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
@@ -65,8 +64,6 @@ impl<ID: Hash+Clone> ControlT<ID> for NumericInputT<ID> {
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{set_window_font, handle_of_window, handle_of_font};
-        use user32::SendMessageW;
-        use winapi::UDM_SETBUDDY;
 
         // A NumericInput is composed of three controls: a custom window, a textinput and a "up down".
 
@@ -91,18 +88,13 @@ impl<ID: Hash+Clone> ControlT<ID> for NumericInputT<ID> {
             Err(e) => { return Err(e); }
         };
 
-        let updown_handle = match unsafe{ build_updown(self, base_handle) } {
-            Ok(h) => h,
-            Err(e) => { return Err(e); }
-        };
-
         let edit_handle =  match unsafe{ build_edit(self, base_handle) } {
             Ok(h) => h,
             Err(e) => { return Err(e); }
         };
 
         unsafe{ 
-            SendMessageW(updown_handle, UDM_SETBUDDY, mem::transmute(edit_handle), 0);
+            hook(edit_handle);
             set_window_font(edit_handle, font_handle, true); 
         }
 
@@ -110,7 +102,6 @@ impl<ID: Hash+Clone> ControlT<ID> for NumericInputT<ID> {
             NumericInput {
                 handle: base_handle,
                 edit_handle: edit_handle,
-                updown_handle: updown_handle
             }
         ))
     }
@@ -119,7 +110,6 @@ impl<ID: Hash+Clone> ControlT<ID> for NumericInputT<ID> {
 pub struct NumericInput {
     handle: HWND,
     edit_handle: HWND,
-    updown_handle: HWND,
 }
 
 impl Control for NumericInput {
@@ -133,8 +123,19 @@ impl Control for NumericInput {
     }
 
     fn free(&mut self) {
-        use user32::DestroyWindow;
-        unsafe{ DestroyWindow(self.handle) };
+        use user32::{DestroyWindow, UnregisterClassW};
+        use kernel32::GetModuleHandleW;
+        use low::other_helper::to_utf16;
+        
+        unsafe{
+            unhook(self.edit_handle);
+
+            DestroyWindow(self.handle); 
+
+            let cls = to_utf16(NUMERICINPUT_CLASS_NAME);
+            let hmod = GetModuleHandleW(ptr::null_mut());
+            UnregisterClassW(cls.as_ptr(), hmod);
+        }
     }
 
 }
@@ -143,6 +144,7 @@ impl Control for NumericInput {
 // Private methods
 
 const NUMERICINPUT_CLASS_NAME: &'static str = "NWG_BUILTIN_NUMERICINPUT";
+const CUSTOM_EVENTS_DISPATCH_ID: UINT_PTR = 5674;
 
 #[allow(unused_variables)]
 unsafe extern "system" fn numeric_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
@@ -165,10 +167,16 @@ unsafe extern "system" fn numeric_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: L
     }
 }
 
+#[allow(unused_variables)]
+unsafe extern "system" fn edit_hook(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
+    use comctl32::DefSubclassProc;
+    DefSubclassProc(hwnd, msg, w, l)
+}
+
 #[inline(always)]
 unsafe fn build_base<ID: Hash+Clone>(t: &NumericInputT<ID>, parent: HWND) -> Result<HWND, Error> {
-    use low::window_helper::{SysclassParams, build_sysclass};
-    use winapi::{CS_HREDRAW, CS_VREDRAW};
+    use low::window_helper::{WindowParams, SysclassParams, build_sysclass, build_window};
+    use winapi::{CS_HREDRAW, CS_VREDRAW, WS_VISIBLE, WS_CHILD, WS_BORDER, WS_DISABLED, WS_CLIPCHILDREN};
 
     let params = SysclassParams { 
         class_name: NUMERICINPUT_CLASS_NAME,
@@ -181,26 +189,48 @@ unsafe fn build_base<ID: Hash+Clone>(t: &NumericInputT<ID>, parent: HWND) -> Res
         return Err(Error::System(e));
     }
 
-    return Err(Error::Unimplemented);
+    let flags = WS_CHILD | WS_BORDER | WS_CLIPCHILDREN |
+    if t.visible    { WS_VISIBLE }   else { 0 } |
+    if t.disabled   { WS_DISABLED }  else { 0 };
+
+    let params = WindowParams {
+        title: "",
+        class_name: NUMERICINPUT_CLASS_NAME,
+        position: t.position.clone(),
+        size: t.size.clone(),
+        flags: flags,
+        ex_flags: Some(0),
+        parent: parent
+    };
+
+    match build_window(params) {
+        Ok(h) => {
+            //set_window_long(h, GWL_USERDATA, t.exit_on_close as usize);
+            Ok(h)
+        },
+        Err(e) => Err(Error::System(e))
+    }
 }
 
 #[inline(always)]
 unsafe fn build_edit<ID: Hash+Clone>(t: &NumericInputT<ID>, parent: HWND) -> Result<HWND, Error> {
     use low::window_helper::{WindowParams, build_window};
     use low::defs::{ES_AUTOHSCROLL, ES_READONLY};
-    use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER};
+    use winapi::{DWORD, WS_VISIBLE, WS_CHILD};
 
-    let flags: DWORD = WS_CHILD | WS_BORDER | ES_AUTOHSCROLL | 
-        if t.readonly { ES_READONLY } else { 0 } |
-        if t.visible  { WS_VISIBLE }  else { 0 } |
-        if t.disabled { WS_DISABLED } else { 0 };
+    let flags: DWORD = WS_CHILD | ES_AUTOHSCROLL | WS_VISIBLE | 
+        if t.readonly { ES_READONLY } else { 0 };
+
+    let mut size = t.size.clone();
+    size.0 -= 15;
 
     let params = WindowParams {
         title: format!("{}", t.value),
         class_name: "EDIT",
-        position: t.position.clone(),
-        size: t.size.clone(),
+        position: (0,0),
+        size: size,
         flags: flags,
+        ex_flags: Some(0),
         parent: parent
     };
 
@@ -210,27 +240,20 @@ unsafe fn build_edit<ID: Hash+Clone>(t: &NumericInputT<ID>, parent: HWND) -> Res
     }
 }
 
+#[allow(unused_variables, dead_code)]
 #[inline(always)]
 unsafe fn build_updown<ID: Hash+Clone>(t: &NumericInputT<ID>, parent: HWND) -> Result<HWND, Error> {
-    use low::window_helper::{WindowParams, build_window};
-    use winapi::{UDS_ARROWKEYS, WS_VISIBLE, WS_CHILD};
-    
-    let flags = UDS_ARROWKEYS | WS_VISIBLE | WS_CHILD;
-    
-    let mut pos = t.position.clone();
-    pos.0 += t.size.0 as i32;
+    Err(Error::Unimplemented)
+}
 
-    let params = WindowParams {
-        title: "",
-        class_name: "msctls_updown32",
-        position: pos,
-        size: t.size.clone(),
-        flags: flags,
-        parent: parent
-    };
+#[inline(always)]
+unsafe fn hook(edit: HWND) {
+    use comctl32::SetWindowSubclass;
+    SetWindowSubclass(edit, Some(edit_hook), CUSTOM_EVENTS_DISPATCH_ID, 0);
+}
 
-    match build_window(params) {
-        Ok(h) => Ok(h),
-        Err(e) => Err(Error::System(e))
-    }
+#[inline(always)]
+unsafe fn unhook(edit: HWND) {
+    use comctl32::RemoveWindowSubclass;
+    RemoveWindowSubclass(edit, Some(edit_hook), CUSTOM_EVENTS_DISPATCH_ID);
 }

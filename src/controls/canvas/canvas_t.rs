@@ -213,6 +213,7 @@ unsafe fn build_window<ID: Hash+Clone>(ui: &Ui<ID>, t: &CanvasT<ID>) -> Result<(
         position: t.position.clone(),
         size: t.size.clone(),
         flags: flags,
+        ex_flags: None,
         parent: parent
     };
 
