@@ -290,6 +290,23 @@ macro_rules! nwg_textbox {
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, readonly: false,
             limit: 32_767,
+            scrollbars: (false, false),
+            parent: $p,
+            font: None
+        };
+        $( t.$i = $v; );*
+        t
+    }}
+}
+
+#[macro_export]
+macro_rules! nwg_groupbox {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::GroupBoxT {
+            text: "",
+            position: (0, 0), size: (100, 100), 
+            visible: true, disabled: false,
             parent: $p,
             font: None
         };

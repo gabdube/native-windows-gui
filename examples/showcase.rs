@@ -31,9 +31,12 @@ nwg_template!(
         ("TriCheckBox", nwg_checkbox!(parent="MainWindow"; text="Three states"; position=(240, 10); size=(110, 30); tristate=true; checkstate=CheckState::Indeterminate; font=Some("Font1"))),
         ("CatRadio", nwg_radiobutton!(parent="MainWindow"; text="I have a cat"; position=(120, 50); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
         ("DogRadio", nwg_radiobutton!(parent="MainWindow"; text="I have a dog"; position=(240, 50); size=(110, 30); font=Some("Font1"))),
+        ("YesNoGroup", nwg_groupbox!(parent="MainWindow"; text="Choose one"; position=(360, 40); size=(130, 80); font=Some("Font1") )),
+        ("YesRadio", nwg_radiobutton!(parent="YesNoGroup"; text="Yes"; position=(10, 20); size=(110, 30); font=Some("Font1"))),
+        ("NoRadio", nwg_radiobutton!(parent="YesNoGroup"; text="No"; position=(10, 45); size=(110, 30); font=Some("Font1"))),
         ("SchoolSupplyComboBox", nwg_combobox!(parent="MainWindow"; position=(360, 10); size=(130, 30); placeholder=Some("Choose plz"); font=Some("Font1"); collection=vec!["Pencil", "Eraser", "Scissor", "Calculator", "Notebook"])),
         ("RandomStuffLabel", nwg_label!(parent="MainWindow"; text="Write some notes in here:"; position=(10, 160); size=(180, 25); font=Some("Font1"))),
-        ("RandomStuffTextBox", nwg_textbox!(parent="MainWindow"; position=(10, 185); size=(200, 60)))
+        ("RandomStuffTextBox", nwg_textbox!(parent="MainWindow"; position=(10, 185); size=(200, 60); scrollbars=(false, true)))
     ];
     events: [
         ("NestedAction", "SayHello", Event::Triggered, |_,_,_,_| {

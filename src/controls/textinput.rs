@@ -34,6 +34,19 @@ use events::Event;
 
 /**
     A template that creates a single line textinput control
+
+    Members:  
+    • `text`: The text of the textinput  
+    • `position`: The start position of the textinput  
+    • `size`: The start size of the textinput  
+    • `visible`: If the textinput should be visible to the user   
+    • `disabled`: If the user can or can't click on the textinput  
+    • `readonly`: If the user can copty the text but can't edit the textinput content  
+    • `password`: If the textinput should hide its content  
+    • `placeholder`: Some text that is displayed when the actual value is empty  
+    • `limit`: The maximum number of characters that the control can hold  
+    • `parent`: The textinput parent  
+    • `font`: The textinput font. If None, use the system default  
 */
 #[derive(Clone)]
 pub struct TextInputT<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+Clone> {

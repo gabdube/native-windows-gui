@@ -209,7 +209,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
 pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, handle: HWND) { unsafe {
   use comctl32::SetWindowSubclass;
 
-  // While definitely questionable in term of safeness, the reference to the UiInner is actually (always)
+  // While definitely questionable in term of safety, the reference to the UiInner is actually (always)
   // a raw pointer belonging to a Ui. Also, when the Ui goes out of scope, every window control
   // gets destroyed BEFORE the UiInner, this guarantees that uinner lives long enough.
   let ui_inner_raw: *mut UiInner<ID> = uiinner as *mut UiInner<ID>;

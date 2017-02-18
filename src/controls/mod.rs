@@ -28,6 +28,7 @@ pub mod radiobutton;
 pub mod label;
 pub mod listbox;
 pub mod combobox;
+pub mod groupbox;
 pub mod file_dialog;
 pub mod timer;
 pub mod canvas;
@@ -47,6 +48,7 @@ pub use controls::radiobutton::{RadioButtonT, RadioButton};
 pub use controls::label::{LabelT, Label};
 pub use controls::listbox::{ListBoxT, ListBox};
 pub use controls::combobox::{ComboBoxT, ComboBox};
+pub use controls::groupbox::{GroupBoxT, GroupBox};
 pub use controls::file_dialog::{FileDialogT, FileDialog};
 pub use controls::timer::{TimerT, Timer};
 pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
@@ -86,6 +88,7 @@ pub enum ControlType {
     MenuItem,
     Timer,
     ComboBox,
+    GroupBox,
     NumericInput,
     FileDialog,
     Canvas,

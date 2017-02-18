@@ -36,6 +36,18 @@ use events::Event;
 
 /**
     A template that creates a multi line textinput control
+
+    Members:  
+    • `text`: The text of the textbox  
+    • `position`: The start position of the textbox  
+    • `size`: The start size of the textbox  
+    • `visible`: If the textbox should be visible to the user   
+    • `disabled`: If the user can or can't click on the textbox  
+    • `readonly`: If the user can copty the text but can't edit the textbox content  
+    • `limit`: The maximum number of characters that the control can hold  
+    • `scrollbars`: A tuple to defined whether to show scrollbars or not (show horizontal, show vertical)
+    • `parent`: The textbox parent  
+    • `font`: The textbox font. If None, use the system default  
 */
 #[derive(Clone)]
 pub struct TextBoxT<S1: Clone+Into<String>, ID: Hash+Clone> {
@@ -46,6 +58,7 @@ pub struct TextBoxT<S1: Clone+Into<String>, ID: Hash+Clone> {
     pub disabled: bool,
     pub readonly: bool,
     pub limit: u32,
+    pub scrollbars: (bool, bool),
     pub parent: ID,
     pub font: Option<ID>,
 }
@@ -61,11 +74,13 @@ impl<S1: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextBoxT<S1, ID> {
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
         use low::defs::{ES_AUTOHSCROLL, ES_AUTOVSCROLL, ES_READONLY, EM_LIMITTEXT, ES_MULTILINE};
-        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER, WS_HSCROLL, WS_VSCROLL};
 
         let flags: DWORD = WS_CHILD | WS_BORDER | ES_AUTOHSCROLL | ES_MULTILINE | ES_AUTOVSCROLL |
         if self.readonly { ES_READONLY } else { 0 } |
         if self.visible  { WS_VISIBLE }  else { 0 } |
+        if self.scrollbars.0 { WS_HSCROLL } else { 0 } |
+        if self.scrollbars.1 { WS_VSCROLL } else { 0 } |
         if self.disabled { WS_DISABLED } else { 0 };
 
         // Get the parent handle
