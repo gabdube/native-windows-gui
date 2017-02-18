@@ -27,6 +27,7 @@ use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::Event;
+use defs::HTextAlign;
 
 /**
     A template that creates a standard groupbox
@@ -47,6 +48,7 @@ pub struct GroupBoxT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub size: (u32, u32),
     pub visible: bool,
     pub disabled: bool,
+    pub align: HTextAlign,
     pub parent: ID,
     pub font: Option<ID>,
 }
@@ -60,11 +62,12 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for GroupBoxT<S, ID> {
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
-        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY, BS_GROUPBOX};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY, BS_GROUPBOX, BS_TOP, BS_CENTER, BS_LEFT, BS_RIGHT};
 
-        let flags: DWORD = WS_CHILD | BS_NOTIFY | BS_GROUPBOX |
+        let flags: DWORD = WS_CHILD | BS_NOTIFY | BS_GROUPBOX | BS_TOP |
         if self.visible    { WS_VISIBLE }   else { 0 } |
-        if self.disabled   { WS_DISABLED }  else { 0 };
+        if self.disabled   { WS_DISABLED }  else { 0 } |
+        match self.align   { HTextAlign::Center=>BS_CENTER, HTextAlign::Left=>BS_LEFT, HTextAlign::Right=>BS_RIGHT };;
 
         // Get the parent handle
         let parent = match handle_of_window(ui, &self.parent, "The parent of a groupbox must be a window-like control.") {

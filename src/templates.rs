@@ -307,12 +307,32 @@ macro_rules! nwg_groupbox {
             text: "",
             position: (0, 0), size: (100, 100), 
             visible: true, disabled: false,
+            align: $crate::constants::HTextAlign::Left,
             parent: $p,
             font: None
         };
         $( t.$i = $v; );*
         t
     }}
+}
+
+#[macro_export]
+macro_rules! nwg_progressbar {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::ProgressBarT {
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false,
+            range: (0, 100),
+            step: 10,
+            value: 0,
+            state: $crate::constants::ProgressBarState::Normal,
+            vertical: false,
+            parent: $p,
+        };
+        $( t.$i = $v; );*
+        t
+    }} 
 }
 
 #[macro_export]

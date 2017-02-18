@@ -35,8 +35,7 @@ static mut TIMERS_ID: UINT_PTR = 0;
     its creation, it cannot start automatically.
 
     Members:  
-    • `interval`: The timer interval in miliseconds
-    • `repeat`: If the timer should automatically restart after the interval
+    • `interval`: The timer interval in milliseconds
 */
 #[derive(Clone)]
 pub struct TimerT {

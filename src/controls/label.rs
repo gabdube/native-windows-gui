@@ -36,7 +36,7 @@ use defs::HTextAlign;
     • `text`: The text of the label  
     • `position`: The start position of the label  
     • `size`: The start size of the label  
-    • `visible`: If the label should be visible to the user32  
+    • `visible`: If the label should be visible to the user  
     • `disabled`: If the user can or can't click on the label  
     • `align`: The text align of the label
     • `parent`: The label parent  
@@ -72,7 +72,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for LabelT<S, ID> {
         match self.align   { HTextAlign::Center=>SS_CENTER, HTextAlign::Left=>SS_LEFT, HTextAlign::Right=>SS_RIGHT };
 
         // Get the parent handle
-        let parent = match handle_of_window(ui, &self.parent, "The parent of a button must be a window-like control.") {
+        let parent = match handle_of_window(ui, &self.parent, "The parent of a label must be a window-like control.") {
             Ok(h) => h,
             Err(e) => { return Err(e); }
         };
@@ -80,7 +80,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for LabelT<S, ID> {
         // Get the font handle (if any)
         let font_handle: Option<HFONT> = match self.font.as_ref() {
             Some(font_id) => 
-                match handle_of_font(ui, &font_id, "The font of a button must be a font resource.") {
+                match handle_of_font(ui, &font_id, "The font of a label must be a font resource.") {
                     Ok(h) => Some(h),
                     Err(e) => { return Err(e); }
                 },

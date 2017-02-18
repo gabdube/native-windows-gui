@@ -135,6 +135,21 @@ pub enum FileDialogAction {
 }
 
 /**
+    Define the state of a progress bar
+
+    Members:  
+    * `Normal`: Default state of a progress bar  (in progress)
+    * `Paused`: Paused  
+    * `Error`: Error   
+*/
+#[derive(Clone, PartialEq, Debug)]
+pub enum ProgressBarState {
+    Normal,
+    Paused,
+    Error,
+}
+
+/**
     Define a rectangle shape that can be used with canvases
 */
 #[derive(Clone)]
