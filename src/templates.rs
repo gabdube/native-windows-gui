@@ -282,14 +282,14 @@ macro_rules! nwg_textinput {
 }
 
 #[macro_export]
-macro_rules! nwg_numericinput {
+macro_rules! nwg_textbox {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
-        $crate::NumericInputT::<_> {
-            value: 0,
+        $crate::TextBoxT::<_, _> {
+            text: "",
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, readonly: false,
-            range: (i64::min_value(), i64::max_value()),
+            limit: 32_767,
             parent: $p,
             font: None
         };

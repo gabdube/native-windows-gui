@@ -22,12 +22,12 @@ pub mod window;
 pub mod menu;
 pub mod button;
 pub mod textinput;
+pub mod textbox;
 pub mod checkbox;
 pub mod radiobutton;
 pub mod label;
 pub mod listbox;
 pub mod combobox;
-pub mod numinput;
 pub mod file_dialog;
 pub mod timer;
 pub mod canvas;
@@ -41,12 +41,12 @@ pub use controls::window::{WindowT, Window};
 pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem, SeparatorT, Separator};
 pub use controls::button::{ButtonT, Button};
 pub use controls::textinput::{TextInputT, TextInput};
+pub use controls::textbox::{TextBoxT, TextBox};
 pub use controls::checkbox::{CheckBoxT, CheckBox};
 pub use controls::radiobutton::{RadioButtonT, RadioButton};
 pub use controls::label::{LabelT, Label};
 pub use controls::listbox::{ListBoxT, ListBox};
 pub use controls::combobox::{ComboBoxT, ComboBox};
-pub use controls::numinput::{NumericInputT, NumericInput};
 pub use controls::file_dialog::{FileDialogT, FileDialog};
 pub use controls::timer::{TimerT, Timer};
 pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
@@ -77,6 +77,7 @@ pub enum ControlType {
     Window,
     Button,
     TextInput,
+    TextBox,
     CheckBox,
     RadioButton,
     ListBox,

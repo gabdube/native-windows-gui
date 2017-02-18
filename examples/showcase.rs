@@ -32,8 +32,8 @@ nwg_template!(
         ("CatRadio", nwg_radiobutton!(parent="MainWindow"; text="I have a cat"; position=(120, 50); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
         ("DogRadio", nwg_radiobutton!(parent="MainWindow"; text="I have a dog"; position=(240, 50); size=(110, 30); font=Some("Font1"))),
         ("SchoolSupplyComboBox", nwg_combobox!(parent="MainWindow"; position=(360, 10); size=(130, 30); placeholder=Some("Choose plz"); font=Some("Font1"); collection=vec!["Pencil", "Eraser", "Scissor", "Calculator", "Notebook"])),
-        ("NumberOfCatsLabel", nwg_label!(parent="MainWindow"; position=(10, 165); text="Number of cats: "; size=(110, 24); font=Some("Font1"))),
-        ("NumberOfCatsInput", nwg_numericinput!(parent="MainWindow"; position=(120, 165); size=(150, 22); range=(0, 1000); font=Some("Font1")))
+        ("RandomStuffLabel", nwg_label!(parent="MainWindow"; text="Write some notes in here:"; position=(10, 160); size=(180, 25); font=Some("Font1"))),
+        ("RandomStuffTextBox", nwg_textbox!(parent="MainWindow"; position=(10, 185); size=(200, 60)))
     ];
     events: [
         ("NestedAction", "SayHello", Event::Triggered, |_,_,_,_| {

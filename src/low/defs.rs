@@ -129,8 +129,10 @@ pub const CB_SHOWDROPDOWN: UINT = 335;
 pub const CB_SETCUEBANNER: UINT = 5891;
 
 pub const ES_AUTOHSCROLL: UINT = 128;
+pub const ES_AUTOVSCROLL: UINT = 64;
 pub const ES_PASSWORD: UINT = 32;
 pub const ES_READONLY: UINT = 0x800;
+pub const ES_MULTILINE: UINT = 4;
 
 pub const EM_LIMITTEXT: UINT = 197;
 pub const EM_GETLIMITTEXT: UINT = 213;

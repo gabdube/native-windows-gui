@@ -65,6 +65,8 @@ impl<ID: Hash+Clone> ControlT<ID> for NumericInputT<ID> {
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{set_window_font, handle_of_window, handle_of_font};
 
+        return Err(Error::Unimplemented);
+
         // A NumericInput is composed of three controls: a custom window, a textinput and a "up down".
 
         // Get the parent handle

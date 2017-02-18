@@ -83,7 +83,7 @@ fn parse_command(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, 
   match control_type {
     ControlType::ListBox => parse_listbox_command(id, ncode),
     ControlType::Button => parse_button_command(id, ncode),
-    ControlType::TextInput => parse_edit_command(id, ncode),
+    ControlType::TextInput | ControlType::TextBox => parse_edit_command(id, ncode),
     ControlType::Label => parse_static_command(id, ncode),
     _ => None
   }
