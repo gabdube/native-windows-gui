@@ -9,6 +9,7 @@
 
     <title>native_windows_gui - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
     
@@ -47,137 +48,523 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/native_windows_gui/src/lib.rs.html#1-37' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/lib.rs.html#1-66' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>A very high level native gui library for Windows.</p>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
-                           <td><a class='mod' href='keys/index.html'
-                                  title='native_windows_gui::keys'>keys</a></td>
+                           <td><a class='mod' href='constants/index.html'
+                                  title='mod native_windows_gui::constants'>constants</a></td>
                            <td class='docblock-short'>
-                                <p>Windows virtual key code</p>
+                                <p>Controls constants</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='custom/index.html'
+                                  title='mod native_windows_gui::custom'>custom</a></td>
+                           <td class='docblock-short'>
+                                <p>Custom control creation resources</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='templates/index.html'
+                                  title='mod native_windows_gui::templates'>templates</a></td>
+                           <td class='docblock-short'>
+                                <p>Macro based template system.</p>
+                           </td>
+                       </tr></table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_button.html'
+                                  title='macro native_windows_gui::nwg_button'>nwg_button</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_canvas.html'
+                                  title='macro native_windows_gui::nwg_canvas'>nwg_canvas</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_checkbox.html'
+                                  title='macro native_windows_gui::nwg_checkbox'>nwg_checkbox</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_combobox.html'
+                                  title='macro native_windows_gui::nwg_combobox'>nwg_combobox</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_filedialog.html'
+                                  title='macro native_windows_gui::nwg_filedialog'>nwg_filedialog</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_font.html'
+                                  title='macro native_windows_gui::nwg_font'>nwg_font</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_get.html'
+                                  title='macro native_windows_gui::nwg_get'>nwg_get</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_get_mut.html'
+                                  title='macro native_windows_gui::nwg_get_mut'>nwg_get_mut</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_groupbox.html'
+                                  title='macro native_windows_gui::nwg_groupbox'>nwg_groupbox</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_label.html'
+                                  title='macro native_windows_gui::nwg_label'>nwg_label</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_listbox.html'
+                                  title='macro native_windows_gui::nwg_listbox'>nwg_listbox</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_menu.html'
+                                  title='macro native_windows_gui::nwg_menu'>nwg_menu</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_menuitem.html'
+                                  title='macro native_windows_gui::nwg_menuitem'>nwg_menuitem</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_progressbar.html'
+                                  title='macro native_windows_gui::nwg_progressbar'>nwg_progressbar</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_radiobutton.html'
+                                  title='macro native_windows_gui::nwg_radiobutton'>nwg_radiobutton</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_separator.html'
+                                  title='macro native_windows_gui::nwg_separator'>nwg_separator</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_template.html'
+                                  title='macro native_windows_gui::nwg_template'>nwg_template</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_textbox.html'
+                                  title='macro native_windows_gui::nwg_textbox'>nwg_textbox</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_textinput.html'
+                                  title='macro native_windows_gui::nwg_textinput'>nwg_textinput</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_timer.html'
+                                  title='macro native_windows_gui::nwg_timer'>nwg_timer</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.nwg_window.html'
+                                  title='macro native_windows_gui::nwg_window'>nwg_window</a></td>
+                           <td class='docblock-short'>
+                                
                            </td>
                        </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
                        <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Button.html'
+                                  title='struct native_windows_gui::Button'>Button</a></td>
+                           <td class='docblock-short'>
+                                <p>A standard button</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ButtonT.html'
+                                  title='struct native_windows_gui::ButtonT'>ButtonT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a standard button</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Canvas.html'
+                                  title='struct native_windows_gui::Canvas'>Canvas</a></td>
+                           <td class='docblock-short'>
+                                <p>A blank control that can be painted to</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.CanvasRenderer.html'
+                                  title='struct native_windows_gui::CanvasRenderer'>CanvasRenderer</a></td>
+                           <td class='docblock-short'>
+                                <p>Object that offers a light wrapper over the D2D1 api.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.CanvasT.html'
+                                  title='struct native_windows_gui::CanvasT'>CanvasT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a canvas</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.CheckBox.html'
+                                  title='struct native_windows_gui::CheckBox'>CheckBox</a></td>
+                           <td class='docblock-short'>
+                                <p>A standard checkbox</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.CheckBoxT.html'
+                                  title='struct native_windows_gui::CheckBoxT'>CheckBoxT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a standard checkbox</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ComboBox.html'
+                                  title='struct native_windows_gui::ComboBox'>ComboBox</a></td>
+                           <td class='docblock-short'>
+                                <p>A combobox control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ComboBoxT.html'
+                                  title='struct native_windows_gui::ComboBoxT'>ComboBoxT</a></td>
+                           <td class='docblock-short'>
+                                <p>Template that creates a combobox control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.FileDialog.html'
+                                  title='struct native_windows_gui::FileDialog'>FileDialog</a></td>
+                           <td class='docblock-short'>
+                                <p>A file dialog control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.FileDialogT.html'
+                                  title='struct native_windows_gui::FileDialogT'>FileDialogT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a standard file dialog</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Font.html'
+                                  title='struct native_windows_gui::Font'>Font</a></td>
+                           <td class='docblock-short'>
+                                <p>A font resource</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.FontT.html'
+                                  title='struct native_windows_gui::FontT'>FontT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that can create a font resource</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.GroupBox.html'
+                                  title='struct native_windows_gui::GroupBox'>GroupBox</a></td>
+                           <td class='docblock-short'>
+                                <p>A groupbox</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.GroupBoxT.html'
+                                  title='struct native_windows_gui::GroupBoxT'>GroupBoxT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a standard groupbox</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Label.html'
+                                  title='struct native_windows_gui::Label'>Label</a></td>
+                           <td class='docblock-short'>
+                                <p>A standard label</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.LabelT.html'
+                                  title='struct native_windows_gui::LabelT'>LabelT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a standard label</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ListBox.html'
+                                  title='struct native_windows_gui::ListBox'>ListBox</a></td>
+                           <td class='docblock-short'>
+                                <p>A listbox control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ListBoxT.html'
+                                  title='struct native_windows_gui::ListBoxT'>ListBoxT</a></td>
+                           <td class='docblock-short'>
+                                <p>Template that creates a listbox control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
                            <td><a class='struct' href='struct.Menu.html'
-                                  title='native_windows_gui::Menu'>Menu</a></td>
+                                  title='struct native_windows_gui::Menu'>Menu</a></td>
                            <td class='docblock-short'>
                                 <p>A menu control</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='struct' href='struct.MenuItem.html'
-                                  title='native_windows_gui::MenuItem'>MenuItem</a></td>
+                                  title='struct native_windows_gui::MenuItem'>MenuItem</a></td>
                            <td class='docblock-short'>
                                 <p>A menu item control</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='struct' href='struct.MenuItemT.html'
-                                  title='native_windows_gui::MenuItemT'>MenuItemT</a></td>
+                                  title='struct native_windows_gui::MenuItemT'>MenuItemT</a></td>
                            <td class='docblock-short'>
                                 <p>A template to create menuitems</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='struct' href='struct.MenuT.html'
-                                  title='native_windows_gui::MenuT'>MenuT</a></td>
+                                  title='struct native_windows_gui::MenuT'>MenuT</a></td>
                            <td class='docblock-short'>
                                 <p>A template to create menu controls</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ProgressBar.html'
+                                  title='struct native_windows_gui::ProgressBar'>ProgressBar</a></td>
+                           <td class='docblock-short'>
+                                <p>A standard progress bar</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ProgressBarT.html'
+                                  title='struct native_windows_gui::ProgressBarT'>ProgressBarT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a progress bar</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.RadioButton.html'
+                                  title='struct native_windows_gui::RadioButton'>RadioButton</a></td>
+                           <td class='docblock-short'>
+                                <p>A standard radio button</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.RadioButtonT.html'
+                                  title='struct native_windows_gui::RadioButtonT'>RadioButtonT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a standard radio button</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Separator.html'
+                                  title='struct native_windows_gui::Separator'>Separator</a></td>
+                           <td class='docblock-short'>
+                                <p>A separator control.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.SeparatorT.html'
+                                  title='struct native_windows_gui::SeparatorT'>SeparatorT</a></td>
+                           <td class='docblock-short'>
+                                <p>A menu item separator.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.TextBox.html'
+                                  title='struct native_windows_gui::TextBox'>TextBox</a></td>
+                           <td class='docblock-short'>
+                                <p>A multi line textinput control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.TextBoxT.html'
+                                  title='struct native_windows_gui::TextBoxT'>TextBoxT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a multi line textinput control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.TextInput.html'
+                                  title='struct native_windows_gui::TextInput'>TextInput</a></td>
+                           <td class='docblock-short'>
+                                <p>A single line textinput control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.TextInputT.html'
+                                  title='struct native_windows_gui::TextInputT'>TextInputT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a single line textinput control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Timer.html'
+                                  title='struct native_windows_gui::Timer'>Timer</a></td>
+                           <td class='docblock-short'>
+                                <p>A timer control</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.TimerT.html'
+                                  title='struct native_windows_gui::TimerT'>TimerT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a timer. Note that because the timer callbacks must be added AFTER
+its creation, it cannot start automatically.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
                            <td><a class='struct' href='struct.Ui.html'
-                                  title='native_windows_gui::Ui'>Ui</a></td>
+                                  title='struct native_windows_gui::Ui'>Ui</a></td>
                            <td class='docblock-short'>
                                 <p>Object that manage the GUI elements</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='struct' href='struct.Window.html'
-                                  title='native_windows_gui::Window'>Window</a></td>
+                                  title='struct native_windows_gui::Window'>Window</a></td>
                            <td class='docblock-short'>
                                 <p>A window control.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='struct' href='struct.WindowT.html'
-                                  title='native_windows_gui::WindowT'>WindowT</a></td>
+                                  title='struct native_windows_gui::WindowT'>WindowT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that will create a window.</p>
                            </td>
                        </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
                        <tr class=' module-item'>
-                           <td><a class='enum' href='enum.AnyHandle.html'
-                                  title='native_windows_gui::AnyHandle'>AnyHandle</a></td>
-                           <td class='docblock-short'>
-                                <p>A type that expose the different underlying handle into one type</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
                            <td><a class='enum' href='enum.Error.html'
-                                  title='native_windows_gui::Error'>Error</a></td>
+                                  title='enum native_windows_gui::Error'>Error</a></td>
                            <td class='docblock-short'>
                                 <p>Error class that regroup errors generated by NWG</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='enum' href='enum.Event.html'
-                                  title='native_windows_gui::Event'>Event</a></td>
+                                  title='enum native_windows_gui::Event'>Event</a></td>
                            <td class='docblock-short'>
                                 <p>Events name definition</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='enum' href='enum.EventArgs.html'
-                                  title='native_windows_gui::EventArgs'>EventArgs</a></td>
+                                  title='enum native_windows_gui::EventArgs'>EventArgs</a></td>
                            <td class='docblock-short'>
                                 <p>Events arguments definition. If an event do not have arguments, EventArgs::None is passed.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='enum' href='enum.SystemError.html'
-                                  title='native_windows_gui::SystemError'>SystemError</a></td>
+                                  title='enum native_windows_gui::SystemError'>SystemError</a></td>
                            <td class='docblock-short'>
                                 <p>Error class that regroups errors generated by the system</p>
-                           </td>
-                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
-<table>
-                       <tr class=' module-item'>
-                           <td><a class='trait' href='trait.Control.html'
-                                  title='native_windows_gui::Control'>Control</a></td>
-                           <td class='docblock-short'>
-                                <p>Structures implementing this trait are controls that can be stored in a Ui</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='trait' href='trait.ControlT.html'
-                                  title='native_windows_gui::ControlT'>ControlT</a></td>
-                           <td class='docblock-short'>
-                                <p>Structures implementing this trait can be used by a Ui to build a Control</p>
                            </td>
                        </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class='fn' href='fn.dispatch_events.html'
-                                  title='native_windows_gui::dispatch_events'>dispatch_events</a></td>
+                                  title='fn native_windows_gui::dispatch_events'>dispatch_events</a></td>
                            <td class='docblock-short'>
                                 <p>Dispatch the messages waiting the the system message queue to the associated Uis. This includes NWG custom messages.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
-                           <td><a class='fn' href='fn.exit.html'
-                                  title='native_windows_gui::exit'>exit</a></td>
+                           <td><a class='fn' href='fn.error_message.html'
+                                  title='fn native_windows_gui::error_message'>error_message</a></td>
                            <td class='docblock-short'>
-                                <p>Send a WM_QUIT to the system queue. Breaks the dispatch_events loop.</p>
+                                <p>Display a simple error message box. The message box has for style <code>MessageButtons::Ok</code> and <code>MessageIcons::Error</code> .</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.exit.html'
+                                  title='fn native_windows_gui::exit'>exit</a></td>
+                           <td class='docblock-short'>
+                                <p>Send a WM_QUIT to the system queue. Breaks the <code>dispatch_events</code> loop.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.fatal_message.html'
+                                  title='fn native_windows_gui::fatal_message'>fatal_message</a></td>
+                           <td class='docblock-short'>
+                                <p>Display a message box and then panic. The message box has for style <code>MessageButtons::Ok</code> and <code>MessageIcons::Error</code> .</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.message.html'
+                                  title='fn native_windows_gui::message'>message</a></td>
+                           <td class='docblock-short'>
+                                <p>Create an application wide message box</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.simple_message.html'
+                                  title='fn native_windows_gui::simple_message'>simple_message</a></td>
+                           <td class='docblock-short'>
+                                <p>Display a simple message box. The message box has for style <code>MessageButtons::Ok</code> and <code>MessageIcons::Info</code> .</p>
                            </td>
                        </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class='type' href='type.EventCallback.html'
-                                  title='native_windows_gui::EventCallback'>EventCallback</a></td>
+                                  title='type native_windows_gui::EventCallback'>EventCallback</a></td>
                            <td class='docblock-short'>
                                 <p>Event callback type</p>
                            </td>
@@ -237,11 +624,9 @@
     <script>
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
-        window.playgroundUrl = "";
     </script>
     <script src="../jquery.js"></script>
     <script src="../main.js"></script>
-    
     <script defer src="../search-index.js"></script>
 </body>
 </html>

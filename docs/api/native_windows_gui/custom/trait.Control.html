@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Control` trait in crate `native_windows_gui`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Control">
+
+    <title>native_windows_gui::custom::Control - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>native_windows_gui</a>::<wbr><a href='index.html'>custom</a></p><script>window.sidebarCurrent = {name: 'Control', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>native_windows_gui</a>::<wbr><a href='index.html'>custom</a>::<wbr><a class='trait' href=''>Control</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/native_windows_gui/controls/mod.rs.html#125-142' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Control {
+    fn <a href='#tymethod.handle' class='fnname'>handle</a>(&amp;self) -&gt; <a class='enum' href='../../native_windows_gui/custom/enum.AnyHandle.html' title='enum native_windows_gui::custom::AnyHandle'>AnyHandle</a>;
+
+    fn <a href='#method.control_type' class='fnname'>control_type</a>(&amp;self) -&gt; <a class='enum' href='../../native_windows_gui/constants/enum.ControlType.html' title='enum native_windows_gui::constants::ControlType'>ControlType</a> { ... }
+    fn <a href='#method.free' class='fnname'>free</a>(&amp;mut self) { ... }
+}</pre><div class='docblock'><p>Structures implementing this trait are controls that can be stored in a Ui</p>
+</div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.handle' class='method'><span id='handle.v' class='invisible'><code>fn <a href='#tymethod.handle' class='fnname'>handle</a>(&amp;self) -&gt; <a class='enum' href='../../native_windows_gui/custom/enum.AnyHandle.html' title='enum native_windows_gui::custom::AnyHandle'>AnyHandle</a></code></span></h3><div class='docblock'><p>Should return the underlying handle to the object</p>
+</div></div>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.control_type' class='method'><span id='control_type.v' class='invisible'><code>fn <a href='#method.control_type' class='fnname'>control_type</a>(&amp;self) -&gt; <a class='enum' href='../../native_windows_gui/constants/enum.ControlType.html' title='enum native_windows_gui::constants::ControlType'>ControlType</a></code></span></h3><div class='docblock'><p>Should return the type of the control. For custom controls, the return value should be <code>Undefined</code> (the default).</p>
+</div><h3 id='method.free' class='method'><span id='free.v' class='invisible'><code>fn <a href='#method.free' class='fnname'>free</a>(&amp;mut self)</code></span></h3><div class='docblock'><p>If specified, should free any ressource allocated in the template <code>build</code> function. This includes functions like <code>DestroyWindow</code>.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.Window.html' title='struct native_windows_gui::Window'>Window</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.Menu.html' title='struct native_windows_gui::Menu'>Menu</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.MenuItem.html' title='struct native_windows_gui::MenuItem'>MenuItem</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.Separator.html' title='struct native_windows_gui::Separator'>Separator</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.Button.html' title='struct native_windows_gui::Button'>Button</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.TextInput.html' title='struct native_windows_gui::TextInput'>TextInput</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.TextBox.html' title='struct native_windows_gui::TextBox'>TextBox</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.CheckBox.html' title='struct native_windows_gui::CheckBox'>CheckBox</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.RadioButton.html' title='struct native_windows_gui::RadioButton'>RadioButton</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.Label.html' title='struct native_windows_gui::Label'>Label</a></code></li>
+<li><code>impl&lt;D:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='trait core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='trait core::fmt::Display'>Display</a>&gt; Control for <a class='struct' href='../../native_windows_gui/struct.ListBox.html' title='struct native_windows_gui::ListBox'>ListBox</a>&lt;D&gt;</code></li>
+<li><code>impl&lt;D:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='trait core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='trait core::fmt::Display'>Display</a>&gt; Control for <a class='struct' href='../../native_windows_gui/struct.ComboBox.html' title='struct native_windows_gui::ComboBox'>ComboBox</a>&lt;D&gt;</code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.GroupBox.html' title='struct native_windows_gui::GroupBox'>GroupBox</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.ProgressBar.html' title='struct native_windows_gui::ProgressBar'>ProgressBar</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.FileDialog.html' title='struct native_windows_gui::FileDialog'>FileDialog</a></code></li>
+<li><code>impl Control for <a class='struct' href='../../native_windows_gui/struct.Timer.html' title='struct native_windows_gui::Timer'>Timer</a></code></li>
+<li><code>impl&lt;ID:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='trait core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='trait core::hash::Hash'>Hash</a>&gt; Control for <a class='struct' href='../../native_windows_gui/struct.Canvas.html' title='struct native_windows_gui::Canvas'>Canvas</a>&lt;ID&gt;</code></li>
+</ul><script type="text/javascript" async
+                         src="../../implementors/native_windows_gui/custom/trait.Control.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "native_windows_gui";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

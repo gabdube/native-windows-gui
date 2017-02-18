@@ -9,6 +9,7 @@
 
     <title>native_windows_gui::Window - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
     
@@ -47,16 +48,30 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-843' class='srclink' href='../src/native_windows_gui/src/controls/window.rs.html#79-81' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/controls/window.rs.html#81-83' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Window { /* fields omitted */ }</pre><div class='docblock'><p>A window control.</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../native_windows_gui/struct.Window.html' title='native_windows_gui::Window'>Window</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-845' class='srclink' href='../src/native_windows_gui/src/controls/window.rs.html#83-94' title='goto source code'>[src]</a></span></h3>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../native_windows_gui/struct.Window.html' title='struct native_windows_gui::Window'>Window</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/window.rs.html#85-113' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.close' class='method'><span id='close.v' class='invisible'><code>fn <a href='#method.close' class='fnname'>close</a>(&amp;self)</code></span></h4>
 <div class='docblock'><p>Close the window as if the user clicked on the X button. This do <strong>NOT</strong> remove the window from the ui,
 it only set it hidden. In order to also destroy the window, add an unpack statement on the <strong>Closed</strong> event.</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='../native_windows_gui/trait.Control.html' title='native_windows_gui::Control'>Control</a> for <a class='struct' href='../native_windows_gui/struct.Window.html' title='native_windows_gui::Window'>Window</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-850' class='srclink' href='../src/native_windows_gui/src/controls/window.rs.html#96-107' title='goto source code'>[src]</a></span></h3>
-<div class='impl-items'><h4 id='method.handle' class='method'><span id='handle.v' class='invisible'><code>fn <a href='../native_windows_gui/trait.Control.html#tymethod.handle' class='fnname'>handle</a>(&amp;self) -&gt; <a class='enum' href='../native_windows_gui/enum.AnyHandle.html' title='native_windows_gui::AnyHandle'>AnyHandle</a></code></span></h4>
+</div><h4 id='method.activate' class='method'><span id='activate.v' class='invisible'><code>fn <a href='#method.activate' class='fnname'>activate</a>(&amp;self)</code></span></h4>
+<div class='docblock'><p>Activate the window and set it above the other windows</p>
+</div><h4 id='method.get_title' class='method'><span id='get_title.v' class='invisible'><code>fn <a href='#method.get_title' class='fnname'>get_title</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='struct collections::string::String'>String</a></code></span></h4>
+<h4 id='method.set_title' class='method'><span id='set_title.v' class='invisible'><code>fn <a href='#method.set_title' class='fnname'>set_title</a>&lt;'a&gt;(&amp;self, text: &amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></span></h4>
+<h4 id='method.get_visibility' class='method'><span id='get_visibility.v' class='invisible'><code>fn <a href='#method.get_visibility' class='fnname'>get_visibility</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<h4 id='method.set_visibility' class='method'><span id='set_visibility.v' class='invisible'><code>fn <a href='#method.set_visibility' class='fnname'>set_visibility</a>(&amp;self, visible: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>)</code></span></h4>
+<h4 id='method.get_position' class='method'><span id='get_position.v' class='invisible'><code>fn <a href='#method.get_position' class='fnname'>get_position</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a></code></span></h4>
+<h4 id='method.set_position' class='method'><span id='set_position.v' class='invisible'><code>fn <a href='#method.set_position' class='fnname'>set_position</a>(&amp;self, x: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, y: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>)</code></span></h4>
+<h4 id='method.get_size' class='method'><span id='get_size.v' class='invisible'><code>fn <a href='#method.get_size' class='fnname'>get_size</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a></code></span></h4>
+<h4 id='method.set_size' class='method'><span id='set_size.v' class='invisible'><code>fn <a href='#method.set_size' class='fnname'>set_size</a>(&amp;self, w: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>, h: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>)</code></span></h4>
+<h4 id='method.get_enabled' class='method'><span id='get_enabled.v' class='invisible'><code>fn <a href='#method.get_enabled' class='fnname'>get_enabled</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<h4 id='method.set_enabled' class='method'><span id='set_enabled.v' class='invisible'><code>fn <a href='#method.set_enabled' class='fnname'>set_enabled</a>(&amp;self, e: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>)</code></span></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='../native_windows_gui/custom/trait.Control.html' title='trait native_windows_gui::custom::Control'>Control</a> for <a class='struct' href='../native_windows_gui/struct.Window.html' title='struct native_windows_gui::Window'>Window</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/window.rs.html#115-130' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.handle' class='method'><span id='handle.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#tymethod.handle' class='fnname'>handle</a>(&amp;self) -&gt; <a class='enum' href='../native_windows_gui/custom/enum.AnyHandle.html' title='enum native_windows_gui::custom::AnyHandle'>AnyHandle</a></code></span></h4>
 <div class='docblock'><p>Should return the underlying handle to the object</p>
-</div><h4 id='method.free' class='method'><span id='free.v' class='invisible'><code>fn <a href='../native_windows_gui/trait.Control.html#method.free' class='fnname'>free</a>(&amp;mut self)</code></span></h4>
+</div><h4 id='method.control_type' class='method'><span id='control_type.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#method.control_type' class='fnname'>control_type</a>(&amp;self) -&gt; <a class='enum' href='../native_windows_gui/constants/enum.ControlType.html' title='enum native_windows_gui::constants::ControlType'>ControlType</a></code></span></h4>
+<div class='docblock'><p>Should return the type of the control. For custom controls, the return value should be <code>Undefined</code> (the default).</p>
+</div><h4 id='method.free' class='method'><span id='free.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#method.free' class='fnname'>free</a>(&amp;mut self)</code></span></h4>
 <div class='docblock'><p>If specified, should free any ressource allocated in the template <code>build</code> function. This includes functions like <code>DestroyWindow</code>.</p>
 </div></div></section>
     <section id='search' class="content hidden"></section>
@@ -114,11 +129,9 @@ it only set it hidden. In order to also destroy the window, add an unpack statem
     <script>
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
-        window.playgroundUrl = "";
     </script>
     <script src="../jquery.js"></script>
     <script src="../main.js"></script>
-    
     <script defer src="../search-index.js"></script>
 </body>
 </html>
