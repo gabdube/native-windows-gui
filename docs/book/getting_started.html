@@ -7,7 +7,7 @@
     <title>Native Windows GUI guide - Getting started</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
     
 </head>
 <body class="rustdoc">
@@ -56,7 +56,90 @@
 
 
     <h1 class="title">Getting started</h1>
-    
+    <p>In this first chapter, you will install NWG and then look at a very simple application. This tutorial
+        will intoduce the concepts of <b>Control Templates</b>, <b>Events</b> and <b> the macro-based template system</b>.
+        These three compose the foundation of NWG. The next chapter "Basics" will go deeper into these.
+    </p>
+    <h1 id="installing-nwg" class="section-header"><a href="#installing-nwg">Installing NWG</a></h1>
+    NWG should work with any recent version of rust (64 bits or 32 bits). Any channel can be used (stable, beta, nightly).
+    NWG was only tested using the <b>MSVC ABI builds.</b> on both stable and nightly<br/>
+    To use NWG in your project add it to <code>cargo.toml</code>:
+
+<pre class="rust rust-example-rendered">[<span class="kw">dependencies</span>]
+<span class="ident">native-windows-gui</span> = <span class="string"><span class="string">"</span>0.2.0<span class="string">"</span></span>
+</pre>
+
+    And then, in <code>main.rs</code> or <code>lib.rs</code> :
+
+<pre class="rust rust-example-rendered">
+<span class="kw">extern crate</span> <span class="ident">native_windows_gui</span> <span class="kw">as</span> <span class="ident">nwg</span>;
+</pre>
+
+    <h1 id="hello-world" class="section-header"><a href="#hello-world">Hello World!</a></h1>
+    Here is a minimalistic program that display a window with a text input and a button. When the button
+    is clicked, a messagebox that says "Hello {your name}!" is created. This code is available in the NWG
+    examples and uses the <b>template API</b> (scroll further down to see the code without the template).
+
+<div class="syntax"><pre><span></span><span class="sd">/**</span>
+<span class="sd">    Simple example on how to use the nwg template system.</span>
+<span class="sd">*/</span><span class="w"></span>
+
+<span class="cp">#[macro_use]</span><span class="w"> </span><span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">native_windows_gui</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">nwg</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">use</span><span class="w"> </span><span class="n">nwg</span>::<span class="p">{</span><span class="n">Event</span><span class="p">,</span><span class="w"> </span><span class="n">Ui</span><span class="p">,</span><span class="w"> </span><span class="n">simple_message</span><span class="p">,</span><span class="w"> </span><span class="n">fatal_message</span><span class="p">,</span><span class="w"> </span><span class="n">dispatch_events</span><span class="p">};</span><span class="w"></span>
+
+<span class="n">nwg_template</span><span class="o">!</span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="n">head</span>: <span class="nc">setup_ui</span><span class="o">&lt;&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="kt">str</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">controls</span>: <span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">(</span><span class="s">"MainWindow"</span><span class="p">,</span><span class="w"> </span><span class="n">nwg_window</span><span class="o">!</span><span class="p">(</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">"Template Example"</span><span class="p">;</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">280</span><span class="p">,</span><span class="w"> </span><span class="mi">105</span><span class="p">)</span><span class="w"> </span><span class="p">)),</span><span class="w"></span>
+<span class="w">        </span>
+<span class="w">        </span><span class="p">(</span><span class="s">"Label1"</span><span class="p">,</span><span class="w"> </span><span class="n">nwg_label</span><span class="o">!</span><span class="p">(</span><span class="w"> </span>
+<span class="w">           </span><span class="n">parent</span><span class="o">=</span><span class="s">"MainWindow"</span><span class="p">;</span><span class="w"> </span><span class="n">text</span><span class="o">=</span><span class="s">"Your Name: "</span><span class="p">;</span><span class="w"></span>
+<span class="w">           </span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">15</span><span class="p">);</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">);</span><span class="w"> </span><span class="n">font</span><span class="o">=</span><span class="nb">Some</span><span class="p">(</span><span class="s">"TextFont"</span><span class="p">)</span><span class="w"> </span><span class="p">)),</span><span class="w"></span>
+<span class="w">        </span>
+<span class="w">        </span><span class="p">(</span><span class="s">"YourName"</span><span class="p">,</span><span class="w"> </span><span class="n">nwg_textinput</span><span class="o">!</span><span class="p">(</span><span class="w"> </span>
+<span class="w">           </span><span class="n">parent</span><span class="o">=</span><span class="s">"MainWindow"</span><span class="p">;</span><span class="w"> </span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mi">85</span><span class="p">,</span><span class="mi">13</span><span class="p">);</span><span class="w"> </span>
+<span class="w">           </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">185</span><span class="p">,</span><span class="mi">22</span><span class="p">);</span><span class="w"> </span><span class="n">font</span><span class="o">=</span><span class="nb">Some</span><span class="p">(</span><span class="s">"TextFont"</span><span class="p">)</span><span class="w"> </span><span class="p">)),</span><span class="w"></span>
+<span class="w">        </span>
+<span class="w">        </span><span class="p">(</span><span class="s">"HelloButton"</span><span class="p">,</span><span class="w"> </span><span class="n">nwg_button</span><span class="o">!</span><span class="p">(</span><span class="w"> </span>
+<span class="w">           </span><span class="n">parent</span><span class="o">=</span><span class="s">"MainWindow"</span><span class="p">;</span><span class="w"> </span><span class="n">text</span><span class="o">=</span><span class="s">"Hello World!"</span><span class="p">;</span><span class="w"></span>
+<span class="w">           </span><span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">45</span><span class="p">);</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">270</span><span class="p">,</span><span class="w"> </span><span class="mi">50</span><span class="p">);</span><span class="w"> </span><span class="n">font</span><span class="o">=</span><span class="nb">Some</span><span class="p">(</span><span class="s">"MainFont"</span><span class="p">)</span><span class="w"> </span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="n">events</span>: <span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">(</span><span class="s">"HelloButton"</span><span class="p">,</span><span class="w"> </span><span class="s">"SaySomething"</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span>::<span class="n">Click</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">ui</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">your_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg_get</span><span class="o">!</span><span class="p">(</span><span class="n">ui</span><span class="p">;</span><span class="w"> </span><span class="p">(</span><span class="s">"YourName"</span><span class="p">,</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">TextInput</span><span class="p">));</span><span class="w"></span>
+<span class="w">            </span><span class="n">simple_message</span><span class="p">(</span><span class="s">"Hello"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">"Hello {}!"</span><span class="p">,</span><span class="w"> </span><span class="n">your_name</span><span class="p">.</span><span class="n">get_text</span><span class="p">())</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">})</span><span class="w"></span>
+<span class="w">    </span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="n">resources</span>: <span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">(</span><span class="s">"MainFont"</span><span class="p">,</span><span class="w"> </span><span class="n">nwg_font</span><span class="o">!</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s">"Arial"</span><span class="p">;</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="mi">27</span><span class="p">)),</span><span class="w"></span>
+<span class="w">        </span><span class="p">(</span><span class="s">"TextFont"</span><span class="p">,</span><span class="w"> </span><span class="n">nwg_font</span><span class="o">!</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s">"Arial"</span><span class="p">;</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="mi">17</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="n">values</span>: <span class="p">[]</span><span class="w"></span>
+<span class="p">);</span><span class="w"></span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">app</span>: <span class="nc">Ui</span><span class="o">&lt;&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="kt">str</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">Ui</span>::<span class="n">new</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">_app</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_app</span><span class="p">;</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">fatal_message</span><span class="p">(</span><span class="s">"Fatal Error"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">"{:?}"</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">setup_ui</span><span class="p">(</span><span class="o">&amp;</span><span class="n">app</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">fatal_message</span><span class="p">(</span><span class="s">"Fatal Error"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">"{:?}"</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">dispatch_events</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+    <h1 id="hello-details" class="section-header"><a href="#hello-details">The example details</a></h1>
+
+
+    <h1 id="hello-world" class="section-header"><a href="#hello-world2">Hello World! (no macro)</a></h1>
+    Here is the same example without the macro templates.
+
 </div>
 </div>
 

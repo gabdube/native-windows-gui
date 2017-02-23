@@ -1,10 +1,10 @@
 [package]
 name = "native-windows-gui"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Gabriel Dube <gdube.475@gmail.com>"]
 
 description = "A thin GUI toolkit built over the Microsoft Windows WINAPI"
-documentation = "https://gabdube.github.io/native-windows-gui/book_10.html"
+documentation = "https://gabdube.github.io/native-windows-gui/docs/book/introduction.html"
 homepage = "https://gabdube.github.io/native-windows-gui/"
 repository = "https://github.com/gabdube/native-windows-gui"
 

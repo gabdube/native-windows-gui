@@ -9,21 +9,22 @@ use nwg::{Event, Ui, simple_message, fatal_message, dispatch_events};
 nwg_template!(
     head: setup_ui<&'static str>,
     controls: [
-        ("MainWindow", nwg_window!( title="Template Example"; size=(280, 60) )),
-        ("HelloButton", nwg_button!( parent="MainWindow"; text="Hello World!"; position=(5, 5); size=(270, 50); font=Some("MainFont") ))
+        ("MainWindow", nwg_window!( title="Template Example"; size=(280, 105) )),
+        ("Label1", nwg_label!( parent="MainWindow"; text="Your Name: "; position=(5,15); size=(80, 25); font=Some("TextFont") )),
+        ("YourName", nwg_textinput!( parent="MainWindow"; position=(85,13); size=(185,22); font=Some("TextFont") )),
+        ("HelloButton", nwg_button!( parent="MainWindow"; text="Hello World!"; position=(5, 45); size=(270, 50); font=Some("MainFont") ))
     ];
     events: [
-        ("HelloButton", "SaySomething", Event::Click, |_,_,_,_| {
-            simple_message("Hello", "Hello World!");
+        ("HelloButton", "SaySomething", Event::Click, |ui,_,_,_| {
+            let your_name = nwg_get!(ui; ("YourName", nwg::TextInput));
+            simple_message("Hello", &format!("Hello {}!", your_name.get_text()) );
         })
     ];
     resources: [
-        ("MainFont", nwg_font!(family="Arial"; size=27))
+        ("MainFont", nwg_font!(family="Arial"; size=27)),
+        ("TextFont", nwg_font!(family="Arial"; size=17))
     ];
-    values: [
-        ("CustomValue", 1234),
-        ("HelloBuddy", Vec::<u32>::new())
-    ]
+    values: []
 );
 
 fn main() {
