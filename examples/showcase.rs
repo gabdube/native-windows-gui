@@ -43,7 +43,7 @@ nwg_template!(
     events: [
         ("RandomStuffTextBox", "AllSystemEvents", Event::Raw, |_,_,_,args| {
             let (msg, w) = match args {
-                &EventArgs::Raw(msg, w, l) => (msg, w),
+                &EventArgs::Raw(msg, w, _) => (msg, w),
                 _ => unreachable!()
             };
 

@@ -117,6 +117,8 @@
 <span id="72">72</span>
 <span id="73">73</span>
 <span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
 </pre><pre class='rust '>
 <span class='doccomment'>/*!
     High level events definitions
@@ -165,6 +167,7 @@
     <span class='ident'>Moved</span>,
     <span class='ident'>Resized</span>,
     <span class='ident'>Paint</span>,
+    <span class='ident'>Raw</span>,
 
     <span class='comment'>// Default control specific events</span>
     <span class='ident'>Click</span>,
@@ -190,6 +193,7 @@
     <span class='ident'>Tick</span>(<span class='ident'>Duration</span>),
     <span class='ident'>Position</span>(<span class='ident'>i32</span>, <span class='ident'>i32</span>),
     <span class='ident'>Size</span>(<span class='ident'>u32</span>, <span class='ident'>u32</span>),
+    <span class='ident'>Raw</span>(<span class='ident'>u32</span>, <span class='ident'>usize</span>, <span class='ident'>usize</span>), <span class='comment'>// MSG, WPARAM, LPARAM</span>
     <span class='prelude-val'>None</span>
 }</pre>
 </section>

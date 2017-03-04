@@ -8,7 +8,7 @@
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
     <link rel="stylesheet" type="text/css" href="style/pygments.css">
-
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 </head>
 <body class="rustdoc">
     <!--[if lte IE 8]>
@@ -137,8 +137,22 @@
     <h1 id="hello-details" class="section-header"><a href="#hello-details">The example details</a></h1>
 
     <h3>UI creation</h3>
+    The <code>Ui</code> encapsulate the various components of NWG. Its role is to manage these components so that most of your energy is spent
+    developing the actual application instead of the UI. As of <b>BETA 1</b>, an application can instance as many Ui as it requires.<br/><br/>
+
+    The Ui object is basically a HashMap. Obviously the type of its key must be defined when it is declared. The "best" types are either 
+    <code>&amp;'static str</code> if the ui is entirely static, or <code>usize</code> if new controls will be created at runtime. The hash values
+    are the UI component such as the <b>controls</b> <br/><br/>
+
+    Ui creation is done by calling the <code>Ui::new()</code> method. The constructor execute some system initialization and therefore can fail.
+    Once the Ui is ready, it is now time to add stuff inside of it. The easiest way to do this is to use the built-in template system.
 
     <h3>Template - Base</h3>
+    The <b>NWG</b> template system is composed of multiple macros. It's role is to make the definition of <b>static</b> ui as painless as possible.
+    There's absolutely no black magic behind it. For an overview of how the last example could look like if it was done without using templates, see
+    the example at the end of this page. <br/><br/>
+
+    The base of the template system is the <code>nwg_template!</code> macro.
 
     <h3>Template - Controls</h3>
 

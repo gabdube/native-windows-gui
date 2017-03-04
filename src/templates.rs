@@ -19,6 +19,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+    Return controls from the Ui. Panics if one of the controls could not be retrieved.  
+    
+    
+    To avoid the panic, use `ui.get` directly.
+
+    Usage:  
+    `let control = nwg_get!(ui; (control ID, control type))`  
+    `let (control1, control2) = nwg_get!(ui; [(control1_ID, control1 type), (control2_ID, control2_type)])`  
+*/
 #[macro_export]
 macro_rules! nwg_get {
     ( $ui:ident; ($n:expr, $t:ty) ) => {
@@ -32,6 +42,16 @@ macro_rules! nwg_get {
     }
 }
 
+/**
+    Return controls from the Ui. Panics if one of the controls could not be retrieved.  
+    
+    
+    To avoid the panic, use `ui.get` directly. This is the mutable version of `nwg_get!`
+
+    Usage:  
+    `let control = nwg_get_mut!(ui; (control ID, control type))`  
+    `let (control1, control2) = nwg_get_mut!(ui; [(control1_ID, control1 type), (control2_ID, control2_type)])`  
+*/
 #[macro_export]
 macro_rules! nwg_get_mut {
     ( $ui:ident; ($n:expr, $t:ty) ) => {
@@ -45,6 +65,42 @@ macro_rules! nwg_get_mut {
     }
 }
 
+/**
+    Generates a function that initialize the content of a UI. 
+
+    **head**: Define the name of the function and Ui key type. Ex: `my_function<my_type>`
+
+    **controls**: A list of controls to add to the Ui. Accepts an array of `(ID, Template)`
+
+    **events**: A list of events to bind to the controls of the UI. Accepts an array of `(ControlID, EventID, Event, Callback)`
+
+    **resources**: A list of resources to add to the Ui. Accepts an array of `(ID, Template)`
+
+    **values**: A list of user values to add to the Ui. Accepts an array of `(ID, Template)`
+
+    **Return Value**: The function calls `commit` before returning. If the Ui initialization fails,
+    the function will return the error.
+
+    Usage: 
+
+    ```rust  
+        nwg_template!(
+            head: setup_ui<&'static str>,
+            controls: [ ("TEST", Control), ("TEST2", Control) ],
+            events: [ 
+            
+            ("TEST", "ACTION", Event::Click, |ui, caller, event, args| { 
+                println!("Hello World!"); 
+            })
+            
+            ],
+            resources: [ ("Font1", Font1), ("Font1", Font1) ],
+            values: [ ("True", true), ("()", ()) ]
+        );  
+
+    ```
+
+*/
 #[macro_export]
 macro_rules! nwg_template {
     (
@@ -73,6 +129,23 @@ pub fn $n(ui: &$crate::Ui<$t>) -> Result<(), $crate::Error> {
 
 //---- Controls ----//
 
+/**
+    Sane defaults for the Window control.
+
+    Defaults:  
+    • title: `"Native Windows GUI"`  
+    • position: `(100, 100)`  
+    • size: `(800, 600)`  
+    • resizable: `false`  
+    • visible: `true`  
+    • disabled: `false`  
+    • exit_on_close: `true`
+
+    Usage:  
+    `nwg_window!()`  
+    `nwg_window!(visible=false; resizable=true)`  
+    `nwg_window!(\* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_window {
     ( $( $i:ident=$v:expr );* ) => { {
@@ -90,6 +163,22 @@ macro_rules! nwg_window {
     }}
 }
 
+/**
+    Sane defaults for the Button control. Requires a parent.
+
+    Defaults:  
+    • text: `""`  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • font: `None`
+
+    Usage:  
+    `nwg_button!(parent="MyParent";)`  
+    `nwg_button!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_button!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_button {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -107,6 +196,24 @@ macro_rules! nwg_button {
     }}
 }
 
+/**
+    Sane defaults for the CheckBox control. Requires a parent.
+
+    Defaults:  
+    • text: `""`  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • checkstate: `CheckState::Unchecked`  
+    • tristate: `false`  
+    • font: `None`
+
+    Usage:  
+    `nwg_checkbox!(parent="MyParent";)`  
+    `nwg_checkbox!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_checkbox!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_checkbox {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -126,6 +233,25 @@ macro_rules! nwg_checkbox {
     }}
 }
 
+/**
+    Sane defaults for the Combobox control. Requires a parent.
+
+    `Data` parameter can be ommited if a default collection is passed.
+
+    Defaults:  
+    • collection: `[]`  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • placeholder: `None`  
+    • font: `None`
+
+    Usage:  
+    `nwg_combobox!(data=String; parent="MyParent";)`  
+    `nwg_combobox!(parent="MyParent"; visible=false; collection=vec!["TEST", "TEST2"])`  
+    `nwg_combobox!(data=&'static str; parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_combobox {
     (data=$t:ty, parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -158,6 +284,23 @@ macro_rules! nwg_combobox {
     }}
 }
 
+/**
+    Sane defaults for the Label control. Requires a parent.
+
+    Defaults:  
+    • text: `"A Label"`  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • align: `HTextAlign::Left`  
+    • font: `None`
+
+    Usage:  
+    `nwg_label!(parent="MyParent";)`  
+    `nwg_label!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_label!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_label {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -176,6 +319,26 @@ macro_rules! nwg_label {
     }}
 }
 
+/**
+    Sane defaults for the ListBox control. Requires a parent.
+
+    `Data` parameter can be ommited if a default collection is passed.
+
+    Defaults:  
+    • collection: `[]`  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • readonly: `false`  
+    • multi_select: `false`  
+    • font: `None`
+
+    Usage:  
+    `nwg_listbox!(parent="MyParent";)`  
+    `nwg_listbox!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_listbox!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_listbox {
     (data=$t:ty; parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -208,6 +371,18 @@ macro_rules! nwg_listbox {
 }
 
 
+/**
+    Sane defaults for the Menu control. Requires a window parent.
+
+    Defaults:  
+    • text: `"Menu"`  
+    • disabled: `false`  
+
+    Usage:  
+    `nwg_menu!(parent="MyParent";)`  
+    `nwg_menu!(parent="MyParent"; text="AAA")`  
+    `nwg_menu!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_menu {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -218,6 +393,18 @@ macro_rules! nwg_menu {
     }}
 }
 
+/**
+    Sane defaults for the MenuItem control. Requires a menu parent.
+
+    Defaults:  
+    • text: `"Menuitem"`  
+    • disabled: `false`  
+
+    Usage:  
+    `nwg_menuitem!(parent="MyParent";)`  
+    `nwg_menuitem!(parent="MyParent"; text="AAA")`  
+    `nwg_menuitem!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_menuitem {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -227,6 +414,14 @@ macro_rules! nwg_menuitem {
     }}
 }
 
+/**
+    Sane defaults for the Separator control. Requires a menu parent.
+
+    The separator control do not have any properties beside the required parent.
+
+    Usage:  
+    `nwg_separator!(parent="MyParent";)`   
+*/
 #[macro_export]
 macro_rules! nwg_separator {
     (parent=$p:expr) => { {
@@ -234,6 +429,23 @@ macro_rules! nwg_separator {
     }}
 }
 
+/**
+    Sane defaults for the RadioButton control. Requires a parent.
+
+    Defaults:  
+    • text: `""`  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • checkstate: `CheckState::Unchecked`  
+    • font: `None`
+
+    Usage:  
+    `nwg_radiobutton!(parent="MyParent";)`  
+    `nwg_radiobutton!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_radiobutton!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_radiobutton {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -251,6 +463,16 @@ macro_rules! nwg_radiobutton {
     }}
 }
 
+/**
+    Sane defaults for the Timer control.
+
+    Defaults:  
+    • interval: `1000` (1 second)
+
+    Usage:  
+    `nwg_timer!(parent="MyParent";)`  
+    `nwg_timer!(parent="MyParent"; interval=1)`  
+*/
 #[macro_export]
 macro_rules! nwg_timer {
     ($( $i:ident=$v:expr );*) => { {
@@ -263,6 +485,26 @@ macro_rules! nwg_timer {
     }}
 }
 
+/**
+    Sane defaults for the TextInput control. Requires a parent.
+
+    Defaults:  
+    • text: `""`  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • readonly: `false`  
+    • password: `false`  
+    • limit: `32_767`  
+    • placeholder: `None`  
+    • font: `None`
+
+    Usage:  
+    `nwg_textinput!(parent="MyParent";)`  
+    `nwg_textinput!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_textinput!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_textinput {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -281,6 +523,25 @@ macro_rules! nwg_textinput {
     }}
 }
 
+/**
+    Sane defaults for the TextBox control. Requires a parent.
+
+    Defaults:  
+    • text: `""`  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • readonly: `false`  
+    • limit: `32_767`  
+    • scrollbars: `(false, false)`  
+    • font: `None`
+
+    Usage:  
+    `nwg_textbox!(parent="MyParent";)`  
+    `nwg_textbox!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_textbox!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_textbox {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -299,6 +560,23 @@ macro_rules! nwg_textbox {
     }}
 }
 
+/**
+    Sane defaults for the GroupBox control. Requires a parent.
+
+    Defaults:  
+    • text: `""`  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • align: `HTextAlign::Left`  
+    • font: `None`
+
+    Usage:  
+    `nwg_groupbox!(parent="MyParent";)`  
+    `nwg_groupbox!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_groupbox!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_groupbox {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -316,6 +594,26 @@ macro_rules! nwg_groupbox {
     }}
 }
 
+/**
+    Sane defaults for the ProgressBar control. Requires a parent.
+
+    Defaults:  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • range: `(0, 100)`  
+    • step: `10`  
+    • value: `0`  
+    • state: `ProgressBarState::Normal`  
+    • vertical: `false`  
+    • font: `None`
+
+    Usage:  
+    `nwg_progressbar!(parent="MyParent";)`  
+    `nwg_progressbar!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_progressbar!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_progressbar {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -335,6 +633,22 @@ macro_rules! nwg_progressbar {
     }} 
 }
 
+/**
+    Sane defaults for the FileDialog control.
+
+    Defaults:  
+    • parent: `None`  
+    • title: `"Open file"`  
+    • action: `FileDialogAction::Open`  
+    • multiselect: `false`  
+    • default_folder: `None`  
+    • filters: `None`  
+
+    Usage:  
+    `nwg_filedialog!()`  
+    `nwg_filedialog!(parent="MyParent"; title="Hey buddy!")`  
+    `nwg_filedialog!(\* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_filedialog {
     ($( $i:ident=$v:expr );*) => { {
@@ -354,6 +668,20 @@ macro_rules! nwg_filedialog {
     }}
 }
 
+/**
+    Sane defaults for the Canvas control. Requires a parent.
+
+    Defaults:  
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+
+    Usage:  
+    `nwg_canvas!(parent="MyParent";)`  
+    `nwg_canvas!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_canvas!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_canvas {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
@@ -371,6 +699,20 @@ macro_rules! nwg_canvas {
 
 //---- Resources ----//
 
+/**
+    Sane defaults for the Font resource.
+
+    Defaults:  
+    • family: `"Arial"`  
+    • size: `12`  
+    • weight: `FONT_WEIGHT_NORMAL`  
+    • decoration: `FONT_DECO_NORMAL`  
+
+    Usage:  
+    `nwg_font!()`  
+    `nwg_font!(family="Comic Sans")`  
+    `nwg_font!(\* Any combinations of the template properties*\)`    
+*/
 #[macro_export]
 macro_rules! nwg_font {
     ($( $i:ident=$v:expr );*) => { {
