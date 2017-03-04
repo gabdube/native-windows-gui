@@ -57,7 +57,7 @@ impl<ID: Hash+Clone+'static> ControlT<ID> for CanvasT<ID> {
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp,
-             Event::Moved, Event::Resized, Event::Paint]
+             Event::Moved, Event::Resized, Event::Paint, Event::Raw]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

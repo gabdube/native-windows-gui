@@ -59,7 +59,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> ControlT<I
     fn type_id(&self) -> TypeId { TypeId::of::<ComboBox<D>>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized]
+        vec![Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

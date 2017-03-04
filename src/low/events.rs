@@ -100,6 +100,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
     WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, WM_COMMAND, WM_TIMER, WM_MOVE, WM_SIZING, WM_EXITSIZEMOVE, WM_SIZE,
     WM_PAINT, c_int, LOWORD, HIWORD, RECT};
   use low::menu_helper::get_menu_id;
+  use low::defs::{NWG_CUSTOM_MIN, NWG_CUSTOM_MAX};
 
   let inner: &mut UiInner<ID> = mem::transmute(data);
   let inner_id: u64;
@@ -198,6 +199,13 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
 
   if let Some((inner_id, evt, params)) = callback_data {
     inner.trigger(inner_id, evt, params);
+  }
+
+  // Trigger a raw event 
+  if msg < NWG_CUSTOM_MIN || msg > NWG_CUSTOM_MAX {
+    if let Some(inner_id) = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ) {
+      inner.trigger(inner_id, Event::Raw, EventArgs::Raw(msg, w as usize, l as usize));
+    }
   }
 
   DefSubclassProc(hwnd, msg, w, l)

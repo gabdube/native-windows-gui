@@ -45,6 +45,7 @@ pub enum Event {
     Moved,
     Resized,
     Paint,
+    Raw,
 
     // Default control specific events
     Click,
@@ -70,5 +71,6 @@ pub enum EventArgs {
     Tick(Duration),
     Position(i32, i32),
     Size(u32, u32),
+    Raw(u32, usize, usize), // MSG, WPARAM, LPARAM
     None
 }

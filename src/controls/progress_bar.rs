@@ -64,7 +64,7 @@ impl<ID: Hash+Clone> ControlT<ID> for ProgressBarT<ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<ProgressBar>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Moved, Event::Resized]
+        vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

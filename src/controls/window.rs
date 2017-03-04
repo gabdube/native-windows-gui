@@ -59,7 +59,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp,
-             Event::Moved, Event::Resized]
+             Event::Moved, Event::Resized, Event::Raw]
     }
 
     #[allow(unused_variables)]

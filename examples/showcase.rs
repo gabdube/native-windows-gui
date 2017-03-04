@@ -41,6 +41,17 @@ nwg_template!(
         ("CatProgress", nwg_progressbar!(parent="MainWindow"; position=(230, 190); size=(240, 25); range=(0, 100); value=85))
     ];
     events: [
+        ("RandomStuffTextBox", "AllSystemEvents", Event::Raw, |_,_,_,args| {
+            let (msg, w) = match args {
+                &EventArgs::Raw(msg, w, l) => (msg, w),
+                _ => unreachable!()
+            };
+
+            if msg == 0x0100 { // WM_KEYDOWN
+                println!("The virtual key {:?} was pressed", w);
+            }
+        }),
+
         ("NestedAction", "SayHello", Event::Triggered, |_,_,_,_| {
             nwg::simple_message("Hello", "Hello World!");
         }),

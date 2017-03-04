@@ -68,7 +68,7 @@ impl<S1: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextBoxT<S1, ID> {
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp,
-             Event::ValueChanged, Event::Moved, Event::Resized]
+             Event::ValueChanged, Event::Moved, Event::Resized, Event::Raw]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
