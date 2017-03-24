@@ -140,19 +140,27 @@
     The <code>Ui</code> encapsulate the various components of NWG. Its role is to manage these components so that most of your energy is spent
     developing the actual application instead of the UI. As of <b>BETA 1</b>, an application can instance as many Ui as it requires.<br/><br/>
 
-    The Ui object is basically a HashMap. Obviously the type of its key must be defined when it is declared. The "best" types are either 
+    The Ui object is basically a generic HashMap, therefore the type of its key must be defined when it is declared. The "best" types are either 
     <code>&amp;'static str</code> if the ui is entirely static, or <code>usize</code> if new controls will be created at runtime. The hash values
-    are the UI component such as the <b>controls</b> <br/><br/>
+    are UI components (ex: the <b>controls</b>). <br/><br/>
 
     Ui creation is done by calling the <code>Ui::new()</code> method. The constructor execute some system initialization and therefore can fail.
     Once the Ui is ready, it is now time to add stuff inside of it. The easiest way to do this is to use the built-in template system.
 
     <h3>Template - Base</h3>
     The <b>NWG</b> template system is composed of multiple macros. It's role is to make the definition of <b>static</b> ui as painless as possible.
-    There's absolutely no black magic behind it. For an overview of how the last example could look like if it was done without using templates, see
+    There's absolutely no black magic behind it. For an example of how the last example could look like if it was done without using templates, see
     the example at the end of this page. <br/><br/>
 
-    The base of the template system is the <code>nwg_template!</code> macro.
+    The base of the template system is the <code>nwg_template!</code> macro (<a href="docs/api/native_windows_gui/macro.nwg_template.html">documentation</a>).
+    Its role is to define a function that initialize an Ui components.<br/><br/>
+
+    The first parameter <code>head</code> defines the type of the Ui that will be accepted and the name of the function
+    The other parameters are described in the following sections.<br/><br/>
+
+    If the initialization of the Ui fails, an <code>Error</code> is returned with some information about what went wrong.
+    The template content is ready to be used as soon as the function returns. 
+    
 
     <h3>Template - Controls</h3>
 
