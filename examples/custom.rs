@@ -7,7 +7,7 @@
 
     Right now, creating custom control is unsafe. Safe and simpler way to create custom may be added in future version of NWG.
 
-    For simpicity, the custom control source is in the same source file.
+    For simplicity, the custom control source is in the same source file.
     It is a better idea to have a single extern module for every custom control.
 */
 extern crate user32;
@@ -49,7 +49,7 @@ impl<ID: Hash+Clone> ControlT<ID> for MyCustomWindowT {
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use winapi::{WS_HSCROLL, WS_VISIBLE, WS_VSCROLL, WS_OVERLAPPEDWINDOW};
 
-        // This method must create the low level control and return it as a Boxed Control
+        // This method must create the low level control and return it as a Box<Control>
         // NWG offers both build_sysclass and build_window in order to facilitate the low level window creation
         // If the method returns an error, Ui::commit will return it.
         

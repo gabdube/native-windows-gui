@@ -67,9 +67,9 @@ impl<ID: Clone+Hash> Canvas<ID> {
     /**
         Create a solid brush into the canvas and add it under the selected `name`.
 
-        Errors:
-        • `Error::System` if the canvas could not create the brush.
-        • `Error::KeyExists` if the a resource with the specified name already exists
+        Errors:  
+        • `Error::System` if the canvas could not create the brush.  
+        • `Error::KeyExists` if the a resource with the specified name already exists  
     */
     pub fn create_solid_brush(&mut self, name: &ID, brush: &defs::SolidBrush) -> Result<(), Error> {
         use winapi::{D2D1_COLOR_F, D2D1_BRUSH_PROPERTIES};
@@ -97,9 +97,9 @@ impl<ID: Clone+Hash> Canvas<ID> {
     /**
         Create a pen into the canvas and add it under the selected `name`.
 
-        Errors:
-        • `Error::System` if the canvas could not create the brush.
-        • `Error::KeyExists` if the a resource with the specified name already exists
+        Errors:  
+        • `Error::System` if the canvas could not create the brush.  
+        • `Error::KeyExists` if the a resource with the specified name already exists  
     */
     pub fn create_pen(&mut self, name: &ID, pen: &defs::Pen) -> Result<(), Error> {
         use winapi::{D2D1_STROKE_STYLE_PROPERTIES, D2D1_CAP_STYLE, D2D1_LINE_JOIN, D2D1_DASH_STYLE};
@@ -171,9 +171,9 @@ impl<ID: Clone+Hash> Canvas<ID> {
     /**
         Sets the dots per inch (DPI) of the render target.   
 
-        Arguments:
+        Arguments:  
         • `dpix`:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.  
-        • `dpiy`:  A value greater than or equal to zero that specifies the vertical DPI of the render target.
+        • `dpiy`:  A value greater than or equal to zero that specifies the vertical DPI of the render target.  
     */
     pub fn set_dpi(&mut self, dpix: f32, fpiy: f32) {
         unsafe { self.SetDpi(dpix, fpiy); }

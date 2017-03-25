@@ -23,7 +23,15 @@ use std::time::Duration;
 use ui::Ui;
 use defs::MouseButton;
 
-/// Event callback type
+/**
+The function signature for the event callback
+
+Arguments:  
+  • 1: A reference to the Ui  
+  • 2: A reference to the ID of the control  
+  • 3: A reference to the event type that was called  
+  • 4: A reference to the arguments passed with the controls  
+*/
 pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
 
 /**

@@ -426,9 +426,9 @@
     <span class='doccomment'>/**
         Create a solid brush into the canvas and add it under the selected `name`.
 
-        Errors:
-        • `Error::System` if the canvas could not create the brush.
-        • `Error::KeyExists` if the a resource with the specified name already exists
+        Errors:  
+        • `Error::System` if the canvas could not create the brush.  
+        • `Error::KeyExists` if the a resource with the specified name already exists  
     */</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>create_solid_brush</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>defs</span>::<span class='ident'>SolidBrush</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
         <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>D2D1_COLOR_F</span>, <span class='ident'>D2D1_BRUSH_PROPERTIES</span>};
@@ -456,9 +456,9 @@
     <span class='doccomment'>/**
         Create a pen into the canvas and add it under the selected `name`.
 
-        Errors:
-        • `Error::System` if the canvas could not create the brush.
-        • `Error::KeyExists` if the a resource with the specified name already exists
+        Errors:  
+        • `Error::System` if the canvas could not create the brush.  
+        • `Error::KeyExists` if the a resource with the specified name already exists  
     */</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>create_pen</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>pen</span>: <span class='kw-2'>&amp;</span><span class='ident'>defs</span>::<span class='ident'>Pen</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
         <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>D2D1_STROKE_STYLE_PROPERTIES</span>, <span class='ident'>D2D1_CAP_STYLE</span>, <span class='ident'>D2D1_LINE_JOIN</span>, <span class='ident'>D2D1_DASH_STYLE</span>};
@@ -530,9 +530,9 @@
     <span class='doccomment'>/**
         Sets the dots per inch (DPI) of the render target.   
 
-        Arguments:
+        Arguments:  
         • `dpix`:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.  
-        • `dpiy`:  A value greater than or equal to zero that specifies the vertical DPI of the render target.
+        • `dpiy`:  A value greater than or equal to zero that specifies the vertical DPI of the render target.  
     */</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_dpi</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>dpix</span>: <span class='ident'>f32</span>, <span class='ident'>fpiy</span>: <span class='ident'>f32</span>) {
         <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>SetDpi</span>(<span class='ident'>dpix</span>, <span class='ident'>fpiy</span>); }
