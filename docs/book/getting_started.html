@@ -141,7 +141,7 @@
     developing the actual application instead of the UI. As of <b>BETA 1</b>, an application can instance as many Ui as it requires.
     <a href="/docs/api/native_windows_gui/struct.Ui.html">See the documentation for more information.</a><br/><br/>
 
-    The Ui object is basically a generic HashMap, therefore the type of its key must be defined when it is declared. The "best" types are either 
+    The Ui object is basically a generic HashMap, therefore the type of its key must be defined when it is declared. The "best" types are either
     <code>&amp;'static str</code> if the ui is entirely static, or <code>usize</code> if new controls will be created at runtime. The hash values
     are UI components (ex: the <b>controls</b>). <br/><br/>
 
@@ -154,30 +154,31 @@
     the example at the end of this page. <br/><br/>
 
     The base of the template system is the <code>nwg_template!</code> macro (<a href="docs/api/native_windows_gui/macro.nwg_template.html">documentation</a>).
-    Its role is to define a function that initialize a Ui components.<br/><br/>
+    Its role is to define a function that initialize the Ui components.<br/><br/>
 
     The first parameter <code>head</code> defines the type of the Ui that will be accepted and the name of the function
     The other parameters (controls, events, resources and values) are described in the following sections.<br/><br/>
 
     If the initialization of the Ui fails, an <code>Error</code> is returned with some information about what went wrong.
-    The template content is ready to be used as soon as the function returns with success. 
+    The template content is ready to be used as soon as the function returns with success.
 
     <h3>Template - Controls</h3>
 
-    A control is a Ui element (ex: a button) that can be added to a Ui.<br/><br/>
+    A control is an item (ex: a button) that can be added to a Ui.<br/><br/>
 
-    The second argument in the <code>nwg_template!</code> macro is <code>controls</code>. Controls accepts a list of <code>(Control_ID, Control_Template)</code> that
-    will be created in the order they were added.<br/><br/>
+    The second argument in the <code>nwg_template!</code> macro is <code>controls</code>. Controls accepts a list of <code>(Control_ID, Control_Template)</code>.<br/><br/>
 
     <code>Control_ID</code> is the unique ID that will identify the control in the Ui. Its type must match the type of the Ui. <br/><br/>
 
     <code>Control_Template</code> is the template of the control. NWG control templates are structs that define controls. By default, the templates do not
     have sane default. In order to ease the template definition, NWG has a macro named <code>nwg_[control_name]</code> (ex: <a href="docs/api/native_windows_gui/macro.nwg_button.html">button</a>)
-    for each built-in control.
+    for each built-in control.<br><br>
 
-    <h3>Template - Events</h3>  
+    The controls are added in the order defined in the template.
 
-    An Event is a function that is called when a control is triggered by something.<br/><br/>
+    <h3>Template - Events</h3>
+
+    An Event is a function that is called when a control is triggered by something (usually user actions).<br/><br/>
 
     The third argument in the <code>nwg_template!</code> macro is <code>events</code>. Events accepts a list of <code>(Control_ID, Event_ID, Event_Type, Callback)</code>.<br/><br/>
 
@@ -189,11 +190,15 @@
 
     <code>Callback</code> Is the function that will be called. The callback function signature is <a href="docs/api/native_windows_gui/type.EventCallback.html">EventCallback</a><br/><br/>
 
+    There are no limits to the number of callback on a control.
+
     <h3>Template - Resources</h3>
 
     A Resource is a special element that can be used by controls, but do not accepts events. (ex: Font &amp; Bitmap)<br/><br/>
 
-    The fourth argument in the <code>nwg_template!</code> macro is <code>resources</code>. Resources accepts a list of <code>(Resource_ID, Resource_Template)</code> that
+    The fourth argument in the <code>nwg_template!</code> macro is <code>resources</code>.<br/><br/>
+
+    Resources accepts a list of <code>(Resource_ID, Resource_Template)</code> that
     will be created in the order they were added.<br/><br/>
 
     Resources creation works like the controls.
@@ -204,7 +209,7 @@
 
     The last argument in the <code>nwg_template!</code> macro is <code>values</code>. Values accepts a list of <code>(Value_ID, ValueObject)</code>.
 
-    Resources creation works like controls and resources with the exception that <code>ValueObject<code> is the object itself and not some kind of template.
+    Resources creation works like controls and resources with the exception that <code>ValueObject</code> is the object itself and not some kind of template.
 
     <h3>Listening for events</h3>
 
