@@ -478,7 +478,7 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Execute the NWG commands waiting in the Ui command queue in the order they w     ere added.
+        Execute the NWG commands waiting in the Ui command queue in the order they were added.
 
         Returns `Ok(())` if everything was executed without Errors  
         Returns `Err(Error)` if an error was encountered while executing the commands.  
