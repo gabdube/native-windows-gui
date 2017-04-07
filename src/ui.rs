@@ -27,7 +27,7 @@ use std::cell::{RefCell, Ref, RefMut};
 use std::rc::Rc;
 
 use low::message_handler::MessageHandler;
-use low::defs::{PackUserValueArgs, PackControlArgs, PackResourceArgs, UnpackArgs, BindArgs, UnbindArgs};
+use low::defs::{PackUserValueArgs, PackControlArgs, PackResourceArgs, UnpackArgs, BindArgs, UnbindArgs, TriggerArgs};
 use controls::{ControlT, Control, AnyHandle};
 use resources::{ResourceT, Resource};
 use events::{Event, EventCallback, EventArgs};
@@ -343,7 +343,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
             let events_collection = self.control_events.get_mut(&id);
             if events_collection.is_none() { return Some(Error::ControlRequired); }
 
-            // The the callback list for the requested event
+            // Get the callback list for the requested event
             let callbacks = events_collection.unwrap().get_mut(&event);
             if callbacks.is_none() { return Some(Error::EventNotSupported(event)); }
 
@@ -491,7 +491,7 @@ impl<ID:Hash+Clone> Ui<ID> {
 
     /**
         Add an user value to the Ui.  
-        Asynchronous, this only registers the command in the ui message queue.  
+        Delayed, this only registers the command in the ui message queue.  
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.  
 
         Commit returns  
@@ -507,7 +507,7 @@ impl<ID:Hash+Clone> Ui<ID> {
 
     /**
         Add a control to the Ui.  
-        Asynchronous, this only registers the command in the ui message queue.  
+        Delayed, this only registers the command in the ui message queue.  
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         Commit returns  
@@ -524,7 +524,7 @@ impl<ID:Hash+Clone> Ui<ID> {
 
     /**
         Add a resource to the Ui.  
-        Asynchronous, this only registers the command in the ui message queue.  
+        Delayed, this only registers the command in the ui message queue.  
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         Commit returns  
@@ -541,10 +541,10 @@ impl<ID:Hash+Clone> Ui<ID> {
 
      /**
         Remove a element from the ui using its ID. The ID can identify a control, a resource or a user value.  
-        Asynchronous, this only registers the command in the ui message queue.   
+        Delayed, this only registers the command in the ui message queue.   
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        Commit returns:  
+        Commit may returns:  
           • `Error::ControlInUse` if the control callbacks are being executed  
           • `Error::ControlInUse` if the object is currently borrowed (using ui.get or ui.get_mut)  
           • `Error::KeyNotFound` if the id do not exists in the Ui  
@@ -566,7 +566,7 @@ impl<ID:Hash+Clone> Ui<ID> {
         Params:  
           • id: The id that identify the element in the ui  
 
-        Commit returns:  
+        Commit may returns:  
           • `Error::KeyNotFound` will be returned if the key was not found in the Ui  
           • `Error::BadType` will be returned if the key exists, but the type do not match  
           • `Error::BorrowError` will be returned if the element was already borrowed mutably  
@@ -611,14 +611,14 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Return an mutable reference to element identified by `id` in the Ui.
+        Return an mutable reference to element identified by `id` in the Ui.  
         It is required to give a type `T` to this function as it is needed to cast the underlying value.
         Ex: `ui.get_mut::<u32>(100)`
 
         Params:  
           • id: The id that identify the element in the ui  
 
-        Commit returns:  
+        Commit may returns:  
           • `Error::KeyNotFound` will be returned if the key was not found in the Ui  
           • `Error::BadType` will be returned if the key exists, but the type do not match  
           • `Error::BorrowError` will be returned if the element was already borrowed mutably  
@@ -663,8 +663,8 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Bind/Add a callback to a control event. 
-        Asynchronous, this only registers the command in the ui message queue. 
+        Bind/Add a callback to a control event.  
+        Delayed, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         Params:  
@@ -673,7 +673,7 @@ impl<ID:Hash+Clone> Ui<ID> {
           • event: Type of event to target  
           • cb: The callback  
 
-        Commit returns:  
+        Commit may returns:  
           • `Error::EventNotSupported` if the event is not supported on the callback  
           • `Error::ControlRequired` if the id do not indentify a control  
           • `Error::KeyNotFound` if the id is not in the Ui.  
@@ -692,11 +692,16 @@ impl<ID:Hash+Clone> Ui<ID> {
     }
 
     /**
-        Unbind/Remove a callback to a control event.
-        Asynchronous, this only registers the command in the ui message queue. 
+        Unbind/Remove a callback to a control event.  
+        Delayed, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        Commit returns:  
+        Params:  
+          • id: The id that identify the element in the ui  
+          • cb_id: The id that identify the callback  
+          • event: The type of the event to unbind  
+
+        Commit may returns:  
           • `Error::EventNotSupported` if the event is not supported on the callback  
           • `Error::ControlRequired` if the id do not indentify a control  
           • `Error::KeyNotFound` if the id is not in the Ui.  
@@ -710,6 +715,30 @@ impl<ID:Hash+Clone> Ui<ID> {
         let (inner_id, cb_inner_id) = (UiInner::hash_id(id), UiInner::hash_id(cb_id));
         let data = UnbindArgs{ id: inner_id, cb_id: cb_inner_id, event: event};
         inner.messages.post(self.inner, NWG_UNBIND, Box::new(data) as Box<Any> );
+    }
+
+    /**
+        Trigger the callbacks bound to a control event.  
+        Delayed, this only registers the command in the ui message queue. 
+        Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
+
+        Params:  
+          • id: The id that identify the control in the ui  
+          • event: The type of the event to trigger  
+          • event_arg: The arguments to send to the callbacks  
+
+        Commit may returns:  
+          • `Error::EventNotSupported` if the event is not supported on the callback  
+          • `Error::ControlRequired` if the id do not indentify a control  
+          • `Error::KeyNotFound` if the id is not in the Ui.   
+    */
+    pub fn trigger(&self, id: &ID, event: Event, event_arg: EventArgs) {
+        use low::defs::{NWG_TRIGGER};
+        
+        let inner = unsafe{ &mut *self.inner };
+        let inner_id = UiInner::hash_id(id);
+        let data = TriggerArgs{ id: inner_id, event: event, args: event_arg};
+        inner.messages.post(self.inner, NWG_TRIGGER, Box::new(data) as Box<Any> );
     }
 
     /**

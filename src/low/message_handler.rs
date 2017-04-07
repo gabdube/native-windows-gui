@@ -142,8 +142,8 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
 #[allow(unused_variables)]
 unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use user32::{DefWindowProcW};
-    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, NWG_UNPACK, NWG_BIND, NWG_UNBIND, NWG_PACK_RESOURCE, COMMIT_SUCCESS, COMMIT_FAILED};
-    use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs, UnbindArgs, PackResourceArgs};
+    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, NWG_UNPACK, NWG_BIND, NWG_UNBIND, NWG_TRIGGER, NWG_PACK_RESOURCE, COMMIT_SUCCESS, COMMIT_FAILED};
+    use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs, UnbindArgs, PackResourceArgs, TriggerArgs};
 
     let ui: &mut UiInner<ID> = mem::transmute(w);
     let args: *mut *mut Any = mem::transmute::<LPARAM, *mut *mut Any>(l);
@@ -194,6 +194,15 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
             let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<UnbindArgs>() {
                 (true, ui.unbind(*params))
+            } else {
+                panic!("Could not downcast command NWG_UNBIND args into a UnbindArgs struct.");
+            }
+        },
+        NWG_TRIGGER => {
+            let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
+            if let Ok(params) = args.downcast::<TriggerArgs>() {
+                let TriggerArgs{ id, event, args } = *params;
+                (true, ui.trigger(id, event, args))
             } else {
                 panic!("Could not downcast command NWG_UNBIND args into a UnbindArgs struct.");
             }

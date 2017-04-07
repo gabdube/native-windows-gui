@@ -28,7 +28,7 @@ use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, MENUIT
 use std::ops::{Deref, DerefMut};
 
 
-use events::{Event, EventCallback};
+use events::{Event, EventCallback, EventArgs};
 use controls::ControlT;
 use resources::ResourceT;
 
@@ -41,7 +41,8 @@ pub const NWG_UNPACK:            UINT = 0x402;  /// Message sent when removing a
 pub const NWG_BIND:              UINT = 0x403;  /// Message sent when binding an event to a control
 pub const NWG_UNBIND:            UINT = 0x404;  /// Message sent when unbinding an event from a control
 pub const NWG_PACK_RESOURCE:     UINT = 0x405;  /// Message sent when packing a resource
-pub const NWG_CUSTOM_MAX:        UINT = 0x406;  /// Maximum custom event value
+pub const NWG_TRIGGER:           UINT = 0x406;  /// Message sent when triggering an event
+pub const NWG_CUSTOM_MAX:        UINT = 0x407;  /// Maximum custom event value
 
 // Value returned by a window proc if the message execution failed/succeeded
 
@@ -322,4 +323,10 @@ pub struct UnbindArgs {
     pub id: u64,
     pub cb_id: u64,
     pub event: Event
+}
+
+pub struct TriggerArgs {
+    pub id: u64,
+    pub event: Event,
+    pub args: EventArgs
 }

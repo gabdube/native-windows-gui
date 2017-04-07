@@ -333,6 +333,43 @@ fn test_ui_unbind() {
     dispatch_events();
 }
 
+
+#[test]
+fn test_user_trigger() {
+    let ui = setup_ui();
+    let mut flag_set: bool = false;
+    let x = &mut flag_set as *mut bool;
+    
+    ui.pack_value(&1001, 5u32);
+    ui.pack_control(&1000, window());
+    ui.bind(&1000, &5000, Event::MouseDown, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
+    ui.bind(&1000, &5000, Event::MouseUp, move |ui, _, _, _|{ 
+        ui.trigger(&1000, Event::MouseDown, EventArgs::None);
+        let r = ui.commit().expect("Commit was not successful");;
+    });
+   
+    ui.trigger(&1000, Event::MouseDown, EventArgs::None);
+    ui.commit().expect("Commit was not successful");
+
+    ui.trigger(&1030, Event::MouseDown, EventArgs::None);
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
+
+    ui.trigger(&1001, Event::MouseDown, EventArgs::None);
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::ControlRequired, "Commit was successful");
+
+    ui.trigger(&1000, Event::SelectionChanged, EventArgs::None);
+    let r = ui.commit();
+    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::SelectionChanged), "Commit was successful");
+
+    ui.trigger(&1000, Event::MouseUp, EventArgs::None);
+    let r = ui.commit();
+
+    assert!(flag_set, "Flag was not set");
+}
+
+
 #[test]
 fn test_window_control_user_close() {
     let ui = setup_ui();
