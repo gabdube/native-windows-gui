@@ -30,6 +30,7 @@ pub mod listbox;
 pub mod combobox;
 pub mod groupbox;
 pub mod progress_bar;
+pub mod datepicker;
 pub mod file_dialog;
 pub mod timer;
 pub mod canvas;
@@ -54,6 +55,7 @@ pub use controls::progress_bar::{ProgressBarT, ProgressBar};
 pub use controls::file_dialog::{FileDialogT, FileDialog};
 pub use controls::timer::{TimerT, Timer};
 pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
+pub use controls::datepicker::{DatePickerT, DatePicker};
 use ui::Ui;
 use events::Event;
 use error::Error;
@@ -93,6 +95,7 @@ pub enum ControlType {
     ComboBox,
     GroupBox,
     NumericInput,
+    DatePicker,
     FileDialog,
     Canvas,
     Undefined  // Control is not a common control

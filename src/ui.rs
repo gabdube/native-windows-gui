@@ -72,8 +72,10 @@ impl<ID: Hash+Clone> UiInner<ID> {
             Err(e) => { return Err(e); }
         };
 
-        unsafe{ enable_visual_styles(); }
-        unsafe { enable_com();}
+        unsafe{ 
+            enable_visual_styles(); 
+            enable_com();
+        }
 
         Ok(UiInner{
             messages: messages,

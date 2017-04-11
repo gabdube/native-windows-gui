@@ -17,7 +17,7 @@ Here are true facts about NWG:
 * If you don't like dependencies, NWG might be for you. NWG only requires some `winapi-rs` crates and do not depends on external "executable" code 
 * If you want a canvas to draw pretty things, NWG has a very powerful (and light) canvas build over Direct2D
 * If you don't like to manage widgets (aka controls, aka stuff the user clicks on), NWG is for you. The UI manages the controls and the resources for you.
-* If you like documentation, NWG has one ( and I think it's pretty good ). Oh and it's API is avaible online too: https://gabdube.github.io/native-windows-gui/ 
+* If you like documentation, NWG has one ( and I think it's pretty good ). Oh and its API is avaible online too: https://gabdube.github.io/native-windows-gui/ 
 * If you want a light and simple API, NWG might be for you (ok, I'm totally biased on this one, external opinion required)
 * -------
 * If you want portability across system, NWG is not for you. Maybe it will work with WINE though...

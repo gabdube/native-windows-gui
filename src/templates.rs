@@ -634,6 +634,44 @@ macro_rules! nwg_progressbar {
 }
 
 /**
+    Sane defaults for the DatePicker control. Requires a parent.
+
+    Defaults:  
+    • value: Todays date
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • font: `None`  
+    • align: `HTextAlign::Left`  
+    • format: The system locale format in a short format (ex: 2017-01-01)  
+    • optional: `false`  
+
+    Usage:  
+    `nwg_DatePicker!(parent="MyParent";)`  
+    `nwg_DatePicker!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_DatePicker!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
+#[macro_export]
+macro_rules! nwg_DatePicker {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::DatePickerT{ 
+            value: "",
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false, 
+            align: $crate::constants::HTextAlign::Left,
+            parent: $p, font: None,
+            format: "", optional: false
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }}
+}
+
+/**
     Sane defaults for the FileDialog control.
 
     Defaults:  
