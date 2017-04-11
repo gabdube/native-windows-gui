@@ -1,5 +1,7 @@
 # Native Windows GUI
 
+<b>NWG is currently being rewritten. Please see the `v2` branch for the lastest api and features</b>
+
 <b>Native Windows GUI (NWG)</b> is a thin GUI toolkit built over the <b>Microsoft Windows WINAPI</b> for rust. The current version is
 <b>0.1.0 ALPHA</b>. The library is not production ready, but it has enough features implemented in order 
 to create simple GUI applications.
