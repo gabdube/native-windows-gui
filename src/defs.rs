@@ -20,6 +20,8 @@
 
 use winapi::{c_int, DWORD, CW_USEDEFAULT};
 
+pub use winapi::SYSTEMTIME;
+
 /**
     Checkbox checkstate
 */
@@ -100,6 +102,16 @@ pub enum MessageChoice {
     Retry,
     TryAgain,
     Yes
+}
+
+/**
+    A date struct that can be passed to a date time picker control.
+*/
+#[derive(Clone, PartialEq, Debug)]
+pub struct PickerDate {
+    pub year: u16,
+    pub month: u16,
+    pub day: u16
 }
 
 /**

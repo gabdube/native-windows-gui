@@ -1,5 +1,6 @@
 /*!
-    Date time picker control definition
+    Date picker control definition.  
+    Note: While the control supports date AND time operation, this control assumes only the date part will be used.
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -19,15 +20,16 @@
 */
 use std::hash::Hash;
 use std::any::TypeId;
+use std::mem;
 
-use winapi::{HWND, HFONT};
+use winapi::{HWND, HFONT, DATETIMEPICKERINFO, SYSTEMTIME};
 use user32::SendMessageW;
 
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::Event;
-use defs::HTextAlign;
+use defs::{HTextAlign, CheckState, PickerDate};
 use low::other_helper::to_utf16;
 
 /**
@@ -38,12 +40,6 @@ use low::other_helper::to_utf16;
     "dd" 	The two-digit day. Single-digit day values are preceded by a zero.  
     "ddd" 	The three-character weekday abbreviation.  
     "dddd" 	The full weekday name.  
-    "h" 	The one- or two-digit hour in 12-hour format.  
-    "hh" 	The two-digit hour in 12-hour format. Single-digit values are preceded by a zero.  
-    "H" 	The one- or two-digit hour in 24-hour format.  
-    "HH" 	The two-digit hour in 24-hour format. Single-digit values are preceded by a zero.  
-    "m" 	The one- or two-digit minute.  
-    "mm" 	The two-digit minute. Single-digit values are preceded by a zero.  
     "M" 	The one- or two-digit month number.  
     "MM" 	The two-digit month number. Single-digit values are preceded by a zero.  
     "MMM" 	The three-character month abbreviation.  
@@ -54,22 +50,22 @@ use low::other_helper::to_utf16;
     "yyyy" 	The full year (that is, 1996 would be displayed as "1996").   
 
     Furthermore, any string enclosed in `'` can be used in the format to display text.  
-    For example, to display the current date with the format `'Today is: 04:22:31 Tuesday Mar 23, 1996`, the format string is `'Today is: 'hh':'m':'s dddd MMM dd', 'yyyy`. 
+    For example, to display the current date with the format `'Today is: Tuesday Mar 23, 1996`, the format string is `'Today is: 'dddd MMM dd', 'yyyy`. 
 
     Members:  
-    • `value`: The value of the dtp, must match `format`. If left empty and `optional` is false, use the current date.
+    • `value`: The value of the dtp, must match `format`.
     • `position`: The start position of the dtp  
     • `size`: The start size of the dtp  
     • `visible`: If the dtp should be visible to the user   
     • `disabled`: If the user can or can't edit the value of the dtp  
     • `parent`: The dtp parent  
     • `font`: The dtp font. If None, use the system default  
-    • `format`: The dtp format string. See the docs above for the available formats. If left empty, use the system locale date format.  
+    • `format`: The dtp format string. See the docs above for the available formats. If left empty, use the default system locale date format.  
     • `optional`: If the dtp must contain a value (or not)  
 */
 #[derive(Clone)]
 pub struct DatePickerT<S: Clone+Into<String>, ID: Hash+Clone> {
-    pub value: S,
+    pub value: Option<PickerDate>,
     pub position: (i32, i32),
     pub size: (u32, u32),
     pub visible: bool,
@@ -141,8 +137,12 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for DatePickerT<S, ID> 
     }
 }
 
+/**
+    A simple date picker control. Do not handle timezone. It is recomended to use a specialized date time library to
+    use with this control.
+*/
 pub struct DatePicker {
-    handle: HWND
+    handle: HWND,
 }
 
 impl DatePicker {
@@ -152,12 +152,71 @@ impl DatePicker {
         unsafe{ set_dtp_format(self.handle, format); }
     }
 
+    /**
+        Return the check state of the checkbox of the control (if optional was set to true).  
+        If the date time picker is not optional, return false.
+    */
+    pub fn get_checkstate(&self) -> CheckState {
+        use low::defs::STATE_SYSTEM_CHECKED;
+        let info = unsafe{ get_dtp_info(self.handle) };
+
+        match info.stateCheck {
+            STATE_SYSTEM_CHECKED => CheckState::Checked,
+            _ => CheckState::Unchecked
+        }
+    }
+
+    /**
+        Return the time set in the control in a `PickerDate` structure.  
+        Return None if `optional` was set and the checkbox is not checked.  
+        Note: use `get_date_string` to get the text value of the control.
+    */
+    pub fn get_date(&self) -> Option<PickerDate> {
+        use winapi::{DTM_GETSYSTEMTIME, GDT_VALID};
+        let mut syst: SYSTEMTIME = unsafe{ mem::uninitialized() };
+
+        let r = unsafe{ SendMessageW(self.handle, DTM_GETSYSTEMTIME, 0, mem::transmute(&mut syst)) };
+        match r {
+            GDT_VALID => Some(PickerDate{
+                year: syst.wYear,
+                month: syst.wMonth,
+                day: syst.wDay
+            }),
+            _ => None
+        }
+    }
+
+    /**
+        Set the time set in the control in a `PickerDate` structure.  
+        If `None` is passed, clears the checkbox.
+    */
+    pub fn set_date(&self, date: &Option<PickerDate>) {
+        use winapi::{DTM_SETSYSTEMTIME, GDT_VALID, GDT_NONE, WPARAM};
+        unsafe{
+            match date {
+                &Some(ref date) => {
+                    let syst: SYSTEMTIME = SYSTEMTIME{ 
+                        wYear: date.year, 
+                        wMonth: date.month, 
+                        wDay: date.day, 
+                        wDayOfWeek:0, wHour:0, wMinute:0, wSecond:0, wMilliseconds: 0 
+                    };
+                    SendMessageW(self.handle, DTM_SETSYSTEMTIME, GDT_VALID as WPARAM, mem::transmute(&syst));
+                },
+                &None => { 
+                    SendMessageW(self.handle, DTM_SETSYSTEMTIME, GDT_NONE as WPARAM, 0); 
+                }
+            };
+        }
+    }
+
     /// Close the calendar popup if it is open  
     pub fn close_calendar(&self) {
-        use winapi::{DTM_CLOSEMONTHCAL, LPARAM};
+        use winapi::{DTM_CLOSEMONTHCAL};
         unsafe{ SendMessageW(self.handle, DTM_CLOSEMONTHCAL, 0, 0); }
     }
 
+    pub fn get_date_string(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
     pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
     pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
@@ -192,4 +251,14 @@ unsafe fn set_dtp_format<S: Clone+Into<String>>(handle: HWND, format: &S) {
     use winapi::{DTM_SETFORMATW, LPARAM};
     let format = to_utf16(format.clone().into().as_str());
     SendMessageW(handle, DTM_SETFORMATW, 0, format.as_ptr() as LPARAM);
+}
+
+#[inline(always)]
+unsafe fn get_dtp_info(handle: HWND) -> DATETIMEPICKERINFO {
+    use winapi::{DTM_GETDATETIMEPICKERINFO, DWORD};
+    let mut dtp_info: DATETIMEPICKERINFO = mem::uninitialized();
+    dtp_info.cbSize = mem::size_of::<DATETIMEPICKERINFO>() as DWORD;
+    SendMessageW(handle, DTM_GETDATETIMEPICKERINFO, 0, mem::transmute(&mut dtp_info));
+
+    dtp_info
 }

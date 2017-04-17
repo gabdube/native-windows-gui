@@ -653,7 +653,7 @@ macro_rules! nwg_progressbar {
     `nwg_DatePicker!(parent="MyParent"; \* Any combinations of the template properties*\)`    
 */
 #[macro_export]
-macro_rules! nwg_DatePicker {
+macro_rules! nwg_datepicker {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::DatePickerT{ 

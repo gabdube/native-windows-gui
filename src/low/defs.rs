@@ -158,6 +158,9 @@ pub const IDYES: i32 = 6;
 
 pub const SFGAO_FOLDER: u32 = 0x20000000;
 
+pub const STATE_SYSTEM_CHECKED: u32 = 0x10;
+pub const STATE_SYSTEM_INVISIBLE: u32 = 0x8000;
+
 // System structs
 #[repr(C)]
 #[allow(non_snake_case)]
