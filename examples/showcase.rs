@@ -39,7 +39,7 @@ nwg_template!(
         ("RandomStuffTextBox", nwg_textbox!(parent="MainWindow"; position=(10, 185); size=(200, 60); scrollbars=(false, true))),
         ("InstallCatLabel", nwg_label!(parent="MainWindow"; text="Installing cat.exe ..."; position=(230, 160); size=(180, 25); font=Some("Font1") )),
         ("CatProgress", nwg_progressbar!(parent="MainWindow"; position=(230, 190); size=(240, 25); range=(0, 100); value=85)),
-        ("DatePicker", nwg_datepicker!(parent="MainWindow"; position=(230, 220); size=(240, 25); font=Some("Font1"); optional=true))
+        ("DatePicker", nwg_datepicker!(parent="MainWindow"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(230, 220); size=(240, 25); font=Some("Font1")))
     ];
     events: [
         ("RandomStuffTextBox", "AllSystemEvents", Event::Raw, |_,_,_,args| {
@@ -62,10 +62,6 @@ nwg_template!(
         }),
 
         ("TimerButton", "Start Timer", Event::Click, |app,_,_,_|{
-            let x = nwg_get!(app; ("DatePicker", nwg::DatePicker));
-            x.set_date(&Some(PickerDate{ year: 2018, month: 12, day: 5 }));
-            println!("{:?}", x.get_date());
-
             let (mut timer, btn) = nwg_get_mut!(app; [
                 ("Timer", nwg::Timer),
                 ("TimerButton", nwg::Button)

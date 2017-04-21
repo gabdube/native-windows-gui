@@ -657,12 +657,13 @@ macro_rules! nwg_datepicker {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::DatePickerT{ 
-            value: "",
+            value: None,
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, 
             align: $crate::constants::HTextAlign::Left,
             parent: $p, font: None,
-            format: "", optional: false
+            format: "", optional: false,
+            range: (None, None)
         };
         
         $( t.$i = $v; );*

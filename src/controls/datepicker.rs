@@ -1,6 +1,5 @@
 /*!
-    Date picker control definition.  
-    Note: While the control supports date AND time operation, this control assumes only the date part will be used.
+    Date picker control definition.
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -53,14 +52,15 @@ use low::other_helper::to_utf16;
     For example, to display the current date with the format `'Today is: Tuesday Mar 23, 1996`, the format string is `'Today is: 'dddd MMM dd', 'yyyy`. 
 
     Members:  
-    • `value`: The value of the dtp, must match `format`.
+    • `value`: The value of the dtp. If None, either use the current system time or show nothing (if optional is true)
     • `position`: The start position of the dtp  
     • `size`: The start size of the dtp  
     • `visible`: If the dtp should be visible to the user   
     • `disabled`: If the user can or can't edit the value of the dtp  
     • `parent`: The dtp parent  
     • `font`: The dtp font. If None, use the system default  
-    • `format`: The dtp format string. See the docs above for the available formats. If left empty, use the default system locale date format.  
+    • `align`: The alignment of the dtp control,
+    • `format`: The dtp format string. See the docs just above for the available formats. If left empty, use the default system locale date format.  
     • `optional`: If the dtp must contain a value (or not)  
 */
 #[derive(Clone)]
@@ -74,7 +74,8 @@ pub struct DatePickerT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub font: Option<ID>,
     pub align: HTextAlign,
     pub format: S,
-    pub optional: bool
+    pub optional: bool,
+    pub range: (Option<PickerDate>, Option<PickerDate>)
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for DatePickerT<S, ID> {
@@ -128,9 +129,12 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for DatePickerT<S, ID> 
             Ok(h) => {
                 unsafe{ 
                     set_window_font(h, font_handle, true); 
-                    set_dtp_format(h, &self.format);
                 }
-                Ok( Box::new(DatePicker{handle: h}) )
+                let dtp = DatePicker{handle: h};
+                dtp.set_format(&self.format);
+                dtp.set_value(&self.value);
+                dtp.set_align(&self.align);
+                Ok( Box::new(dtp) )
             },
             Err(e) => Err(Error::System(e))
         }
@@ -149,7 +153,11 @@ impl DatePicker {
 
     /// Set the format of the date time picker. Use the format specified in the DTP template.
     pub fn set_format<S: Clone+Into<String>>(&self, format: &S) {
-        unsafe{ set_dtp_format(self.handle, format); }
+        use winapi::{DTM_SETFORMATW, LPARAM};
+        unsafe{
+            let format = to_utf16(format.clone().into().as_str());
+            SendMessageW(self.handle, DTM_SETFORMATW, 0, format.as_ptr() as LPARAM);
+        }
     }
 
     /**
@@ -171,7 +179,7 @@ impl DatePicker {
         Return None if `optional` was set and the checkbox is not checked.  
         Note: use `get_date_string` to get the text value of the control.
     */
-    pub fn get_date(&self) -> Option<PickerDate> {
+    pub fn get_value(&self) -> Option<PickerDate> {
         use winapi::{DTM_GETSYSTEMTIME, GDT_VALID};
         let mut syst: SYSTEMTIME = unsafe{ mem::uninitialized() };
 
@@ -190,7 +198,7 @@ impl DatePicker {
         Set the time set in the control in a `PickerDate` structure.  
         If `None` is passed, clears the checkbox.
     */
-    pub fn set_date(&self, date: &Option<PickerDate>) {
+    pub fn set_value(&self, date: &Option<PickerDate>) {
         use winapi::{DTM_SETSYSTEMTIME, GDT_VALID, GDT_NONE, WPARAM};
         unsafe{
             match date {
@@ -210,13 +218,50 @@ impl DatePicker {
         }
     }
 
+    /**
+        Get the alignment of the calendar popup. 
+        For some reason, it is impossible to retrive the TextEdit handle, therefore getting its alignment is impossible.
+    */
+    pub fn get_align(&self) -> HTextAlign {
+        use low::window_helper::get_window_long;
+        use winapi::{GWL_STYLE, DTS_RIGHTALIGN};
+
+        let style = get_window_long(self.handle, GWL_STYLE) as u32;
+
+        if (style & DTS_RIGHTALIGN) == DTS_RIGHTALIGN {
+            HTextAlign::Right
+        } else {
+            HTextAlign::Left
+        }
+    }
+
+    /**
+       Change the alignment of the calendar popup. 
+       For some reason, it is impossible to retrive the TextEdit handle, therefore setting its alignment is impossible.
+    */
+    pub fn set_align(&self, align: &HTextAlign) {
+         use low::window_helper::{set_window_long, get_window_long};
+         use winapi::{GWL_STYLE, DTS_RIGHTALIGN};
+
+         // Set the calendar dropdown align
+         let mut old_style = get_window_long(self.handle, GWL_STYLE) as usize;
+         let right_align = DTS_RIGHTALIGN as usize;
+         old_style = (old_style | right_align) ^ right_align ;
+
+         if *align == HTextAlign::Right {
+            set_window_long(self.handle, GWL_STYLE, old_style|right_align);
+         } else {
+            set_window_long(self.handle, GWL_STYLE, old_style);
+         }
+    }
+
     /// Close the calendar popup if it is open  
     pub fn close_calendar(&self) {
         use winapi::{DTM_CLOSEMONTHCAL};
         unsafe{ SendMessageW(self.handle, DTM_CLOSEMONTHCAL, 0, 0); }
     }
 
-    pub fn get_date_string(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
+    pub fn get_value_string(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
     pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
     pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
@@ -245,13 +290,6 @@ impl Control for DatePicker {
 }
 
 // Private functions
-
-#[inline(always)]
-unsafe fn set_dtp_format<S: Clone+Into<String>>(handle: HWND, format: &S) {
-    use winapi::{DTM_SETFORMATW, LPARAM};
-    let format = to_utf16(format.clone().into().as_str());
-    SendMessageW(handle, DTM_SETFORMATW, 0, format.as_ptr() as LPARAM);
-}
 
 #[inline(always)]
 unsafe fn get_dtp_info(handle: HWND) -> DATETIMEPICKERINFO {
