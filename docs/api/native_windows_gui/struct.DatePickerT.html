@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `DatePickerT` struct in crate `native_windows_gui`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, DatePickerT">
+
+    <title>native_windows_gui::DatePickerT - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'DatePickerT', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>native_windows_gui</a>::<wbr><a class="struct" href=''>DatePickerT</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/native_windows_gui/controls/datepicker.rs.html#67-79' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct DatePickerT&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;, ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; {
+    pub value: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../native_windows_gui/constants/struct.PickerDate.html" title="struct native_windows_gui::constants::PickerDate">PickerDate</a>&gt;,
+    pub position: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a>,
+    pub size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a>,
+    pub visible: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>,
+    pub disabled: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>,
+    pub parent: ID,
+    pub font: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;ID&gt;,
+    pub align: <a class="enum" href="../native_windows_gui/constants/enum.HTextAlign.html" title="enum native_windows_gui::constants::HTextAlign">HTextAlign</a>,
+    pub format: S,
+    pub optional: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>,
+    pub range: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../native_windows_gui/constants/struct.PickerDate.html" title="struct native_windows_gui::constants::PickerDate">PickerDate</a>&gt;, <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../native_windows_gui/constants/struct.PickerDate.html" title="struct native_windows_gui::constants::PickerDate">PickerDate</a>&gt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a>,
+}</pre><div class='docblock'><p>A template that creates a standard date picker (dtp)</p>
+<p>About the format string:<br />
+&quot;d&quot;     The one- or two-digit day.<br />
+&quot;dd&quot;    The two-digit day. Single-digit day values are preceded by a zero.<br />
+&quot;ddd&quot;   The three-character weekday abbreviation.<br />
+&quot;dddd&quot;  The full weekday name.<br />
+&quot;M&quot;     The one- or two-digit month number.<br />
+&quot;MM&quot;    The two-digit month number. Single-digit values are preceded by a zero.<br />
+&quot;MMM&quot;   The three-character month abbreviation.<br />
+&quot;MMMM&quot;  The full month name.<br />
+&quot;t&quot;     The one-letter AM/PM abbreviation (that is, AM is displayed as &quot;A&quot;).<br />
+&quot;tt&quot;    The two-letter AM/PM abbreviation (that is, AM is displayed as &quot;AM&quot;).<br />
+&quot;yy&quot;    The last two digits of the year (that is, 1996 would be displayed as &quot;96&quot;).<br />
+&quot;yyyy&quot;  The full year (that is, 1996 would be displayed as &quot;1996&quot;).</p>
+<p>Furthermore, any string enclosed in <code>'</code> can be used in the format to display text.<br />
+For example, to display the current date with the format <code>'Today is: Tuesday Mar 23, 1996</code>, the format string is <code>'Today is: 'dddd MMM dd', 'yyyy</code>.</p>
+<p>Members:<br />
+• <code>value</code>: The value of the dtp. If None, either use the current system time or show nothing (if optional is true)
+• <code>position</code>: The start position of the dtp<br />
+• <code>size</code>: The start size of the dtp<br />
+• <code>visible</code>: If the dtp should be visible to the user<br />
+• <code>disabled</code>: If the user can or can't edit the value of the dtp<br />
+• <code>parent</code>: The dtp parent<br />
+• <code>font</code>: The dtp font. If None, use the system default<br />
+• <code>align</code>: The alignment of the dtp control,
+• <code>format</code>: The dtp format string. See the docs just above for the available formats. If left empty, use the default system locale date format.<br />
+• <code>optional</code>: If the dtp must contain a value (or not)  </p>
+</div><h2 class='fields'>Fields</h2><span id='structfield.value' class="structfield">
+                           <span id='value.v' class='invisible'>
+                           <code>value: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../native_windows_gui/constants/struct.PickerDate.html" title="struct native_windows_gui::constants::PickerDate">PickerDate</a>&gt;</code>
+                           </span></span><span id='structfield.position' class="structfield">
+                           <span id='position.v' class='invisible'>
+                           <code>position: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a></code>
+                           </span></span><span id='structfield.size' class="structfield">
+                           <span id='size.v' class='invisible'>
+                           <code>size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a></code>
+                           </span></span><span id='structfield.visible' class="structfield">
+                           <span id='visible.v' class='invisible'>
+                           <code>visible: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code>
+                           </span></span><span id='structfield.disabled' class="structfield">
+                           <span id='disabled.v' class='invisible'>
+                           <code>disabled: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code>
+                           </span></span><span id='structfield.parent' class="structfield">
+                           <span id='parent.v' class='invisible'>
+                           <code>parent: ID</code>
+                           </span></span><span id='structfield.font' class="structfield">
+                           <span id='font.v' class='invisible'>
+                           <code>font: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;ID&gt;</code>
+                           </span></span><span id='structfield.align' class="structfield">
+                           <span id='align.v' class='invisible'>
+                           <code>align: <a class="enum" href="../native_windows_gui/constants/enum.HTextAlign.html" title="enum native_windows_gui::constants::HTextAlign">HTextAlign</a></code>
+                           </span></span><span id='structfield.format' class="structfield">
+                           <span id='format.v' class='invisible'>
+                           <code>format: S</code>
+                           </span></span><span id='structfield.optional' class="structfield">
+                           <span id='optional.v' class='invisible'>
+                           <code>optional: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code>
+                           </span></span><span id='structfield.range' class="structfield">
+                           <span id='range.v' class='invisible'>
+                           <code>range: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../native_windows_gui/constants/struct.PickerDate.html" title="struct native_windows_gui::constants::PickerDate">PickerDate</a>&gt;, <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../native_windows_gui/constants/struct.PickerDate.html" title="struct native_windows_gui::constants::PickerDate">PickerDate</a>&gt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a></code>
+                           </span></span><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;, ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="../native_windows_gui/struct.DatePickerT.html" title="struct native_windows_gui::DatePickerT">DatePickerT</a>&lt;S, ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/datepicker.rs.html#66' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class="method"><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class="struct" href="../native_windows_gui/struct.DatePickerT.html" title="struct native_windows_gui::DatePickerT">DatePickerT</a>&lt;S, ID&gt;</code></span></h4>
+<div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
+</div><h4 id='method.clone_from' class="method"><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;, ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; <a class="trait" href="../native_windows_gui/custom/trait.ControlT.html" title="trait native_windows_gui::custom::ControlT">ControlT</a>&lt;ID&gt; for <a class="struct" href="../native_windows_gui/struct.DatePickerT.html" title="struct native_windows_gui::DatePickerT">DatePickerT</a>&lt;S, ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/datepicker.rs.html#81-142' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.type_id' class="method"><span id='type_id.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#tymethod.type_id' class='fnname'>type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></code></span></h4>
+<div class='docblock'><p>Should return the TypeId of the generated control. For example a <code>WindowT</code> struct returns the TypeId of a <code>Window</code> struct.</p>
+</div><h4 id='method.events' class="method"><span id='events.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../native_windows_gui/enum.Event.html" title="enum native_windows_gui::Event">Event</a>&gt;</code></span></h4>
+<div class='docblock'><p>Should return the events supported by the control.</p>
+</div><h4 id='method.build' class="method"><span id='build.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#tymethod.build' class='fnname'>build</a>(&amp;self, ui: &amp;<a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;<a class="trait" href="../native_windows_gui/custom/trait.Control.html" title="trait native_windows_gui::custom::Control">Control</a>&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
+<div class='docblock'><p>Should instance the control and return it as a Box. If an error is raised, it will be returned by <code>ui.commit</code>.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "native_windows_gui";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
