@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -348,11 +348,11 @@
 <span id="303">303</span>
 <span id="304">304</span>
 <span id="305">305</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     Low level events functions
 */</span>
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -369,290 +369,290 @@
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>TypeId</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">TypeId</span>;
 
-<span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>HWND</span>, <span class='ident'>HMENU</span>, <span class='ident'>UINT</span>, <span class='ident'>WPARAM</span>, <span class='ident'>LPARAM</span>, <span class='ident'>UINT_PTR</span>, <span class='ident'>DWORD_PTR</span>, <span class='ident'>LRESULT</span>, <span class='ident'>DWORD</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HWND</span>, <span class="ident">HMENU</span>, <span class="ident">UINT</span>, <span class="ident">WPARAM</span>, <span class="ident">LPARAM</span>, <span class="ident">UINT_PTR</span>, <span class="ident">DWORD_PTR</span>, <span class="ident">LRESULT</span>, <span class="ident">DWORD</span>};
 
-<span class='kw'>use</span> <span class='ident'>ui</span>::<span class='ident'>UiInner</span>;
-<span class='kw'>use</span> <span class='ident'>events</span>::{<span class='ident'>Event</span>, <span class='ident'>EventArgs</span>};
-<span class='kw'>use</span> <span class='ident'>controls</span>::{<span class='ident'>ControlType</span>, <span class='ident'>AnyHandle</span>, <span class='ident'>Timer</span>};
+<span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">UiInner</span>;
+<span class="kw">use</span> <span class="ident">events</span>::{<span class="ident">Event</span>, <span class="ident">EventArgs</span>};
+<span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">ControlType</span>, <span class="ident">AnyHandle</span>, <span class="ident">Timer</span>};
 
-<span class='doccomment'>/// A magic number to identify the NWG subclass that dispatches events</span>
-<span class='kw'>const</span> <span class='ident'>EVENTS_DISPATCH_ID</span>: <span class='ident'>UINT_PTR</span> <span class='op'>=</span> <span class='number'>2465</span>;
+<span class="doccomment">/// A magic number to identify the NWG subclass that dispatches events</span>
+<span class="kw">const</span> <span class="ident">EVENTS_DISPATCH_ID</span>: <span class="ident">UINT_PTR</span> <span class="op">=</span> <span class="number">2465</span>;
 
-<span class='kw'>fn</span> <span class='ident'>parse_listbox_command</span>(<span class='ident'>id</span>: <span class='ident'>u64</span>, <span class='ident'>ncode</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>u64</span>, <span class='ident'>Event</span>, <span class='ident'>EventArgs</span>)<span class='op'>&gt;</span> {
-  <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>LBN_SELCHANGE</span>, <span class='ident'>LBN_DBLCLK</span>, <span class='ident'>LBN_SETFOCUS</span>, <span class='ident'>LBN_KILLFOCUS</span>};
+<span class="kw">fn</span> <span class="ident">parse_listbox_command</span>(<span class="ident">id</span>: <span class="ident">u64</span>, <span class="ident">ncode</span>: <span class="ident">u32</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">Event</span>, <span class="ident">EventArgs</span>)<span class="op">&gt;</span> {
+  <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">LBN_SELCHANGE</span>, <span class="ident">LBN_DBLCLK</span>, <span class="ident">LBN_SETFOCUS</span>, <span class="ident">LBN_KILLFOCUS</span>};
 
-  <span class='kw'>match</span> <span class='ident'>ncode</span> {
-    <span class='ident'>LBN_SELCHANGE</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>SelectionChanged</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>)),
-    <span class='ident'>LBN_DBLCLK</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>DoubleClick</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>)),
-    <span class='ident'>LBN_SETFOCUS</span> <span class='op'>|</span> <span class='ident'>LBN_KILLFOCUS</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>Focus</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Focus</span>(<span class='ident'>ncode</span><span class='op'>==</span><span class='ident'>LBN_SETFOCUS</span>))),
-    _ <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>
+  <span class="kw">match</span> <span class="ident">ncode</span> {
+    <span class="ident">LBN_SELCHANGE</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">SelectionChanged</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>)),
+    <span class="ident">LBN_DBLCLK</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">DoubleClick</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>)),
+    <span class="ident">LBN_SETFOCUS</span> <span class="op">|</span> <span class="ident">LBN_KILLFOCUS</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">Focus</span>, <span class="ident">EventArgs</span>::<span class="ident">Focus</span>(<span class="ident">ncode</span><span class="op">==</span><span class="ident">LBN_SETFOCUS</span>))),
+    _ <span class="op">=&gt;</span> <span class="prelude-val">None</span>
   }
 }
 
-<span class='kw'>fn</span> <span class='ident'>parse_button_command</span>(<span class='ident'>id</span>: <span class='ident'>u64</span>, <span class='ident'>ncode</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>u64</span>, <span class='ident'>Event</span>, <span class='ident'>EventArgs</span>)<span class='op'>&gt;</span> {
-  <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>BN_CLICKED</span>, <span class='ident'>BN_DBLCLK</span>, <span class='ident'>BN_SETFOCUS</span>, <span class='ident'>BN_KILLFOCUS</span>};
-  <span class='kw'>match</span> <span class='ident'>ncode</span> {
-    <span class='ident'>BN_CLICKED</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>Click</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>)),
-    <span class='ident'>BN_DBLCLK</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>DoubleClick</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>)),
-    <span class='ident'>BN_SETFOCUS</span> <span class='op'>|</span> <span class='ident'>BN_KILLFOCUS</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>Focus</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Focus</span>(<span class='ident'>ncode</span><span class='op'>==</span><span class='ident'>BN_SETFOCUS</span>))),
-    _ <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>
+<span class="kw">fn</span> <span class="ident">parse_button_command</span>(<span class="ident">id</span>: <span class="ident">u64</span>, <span class="ident">ncode</span>: <span class="ident">u32</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">Event</span>, <span class="ident">EventArgs</span>)<span class="op">&gt;</span> {
+  <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">BN_CLICKED</span>, <span class="ident">BN_DBLCLK</span>, <span class="ident">BN_SETFOCUS</span>, <span class="ident">BN_KILLFOCUS</span>};
+  <span class="kw">match</span> <span class="ident">ncode</span> {
+    <span class="ident">BN_CLICKED</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">Click</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>)),
+    <span class="ident">BN_DBLCLK</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">DoubleClick</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>)),
+    <span class="ident">BN_SETFOCUS</span> <span class="op">|</span> <span class="ident">BN_KILLFOCUS</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">Focus</span>, <span class="ident">EventArgs</span>::<span class="ident">Focus</span>(<span class="ident">ncode</span><span class="op">==</span><span class="ident">BN_SETFOCUS</span>))),
+    _ <span class="op">=&gt;</span> <span class="prelude-val">None</span>
   }
 }
 
-<span class='kw'>fn</span> <span class='ident'>parse_edit_command</span>(<span class='ident'>id</span>: <span class='ident'>u64</span>, <span class='ident'>ncode</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>u64</span>, <span class='ident'>Event</span>, <span class='ident'>EventArgs</span>)<span class='op'>&gt;</span> {
-  <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>EN_SETFOCUS</span>, <span class='ident'>EN_KILLFOCUS</span>, <span class='ident'>EN_UPDATE</span>, <span class='ident'>EN_MAXTEXT</span>};
-  <span class='kw'>match</span> <span class='ident'>ncode</span> {
-    <span class='ident'>EN_UPDATE</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>ValueChanged</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>)),
-    <span class='ident'>EN_MAXTEXT</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>LimitReached</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>)),
-    <span class='ident'>EN_SETFOCUS</span> <span class='op'>|</span> <span class='ident'>EN_KILLFOCUS</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>Focus</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Focus</span>(<span class='ident'>ncode</span><span class='op'>==</span><span class='ident'>EN_SETFOCUS</span>))),
-    _ <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>
+<span class="kw">fn</span> <span class="ident">parse_edit_command</span>(<span class="ident">id</span>: <span class="ident">u64</span>, <span class="ident">ncode</span>: <span class="ident">u32</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">Event</span>, <span class="ident">EventArgs</span>)<span class="op">&gt;</span> {
+  <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">EN_SETFOCUS</span>, <span class="ident">EN_KILLFOCUS</span>, <span class="ident">EN_UPDATE</span>, <span class="ident">EN_MAXTEXT</span>};
+  <span class="kw">match</span> <span class="ident">ncode</span> {
+    <span class="ident">EN_UPDATE</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">ValueChanged</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>)),
+    <span class="ident">EN_MAXTEXT</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">LimitReached</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>)),
+    <span class="ident">EN_SETFOCUS</span> <span class="op">|</span> <span class="ident">EN_KILLFOCUS</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">Focus</span>, <span class="ident">EventArgs</span>::<span class="ident">Focus</span>(<span class="ident">ncode</span><span class="op">==</span><span class="ident">EN_SETFOCUS</span>))),
+    _ <span class="op">=&gt;</span> <span class="prelude-val">None</span>
   }
 }
 
-<span class='kw'>fn</span> <span class='ident'>parse_static_command</span>(<span class='ident'>id</span>: <span class='ident'>u64</span>, <span class='ident'>ncode</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>u64</span>, <span class='ident'>Event</span>, <span class='ident'>EventArgs</span>)<span class='op'>&gt;</span> {
-  <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>STN_CLICKED</span>, <span class='ident'>STN_DBLCLK</span>};
-  <span class='kw'>match</span> <span class='ident'>ncode</span> {
-    <span class='ident'>STN_CLICKED</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>Click</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>)),
-    <span class='ident'>STN_DBLCLK</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>((<span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>DoubleClick</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>)),
-    _ <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>
+<span class="kw">fn</span> <span class="ident">parse_static_command</span>(<span class="ident">id</span>: <span class="ident">u64</span>, <span class="ident">ncode</span>: <span class="ident">u32</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">Event</span>, <span class="ident">EventArgs</span>)<span class="op">&gt;</span> {
+  <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">STN_CLICKED</span>, <span class="ident">STN_DBLCLK</span>};
+  <span class="kw">match</span> <span class="ident">ncode</span> {
+    <span class="ident">STN_CLICKED</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">Click</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>)),
+    <span class="ident">STN_DBLCLK</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">DoubleClick</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>)),
+    _ <span class="op">=&gt;</span> <span class="prelude-val">None</span>
   }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
   Parse the common controls notification passed through the `WM_COMMAND` message.
 */</span>
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>fn</span> <span class='ident'>parse_command</span>(<span class='ident'>id</span>: <span class='ident'>u64</span>, <span class='ident'>control_type</span>: <span class='ident'>ControlType</span>, <span class='ident'>w</span>: <span class='ident'>WPARAM</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>u64</span>, <span class='ident'>Event</span>, <span class='ident'>EventArgs</span>)<span class='op'>&gt;</span> {
-  <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>HIWORD</span>;
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">fn</span> <span class="ident">parse_command</span>(<span class="ident">id</span>: <span class="ident">u64</span>, <span class="ident">control_type</span>: <span class="ident">ControlType</span>, <span class="ident">w</span>: <span class="ident">WPARAM</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">Event</span>, <span class="ident">EventArgs</span>)<span class="op">&gt;</span> {
+  <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">HIWORD</span>;
 
-  <span class='kw'>let</span> <span class='ident'>ncode</span> <span class='op'>=</span> <span class='ident'>HIWORD</span>(<span class='ident'>w</span> <span class='kw'>as</span> <span class='ident'>DWORD</span>) <span class='kw'>as</span> <span class='ident'>u32</span>;
-  <span class='kw'>match</span> <span class='ident'>control_type</span> {
-    <span class='ident'>ControlType</span>::<span class='ident'>ListBox</span> <span class='op'>=&gt;</span> <span class='ident'>parse_listbox_command</span>(<span class='ident'>id</span>, <span class='ident'>ncode</span>),
-    <span class='ident'>ControlType</span>::<span class='ident'>Button</span> <span class='op'>=&gt;</span> <span class='ident'>parse_button_command</span>(<span class='ident'>id</span>, <span class='ident'>ncode</span>),
-    <span class='ident'>ControlType</span>::<span class='ident'>TextInput</span> <span class='op'>|</span> <span class='ident'>ControlType</span>::<span class='ident'>TextBox</span> <span class='op'>=&gt;</span> <span class='ident'>parse_edit_command</span>(<span class='ident'>id</span>, <span class='ident'>ncode</span>),
-    <span class='ident'>ControlType</span>::<span class='ident'>Label</span> <span class='op'>=&gt;</span> <span class='ident'>parse_static_command</span>(<span class='ident'>id</span>, <span class='ident'>ncode</span>),
-    _ <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>
+  <span class="kw">let</span> <span class="ident">ncode</span> <span class="op">=</span> <span class="ident">HIWORD</span>(<span class="ident">w</span> <span class="kw">as</span> <span class="ident">DWORD</span>) <span class="kw">as</span> <span class="ident">u32</span>;
+  <span class="kw">match</span> <span class="ident">control_type</span> {
+    <span class="ident">ControlType</span>::<span class="ident">ListBox</span> <span class="op">=&gt;</span> <span class="ident">parse_listbox_command</span>(<span class="ident">id</span>, <span class="ident">ncode</span>),
+    <span class="ident">ControlType</span>::<span class="ident">Button</span> <span class="op">=&gt;</span> <span class="ident">parse_button_command</span>(<span class="ident">id</span>, <span class="ident">ncode</span>),
+    <span class="ident">ControlType</span>::<span class="ident">TextInput</span> <span class="op">|</span> <span class="ident">ControlType</span>::<span class="ident">TextBox</span> <span class="op">=&gt;</span> <span class="ident">parse_edit_command</span>(<span class="ident">id</span>, <span class="ident">ncode</span>),
+    <span class="ident">ControlType</span>::<span class="ident">Label</span> <span class="op">=&gt;</span> <span class="ident">parse_static_command</span>(<span class="ident">id</span>, <span class="ident">ncode</span>),
+    _ <span class="op">=&gt;</span> <span class="prelude-val">None</span>
   }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
   Proc that dispatches the NWG events
 */</span>
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_variables</span>)]</span>
-<span class='kw'>unsafe</span> <span class='kw'>extern</span> <span class='string'>&quot;system&quot;</span> <span class='kw'>fn</span> <span class='ident'>process_events</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>+</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='ident'>hwnd</span>: <span class='ident'>HWND</span>, <span class='ident'>msg</span>: <span class='ident'>UINT</span>, <span class='ident'>w</span>: <span class='ident'>WPARAM</span>, <span class='ident'>l</span>: <span class='ident'>LPARAM</span>, <span class='ident'>id</span>: <span class='ident'>UINT_PTR</span>, <span class='ident'>data</span>: <span class='ident'>DWORD_PTR</span>) <span class='op'>-&gt;</span> <span class='ident'>LRESULT</span> {
-  <span class='kw'>use</span> <span class='ident'>comctl32</span>::<span class='ident'>DefSubclassProc</span>;
-  <span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>GetClientRect</span>;
-  <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>WM_KEYDOWN</span>, <span class='ident'>WM_KEYUP</span>, <span class='ident'>WM_UNICHAR</span>, <span class='ident'>WM_CHAR</span>, <span class='ident'>UNICODE_NOCHAR</span>, <span class='ident'>WM_MENUCOMMAND</span>, <span class='ident'>WM_CLOSE</span>, <span class='ident'>WM_LBUTTONUP</span>, <span class='ident'>WM_LBUTTONDOWN</span>, 
-    <span class='ident'>WM_RBUTTONUP</span>, <span class='ident'>WM_RBUTTONDOWN</span>, <span class='ident'>WM_MBUTTONUP</span>, <span class='ident'>WM_MBUTTONDOWN</span>, <span class='ident'>WM_COMMAND</span>, <span class='ident'>WM_TIMER</span>, <span class='ident'>WM_MOVE</span>, <span class='ident'>WM_SIZING</span>, <span class='ident'>WM_EXITSIZEMOVE</span>, <span class='ident'>WM_SIZE</span>,
-    <span class='ident'>WM_PAINT</span>, <span class='ident'>c_int</span>, <span class='ident'>LOWORD</span>, <span class='ident'>HIWORD</span>, <span class='ident'>RECT</span>};
-  <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>menu_helper</span>::<span class='ident'>get_menu_id</span>;
-  <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>NWG_CUSTOM_MIN</span>, <span class='ident'>NWG_CUSTOM_MAX</span>};
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+<span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;system&quot;</span> <span class="kw">fn</span> <span class="ident">process_events</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">+</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">hwnd</span>: <span class="ident">HWND</span>, <span class="ident">msg</span>: <span class="ident">UINT</span>, <span class="ident">w</span>: <span class="ident">WPARAM</span>, <span class="ident">l</span>: <span class="ident">LPARAM</span>, <span class="ident">id</span>: <span class="ident">UINT_PTR</span>, <span class="ident">data</span>: <span class="ident">DWORD_PTR</span>) <span class="op">-&gt;</span> <span class="ident">LRESULT</span> {
+  <span class="kw">use</span> <span class="ident">comctl32</span>::<span class="ident">DefSubclassProc</span>;
+  <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">GetClientRect</span>;
+  <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">WM_KEYDOWN</span>, <span class="ident">WM_KEYUP</span>, <span class="ident">WM_UNICHAR</span>, <span class="ident">WM_CHAR</span>, <span class="ident">UNICODE_NOCHAR</span>, <span class="ident">WM_MENUCOMMAND</span>, <span class="ident">WM_CLOSE</span>, <span class="ident">WM_LBUTTONUP</span>, <span class="ident">WM_LBUTTONDOWN</span>, 
+    <span class="ident">WM_RBUTTONUP</span>, <span class="ident">WM_RBUTTONDOWN</span>, <span class="ident">WM_MBUTTONUP</span>, <span class="ident">WM_MBUTTONDOWN</span>, <span class="ident">WM_COMMAND</span>, <span class="ident">WM_TIMER</span>, <span class="ident">WM_MOVE</span>, <span class="ident">WM_SIZING</span>, <span class="ident">WM_EXITSIZEMOVE</span>, <span class="ident">WM_SIZE</span>,
+    <span class="ident">WM_PAINT</span>, <span class="ident">c_int</span>, <span class="ident">LOWORD</span>, <span class="ident">HIWORD</span>, <span class="ident">RECT</span>};
+  <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">menu_helper</span>::<span class="ident">get_menu_id</span>;
+  <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">NWG_CUSTOM_MIN</span>, <span class="ident">NWG_CUSTOM_MAX</span>};
 
-  <span class='kw'>let</span> <span class='ident'>inner</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>data</span>);
-  <span class='kw'>let</span> <span class='ident'>inner_id</span>: <span class='ident'>u64</span>;
+  <span class="kw">let</span> <span class="ident">inner</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">data</span>);
+  <span class="kw">let</span> <span class="ident">inner_id</span>: <span class="ident">u64</span>;
 
-  <span class='kw'>let</span> <span class='ident'>callback_data</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>msg</span> {
-    <span class='ident'>WM_PAINT</span> <span class='op'>=&gt;</span> {
-      <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match system handle to ui control (msg: WM_PAINT)&quot;</span>);;
-      <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>Paint</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>) )
+  <span class="kw">let</span> <span class="ident">callback_data</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">msg</span> {
+    <span class="ident">WM_PAINT</span> <span class="op">=&gt;</span> {
+      <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ).<span class="ident">expect</span>(<span class="string">&quot;Could not match system handle to ui control (msg: WM_PAINT)&quot;</span>);;
+      <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">Paint</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>) )
     },
-    <span class='ident'>WM_COMMAND</span> <span class='op'>=&gt;</span> {
-      <span class='kw'>if</span> <span class='ident'>l</span> <span class='op'>==</span> <span class='number'>0</span> { 
-        <span class='prelude-val'>None</span> 
-      } <span class='kw'>else</span> {
-        <span class='comment'>// Somehow, WM_COMMAND messages get sent while freeing and so inner_id_from_handle can fail...</span>
-        <span class='kw'>let</span> <span class='ident'>nhandle</span>: <span class='ident'>HWND</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>l</span>);
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>id</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>nhandle</span>) ) {
-          <span class='kw'>let</span> <span class='ident'>control_type</span> <span class='op'>=</span> (<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='ident'>inner</span>.<span class='ident'>controls</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Could not find a control with with the specified type ID&quot;</span>).<span class='ident'>as_ptr</span>()).<span class='ident'>control_type</span>();
-          <span class='ident'>parse_command</span>(<span class='ident'>id</span>, <span class='ident'>control_type</span>, <span class='ident'>w</span>)
-        } <span class='kw'>else</span> {
-          <span class='prelude-val'>None</span>
+    <span class="ident">WM_COMMAND</span> <span class="op">=&gt;</span> {
+      <span class="kw">if</span> <span class="ident">l</span> <span class="op">==</span> <span class="number">0</span> { 
+        <span class="prelude-val">None</span> 
+      } <span class="kw">else</span> {
+        <span class="comment">// Somehow, WM_COMMAND messages get sent while freeing and so inner_id_from_handle can fail...</span>
+        <span class="kw">let</span> <span class="ident">nhandle</span>: <span class="ident">HWND</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">l</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">nhandle</span>) ) {
+          <span class="kw">let</span> <span class="ident">control_type</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">inner</span>.<span class="ident">controls</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">expect</span>(<span class="string">&quot;Could not find a control with with the specified type ID&quot;</span>).<span class="ident">as_ptr</span>()).<span class="ident">control_type</span>();
+          <span class="ident">parse_command</span>(<span class="ident">id</span>, <span class="ident">control_type</span>, <span class="ident">w</span>)
+        } <span class="kw">else</span> {
+          <span class="prelude-val">None</span>
         }
       }
     },
-    <span class='ident'>WM_LBUTTONUP</span> <span class='op'>|</span> <span class='ident'>WM_RBUTTONUP</span>  <span class='op'>|</span> <span class='ident'>WM_MBUTTONUP</span> <span class='op'>=&gt;</span> {
-      <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match system handle to ui control (msg: WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP)&quot;</span>);;
-      <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>MouseUp</span>, <span class='ident'>parse_mouse_click</span>(<span class='ident'>msg</span>, <span class='ident'>l</span>)) )
+    <span class="ident">WM_LBUTTONUP</span> <span class="op">|</span> <span class="ident">WM_RBUTTONUP</span>  <span class="op">|</span> <span class="ident">WM_MBUTTONUP</span> <span class="op">=&gt;</span> {
+      <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ).<span class="ident">expect</span>(<span class="string">&quot;Could not match system handle to ui control (msg: WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP)&quot;</span>);;
+      <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">MouseUp</span>, <span class="ident">parse_mouse_click</span>(<span class="ident">msg</span>, <span class="ident">l</span>)) )
     },
-    <span class='ident'>WM_LBUTTONDOWN</span> <span class='op'>|</span> <span class='ident'>WM_RBUTTONDOWN</span> <span class='op'>|</span> <span class='ident'>WM_MBUTTONDOWN</span> <span class='op'>=&gt;</span> {
-      <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match system handle to ui control (msg: WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN)&quot;</span>);;
-      <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>MouseDown</span>, <span class='ident'>parse_mouse_click</span>(<span class='ident'>msg</span>, <span class='ident'>l</span>)) )
+    <span class="ident">WM_LBUTTONDOWN</span> <span class="op">|</span> <span class="ident">WM_RBUTTONDOWN</span> <span class="op">|</span> <span class="ident">WM_MBUTTONDOWN</span> <span class="op">=&gt;</span> {
+      <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ).<span class="ident">expect</span>(<span class="string">&quot;Could not match system handle to ui control (msg: WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN)&quot;</span>);;
+      <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">MouseDown</span>, <span class="ident">parse_mouse_click</span>(<span class="ident">msg</span>, <span class="ident">l</span>)) )
     },
-    <span class='ident'>WM_KEYDOWN</span> <span class='op'>|</span> <span class='ident'>WM_KEYUP</span> <span class='op'>=&gt;</span> {
-      <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match system handle to ui control (msg: WM_KEYDOWN | WM_KEYUP)&quot;</span>);;
-      <span class='kw'>let</span> <span class='ident'>evt</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>msg</span> <span class='op'>==</span> <span class='ident'>WM_KEYDOWN</span> { <span class='ident'>Event</span>::<span class='ident'>KeyDown</span> } <span class='kw'>else</span> { <span class='ident'>Event</span>::<span class='ident'>KeyUp</span> };
-      <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>evt</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Key</span>(<span class='ident'>w</span> <span class='kw'>as</span> <span class='ident'>u32</span>)) )
+    <span class="ident">WM_KEYDOWN</span> <span class="op">|</span> <span class="ident">WM_KEYUP</span> <span class="op">=&gt;</span> {
+      <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ).<span class="ident">expect</span>(<span class="string">&quot;Could not match system handle to ui control (msg: WM_KEYDOWN | WM_KEYUP)&quot;</span>);;
+      <span class="kw">let</span> <span class="ident">evt</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">msg</span> <span class="op">==</span> <span class="ident">WM_KEYDOWN</span> { <span class="ident">Event</span>::<span class="ident">KeyDown</span> } <span class="kw">else</span> { <span class="ident">Event</span>::<span class="ident">KeyUp</span> };
+      <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">evt</span>, <span class="ident">EventArgs</span>::<span class="ident">Key</span>(<span class="ident">w</span> <span class="kw">as</span> <span class="ident">u32</span>)) )
     },
-    <span class='ident'>WM_MENUCOMMAND</span> <span class='op'>=&gt;</span> {
-      <span class='kw'>let</span> <span class='ident'>parent_menu</span>: <span class='ident'>HMENU</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>l</span>);
-      <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU_ITEM</span>(<span class='ident'>parent_menu</span>, <span class='ident'>get_menu_id</span>(<span class='ident'>parent_menu</span>, <span class='ident'>w</span> <span class='kw'>as</span> <span class='ident'>c_int</span>));
+    <span class="ident">WM_MENUCOMMAND</span> <span class="op">=&gt;</span> {
+      <span class="kw">let</span> <span class="ident">parent_menu</span>: <span class="ident">HMENU</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">l</span>);
+      <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">AnyHandle</span>::<span class="ident">HMENU_ITEM</span>(<span class="ident">parent_menu</span>, <span class="ident">get_menu_id</span>(<span class="ident">parent_menu</span>, <span class="ident">w</span> <span class="kw">as</span> <span class="ident">c_int</span>));
 
-      <span class='comment'>// Custom controls might have their own way to handle the message</span>
-      <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>inner_id</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>handle</span> ) { 
-        <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>Triggered</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>) )
-      } <span class='kw'>else</span> {
-        <span class='prelude-val'>None</span>
+      <span class="comment">// Custom controls might have their own way to handle the message</span>
+      <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">inner_id</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">handle</span> ) { 
+        <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">Triggered</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>) )
+      } <span class="kw">else</span> {
+        <span class="prelude-val">None</span>
       }  
     },
-    <span class='ident'>WM_UNICHAR</span> <span class='op'>|</span> <span class='ident'>WM_CHAR</span> <span class='op'>=&gt;</span> {
-      <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match system handle to ui control (msg: WM_UNICHAR | WM_CHAR)&quot;</span>);;
-      <span class='kw'>if</span> <span class='ident'>w</span> <span class='op'>==</span> <span class='ident'>UNICODE_NOCHAR</span> { <span class='kw'>return</span> <span class='number'>1</span>; } 
-      <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>=</span> ::<span class='ident'>std</span>::<span class='ident'>char</span>::<span class='ident'>from_u32</span>(<span class='ident'>w</span> <span class='kw'>as</span> <span class='ident'>u32</span>) {
-        <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>Char</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Char</span>( <span class='ident'>c</span> )) )
-      } <span class='kw'>else</span> {
-        <span class='prelude-val'>None</span>
+    <span class="ident">WM_UNICHAR</span> <span class="op">|</span> <span class="ident">WM_CHAR</span> <span class="op">=&gt;</span> {
+      <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ).<span class="ident">expect</span>(<span class="string">&quot;Could not match system handle to ui control (msg: WM_UNICHAR | WM_CHAR)&quot;</span>);;
+      <span class="kw">if</span> <span class="ident">w</span> <span class="op">==</span> <span class="ident">UNICODE_NOCHAR</span> { <span class="kw">return</span> <span class="number">1</span>; } 
+      <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span> ::<span class="ident">std</span>::<span class="ident">char</span>::<span class="ident">from_u32</span>(<span class="ident">w</span> <span class="kw">as</span> <span class="ident">u32</span>) {
+        <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">Char</span>, <span class="ident">EventArgs</span>::<span class="ident">Char</span>( <span class="ident">c</span> )) )
+      } <span class="kw">else</span> {
+        <span class="prelude-val">None</span>
       }
     },
-    <span class='ident'>WM_TIMER</span> <span class='op'>=&gt;</span> {
-      <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>AnyHandle</span>::<span class='ident'>Custom</span>(<span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>Timer</span><span class='op'>&gt;</span>(), <span class='ident'>w</span> <span class='kw'>as</span> <span class='ident'>usize</span>);
+    <span class="ident">WM_TIMER</span> <span class="op">=&gt;</span> {
+      <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">AnyHandle</span>::<span class="ident">Custom</span>(<span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">Timer</span><span class="op">&gt;</span>(), <span class="ident">w</span> <span class="kw">as</span> <span class="ident">usize</span>);
 
-      <span class='comment'>// Here I assume WM_TIMER will only be sent by built-in timers. Using a user event might be a better idea.</span>
-      <span class='comment'>// Custom controls might have their own way to handle the message</span>
-      <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>inner_id</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>handle</span> ) {
-        <span class='kw'>let</span> <span class='ident'>timer</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Timer</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>( <span class='ident'>inner</span>.<span class='ident'>controls</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>).<span class='ident'>unwrap</span>().<span class='ident'>as_ptr</span>() );
-        <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>Tick</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Tick</span>(<span class='ident'>timer</span>.<span class='ident'>elapsed</span>())) )
-      } <span class='kw'>else</span> {
-        <span class='prelude-val'>None</span>
+      <span class="comment">// Here I assume WM_TIMER will only be sent by built-in timers. Using a user event might be a better idea.</span>
+      <span class="comment">// Custom controls might have their own way to handle the message</span>
+      <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">inner_id</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">handle</span> ) {
+        <span class="kw">let</span> <span class="ident">timer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Timer</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">transmute</span>( <span class="ident">inner</span>.<span class="ident">controls</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>).<span class="ident">unwrap</span>().<span class="ident">as_ptr</span>() );
+        <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">Tick</span>, <span class="ident">EventArgs</span>::<span class="ident">Tick</span>(<span class="ident">timer</span>.<span class="ident">elapsed</span>())) )
+      } <span class="kw">else</span> {
+        <span class="prelude-val">None</span>
       }
     },
-    <span class='ident'>WM_MOVE</span> <span class='op'>=&gt;</span> {
-      <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match system handle to ui control (msg: WM_MOVE)&quot;</span>);
-      <span class='kw'>let</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='op'>=</span> (<span class='ident'>LOWORD</span>(<span class='ident'>l</span> <span class='kw'>as</span> <span class='ident'>u32</span>), <span class='ident'>HIWORD</span>(<span class='ident'>l</span> <span class='kw'>as</span> <span class='ident'>u32</span>));
-      <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>Moved</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Position</span>(<span class='ident'>x</span> <span class='kw'>as</span> <span class='ident'>i32</span>, <span class='ident'>y</span> <span class='kw'>as</span> <span class='ident'>i32</span>)) )
+    <span class="ident">WM_MOVE</span> <span class="op">=&gt;</span> {
+      <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ).<span class="ident">expect</span>(<span class="string">&quot;Could not match system handle to ui control (msg: WM_MOVE)&quot;</span>);
+      <span class="kw">let</span> (<span class="ident">x</span>, <span class="ident">y</span>) <span class="op">=</span> (<span class="ident">LOWORD</span>(<span class="ident">l</span> <span class="kw">as</span> <span class="ident">u32</span>), <span class="ident">HIWORD</span>(<span class="ident">l</span> <span class="kw">as</span> <span class="ident">u32</span>));
+      <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">Moved</span>, <span class="ident">EventArgs</span>::<span class="ident">Position</span>(<span class="ident">x</span> <span class="kw">as</span> <span class="ident">i32</span>, <span class="ident">y</span> <span class="kw">as</span> <span class="ident">i32</span>)) )
     },
-    <span class='ident'>WM_SIZING</span> <span class='op'>|</span> <span class='ident'>WM_SIZE</span> <span class='op'>=&gt;</span> {
-      <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match system handle to ui control (msg: WM_SIZING)&quot;</span>);
-      <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span>: <span class='ident'>RECT</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>uninitialized</span>();
-      <span class='ident'>GetClientRect</span>(<span class='ident'>hwnd</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>r</span>);
-      <span class='kw'>let</span> <span class='ident'>w</span>: <span class='ident'>u32</span> <span class='op'>=</span> (<span class='ident'>r</span>.<span class='ident'>right</span><span class='op'>-</span><span class='ident'>r</span>.<span class='ident'>left</span>) <span class='kw'>as</span> <span class='ident'>u32</span>;
-      <span class='kw'>let</span> <span class='ident'>h</span>: <span class='ident'>u32</span> <span class='op'>=</span> (<span class='ident'>r</span>.<span class='ident'>bottom</span><span class='op'>-</span><span class='ident'>r</span>.<span class='ident'>top</span>) <span class='kw'>as</span> <span class='ident'>u32</span>;
-      <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>Resized</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Size</span>(<span class='ident'>w</span>, <span class='ident'>h</span>)) )
+    <span class="ident">WM_SIZING</span> <span class="op">|</span> <span class="ident">WM_SIZE</span> <span class="op">=&gt;</span> {
+      <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ).<span class="ident">expect</span>(<span class="string">&quot;Could not match system handle to ui control (msg: WM_SIZING)&quot;</span>);
+      <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span>: <span class="ident">RECT</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">uninitialized</span>();
+      <span class="ident">GetClientRect</span>(<span class="ident">hwnd</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">r</span>);
+      <span class="kw">let</span> <span class="ident">w</span>: <span class="ident">u32</span> <span class="op">=</span> (<span class="ident">r</span>.<span class="ident">right</span><span class="op">-</span><span class="ident">r</span>.<span class="ident">left</span>) <span class="kw">as</span> <span class="ident">u32</span>;
+      <span class="kw">let</span> <span class="ident">h</span>: <span class="ident">u32</span> <span class="op">=</span> (<span class="ident">r</span>.<span class="ident">bottom</span><span class="op">-</span><span class="ident">r</span>.<span class="ident">top</span>) <span class="kw">as</span> <span class="ident">u32</span>;
+      <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">Resized</span>, <span class="ident">EventArgs</span>::<span class="ident">Size</span>(<span class="ident">w</span>, <span class="ident">h</span>)) )
     },
-    <span class='ident'>WM_EXITSIZEMOVE</span> <span class='op'>=&gt;</span> {
-      <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match system handle to ui control (msg: WM_SIZING)&quot;</span>);
-      <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span>: <span class='ident'>RECT</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>uninitialized</span>();
-      <span class='ident'>GetClientRect</span>(<span class='ident'>hwnd</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>r</span>);
-      <span class='kw'>let</span> <span class='ident'>w</span>: <span class='ident'>u32</span> <span class='op'>=</span> (<span class='ident'>r</span>.<span class='ident'>right</span><span class='op'>-</span><span class='ident'>r</span>.<span class='ident'>left</span>) <span class='kw'>as</span> <span class='ident'>u32</span>;
-      <span class='kw'>let</span> <span class='ident'>h</span>: <span class='ident'>u32</span> <span class='op'>=</span> (<span class='ident'>r</span>.<span class='ident'>bottom</span><span class='op'>-</span><span class='ident'>r</span>.<span class='ident'>top</span>) <span class='kw'>as</span> <span class='ident'>u32</span>;
-      <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>Resized</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Size</span>(<span class='ident'>w</span>, <span class='ident'>h</span>)) )
+    <span class="ident">WM_EXITSIZEMOVE</span> <span class="op">=&gt;</span> {
+      <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ).<span class="ident">expect</span>(<span class="string">&quot;Could not match system handle to ui control (msg: WM_SIZING)&quot;</span>);
+      <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span>: <span class="ident">RECT</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">uninitialized</span>();
+      <span class="ident">GetClientRect</span>(<span class="ident">hwnd</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">r</span>);
+      <span class="kw">let</span> <span class="ident">w</span>: <span class="ident">u32</span> <span class="op">=</span> (<span class="ident">r</span>.<span class="ident">right</span><span class="op">-</span><span class="ident">r</span>.<span class="ident">left</span>) <span class="kw">as</span> <span class="ident">u32</span>;
+      <span class="kw">let</span> <span class="ident">h</span>: <span class="ident">u32</span> <span class="op">=</span> (<span class="ident">r</span>.<span class="ident">bottom</span><span class="op">-</span><span class="ident">r</span>.<span class="ident">top</span>) <span class="kw">as</span> <span class="ident">u32</span>;
+      <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">Resized</span>, <span class="ident">EventArgs</span>::<span class="ident">Size</span>(<span class="ident">w</span>, <span class="ident">h</span>)) )
     }
-    <span class='ident'>WM_CLOSE</span> <span class='op'>=&gt;</span> {
-      <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match system handle to ui control (msg: WM_CLOSE)&quot;</span>);
-      <span class='prelude-val'>Some</span>( (<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>Closed</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>) )
+    <span class="ident">WM_CLOSE</span> <span class="op">=&gt;</span> {
+      <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ).<span class="ident">expect</span>(<span class="string">&quot;Could not match system handle to ui control (msg: WM_CLOSE)&quot;</span>);
+      <span class="prelude-val">Some</span>( (<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">Closed</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>) )
     },
-    _ <span class='op'>=&gt;</span> { <span class='prelude-val'>None</span> }
+    _ <span class="op">=&gt;</span> { <span class="prelude-val">None</span> }
   };
 
-  <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>((<span class='ident'>inner_id</span>, <span class='ident'>evt</span>, <span class='ident'>params</span>)) <span class='op'>=</span> <span class='ident'>callback_data</span> {
-    <span class='ident'>inner</span>.<span class='ident'>trigger</span>(<span class='ident'>inner_id</span>, <span class='ident'>evt</span>, <span class='ident'>params</span>);
+  <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">inner_id</span>, <span class="ident">evt</span>, <span class="ident">params</span>)) <span class="op">=</span> <span class="ident">callback_data</span> {
+    <span class="ident">inner</span>.<span class="ident">trigger</span>(<span class="ident">inner_id</span>, <span class="ident">evt</span>, <span class="ident">params</span>);
   }
 
-  <span class='comment'>// Trigger a raw event </span>
-  <span class='kw'>if</span> <span class='ident'>msg</span> <span class='op'>&lt;</span> <span class='ident'>NWG_CUSTOM_MIN</span> <span class='op'>||</span> <span class='ident'>msg</span> <span class='op'>&gt;</span> <span class='ident'>NWG_CUSTOM_MAX</span> {
-    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>inner_id</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>hwnd</span>) ) {
-      <span class='ident'>inner</span>.<span class='ident'>trigger</span>(<span class='ident'>inner_id</span>, <span class='ident'>Event</span>::<span class='ident'>Raw</span>, <span class='ident'>EventArgs</span>::<span class='ident'>Raw</span>(<span class='ident'>msg</span>, <span class='ident'>w</span> <span class='kw'>as</span> <span class='ident'>usize</span>, <span class='ident'>l</span> <span class='kw'>as</span> <span class='ident'>usize</span>));
+  <span class="comment">// Trigger a raw event </span>
+  <span class="kw">if</span> <span class="ident">msg</span> <span class="op">&lt;</span> <span class="ident">NWG_CUSTOM_MIN</span> <span class="op">||</span> <span class="ident">msg</span> <span class="op">&gt;</span> <span class="ident">NWG_CUSTOM_MAX</span> {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">inner_id</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">hwnd</span>) ) {
+      <span class="ident">inner</span>.<span class="ident">trigger</span>(<span class="ident">inner_id</span>, <span class="ident">Event</span>::<span class="ident">Raw</span>, <span class="ident">EventArgs</span>::<span class="ident">Raw</span>(<span class="ident">msg</span>, <span class="ident">w</span> <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">l</span> <span class="kw">as</span> <span class="ident">usize</span>));
     }
   }
 
-  <span class='ident'>DefSubclassProc</span>(<span class='ident'>hwnd</span>, <span class='ident'>msg</span>, <span class='ident'>w</span>, <span class='ident'>l</span>)
+  <span class="ident">DefSubclassProc</span>(<span class="ident">hwnd</span>, <span class="ident">msg</span>, <span class="ident">w</span>, <span class="ident">l</span>)
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Add a subclass that dispatches the system event to the application callbacks to a window control.
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>hook_window_events</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>+</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='ident'>uiinner</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>handle</span>: <span class='ident'>HWND</span>) { <span class='kw'>unsafe</span> {
-  <span class='kw'>use</span> <span class='ident'>comctl32</span>::<span class='ident'>SetWindowSubclass</span>;
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hook_window_events</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">+</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">uiinner</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">handle</span>: <span class="ident">HWND</span>) { <span class="kw">unsafe</span> {
+  <span class="kw">use</span> <span class="ident">comctl32</span>::<span class="ident">SetWindowSubclass</span>;
 
-  <span class='comment'>// While definitely questionable in term of safety, the reference to the UiInner is actually (always)</span>
-  <span class='comment'>// a raw pointer belonging to a Ui. Also, when the Ui goes out of scope, every window control</span>
-  <span class='comment'>// gets destroyed BEFORE the UiInner, this guarantees that uinner lives long enough.</span>
-  <span class='kw'>let</span> <span class='ident'>ui_inner_raw</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>uiinner</span> <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>;
-  <span class='ident'>SetWindowSubclass</span>(<span class='ident'>handle</span>, <span class='prelude-val'>Some</span>(<span class='ident'>process_events</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>), <span class='ident'>EVENTS_DISPATCH_ID</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>ui_inner_raw</span>));
+  <span class="comment">// While definitely questionable in term of safety, the reference to the UiInner is actually (always)</span>
+  <span class="comment">// a raw pointer belonging to a Ui. Also, when the Ui goes out of scope, every window control</span>
+  <span class="comment">// gets destroyed BEFORE the UiInner, this guarantees that uinner lives long enough.</span>
+  <span class="kw">let</span> <span class="ident">ui_inner_raw</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">uiinner</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>;
+  <span class="ident">SetWindowSubclass</span>(<span class="ident">handle</span>, <span class="prelude-val">Some</span>(<span class="ident">process_events</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>), <span class="ident">EVENTS_DISPATCH_ID</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">ui_inner_raw</span>));
 }}
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
   Remove a subclass and free the associated data
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>unhook_window_events</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>+</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='ident'>handle</span>: <span class='ident'>HWND</span>) { <span class='kw'>unsafe</span> {
-  <span class='kw'>use</span> <span class='ident'>comctl32</span>::{<span class='ident'>RemoveWindowSubclass</span>, <span class='ident'>GetWindowSubclass</span>};
-  <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>TRUE</span>, <span class='ident'>DWORD_PTR</span>};
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unhook_window_events</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">+</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">handle</span>: <span class="ident">HWND</span>) { <span class="kw">unsafe</span> {
+  <span class="kw">use</span> <span class="ident">comctl32</span>::{<span class="ident">RemoveWindowSubclass</span>, <span class="ident">GetWindowSubclass</span>};
+  <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">TRUE</span>, <span class="ident">DWORD_PTR</span>};
 
-  <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>data</span>: <span class='ident'>DWORD_PTR</span> <span class='op'>=</span> <span class='number'>0</span>;
-  <span class='kw'>if</span> <span class='ident'>GetWindowSubclass</span>(<span class='ident'>handle</span>, <span class='prelude-val'>Some</span>(<span class='ident'>process_events</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>), <span class='ident'>EVENTS_DISPATCH_ID</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>data</span>) <span class='op'>==</span> <span class='ident'>TRUE</span> {
-    <span class='ident'>RemoveWindowSubclass</span>(<span class='ident'>handle</span>, <span class='prelude-val'>Some</span>(<span class='ident'>process_events</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>), <span class='ident'>EVENTS_DISPATCH_ID</span>);
+  <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span>: <span class="ident">DWORD_PTR</span> <span class="op">=</span> <span class="number">0</span>;
+  <span class="kw">if</span> <span class="ident">GetWindowSubclass</span>(<span class="ident">handle</span>, <span class="prelude-val">Some</span>(<span class="ident">process_events</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>), <span class="ident">EVENTS_DISPATCH_ID</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>) <span class="op">==</span> <span class="ident">TRUE</span> {
+    <span class="ident">RemoveWindowSubclass</span>(<span class="ident">handle</span>, <span class="prelude-val">Some</span>(<span class="ident">process_events</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>), <span class="ident">EVENTS_DISPATCH_ID</span>);
   }
 }}
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
   Check if a window is hooked by nwg. If it is, return its ID, if not return None
 */</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>window_id</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span>(<span class='ident'>handle</span>: <span class='ident'>HWND</span>, <span class='ident'>inner_ref</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span> {
-  <span class='kw'>use</span> <span class='ident'>comctl32</span>::<span class='ident'>GetWindowSubclass</span>;
-  <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>TRUE</span>, <span class='ident'>DWORD_PTR</span>};
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">window_id</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span>(<span class="ident">handle</span>: <span class="ident">HWND</span>, <span class="ident">inner_ref</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+  <span class="kw">use</span> <span class="ident">comctl32</span>::<span class="ident">GetWindowSubclass</span>;
+  <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">TRUE</span>, <span class="ident">DWORD_PTR</span>};
 
-  <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>data</span>: <span class='ident'>DWORD_PTR</span> <span class='op'>=</span> <span class='number'>0</span>;
-  <span class='kw'>if</span> <span class='ident'>GetWindowSubclass</span>(<span class='ident'>handle</span>, <span class='prelude-val'>Some</span>(<span class='ident'>process_events</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>), <span class='ident'>EVENTS_DISPATCH_ID</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>data</span>) <span class='op'>==</span> <span class='ident'>TRUE</span> {
-    <span class='kw'>let</span> <span class='ident'>data</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>data</span>);
-    <span class='kw'>if</span> <span class='ident'>data</span> <span class='op'>==</span> <span class='ident'>inner_ref</span> {
-      (<span class='kw-2'>&amp;</span><span class='kw-2'>*</span><span class='ident'>data</span>).<span class='ident'>inner_id_from_handle</span>( <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>handle</span>) )
-    } <span class='kw'>else</span> {
-      <span class='prelude-val'>None</span>
+  <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span>: <span class="ident">DWORD_PTR</span> <span class="op">=</span> <span class="number">0</span>;
+  <span class="kw">if</span> <span class="ident">GetWindowSubclass</span>(<span class="ident">handle</span>, <span class="prelude-val">Some</span>(<span class="ident">process_events</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>), <span class="ident">EVENTS_DISPATCH_ID</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>) <span class="op">==</span> <span class="ident">TRUE</span> {
+    <span class="kw">let</span> <span class="ident">data</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">data</span>);
+    <span class="kw">if</span> <span class="ident">data</span> <span class="op">==</span> <span class="ident">inner_ref</span> {
+      (<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">data</span>).<span class="ident">inner_id_from_handle</span>( <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">handle</span>) )
+    } <span class="kw">else</span> {
+      <span class="prelude-val">None</span>
     }
-  } <span class='kw'>else</span> {
-    <span class='prelude-val'>None</span>
+  } <span class="kw">else</span> {
+    <span class="prelude-val">None</span>
   }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Dispatch the messages waiting the the system message queue to the associated Uis. This includes NWG custom messages.
 
     Return once a quit event was received.
 */</span>
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>dispatch_events</span>() {
-  <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>MSG</span>;
-  <span class='kw'>use</span> <span class='ident'>user32</span>::{<span class='ident'>GetMessageW</span>, <span class='ident'>TranslateMessage</span>, <span class='ident'>DispatchMessageW</span>};
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">dispatch_events</span>() {
+  <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">MSG</span>;
+  <span class="kw">use</span> <span class="ident">user32</span>::{<span class="ident">GetMessageW</span>, <span class="ident">TranslateMessage</span>, <span class="ident">DispatchMessageW</span>};
 
-  <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>msg</span>: <span class='ident'>MSG</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>uninitialized</span>();
-  <span class='kw'>while</span> <span class='ident'>GetMessageW</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>msg</span>, <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='number'>0</span>, <span class='number'>0</span>) <span class='op'>!=</span> <span class='number'>0</span> {
-      <span class='ident'>TranslateMessage</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>); 
-      <span class='ident'>DispatchMessageW</span>(<span class='kw-2'>&amp;</span><span class='ident'>msg</span>); 
-      <span class='comment'>// TODO dispatch events sent from other thread / other processes ( after first stable release )</span>
+  <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msg</span>: <span class="ident">MSG</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">uninitialized</span>();
+  <span class="kw">while</span> <span class="ident">GetMessageW</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">msg</span>, <span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="number">0</span>, <span class="number">0</span>) <span class="op">!=</span> <span class="number">0</span> {
+      <span class="ident">TranslateMessage</span>(<span class="kw-2">&amp;</span><span class="ident">msg</span>); 
+      <span class="ident">DispatchMessageW</span>(<span class="kw-2">&amp;</span><span class="ident">msg</span>); 
+      <span class="comment">// TODO dispatch events sent from other thread / other processes ( after first stable release )</span>
   }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Send a WM_QUIT to the system queue. Breaks the dispatch_events loop.
 */</span>
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>exit</span>() {
-  <span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>PostMessageW</span>;
-  <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>WM_QUIT</span>;
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">exit</span>() {
+  <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">PostMessageW</span>;
+  <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">WM_QUIT</span>;
 
-  <span class='ident'>PostMessageW</span>(<span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='ident'>WM_QUIT</span>, <span class='number'>0</span>, <span class='number'>0</span>);
+  <span class="ident">PostMessageW</span>(<span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="ident">WM_QUIT</span>, <span class="number">0</span>, <span class="number">0</span>);
 }
 
-<span class='kw'>fn</span> <span class='ident'>parse_mouse_click</span>(<span class='ident'>msg</span>: <span class='ident'>UINT</span>, <span class='ident'>l</span>: <span class='ident'>LPARAM</span>) <span class='op'>-&gt;</span> <span class='ident'>EventArgs</span> {
-  <span class='kw'>use</span> <span class='ident'>defs</span>::<span class='ident'>MouseButton</span>;
-  <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>WM_LBUTTONUP</span>, <span class='ident'>WM_LBUTTONDOWN</span>, <span class='ident'>WM_RBUTTONUP</span>, <span class='ident'>WM_RBUTTONDOWN</span>, <span class='ident'>WM_MBUTTONUP</span>, <span class='ident'>WM_MBUTTONDOWN</span>, 
-    <span class='ident'>GET_X_LPARAM</span>, <span class='ident'>GET_Y_LPARAM</span>};
+<span class="kw">fn</span> <span class="ident">parse_mouse_click</span>(<span class="ident">msg</span>: <span class="ident">UINT</span>, <span class="ident">l</span>: <span class="ident">LPARAM</span>) <span class="op">-&gt;</span> <span class="ident">EventArgs</span> {
+  <span class="kw">use</span> <span class="ident">defs</span>::<span class="ident">MouseButton</span>;
+  <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">WM_LBUTTONUP</span>, <span class="ident">WM_LBUTTONDOWN</span>, <span class="ident">WM_RBUTTONUP</span>, <span class="ident">WM_RBUTTONDOWN</span>, <span class="ident">WM_MBUTTONUP</span>, <span class="ident">WM_MBUTTONDOWN</span>, 
+    <span class="ident">GET_X_LPARAM</span>, <span class="ident">GET_Y_LPARAM</span>};
 
-  <span class='kw'>let</span> <span class='ident'>btn</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>msg</span> {
-    <span class='ident'>WM_LBUTTONUP</span> <span class='op'>|</span> <span class='ident'>WM_LBUTTONDOWN</span> <span class='op'>=&gt;</span> <span class='ident'>MouseButton</span>::<span class='ident'>Left</span>,
-    <span class='ident'>WM_RBUTTONUP</span> <span class='op'>|</span> <span class='ident'>WM_RBUTTONDOWN</span> <span class='op'>=&gt;</span> <span class='ident'>MouseButton</span>::<span class='ident'>Right</span>,
-    <span class='ident'>WM_MBUTTONUP</span> <span class='op'>|</span> <span class='ident'>WM_MBUTTONDOWN</span> <span class='op'>=&gt;</span> <span class='ident'>MouseButton</span>::<span class='ident'>Middle</span>,
-    _ <span class='op'>=&gt;</span> <span class='ident'>MouseButton</span>::<span class='ident'>Left</span>
+  <span class="kw">let</span> <span class="ident">btn</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">msg</span> {
+    <span class="ident">WM_LBUTTONUP</span> <span class="op">|</span> <span class="ident">WM_LBUTTONDOWN</span> <span class="op">=&gt;</span> <span class="ident">MouseButton</span>::<span class="ident">Left</span>,
+    <span class="ident">WM_RBUTTONUP</span> <span class="op">|</span> <span class="ident">WM_RBUTTONDOWN</span> <span class="op">=&gt;</span> <span class="ident">MouseButton</span>::<span class="ident">Right</span>,
+    <span class="ident">WM_MBUTTONUP</span> <span class="op">|</span> <span class="ident">WM_MBUTTONDOWN</span> <span class="op">=&gt;</span> <span class="ident">MouseButton</span>::<span class="ident">Middle</span>,
+    _ <span class="op">=&gt;</span> <span class="ident">MouseButton</span>::<span class="ident">Left</span>
   };
 
-  <span class='kw'>let</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>GET_X_LPARAM</span>(<span class='ident'>l</span>) <span class='kw'>as</span> <span class='ident'>i32</span>; 
-  <span class='kw'>let</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='ident'>GET_Y_LPARAM</span>(<span class='ident'>l</span>) <span class='kw'>as</span> <span class='ident'>i32</span>;
+  <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">GET_X_LPARAM</span>(<span class="ident">l</span>) <span class="kw">as</span> <span class="ident">i32</span>; 
+  <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">GET_Y_LPARAM</span>(<span class="ident">l</span>) <span class="kw">as</span> <span class="ident">i32</span>;
 
-  <span class='ident'>EventArgs</span>::<span class='ident'>MouseClick</span>{<span class='ident'>btn</span>: <span class='ident'>btn</span>, <span class='ident'>pos</span>: (<span class='ident'>x</span>, <span class='ident'>y</span>)}
+  <span class="ident">EventArgs</span>::<span class="ident">MouseClick</span>{<span class="ident">btn</span>: <span class="ident">btn</span>, <span class="ident">pos</span>: (<span class="ident">x</span>, <span class="ident">y</span>)}
 }</pre>
 </section>
     <section id='search' class="content hidden"></section>

@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -368,11 +368,21 @@
 <span id="323">323</span>
 <span id="324">324</span>
 <span id="325">325</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     Types, constants and extern functions used in the low-level part of NWG
 */</span>
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -388,311 +398,321 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>non_snake_case</span>)]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
+<span class="attribute">#<span class="op">!</span>[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
+<span class="attribute">#<span class="op">!</span>[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::{<span class='ident'>Any</span>, <span class='ident'>TypeId</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>};
 
-<span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>UINT</span>, <span class='ident'>LRESULT</span>, <span class='ident'>DWORD</span>, <span class='ident'>HBRUSH</span>, <span class='ident'>ULONG_PTR</span>, <span class='ident'>HMENU</span>, <span class='ident'>BOOL</span>, <span class='ident'>c_int</span>, <span class='ident'>MENUITEMINFOW</span>, <span class='ident'>IShellItem</span>, <span class='ident'>HRESULT</span>, <span class='ident'>IUnknownVtbl</span>,
- <span class='ident'>IUnknown</span>, <span class='ident'>PCWSTR</span>, <span class='ident'>IBindCtx</span>, <span class='ident'>REFIID</span>, <span class='ident'>D2D1_FACTORY_TYPE</span>, <span class='ident'>D2D1_FACTORY_OPTIONS</span>, <span class='ident'>ID2D1Factory</span>,<span class='ident'>c_void</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::{<span class='ident'>Deref</span>, <span class='ident'>DerefMut</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">UINT</span>, <span class="ident">LRESULT</span>, <span class="ident">DWORD</span>, <span class="ident">HBRUSH</span>, <span class="ident">ULONG_PTR</span>, <span class="ident">HMENU</span>, <span class="ident">BOOL</span>, <span class="ident">c_int</span>, <span class="ident">MENUITEMINFOW</span>, <span class="ident">IShellItem</span>, <span class="ident">HRESULT</span>, <span class="ident">IUnknownVtbl</span>,
+ <span class="ident">IUnknown</span>, <span class="ident">PCWSTR</span>, <span class="ident">IBindCtx</span>, <span class="ident">REFIID</span>, <span class="ident">D2D1_FACTORY_TYPE</span>, <span class="ident">D2D1_FACTORY_OPTIONS</span>, <span class="ident">ID2D1Factory</span>,<span class="ident">c_void</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
 
 
-<span class='kw'>use</span> <span class='ident'>events</span>::{<span class='ident'>Event</span>, <span class='ident'>EventCallback</span>};
-<span class='kw'>use</span> <span class='ident'>controls</span>::<span class='ident'>ControlT</span>;
-<span class='kw'>use</span> <span class='ident'>resources</span>::<span class='ident'>ResourceT</span>;
+<span class="kw">use</span> <span class="ident">events</span>::{<span class="ident">Event</span>, <span class="ident">EventCallback</span>, <span class="ident">EventArgs</span>};
+<span class="kw">use</span> <span class="ident">controls</span>::<span class="ident">ControlT</span>;
+<span class="kw">use</span> <span class="ident">resources</span>::<span class="ident">ResourceT</span>;
 
-<span class='comment'>// Custom message proc definitions</span>
+<span class="comment">// Custom message proc definitions</span>
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NWG_CUSTOM_MIN</span>:        <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x400</span>;  <span class='doccomment'>/// Minimum custom event value</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NWG_PACK_USER_VALUE</span>:   <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x400</span>;  <span class='doccomment'>/// Message sent when packing a user value</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NWG_PACK_CONTROL</span>:      <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x401</span>;  <span class='doccomment'>/// Message sent when packing a control</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NWG_UNPACK</span>:            <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x402</span>;  <span class='doccomment'>/// Message sent when removing an element from the ui</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NWG_BIND</span>:              <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x403</span>;  <span class='doccomment'>/// Message sent when binding an event to a control</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NWG_UNBIND</span>:            <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x404</span>;  <span class='doccomment'>/// Message sent when unbinding an event from a control</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NWG_PACK_RESOURCE</span>:     <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x405</span>;  <span class='doccomment'>/// Message sent when packing a resource</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NWG_CUSTOM_MAX</span>:        <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x406</span>;  <span class='doccomment'>/// Maximum custom event value</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_CUSTOM_MIN</span>:        <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x400</span>;  <span class="doccomment">/// Minimum custom event value</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_PACK_USER_VALUE</span>:   <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x400</span>;  <span class="doccomment">/// Message sent when packing a user value</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_PACK_CONTROL</span>:      <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x401</span>;  <span class="doccomment">/// Message sent when packing a control</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_UNPACK</span>:            <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x402</span>;  <span class="doccomment">/// Message sent when removing an element from the ui</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_BIND</span>:              <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x403</span>;  <span class="doccomment">/// Message sent when binding an event to a control</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_UNBIND</span>:            <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x404</span>;  <span class="doccomment">/// Message sent when unbinding an event from a control</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_PACK_RESOURCE</span>:     <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x405</span>;  <span class="doccomment">/// Message sent when packing a resource</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_TRIGGER</span>:           <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x406</span>;  <span class="doccomment">/// Message sent when triggering an event</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_CUSTOM_MAX</span>:        <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x407</span>;  <span class="doccomment">/// Maximum custom event value</span>
 
-<span class='comment'>// Value returned by a window proc if the message execution failed/succeeded</span>
+<span class="comment">// Value returned by a window proc if the message execution failed/succeeded</span>
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>COMMIT_SUCCESS</span>: <span class='ident'>LRESULT</span> <span class='op'>=</span> <span class='number'>0</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>COMMIT_FAILED</span>: <span class='ident'>LRESULT</span> <span class='op'>=</span> <span class='number'>5555</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">COMMIT_SUCCESS</span>: <span class="ident">LRESULT</span> <span class="op">=</span> <span class="number">0</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">COMMIT_FAILED</span>: <span class="ident">LRESULT</span> <span class="op">=</span> <span class="number">5555</span>;
 
-<span class='comment'>// Constants not included in winapi-rs</span>
+<span class="comment">// Constants not included in winapi-rs</span>
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MIM_STYLE</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x00000010</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MIM_STYLE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x00000010</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MIIM_STATE</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x00000001</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MIIM_ID</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x00000002</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MIIM_STATE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x00000001</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MIIM_ID</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x00000002</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MNS_NOTIFYBYPOS</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x08000000</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MNS_NOTIFYBYPOS</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x08000000</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MFS_DISABLED</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x00000003</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MFS_ENABLED</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x00000000</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MFS_DISABLED</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x00000003</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MFS_ENABLED</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x00000000</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MF_BYPOSITION</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x00000400</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MF_SEPARATOR</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x00000800</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MF_BYPOSITION</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x00000400</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MF_SEPARATOR</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x00000800</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ACTCTX_FLAG_RESOURCE_NAME_VALID</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x008</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ACTCTX_FLAG_SET_PROCESS_DEFAULT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x010</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x004</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ACTCTX_FLAG_RESOURCE_NAME_VALID</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x008</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ACTCTX_FLAG_SET_PROCESS_DEFAULT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x010</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x004</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_ADDSTRING</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>384</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_INSERTSTRING</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>385</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_DELETESTRING</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>386</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_SELITEMRANGEEX</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>387</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_RESETCONTENT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>388</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_SETSEL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>389</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_SETCURSEL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>390</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_GETCURSEL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>392</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_GETTEXT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>393</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_GETTEXTLEN</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>394</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_GETSEL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>391</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_FINDSTRING</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>399</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_GETSELCOUNT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>400</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_GETSELITEMS</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>401</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LB_FINDSTRINGEXACT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>418</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_ADDSTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">384</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_INSERTSTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">385</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_DELETESTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">386</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_SELITEMRANGEEX</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">387</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_RESETCONTENT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">388</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_SETSEL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">389</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_SETCURSEL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">390</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_GETCURSEL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">392</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_GETTEXT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">393</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_GETTEXTLEN</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">394</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_GETSEL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">391</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_FINDSTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">399</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_GETSELCOUNT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">400</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_GETSELITEMS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">401</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_FINDSTRINGEXACT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">418</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LBS_NOTIFY</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>1</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LBS_NOSEL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x4000</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LBS_HASSTRINGS</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>64</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LBS_MULTIPLESEL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>8</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBS_NOTIFY</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBS_NOSEL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x4000</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBS_HASSTRINGS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">64</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBS_MULTIPLESEL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">8</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LBN_SELCHANGE</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>1</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LBN_DBLCLK</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>2</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LBN_SETFOCUS</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>4</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LBN_KILLFOCUS</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>5</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_SELCHANGE</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_DBLCLK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">2</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_SETFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_KILLFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">5</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BN_CLICKED</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BN_DBLCLK</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>5</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BN_SETFOCUS</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>6</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BN_KILLFOCUS</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>7</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BN_CLICKED</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BN_DBLCLK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">5</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BN_SETFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">6</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BN_KILLFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">7</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BM_SETCHECK</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>241</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BM_GETCHECK</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>240</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BM_SETCHECK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">241</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BM_GETCHECK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">240</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BST_CHECKED</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>1</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BST_INDETERMINATE</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>2</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BST_UNCHECKED</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BST_CHECKED</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BST_INDETERMINATE</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">2</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BST_UNCHECKED</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SS_NOTIFY</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>256</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SS_RIGHT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>2</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SS_LEFT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SS_CENTER</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>1</span>;   
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SS_NOPREFIX</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>128</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SS_NOTIFY</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">256</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SS_RIGHT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">2</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SS_LEFT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SS_CENTER</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1</span>;   
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SS_NOPREFIX</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">128</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CBS_DROPDOWNLIST</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>3</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CBS_HASSTRINGS</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>512</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CBS_DROPDOWNLIST</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">3</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CBS_HASSTRINGS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">512</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_ADDSTRING</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>323</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_RESETCONTENT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>331</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_DELETESTRING</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>324</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_INSERTSTRING</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>330</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_FINDSTRING</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>332</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_FINDSTRINGEXACT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>344</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_GETCURSEL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>327</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_GETDROPPEDSTATE</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>343</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_GETLBTEXT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>328</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_GETLBTEXTLEN</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>329</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_SETCURSEL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>334</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_SHOWDROPDOWN</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>335</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CB_SETCUEBANNER</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>5891</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_ADDSTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">323</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_RESETCONTENT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">331</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_DELETESTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">324</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_INSERTSTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">330</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_FINDSTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">332</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_FINDSTRINGEXACT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">344</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_GETCURSEL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">327</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_GETDROPPEDSTATE</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">343</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_GETLBTEXT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">328</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_GETLBTEXTLEN</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">329</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_SETCURSEL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">334</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_SHOWDROPDOWN</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">335</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CB_SETCUEBANNER</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">5891</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ES_AUTOHSCROLL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>128</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ES_AUTOVSCROLL</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>64</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ES_PASSWORD</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>32</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ES_READONLY</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0x800</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ES_MULTILINE</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>4</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ES_AUTOHSCROLL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">128</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ES_AUTOVSCROLL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">64</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ES_PASSWORD</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">32</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ES_READONLY</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x800</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ES_MULTILINE</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">4</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EM_LIMITTEXT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>197</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EM_GETLIMITTEXT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>213</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EM_LIMITTEXT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">197</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EM_GETLIMITTEXT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">213</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EN_SETFOCUS</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>256</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EN_KILLFOCUS</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>512</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EN_UPDATE</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>1024</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EN_MAXTEXT</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>1281</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_SETFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">256</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_KILLFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">512</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_UPDATE</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1024</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_MAXTEXT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1281</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>STN_CLICKED</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>STN_DBLCLK</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>1</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STN_CLICKED</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STN_DBLCLK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>IDABORT</span>: <span class='ident'>i32</span> <span class='op'>=</span> <span class='number'>3</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>IDCANCEL</span>: <span class='ident'>i32</span> <span class='op'>=</span> <span class='number'>2</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>IDCONTINUE</span>: <span class='ident'>i32</span> <span class='op'>=</span> <span class='number'>11</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>IDIGNORE</span>: <span class='ident'>i32</span> <span class='op'>=</span> <span class='number'>5</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>IDNO</span>: <span class='ident'>i32</span> <span class='op'>=</span> <span class='number'>7</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>IDOK</span>: <span class='ident'>i32</span> <span class='op'>=</span> <span class='number'>1</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>IDRETRY</span>: <span class='ident'>i32</span> <span class='op'>=</span> <span class='number'>4</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>IDTRYAGAIN</span>: <span class='ident'>i32</span> <span class='op'>=</span> <span class='number'>10</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>IDYES</span>: <span class='ident'>i32</span> <span class='op'>=</span> <span class='number'>6</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDABORT</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">3</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDCANCEL</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">2</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDCONTINUE</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">11</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDIGNORE</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">5</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDNO</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">7</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDOK</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">1</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDRETRY</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDTRYAGAIN</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">10</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDYES</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">6</span>;
 
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SFGAO_FOLDER</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x20000000</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SFGAO_FOLDER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x20000000</span>;
 
-<span class='comment'>// System structs</span>
-<span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span>
-<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>non_snake_case</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MENUINFO</span> {
-    <span class='kw'>pub</span> <span class='ident'>cbSize</span>: <span class='ident'>DWORD</span>,
-    <span class='kw'>pub</span> <span class='ident'>fMask</span>: <span class='ident'>DWORD</span>,
-    <span class='kw'>pub</span> <span class='ident'>dwStyle</span>: <span class='ident'>DWORD</span>,
-    <span class='kw'>pub</span> <span class='ident'>cyMax</span>: <span class='ident'>UINT</span>,
-    <span class='kw'>pub</span> <span class='ident'>hbrBack</span>: <span class='ident'>HBRUSH</span>,
-    <span class='kw'>pub</span> <span class='ident'>dwContextHelpID</span>: <span class='ident'>DWORD</span>,
-    <span class='kw'>pub</span> <span class='ident'>dwMenuData</span>: <span class='ident'>ULONG_PTR</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STATE_SYSTEM_CHECKED</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x10</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STATE_SYSTEM_INVISIBLE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x8000</span>;
+
+<span class="comment">// System structs</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MENUINFO</span> {
+    <span class="kw">pub</span> <span class="ident">cbSize</span>: <span class="ident">DWORD</span>,
+    <span class="kw">pub</span> <span class="ident">fMask</span>: <span class="ident">DWORD</span>,
+    <span class="kw">pub</span> <span class="ident">dwStyle</span>: <span class="ident">DWORD</span>,
+    <span class="kw">pub</span> <span class="ident">cyMax</span>: <span class="ident">UINT</span>,
+    <span class="kw">pub</span> <span class="ident">hbrBack</span>: <span class="ident">HBRUSH</span>,
+    <span class="kw">pub</span> <span class="ident">dwContextHelpID</span>: <span class="ident">DWORD</span>,
+    <span class="kw">pub</span> <span class="ident">dwMenuData</span>: <span class="ident">ULONG_PTR</span>
 }
 
-<span class='comment'>// COM interfaces</span>
-<span class='comment'>// Unused functions have an empty signature</span>
+<span class="comment">// COM interfaces</span>
+<span class="comment">// Unused functions have an empty signature</span>
 
-<span class='comment'>// MACRO taken from winapi. Original author: Peter Atashian (retep998)</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>RIDL</span> {
-    (<span class='ident'>interface</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span>:<span class='ident'>ident</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vtbl</span>:<span class='ident'>ident</span>) {$(
-        <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>:<span class='ident'>ident</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span> $(,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>ident</span> : <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='kw-2'>*</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rtr</span>:<span class='ident'>ty</span>
-    ),<span class='op'>+</span>}) <span class='op'>=&gt;</span> (
-        <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span> <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_copy_implementations</span>)]</span>
-        <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vtbl</span> {
-            $(<span class='kw'>pub</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>: <span class='kw'>unsafe</span> <span class='kw'>extern</span> <span class='string'>&quot;system&quot;</span> <span class='kw'>fn</span>(
-                <span class='ident'>This</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span>
-                $(,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>)<span class='op'>*</span>
-            ) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rtr</span>),<span class='op'>+</span>
+<span class="comment">// MACRO taken from winapi. Original author: Peter Atashian (retep998)</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">RIDL</span> {
+    (<span class="ident">interface</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span>:<span class="ident">ident</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">vtbl</span>:<span class="ident">ident</span>) {$(
+        <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">method</span>:<span class="ident">ident</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span> $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>)<span class="kw-2">*</span>) <span class="op">-&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rtr</span>:<span class="ident">ty</span>
+    ),<span class="op">+</span>}) <span class="op">=&gt;</span> (
+        <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span> <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_copy_implementations</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">vtbl</span> {
+            $(<span class="kw">pub</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">method</span>: <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;system&quot;</span> <span class="kw">fn</span>(
+                <span class="ident">This</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span>
+                $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>)<span class="op">*</span>
+            ) <span class="op">-&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rtr</span>),<span class="op">+</span>
         }
-        <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span> <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_copy_implementations</span>)]</span>
-        <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {
-            <span class='kw'>pub</span> <span class='ident'>lpVtbl</span>: <span class='kw-2'>*</span><span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vtbl</span>
+        <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span> <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_copy_implementations</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {
+            <span class="kw">pub</span> <span class="ident">lpVtbl</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">vtbl</span>
         }
-        <span class='macro'>RIDL</span><span class='macro'>!</span>{@<span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {$(<span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span> $(,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>)<span class='kw-2'>*</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rtr</span>),<span class='op'>+</span>}}
+        <span class="macro">RIDL</span><span class="macro">!</span>{@<span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {$(<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">method</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span> $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>)<span class="kw-2">*</span>) <span class="op">-&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rtr</span>),<span class="op">+</span>}}
     );
-    (<span class='ident'>interface</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span>:<span class='ident'>ident</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vtbl</span>:<span class='ident'>ident</span>) : <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pinterface</span>:<span class='ident'>ident</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pvtbl</span>:<span class='ident'>ident</span>) {
-    }) <span class='op'>=&gt;</span> (
-        <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span> <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_copy_implementations</span>)]</span>
-        <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vtbl</span> {
-            <span class='kw'>pub</span> <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pvtbl</span>
+    (<span class="ident">interface</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span>:<span class="ident">ident</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">vtbl</span>:<span class="ident">ident</span>) : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pinterface</span>:<span class="ident">ident</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pvtbl</span>:<span class="ident">ident</span>) {
+    }) <span class="op">=&gt;</span> (
+        <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span> <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_copy_implementations</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">vtbl</span> {
+            <span class="kw">pub</span> <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pvtbl</span>
         }
-        <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span> <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_copy_implementations</span>)]</span>
-        <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {
-            <span class='kw'>pub</span> <span class='ident'>lpVtbl</span>: <span class='kw-2'>*</span><span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vtbl</span>
+        <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span> <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_copy_implementations</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {
+            <span class="kw">pub</span> <span class="ident">lpVtbl</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">vtbl</span>
         }
-        <span class='kw'>impl</span> <span class='ident'>Deref</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {
-            <span class='kw'>type</span> <span class='ident'>Target</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pinterface</span>;
-            <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-            <span class='kw'>fn</span> <span class='ident'>deref</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pinterface</span> {
-                <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>*</span>(<span class='self'>self</span> <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw'>const</span> _ <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw'>const</span> _) }
+        <span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {
+            <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pinterface</span>;
+            <span class="attribute">#[<span class="ident">inline</span>]</span>
+            <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">pinterface</span> {
+                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> _ <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> _) }
             }
         }
-        <span class='kw'>impl</span> <span class='ident'>DerefMut</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {
-            <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-            <span class='kw'>fn</span> <span class='ident'>deref_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pinterface</span> {
-                <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span>(<span class='self'>self</span> <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> _ <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> _) }
-            }
-        }
-    );
-    (<span class='ident'>interface</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span>:<span class='ident'>ident</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vtbl</span>:<span class='ident'>ident</span>) : <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pinterface</span>:<span class='ident'>ident</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pvtbl</span>:<span class='ident'>ident</span>) {$(
-        <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>:<span class='ident'>ident</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span> $(,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>ident</span> : <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='kw-2'>*</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rtr</span>:<span class='ident'>ty</span>
-    ),<span class='op'>+</span>}) <span class='op'>=&gt;</span> (
-        <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span> <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_copy_implementations</span>)]</span>
-        <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vtbl</span> {
-            <span class='kw'>pub</span> <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pvtbl</span>
-            $(,<span class='kw'>pub</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>: <span class='kw'>unsafe</span> <span class='kw'>extern</span> <span class='string'>&quot;system&quot;</span> <span class='kw'>fn</span>(
-                <span class='ident'>This</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span>
-                $(,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>)<span class='op'>*</span>
-            ) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rtr</span>)<span class='op'>+</span>
-        }
-        <span class='attribute'>#[<span class='ident'>repr</span>(<span class='ident'>C</span>)]</span> <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>missing_copy_implementations</span>)]</span>
-        <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {
-            <span class='kw'>pub</span> <span class='ident'>lpVtbl</span>: <span class='kw-2'>*</span><span class='kw'>const</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vtbl</span>
-        }
-        <span class='macro'>RIDL</span><span class='macro'>!</span>{@<span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {$(<span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span> $(,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>)<span class='kw-2'>*</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rtr</span>),<span class='op'>+</span>}}
-        <span class='kw'>impl</span> <span class='ident'>Deref</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {
-            <span class='kw'>type</span> <span class='ident'>Target</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pinterface</span>;
-            <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-            <span class='kw'>fn</span> <span class='ident'>deref</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pinterface</span> {
-                <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>*</span>(<span class='self'>self</span> <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw'>const</span> _ <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw'>const</span> _) }
-            }
-        }
-        <span class='kw'>impl</span> <span class='ident'>DerefMut</span> <span class='kw'>for</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {
-            <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-            <span class='kw'>fn</span> <span class='ident'>deref_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>pinterface</span> {
-                <span class='kw'>unsafe</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span>(<span class='self'>self</span> <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> _ <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> _) }
+        <span class="kw">impl</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {
+            <span class="attribute">#[<span class="ident">inline</span>]</span>
+            <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pinterface</span> {
+                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span>(<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> _ <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> _) }
             }
         }
     );
-    (@<span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span>:<span class='ident'>ident</span> {$(
-        <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>:<span class='ident'>ident</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span> $(,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>ident</span> : <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>)<span class='kw-2'>*</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rtr</span>:<span class='ident'>ty</span>
-    ),<span class='op'>+</span>}) <span class='op'>=&gt;</span> (
-        <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>interface</span> {
-            <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-            $(<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span> $(,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>)<span class='kw-2'>*</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rtr</span> {
-                ((<span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>lpVtbl</span>).<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>)(<span class='self'>self</span> $(,<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>)<span class='kw-2'>*</span>)
-            })<span class='op'>+</span>
+    (<span class="ident">interface</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span>:<span class="ident">ident</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">vtbl</span>:<span class="ident">ident</span>) : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pinterface</span>:<span class="ident">ident</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pvtbl</span>:<span class="ident">ident</span>) {$(
+        <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">method</span>:<span class="ident">ident</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span> $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>)<span class="kw-2">*</span>) <span class="op">-&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rtr</span>:<span class="ident">ty</span>
+    ),<span class="op">+</span>}) <span class="op">=&gt;</span> (
+        <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span> <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_copy_implementations</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">vtbl</span> {
+            <span class="kw">pub</span> <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pvtbl</span>
+            $(,<span class="kw">pub</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">method</span>: <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;system&quot;</span> <span class="kw">fn</span>(
+                <span class="ident">This</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span>
+                $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>)<span class="op">*</span>
+            ) <span class="op">-&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rtr</span>)<span class="op">+</span>
+        }
+        <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span> <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_copy_implementations</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {
+            <span class="kw">pub</span> <span class="ident">lpVtbl</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">vtbl</span>
+        }
+        <span class="macro">RIDL</span><span class="macro">!</span>{@<span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {$(<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">method</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span> $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>)<span class="kw-2">*</span>) <span class="op">-&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rtr</span>),<span class="op">+</span>}}
+        <span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {
+            <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pinterface</span>;
+            <span class="attribute">#[<span class="ident">inline</span>]</span>
+            <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">pinterface</span> {
+                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> _ <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> _) }
+            }
+        }
+        <span class="kw">impl</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {
+            <span class="attribute">#[<span class="ident">inline</span>]</span>
+            <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pinterface</span> {
+                <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span>(<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> _ <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> _) }
+            }
+        }
+    );
+    (@<span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span>:<span class="ident">ident</span> {$(
+        <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">method</span>:<span class="ident">ident</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span> $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>)<span class="kw-2">*</span>) <span class="op">-&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rtr</span>:<span class="ident">ty</span>
+    ),<span class="op">+</span>}) <span class="op">=&gt;</span> (
+        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">interface</span> {
+            <span class="attribute">#[<span class="ident">inline</span>]</span>
+            $(<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">method</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span> $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>)<span class="kw-2">*</span>) <span class="op">-&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rtr</span> {
+                ((<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">lpVtbl</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">method</span>)(<span class="self">self</span> $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>)<span class="kw-2">*</span>)
+            })<span class="op">+</span>
         }
     );
 }
 
-<span class='macro'>RIDL</span><span class='macro'>!</span>(
-<span class='ident'>interface</span> <span class='ident'>IShellItemArray</span>(<span class='ident'>IShellItemArrayVtbl</span>): <span class='ident'>IUnknown</span>(<span class='ident'>IUnknownVtbl</span>) {
-    <span class='kw'>fn</span> <span class='ident'>BindToHandler</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> (),
-    <span class='kw'>fn</span> <span class='ident'>GetPropertyStore</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> (),
-    <span class='kw'>fn</span> <span class='ident'>GetPropertyDescriptionList</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> (),
-    <span class='kw'>fn</span> <span class='ident'>GetAttributes</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> (),
-    <span class='kw'>fn</span> <span class='ident'>GetCount</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>pdwNumItems</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>DWORD</span>) <span class='op'>-&gt;</span> <span class='ident'>HRESULT</span>,
-    <span class='kw'>fn</span> <span class='ident'>GetItemAt</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>dwIndex</span>: <span class='ident'>DWORD</span>, <span class='ident'>ppsi</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>IShellItem</span>) <span class='op'>-&gt;</span> <span class='ident'>HRESULT</span>,
-    <span class='kw'>fn</span> <span class='ident'>EnumItems</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> ()
+<span class="macro">RIDL</span><span class="macro">!</span>(
+<span class="ident">interface</span> <span class="ident">IShellItemArray</span>(<span class="ident">IShellItemArrayVtbl</span>): <span class="ident">IUnknown</span>(<span class="ident">IUnknownVtbl</span>) {
+    <span class="kw">fn</span> <span class="ident">BindToHandler</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> (),
+    <span class="kw">fn</span> <span class="ident">GetPropertyStore</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> (),
+    <span class="kw">fn</span> <span class="ident">GetPropertyDescriptionList</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> (),
+    <span class="kw">fn</span> <span class="ident">GetAttributes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> (),
+    <span class="kw">fn</span> <span class="ident">GetCount</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pdwNumItems</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">DWORD</span>) <span class="op">-&gt;</span> <span class="ident">HRESULT</span>,
+    <span class="kw">fn</span> <span class="ident">GetItemAt</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dwIndex</span>: <span class="ident">DWORD</span>, <span class="ident">ppsi</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">IShellItem</span>) <span class="op">-&gt;</span> <span class="ident">HRESULT</span>,
+    <span class="kw">fn</span> <span class="ident">EnumItems</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> ()
 }
 );
 
-<span class='comment'>// System extern</span>
-<span class='kw'>extern</span> <span class='string'>&quot;system&quot;</span> {
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>GetMenuItemCount</span>(<span class='ident'>menu</span>: <span class='ident'>HMENU</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span>;
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>GetSubMenu</span>(<span class='ident'>hMenu</span>: <span class='ident'>HMENU</span>, <span class='ident'>nPos</span>: <span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>HMENU</span>;
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>SetMenuInfo</span>(<span class='ident'>menu</span>: <span class='ident'>HMENU</span>, <span class='ident'>info</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>MENUINFO</span>) <span class='op'>-&gt;</span> <span class='ident'>BOOL</span>;
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>RemoveMenu</span>(<span class='ident'>menu</span>: <span class='ident'>HMENU</span>, <span class='ident'>pos</span>: <span class='ident'>UINT</span>, <span class='ident'>flags</span>: <span class='ident'>UINT</span>) <span class='op'>-&gt;</span> <span class='ident'>BOOL</span>;
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>GetMenuItemID</span>(<span class='ident'>menu</span>: <span class='ident'>HMENU</span>, <span class='ident'>index</span>: <span class='ident'>c_int</span>) <span class='op'>-&gt;</span> <span class='ident'>UINT</span>;
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>SetMenuItemInfoW</span>(<span class='ident'>hMenu</span>: <span class='ident'>HMENU</span>, <span class='ident'>uItem</span>: <span class='ident'>UINT</span>, <span class='ident'>gByPosition</span>: <span class='ident'>BOOL</span>, <span class='ident'>lpmii</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>MENUITEMINFOW</span>) <span class='op'>-&gt;</span> <span class='ident'>BOOL</span>;
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>GetMenuItemInfoW</span>(<span class='ident'>hMenu</span>: <span class='ident'>HMENU</span>, <span class='ident'>uItem</span>: <span class='ident'>UINT</span>, <span class='ident'>gByPosition</span>: <span class='ident'>BOOL</span>, <span class='ident'>lpmii</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>MENUITEMINFOW</span>) <span class='op'>-&gt;</span> <span class='ident'>BOOL</span>;
+<span class="comment">// System extern</span>
+<span class="kw">extern</span> <span class="string">&quot;system&quot;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">GetMenuItemCount</span>(<span class="ident">menu</span>: <span class="ident">HMENU</span>) <span class="op">-&gt;</span> <span class="ident">c_int</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">GetSubMenu</span>(<span class="ident">hMenu</span>: <span class="ident">HMENU</span>, <span class="ident">nPos</span>: <span class="ident">c_int</span>) <span class="op">-&gt;</span> <span class="ident">HMENU</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">SetMenuInfo</span>(<span class="ident">menu</span>: <span class="ident">HMENU</span>, <span class="ident">info</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MENUINFO</span>) <span class="op">-&gt;</span> <span class="ident">BOOL</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">RemoveMenu</span>(<span class="ident">menu</span>: <span class="ident">HMENU</span>, <span class="ident">pos</span>: <span class="ident">UINT</span>, <span class="ident">flags</span>: <span class="ident">UINT</span>) <span class="op">-&gt;</span> <span class="ident">BOOL</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">GetMenuItemID</span>(<span class="ident">menu</span>: <span class="ident">HMENU</span>, <span class="ident">index</span>: <span class="ident">c_int</span>) <span class="op">-&gt;</span> <span class="ident">UINT</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">SetMenuItemInfoW</span>(<span class="ident">hMenu</span>: <span class="ident">HMENU</span>, <span class="ident">uItem</span>: <span class="ident">UINT</span>, <span class="ident">gByPosition</span>: <span class="ident">BOOL</span>, <span class="ident">lpmii</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MENUITEMINFOW</span>) <span class="op">-&gt;</span> <span class="ident">BOOL</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">GetMenuItemInfoW</span>(<span class="ident">hMenu</span>: <span class="ident">HMENU</span>, <span class="ident">uItem</span>: <span class="ident">UINT</span>, <span class="ident">gByPosition</span>: <span class="ident">BOOL</span>, <span class="ident">lpmii</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MENUITEMINFOW</span>) <span class="op">-&gt;</span> <span class="ident">BOOL</span>;
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>SHCreateItemFromParsingName</span>(<span class='ident'>pszPath</span>: <span class='ident'>PCWSTR</span>, <span class='ident'>pbc</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>IBindCtx</span>, <span class='ident'>riid</span>: <span class='ident'>REFIID</span>, <span class='ident'>ppv</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>c_void</span>) <span class='op'>-&gt;</span> <span class='ident'>HRESULT</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">SHCreateItemFromParsingName</span>(<span class="ident">pszPath</span>: <span class="ident">PCWSTR</span>, <span class="ident">pbc</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">IBindCtx</span>, <span class="ident">riid</span>: <span class="ident">REFIID</span>, <span class="ident">ppv</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>) <span class="op">-&gt;</span> <span class="ident">HRESULT</span>;
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>D2D1CreateFactory</span>(
-        <span class='ident'>factoryType</span>: <span class='ident'>D2D1_FACTORY_TYPE</span>,
-		<span class='ident'>riid</span>: <span class='ident'>REFIID</span>, 
-		<span class='ident'>pFactoryOptions</span>: <span class='kw-2'>*</span><span class='kw'>const</span> <span class='ident'>D2D1_FACTORY_OPTIONS</span>,
-        <span class='ident'>ppIFactory</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1Factory</span>
-    ) <span class='op'>-&gt;</span> <span class='ident'>HRESULT</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">D2D1CreateFactory</span>(
+        <span class="ident">factoryType</span>: <span class="ident">D2D1_FACTORY_TYPE</span>,
+		<span class="ident">riid</span>: <span class="ident">REFIID</span>, 
+		<span class="ident">pFactoryOptions</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">D2D1_FACTORY_OPTIONS</span>,
+        <span class="ident">ppIFactory</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1Factory</span>
+    ) <span class="op">-&gt;</span> <span class="ident">HRESULT</span>;
 }
 
-<span class='comment'>// Arguments passed to the NWG custom events </span>
+<span class="comment">// Arguments passed to the NWG custom events </span>
 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>PackUserValueArgs</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>id</span>: <span class='ident'>ID</span>,
-    <span class='kw'>pub</span> <span class='ident'>tid</span>: <span class='ident'>TypeId</span>,
-    <span class='kw'>pub</span> <span class='ident'>value</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PackUserValueArgs</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">ID</span>,
+    <span class="kw">pub</span> <span class="ident">tid</span>: <span class="ident">TypeId</span>,
+    <span class="kw">pub</span> <span class="ident">value</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;</span>
 }
 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>UnpackArgs</span> {
-    <span class='kw'>pub</span> <span class='ident'>id</span>: <span class='ident'>u64</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnpackArgs</span> {
+    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">u64</span>
 }
 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>PackControlArgs</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>id</span>: <span class='ident'>ID</span>,
-    <span class='kw'>pub</span> <span class='ident'>value</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>ControlT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PackControlArgs</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">ID</span>,
+    <span class="kw">pub</span> <span class="ident">value</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;&gt;</span>
 }
 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>PackResourceArgs</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>id</span>: <span class='ident'>ID</span>,
-    <span class='kw'>pub</span> <span class='ident'>value</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>ResourceT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PackResourceArgs</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">ID</span>,
+    <span class="kw">pub</span> <span class="ident">value</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ResourceT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;&gt;</span>
 }
 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BindArgs</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>+</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>id</span>: <span class='ident'>u64</span>,
-    <span class='kw'>pub</span> <span class='ident'>cb_id</span>: <span class='ident'>u64</span>,
-    <span class='kw'>pub</span> <span class='ident'>event</span>: <span class='ident'>Event</span>,
-    <span class='kw'>pub</span> <span class='ident'>cb</span>: <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>EventCallback</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BindArgs</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">+</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">u64</span>,
+    <span class="kw">pub</span> <span class="ident">cb_id</span>: <span class="ident">u64</span>,
+    <span class="kw">pub</span> <span class="ident">event</span>: <span class="ident">Event</span>,
+    <span class="kw">pub</span> <span class="ident">cb</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">EventCallback</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;&gt;</span>
 }
 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>UnbindArgs</span> {
-    <span class='kw'>pub</span> <span class='ident'>id</span>: <span class='ident'>u64</span>,
-    <span class='kw'>pub</span> <span class='ident'>cb_id</span>: <span class='ident'>u64</span>,
-    <span class='kw'>pub</span> <span class='ident'>event</span>: <span class='ident'>Event</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnbindArgs</span> {
+    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">u64</span>,
+    <span class="kw">pub</span> <span class="ident">cb_id</span>: <span class="ident">u64</span>,
+    <span class="kw">pub</span> <span class="ident">event</span>: <span class="ident">Event</span>
+}
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TriggerArgs</span> {
+    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">u64</span>,
+    <span class="kw">pub</span> <span class="ident">event</span>: <span class="ident">Event</span>,
+    <span class="kw">pub</span> <span class="ident">args</span>: <span class="ident">EventArgs</span>
 }</pre>
 </section>
     <section id='search' class="content hidden"></section>

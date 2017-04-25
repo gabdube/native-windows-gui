@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -773,12 +773,51 @@
 <span id="728">728</span>
 <span id="729">729</span>
 <span id="730">730</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     Macro based template system.
 */</span>
 
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dub�
 
     This program is free software: you can redistribute it and/or modify
@@ -795,7 +834,7 @@
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Return controls from the Ui. Panics if one of the controls could not be retrieved.  
     
     
@@ -805,20 +844,20 @@
     `let control = nwg_get!(ui; (control ID, control type))`  
     `let (control1, control2) = nwg_get!(ui; [(control1_ID, control1 type), (control2_ID, control2_type)])`  
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_get</span> {
-    ( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>:<span class='ident'>ident</span>; (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>) ) <span class='op'>=&gt;</span> {
-        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>.<span class='ident'>get</span>::<span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Failed to find a control&quot;</span>)
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_get</span> {
+    ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>:<span class="ident">ident</span>; (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>) ) <span class="op">=&gt;</span> {
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>.<span class="ident">get</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to find a control&quot;</span>)
     };
 
-    ( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>:<span class='ident'>ident</span>; [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>) ),<span class='op'>*</span> ] ) <span class='op'>=&gt;</span> {
+    ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>:<span class="ident">ident</span>; [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>) ),<span class="op">*</span> ] ) <span class="op">=&gt;</span> {
         (
-            $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>.<span class='ident'>get</span>::<span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Failed to find a control&quot;</span>) ),<span class='op'>*</span>
+            $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>.<span class="ident">get</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to find a control&quot;</span>) ),<span class="op">*</span>
         )
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Return controls from the Ui. Panics if one of the controls could not be retrieved.  
     
     
@@ -828,20 +867,20 @@
     `let control = nwg_get_mut!(ui; (control ID, control type))`  
     `let (control1, control2) = nwg_get_mut!(ui; [(control1_ID, control1 type), (control2_ID, control2_type)])`  
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_get_mut</span> {
-    ( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>:<span class='ident'>ident</span>; (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>) ) <span class='op'>=&gt;</span> {
-        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>.<span class='ident'>get_mut</span>::<span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Failed to find a control&quot;</span>)
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_get_mut</span> {
+    ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>:<span class="ident">ident</span>; (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>) ) <span class="op">=&gt;</span> {
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>.<span class="ident">get_mut</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to find a control&quot;</span>)
     };
 
-    ( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>:<span class='ident'>ident</span>; [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>) ),<span class='op'>*</span> ] ) <span class='op'>=&gt;</span> {
+    ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>:<span class="ident">ident</span>; [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>) ),<span class="op">*</span> ] ) <span class="op">=&gt;</span> {
         (
-            $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>.<span class='ident'>get_mut</span>::<span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Failed to find a control&quot;</span>) ),<span class='op'>*</span>
+            $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>.<span class="ident">get_mut</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to find a control&quot;</span>) ),<span class="op">*</span>
         )
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Generates a function that initialize the content of a UI. 
 
     **head**: Define the name of the function and Ui key type. Ex: `my_function&lt;my_type&gt;`
@@ -877,35 +916,35 @@
     ```
 
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_template</span> {
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_template</span> {
     (
-        <span class='ident'>head</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>:<span class='ident'>ident</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span><span class='op'>&gt;</span>,
-        <span class='ident'>controls</span>: [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i1</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>c</span>:<span class='ident'>expr</span>) ),<span class='op'>*</span> ];
-        <span class='ident'>events</span>: [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i4</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i5</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>b</span>:<span class='ident'>expr</span>) ),<span class='op'>*</span>  ];
-        <span class='ident'>resources</span>: [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i2</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>r</span>:<span class='ident'>expr</span>) ),<span class='op'>*</span> ];
-        <span class='ident'>values</span>: [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i3</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span>) ),<span class='op'>*</span> ]
-    ) <span class='op'>=&gt;</span> 
+        <span class="ident">head</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span><span class="op">&gt;</span>,
+        <span class="ident">controls</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i1</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ];
+        <span class="ident">events</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i4</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i5</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>:<span class="ident">expr</span>) ),<span class="op">*</span>  ];
+        <span class="ident">resources</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i2</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">r</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ];
+        <span class="ident">values</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i3</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ]
+    ) <span class="op">=&gt;</span> 
     {
 
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>(<span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>Ui</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>Error</span><span class='op'>&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>(<span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">Ui</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">Error</span><span class="op">&gt;</span> {
 
-    $( <span class='ident'>ui</span>.<span class='ident'>pack_value</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i3</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>); );<span class='op'>*</span>
+    $( <span class="ident">ui</span>.<span class="ident">pack_value</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">i3</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>); );<span class="op">*</span>
 
-    $( <span class='ident'>ui</span>.<span class='ident'>pack_resource</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i2</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>r</span>); );<span class='op'>*</span>
+    $( <span class="ident">ui</span>.<span class="ident">pack_resource</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">i2</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">r</span>); );<span class="op">*</span>
 
-    $( <span class='ident'>ui</span>.<span class='ident'>pack_control</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i1</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>c</span>); );<span class='op'>*</span>
-    $( <span class='ident'>ui</span>.<span class='ident'>bind</span>(<span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i4</span>, <span class='kw-2'>&amp;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i5</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>b</span>); );<span class='op'>*</span>
+    $( <span class="ident">ui</span>.<span class="ident">pack_control</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">i1</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>); );<span class="op">*</span>
+    $( <span class="ident">ui</span>.<span class="ident">bind</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">i4</span>, <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">i5</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>); );<span class="op">*</span>
    
-    <span class='ident'>ui</span>.<span class='ident'>commit</span>()
+    <span class="ident">ui</span>.<span class="ident">commit</span>()
 }
        
     }
 }
 
-<span class='comment'>//---- Controls ----//</span>
+<span class="comment">//---- Controls ----//</span>
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the Window control.
 
     Defaults:  
@@ -922,24 +961,24 @@
     `nwg_window!(visible=false; resizable=true)`  
     `nwg_window!(\* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_window</span> {
-    ( $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>WindowT</span>{ 
-            <span class='ident'>title</span>: <span class='string'>&quot;Native Windows GUI&quot;</span>, 
-            <span class='ident'>position</span>: (<span class='number'>100</span>, <span class='number'>100</span>), <span class='ident'>size</span>: (<span class='number'>800</span>, <span class='number'>600</span>), 
-            <span class='ident'>resizable</span>: <span class='bool-val'>false</span>, <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, 
-            <span class='ident'>exit_on_close</span>: <span class='bool-val'>true</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_window</span> {
+    ( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">WindowT</span>{ 
+            <span class="ident">title</span>: <span class="string">&quot;Native Windows GUI&quot;</span>, 
+            <span class="ident">position</span>: (<span class="number">100</span>, <span class="number">100</span>), <span class="ident">size</span>: (<span class="number">800</span>, <span class="number">600</span>), 
+            <span class="ident">resizable</span>: <span class="bool-val">false</span>, <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
+            <span class="ident">exit_on_close</span>: <span class="bool-val">true</span>
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the Button control. Requires a parent.
 
     Defaults:  
@@ -955,24 +994,24 @@
     `nwg_button!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_button!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_button</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ButtonT</span>{ 
-            <span class='ident'>text</span>: <span class='string'>&quot;&quot;</span>, 
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, 
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>, <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_button</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">ButtonT</span>{ 
+            <span class="ident">text</span>: <span class="string">&quot;&quot;</span>, 
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the CheckBox control. Requires a parent.
 
     Defaults:  
@@ -990,26 +1029,26 @@
     `nwg_checkbox!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_checkbox!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_checkbox</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>CheckBoxT</span>{ 
-            <span class='ident'>text</span>: <span class='string'>&quot;&quot;</span>, 
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, 
-            <span class='ident'>checkstate</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>constants</span>::<span class='ident'>CheckState</span>::<span class='ident'>Unchecked</span>,
-            <span class='ident'>tristate</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>, <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_checkbox</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">CheckBoxT</span>{ 
+            <span class="ident">text</span>: <span class="string">&quot;&quot;</span>, 
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
+            <span class="ident">checkstate</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">CheckState</span>::<span class="ident">Unchecked</span>,
+            <span class="ident">tristate</span>: <span class="bool-val">false</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the Combobox control. Requires a parent.
 
     `Data` parameter can be ommited if a default collection is passed.
@@ -1028,39 +1067,39 @@
     `nwg_combobox!(parent=&quot;MyParent&quot;; visible=false; collection=vec![&quot;TEST&quot;, &quot;TEST2&quot;])`  
     `nwg_combobox!(data=&amp;&#39;static str; parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_combobox</span> {
-    (<span class='ident'>data</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>, <span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ComboBoxT</span>::<span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;</span>{ 
-            <span class='ident'>collection</span>: [],
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, 
-            <span class='ident'>placeholder</span>: <span class='prelude-val'>None</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>, <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_combobox</span> {
+    (<span class="ident">data</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>, <span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">ComboBoxT</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span><span class="op">&gt;</span>{ 
+            <span class="ident">collection</span>: [],
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
+            <span class="ident">placeholder</span>: <span class="prelude-val">None</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }};
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ComboBoxT</span>{ 
-            <span class='ident'>collection</span>: <span class='macro'>vec</span><span class='macro'>!</span>[],
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, 
-            <span class='ident'>placeholder</span>: <span class='prelude-val'>None</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>, <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">ComboBoxT</span>{ 
+            <span class="ident">collection</span>: <span class="macro">vec</span><span class="macro">!</span>[],
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
+            <span class="ident">placeholder</span>: <span class="prelude-val">None</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the Label control. Requires a parent.
 
     Defaults:  
@@ -1077,25 +1116,25 @@
     `nwg_label!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_label!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_label</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>LabelT</span>{ 
-            <span class='ident'>text</span>: <span class='string'>&quot;A label&quot;</span>,
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, 
-            <span class='ident'>align</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>constants</span>::<span class='ident'>HTextAlign</span>::<span class='ident'>Left</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>, <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_label</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">LabelT</span>{ 
+            <span class="ident">text</span>: <span class="string">&quot;A label&quot;</span>,
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
+            <span class="ident">align</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">HTextAlign</span>::<span class="ident">Left</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the ListBox control. Requires a parent.
 
     `Data` parameter can be ommited if a default collection is passed.
@@ -1115,39 +1154,39 @@
     `nwg_listbox!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_listbox!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_listbox</span> {
-    (<span class='ident'>data</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>; <span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ListBoxT</span>::<span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>, _<span class='op'>&gt;</span>{ 
-            <span class='ident'>collection</span>: <span class='macro'>vec</span><span class='macro'>!</span>[],
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, <span class='ident'>readonly</span>: <span class='bool-val'>false</span>, <span class='ident'>multi_select</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>, <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_listbox</span> {
+    (<span class="ident">data</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>; <span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">ListBoxT</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>, _<span class="op">&gt;</span>{ 
+            <span class="ident">collection</span>: <span class="macro">vec</span><span class="macro">!</span>[],
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, <span class="ident">readonly</span>: <span class="bool-val">false</span>, <span class="ident">multi_select</span>: <span class="bool-val">false</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }};
 
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ListBoxT</span>::<span class='op'>&lt;</span>_, _<span class='op'>&gt;</span>{ 
-            <span class='ident'>collection</span>: <span class='macro'>vec</span><span class='macro'>!</span>[],
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, <span class='ident'>readonly</span>: <span class='bool-val'>false</span>, <span class='ident'>multi_select</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>, <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">ListBoxT</span>::<span class="op">&lt;</span>_, _<span class="op">&gt;</span>{ 
+            <span class="ident">collection</span>: <span class="macro">vec</span><span class="macro">!</span>[],
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, <span class="ident">readonly</span>: <span class="bool-val">false</span>, <span class="ident">multi_select</span>: <span class="bool-val">false</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }}
 }
 
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the Menu control. Requires a window parent.
 
     Defaults:  
@@ -1159,17 +1198,17 @@
     `nwg_menu!(parent=&quot;MyParent&quot;; text=&quot;AAA&quot;)`  
     `nwg_menu!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_menu</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>MenuT</span>{  <span class='ident'>text</span>: <span class='string'>&quot;Menu&quot;</span>, <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>  };
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
-        <span class='ident'>t</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_menu</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">MenuT</span>{  <span class="ident">text</span>: <span class="string">&quot;Menu&quot;</span>, <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>  };
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the MenuItem control. Requires a menu parent.
 
     Defaults:  
@@ -1181,16 +1220,16 @@
     `nwg_menuitem!(parent=&quot;MyParent&quot;; text=&quot;AAA&quot;)`  
     `nwg_menuitem!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_menuitem</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span>  <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>MenuItemT</span>{  <span class='ident'>text</span>: <span class='string'>&quot;Menuitem&quot;</span>, <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span> };
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
-        <span class='ident'>t</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_menuitem</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span>  <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">MenuItemT</span>{  <span class="ident">text</span>: <span class="string">&quot;Menuitem&quot;</span>, <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span> };
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the Separator control. Requires a menu parent.
 
     The separator control do not have any properties beside the required parent.
@@ -1198,14 +1237,14 @@
     Usage:  
     `nwg_separator!(parent=&quot;MyParent&quot;;)`   
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_separator</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> { {
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>SeparatorT</span>{ <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span> }
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_separator</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>) <span class="op">=&gt;</span> { {
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">SeparatorT</span>{ <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span> }
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the RadioButton control. Requires a parent.
 
     Defaults:  
@@ -1222,24 +1261,24 @@
     `nwg_radiobutton!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_radiobutton!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_radiobutton</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>RadioButtonT</span>{
-            <span class='ident'>text</span>: <span class='string'>&quot;&quot;</span>,
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, 
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>,
-            <span class='ident'>checkstate</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>constants</span>::<span class='ident'>CheckState</span>::<span class='ident'>Unchecked</span>,
-            <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_radiobutton</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">RadioButtonT</span>{
+            <span class="ident">text</span>: <span class="string">&quot;&quot;</span>,
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>,
+            <span class="ident">checkstate</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">CheckState</span>::<span class="ident">Unchecked</span>,
+            <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
-        <span class='ident'>t</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the Timer control.
 
     Defaults:  
@@ -1249,19 +1288,19 @@
     `nwg_timer!(parent=&quot;MyParent&quot;;)`  
     `nwg_timer!(parent=&quot;MyParent&quot;; interval=1)`  
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_timer</span> {
-    ($( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='kw-2'>*</span>) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>TimerT</span>{
-            <span class='ident'>interval</span>: <span class='number'>1000</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_timer</span> {
+    ($( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="kw-2">*</span>) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">TimerT</span>{
+            <span class="ident">interval</span>: <span class="number">1000</span>
         };
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
-        <span class='ident'>t</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the TextInput control. Requires a parent.
 
     Defaults:  
@@ -1281,25 +1320,25 @@
     `nwg_textinput!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_textinput!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_textinput</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>TextInputT</span>::<span class='op'>&lt;</span>_, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>, _<span class='op'>&gt;</span> {
-            <span class='ident'>text</span>: <span class='string'>&quot;&quot;</span>,
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, <span class='ident'>readonly</span>: <span class='bool-val'>false</span>, <span class='ident'>password</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>limit</span>: <span class='number'>32_767</span>,
-            <span class='ident'>placeholder</span>: <span class='prelude-val'>None</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>,
-            <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_textinput</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">TextInputT</span>::<span class="op">&lt;</span>_, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, _<span class="op">&gt;</span> {
+            <span class="ident">text</span>: <span class="string">&quot;&quot;</span>,
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, <span class="ident">readonly</span>: <span class="bool-val">false</span>, <span class="ident">password</span>: <span class="bool-val">false</span>,
+            <span class="ident">limit</span>: <span class="number">32_767</span>,
+            <span class="ident">placeholder</span>: <span class="prelude-val">None</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>,
+            <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
-        <span class='ident'>t</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the TextBox control. Requires a parent.
 
     Defaults:  
@@ -1318,25 +1357,25 @@
     `nwg_textbox!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_textbox!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_textbox</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>TextBoxT</span>::<span class='op'>&lt;</span>_, _<span class='op'>&gt;</span> {
-            <span class='ident'>text</span>: <span class='string'>&quot;&quot;</span>,
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>, <span class='ident'>readonly</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>limit</span>: <span class='number'>32_767</span>,
-            <span class='ident'>scrollbars</span>: (<span class='bool-val'>false</span>, <span class='bool-val'>false</span>),
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>,
-            <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_textbox</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">TextBoxT</span>::<span class="op">&lt;</span>_, _<span class="op">&gt;</span> {
+            <span class="ident">text</span>: <span class="string">&quot;&quot;</span>,
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, <span class="ident">readonly</span>: <span class="bool-val">false</span>,
+            <span class="ident">limit</span>: <span class="number">32_767</span>,
+            <span class="ident">scrollbars</span>: (<span class="bool-val">false</span>, <span class="bool-val">false</span>),
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>,
+            <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
-        <span class='ident'>t</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the GroupBox control. Requires a parent.
 
     Defaults:  
@@ -1353,24 +1392,24 @@
     `nwg_groupbox!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_groupbox!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_groupbox</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>GroupBoxT</span> {
-            <span class='ident'>text</span>: <span class='string'>&quot;&quot;</span>,
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>100</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>align</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>constants</span>::<span class='ident'>HTextAlign</span>::<span class='ident'>Left</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>,
-            <span class='ident'>font</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_groupbox</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">GroupBoxT</span> {
+            <span class="ident">text</span>: <span class="string">&quot;&quot;</span>,
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">100</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>,
+            <span class="ident">align</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">HTextAlign</span>::<span class="ident">Left</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>,
+            <span class="ident">font</span>: <span class="prelude-val">None</span>
         };
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
-        <span class='ident'>t</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the ProgressBar control. Requires a parent.
 
     Defaults:  
@@ -1390,26 +1429,65 @@
     `nwg_progressbar!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_progressbar!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_progressbar</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>ProgressBarT</span> {
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>30</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>range</span>: (<span class='number'>0</span>, <span class='number'>100</span>),
-            <span class='ident'>step</span>: <span class='number'>10</span>,
-            <span class='ident'>value</span>: <span class='number'>0</span>,
-            <span class='ident'>state</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>constants</span>::<span class='ident'>ProgressBarState</span>::<span class='ident'>Normal</span>,
-            <span class='ident'>vertical</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>,
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_progressbar</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">ProgressBarT</span> {
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>,
+            <span class="ident">range</span>: (<span class="number">0</span>, <span class="number">100</span>),
+            <span class="ident">step</span>: <span class="number">10</span>,
+            <span class="ident">value</span>: <span class="number">0</span>,
+            <span class="ident">state</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">ProgressBarState</span>::<span class="ident">Normal</span>,
+            <span class="ident">vertical</span>: <span class="bool-val">false</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>,
         };
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
-        <span class='ident'>t</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+        <span class="ident">t</span>
     }} 
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
+    Sane defaults for the DatePicker control. Requires a parent.
+
+    Defaults:  
+    • value: Todays date
+    • position: `(0, 0)`  
+    • size: `(100, 30)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • font: `None`  
+    • align: `HTextAlign::Left`  
+    • format: The system locale format in a short format (ex: 2017-01-01)  
+    • optional: `false`  
+
+    Usage:  
+    `nwg_DatePicker!(parent=&quot;MyParent&quot;;)`  
+    `nwg_DatePicker!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
+    `nwg_DatePicker!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
+*/</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_datepicker</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">DatePickerT</span>{ 
+            <span class="ident">value</span>: <span class="prelude-val">None</span>,
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
+            <span class="ident">align</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">HTextAlign</span>::<span class="ident">Left</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>, <span class="ident">font</span>: <span class="prelude-val">None</span>,
+            <span class="ident">format</span>: <span class="string">&quot;&quot;</span>, <span class="ident">optional</span>: <span class="bool-val">false</span>,
+            <span class="ident">range</span>: (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>)
+        };
+        
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+
+        <span class="ident">t</span>
+    }}
+}
+
+<span class="doccomment">/**
     Sane defaults for the FileDialog control.
 
     Defaults:  
@@ -1425,26 +1503,26 @@
     `nwg_filedialog!(parent=&quot;MyParent&quot;; title=&quot;Hey buddy!&quot;)`  
     `nwg_filedialog!(\* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_filedialog</span> {
-    ($( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='kw-2'>*</span>) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>FileDialogT</span>::<span class='op'>&lt;</span>_, _<span class='op'>&gt;</span>{ 
-            <span class='ident'>parent</span>: <span class='prelude-val'>None</span>,
-            <span class='ident'>title</span>: <span class='string'>&quot;Open file&quot;</span>,
-            <span class='ident'>action</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>constants</span>::<span class='ident'>FileDialogAction</span>::<span class='ident'>Open</span>,
-            <span class='ident'>multiselect</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>default_folder</span>: <span class='prelude-val'>None</span>,
-            <span class='ident'>filters</span>: <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_filedialog</span> {
+    ($( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="kw-2">*</span>) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">FileDialogT</span>::<span class="op">&lt;</span>_, _<span class="op">&gt;</span>{ 
+            <span class="ident">parent</span>: <span class="prelude-val">None</span>,
+            <span class="ident">title</span>: <span class="string">&quot;Open file&quot;</span>,
+            <span class="ident">action</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">FileDialogAction</span>::<span class="ident">Open</span>,
+            <span class="ident">multiselect</span>: <span class="bool-val">false</span>,
+            <span class="ident">default_folder</span>: <span class="prelude-val">None</span>,
+            <span class="ident">filters</span>: <span class="prelude-val">None</span>
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }}
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the Canvas control. Requires a parent.
 
     Defaults:  
@@ -1458,24 +1536,24 @@
     `nwg_canvas!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))`  
     `nwg_canvas!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_canvas</span> {
-    (<span class='ident'>parent</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>:<span class='ident'>expr</span>; $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='op'>*</span> ) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>CanvasT</span> {
-            <span class='ident'>position</span>: (<span class='number'>0</span>, <span class='number'>0</span>), <span class='ident'>size</span>: (<span class='number'>100</span>, <span class='number'>100</span>), 
-            <span class='ident'>visible</span>: <span class='bool-val'>true</span>, <span class='ident'>disabled</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>parent</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>p</span>,
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_canvas</span> {
+    (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">CanvasT</span> {
+            <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">100</span>), 
+            <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>,
+            <span class="ident">parent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>,
         };
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
-        <span class='ident'>t</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
+        <span class="ident">t</span>
     }}
 }
 
 
-<span class='comment'>//---- Resources ----//</span>
+<span class="comment">//---- Resources ----//</span>
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Sane defaults for the Font resource.
 
     Defaults:  
@@ -1489,19 +1567,19 @@
     `nwg_font!(family=&quot;Comic Sans&quot;)`  
     `nwg_font!(\* Any combinations of the template properties*\)`    
 */</span>
-<span class='attribute'>#[<span class='ident'>macro_export</span>]</span>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_font</span> {
-    ($( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span>:<span class='ident'>ident</span><span class='op'>=</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span> );<span class='kw-2'>*</span>) <span class='op'>=&gt;</span> { {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>t</span> <span class='op'>=</span> 
-        <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>FontT</span>{ 
-            <span class='ident'>family</span>: <span class='string'>&quot;Arial&quot;</span>, <span class='ident'>size</span>: <span class='number'>12</span>,
-            <span class='ident'>weight</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>constants</span>::<span class='ident'>FONT_WEIGHT_NORMAL</span>,
-            <span class='ident'>decoration</span>: <span class='macro-nonterminal'>$</span><span class='kw'>crate</span>::<span class='macro-nonterminal'>constants</span>::<span class='ident'>FONT_DECO_NORMAL</span>,
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_font</span> {
+    ($( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="kw-2">*</span>) <span class="op">=&gt;</span> { {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">FontT</span>{ 
+            <span class="ident">family</span>: <span class="string">&quot;Arial&quot;</span>, <span class="ident">size</span>: <span class="number">12</span>,
+            <span class="ident">weight</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">FONT_WEIGHT_NORMAL</span>,
+            <span class="ident">decoration</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">FONT_DECO_NORMAL</span>,
         };
         
-        $( <span class='ident'>t</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>; );<span class='op'>*</span>
+        $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
 
-        <span class='ident'>t</span>
+        <span class="ident">t</span>
     }}
 }</pre>
 </section>

@@ -951,14 +951,21 @@
         if (relatedDoc.is(".docblock")) {
             if (relatedDoc.is(":visible")) {
                 if (animate === true) {
-                    relatedDoc.slideUp({duration: 'fast', easing: 'linear'});
-                    toggle.children(".toggle-label").fadeIn();
+                    relatedDoc.slideUp({
+                        duration: 'fast',
+                        easing: 'linear',
+                        complete: function() {
+                            toggle.children(".toggle-label").fadeIn();
+                            toggle.parent(".toggle-wrapper").addClass("collapsed");
+                            toggle.children(".inner").text(labelForToggleButton(true));
+                        },
+                    });
                 } else {
                     relatedDoc.hide();
                     toggle.children(".toggle-label").show();
+                    toggle.parent(".toggle-wrapper").addClass("collapsed");
+                    toggle.children(".inner").text(labelForToggleButton(true));
                 }
-                toggle.parent(".toggle-wrapper").addClass("collapsed");
-                toggle.children(".inner").text(labelForToggleButton(true));
             } else {
                 relatedDoc.slideDown({duration: 'fast', easing: 'linear'});
                 toggle.parent(".toggle-wrapper").removeClass("collapsed");
@@ -979,7 +986,7 @@
             .html("[<span class='inner'></span>]");
         toggle.children(".inner").text(labelForToggleButton(false));
 
-        $(".method").each(function() {
+        $(".method, .impl-items > .associatedconstant").each(function() {
             if ($(this).next().is(".docblock") ||
                 ($(this).next().is(".stability") && $(this).next().next().is(".docblock"))) {
                     $(this).children().last().after(toggle.clone());

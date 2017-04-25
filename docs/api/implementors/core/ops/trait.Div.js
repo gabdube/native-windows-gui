@@ -1,5 +1,5 @@
 (function() {var implementors = {};
-implementors["native_windows_gui"] = ["impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='trait core::ops::Div'>Div</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>&gt; for <a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='struct std::time::duration::Duration'>Duration</a>",];
+implementors["native_windows_gui"] = ["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/ops/trait.Div.html\" title=\"trait core::ops::Div\">Div</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/nightly/std/primitive.u32.html\">u32</a>&gt; for <a class=\"struct\" href=\"https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html\" title=\"struct std::time::duration::Duration\">Duration</a>",];
 
             if (window.register_implementors) {
                 window.register_implementors(implementors);

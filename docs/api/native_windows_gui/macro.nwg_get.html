@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc macro">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,23 +43,21 @@
         </form>
     </nav>
 
-    <section id='main' class="content macro">
-<h1 class='fqn'><span class='in-band'>Macro <a href='index.html'>native_windows_gui</a>::<wbr><a class='macro' href=''>nwg_get</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Macro <a href='index.html'>native_windows_gui</a>::<wbr><a class="macro" href=''>nwg_get</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
                </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#33-43' title='goto source code'>[src]</a></span></h1>
-<pre class='rust macro'>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_get</span> {
-    ( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>:<span class='ident'>ident</span>; (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>) ) <span class='op'>=&gt;</span> { ... };
-    ( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ui</span>:<span class='ident'>ident</span>; [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>) ),<span class='op'>*</span> ] ) <span class='op'>=&gt;</span> { ... };
+<pre class="rust macro">
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_get</span> {
+    ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>:<span class="ident">ident</span>; (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>) ) <span class="op">=&gt;</span> { ... };
+    ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>:<span class="ident">ident</span>; [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>) ),<span class="op">*</span> ] ) <span class="op">=&gt;</span> { ... };
 }</pre>
 <div class='docblock'><p>Return controls from the Ui. Panics if one of the controls could not be retrieved.</p>
-
 <p>To avoid the panic, use <code>ui.get</code> directly.</p>
-
-<p>Usage:<br>
-<code>let control = nwg_get!(ui; (control ID, control type))</code><br>
+<p>Usage:<br />
+<code>let control = nwg_get!(ui; (control ID, control type))</code><br />
 <code>let (control1, control2) = nwg_get!(ui; [(control1_ID, control1 type), (control2_ID, control2_type)])</code>  </p>
 </div></section>
     <section id='search' class="content hidden"></section>

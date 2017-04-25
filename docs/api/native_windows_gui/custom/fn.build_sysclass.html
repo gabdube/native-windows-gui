@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc fn">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,17 +43,15 @@
         </form>
     </nav>
 
-    <section id='main' class="content fn">
-<h1 class='fqn'><span class='in-band'>Function <a href='../index.html'>native_windows_gui</a>::<wbr><a href='index.html'>custom</a>::<wbr><a class='fn' href=''>build_sysclass</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Function <a href='../index.html'>native_windows_gui</a>::<wbr><a href='index.html'>custom</a>::<wbr><a class="fn" href=''>build_sysclass</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
                </span><a class='srclink' href='../../src/native_windows_gui/low/window_helper.rs.html#77-119' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub unsafe fn build_sysclass&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='trait core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='struct collections::string::String'>String</a>&gt;&gt;(p: <a class='struct' href='../../native_windows_gui/custom/struct.SysclassParams.html' title='struct native_windows_gui::custom::SysclassParams'>SysclassParams</a>&lt;S&gt;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='enum core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='enum' href='../../native_windows_gui/enum.SystemError.html' title='enum native_windows_gui::SystemError'>SystemError</a>&gt;</pre><div class='docblock'><p>Try to create a system class using the parameters provided in <code>SysclassParams</code>. Will not fail if
+<pre class='rust fn'>pub unsafe fn build_sysclass&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;p: <a class="struct" href="../../native_windows_gui/custom/struct.SysclassParams.html" title="struct native_windows_gui::custom::SysclassParams">SysclassParams</a>&lt;S&gt;<br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../../native_windows_gui/enum.SystemError.html" title="enum native_windows_gui::SystemError">SystemError</a>&gt;</pre><div class='docblock'><p>Try to create a system class using the parameters provided in <code>SysclassParams</code>. Will not fail if
 the system class already exists.</p>
-
 <p>Returns <code>Err(SystemError::SysclassCreationFailed)</code> if the system class creation failed.</p>
-
 <p>Note that if the system class window proc used is malformed, the program will most likely segfault.</p>
 </div></section>
     <section id='search' class="content hidden"></section>

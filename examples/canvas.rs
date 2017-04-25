@@ -64,9 +64,9 @@ fn setup_canvas_resources(app: &Ui<&'static str>) {
         start_cap: nwgc::CapStyle::Round,
         end_cap: nwgc::CapStyle::Round,
         dash_cap: nwgc::CapStyle::Round,
-        line_join: nwgc::LineJoin::D2d1LineJoinRound,
+        line_join: nwgc::LineJoin::Round,
         miter_limit: 0.0,
-        dash_style: nwgc::DashStyle::D2d1DashStyleDash,
+        dash_style: nwgc::DashStyle::Dash,
         dash_offset: 5.0
     };
 

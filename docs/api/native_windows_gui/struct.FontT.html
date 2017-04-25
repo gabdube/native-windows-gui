@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc struct">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,45 +43,44 @@
         </form>
     </nav>
 
-    <section id='main' class="content struct">
-<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>native_windows_gui</a>::<wbr><a class='struct' href=''>FontT</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>native_windows_gui</a>::<wbr><a class="struct" href=''>FontT</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
                </span><a class='srclink' href='../src/native_windows_gui/resources/font.rs.html#40-45' title='goto source code'>[src]</a></span></h1>
-<pre class='rust struct'>pub struct FontT&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='trait core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='trait core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='struct collections::string::String'>String</a>&gt;&gt; {
+<pre class='rust struct'>pub struct FontT&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;&gt; {
     pub family: S,
-    pub size: <a class='type' href='https://doc.rust-lang.org/nightly/std/os/raw/type.c_int.html' title='type std::os::raw::c_int'>c_int</a>,
-    pub weight: <a class='type' href='https://doc.rust-lang.org/nightly/std/os/raw/type.c_int.html' title='type std::os::raw::c_int'>c_int</a>,
-    pub decoration: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>,
+    pub size: <a class="type" href="https://doc.rust-lang.org/nightly/std/os/raw/type.c_int.html" title="type std::os::raw::c_int">c_int</a>,
+    pub weight: <a class="type" href="https://doc.rust-lang.org/nightly/std/os/raw/type.c_int.html" title="type std::os::raw::c_int">c_int</a>,
+    pub decoration: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>,
 }</pre><div class='docblock'><p>A template that can create a font resource</p>
-
-<p>Params:<br>
-• <code>size</code>: The height, in logical units, of the font&#39;s character cell or character. 0 means default height.<br>
-• <code>weight</code>: The weight of the font in the range 0 through 1000. For example, 400 is normal and 700 is bold. See the FONT_WEIGHT_* constants for convenience<br>
+<p>Params:<br />
+• <code>size</code>: The height, in logical units, of the font's character cell or character. 0 means default height.<br />
+• <code>weight</code>: The weight of the font in the range 0 through 1000. For example, 400 is normal and 700 is bold. See the FONT_WEIGHT_* constants for convenience<br />
 • <code>decoration</code>: Extra style for the font. A bitwise combination of the FONT_DECO_* constants. Ex: FONT_DECO_ITALIC | FONT_DECO_UNDERLINE | FONT_DECO_STRIKEOUT  </p>
-</div><h2 class='fields'>Fields</h2><span id='structfield.family' class='structfield'>
+</div><h2 class='fields'>Fields</h2><span id='structfield.family' class="structfield">
                            <span id='family.v' class='invisible'>
                            <code>family: S</code>
-                           </span></span><span id='structfield.size' class='structfield'>
+                           </span></span><span id='structfield.size' class="structfield">
                            <span id='size.v' class='invisible'>
-                           <code>size: <a class='type' href='https://doc.rust-lang.org/nightly/std/os/raw/type.c_int.html' title='type std::os::raw::c_int'>c_int</a></code>
-                           </span></span><span id='structfield.weight' class='structfield'>
+                           <code>size: <a class="type" href="https://doc.rust-lang.org/nightly/std/os/raw/type.c_int.html" title="type std::os::raw::c_int">c_int</a></code>
+                           </span></span><span id='structfield.weight' class="structfield">
                            <span id='weight.v' class='invisible'>
-                           <code>weight: <a class='type' href='https://doc.rust-lang.org/nightly/std/os/raw/type.c_int.html' title='type std::os::raw::c_int'>c_int</a></code>
-                           </span></span><span id='structfield.decoration' class='structfield'>
+                           <code>weight: <a class="type" href="https://doc.rust-lang.org/nightly/std/os/raw/type.c_int.html" title="type std::os::raw::c_int">c_int</a></code>
+                           </span></span><span id='structfield.decoration' class="structfield">
                            <span id='decoration.v' class='invisible'>
-                           <code>decoration: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a></code>
-                           </span></span><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='trait core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='trait core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='trait core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='struct collections::string::String'>String</a>&gt;&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='trait core::clone::Clone'>Clone</a> for <a class='struct' href='../native_windows_gui/struct.FontT.html' title='struct native_windows_gui::FontT'>FontT</a>&lt;S&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/resources/font.rs.html#39' title='goto source code'>[src]</a></span></h3>
-<div class='impl-items'><h4 id='method.clone' class='method'><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../native_windows_gui/struct.FontT.html' title='struct native_windows_gui::FontT'>FontT</a>&lt;S&gt;</code></span></h4>
+                           <code>decoration: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a></code>
+                           </span></span><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="../native_windows_gui/struct.FontT.html" title="struct native_windows_gui::FontT">FontT</a>&lt;S&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/resources/font.rs.html#39' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class="method"><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class="struct" href="../native_windows_gui/struct.FontT.html" title="struct native_windows_gui::FontT">FontT</a>&lt;S&gt;</code></span></h4>
 <div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
-</div><h4 id='method.clone_from' class='method'><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+</div><h4 id='method.clone_from' class="method"><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
 <div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
-</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;ID:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='trait core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='trait core::hash::Hash'>Hash</a>, S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='trait core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='trait core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='struct collections::string::String'>String</a>&gt;&gt; <a class='trait' href='../native_windows_gui/custom/trait.ResourceT.html' title='trait native_windows_gui::custom::ResourceT'>ResourceT</a>&lt;ID&gt; for <a class='struct' href='../native_windows_gui/struct.FontT.html' title='struct native_windows_gui::FontT'>FontT</a>&lt;S&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/resources/font.rs.html#47-83' title='goto source code'>[src]</a></span></h3>
-<div class='impl-items'><h4 id='method.type_id' class='method'><span id='type_id.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ResourceT.html#tymethod.type_id' class='fnname'>type_id</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/core/any/struct.TypeId.html' title='struct core::any::TypeId'>TypeId</a></code></span></h4>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a>, S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;&gt; <a class="trait" href="../native_windows_gui/custom/trait.ResourceT.html" title="trait native_windows_gui::custom::ResourceT">ResourceT</a>&lt;ID&gt; for <a class="struct" href="../native_windows_gui/struct.FontT.html" title="struct native_windows_gui::FontT">FontT</a>&lt;S&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/resources/font.rs.html#47-83' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.type_id' class="method"><span id='type_id.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ResourceT.html#tymethod.type_id' class='fnname'>type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></code></span></h4>
 <div class='docblock'><p>Should return the TypeId of the generated resource. For example a <code>FontT</code> struct returns the TypeId of a <code>Font</code> struct.</p>
-</div><h4 id='method.build' class='method'><span id='build.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ResourceT.html#tymethod.build' class='fnname'>build</a>(&amp;self, ui: &amp;<a class='struct' href='../native_windows_gui/struct.Ui.html' title='struct native_windows_gui::Ui'>Ui</a>&lt;ID&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='enum core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html' title='struct alloc::boxed::Box'>Box</a>&lt;<a class='trait' href='../native_windows_gui/custom/trait.Resource.html' title='trait native_windows_gui::custom::Resource'>Resource</a>&gt;, <a class='enum' href='../native_windows_gui/enum.Error.html' title='enum native_windows_gui::Error'>Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Should instance the resource and return it as a Box<Resource>. If an error is raised, it will be returned by <code>ui.commit</code>.</p>
+</div><h4 id='method.build' class="method"><span id='build.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ResourceT.html#tymethod.build' class='fnname'>build</a>(&amp;self, ui: &amp;<a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;<a class="trait" href="../native_windows_gui/custom/trait.Resource.html" title="trait native_windows_gui::custom::Resource">Resource</a>&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
+<div class='docblock'><p>Should instance the resource and return it as a Box. If an error is raised, it will be returned by <code>ui.commit</code>.</p>
 </div></div></section>
     <section id='search' class="content hidden"></section>
 

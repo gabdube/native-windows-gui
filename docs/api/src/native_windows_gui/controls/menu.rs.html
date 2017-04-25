@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -407,11 +407,11 @@
 <span id="362">362</span>
 <span id="363">363</span>
 <span id="364">364</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     Menu control definition that integrates with the built-in window type
 */</span>
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -428,348 +428,348 @@
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>TypeId</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">TypeId</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
 
-<span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>HMENU</span>, <span class='ident'>UINT</span>, <span class='ident'>BOOL</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HMENU</span>, <span class="ident">UINT</span>, <span class="ident">BOOL</span>};
 
-<span class='kw'>use</span> <span class='ident'>ui</span>::<span class='ident'>Ui</span>;
-<span class='kw'>use</span> <span class='ident'>controls</span>::{<span class='ident'>Control</span>, <span class='ident'>ControlT</span>, <span class='ident'>ControlType</span>, <span class='ident'>AnyHandle</span>};
-<span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>Error</span>;
-<span class='kw'>use</span> <span class='ident'>events</span>::<span class='ident'>Event</span>;
+<span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
+<span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">Control</span>, <span class="ident">ControlT</span>, <span class="ident">ControlType</span>, <span class="ident">AnyHandle</span>};
+<span class="kw">use</span> <span class="ident">error</span>::<span class="ident">Error</span>;
+<span class="kw">use</span> <span class="ident">events</span>::<span class="ident">Event</span>;
 
-<span class='kw'>static</span> <span class='kw-2'>mut</span> <span class='ident'>MENU_ITEMS_ID</span>: <span class='ident'>UINT</span> <span class='op'>=</span> <span class='number'>0</span>; 
+<span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">MENU_ITEMS_ID</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0</span>; 
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A template to create menu controls
 
     Members:  
       • `text` : The menu text  
       • `parent` : ID of the parent control to add the menu to  
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MenuT</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>text</span>: <span class='ident'>S</span>,
-    <span class='kw'>pub</span> <span class='ident'>parent</span>: <span class='ident'>ID</span>,
-    <span class='kw'>pub</span> <span class='ident'>disabled</span>: <span class='ident'>bool</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MenuT</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">text</span>: <span class="ident">S</span>,
+    <span class="kw">pub</span> <span class="ident">parent</span>: <span class="ident">ID</span>,
+    <span class="kw">pub</span> <span class="ident">disabled</span>: <span class="ident">bool</span>
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>ControlT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>MenuT</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>type_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>TypeId</span> { <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>Menu</span><span class='op'>&gt;</span>() }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MenuT</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">Menu</span><span class="op">&gt;</span>() }
 
-    <span class='kw'>fn</span> <span class='ident'>events</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Event</span><span class='op'>&gt;</span> {
-        <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>Event</span>::<span class='ident'>Destroyed</span>]
+    <span class="kw">fn</span> <span class="ident">events</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
+        <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Event</span>::<span class="ident">Destroyed</span>]
     }
 
-    <span class='kw'>fn</span> <span class='ident'>build</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Control</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>handle_result</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>build_menu</span>(<span class='ident'>ui</span>, <span class='self'>self</span>) };
-        <span class='kw'>match</span> <span class='ident'>handle_result</span> {
-            <span class='prelude-val'>Ok</span>((<span class='ident'>h</span>, <span class='ident'>parent</span>)) <span class='op'>=&gt;</span> { <span class='prelude-val'>Ok</span>( <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>Menu</span>{<span class='ident'>handle</span>: <span class='ident'>h</span>, <span class='ident'>parent</span>: <span class='ident'>parent</span>}) <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Control</span><span class='op'>&gt;</span> ) },
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>)
+    <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">handle_result</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">build_menu</span>(<span class="ident">ui</span>, <span class="self">self</span>) };
+        <span class="kw">match</span> <span class="ident">handle_result</span> {
+            <span class="prelude-val">Ok</span>((<span class="ident">h</span>, <span class="ident">parent</span>)) <span class="op">=&gt;</span> { <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Menu</span>{<span class="ident">handle</span>: <span class="ident">h</span>, <span class="ident">parent</span>: <span class="ident">parent</span>}) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span> ) },
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>)
         }
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A menu control
 */</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Menu</span> {
-    <span class='ident'>handle</span>: <span class='ident'>HMENU</span>,
-    <span class='ident'>parent</span>: <span class='ident'>AnyHandle</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Menu</span> {
+    <span class="ident">handle</span>: <span class="ident">HMENU</span>,
+    <span class="ident">parent</span>: <span class="ident">AnyHandle</span>
 }
 
-<span class='kw'>impl</span> <span class='ident'>Menu</span> {
+<span class="kw">impl</span> <span class="ident">Menu</span> {
 
-    <span class='doccomment'>/// Return true if the menu is enabled or false otherwise</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>menu_helper</span>::<span class='ident'>is_menu_enabled</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>parent</span>) }
+    <span class="doccomment">/// Return true if the menu is enabled or false otherwise</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">menu_helper</span>::<span class="ident">is_menu_enabled</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">parent</span>) }
     }
 
-    <span class='doccomment'>/// Enable or disable the menu</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>enabled</span>: <span class='ident'>bool</span>) {
-        <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>menu_helper</span>::<span class='ident'>enable_menu</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>parent</span>, <span class='ident'>enabled</span>); }
+    <span class="doccomment">/// Enable or disable the menu</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">enabled</span>: <span class="ident">bool</span>) {
+        <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">menu_helper</span>::<span class="ident">enable_menu</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">parent</span>, <span class="ident">enabled</span>); }
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>Control</span> <span class='kw'>for</span> <span class='ident'>Menu</span> {
+<span class="kw">impl</span> <span class="ident">Control</span> <span class="kw">for</span> <span class="ident">Menu</span> {
 
-    <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>AnyHandle</span> {
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU</span>(<span class='self'>self</span>.<span class='ident'>handle</span>)
+    <span class="kw">fn</span> <span class="ident">handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">AnyHandle</span> {
+        <span class="ident">AnyHandle</span>::<span class="ident">HMENU</span>(<span class="self">self</span>.<span class="ident">handle</span>)
     }
 
-    <span class='kw'>fn</span> <span class='ident'>control_type</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ControlType</span> {
-        <span class='ident'>ControlType</span>::<span class='ident'>Menu</span>
+    <span class="kw">fn</span> <span class="ident">control_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">ControlType</span> {
+        <span class="ident">ControlType</span>::<span class="ident">Menu</span>
     }
 
-    <span class='kw'>fn</span> <span class='ident'>free</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>DestroyMenu</span>;
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>menu_helper</span>::<span class='ident'>remove_menu_from_parent</span>;
+    <span class="kw">fn</span> <span class="ident">free</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">DestroyMenu</span>;
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">menu_helper</span>::<span class="ident">remove_menu_from_parent</span>;
 
-        <span class='kw'>unsafe</span>{ <span class='ident'>remove_menu_from_parent</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>parent</span>) };
+        <span class="kw">unsafe</span>{ <span class="ident">remove_menu_from_parent</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">parent</span>) };
 
-        <span class='kw'>unsafe</span>{ <span class='ident'>DestroyMenu</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) };
+        <span class="kw">unsafe</span>{ <span class="ident">DestroyMenu</span>(<span class="self">self</span>.<span class="ident">handle</span>) };
     }
 
 }
 
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A template to create menuitems
 
     Members:  
       • `text` : The menu text  
       • `parent` : ID of the parent control to add the menu to  
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MenuItemT</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>text</span>: <span class='ident'>S</span>,
-    <span class='kw'>pub</span> <span class='ident'>parent</span>: <span class='ident'>ID</span>,
-    <span class='kw'>pub</span> <span class='ident'>disabled</span>: <span class='ident'>bool</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MenuItemT</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">text</span>: <span class="ident">S</span>,
+    <span class="kw">pub</span> <span class="ident">parent</span>: <span class="ident">ID</span>,
+    <span class="kw">pub</span> <span class="ident">disabled</span>: <span class="ident">bool</span>
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>ControlT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>MenuItemT</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>type_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>TypeId</span> { <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>MenuItem</span><span class='op'>&gt;</span>() }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MenuItemT</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">MenuItem</span><span class="op">&gt;</span>() }
 
-    <span class='kw'>fn</span> <span class='ident'>events</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Event</span><span class='op'>&gt;</span> {
-        <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>Event</span>::<span class='ident'>Destroyed</span>, <span class='ident'>Event</span>::<span class='ident'>Triggered</span>]
+    <span class="kw">fn</span> <span class="ident">events</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
+        <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Event</span>::<span class="ident">Destroyed</span>, <span class="ident">Event</span>::<span class="ident">Triggered</span>]
     }
 
-   <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_variables</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>build</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Control</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>handle_result</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>build_menu_item</span>(<span class='ident'>ui</span>, <span class='self'>self</span>) };
-        <span class='kw'>match</span> <span class='ident'>handle_result</span> {
-            <span class='prelude-val'>Ok</span>((<span class='ident'>parent</span>, <span class='ident'>uid</span>)) <span class='op'>=&gt;</span> { <span class='prelude-val'>Ok</span>( <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>MenuItem</span>{<span class='ident'>parent</span>: <span class='ident'>parent</span>, <span class='ident'>unique_id</span>: <span class='ident'>uid</span>}) <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Control</span><span class='op'>&gt;</span> ) },
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>)
+   <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">handle_result</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">build_menu_item</span>(<span class="ident">ui</span>, <span class="self">self</span>) };
+        <span class="kw">match</span> <span class="ident">handle_result</span> {
+            <span class="prelude-val">Ok</span>((<span class="ident">parent</span>, <span class="ident">uid</span>)) <span class="op">=&gt;</span> { <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">MenuItem</span>{<span class="ident">parent</span>: <span class="ident">parent</span>, <span class="ident">unique_id</span>: <span class="ident">uid</span>}) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span> ) },
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>)
         }
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A menu item control
 */</span> 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MenuItem</span> {
-    <span class='ident'>parent</span>: <span class='ident'>HMENU</span>,
-    <span class='ident'>unique_id</span>: <span class='ident'>UINT</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MenuItem</span> {
+    <span class="ident">parent</span>: <span class="ident">HMENU</span>,
+    <span class="ident">unique_id</span>: <span class="ident">UINT</span>
 }
 
-<span class='kw'>impl</span> <span class='ident'>MenuItem</span> {
+<span class="kw">impl</span> <span class="ident">MenuItem</span> {
 
-    <span class='doccomment'>/// Return true if the menuitem is enabled or false otherwise</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>menu_helper</span>::<span class='ident'>is_menuitem_enabled</span>(<span class='self'>self</span>.<span class='ident'>parent</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>unique_id</span>)) }
+    <span class="doccomment">/// Return true if the menuitem is enabled or false otherwise</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">menu_helper</span>::<span class="ident">is_menuitem_enabled</span>(<span class="self">self</span>.<span class="ident">parent</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">unique_id</span>)) }
     }
 
-    <span class='doccomment'>/// Enable or disable the menuitem</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>enabled</span>: <span class='ident'>bool</span>) {
-        <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>menu_helper</span>::<span class='ident'>enable_menuitem</span>(<span class='self'>self</span>.<span class='ident'>parent</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>unique_id</span>), <span class='ident'>enabled</span>); }
+    <span class="doccomment">/// Enable or disable the menuitem</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">enabled</span>: <span class="ident">bool</span>) {
+        <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">menu_helper</span>::<span class="ident">enable_menuitem</span>(<span class="self">self</span>.<span class="ident">parent</span>, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">unique_id</span>), <span class="ident">enabled</span>); }
     }
 
 }
 
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A menu item control
 */</span>
-<span class='kw'>impl</span> <span class='ident'>Control</span> <span class='kw'>for</span> <span class='ident'>MenuItem</span> {
+<span class="kw">impl</span> <span class="ident">Control</span> <span class="kw">for</span> <span class="ident">MenuItem</span> {
 
-    <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>AnyHandle</span> {
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU_ITEM</span>(<span class='self'>self</span>.<span class='ident'>parent</span>, <span class='self'>self</span>.<span class='ident'>unique_id</span>)
+    <span class="kw">fn</span> <span class="ident">handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">AnyHandle</span> {
+        <span class="ident">AnyHandle</span>::<span class="ident">HMENU_ITEM</span>(<span class="self">self</span>.<span class="ident">parent</span>, <span class="self">self</span>.<span class="ident">unique_id</span>)
     }
 
-    <span class='kw'>fn</span> <span class='ident'>control_type</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ControlType</span> { 
-        <span class='ident'>ControlType</span>::<span class='ident'>MenuItem</span> 
+    <span class="kw">fn</span> <span class="ident">control_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">ControlType</span> { 
+        <span class="ident">ControlType</span>::<span class="ident">MenuItem</span> 
     }
 
-    <span class='kw'>fn</span> <span class='ident'>free</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>menu_helper</span>::<span class='ident'>remove_menu_item_from_parent</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>remove_menu_item_from_parent</span>(<span class='self'>self</span>.<span class='ident'>parent</span>, <span class='self'>self</span>.<span class='ident'>unique_id</span>) };
+    <span class="kw">fn</span> <span class="ident">free</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">menu_helper</span>::<span class="ident">remove_menu_item_from_parent</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">remove_menu_item_from_parent</span>(<span class="self">self</span>.<span class="ident">parent</span>, <span class="self">self</span>.<span class="ident">unique_id</span>) };
     }
 }
 
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A menu item separator.
 
     Member:  
     * parent: The parent. Must point to a `Menu` control
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SeparatorT</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>parent</span>: <span class='ident'>ID</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SeparatorT</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">parent</span>: <span class="ident">ID</span>
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>ControlT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>SeparatorT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>type_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>TypeId</span> { <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>Separator</span><span class='op'>&gt;</span>() }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SeparatorT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">Separator</span><span class="op">&gt;</span>() }
 
-    <span class='kw'>fn</span> <span class='ident'>events</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Event</span><span class='op'>&gt;</span> {
-        <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>Event</span>::<span class='ident'>Destroyed</span>]
+    <span class="kw">fn</span> <span class="ident">events</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
+        <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Event</span>::<span class="ident">Destroyed</span>]
     }
 
-   <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_variables</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>build</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Control</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>handle_result</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { <span class='ident'>build_separator</span>(<span class='ident'>ui</span>, <span class='self'>self</span>) };
-        <span class='kw'>match</span> <span class='ident'>handle_result</span> {
-            <span class='prelude-val'>Ok</span>((<span class='ident'>parent</span>, <span class='ident'>uid</span>)) <span class='op'>=&gt;</span> { <span class='prelude-val'>Ok</span>( <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>Separator</span>{<span class='ident'>parent</span>: <span class='ident'>parent</span>, <span class='ident'>unique_id</span>: <span class='ident'>uid</span>}) <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Control</span><span class='op'>&gt;</span> ) },
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>)
+   <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">handle_result</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">build_separator</span>(<span class="ident">ui</span>, <span class="self">self</span>) };
+        <span class="kw">match</span> <span class="ident">handle_result</span> {
+            <span class="prelude-val">Ok</span>((<span class="ident">parent</span>, <span class="ident">uid</span>)) <span class="op">=&gt;</span> { <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Separator</span>{<span class="ident">parent</span>: <span class="ident">parent</span>, <span class="ident">unique_id</span>: <span class="ident">uid</span>}) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span> ) },
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>)
         }
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A separator control.
 */</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Separator</span> {
-    <span class='ident'>parent</span>: <span class='ident'>HMENU</span>,
-    <span class='ident'>unique_id</span>: <span class='ident'>UINT</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Separator</span> {
+    <span class="ident">parent</span>: <span class="ident">HMENU</span>,
+    <span class="ident">unique_id</span>: <span class="ident">UINT</span>
 }
 
 
-<span class='kw'>impl</span> <span class='ident'>Control</span> <span class='kw'>for</span> <span class='ident'>Separator</span> {
+<span class="kw">impl</span> <span class="ident">Control</span> <span class="kw">for</span> <span class="ident">Separator</span> {
 
-    <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>AnyHandle</span> {
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU_ITEM</span>(<span class='self'>self</span>.<span class='ident'>parent</span>, <span class='self'>self</span>.<span class='ident'>unique_id</span>)
+    <span class="kw">fn</span> <span class="ident">handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">AnyHandle</span> {
+        <span class="ident">AnyHandle</span>::<span class="ident">HMENU_ITEM</span>(<span class="self">self</span>.<span class="ident">parent</span>, <span class="self">self</span>.<span class="ident">unique_id</span>)
     }
 
-    <span class='kw'>fn</span> <span class='ident'>control_type</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ControlType</span> { 
-        <span class='ident'>ControlType</span>::<span class='ident'>MenuItem</span> 
+    <span class="kw">fn</span> <span class="ident">control_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">ControlType</span> { 
+        <span class="ident">ControlType</span>::<span class="ident">MenuItem</span> 
     }
 
-    <span class='kw'>fn</span> <span class='ident'>free</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>menu_helper</span>::<span class='ident'>remove_menu_item_from_parent</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>remove_menu_item_from_parent</span>(<span class='self'>self</span>.<span class='ident'>parent</span>, <span class='self'>self</span>.<span class='ident'>unique_id</span>) };
+    <span class="kw">fn</span> <span class="ident">free</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">menu_helper</span>::<span class="ident">remove_menu_item_from_parent</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">remove_menu_item_from_parent</span>(<span class="self">self</span>.<span class="ident">parent</span>, <span class="self">self</span>.<span class="ident">unique_id</span>) };
     }
 }
 
 
-<span class='comment'>/*
+<span class="comment">/*
     Private unsafe menu/menuitem methods
 */</span>
 
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>build_menu</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span>(<span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>t</span>: <span class='kw-2'>&amp;</span><span class='ident'>MenuT</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>HMENU</span>, <span class='ident'>AnyHandle</span>), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-    <span class='kw'>use</span> <span class='ident'>user32</span>::{<span class='ident'>CreateMenu</span>, <span class='ident'>AppendMenuW</span>, <span class='ident'>GetMenu</span>, <span class='ident'>SetMenu</span>, <span class='ident'>DrawMenuBar</span>};
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>MF_STRING</span>, <span class='ident'>MF_POPUP</span>};
-    <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>menu_helper</span>::{<span class='ident'>use_menu_command</span>, <span class='ident'>enable_menuitem</span>};
-    <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>other_helper</span>::<span class='ident'>to_utf16</span>;
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">build_menu</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span>(<span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">MenuT</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">HMENU</span>, <span class="ident">AnyHandle</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">use</span> <span class="ident">user32</span>::{<span class="ident">CreateMenu</span>, <span class="ident">AppendMenuW</span>, <span class="ident">GetMenu</span>, <span class="ident">SetMenu</span>, <span class="ident">DrawMenuBar</span>};
+    <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">MF_STRING</span>, <span class="ident">MF_POPUP</span>};
+    <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">menu_helper</span>::{<span class="ident">use_menu_command</span>, <span class="ident">enable_menuitem</span>};
+    <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">other_helper</span>::<span class="ident">to_utf16</span>;
 
-    <span class='kw'>let</span> <span class='ident'>ph_result</span> <span class='op'>=</span> <span class='ident'>ui</span>.<span class='ident'>handle_of</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>.<span class='ident'>parent</span>);
-    <span class='kw'>if</span> <span class='ident'>ph_result</span>.<span class='ident'>is_err</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ph_result</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>()); }
+    <span class="kw">let</span> <span class="ident">ph_result</span> <span class="op">=</span> <span class="ident">ui</span>.<span class="ident">handle_of</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">parent</span>);
+    <span class="kw">if</span> <span class="ident">ph_result</span>.<span class="ident">is_err</span>() { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ph_result</span>.<span class="ident">err</span>().<span class="ident">unwrap</span>()); }
 
-    <span class='kw'>match</span> <span class='ident'>ph_result</span>.<span class='ident'>unwrap</span>() {
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>parent_h</span>) <span class='op'>=&gt;</span> {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>menubar</span> <span class='op'>=</span> <span class='ident'>GetMenu</span>(<span class='ident'>parent_h</span>);
-            <span class='kw'>if</span> <span class='ident'>menubar</span>.<span class='ident'>is_null</span>() {
-                <span class='comment'>// If the window do not have a menu bar, create one</span>
-                <span class='ident'>menubar</span> <span class='op'>=</span> <span class='ident'>CreateMenu</span>();
-                <span class='ident'>use_menu_command</span>(<span class='ident'>menubar</span>);
-                <span class='ident'>SetMenu</span>(<span class='ident'>parent_h</span>, <span class='ident'>menubar</span>);
+    <span class="kw">match</span> <span class="ident">ph_result</span>.<span class="ident">unwrap</span>() {
+        <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">parent_h</span>) <span class="op">=&gt;</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">menubar</span> <span class="op">=</span> <span class="ident">GetMenu</span>(<span class="ident">parent_h</span>);
+            <span class="kw">if</span> <span class="ident">menubar</span>.<span class="ident">is_null</span>() {
+                <span class="comment">// If the window do not have a menu bar, create one</span>
+                <span class="ident">menubar</span> <span class="op">=</span> <span class="ident">CreateMenu</span>();
+                <span class="ident">use_menu_command</span>(<span class="ident">menubar</span>);
+                <span class="ident">SetMenu</span>(<span class="ident">parent_h</span>, <span class="ident">menubar</span>);
             }
 
-            <span class='kw'>let</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>CreateMenu</span>();
-            <span class='ident'>use_menu_command</span>(<span class='ident'>h</span>);
+            <span class="kw">let</span> <span class="ident">h</span> <span class="op">=</span> <span class="ident">CreateMenu</span>();
+            <span class="ident">use_menu_command</span>(<span class="ident">h</span>);
 
-            <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='ident'>t</span>.<span class='ident'>text</span>.<span class='ident'>clone</span>().<span class='ident'>into</span>().<span class='ident'>as_ref</span>());
-            <span class='ident'>AppendMenuW</span>(<span class='ident'>menubar</span>, <span class='ident'>MF_STRING</span><span class='op'>|</span><span class='ident'>MF_POPUP</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>h</span>), <span class='ident'>text</span>.<span class='ident'>as_ptr</span>());
-            <span class='ident'>enable_menuitem</span>(<span class='ident'>menubar</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>, <span class='op'>!</span><span class='ident'>t</span>.<span class='ident'>disabled</span>);
-            <span class='ident'>DrawMenuBar</span>(<span class='ident'>parent_h</span>); <span class='comment'>// Draw the menu bar to make sure the changes are visible</span>
+            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="ident">t</span>.<span class="ident">text</span>.<span class="ident">clone</span>().<span class="ident">into</span>().<span class="ident">as_ref</span>());
+            <span class="ident">AppendMenuW</span>(<span class="ident">menubar</span>, <span class="ident">MF_STRING</span><span class="op">|</span><span class="ident">MF_POPUP</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">h</span>), <span class="ident">text</span>.<span class="ident">as_ptr</span>());
+            <span class="ident">enable_menuitem</span>(<span class="ident">menubar</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="op">!</span><span class="ident">t</span>.<span class="ident">disabled</span>);
+            <span class="ident">DrawMenuBar</span>(<span class="ident">parent_h</span>); <span class="comment">// Draw the menu bar to make sure the changes are visible</span>
 
-            <span class='prelude-val'>Ok</span>( ( <span class='ident'>h</span>, <span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>parent_h</span>)) )
+            <span class="prelude-val">Ok</span>( ( <span class="ident">h</span>, <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">parent_h</span>)) )
         },
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU</span>(<span class='ident'>parent_h</span>) <span class='op'>=&gt;</span> {
-            <span class='kw'>let</span> <span class='ident'>h</span> <span class='op'>=</span> <span class='ident'>CreateMenu</span>();
-            <span class='ident'>use_menu_command</span>(<span class='ident'>h</span>);
+        <span class="ident">AnyHandle</span>::<span class="ident">HMENU</span>(<span class="ident">parent_h</span>) <span class="op">=&gt;</span> {
+            <span class="kw">let</span> <span class="ident">h</span> <span class="op">=</span> <span class="ident">CreateMenu</span>();
+            <span class="ident">use_menu_command</span>(<span class="ident">h</span>);
 
-            <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='ident'>t</span>.<span class='ident'>text</span>.<span class='ident'>clone</span>().<span class='ident'>into</span>().<span class='ident'>as_ref</span>());
-            <span class='ident'>AppendMenuW</span>(<span class='ident'>parent_h</span>, <span class='ident'>MF_STRING</span><span class='op'>|</span><span class='ident'>MF_POPUP</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>h</span>), <span class='ident'>text</span>.<span class='ident'>as_ptr</span>());
-            <span class='ident'>enable_menuitem</span>(<span class='ident'>parent_h</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>, <span class='op'>!</span><span class='ident'>t</span>.<span class='ident'>disabled</span>);
+            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="ident">t</span>.<span class="ident">text</span>.<span class="ident">clone</span>().<span class="ident">into</span>().<span class="ident">as_ref</span>());
+            <span class="ident">AppendMenuW</span>(<span class="ident">parent_h</span>, <span class="ident">MF_STRING</span><span class="op">|</span><span class="ident">MF_POPUP</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">h</span>), <span class="ident">text</span>.<span class="ident">as_ptr</span>());
+            <span class="ident">enable_menuitem</span>(<span class="ident">parent_h</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="op">!</span><span class="ident">t</span>.<span class="ident">disabled</span>);
 
-            <span class='prelude-val'>Ok</span>( ( <span class='ident'>h</span>, <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU</span>(<span class='ident'>parent_h</span>) ) )
+            <span class="prelude-val">Ok</span>( ( <span class="ident">h</span>, <span class="ident">AnyHandle</span>::<span class="ident">HMENU</span>(<span class="ident">parent_h</span>) ) )
         },
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU_ITEM</span>(_, _) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BadParent</span>(<span class='string'>&quot;Window or menu parent required, got MenuItem&quot;</span>.<span class='ident'>to_string</span>())),
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HFONT</span>(_) <span class='op'>=&gt;</span>  <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BadParent</span>(<span class='string'>&quot;Window or menu parent required, got Font&quot;</span>.<span class='ident'>to_string</span>())),
-        <span class='ident'>AnyHandle</span>::<span class='ident'>Custom</span>(_, _) <span class='op'>=&gt;</span>  <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BadParent</span>(<span class='string'>&quot;Window or menu parent required, got custom control&quot;</span>.<span class='ident'>to_string</span>())),
+        <span class="ident">AnyHandle</span>::<span class="ident">HMENU_ITEM</span>(_, _) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="string">&quot;Window or menu parent required, got MenuItem&quot;</span>.<span class="ident">to_string</span>())),
+        <span class="ident">AnyHandle</span>::<span class="ident">HFONT</span>(_) <span class="op">=&gt;</span>  <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="string">&quot;Window or menu parent required, got Font&quot;</span>.<span class="ident">to_string</span>())),
+        <span class="ident">AnyHandle</span>::<span class="ident">Custom</span>(_, _) <span class="op">=&gt;</span>  <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="string">&quot;Window or menu parent required, got custom control&quot;</span>.<span class="ident">to_string</span>())),
    }
 }
 
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>build_menu_item</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span>(<span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>t</span>: <span class='kw-2'>&amp;</span><span class='ident'>MenuItemT</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>HMENU</span>, <span class='ident'>UINT</span>), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-    <span class='kw'>use</span> <span class='ident'>user32</span>::{<span class='ident'>AppendMenuW</span>, <span class='ident'>CreateMenu</span>, <span class='ident'>GetMenu</span>, <span class='ident'>SetMenu</span>, <span class='ident'>DrawMenuBar</span>};
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>MF_STRING</span>, <span class='ident'>UINT_PTR</span>};
-    <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>other_helper</span>::<span class='ident'>to_utf16</span>;
-    <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>menu_helper</span>::<span class='ident'>enable_menuitem</span>;
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">build_menu_item</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span>(<span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">MenuItemT</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">HMENU</span>, <span class="ident">UINT</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">use</span> <span class="ident">user32</span>::{<span class="ident">AppendMenuW</span>, <span class="ident">CreateMenu</span>, <span class="ident">GetMenu</span>, <span class="ident">SetMenu</span>, <span class="ident">DrawMenuBar</span>};
+    <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">MF_STRING</span>, <span class="ident">UINT_PTR</span>};
+    <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">other_helper</span>::<span class="ident">to_utf16</span>;
+    <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">menu_helper</span>::<span class="ident">enable_menuitem</span>;
     
-    <span class='kw'>let</span> <span class='ident'>ph_result</span> <span class='op'>=</span> <span class='ident'>ui</span>.<span class='ident'>handle_of</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>.<span class='ident'>parent</span>);
-    <span class='kw'>if</span> <span class='ident'>ph_result</span>.<span class='ident'>is_err</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ph_result</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>()); }
+    <span class="kw">let</span> <span class="ident">ph_result</span> <span class="op">=</span> <span class="ident">ui</span>.<span class="ident">handle_of</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">parent</span>);
+    <span class="kw">if</span> <span class="ident">ph_result</span>.<span class="ident">is_err</span>() { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ph_result</span>.<span class="ident">err</span>().<span class="ident">unwrap</span>()); }
 
-    <span class='kw'>match</span> <span class='ident'>ph_result</span>.<span class='ident'>unwrap</span>() {
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>parent_h</span>) <span class='op'>=&gt;</span> {
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>menubar</span> <span class='op'>=</span> <span class='ident'>GetMenu</span>(<span class='ident'>parent_h</span>);
-            <span class='kw'>if</span> <span class='ident'>menubar</span>.<span class='ident'>is_null</span>() {
-                <span class='comment'>// If the window do not have a menu bar, create one</span>
-                <span class='ident'>menubar</span> <span class='op'>=</span> <span class='ident'>CreateMenu</span>();
-                <span class='ident'>SetMenu</span>(<span class='ident'>parent_h</span>, <span class='ident'>menubar</span>);
+    <span class="kw">match</span> <span class="ident">ph_result</span>.<span class="ident">unwrap</span>() {
+        <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">parent_h</span>) <span class="op">=&gt;</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">menubar</span> <span class="op">=</span> <span class="ident">GetMenu</span>(<span class="ident">parent_h</span>);
+            <span class="kw">if</span> <span class="ident">menubar</span>.<span class="ident">is_null</span>() {
+                <span class="comment">// If the window do not have a menu bar, create one</span>
+                <span class="ident">menubar</span> <span class="op">=</span> <span class="ident">CreateMenu</span>();
+                <span class="ident">SetMenu</span>(<span class="ident">parent_h</span>, <span class="ident">menubar</span>);
             }
 
-            <span class='ident'>MENU_ITEMS_ID</span> <span class='op'>+=</span> <span class='number'>1</span>;
-            <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='ident'>t</span>.<span class='ident'>text</span>.<span class='ident'>clone</span>().<span class='ident'>into</span>().<span class='ident'>as_ref</span>());
-            <span class='kw'>let</span> <span class='ident'>ensure_id_stays_the_same</span> <span class='op'>=</span> <span class='ident'>MENU_ITEMS_ID</span>;
+            <span class="ident">MENU_ITEMS_ID</span> <span class="op">+=</span> <span class="number">1</span>;
+            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="ident">t</span>.<span class="ident">text</span>.<span class="ident">clone</span>().<span class="ident">into</span>().<span class="ident">as_ref</span>());
+            <span class="kw">let</span> <span class="ident">ensure_id_stays_the_same</span> <span class="op">=</span> <span class="ident">MENU_ITEMS_ID</span>;
 
-            <span class='ident'>AppendMenuW</span>(<span class='ident'>menubar</span>, <span class='ident'>MF_STRING</span>, <span class='ident'>ensure_id_stays_the_same</span> <span class='kw'>as</span> <span class='ident'>UINT_PTR</span>, <span class='ident'>text</span>.<span class='ident'>as_ptr</span>());
-            <span class='ident'>enable_menuitem</span>(<span class='ident'>menubar</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>, <span class='op'>!</span><span class='ident'>t</span>.<span class='ident'>disabled</span>);
+            <span class="ident">AppendMenuW</span>(<span class="ident">menubar</span>, <span class="ident">MF_STRING</span>, <span class="ident">ensure_id_stays_the_same</span> <span class="kw">as</span> <span class="ident">UINT_PTR</span>, <span class="ident">text</span>.<span class="ident">as_ptr</span>());
+            <span class="ident">enable_menuitem</span>(<span class="ident">menubar</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="op">!</span><span class="ident">t</span>.<span class="ident">disabled</span>);
 
-            <span class='ident'>DrawMenuBar</span>(<span class='ident'>parent_h</span>); <span class='comment'>// Draw the menu bar to make sure the changes are visible</span>
+            <span class="ident">DrawMenuBar</span>(<span class="ident">parent_h</span>); <span class="comment">// Draw the menu bar to make sure the changes are visible</span>
 
-            <span class='comment'>// WATCH OUT HERE!!! Calling `DrawMenuBar` (or maybe AppendMenuW) corrupted the MENU_ITEMS_ID value (which in turn f* the whole menuitem system)</span>
-            <span class='comment'>// Saving the id in its own little variable saved the day</span>
+            <span class="comment">// WATCH OUT HERE!!! Calling `DrawMenuBar` (or maybe AppendMenuW) corrupted the MENU_ITEMS_ID value (which in turn f* the whole menuitem system)</span>
+            <span class="comment">// Saving the id in its own little variable saved the day</span>
 
-            <span class='prelude-val'>Ok</span>( (<span class='ident'>menubar</span>, <span class='ident'>ensure_id_stays_the_same</span>) )
+            <span class="prelude-val">Ok</span>( (<span class="ident">menubar</span>, <span class="ident">ensure_id_stays_the_same</span>) )
         },
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU</span>(<span class='ident'>parent_h</span>) <span class='op'>=&gt;</span> {
-            <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='ident'>t</span>.<span class='ident'>text</span>.<span class='ident'>clone</span>().<span class='ident'>into</span>().<span class='ident'>as_ref</span>());
-            <span class='ident'>MENU_ITEMS_ID</span> <span class='op'>+=</span> <span class='number'>1</span>;
-            <span class='ident'>AppendMenuW</span>(<span class='ident'>parent_h</span>, <span class='ident'>MF_STRING</span>, <span class='ident'>MENU_ITEMS_ID</span> <span class='kw'>as</span> <span class='ident'>UINT_PTR</span>, <span class='ident'>text</span>.<span class='ident'>as_ptr</span>());
-            <span class='ident'>enable_menuitem</span>(<span class='ident'>parent_h</span>, <span class='prelude-val'>None</span>, <span class='prelude-val'>None</span>, <span class='op'>!</span><span class='ident'>t</span>.<span class='ident'>disabled</span>);
-            <span class='prelude-val'>Ok</span>( (<span class='ident'>parent_h</span>, <span class='ident'>MENU_ITEMS_ID</span>) )
+        <span class="ident">AnyHandle</span>::<span class="ident">HMENU</span>(<span class="ident">parent_h</span>) <span class="op">=&gt;</span> {
+            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="ident">t</span>.<span class="ident">text</span>.<span class="ident">clone</span>().<span class="ident">into</span>().<span class="ident">as_ref</span>());
+            <span class="ident">MENU_ITEMS_ID</span> <span class="op">+=</span> <span class="number">1</span>;
+            <span class="ident">AppendMenuW</span>(<span class="ident">parent_h</span>, <span class="ident">MF_STRING</span>, <span class="ident">MENU_ITEMS_ID</span> <span class="kw">as</span> <span class="ident">UINT_PTR</span>, <span class="ident">text</span>.<span class="ident">as_ptr</span>());
+            <span class="ident">enable_menuitem</span>(<span class="ident">parent_h</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="op">!</span><span class="ident">t</span>.<span class="ident">disabled</span>);
+            <span class="prelude-val">Ok</span>( (<span class="ident">parent_h</span>, <span class="ident">MENU_ITEMS_ID</span>) )
         },
-        <span class='ident'>h</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>( <span class='ident'>Error</span>::<span class='ident'>BadParent</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;A menu item parent must be a Menu or a Window. Got {:?}&quot;</span>, <span class='ident'>h</span>)) )
+        <span class="ident">h</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>( <span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;A menu item parent must be a Menu or a Window. Got {:?}&quot;</span>, <span class="ident">h</span>)) )
     }
 }
 
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>build_separator</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span>(<span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>t</span>: <span class='kw-2'>&amp;</span><span class='ident'>SeparatorT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>HMENU</span>, <span class='ident'>UINT</span>), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-    <span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>AppendMenuW</span>;
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>MENUITEMINFOW</span>;
-    <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>MF_SEPARATOR</span>, <span class='ident'>SetMenuItemInfoW</span>, <span class='ident'>GetMenuItemCount</span>, <span class='ident'>MIIM_ID</span>};
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">build_separator</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span>(<span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">SeparatorT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">HMENU</span>, <span class="ident">UINT</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">AppendMenuW</span>;
+    <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">MENUITEMINFOW</span>;
+    <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">MF_SEPARATOR</span>, <span class="ident">SetMenuItemInfoW</span>, <span class="ident">GetMenuItemCount</span>, <span class="ident">MIIM_ID</span>};
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
     
-    <span class='kw'>let</span> <span class='ident'>ph_result</span> <span class='op'>=</span> <span class='ident'>ui</span>.<span class='ident'>handle_of</span>(<span class='kw-2'>&amp;</span><span class='ident'>t</span>.<span class='ident'>parent</span>);
-    <span class='kw'>if</span> <span class='ident'>ph_result</span>.<span class='ident'>is_err</span>() { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ph_result</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>()); }
+    <span class="kw">let</span> <span class="ident">ph_result</span> <span class="op">=</span> <span class="ident">ui</span>.<span class="ident">handle_of</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">parent</span>);
+    <span class="kw">if</span> <span class="ident">ph_result</span>.<span class="ident">is_err</span>() { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ph_result</span>.<span class="ident">err</span>().<span class="ident">unwrap</span>()); }
 
-    <span class='kw'>match</span> <span class='ident'>ph_result</span>.<span class='ident'>unwrap</span>() {
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU</span>(<span class='ident'>parent_h</span>) <span class='op'>=&gt;</span> {
-            <span class='ident'>MENU_ITEMS_ID</span> <span class='op'>+=</span> <span class='number'>1</span>;
-            <span class='kw'>let</span> <span class='ident'>ensure_id_stays_the_same</span> <span class='op'>=</span> <span class='ident'>MENU_ITEMS_ID</span>;
+    <span class="kw">match</span> <span class="ident">ph_result</span>.<span class="ident">unwrap</span>() {
+        <span class="ident">AnyHandle</span>::<span class="ident">HMENU</span>(<span class="ident">parent_h</span>) <span class="op">=&gt;</span> {
+            <span class="ident">MENU_ITEMS_ID</span> <span class="op">+=</span> <span class="number">1</span>;
+            <span class="kw">let</span> <span class="ident">ensure_id_stays_the_same</span> <span class="op">=</span> <span class="ident">MENU_ITEMS_ID</span>;
 
-            <span class='comment'>// MF_SEPARATOR ignore the lpNewItem and uIDNewItem parameters, so they must be setted using SetMenuItemInfo</span>
-            <span class='ident'>AppendMenuW</span>(<span class='ident'>parent_h</span>, <span class='ident'>MF_SEPARATOR</span>, <span class='number'>0</span>, <span class='ident'>ptr</span>::<span class='ident'>null</span>());
+            <span class="comment">// MF_SEPARATOR ignore the lpNewItem and uIDNewItem parameters, so they must be setted using SetMenuItemInfo</span>
+            <span class="ident">AppendMenuW</span>(<span class="ident">parent_h</span>, <span class="ident">MF_SEPARATOR</span>, <span class="number">0</span>, <span class="ident">ptr</span>::<span class="ident">null</span>());
 
-            <span class='comment'>// Set the unique id of the separator</span>
-            <span class='kw'>let</span> <span class='ident'>pos</span> <span class='op'>=</span> <span class='ident'>GetMenuItemCount</span>(<span class='ident'>parent_h</span>) <span class='op'>-</span> <span class='number'>1</span>;
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>info</span> <span class='op'>=</span> <span class='ident'>MENUITEMINFOW</span>{ 
-                <span class='ident'>cbSize</span>: <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>MENUITEMINFOW</span><span class='op'>&gt;</span>() <span class='kw'>as</span> <span class='ident'>UINT</span>,
-                <span class='ident'>fMask</span>: <span class='ident'>MIIM_ID</span>, <span class='ident'>fType</span>: <span class='number'>0</span>, <span class='ident'>fState</span>: <span class='number'>0</span>,
-                <span class='ident'>wID</span>: <span class='ident'>ensure_id_stays_the_same</span> <span class='kw'>as</span> <span class='ident'>UINT</span>,
-                <span class='ident'>hSubMenu</span>: <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='ident'>hbmpChecked</span>: <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(),
-                <span class='ident'>hbmpUnchecked</span>: <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='ident'>dwItemData</span>: <span class='number'>0</span>, <span class='ident'>dwTypeData</span>: <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(),
-                <span class='ident'>cch</span>: <span class='number'>0</span>, <span class='ident'>hbmpItem</span>: <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>()
+            <span class="comment">// Set the unique id of the separator</span>
+            <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">GetMenuItemCount</span>(<span class="ident">parent_h</span>) <span class="op">-</span> <span class="number">1</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">info</span> <span class="op">=</span> <span class="ident">MENUITEMINFOW</span>{ 
+                <span class="ident">cbSize</span>: <span class="ident">mem</span>::<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">MENUITEMINFOW</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">UINT</span>,
+                <span class="ident">fMask</span>: <span class="ident">MIIM_ID</span>, <span class="ident">fType</span>: <span class="number">0</span>, <span class="ident">fState</span>: <span class="number">0</span>,
+                <span class="ident">wID</span>: <span class="ident">ensure_id_stays_the_same</span> <span class="kw">as</span> <span class="ident">UINT</span>,
+                <span class="ident">hSubMenu</span>: <span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="ident">hbmpChecked</span>: <span class="ident">ptr</span>::<span class="ident">null_mut</span>(),
+                <span class="ident">hbmpUnchecked</span>: <span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="ident">dwItemData</span>: <span class="number">0</span>, <span class="ident">dwTypeData</span>: <span class="ident">ptr</span>::<span class="ident">null_mut</span>(),
+                <span class="ident">cch</span>: <span class="number">0</span>, <span class="ident">hbmpItem</span>: <span class="ident">ptr</span>::<span class="ident">null_mut</span>()
             };
 
-            <span class='ident'>SetMenuItemInfoW</span>(<span class='ident'>parent_h</span>, <span class='ident'>pos</span> <span class='kw'>as</span> <span class='ident'>UINT</span>, <span class='bool-val'>true</span> <span class='kw'>as</span> <span class='ident'>BOOL</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>info</span>);
+            <span class="ident">SetMenuItemInfoW</span>(<span class="ident">parent_h</span>, <span class="ident">pos</span> <span class="kw">as</span> <span class="ident">UINT</span>, <span class="bool-val">true</span> <span class="kw">as</span> <span class="ident">BOOL</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">info</span>);
 
-            <span class='prelude-val'>Ok</span>( (<span class='ident'>parent_h</span>, <span class='ident'>ensure_id_stays_the_same</span>) )
+            <span class="prelude-val">Ok</span>( (<span class="ident">parent_h</span>, <span class="ident">ensure_id_stays_the_same</span>) )
         },
-        <span class='ident'>h</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>( <span class='ident'>Error</span>::<span class='ident'>BadParent</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;A separator parent must be a Menu. Got {:?}&quot;</span>, <span class='ident'>h</span>)) )
+        <span class="ident">h</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>( <span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;A separator parent must be a Menu. Got {:?}&quot;</span>, <span class="ident">h</span>)) )
     }
 }</pre>
 </section>

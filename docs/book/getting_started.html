@@ -340,8 +340,8 @@ If the UI tries to execute an action on a borrowed element, an error such as <co
 
 <h3>commit</h3> 
 
-NWG UI initialization commands (such as <code>pack_control</code> and <code>bind</code>) are lazy and wont be executed right away. Many initialization commands are
-used when creating a UI. Most of the time, they will never fail and validating each of them individually would be annoying.<br><br>
+Some NWG ui commands (such as <code>pack_control</code> and <code>bind</code>) wont be executed right away. Many of these commands are
+used when creating a UI.With these conditions, they should never fail and validating each of them individually would be annoying.<br><br>
 
 When a lazy command is executed, it is stored in the windows event queue. <code>ui.commit()</code> forces the execution of the waiting commands
 and return an error if the initialization failed. <br><br>

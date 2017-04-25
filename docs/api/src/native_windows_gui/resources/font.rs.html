@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1"> 1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1"> 1</span>
 <span id="2"> 2</span>
 <span id="3"> 3</span>
 <span id="4"> 4</span>
@@ -142,11 +142,11 @@
 <span id="97">97</span>
 <span id="98">98</span>
 <span id="99">99</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     Font resources creation
 */</span>
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -162,18 +162,18 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>TypeId</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">TypeId</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
 
-<span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>HFONT</span>, <span class='ident'>DWORD</span>, <span class='ident'>c_int</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HFONT</span>, <span class="ident">DWORD</span>, <span class="ident">c_int</span>};
 
-<span class='kw'>use</span> <span class='ident'>ui</span>::<span class='ident'>Ui</span>;
-<span class='kw'>use</span> <span class='ident'>controls</span>::<span class='ident'>AnyHandle</span>;
-<span class='kw'>use</span> <span class='ident'>resources</span>::{<span class='ident'>ResourceT</span>, <span class='ident'>Resource</span>};
-<span class='kw'>use</span> <span class='ident'>error</span>::{<span class='ident'>Error</span>, <span class='ident'>SystemError</span>};
-<span class='kw'>use</span> <span class='ident'>defs</span>::{<span class='ident'>FONT_DECO_ITALIC</span>, <span class='ident'>FONT_DECO_UNDERLINE</span>, <span class='ident'>FONT_DECO_STRIKEOUT</span>};
+<span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
+<span class="kw">use</span> <span class="ident">controls</span>::<span class="ident">AnyHandle</span>;
+<span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">ResourceT</span>, <span class="ident">Resource</span>};
+<span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="ident">SystemError</span>};
+<span class="kw">use</span> <span class="ident">defs</span>::{<span class="ident">FONT_DECO_ITALIC</span>, <span class="ident">FONT_DECO_UNDERLINE</span>, <span class="ident">FONT_DECO_STRIKEOUT</span>};
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A template that can create a font resource
 
     Params:  
@@ -181,65 +181,65 @@
     • `weight`: The weight of the font in the range 0 through 1000. For example, 400 is normal and 700 is bold. See the FONT_WEIGHT_* constants for convenience  
     • `decoration`: Extra style for the font. A bitwise combination of the FONT_DECO_* constants. Ex: FONT_DECO_ITALIC | FONT_DECO_UNDERLINE | FONT_DECO_STRIKEOUT  
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>FontT</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>family</span>: <span class='ident'>S</span>,
-    <span class='kw'>pub</span> <span class='ident'>size</span>: <span class='ident'>c_int</span>,
-    <span class='kw'>pub</span> <span class='ident'>weight</span>: <span class='ident'>c_int</span>,
-    <span class='kw'>pub</span> <span class='ident'>decoration</span>: <span class='ident'>u32</span>,
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FontT</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">family</span>: <span class="ident">S</span>,
+    <span class="kw">pub</span> <span class="ident">size</span>: <span class="ident">c_int</span>,
+    <span class="kw">pub</span> <span class="ident">weight</span>: <span class="ident">c_int</span>,
+    <span class="kw">pub</span> <span class="ident">decoration</span>: <span class="ident">u32</span>,
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span>, <span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span> <span class='ident'>ResourceT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>FontT</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>type_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>TypeId</span> { <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>Font</span><span class='op'>&gt;</span>() }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span>, <span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> <span class="ident">ResourceT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FontT</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">Font</span><span class="op">&gt;</span>() }
 
-    <span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>unused_variables</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>build</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Resource</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>gdi32</span>::<span class='ident'>CreateFontW</span>;
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>DEFAULT_CHARSET</span>, <span class='ident'>CLEARTYPE_QUALITY</span>, <span class='ident'>OUT_DEFAULT_PRECIS</span>, <span class='ident'>CLIP_DEFAULT_PRECIS</span>, <span class='ident'>VARIABLE_PITCH</span>};
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>other_helper</span>::<span class='ident'>to_utf16</span>;
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Resource</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">gdi32</span>::<span class="ident">CreateFontW</span>;
+        <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">DEFAULT_CHARSET</span>, <span class="ident">CLEARTYPE_QUALITY</span>, <span class="ident">OUT_DEFAULT_PRECIS</span>, <span class="ident">CLIP_DEFAULT_PRECIS</span>, <span class="ident">VARIABLE_PITCH</span>};
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">other_helper</span>::<span class="ident">to_utf16</span>;
 
-        <span class='kw'>let</span> <span class='ident'>use_italic</span> <span class='op'>=</span> ((<span class='self'>self</span>.<span class='ident'>decoration</span> <span class='op'>&amp;</span> <span class='ident'>FONT_DECO_ITALIC</span>) <span class='op'>!=</span> <span class='number'>0</span>) <span class='kw'>as</span> <span class='ident'>DWORD</span>;
-        <span class='kw'>let</span> <span class='ident'>use_underline</span> <span class='op'>=</span> ((<span class='self'>self</span>.<span class='ident'>decoration</span> <span class='op'>&amp;</span> <span class='ident'>FONT_DECO_UNDERLINE</span>) <span class='op'>!=</span> <span class='number'>0</span>) <span class='kw'>as</span> <span class='ident'>DWORD</span>;
-        <span class='kw'>let</span> <span class='ident'>use_strikeout</span> <span class='op'>=</span> ((<span class='self'>self</span>.<span class='ident'>decoration</span> <span class='op'>&amp;</span> <span class='ident'>FONT_DECO_STRIKEOUT</span>) <span class='op'>!=</span> <span class='number'>0</span>) <span class='kw'>as</span> <span class='ident'>DWORD</span>;
+        <span class="kw">let</span> <span class="ident">use_italic</span> <span class="op">=</span> ((<span class="self">self</span>.<span class="ident">decoration</span> <span class="op">&amp;</span> <span class="ident">FONT_DECO_ITALIC</span>) <span class="op">!=</span> <span class="number">0</span>) <span class="kw">as</span> <span class="ident">DWORD</span>;
+        <span class="kw">let</span> <span class="ident">use_underline</span> <span class="op">=</span> ((<span class="self">self</span>.<span class="ident">decoration</span> <span class="op">&amp;</span> <span class="ident">FONT_DECO_UNDERLINE</span>) <span class="op">!=</span> <span class="number">0</span>) <span class="kw">as</span> <span class="ident">DWORD</span>;
+        <span class="kw">let</span> <span class="ident">use_strikeout</span> <span class="op">=</span> ((<span class="self">self</span>.<span class="ident">decoration</span> <span class="op">&amp;</span> <span class="ident">FONT_DECO_STRIKEOUT</span>) <span class="op">!=</span> <span class="number">0</span>) <span class="kw">as</span> <span class="ident">DWORD</span>;
 
-        <span class='kw'>let</span> <span class='ident'>family_name</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='self'>self</span>.<span class='ident'>family</span>.<span class='ident'>clone</span>().<span class='ident'>into</span>().<span class='ident'>as_ref</span>());
+        <span class="kw">let</span> <span class="ident">family_name</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="self">self</span>.<span class="ident">family</span>.<span class="ident">clone</span>().<span class="ident">into</span>().<span class="ident">as_ref</span>());
 
-        <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='ident'>CreateFontW</span>(
-            <span class='self'>self</span>.<span class='ident'>size</span> <span class='kw'>as</span> <span class='ident'>c_int</span>,       <span class='comment'>// nHeight</span>
-            <span class='number'>0</span>, <span class='number'>0</span>, <span class='number'>0</span>,                  <span class='comment'>// nWidth, nEscapement, nOrientation</span>
-            <span class='self'>self</span>.<span class='ident'>weight</span>,              <span class='comment'>// fnWeight</span>
-            <span class='ident'>use_italic</span>,               <span class='comment'>// fdwItalic</span>
-            <span class='ident'>use_underline</span>,            <span class='comment'>// fdwUnderline</span>
-            <span class='ident'>use_strikeout</span>,            <span class='comment'>// fdwStrikeOut</span>
-            <span class='ident'>DEFAULT_CHARSET</span>,          <span class='comment'>// fdwCharSet</span>
-            <span class='ident'>OUT_DEFAULT_PRECIS</span>,       <span class='comment'>// fdwOutputPrecision</span>
-            <span class='ident'>CLIP_DEFAULT_PRECIS</span>,      <span class='comment'>// fdwClipPrecision</span>
-            <span class='ident'>CLEARTYPE_QUALITY</span>,        <span class='comment'>// fdwQuality</span>
-            <span class='ident'>VARIABLE_PITCH</span>,           <span class='comment'>// fdwPitchAndFamily</span>
-            <span class='ident'>family_name</span>.<span class='ident'>as_ptr</span>(),     <span class='comment'>// lpszFace</span>
+        <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="ident">CreateFontW</span>(
+            <span class="self">self</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">c_int</span>,       <span class="comment">// nHeight</span>
+            <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,                  <span class="comment">// nWidth, nEscapement, nOrientation</span>
+            <span class="self">self</span>.<span class="ident">weight</span>,              <span class="comment">// fnWeight</span>
+            <span class="ident">use_italic</span>,               <span class="comment">// fdwItalic</span>
+            <span class="ident">use_underline</span>,            <span class="comment">// fdwUnderline</span>
+            <span class="ident">use_strikeout</span>,            <span class="comment">// fdwStrikeOut</span>
+            <span class="ident">DEFAULT_CHARSET</span>,          <span class="comment">// fdwCharSet</span>
+            <span class="ident">OUT_DEFAULT_PRECIS</span>,       <span class="comment">// fdwOutputPrecision</span>
+            <span class="ident">CLIP_DEFAULT_PRECIS</span>,      <span class="comment">// fdwClipPrecision</span>
+            <span class="ident">CLEARTYPE_QUALITY</span>,        <span class="comment">// fdwQuality</span>
+            <span class="ident">VARIABLE_PITCH</span>,           <span class="comment">// fdwPitchAndFamily</span>
+            <span class="ident">family_name</span>.<span class="ident">as_ptr</span>(),     <span class="comment">// lpszFace</span>
         ) };
 
-        <span class='kw'>if</span> <span class='ident'>handle</span>.<span class='ident'>is_null</span>() {
-            <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>System</span>(<span class='ident'>SystemError</span>::<span class='ident'>FontCreation</span>))
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Ok</span>( <span class='ident'>Box</span>::<span class='ident'>new</span>( <span class='ident'>Font</span>{ <span class='ident'>handle</span>: <span class='ident'>handle</span> } ) )
+        <span class="kw">if</span> <span class="ident">handle</span>.<span class="ident">is_null</span>() {
+            <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">System</span>(<span class="ident">SystemError</span>::<span class="ident">FontCreation</span>))
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>( <span class="ident">Font</span>{ <span class="ident">handle</span>: <span class="ident">handle</span> } ) )
         }
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A font resource
 */</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Font</span> {
-    <span class='ident'>handle</span>: <span class='ident'>HFONT</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Font</span> {
+    <span class="ident">handle</span>: <span class="ident">HFONT</span>
 }
 
-<span class='kw'>impl</span> <span class='ident'>Resource</span> <span class='kw'>for</span> <span class='ident'>Font</span> {
-    <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>AnyHandle</span> { <span class='ident'>AnyHandle</span>::<span class='ident'>HFONT</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) }
+<span class="kw">impl</span> <span class="ident">Resource</span> <span class="kw">for</span> <span class="ident">Font</span> {
+    <span class="kw">fn</span> <span class="ident">handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">AnyHandle</span> { <span class="ident">AnyHandle</span>::<span class="ident">HFONT</span>(<span class="self">self</span>.<span class="ident">handle</span>) }
 
-    <span class='kw'>fn</span> <span class='ident'>free</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>gdi32</span>::<span class='ident'>DeleteObject</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>DeleteObject</span>(::<span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='self'>self</span>.<span class='ident'>handle</span>)); }
+    <span class="kw">fn</span> <span class="ident">free</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">gdi32</span>::<span class="ident">DeleteObject</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">DeleteObject</span>(::<span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="self">self</span>.<span class="ident">handle</span>)); }
     }
 }</pre>
 </section>

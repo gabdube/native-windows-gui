@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -275,12 +275,17 @@
 <span id="230">230</span>
 <span id="231">231</span>
 <span id="232">232</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     Functionalities that cannot fit in any specific categories
 */</span>
 
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -297,216 +302,221 @@
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
 
-<span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>DWORD</span>;
+<span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">DWORD</span>;
 
-<span class='kw'>use</span> <span class='ident'>defs</span>::{<span class='ident'>MessageParams</span>, <span class='ident'>MessageButtons</span>, <span class='ident'>MessageIcons</span>, <span class='ident'>MessageChoice</span>};
+<span class="kw">use</span> <span class="ident">defs</span>::{<span class="ident">MessageParams</span>, <span class="ident">MessageButtons</span>, <span class="ident">MessageIcons</span>, <span class="ident">MessageChoice</span>};
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Encode a string value into a utf16 string. Adds a null char at the end of the string.
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>to_utf16</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span> {
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>OsStr</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>::<span class='ident'>windows</span>::<span class='ident'>ffi</span>::<span class='ident'>OsStrExt</span>;
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_utf16</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> {
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">OsStr</span>;
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">windows</span>::<span class="ident">ffi</span>::<span class="ident">OsStrExt</span>;
 
-    <span class='ident'>OsStr</span>::<span class='ident'>new</span>(<span class='ident'>s</span>)
-      .<span class='ident'>encode_wide</span>()
-      .<span class='ident'>chain</span>(<span class='prelude-val'>Some</span>(<span class='number'>0u16</span>).<span class='ident'>into_iter</span>())
-      .<span class='ident'>collect</span>()
+    <span class="ident">OsStr</span>::<span class="ident">new</span>(<span class="ident">s</span>)
+      .<span class="ident">encode_wide</span>()
+      .<span class="ident">chain</span>(<span class="prelude-val">Some</span>(<span class="number">0u16</span>).<span class="ident">into_iter</span>())
+      .<span class="ident">collect</span>()
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Decode a raw utf16 string. Should be null terminated.
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_utf16</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u16</span>]) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>OsString</span>;
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>::<span class='ident'>windows</span>::<span class='ident'>ffi</span>::<span class='ident'>OsStringExt</span>;
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_utf16</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) <span class="op">-&gt;</span> <span class="ident">String</span> {
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">OsString</span>;
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">windows</span>::<span class="ident">ffi</span>::<span class="ident">OsStringExt</span>;
 
-    <span class='kw'>let</span> <span class='ident'>null_index</span> <span class='op'>=</span> <span class='ident'>s</span>.<span class='ident'>iter</span>().<span class='ident'>position</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>i</span><span class='op'>|</span> <span class='ident'>i</span><span class='op'>==</span><span class='number'>0</span>).<span class='ident'>unwrap_or</span>(<span class='ident'>s</span>.<span class='ident'>len</span>());
-    <span class='kw'>let</span> <span class='ident'>os_string</span> <span class='op'>=</span> <span class='ident'>OsString</span>::<span class='ident'>from_wide</span>(<span class='kw-2'>&amp;</span><span class='ident'>s</span>[<span class='number'>0</span>..<span class='ident'>null_index</span>]);
+    <span class="kw">let</span> <span class="ident">null_index</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span><span class="op">==</span><span class="number">0</span>).<span class="ident">unwrap_or</span>(<span class="ident">s</span>.<span class="ident">len</span>());
+    <span class="kw">let</span> <span class="ident">os_string</span> <span class="op">=</span> <span class="ident">OsString</span>::<span class="ident">from_wide</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>[<span class="number">0</span>..<span class="ident">null_index</span>]);
 
-    <span class='ident'>os_string</span>.<span class='ident'>into_string</span>().<span class='ident'>unwrap_or</span>(<span class='string'>&quot;Decoding error&quot;</span>.<span class='ident'>to_string</span>())
+    <span class="ident">os_string</span>.<span class="ident">into_string</span>().<span class="ident">unwrap_or</span>(<span class="string">&quot;Decoding error&quot;</span>.<span class="ident">to_string</span>())
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Read a string from a wide char pointer. Undefined behaviour if [ptr] is not null terminated.
 */</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>from_wide_ptr</span>(<span class='ident'>ptr</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>u16</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-    <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>::<span class='ident'>from_raw_parts</span>;
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_wide_ptr</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u16</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">slice</span>::<span class="ident">from_raw_parts</span>;
 
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>length</span>: <span class='ident'>isize</span> <span class='op'>=</span> <span class='number'>0</span>;
-    <span class='kw'>while</span> <span class='kw-2'>*</span><span class='kw-2'>&amp;</span><span class='kw-2'>*</span><span class='ident'>ptr</span>.<span class='ident'>offset</span>(<span class='ident'>length</span>) <span class='op'>!=</span> <span class='number'>0</span> {
-        <span class='ident'>length</span> <span class='op'>+=</span> <span class='number'>1</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">length</span>: <span class="ident">isize</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">while</span> <span class="kw-2">*</span><span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">ptr</span>.<span class="ident">offset</span>(<span class="ident">length</span>) <span class="op">!=</span> <span class="number">0</span> {
+        <span class="ident">length</span> <span class="op">+=</span> <span class="number">1</span>;
     }
 
-    <span class='kw'>let</span> <span class='ident'>array</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>u16</span>] <span class='op'>=</span> <span class='ident'>from_raw_parts</span>(<span class='ident'>ptr</span>, <span class='ident'>length</span> <span class='kw'>as</span> <span class='ident'>usize</span>);
-    <span class='ident'>from_utf16</span>(<span class='ident'>array</span>)
+    <span class="kw">let</span> <span class="ident">array</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] <span class="op">=</span> <span class="ident">from_raw_parts</span>(<span class="ident">ptr</span>, <span class="ident">length</span> <span class="kw">as</span> <span class="ident">usize</span>);
+    <span class="ident">from_utf16</span>(<span class="ident">array</span>)
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Return a formatted output of the last system error that was raised.
 
     (ERROR ID, Error message localized)
 */</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>get_system_error</span>() <span class='op'>-&gt;</span> (<span class='ident'>DWORD</span>, <span class='ident'>String</span>) { 
-  <span class='kw'>use</span> <span class='ident'>kernel32</span>::{<span class='ident'>GetLastError</span>, <span class='ident'>FormatMessageW</span>};
-  <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>FORMAT_MESSAGE_FROM_SYSTEM</span>, <span class='ident'>MAKELANGID</span>, <span class='ident'>LANG_NEUTRAL</span>, <span class='ident'>SUBLANG_DEFAULT</span>};
-  <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>OsString</span>;
-  <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>::<span class='ident'>windows</span>::<span class='ident'>ffi</span>::<span class='ident'>OsStringExt</span>;
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_system_error</span>() <span class="op">-&gt;</span> (<span class="ident">DWORD</span>, <span class="ident">String</span>) { 
+  <span class="kw">use</span> <span class="ident">kernel32</span>::{<span class="ident">GetLastError</span>, <span class="ident">FormatMessageW</span>};
+  <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">FORMAT_MESSAGE_FROM_SYSTEM</span>, <span class="ident">MAKELANGID</span>, <span class="ident">LANG_NEUTRAL</span>, <span class="ident">SUBLANG_DEFAULT</span>};
+  <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">OsString</span>;
+  <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">windows</span>::<span class="ident">ffi</span>::<span class="ident">OsStringExt</span>;
 
-  <span class='kw'>let</span> <span class='ident'>code</span> <span class='op'>=</span> <span class='ident'>GetLastError</span>();
-  <span class='kw'>let</span> <span class='ident'>lang</span> <span class='op'>=</span> <span class='ident'>MAKELANGID</span>(<span class='ident'>LANG_NEUTRAL</span>, <span class='ident'>SUBLANG_DEFAULT</span>) <span class='kw'>as</span> <span class='ident'>DWORD</span>;
-  <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buf</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>1024</span>);
-  <span class='ident'>buf</span>.<span class='ident'>set_len</span>(<span class='number'>1024</span>);
-  <span class='ident'>FormatMessageW</span>(<span class='ident'>FORMAT_MESSAGE_FROM_SYSTEM</span>, <span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='ident'>code</span>, <span class='ident'>lang</span>, <span class='ident'>buf</span>.<span class='ident'>as_mut_ptr</span>(), <span class='number'>1024</span>, <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>());
+  <span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="ident">GetLastError</span>();
+  <span class="kw">let</span> <span class="ident">lang</span> <span class="op">=</span> <span class="ident">MAKELANGID</span>(<span class="ident">LANG_NEUTRAL</span>, <span class="ident">SUBLANG_DEFAULT</span>) <span class="kw">as</span> <span class="ident">DWORD</span>;
+  <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="number">1024</span>);
+  <span class="ident">buf</span>.<span class="ident">set_len</span>(<span class="number">1024</span>);
+  <span class="ident">FormatMessageW</span>(<span class="ident">FORMAT_MESSAGE_FROM_SYSTEM</span>, <span class="ident">ptr</span>::<span class="ident">null</span>(), <span class="ident">code</span>, <span class="ident">lang</span>, <span class="ident">buf</span>.<span class="ident">as_mut_ptr</span>(), <span class="number">1024</span>, <span class="ident">ptr</span>::<span class="ident">null_mut</span>());
 
-  <span class='kw'>let</span> <span class='ident'>end</span> <span class='op'>=</span> <span class='ident'>buf</span>.<span class='ident'>iter</span>().<span class='ident'>position</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span><span class='ident'>i</span><span class='op'>|</span> <span class='ident'>i</span><span class='op'>==</span><span class='number'>0</span>).<span class='ident'>unwrap_or</span>(<span class='number'>1024</span>);
-  <span class='kw'>let</span> <span class='ident'>error_message</span> <span class='op'>=</span> <span class='ident'>OsString</span>::<span class='ident'>from_wide</span>(<span class='kw-2'>&amp;</span><span class='ident'>buf</span>[..<span class='ident'>end</span>])
-    .<span class='ident'>into_string</span>()
-    .<span class='ident'>unwrap_or</span>(<span class='string'>&quot;Error while decoding system error message&quot;</span>.<span class='ident'>to_string</span>());
+  <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span><span class="op">==</span><span class="number">0</span>).<span class="ident">unwrap_or</span>(<span class="number">1024</span>);
+  <span class="kw">let</span> <span class="ident">error_message</span> <span class="op">=</span> <span class="ident">OsString</span>::<span class="ident">from_wide</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>[..<span class="ident">end</span>])
+    .<span class="ident">into_string</span>()
+    .<span class="ident">unwrap_or</span>(<span class="string">&quot;Error while decoding system error message&quot;</span>.<span class="ident">to_string</span>());
 
-  (<span class='ident'>code</span>, <span class='ident'>error_message</span>)
+  (<span class="ident">code</span>, <span class="ident">error_message</span>)
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
   Enable the Windows visual style in the application without having to use a manifest
 */</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>enable_visual_styles</span>() {
-    <span class='kw'>use</span> <span class='ident'>kernel32</span>::{<span class='ident'>ActivateActCtx</span>, <span class='ident'>CreateActCtxW</span>, <span class='ident'>GetSystemDirectoryW</span>};
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>MAX_PATH</span>, <span class='ident'>ULONG</span>, <span class='ident'>ACTCTXW</span>, <span class='ident'>ULONG_PTR</span>};
-    <span class='kw'>use</span> <span class='ident'>comctl32</span>::<span class='ident'>InitCommonControls</span>;
-    <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>ACTCTX_FLAG_RESOURCE_NAME_VALID</span>, <span class='ident'>ACTCTX_FLAG_SET_PROCESS_DEFAULT</span>, <span class='ident'>ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID</span>};
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">enable_visual_styles</span>() {
+    <span class="kw">use</span> <span class="ident">kernel32</span>::{<span class="ident">ActivateActCtx</span>, <span class="ident">CreateActCtxW</span>, <span class="ident">GetSystemDirectoryW</span>};
+    <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">MAX_PATH</span>, <span class="ident">ULONG</span>, <span class="ident">ACTCTXW</span>, <span class="ident">ULONG_PTR</span>, <span class="ident">ICC_STANDARD_CLASSES</span>, <span class="ident">ICC_DATE_CLASSES</span>, <span class="ident">ICC_PROGRESS_CLASS</span>, <span class="ident">ICC_WIN95_CLASSES</span>, <span class="ident">INITCOMMONCONTROLSEX</span>};
+    <span class="kw">use</span> <span class="ident">comctl32</span>::<span class="ident">InitCommonControlsEx</span>;
+    <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">ACTCTX_FLAG_RESOURCE_NAME_VALID</span>, <span class="ident">ACTCTX_FLAG_SET_PROCESS_DEFAULT</span>, <span class="ident">ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID</span>};
 
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sys_dir</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>MAX_PATH</span>);
-    <span class='ident'>sys_dir</span>.<span class='ident'>set_len</span>(<span class='ident'>MAX_PATH</span>);
-    <span class='ident'>GetSystemDirectoryW</span>(<span class='ident'>sys_dir</span>.<span class='ident'>as_mut_ptr</span>(), <span class='ident'>MAX_PATH</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sys_dir</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="ident">MAX_PATH</span>);
+    <span class="ident">sys_dir</span>.<span class="ident">set_len</span>(<span class="ident">MAX_PATH</span>);
+    <span class="ident">GetSystemDirectoryW</span>(<span class="ident">sys_dir</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">MAX_PATH</span> <span class="kw">as</span> <span class="ident">u32</span>);
 
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>source</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='string'>&quot;shell32.dll&quot;</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="string">&quot;shell32.dll&quot;</span>);
 
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>activation_cookie</span>: <span class='ident'>ULONG_PTR</span> <span class='op'>=</span> <span class='number'>0</span>;
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>act_ctx</span> <span class='op'>=</span> <span class='ident'>ACTCTXW</span> {
-        <span class='ident'>cbSize</span>: <span class='ident'>mem</span>::<span class='ident'>size_of</span>::<span class='op'>&lt;</span><span class='ident'>ACTCTXW</span><span class='op'>&gt;</span> <span class='kw'>as</span> <span class='ident'>ULONG</span>,
-        <span class='ident'>dwFlags</span>: <span class='ident'>ACTCTX_FLAG_RESOURCE_NAME_VALID</span> <span class='op'>|</span> <span class='ident'>ACTCTX_FLAG_SET_PROCESS_DEFAULT</span> <span class='op'>|</span> <span class='ident'>ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID</span>,
-        <span class='ident'>lpSource</span>: <span class='ident'>source</span>.<span class='ident'>as_mut_ptr</span>(),
-        <span class='ident'>wProcessorArchitecture</span>: <span class='number'>0</span>,
-        <span class='ident'>wLangId</span>: <span class='number'>0</span>,
-        <span class='ident'>lpAssemblyDirectory</span>: <span class='ident'>sys_dir</span>.<span class='ident'>as_mut_ptr</span>(),
-        <span class='ident'>lpResourceName</span>: <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='number'>124usize</span>), <span class='comment'>// ID_MANIFEST</span>
-        <span class='ident'>lpApplicationName</span>: <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(),
-        <span class='ident'>hModule</span>: <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>()
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">activation_cookie</span>: <span class="ident">ULONG_PTR</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">act_ctx</span> <span class="op">=</span> <span class="ident">ACTCTXW</span> {
+        <span class="ident">cbSize</span>: <span class="ident">mem</span>::<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">ACTCTXW</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">ULONG</span>,
+        <span class="ident">dwFlags</span>: <span class="ident">ACTCTX_FLAG_RESOURCE_NAME_VALID</span> <span class="op">|</span> <span class="ident">ACTCTX_FLAG_SET_PROCESS_DEFAULT</span> <span class="op">|</span> <span class="ident">ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID</span>,
+        <span class="ident">lpSource</span>: <span class="ident">source</span>.<span class="ident">as_mut_ptr</span>(),
+        <span class="ident">wProcessorArchitecture</span>: <span class="number">0</span>,
+        <span class="ident">wLangId</span>: <span class="number">0</span>,
+        <span class="ident">lpAssemblyDirectory</span>: <span class="ident">sys_dir</span>.<span class="ident">as_mut_ptr</span>(),
+        <span class="ident">lpResourceName</span>: <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="number">124usize</span>), <span class="comment">// ID_MANIFEST</span>
+        <span class="ident">lpApplicationName</span>: <span class="ident">ptr</span>::<span class="ident">null_mut</span>(),
+        <span class="ident">hModule</span>: <span class="ident">ptr</span>::<span class="ident">null_mut</span>()
     };
 
-    <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='ident'>CreateActCtxW</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>act_ctx</span>);
-    <span class='ident'>ActivateActCtx</span>(<span class='ident'>handle</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>activation_cookie</span>);
+    <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">CreateActCtxW</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">act_ctx</span>);
+    <span class="ident">ActivateActCtx</span>(<span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">activation_cookie</span>);
 
-    <span class='ident'>InitCommonControls</span>();
+    <span class="kw">let</span> <span class="ident">controls_classes</span> <span class="op">=</span> <span class="ident">INITCOMMONCONTROLSEX</span> {
+        <span class="ident">dwSize</span>: <span class="ident">mem</span>::<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">INITCOMMONCONTROLSEX</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">DWORD</span>,
+        <span class="ident">dwICC</span>: <span class="ident">ICC_DATE_CLASSES</span><span class="op">|</span><span class="ident">ICC_STANDARD_CLASSES</span><span class="op">|</span><span class="ident">ICC_PROGRESS_CLASS</span><span class="op">|</span><span class="ident">ICC_WIN95_CLASSES</span>
+    };
+
+    <span class="ident">InitCommonControlsEx</span>(<span class="kw-2">&amp;</span><span class="ident">controls_classes</span>);
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
    Initializes the COM library for use by the calling thread,
 */</span>
-<span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>enable_com</span>() {
-    <span class='kw'>use</span> <span class='ident'>ole32</span>::<span class='ident'>CoInitializeEx</span>;
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>COINIT_APARTMENTTHREADED</span>, <span class='ident'>COINIT_DISABLE_OLE1DDE</span>};
-    <span class='ident'>CoInitializeEx</span>(<span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='ident'>COINIT_APARTMENTTHREADED</span><span class='op'>|</span><span class='ident'>COINIT_DISABLE_OLE1DDE</span>);
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">enable_com</span>() {
+    <span class="kw">use</span> <span class="ident">ole32</span>::<span class="ident">CoInitializeEx</span>;
+    <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">COINIT_APARTMENTTHREADED</span>, <span class="ident">COINIT_DISABLE_OLE1DDE</span>};
+    <span class="ident">CoInitializeEx</span>(<span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="ident">COINIT_APARTMENTTHREADED</span><span class="op">|</span><span class="ident">COINIT_DISABLE_OLE1DDE</span>);
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Create an application wide message box
 
     Parameters:  
     * params: A `MessageParams` structure that defines how the message box should look
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>message</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>params</span>: <span class='kw-2'>&amp;</span><span class='ident'>MessageParams</span>) <span class='op'>-&gt;</span> <span class='ident'>MessageChoice</span> {
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>MB_ABORTRETRYIGNORE</span>, <span class='ident'>MB_CANCELTRYCONTINUE</span>, <span class='ident'>MB_OK</span>, <span class='ident'>MB_OKCANCEL</span>, <span class='ident'>MB_RETRYCANCEL</span>, <span class='ident'>MB_YESNO</span>,
-     <span class='ident'>MB_YESNOCANCEL</span>, <span class='ident'>MB_ICONSTOP</span>, <span class='ident'>MB_ICONINFORMATION</span>, <span class='ident'>MB_ICONQUESTION</span>, <span class='ident'>MB_ICONEXCLAMATION</span>};
-    <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>IDABORT</span>, <span class='ident'>IDCANCEL</span>, <span class='ident'>IDCONTINUE</span>, <span class='ident'>IDIGNORE</span>, <span class='ident'>IDNO</span>, <span class='ident'>IDOK</span>, <span class='ident'>IDRETRY</span>, <span class='ident'>IDTRYAGAIN</span>, <span class='ident'>IDYES</span>};
-    <span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>MessageBoxW</span>;
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">message</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">params</span>: <span class="kw-2">&amp;</span><span class="ident">MessageParams</span>) <span class="op">-&gt;</span> <span class="ident">MessageChoice</span> {
+    <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">MB_ABORTRETRYIGNORE</span>, <span class="ident">MB_CANCELTRYCONTINUE</span>, <span class="ident">MB_OK</span>, <span class="ident">MB_OKCANCEL</span>, <span class="ident">MB_RETRYCANCEL</span>, <span class="ident">MB_YESNO</span>,
+     <span class="ident">MB_YESNOCANCEL</span>, <span class="ident">MB_ICONSTOP</span>, <span class="ident">MB_ICONINFORMATION</span>, <span class="ident">MB_ICONQUESTION</span>, <span class="ident">MB_ICONEXCLAMATION</span>};
+    <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">IDABORT</span>, <span class="ident">IDCANCEL</span>, <span class="ident">IDCONTINUE</span>, <span class="ident">IDIGNORE</span>, <span class="ident">IDNO</span>, <span class="ident">IDOK</span>, <span class="ident">IDRETRY</span>, <span class="ident">IDTRYAGAIN</span>, <span class="ident">IDYES</span>};
+    <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">MessageBoxW</span>;
 
-    <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='ident'>params</span>.<span class='ident'>content</span>);
-    <span class='kw'>let</span> <span class='ident'>title</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='ident'>params</span>.<span class='ident'>title</span>);
+    <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="ident">params</span>.<span class="ident">content</span>);
+    <span class="kw">let</span> <span class="ident">title</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="ident">params</span>.<span class="ident">title</span>);
 
-    <span class='kw'>let</span> <span class='ident'>buttons</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>params</span>.<span class='ident'>buttons</span> {
-        <span class='ident'>MessageButtons</span>::<span class='ident'>AbortTryIgnore</span> <span class='op'>=&gt;</span> <span class='ident'>MB_ABORTRETRYIGNORE</span>,
-        <span class='ident'>MessageButtons</span>::<span class='ident'>CancelTryContinue</span> <span class='op'>=&gt;</span> <span class='ident'>MB_CANCELTRYCONTINUE</span>,
-        <span class='ident'>MessageButtons</span>::<span class='prelude-val'>Ok</span> <span class='op'>=&gt;</span> <span class='ident'>MB_OK</span>,
-        <span class='ident'>MessageButtons</span>::<span class='ident'>OkCancel</span> <span class='op'>=&gt;</span> <span class='ident'>MB_OKCANCEL</span>,
-        <span class='ident'>MessageButtons</span>::<span class='ident'>RetryCancel</span> <span class='op'>=&gt;</span> <span class='ident'>MB_RETRYCANCEL</span>,
-        <span class='ident'>MessageButtons</span>::<span class='ident'>YesNo</span> <span class='op'>=&gt;</span> <span class='ident'>MB_YESNO</span>,
-        <span class='ident'>MessageButtons</span>::<span class='ident'>YesNoCancel</span> <span class='op'>=&gt;</span> <span class='ident'>MB_YESNOCANCEL</span>
+    <span class="kw">let</span> <span class="ident">buttons</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">params</span>.<span class="ident">buttons</span> {
+        <span class="ident">MessageButtons</span>::<span class="ident">AbortTryIgnore</span> <span class="op">=&gt;</span> <span class="ident">MB_ABORTRETRYIGNORE</span>,
+        <span class="ident">MessageButtons</span>::<span class="ident">CancelTryContinue</span> <span class="op">=&gt;</span> <span class="ident">MB_CANCELTRYCONTINUE</span>,
+        <span class="ident">MessageButtons</span>::<span class="prelude-val">Ok</span> <span class="op">=&gt;</span> <span class="ident">MB_OK</span>,
+        <span class="ident">MessageButtons</span>::<span class="ident">OkCancel</span> <span class="op">=&gt;</span> <span class="ident">MB_OKCANCEL</span>,
+        <span class="ident">MessageButtons</span>::<span class="ident">RetryCancel</span> <span class="op">=&gt;</span> <span class="ident">MB_RETRYCANCEL</span>,
+        <span class="ident">MessageButtons</span>::<span class="ident">YesNo</span> <span class="op">=&gt;</span> <span class="ident">MB_YESNO</span>,
+        <span class="ident">MessageButtons</span>::<span class="ident">YesNoCancel</span> <span class="op">=&gt;</span> <span class="ident">MB_YESNOCANCEL</span>
     };
 
-    <span class='kw'>let</span> <span class='ident'>icons</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>params</span>.<span class='ident'>icons</span> {
-        <span class='ident'>MessageIcons</span>::<span class='ident'>Error</span> <span class='op'>=&gt;</span> <span class='ident'>MB_ICONSTOP</span>,
-        <span class='ident'>MessageIcons</span>::<span class='ident'>Info</span> <span class='op'>=&gt;</span> <span class='ident'>MB_ICONINFORMATION</span>,
-        <span class='ident'>MessageIcons</span>::<span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='number'>0</span>,
-        <span class='ident'>MessageIcons</span>::<span class='ident'>Question</span> <span class='op'>=&gt;</span> <span class='ident'>MB_ICONQUESTION</span>,
-        <span class='ident'>MessageIcons</span>::<span class='ident'>Warning</span> <span class='op'>=&gt;</span> <span class='ident'>MB_ICONEXCLAMATION</span>
+    <span class="kw">let</span> <span class="ident">icons</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">params</span>.<span class="ident">icons</span> {
+        <span class="ident">MessageIcons</span>::<span class="ident">Error</span> <span class="op">=&gt;</span> <span class="ident">MB_ICONSTOP</span>,
+        <span class="ident">MessageIcons</span>::<span class="ident">Info</span> <span class="op">=&gt;</span> <span class="ident">MB_ICONINFORMATION</span>,
+        <span class="ident">MessageIcons</span>::<span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="number">0</span>,
+        <span class="ident">MessageIcons</span>::<span class="ident">Question</span> <span class="op">=&gt;</span> <span class="ident">MB_ICONQUESTION</span>,
+        <span class="ident">MessageIcons</span>::<span class="ident">Warning</span> <span class="op">=&gt;</span> <span class="ident">MB_ICONEXCLAMATION</span>
     };
 
-    <span class='kw'>let</span> <span class='ident'>answer</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='ident'>MessageBoxW</span>(<span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='ident'>text</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>title</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>buttons</span> <span class='op'>|</span> <span class='ident'>icons</span>) };
-    <span class='kw'>match</span> <span class='ident'>answer</span> {
-        <span class='ident'>IDABORT</span> <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='ident'>Abort</span>,
-        <span class='ident'>IDCANCEL</span> <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='ident'>Cancel</span>,
-        <span class='ident'>IDCONTINUE</span> <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='ident'>Continue</span>,
-        <span class='ident'>IDIGNORE</span> <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='ident'>Ignore</span>,
-        <span class='ident'>IDNO</span> <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='ident'>No</span>,
-        <span class='ident'>IDOK</span> <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='prelude-val'>Ok</span>,
-        <span class='ident'>IDRETRY</span> <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='ident'>Retry</span>,
-        <span class='ident'>IDTRYAGAIN</span> <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='ident'>TryAgain</span>,
-        <span class='ident'>IDYES</span> <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='ident'>Yes</span>,
-        _ <span class='op'>=&gt;</span> <span class='ident'>MessageChoice</span>::<span class='ident'>Cancel</span>
+    <span class="kw">let</span> <span class="ident">answer</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="ident">MessageBoxW</span>(<span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="ident">text</span>.<span class="ident">as_ptr</span>(), <span class="ident">title</span>.<span class="ident">as_ptr</span>(), <span class="ident">buttons</span> <span class="op">|</span> <span class="ident">icons</span>) };
+    <span class="kw">match</span> <span class="ident">answer</span> {
+        <span class="ident">IDABORT</span> <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="ident">Abort</span>,
+        <span class="ident">IDCANCEL</span> <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="ident">Cancel</span>,
+        <span class="ident">IDCONTINUE</span> <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="ident">Continue</span>,
+        <span class="ident">IDIGNORE</span> <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="ident">Ignore</span>,
+        <span class="ident">IDNO</span> <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="ident">No</span>,
+        <span class="ident">IDOK</span> <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="prelude-val">Ok</span>,
+        <span class="ident">IDRETRY</span> <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="ident">Retry</span>,
+        <span class="ident">IDTRYAGAIN</span> <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="ident">TryAgain</span>,
+        <span class="ident">IDYES</span> <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="ident">Yes</span>,
+        _ <span class="op">=&gt;</span> <span class="ident">MessageChoice</span>::<span class="ident">Cancel</span>
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Display a message box and then panic. The message box has for style `MessageButtons::Ok` and `MessageIcons::Error` .
 
     Parameters:
     * title: The message box title
     * content: The message box message
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>fatal_message</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>title</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>, <span class='ident'>content</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='op'>!</span> {
-    <span class='ident'>error_message</span>(<span class='ident'>title</span>, <span class='ident'>content</span>);
-    <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;{} - {}&quot;</span>, <span class='ident'>title</span>, <span class='ident'>content</span>);
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fatal_message</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">title</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">content</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="op">!</span> {
+    <span class="ident">error_message</span>(<span class="ident">title</span>, <span class="ident">content</span>);
+    <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;{} - {}&quot;</span>, <span class="ident">title</span>, <span class="ident">content</span>);
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Display a simple error message box. The message box has for style `MessageButtons::Ok` and `MessageIcons::Error` .
 
     Parameters:
     * title: The message box title
     * content: The message box message
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>error_message</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>title</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>, <span class='ident'>content</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>MessageChoice</span> {
-    <span class='kw'>let</span> <span class='ident'>params</span> <span class='op'>=</span> <span class='ident'>MessageParams</span> {
-        <span class='ident'>title</span>: <span class='ident'>title</span>,
-        <span class='ident'>content</span>: <span class='ident'>content</span>,
-        <span class='ident'>buttons</span>: <span class='ident'>MessageButtons</span>::<span class='prelude-val'>Ok</span>,
-        <span class='ident'>icons</span>: <span class='ident'>MessageIcons</span>::<span class='ident'>Error</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">error_message</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">title</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">content</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">MessageChoice</span> {
+    <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">MessageParams</span> {
+        <span class="ident">title</span>: <span class="ident">title</span>,
+        <span class="ident">content</span>: <span class="ident">content</span>,
+        <span class="ident">buttons</span>: <span class="ident">MessageButtons</span>::<span class="prelude-val">Ok</span>,
+        <span class="ident">icons</span>: <span class="ident">MessageIcons</span>::<span class="ident">Error</span>
     };
 
-    <span class='ident'>message</span>(<span class='kw-2'>&amp;</span><span class='ident'>params</span>)
+    <span class="ident">message</span>(<span class="kw-2">&amp;</span><span class="ident">params</span>)
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Display a simple message box. The message box has for style `MessageButtons::Ok` and `MessageIcons::Info` .
 
     Parameters:
     * title: The message box title
     * content: The message box message
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>simple_message</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='ident'>title</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>, <span class='ident'>content</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>MessageChoice</span> {
-    <span class='kw'>let</span> <span class='ident'>params</span> <span class='op'>=</span> <span class='ident'>MessageParams</span> {
-        <span class='ident'>title</span>: <span class='ident'>title</span>,
-        <span class='ident'>content</span>: <span class='ident'>content</span>,
-        <span class='ident'>buttons</span>: <span class='ident'>MessageButtons</span>::<span class='prelude-val'>Ok</span>,
-        <span class='ident'>icons</span>: <span class='ident'>MessageIcons</span>::<span class='ident'>Info</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">simple_message</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">title</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">content</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">MessageChoice</span> {
+    <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">MessageParams</span> {
+        <span class="ident">title</span>: <span class="ident">title</span>,
+        <span class="ident">content</span>: <span class="ident">content</span>,
+        <span class="ident">buttons</span>: <span class="ident">MessageButtons</span>::<span class="prelude-val">Ok</span>,
+        <span class="ident">icons</span>: <span class="ident">MessageIcons</span>::<span class="ident">Info</span>
     };
 
-    <span class='ident'>message</span>(<span class='kw-2'>&amp;</span><span class='ident'>params</span>)
+    <span class="ident">message</span>(<span class="kw-2">&amp;</span><span class="ident">params</span>)
 }</pre>
 </section>
     <section id='search' class="content hidden"></section>

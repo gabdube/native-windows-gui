@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -356,12 +356,12 @@
 <span id="311">311</span>
 <span id="312">312</span>
 <span id="313">313</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     A canvas control where the user can draw stuff.
     This defines the canvas control
 */</span>
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -378,294 +378,294 @@
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::{<span class='ident'>Deref</span>, <span class='ident'>DerefMut</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>marker</span>::<span class='ident'>PhantomData</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
 
-<span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>HWND</span>, <span class='ident'>ID2D1Factory</span>, <span class='ident'>ID2D1HwndRenderTarget</span>, <span class='ident'>ID2D1SolidColorBrush</span>, <span class='ident'>ID2D1StrokeStyle</span>, 
-  <span class='ident'>S_OK</span>, <span class='ident'>D2D1_MATRIX_3X2_F</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HWND</span>, <span class="ident">ID2D1Factory</span>, <span class="ident">ID2D1HwndRenderTarget</span>, <span class="ident">ID2D1SolidColorBrush</span>, <span class="ident">ID2D1StrokeStyle</span>, 
+  <span class="ident">S_OK</span>, <span class="ident">D2D1_MATRIX_3X2_F</span>};
 
-<span class='kw'>use</span> <span class='ident'>controls</span>::{<span class='ident'>Control</span>, <span class='ident'>ControlType</span>, <span class='ident'>AnyHandle</span>};
-<span class='kw'>use</span> <span class='ident'>error</span>::{<span class='ident'>Error</span>, <span class='ident'>SystemError</span>};
-<span class='kw'>use</span> <span class='kw'>super</span>::{<span class='ident'>CanvasRenderer</span>, <span class='ident'>RendererProtected</span>, <span class='ident'>build_render_target</span>, <span class='ident'>CANVAS_CLASS_NAME</span>};
-<span class='kw'>use</span> <span class='ident'>defs</span>;
+<span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">Control</span>, <span class="ident">ControlType</span>, <span class="ident">AnyHandle</span>};
+<span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="ident">SystemError</span>};
+<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">CanvasRenderer</span>, <span class="ident">RendererProtected</span>, <span class="ident">build_render_target</span>, <span class="ident">CANVAS_CLASS_NAME</span>};
+<span class="kw">use</span> <span class="ident">defs</span>;
 
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     D2d resources held by a canvas
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>CanvasResources</span> {
-    <span class='ident'>SolidBrush</span>(<span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1SolidColorBrush</span>),
-    <span class='ident'>StrokeStyle</span>(<span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1StrokeStyle</span>)
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CanvasResources</span> {
+    <span class="ident">SolidBrush</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1SolidColorBrush</span>),
+    <span class="ident">StrokeStyle</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1StrokeStyle</span>)
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A blank control that can be painted to
 */</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> {
-    <span class='ident'>handle</span>: <span class='ident'>HWND</span>,
-    <span class='ident'>factory</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1Factory</span>,
-    <span class='ident'>render_target</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1HwndRenderTarget</span>,
-    <span class='ident'>must_recreate_target</span>: <span class='ident'>bool</span>,
-    <span class='ident'>resources</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>u64</span>, <span class='ident'>CanvasResources</span><span class='op'>&gt;</span>,
-    <span class='ident'>p</span>: <span class='ident'>PhantomData</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+    <span class="ident">handle</span>: <span class="ident">HWND</span>,
+    <span class="ident">factory</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1Factory</span>,
+    <span class="ident">render_target</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1HwndRenderTarget</span>,
+    <span class="ident">must_recreate_target</span>: <span class="ident">bool</span>,
+    <span class="ident">resources</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">CanvasResources</span><span class="op">&gt;</span>,
+    <span class="ident">p</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/**
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="doccomment">/**
         Make the canvas &quot;paint ready&quot; and return an object to paint to it.
         In very very **very** rare case, the renderer creation can fail.
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>renderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>CanvasRenderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='ident'>CanvasRenderer</span>::<span class='ident'>prepare</span>(<span class='self'>self</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">renderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CanvasRenderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="ident">CanvasRenderer</span>::<span class="ident">prepare</span>(<span class="self">self</span>)
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Create a solid brush into the canvas and add it under the selected `name`.
 
         Errors:  
         • `Error::System` if the canvas could not create the brush.  
         • `Error::KeyExists` if the a resource with the specified name already exists  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>create_solid_brush</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>defs</span>::<span class='ident'>SolidBrush</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>D2D1_COLOR_F</span>, <span class='ident'>D2D1_BRUSH_PROPERTIES</span>};
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_solid_brush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">brush</span>: <span class="kw-2">&amp;</span><span class="ident">defs</span>::<span class="ident">SolidBrush</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">D2D1_COLOR_F</span>, <span class="ident">D2D1_BRUSH_PROPERTIES</span>};
 
-        <span class='kw'>let</span> <span class='ident'>id</span> <span class='op'>=</span> <span class='ident'>Canvas</span>::<span class='ident'>hash_id</span>(<span class='ident'>name</span>);
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>KeyExists</span>);
+        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">Canvas</span>::<span class="ident">hash_id</span>(<span class="ident">name</span>);
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">KeyExists</span>);
         }
 
-        <span class='kw'>let</span> <span class='ident'>c</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>brush</span>.<span class='ident'>color</span>;
-        <span class='kw'>let</span> <span class='ident'>color</span> <span class='op'>=</span> <span class='ident'>D2D1_COLOR_F</span>{<span class='ident'>r</span>: <span class='ident'>c</span>.<span class='number'>0</span>, <span class='ident'>g</span>: <span class='ident'>c</span>.<span class='number'>1</span>, <span class='ident'>b</span>: <span class='ident'>c</span>.<span class='number'>2</span>, <span class='ident'>a</span>: <span class='ident'>c</span>.<span class='number'>3</span>};
-        <span class='kw'>let</span> <span class='ident'>identity</span> <span class='op'>=</span> <span class='ident'>D2D1_MATRIX_3X2_F</span> {<span class='ident'>matrix</span>: [[<span class='number'>1.0</span>, <span class='number'>0.0</span>],[<span class='number'>0.0</span>, <span class='number'>1.0</span>],[<span class='number'>0.0</span>, <span class='number'>0.0</span>]]};
-        <span class='kw'>let</span> <span class='ident'>property</span> <span class='op'>=</span> <span class='ident'>D2D1_BRUSH_PROPERTIES</span> { <span class='ident'>opacity</span>: <span class='number'>1.0</span>, <span class='ident'>transform</span>: <span class='ident'>identity</span>};
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>brush</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1SolidColorBrush</span> <span class='op'>=</span> <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>();
-        <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>CreateSolidColorBrush</span>(<span class='kw-2'>&amp;</span><span class='ident'>color</span>, <span class='kw-2'>&amp;</span><span class='ident'>property</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>brush</span>) };
+        <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">brush</span>.<span class="ident">color</span>;
+        <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="ident">D2D1_COLOR_F</span>{<span class="ident">r</span>: <span class="ident">c</span>.<span class="number">0</span>, <span class="ident">g</span>: <span class="ident">c</span>.<span class="number">1</span>, <span class="ident">b</span>: <span class="ident">c</span>.<span class="number">2</span>, <span class="ident">a</span>: <span class="ident">c</span>.<span class="number">3</span>};
+        <span class="kw">let</span> <span class="ident">identity</span> <span class="op">=</span> <span class="ident">D2D1_MATRIX_3X2_F</span> {<span class="ident">matrix</span>: [[<span class="number">1.0</span>, <span class="number">0.0</span>],[<span class="number">0.0</span>, <span class="number">1.0</span>],[<span class="number">0.0</span>, <span class="number">0.0</span>]]};
+        <span class="kw">let</span> <span class="ident">property</span> <span class="op">=</span> <span class="ident">D2D1_BRUSH_PROPERTIES</span> { <span class="ident">opacity</span>: <span class="number">1.0</span>, <span class="ident">transform</span>: <span class="ident">identity</span>};
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">brush</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1SolidColorBrush</span> <span class="op">=</span> <span class="ident">ptr</span>::<span class="ident">null_mut</span>();
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">CreateSolidColorBrush</span>(<span class="kw-2">&amp;</span><span class="ident">color</span>, <span class="kw-2">&amp;</span><span class="ident">property</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">brush</span>) };
 
-        <span class='kw'>if</span> <span class='ident'>result</span> <span class='op'>==</span> <span class='ident'>S_OK</span> {
-            <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>insert</span>(<span class='ident'>id</span>, <span class='ident'>CanvasResources</span>::<span class='ident'>SolidBrush</span>(<span class='ident'>brush</span>));
-            <span class='prelude-val'>Ok</span>(())
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>System</span>(<span class='ident'>SystemError</span>::<span class='ident'>ComError</span>(<span class='string'>&quot;Failed to import brush&quot;</span>.<span class='ident'>to_string</span>())))
+        <span class="kw">if</span> <span class="ident">result</span> <span class="op">==</span> <span class="ident">S_OK</span> {
+            <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">CanvasResources</span>::<span class="ident">SolidBrush</span>(<span class="ident">brush</span>));
+            <span class="prelude-val">Ok</span>(())
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">System</span>(<span class="ident">SystemError</span>::<span class="ident">ComError</span>(<span class="string">&quot;Failed to import brush&quot;</span>.<span class="ident">to_string</span>())))
         }
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Create a pen into the canvas and add it under the selected `name`.
 
         Errors:  
         • `Error::System` if the canvas could not create the brush.  
         • `Error::KeyExists` if the a resource with the specified name already exists  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>create_pen</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>pen</span>: <span class='kw-2'>&amp;</span><span class='ident'>defs</span>::<span class='ident'>Pen</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>D2D1_STROKE_STYLE_PROPERTIES</span>, <span class='ident'>D2D1_CAP_STYLE</span>, <span class='ident'>D2D1_LINE_JOIN</span>, <span class='ident'>D2D1_DASH_STYLE</span>};
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_pen</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">pen</span>: <span class="kw-2">&amp;</span><span class="ident">defs</span>::<span class="ident">Pen</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">D2D1_STROKE_STYLE_PROPERTIES</span>, <span class="ident">D2D1_CAP_STYLE</span>, <span class="ident">D2D1_LINE_JOIN</span>, <span class="ident">D2D1_DASH_STYLE</span>};
 
-        <span class='kw'>let</span> <span class='ident'>id</span> <span class='op'>=</span> <span class='ident'>Canvas</span>::<span class='ident'>hash_id</span>(<span class='ident'>name</span>);
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>KeyExists</span>);
+        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">Canvas</span>::<span class="ident">hash_id</span>(<span class="ident">name</span>);
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">KeyExists</span>);
         }
 
-        <span class='kw'>let</span> <span class='ident'>pen</span> <span class='op'>=</span> <span class='ident'>pen</span>.<span class='ident'>clone</span>();
-        <span class='kw'>let</span> <span class='ident'>start_cap</span> <span class='op'>=</span> <span class='ident'>D2D1_CAP_STYLE</span>(<span class='ident'>pen</span>.<span class='ident'>start_cap</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
-        <span class='kw'>let</span> <span class='ident'>end_cap</span> <span class='op'>=</span> <span class='ident'>D2D1_CAP_STYLE</span>(<span class='ident'>pen</span>.<span class='ident'>end_cap</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
-        <span class='kw'>let</span> <span class='ident'>dash_cap</span> <span class='op'>=</span> <span class='ident'>D2D1_CAP_STYLE</span>(<span class='ident'>pen</span>.<span class='ident'>dash_cap</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
-        <span class='kw'>let</span> <span class='ident'>line_join</span> <span class='op'>=</span> <span class='ident'>D2D1_LINE_JOIN</span>(<span class='ident'>pen</span>.<span class='ident'>line_join</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
-        <span class='kw'>let</span> <span class='ident'>dash_style</span> <span class='op'>=</span> <span class='ident'>D2D1_DASH_STYLE</span>(<span class='ident'>pen</span>.<span class='ident'>dash_style</span> <span class='kw'>as</span> <span class='ident'>u32</span>);
-        <span class='kw'>let</span> <span class='ident'>stroke_style_prop</span> <span class='op'>=</span> <span class='ident'>D2D1_STROKE_STYLE_PROPERTIES</span> {
-            <span class='ident'>startCap</span>: <span class='ident'>start_cap</span>,
-            <span class='ident'>endCap</span>: <span class='ident'>end_cap</span>,
-            <span class='ident'>dashCap</span>: <span class='ident'>dash_cap</span>,
-            <span class='ident'>lineJoin</span>: <span class='ident'>line_join</span>,
-            <span class='ident'>miterLimit</span>: <span class='ident'>pen</span>.<span class='ident'>miter_limit</span>,
-            <span class='ident'>dashStyle</span>: <span class='ident'>dash_style</span>,
-            <span class='ident'>dashOffset</span>: <span class='ident'>pen</span>.<span class='ident'>dash_offset</span>
+        <span class="kw">let</span> <span class="ident">pen</span> <span class="op">=</span> <span class="ident">pen</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">start_cap</span> <span class="op">=</span> <span class="ident">D2D1_CAP_STYLE</span>(<span class="ident">pen</span>.<span class="ident">start_cap</span> <span class="kw">as</span> <span class="ident">u32</span>);
+        <span class="kw">let</span> <span class="ident">end_cap</span> <span class="op">=</span> <span class="ident">D2D1_CAP_STYLE</span>(<span class="ident">pen</span>.<span class="ident">end_cap</span> <span class="kw">as</span> <span class="ident">u32</span>);
+        <span class="kw">let</span> <span class="ident">dash_cap</span> <span class="op">=</span> <span class="ident">D2D1_CAP_STYLE</span>(<span class="ident">pen</span>.<span class="ident">dash_cap</span> <span class="kw">as</span> <span class="ident">u32</span>);
+        <span class="kw">let</span> <span class="ident">line_join</span> <span class="op">=</span> <span class="ident">D2D1_LINE_JOIN</span>(<span class="ident">pen</span>.<span class="ident">line_join</span> <span class="kw">as</span> <span class="ident">u32</span>);
+        <span class="kw">let</span> <span class="ident">dash_style</span> <span class="op">=</span> <span class="ident">D2D1_DASH_STYLE</span>(<span class="ident">pen</span>.<span class="ident">dash_style</span> <span class="kw">as</span> <span class="ident">u32</span>);
+        <span class="kw">let</span> <span class="ident">stroke_style_prop</span> <span class="op">=</span> <span class="ident">D2D1_STROKE_STYLE_PROPERTIES</span> {
+            <span class="ident">startCap</span>: <span class="ident">start_cap</span>,
+            <span class="ident">endCap</span>: <span class="ident">end_cap</span>,
+            <span class="ident">dashCap</span>: <span class="ident">dash_cap</span>,
+            <span class="ident">lineJoin</span>: <span class="ident">line_join</span>,
+            <span class="ident">miterLimit</span>: <span class="ident">pen</span>.<span class="ident">miter_limit</span>,
+            <span class="ident">dashStyle</span>: <span class="ident">dash_style</span>,
+            <span class="ident">dashOffset</span>: <span class="ident">pen</span>.<span class="ident">dash_offset</span>
         };
 
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>stroke_style</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1StrokeStyle</span> <span class='op'>=</span> <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>();
-        <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ (<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>factory</span>).<span class='ident'>CreateStrokeStyle</span>(<span class='kw-2'>&amp;</span><span class='ident'>stroke_style_prop</span>, <span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='number'>0</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>stroke_style</span>) };
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stroke_style</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1StrokeStyle</span> <span class="op">=</span> <span class="ident">ptr</span>::<span class="ident">null_mut</span>();
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">unsafe</span>{ (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">factory</span>).<span class="ident">CreateStrokeStyle</span>(<span class="kw-2">&amp;</span><span class="ident">stroke_style_prop</span>, <span class="ident">ptr</span>::<span class="ident">null</span>(), <span class="number">0</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stroke_style</span>) };
 
-        <span class='kw'>if</span> <span class='ident'>result</span> <span class='op'>==</span> <span class='ident'>S_OK</span> {
-            <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>insert</span>(<span class='ident'>id</span>, <span class='ident'>CanvasResources</span>::<span class='ident'>StrokeStyle</span>(<span class='ident'>stroke_style</span>));
-            <span class='prelude-val'>Ok</span>(())
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>System</span>(<span class='ident'>SystemError</span>::<span class='ident'>ComError</span>(<span class='string'>&quot;Failed to import brush&quot;</span>.<span class='ident'>to_string</span>())))
+        <span class="kw">if</span> <span class="ident">result</span> <span class="op">==</span> <span class="ident">S_OK</span> {
+            <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">CanvasResources</span>::<span class="ident">StrokeStyle</span>(<span class="ident">stroke_style</span>));
+            <span class="prelude-val">Ok</span>(())
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">System</span>(<span class="ident">SystemError</span>::<span class="ident">ComError</span>(<span class="string">&quot;Failed to import brush&quot;</span>.<span class="ident">to_string</span>())))
         }
 
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Redraw the canvas
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>redraw</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>RedrawWindow</span>;
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>RDW_ERASE</span>, <span class='ident'>RDW_INVALIDATE</span>};
-        <span class='kw'>unsafe</span> { 
-            <span class='ident'>RedrawWindow</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>ptr</span>::<span class='ident'>null</span>(), <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='ident'>RDW_ERASE</span><span class='op'>|</span><span class='ident'>RDW_INVALIDATE</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">redraw</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">RedrawWindow</span>;
+        <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">RDW_ERASE</span>, <span class="ident">RDW_INVALIDATE</span>};
+        <span class="kw">unsafe</span> { 
+            <span class="ident">RedrawWindow</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">ptr</span>::<span class="ident">null</span>(), <span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="ident">RDW_ERASE</span><span class="op">|</span><span class="ident">RDW_INVALIDATE</span>);
         }
     }
     
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Set the render target resolution.  
         If the control size do not match the render target size, the result will be upscaled or downscaled
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_render_size</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>w</span>: <span class='ident'>u32</span>, <span class='ident'>h</span>: <span class='ident'>u32</span>) {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>D2D_SIZE_U</span>;
-        <span class='kw'>let</span> <span class='ident'>render_size</span> <span class='op'>=</span> <span class='ident'>D2D_SIZE_U</span>{<span class='ident'>width</span>: <span class='ident'>w</span>, <span class='ident'>height</span>: <span class='ident'>h</span>};
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>Resize</span>(<span class='kw-2'>&amp;</span><span class='ident'>render_size</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_render_size</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">w</span>: <span class="ident">u32</span>, <span class="ident">h</span>: <span class="ident">u32</span>) {
+        <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">D2D_SIZE_U</span>;
+        <span class="kw">let</span> <span class="ident">render_size</span> <span class="op">=</span> <span class="ident">D2D_SIZE_U</span>{<span class="ident">width</span>: <span class="ident">w</span>, <span class="ident">height</span>: <span class="ident">h</span>};
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">Resize</span>(<span class="kw-2">&amp;</span><span class="ident">render_size</span>); }
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Return the render target&#39;s dots per inch (DPI).
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_dpi</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>f32</span>, <span class='ident'>f32</span>) {
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>x</span> <span class='op'>=</span> <span class='number'>0.0f32</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>y</span> <span class='op'>=</span> <span class='number'>0.0f32</span>;
-        <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>GetDpi</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>x</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>y</span>); }
-        (<span class='ident'>x</span>, <span class='ident'>y</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_dpi</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">f32</span>, <span class="ident">f32</span>) {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">x</span> <span class="op">=</span> <span class="number">0.0f32</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">y</span> <span class="op">=</span> <span class="number">0.0f32</span>;
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">GetDpi</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">x</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">y</span>); }
+        (<span class="ident">x</span>, <span class="ident">y</span>)
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Sets the dots per inch (DPI) of the render target.   
 
         Arguments:  
         • `dpix`:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.  
         • `dpiy`:  A value greater than or equal to zero that specifies the vertical DPI of the render target.  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_dpi</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>dpix</span>: <span class='ident'>f32</span>, <span class='ident'>fpiy</span>: <span class='ident'>f32</span>) {
-        <span class='kw'>unsafe</span> { <span class='self'>self</span>.<span class='ident'>SetDpi</span>(<span class='ident'>dpix</span>, <span class='ident'>fpiy</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_dpi</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dpix</span>: <span class="ident">f32</span>, <span class="ident">fpiy</span>: <span class="ident">f32</span>) {
+        <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">SetDpi</span>(<span class="ident">dpix</span>, <span class="ident">fpiy</span>); }
     }
 
-    <span class='doccomment'>/// Hash an ID before inserting it in the canvas resources</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>hash_id</span>(<span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) <span class='op'>-&gt;</span> <span class='ident'>u64</span> {
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hasher</span>;
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>hash_map</span>::<span class='ident'>DefaultHasher</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s1</span> <span class='op'>=</span> <span class='ident'>DefaultHasher</span>::<span class='ident'>new</span>();
-        <span class='ident'>id</span>.<span class='ident'>hash</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>s1</span>);
-        <span class='ident'>s1</span>.<span class='ident'>finish</span>()
+    <span class="doccomment">/// Hash an ID before inserting it in the canvas resources</span>
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">hash_id</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) <span class="op">-&gt;</span> <span class="ident">u64</span> {
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hasher</span>;
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">hash_map</span>::<span class="ident">DefaultHasher</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s1</span> <span class="op">=</span> <span class="ident">DefaultHasher</span>::<span class="ident">new</span>();
+        <span class="ident">id</span>.<span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">s1</span>);
+        <span class="ident">s1</span>.<span class="ident">finish</span>()
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_visibility</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_visibility</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_visibility</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>visible</span>: <span class='ident'>bool</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_visibility</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>visible</span>); }}
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_position</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>i32</span>, <span class='ident'>i32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_position</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_position</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>x</span>: <span class='ident'>i32</span>, <span class='ident'>y</span>: <span class='ident'>i32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_position</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>x</span>, <span class='ident'>y</span>); }}
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_size</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>u32</span>, <span class='ident'>u32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_size</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_size</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>w</span>: <span class='ident'>u32</span>, <span class='ident'>h</span>: <span class='ident'>u32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_size</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>w</span>, <span class='ident'>h</span>, <span class='bool-val'>true</span>); } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_enabled</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>:<span class='ident'>bool</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_enabled</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>e</span>); } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_visibility</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_visibility</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_visibility</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">visible</span>: <span class="ident">bool</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_visibility</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">visible</span>); }}
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">i32</span>, <span class="ident">i32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_position</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">i32</span>, <span class="ident">y</span>: <span class="ident">i32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_position</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">x</span>, <span class="ident">y</span>); }}
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">u32</span>, <span class="ident">u32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_size</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">w</span>: <span class="ident">u32</span>, <span class="ident">h</span>: <span class="ident">u32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_size</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">w</span>, <span class="ident">h</span>, <span class="bool-val">true</span>); } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_enabled</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">e</span>:<span class="ident">bool</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_enabled</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">e</span>); } }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>Control</span> <span class='kw'>for</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">Control</span> <span class="kw">for</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
 
-    <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>AnyHandle</span> {
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='self'>self</span>.<span class='ident'>handle</span>)
+    <span class="kw">fn</span> <span class="ident">handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">AnyHandle</span> {
+        <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="self">self</span>.<span class="ident">handle</span>)
     }
 
-    <span class='kw'>fn</span> <span class='ident'>control_type</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ControlType</span> { 
-        <span class='ident'>ControlType</span>::<span class='ident'>Canvas</span> 
+    <span class="kw">fn</span> <span class="ident">control_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">ControlType</span> { 
+        <span class="ident">ControlType</span>::<span class="ident">Canvas</span> 
     }
 
-    <span class='kw'>fn</span> <span class='ident'>free</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>unsafe</span>{
-            <span class='kw'>use</span> <span class='ident'>user32</span>::{<span class='ident'>DestroyWindow</span>, <span class='ident'>UnregisterClassW</span>};
-            <span class='kw'>use</span> <span class='ident'>kernel32</span>::<span class='ident'>GetModuleHandleW</span>;
-            <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>other_helper</span>::<span class='ident'>to_utf16</span>;
+    <span class="kw">fn</span> <span class="ident">free</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">unsafe</span>{
+            <span class="kw">use</span> <span class="ident">user32</span>::{<span class="ident">DestroyWindow</span>, <span class="ident">UnregisterClassW</span>};
+            <span class="kw">use</span> <span class="ident">kernel32</span>::<span class="ident">GetModuleHandleW</span>;
+            <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">other_helper</span>::<span class="ident">to_utf16</span>;
 
-            <span class='kw'>let</span> <span class='ident'>factory</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>factory</span>;
-            <span class='kw'>let</span> <span class='ident'>render_target</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>render_target</span>;
+            <span class="kw">let</span> <span class="ident">factory</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">factory</span>;
+            <span class="kw">let</span> <span class="ident">render_target</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">render_target</span>;
 
-            <span class='kw'>for</span> (_, <span class='ident'>v</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>drain</span>() {
-                <span class='kw'>match</span> <span class='ident'>v</span> {
-                    <span class='ident'>CanvasResources</span>::<span class='ident'>SolidBrush</span>(<span class='ident'>r</span>) <span class='op'>=&gt;</span> { (<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='ident'>r</span>).<span class='ident'>Release</span>(); },
-                    <span class='ident'>CanvasResources</span>::<span class='ident'>StrokeStyle</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> { (<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='ident'>s</span>).<span class='ident'>Release</span>(); },
+            <span class="kw">for</span> (_, <span class="ident">v</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">drain</span>() {
+                <span class="kw">match</span> <span class="ident">v</span> {
+                    <span class="ident">CanvasResources</span>::<span class="ident">SolidBrush</span>(<span class="ident">r</span>) <span class="op">=&gt;</span> { (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">r</span>).<span class="ident">Release</span>(); },
+                    <span class="ident">CanvasResources</span>::<span class="ident">StrokeStyle</span>(<span class="ident">s</span>) <span class="op">=&gt;</span> { (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">s</span>).<span class="ident">Release</span>(); },
                 }
             }
 
-            <span class='ident'>render_target</span>.<span class='ident'>Release</span>();
-            <span class='ident'>factory</span>.<span class='ident'>Release</span>();
-            <span class='ident'>DestroyWindow</span>(<span class='self'>self</span>.<span class='ident'>handle</span>);
+            <span class="ident">render_target</span>.<span class="ident">Release</span>();
+            <span class="ident">factory</span>.<span class="ident">Release</span>();
+            <span class="ident">DestroyWindow</span>(<span class="self">self</span>.<span class="ident">handle</span>);
 
-            <span class='kw'>let</span> <span class='ident'>cls</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='ident'>CANVAS_CLASS_NAME</span>);
-            <span class='kw'>let</span> <span class='ident'>hmod</span> <span class='op'>=</span> <span class='ident'>GetModuleHandleW</span>(<span class='ident'>ptr</span>::<span class='ident'>null_mut</span>());
-            <span class='ident'>UnregisterClassW</span>(<span class='ident'>cls</span>.<span class='ident'>as_ptr</span>(), <span class='ident'>hmod</span>);
+            <span class="kw">let</span> <span class="ident">cls</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="ident">CANVAS_CLASS_NAME</span>);
+            <span class="kw">let</span> <span class="ident">hmod</span> <span class="op">=</span> <span class="ident">GetModuleHandleW</span>(<span class="ident">ptr</span>::<span class="ident">null_mut</span>());
+            <span class="ident">UnregisterClassW</span>(<span class="ident">cls</span>.<span class="ident">as_ptr</span>(), <span class="ident">hmod</span>);
         };
     }
 
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>Deref</span> <span class='kw'>for</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='kw'>type</span> <span class='ident'>Target</span> <span class='op'>=</span> <span class='ident'>ID2D1HwndRenderTarget</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">ID2D1HwndRenderTarget</span>;
 
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>deref</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>ID2D1HwndRenderTarget</span> {
-        <span class='kw'>unsafe</span>{ <span class='op'>&amp;</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>render_target</span> }
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">ID2D1HwndRenderTarget</span> {
+        <span class="kw">unsafe</span>{ <span class="op">&amp;</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">render_target</span> }
     }
 
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>DerefMut</span> <span class='kw'>for</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
 
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>deref_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1HwndRenderTarget</span> {
-        <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>render_target</span> }
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ID2D1HwndRenderTarget</span> {
+        <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">render_target</span> }
     }
 
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Protected renderer method (only available in the canvas control module)
 */</span>
-<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>CanvasProtected</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span>  {
-    <span class='kw'>fn</span> <span class='ident'>get_must_recreate_target</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>;
-    <span class='kw'>fn</span> <span class='ident'>set_must_recreate_target</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>recreate</span>: <span class='ident'>bool</span>);
-    <span class='kw'>fn</span> <span class='ident'>create</span>(<span class='ident'>h</span>: <span class='ident'>HWND</span>, <span class='ident'>f</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1Factory</span>, <span class='ident'>r</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1HwndRenderTarget</span>) <span class='op'>-&gt;</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>;
-    <span class='kw'>fn</span> <span class='ident'>rebuild</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>SystemError</span><span class='op'>&gt;</span>;
-    <span class='kw'>fn</span> <span class='ident'>get_resource</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>CanvasResources</span>, <span class='ident'>Error</span><span class='op'>&gt;</span>;
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">CanvasProtected</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span>  {
+    <span class="kw">fn</span> <span class="ident">get_must_recreate_target</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span>;
+    <span class="kw">fn</span> <span class="ident">set_must_recreate_target</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">recreate</span>: <span class="ident">bool</span>);
+    <span class="kw">fn</span> <span class="ident">create</span>(<span class="ident">h</span>: <span class="ident">HWND</span>, <span class="ident">f</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1Factory</span>, <span class="ident">r</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1HwndRenderTarget</span>) <span class="op">-&gt;</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">rebuild</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">SystemError</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">get_resource</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CanvasResources</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>CanvasProtected</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">CanvasProtected</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
 
-    <span class='kw'>fn</span> <span class='ident'>get_must_recreate_target</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='self'>self</span>.<span class='ident'>must_recreate_target</span>
+    <span class="kw">fn</span> <span class="ident">get_must_recreate_target</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">must_recreate_target</span>
     }
 
-    <span class='kw'>fn</span> <span class='ident'>set_must_recreate_target</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>recreate</span>: <span class='ident'>bool</span>) {
-        <span class='self'>self</span>.<span class='ident'>must_recreate_target</span> <span class='op'>=</span> <span class='ident'>recreate</span>;
+    <span class="kw">fn</span> <span class="ident">set_must_recreate_target</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">recreate</span>: <span class="ident">bool</span>) {
+        <span class="self">self</span>.<span class="ident">must_recreate_target</span> <span class="op">=</span> <span class="ident">recreate</span>;
     }
 
-    <span class='kw'>fn</span> <span class='ident'>create</span>(<span class='ident'>h</span>: <span class='ident'>HWND</span>, <span class='ident'>f</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1Factory</span>, <span class='ident'>r</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1HwndRenderTarget</span>) <span class='op'>-&gt;</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
-         <span class='ident'>Canvas</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>{
-            <span class='ident'>handle</span>: <span class='ident'>h</span>,
-            <span class='ident'>factory</span>: <span class='ident'>f</span>,
-            <span class='ident'>render_target</span>: <span class='ident'>r</span>,
-            <span class='ident'>must_recreate_target</span>: <span class='bool-val'>false</span>,
-            <span class='ident'>resources</span>: <span class='ident'>HashMap</span>::<span class='ident'>with_capacity</span>(<span class='number'>10</span>),
-            <span class='ident'>p</span>: <span class='ident'>PhantomData</span>
+    <span class="kw">fn</span> <span class="ident">create</span>(<span class="ident">h</span>: <span class="ident">HWND</span>, <span class="ident">f</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1Factory</span>, <span class="ident">r</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1HwndRenderTarget</span>) <span class="op">-&gt;</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+         <span class="ident">Canvas</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>{
+            <span class="ident">handle</span>: <span class="ident">h</span>,
+            <span class="ident">factory</span>: <span class="ident">f</span>,
+            <span class="ident">render_target</span>: <span class="ident">r</span>,
+            <span class="ident">must_recreate_target</span>: <span class="bool-val">false</span>,
+            <span class="ident">resources</span>: <span class="ident">HashMap</span>::<span class="ident">with_capacity</span>(<span class="number">10</span>),
+            <span class="ident">p</span>: <span class="ident">PhantomData</span>
         }
     }
 
-    <span class='doccomment'>/// Rebuild the canvas renderer</span>
-    <span class='kw'>fn</span> <span class='ident'>rebuild</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>SystemError</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='ident'>build_render_target</span>(<span class='self'>self</span>.<span class='ident'>handle</span>,  <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>factory</span>) };
-        <span class='kw'>match</span> <span class='ident'>result</span> {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>render_target</span>) <span class='op'>=&gt;</span> {
-                <span class='self'>self</span>.<span class='ident'>render_target</span> <span class='op'>=</span> <span class='ident'>render_target</span>;
-                <span class='self'>self</span>.<span class='ident'>must_recreate_target</span> <span class='op'>=</span> <span class='bool-val'>false</span>;
-                <span class='prelude-val'>Ok</span>(())
+    <span class="doccomment">/// Rebuild the canvas renderer</span>
+    <span class="kw">fn</span> <span class="ident">rebuild</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">SystemError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="ident">build_render_target</span>(<span class="self">self</span>.<span class="ident">handle</span>,  <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">factory</span>) };
+        <span class="kw">match</span> <span class="ident">result</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">render_target</span>) <span class="op">=&gt;</span> {
+                <span class="self">self</span>.<span class="ident">render_target</span> <span class="op">=</span> <span class="ident">render_target</span>;
+                <span class="self">self</span>.<span class="ident">must_recreate_target</span> <span class="op">=</span> <span class="bool-val">false</span>;
+                <span class="prelude-val">Ok</span>(())
             }
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>)
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>)
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>get_resource</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>CanvasResources</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>id</span> <span class='op'>=</span> <span class='ident'>Canvas</span>::<span class='ident'>hash_id</span>(<span class='ident'>id</span>);
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>r</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-             <span class='prelude-val'>Ok</span>( <span class='ident'>r</span>.<span class='ident'>clone</span>() )
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>KeyNotFound</span>)
+    <span class="kw">fn</span> <span class="ident">get_resource</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CanvasResources</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">Canvas</span>::<span class="ident">hash_id</span>(<span class="ident">id</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">r</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+             <span class="prelude-val">Ok</span>( <span class="ident">r</span>.<span class="ident">clone</span>() )
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">KeyNotFound</span>)
         }
     }
 

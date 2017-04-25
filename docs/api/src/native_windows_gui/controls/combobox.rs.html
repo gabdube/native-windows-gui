@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -370,11 +370,11 @@
 <span id="325">325</span>
 <span id="326">326</span>
 <span id="327">327</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     Combobox control definition
 */</span>
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -390,21 +390,21 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>TypeId</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>::<span class='ident'>Display</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">TypeId</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Display</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
 
-<span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>SendMessageW</span>;
-<span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>HWND</span>, <span class='ident'>HFONT</span>, <span class='ident'>WPARAM</span>};
+<span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">SendMessageW</span>;
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HWND</span>, <span class="ident">HFONT</span>, <span class="ident">WPARAM</span>};
 
-<span class='kw'>use</span> <span class='ident'>ui</span>::<span class='ident'>Ui</span>;
-<span class='kw'>use</span> <span class='ident'>controls</span>::{<span class='ident'>Control</span>, <span class='ident'>ControlT</span>, <span class='ident'>ControlType</span>, <span class='ident'>AnyHandle</span>};
-<span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>Error</span>;
-<span class='kw'>use</span> <span class='ident'>events</span>::<span class='ident'>Event</span>;
-<span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>other_helper</span>::{<span class='ident'>to_utf16</span>, <span class='ident'>from_utf16</span>};
+<span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
+<span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">Control</span>, <span class="ident">ControlT</span>, <span class="ident">ControlType</span>, <span class="ident">AnyHandle</span>};
+<span class="kw">use</span> <span class="ident">error</span>::<span class="ident">Error</span>;
+<span class="kw">use</span> <span class="ident">events</span>::<span class="ident">Event</span>;
+<span class="kw">use</span> <span class="ident">low</span>::<span class="ident">other_helper</span>::{<span class="ident">to_utf16</span>, <span class="ident">from_utf16</span>};
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Template that creates a combobox control
 
     Members:  
@@ -416,216 +416,216 @@
     • `parent`: The combobox parent  
     • `font`: The combobox font. If None, use the system default  
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ComboBoxT</span><span class='op'>&lt;</span><span class='ident'>D</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Display</span><span class='op'>+</span><span class='lifetime'>&#39;static</span>, <span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span>, <span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>collection</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span>,
-    <span class='kw'>pub</span> <span class='ident'>position</span>: (<span class='ident'>i32</span>, <span class='ident'>i32</span>),
-    <span class='kw'>pub</span> <span class='ident'>size</span>: (<span class='ident'>u32</span>, <span class='ident'>u32</span>),
-    <span class='kw'>pub</span> <span class='ident'>visible</span>: <span class='ident'>bool</span>,
-    <span class='kw'>pub</span> <span class='ident'>disabled</span>: <span class='ident'>bool</span>,
-    <span class='kw'>pub</span> <span class='ident'>placeholder</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span>,
-    <span class='kw'>pub</span> <span class='ident'>parent</span>: <span class='ident'>ID</span>,
-    <span class='kw'>pub</span> <span class='ident'>font</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>,
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ComboBoxT</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Display</span><span class="op">+</span><span class="lifetime">&#39;static</span>, <span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span>, <span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">collection</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">position</span>: (<span class="ident">i32</span>, <span class="ident">i32</span>),
+    <span class="kw">pub</span> <span class="ident">size</span>: (<span class="ident">u32</span>, <span class="ident">u32</span>),
+    <span class="kw">pub</span> <span class="ident">visible</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">disabled</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">placeholder</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">parent</span>: <span class="ident">ID</span>,
+    <span class="kw">pub</span> <span class="ident">font</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>,
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>D</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Display</span><span class='op'>+</span><span class='lifetime'>&#39;static</span>, <span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span>, <span class='ident'>S</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span> <span class='ident'>ControlT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>ComboBoxT</span><span class='op'>&lt;</span><span class='ident'>D</span>, <span class='ident'>ID</span>, <span class='ident'>S</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>type_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>TypeId</span> { <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>ComboBox</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;&gt;</span>() }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Display</span><span class="op">+</span><span class="lifetime">&#39;static</span>, <span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span>, <span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> <span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ComboBoxT</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">ID</span>, <span class="ident">S</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">ComboBox</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;&gt;</span>() }
 
-    <span class='kw'>fn</span> <span class='ident'>events</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Event</span><span class='op'>&gt;</span> {
-        <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>Event</span>::<span class='ident'>Destroyed</span>, <span class='ident'>Event</span>::<span class='ident'>SelectionChanged</span>, <span class='ident'>Event</span>::<span class='ident'>DoubleClick</span>, <span class='ident'>Event</span>::<span class='ident'>Focus</span>, <span class='ident'>Event</span>::<span class='ident'>Moved</span>, <span class='ident'>Event</span>::<span class='ident'>Resized</span>, <span class='ident'>Event</span>::<span class='ident'>Raw</span>]
+    <span class="kw">fn</span> <span class="ident">events</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
+        <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Event</span>::<span class="ident">Destroyed</span>, <span class="ident">Event</span>::<span class="ident">SelectionChanged</span>, <span class="ident">Event</span>::<span class="ident">DoubleClick</span>, <span class="ident">Event</span>::<span class="ident">Focus</span>, <span class="ident">Event</span>::<span class="ident">Moved</span>, <span class="ident">Event</span>::<span class="ident">Resized</span>, <span class="ident">Event</span>::<span class="ident">Raw</span>]
     }
 
-    <span class='kw'>fn</span> <span class='ident'>build</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Control</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>window_helper</span>::{<span class='ident'>WindowParams</span>, <span class='ident'>build_window</span>, <span class='ident'>set_window_font</span>, <span class='ident'>handle_of_window</span>, <span class='ident'>handle_of_font</span>};
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>CBS_DROPDOWNLIST</span>, <span class='ident'>CBS_HASSTRINGS</span>, <span class='ident'>CB_ADDSTRING</span>};
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>DWORD</span>, <span class='ident'>WS_VISIBLE</span>, <span class='ident'>WS_DISABLED</span>, <span class='ident'>WS_CHILD</span>};
-        <span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>SendMessageW</span>;
+    <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">window_helper</span>::{<span class="ident">WindowParams</span>, <span class="ident">build_window</span>, <span class="ident">set_window_font</span>, <span class="ident">handle_of_window</span>, <span class="ident">handle_of_font</span>};
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">CBS_DROPDOWNLIST</span>, <span class="ident">CBS_HASSTRINGS</span>, <span class="ident">CB_ADDSTRING</span>};
+        <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">DWORD</span>, <span class="ident">WS_VISIBLE</span>, <span class="ident">WS_DISABLED</span>, <span class="ident">WS_CHILD</span>};
+        <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">SendMessageW</span>;
 
-        <span class='kw'>let</span> <span class='ident'>flags</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='ident'>WS_CHILD</span> <span class='op'>|</span> <span class='ident'>CBS_HASSTRINGS</span> <span class='op'>|</span> <span class='ident'>CBS_DROPDOWNLIST</span> <span class='op'>|</span>
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>visible</span>      { <span class='ident'>WS_VISIBLE</span> }      <span class='kw'>else</span> { <span class='number'>0</span> } <span class='op'>|</span>
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>disabled</span>     { <span class='ident'>WS_DISABLED</span> }     <span class='kw'>else</span> { <span class='number'>0</span> };
+        <span class="kw">let</span> <span class="ident">flags</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">WS_CHILD</span> <span class="op">|</span> <span class="ident">CBS_HASSTRINGS</span> <span class="op">|</span> <span class="ident">CBS_DROPDOWNLIST</span> <span class="op">|</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">visible</span>      { <span class="ident">WS_VISIBLE</span> }      <span class="kw">else</span> { <span class="number">0</span> } <span class="op">|</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">disabled</span>     { <span class="ident">WS_DISABLED</span> }     <span class="kw">else</span> { <span class="number">0</span> };
 
-        <span class='comment'>// Get the parent handle</span>
-        <span class='kw'>let</span> <span class='ident'>parent</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>handle_of_window</span>(<span class='ident'>ui</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>parent</span>, <span class='string'>&quot;The parent of a combobox must be a window-like control.&quot;</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>h</span>) <span class='op'>=&gt;</span> <span class='ident'>h</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+        <span class="comment">// Get the parent handle</span>
+        <span class="kw">let</span> <span class="ident">parent</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">handle_of_window</span>(<span class="ident">ui</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">parent</span>, <span class="string">&quot;The parent of a combobox must be a window-like control.&quot;</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> <span class="ident">h</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='comment'>// Get the font handle (if any)</span>
-        <span class='kw'>let</span> <span class='ident'>font_handle</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>HFONT</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>font</span>.<span class='ident'>as_ref</span>() {
-            <span class='prelude-val'>Some</span>(<span class='ident'>font_id</span>) <span class='op'>=&gt;</span> 
-                <span class='kw'>match</span> <span class='ident'>handle_of_font</span>(<span class='ident'>ui</span>, <span class='kw-2'>&amp;</span><span class='ident'>font_id</span>, <span class='string'>&quot;The font of a combobox must be a font resource.&quot;</span>) {
-                    <span class='prelude-val'>Ok</span>(<span class='ident'>h</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Some</span>(<span class='ident'>h</span>),
-                    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+        <span class="comment">// Get the font handle (if any)</span>
+        <span class="kw">let</span> <span class="ident">font_handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HFONT</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">font</span>.<span class="ident">as_ref</span>() {
+            <span class="prelude-val">Some</span>(<span class="ident">font_id</span>) <span class="op">=&gt;</span> 
+                <span class="kw">match</span> <span class="ident">handle_of_font</span>(<span class="ident">ui</span>, <span class="kw-2">&amp;</span><span class="ident">font_id</span>, <span class="string">&quot;The font of a combobox must be a font resource.&quot;</span>) {
+                    <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">h</span>),
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
                 },
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='prelude-val'>None</span>
+            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>
         };
 
-        <span class='kw'>let</span> <span class='ident'>params</span> <span class='op'>=</span> <span class='ident'>WindowParams</span> {
-            <span class='ident'>title</span>: <span class='string'>&quot;&quot;</span>,
-            <span class='ident'>class_name</span>: <span class='string'>&quot;COMBOBOX&quot;</span>,
-            <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position</span>.<span class='ident'>clone</span>(),
-            <span class='ident'>size</span>: <span class='self'>self</span>.<span class='ident'>size</span>.<span class='ident'>clone</span>(),
-            <span class='ident'>flags</span>: <span class='ident'>flags</span>,
-            <span class='ident'>ex_flags</span>: <span class='prelude-val'>Some</span>(<span class='number'>0</span>),
-            <span class='ident'>parent</span>: <span class='ident'>parent</span>
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">WindowParams</span> {
+            <span class="ident">title</span>: <span class="string">&quot;&quot;</span>,
+            <span class="ident">class_name</span>: <span class="string">&quot;COMBOBOX&quot;</span>,
+            <span class="ident">position</span>: <span class="self">self</span>.<span class="ident">position</span>.<span class="ident">clone</span>(),
+            <span class="ident">size</span>: <span class="self">self</span>.<span class="ident">size</span>.<span class="ident">clone</span>(),
+            <span class="ident">flags</span>: <span class="ident">flags</span>,
+            <span class="ident">ex_flags</span>: <span class="prelude-val">Some</span>(<span class="number">0</span>),
+            <span class="ident">parent</span>: <span class="ident">parent</span>
         };
 
-        <span class='kw'>match</span> <span class='kw'>unsafe</span>{ <span class='ident'>build_window</span>(<span class='ident'>params</span>) } {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>h</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>unsafe</span>{ 
-                    <span class='comment'>// Set font</span>
-                    <span class='ident'>set_window_font</span>(<span class='ident'>h</span>, <span class='ident'>font_handle</span>, <span class='bool-val'>true</span>); 
+        <span class="kw">match</span> <span class="kw">unsafe</span>{ <span class="ident">build_window</span>(<span class="ident">params</span>) } {
+            <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> {
+                <span class="kw">unsafe</span>{ 
+                    <span class="comment">// Set font</span>
+                    <span class="ident">set_window_font</span>(<span class="ident">h</span>, <span class="ident">font_handle</span>, <span class="bool-val">true</span>); 
 
-                    <span class='comment'>// Set placeholder</span>
-                    <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>placeholder</span>.<span class='ident'>as_ref</span>() {
-                        <span class='prelude-val'>Some</span>(<span class='ident'>p</span>) <span class='op'>=&gt;</span> { <span class='ident'>set_placeholder</span>(<span class='ident'>h</span>, <span class='ident'>p</span>.<span class='ident'>clone</span>()); },
-                        _ <span class='op'>=&gt;</span> {}
+                    <span class="comment">// Set placeholder</span>
+                    <span class="kw">match</span> <span class="self">self</span>.<span class="ident">placeholder</span>.<span class="ident">as_ref</span>() {
+                        <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=&gt;</span> { <span class="ident">set_placeholder</span>(<span class="ident">h</span>, <span class="ident">p</span>.<span class="ident">clone</span>()); },
+                        _ <span class="op">=&gt;</span> {}
                     }
 
-                    <span class='comment'>// Init collection</span>
-                    <span class='kw'>let</span> <span class='ident'>collection</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>collection</span>.<span class='ident'>iter</span>().<span class='ident'>map</span>(
-                        <span class='op'>|</span><span class='ident'>s</span><span class='op'>|</span>{  
-                            <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>s</span>).<span class='ident'>as_str</span>());
-                            <span class='ident'>SendMessageW</span>(<span class='ident'>h</span>, <span class='ident'>CB_ADDSTRING</span>, <span class='number'>0</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>text</span>.<span class='ident'>as_ptr</span>()));
-                            <span class='ident'>s</span>.<span class='ident'>clone</span>() 
+                    <span class="comment">// Init collection</span>
+                    <span class="kw">let</span> <span class="ident">collection</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">collection</span>.<span class="ident">iter</span>().<span class="ident">map</span>(
+                        <span class="op">|</span><span class="ident">s</span><span class="op">|</span>{  
+                            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">s</span>).<span class="ident">as_str</span>());
+                            <span class="ident">SendMessageW</span>(<span class="ident">h</span>, <span class="ident">CB_ADDSTRING</span>, <span class="number">0</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">text</span>.<span class="ident">as_ptr</span>()));
+                            <span class="ident">s</span>.<span class="ident">clone</span>() 
                         } 
-                    ).<span class='ident'>collect</span>();
+                    ).<span class="ident">collect</span>();
 
 
-                    <span class='prelude-val'>Ok</span>( <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>ComboBox</span>{<span class='ident'>handle</span>: <span class='ident'>h</span>, <span class='ident'>collection</span>: <span class='ident'>collection</span>}) )
+                    <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">ComboBox</span>{<span class="ident">handle</span>: <span class="ident">h</span>, <span class="ident">collection</span>: <span class="ident">collection</span>}) )
                 }
             },
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>System</span>(<span class='ident'>e</span>))
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">System</span>(<span class="ident">e</span>))
         }
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A combobox control
 */</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ComboBox</span><span class='op'>&lt;</span><span class='ident'>D</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Display</span><span class='op'>&gt;</span> {
-    <span class='ident'>handle</span>: <span class='ident'>HWND</span>,
-    <span class='ident'>collection</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ComboBox</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Display</span><span class="op">&gt;</span> {
+    <span class="ident">handle</span>: <span class="ident">HWND</span>,
+    <span class="ident">collection</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>D</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Display</span><span class='op'>&gt;</span> <span class='ident'>ComboBox</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Display</span><span class="op">&gt;</span> <span class="ident">ComboBox</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> {
 
-    <span class='doccomment'>/// Return the number of items in the inner collection</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>usize</span> { <span class='self'>self</span>.<span class='ident'>collection</span>.<span class='ident'>len</span>() }
+    <span class="doccomment">/// Return the number of items in the inner collection</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">usize</span> { <span class="self">self</span>.<span class="ident">collection</span>.<span class="ident">len</span>() }
 
-    <span class='doccomment'>/// Return the inner collection of the combobox</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>collection</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span> { <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>collection</span> }
+    <span class="doccomment">/// Return the inner collection of the combobox</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">collection</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> { <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">collection</span> }
 
-    <span class='doccomment'>/// Return the inner collection of the combobox, mutable.</span>
-    <span class='doccomment'>/// If the inner collection is changed, `combobox.sync` must be called to show the changes in the combobox</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>collection_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>collection</span> }
+    <span class="doccomment">/// Return the inner collection of the combobox, mutable.</span>
+    <span class="doccomment">/// If the inner collection is changed, `combobox.sync` must be called to show the changes in the combobox</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">collection_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">collection</span> }
 
-    <span class='doccomment'>/// Reload the content of the combobox</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>sync</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>CB_RESETCONTENT</span>, <span class='ident'>CB_ADDSTRING</span>};
+    <span class="doccomment">/// Reload the content of the combobox</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sync</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">CB_RESETCONTENT</span>, <span class="ident">CB_ADDSTRING</span>};
 
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_RESETCONTENT</span>, <span class='number'>0</span>, <span class='number'>0</span>); }
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_RESETCONTENT</span>, <span class="number">0</span>, <span class="number">0</span>); }
 
-        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>collection</span>.<span class='ident'>iter</span>() {
-            <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>i</span>).<span class='ident'>as_str</span>());
-            <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_ADDSTRING</span>, <span class='number'>0</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>text</span>.<span class='ident'>as_ptr</span>())); }
+        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">collection</span>.<span class="ident">iter</span>() {
+            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">i</span>).<span class="ident">as_str</span>());
+            <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_ADDSTRING</span>, <span class="number">0</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">text</span>.<span class="ident">as_ptr</span>())); }
         }
     }
 
-    <span class='doccomment'>/// Add an item at the end of the combobox. Updates both the inner collection and the ui.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>push</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>item</span>: <span class='ident'>D</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::<span class='ident'>CB_ADDSTRING</span>;
+    <span class="doccomment">/// Add an item at the end of the combobox. Updates both the inner collection and the ui.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">item</span>: <span class="ident">D</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">CB_ADDSTRING</span>;
 
-        <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>item</span>).<span class='ident'>as_str</span>());
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_ADDSTRING</span>, <span class='number'>0</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>text</span>.<span class='ident'>as_ptr</span>())); }
+        <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">item</span>).<span class="ident">as_str</span>());
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_ADDSTRING</span>, <span class="number">0</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">text</span>.<span class="ident">as_ptr</span>())); }
 
-        <span class='self'>self</span>.<span class='ident'>collection</span>.<span class='ident'>push</span>(<span class='ident'>item</span>);
+        <span class="self">self</span>.<span class="ident">collection</span>.<span class="ident">push</span>(<span class="ident">item</span>);
     }
 
-    <span class='doccomment'>/// Remove an item from the inner collection and the combobox. Return the removed item.  </span>
-    <span class='doccomment'>/// `Panics` if index is out of bounds.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>index</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>D</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::<span class='ident'>CB_DELETESTRING</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_DELETESTRING</span>, <span class='ident'>index</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='number'>0</span>); }
-        <span class='self'>self</span>.<span class='ident'>collection</span>.<span class='ident'>remove</span>(<span class='ident'>index</span>)
+    <span class="doccomment">/// Remove an item from the inner collection and the combobox. Return the removed item.  </span>
+    <span class="doccomment">/// `Panics` if index is out of bounds.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="ident">D</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">CB_DELETESTRING</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_DELETESTRING</span>, <span class="ident">index</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>); }
+        <span class="self">self</span>.<span class="ident">collection</span>.<span class="ident">remove</span>(<span class="ident">index</span>)
     }
 
-    <span class='doccomment'>/// Insert an item at the selected position in the lisbox and the inner collection.  </span>
-    <span class='doccomment'>/// If index is -1, the item is added at the end of the list.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>insert</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>index</span>: <span class='ident'>usize</span>, <span class='ident'>item</span>: <span class='ident'>D</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::<span class='ident'>CB_INSERTSTRING</span>;
+    <span class="doccomment">/// Insert an item at the selected position in the lisbox and the inner collection.  </span>
+    <span class="doccomment">/// If index is -1, the item is added at the end of the list.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">item</span>: <span class="ident">D</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">CB_INSERTSTRING</span>;
 
-        <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>item</span>).<span class='ident'>as_str</span>());
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_INSERTSTRING</span>, <span class='ident'>index</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>text</span>.<span class='ident'>as_ptr</span>())); }
+        <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">item</span>).<span class="ident">as_str</span>());
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_INSERTSTRING</span>, <span class="ident">index</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">text</span>.<span class="ident">as_ptr</span>())); }
 
-        <span class='self'>self</span>.<span class='ident'>collection</span>.<span class='ident'>insert</span>(<span class='ident'>index</span>, <span class='ident'>item</span>);
+        <span class="self">self</span>.<span class="ident">collection</span>.<span class="ident">insert</span>(<span class="ident">index</span>, <span class="ident">item</span>);
     }
 
-    <span class='doccomment'>/// Try to find an item with the text `text` in the collection. If one is found, return its index else, returns None.  </span>
-    <span class='doccomment'>/// If `full_match` is true, the text must match exactly otherwise it only needs to match the beginning.</span>
-    <span class='doccomment'>/// The search is NOT case sensitive.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>find_string</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>text</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>, <span class='ident'>full_match</span>: <span class='ident'>bool</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>CB_FINDSTRING</span>, <span class='ident'>CB_FINDSTRINGEXACT</span>};
+    <span class="doccomment">/// Try to find an item with the text `text` in the collection. If one is found, return its index else, returns None.  </span>
+    <span class="doccomment">/// If `full_match` is true, the text must match exactly otherwise it only needs to match the beginning.</span>
+    <span class="doccomment">/// The search is NOT case sensitive.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_string</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">text</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">full_match</span>: <span class="ident">bool</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">CB_FINDSTRING</span>, <span class="ident">CB_FINDSTRINGEXACT</span>};
 
-        <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='ident'>text</span>);
-        <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>full_match</span> { <span class='ident'>CB_FINDSTRINGEXACT</span> } <span class='kw'>else</span> { <span class='ident'>CB_FINDSTRING</span> };
-        <span class='kw'>let</span> <span class='ident'>index</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>msg</span>, <span class='op'>-</span><span class='number'>1isize</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>text</span>.<span class='ident'>as_ptr</span>()) ) };
+        <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="ident">text</span>);
+        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">full_match</span> { <span class="ident">CB_FINDSTRINGEXACT</span> } <span class="kw">else</span> { <span class="ident">CB_FINDSTRING</span> };
+        <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">msg</span>, <span class="op">-</span><span class="number">1isize</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">text</span>.<span class="ident">as_ptr</span>()) ) };
 
-        <span class='kw'>if</span> <span class='ident'>index</span> <span class='op'>==</span> <span class='op'>-</span><span class='number'>1</span> {
-            <span class='prelude-val'>None</span>
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>index</span> <span class='kw'>as</span> <span class='ident'>usize</span>)
+        <span class="kw">if</span> <span class="ident">index</span> <span class="op">==</span> <span class="op">-</span><span class="number">1</span> {
+            <span class="prelude-val">None</span>
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>)
         }
     }
 
-    <span class='doccomment'>/// Return the index of currently selected item.  </span>
-    <span class='doccomment'>/// Return None if there is no selected item</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_selected_index</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::<span class='ident'>CB_GETCURSEL</span>;
+    <span class="doccomment">/// Return the index of currently selected item.  </span>
+    <span class="doccomment">/// Return None if there is no selected item</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_selected_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">CB_GETCURSEL</span>;
 
-        <span class='kw'>let</span> <span class='ident'>index</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_GETCURSEL</span>, <span class='number'>0</span>, <span class='number'>0</span>) };
-        <span class='kw'>if</span> <span class='ident'>index</span> <span class='op'>==</span> <span class='op'>-</span><span class='number'>1</span> { <span class='prelude-val'>None</span> } 
-        <span class='kw'>else</span> { <span class='prelude-val'>Some</span>(<span class='ident'>index</span> <span class='kw'>as</span> <span class='ident'>usize</span>) }
+        <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_GETCURSEL</span>, <span class="number">0</span>, <span class="number">0</span>) };
+        <span class="kw">if</span> <span class="ident">index</span> <span class="op">==</span> <span class="op">-</span><span class="number">1</span> { <span class="prelude-val">None</span> } 
+        <span class="kw">else</span> { <span class="prelude-val">Some</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>) }
     }
 
-    <span class='doccomment'>/// Return the currently selected element text. Returns `&quot;&quot;` if no item is selected.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_selected_text</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
-        <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_text</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) }
+    <span class="doccomment">/// Return the currently selected element text. Returns `&quot;&quot;` if no item is selected.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_selected_text</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
+        <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_text</span>(<span class="self">self</span>.<span class="ident">handle</span>) }
     }
 
-    <span class='doccomment'>/// Set the selected index in a combobox.  </span>
-    <span class='doccomment'>/// If `index` is `usize::max_value`, remove the selected index from the combobox</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_selected_index</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>index</span>: <span class='ident'>usize</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::<span class='ident'>CB_SETCURSEL</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_SETCURSEL</span>, <span class='ident'>index</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='number'>0</span>); }
+    <span class="doccomment">/// Set the selected index in a combobox.  </span>
+    <span class="doccomment">/// If `index` is `usize::max_value`, remove the selected index from the combobox</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_selected_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">CB_SETCURSEL</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_SETCURSEL</span>, <span class="ident">index</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>); }
     }
 
-    <span class='doccomment'>/// Return the item text at the provided index. Returns None if the index is not valid.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_string</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>index</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>CB_GETLBTEXT</span>, <span class='ident'>CB_GETLBTEXTLEN</span>};
+    <span class="doccomment">/// Return the item text at the provided index. Returns None if the index is not valid.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">CB_GETLBTEXT</span>, <span class="ident">CB_GETLBTEXTLEN</span>};
 
-        <span class='kw'>let</span> <span class='ident'>length</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_GETLBTEXTLEN</span>, <span class='ident'>index</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='number'>0</span>) };
-        <span class='kw'>if</span> <span class='ident'>length</span> <span class='op'>==</span> <span class='op'>-</span><span class='number'>1</span> { <span class='kw'>return</span> <span class='prelude-val'>None</span>; }
+        <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_GETLBTEXTLEN</span>, <span class="ident">index</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>) };
+        <span class="kw">if</span> <span class="ident">length</span> <span class="op">==</span> <span class="op">-</span><span class="number">1</span> { <span class="kw">return</span> <span class="prelude-val">None</span>; }
 
-        <span class='kw'>let</span> <span class='ident'>length</span> <span class='op'>=</span> (<span class='ident'>length</span><span class='op'>+</span><span class='number'>1</span>) <span class='kw'>as</span> <span class='ident'>usize</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>buffer</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u16</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>length</span>);
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>buffer</span>.<span class='ident'>set_len</span>(<span class='ident'>length</span>);
-            <span class='kw'>let</span> <span class='ident'>err</span> <span class='op'>=</span> <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_GETLBTEXT</span>, <span class='ident'>index</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>( <span class='ident'>buffer</span>.<span class='ident'>as_mut_ptr</span>() ));
-            <span class='kw'>if</span> <span class='ident'>err</span> <span class='op'>==</span> <span class='op'>-</span><span class='number'>1</span> { <span class='kw'>return</span> <span class='prelude-val'>None</span>; }
+        <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> (<span class="ident">length</span><span class="op">+</span><span class="number">1</span>) <span class="kw">as</span> <span class="ident">usize</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="ident">length</span>);
+        <span class="kw">unsafe</span> {
+            <span class="ident">buffer</span>.<span class="ident">set_len</span>(<span class="ident">length</span>);
+            <span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_GETLBTEXT</span>, <span class="ident">index</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>( <span class="ident">buffer</span>.<span class="ident">as_mut_ptr</span>() ));
+            <span class="kw">if</span> <span class="ident">err</span> <span class="op">==</span> <span class="op">-</span><span class="number">1</span> { <span class="kw">return</span> <span class="prelude-val">None</span>; }
         }
 
-       <span class='prelude-val'>Some</span>( <span class='ident'>from_utf16</span>(<span class='kw-2'>&amp;</span><span class='ident'>buffer</span>[..]) )
+       <span class="prelude-val">Some</span>( <span class="ident">from_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">buffer</span>[..]) )
     }
 
-    <span class='doccomment'>/// Set a new placeholder for the combobox. To remove the current placeholder, send `&quot;&quot;`  </span>
-    <span class='doccomment'>/// The maximum length of the placeholder is 255 characters</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_placeholder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>placeholder</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) {
-        <span class='ident'>set_placeholder</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>placeholder</span>);
+    <span class="doccomment">/// Set a new placeholder for the combobox. To remove the current placeholder, send `&quot;&quot;`  </span>
+    <span class="doccomment">/// The maximum length of the placeholder is 255 characters</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_placeholder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">placeholder</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) {
+        <span class="ident">set_placeholder</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">placeholder</span>);
     }
 
-    <span class='comment'>/* Return the current placeholder for the combobox. If there are no placeholder set, returns None.
+    <span class="comment">/* Return the current placeholder for the combobox. If there are no placeholder set, returns None.
 
     CB_GETCUEBANNER IS NOT RELIABLE (blame Windows for this one).
 
@@ -645,58 +645,58 @@
     }
     */</span>
 
-    <span class='doccomment'>/// Return true if the combobox dropdown is visible</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_dropped_state</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::<span class='ident'>CB_GETDROPPEDSTATE</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_GETDROPPEDSTATE</span>, <span class='number'>0</span>, <span class='number'>0</span>) <span class='op'>!=</span> <span class='number'>0</span> }
+    <span class="doccomment">/// Return true if the combobox dropdown is visible</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_dropped_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">CB_GETDROPPEDSTATE</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_GETDROPPEDSTATE</span>, <span class="number">0</span>, <span class="number">0</span>) <span class="op">!=</span> <span class="number">0</span> }
     }
 
-    <span class='doccomment'>/// Show or hide the control dropdown</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_dropped_state</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>dropped</span>: <span class='ident'>bool</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::<span class='ident'>CB_SHOWDROPDOWN</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_SHOWDROPDOWN</span>, <span class='ident'>dropped</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='number'>0</span>); }
+    <span class="doccomment">/// Show or hide the control dropdown</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_dropped_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dropped</span>: <span class="ident">bool</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">CB_SHOWDROPDOWN</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_SHOWDROPDOWN</span>, <span class="ident">dropped</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>); }
     }
 
-    <span class='doccomment'>/// Remove every item in the inner collection and in the combobox</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>clear</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::<span class='ident'>CB_RESETCONTENT</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>CB_RESETCONTENT</span>, <span class='number'>0</span>, <span class='number'>0</span>) };
-        <span class='self'>self</span>.<span class='ident'>collection</span>.<span class='ident'>clear</span>();
+    <span class="doccomment">/// Remove every item in the inner collection and in the combobox</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">CB_RESETCONTENT</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">CB_RESETCONTENT</span>, <span class="number">0</span>, <span class="number">0</span>) };
+        <span class="self">self</span>.<span class="ident">collection</span>.<span class="ident">clear</span>();
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_visibility</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_visibility</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_visibility</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>visible</span>: <span class='ident'>bool</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_visibility</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>visible</span>); }}
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_position</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>i32</span>, <span class='ident'>i32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_position</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_position</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>x</span>: <span class='ident'>i32</span>, <span class='ident'>y</span>: <span class='ident'>i32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_position</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>x</span>, <span class='ident'>y</span>); }}
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_size</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>u32</span>, <span class='ident'>u32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_size</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_size</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>w</span>: <span class='ident'>u32</span>, <span class='ident'>h</span>: <span class='ident'>u32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_size</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>w</span>, <span class='ident'>h</span>, <span class='bool-val'>true</span>); } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_enabled</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>:<span class='ident'>bool</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_enabled</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>e</span>); } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_visibility</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_visibility</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_visibility</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">visible</span>: <span class="ident">bool</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_visibility</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">visible</span>); }}
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">i32</span>, <span class="ident">i32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_position</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">i32</span>, <span class="ident">y</span>: <span class="ident">i32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_position</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">x</span>, <span class="ident">y</span>); }}
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">u32</span>, <span class="ident">u32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_size</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">w</span>: <span class="ident">u32</span>, <span class="ident">h</span>: <span class="ident">u32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_size</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">w</span>, <span class="ident">h</span>, <span class="bool-val">true</span>); } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_enabled</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">e</span>:<span class="ident">bool</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_enabled</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">e</span>); } }
 }
     
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>D</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Display</span><span class='op'>&gt;</span> <span class='ident'>Control</span> <span class='kw'>for</span> <span class='ident'>ComboBox</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>AnyHandle</span> {
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='self'>self</span>.<span class='ident'>handle</span>)
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Display</span><span class="op">&gt;</span> <span class="ident">Control</span> <span class="kw">for</span> <span class="ident">ComboBox</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">AnyHandle</span> {
+        <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="self">self</span>.<span class="ident">handle</span>)
     }
 
-    <span class='kw'>fn</span> <span class='ident'>control_type</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ControlType</span> { 
-        <span class='ident'>ControlType</span>::<span class='ident'>ComboBox</span> 
+    <span class="kw">fn</span> <span class="ident">control_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">ControlType</span> { 
+        <span class="ident">ControlType</span>::<span class="ident">ComboBox</span> 
     }
 
-    <span class='kw'>fn</span> <span class='ident'>free</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>DestroyWindow</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>DestroyWindow</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) };
+    <span class="kw">fn</span> <span class="ident">free</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">DestroyWindow</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">DestroyWindow</span>(<span class="self">self</span>.<span class="ident">handle</span>) };
     }
 }
 
-<span class='comment'>// Private combobox methods</span>
+<span class="comment">// Private combobox methods</span>
 
-<span class='doccomment'>/// Set the placeholder of a combobox.</span>
-<span class='kw'>fn</span> <span class='ident'>set_placeholder</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;&gt;</span>(<span class='ident'>handle</span>: <span class='ident'>HWND</span>, <span class='ident'>placeholder</span>: <span class='ident'>S</span>) {
-    <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::<span class='ident'>CB_SETCUEBANNER</span>;
-    <span class='kw'>let</span> <span class='ident'>text</span> <span class='op'>=</span> <span class='ident'>to_utf16</span>(<span class='ident'>placeholder</span>.<span class='ident'>into</span>().<span class='ident'>as_str</span>());
-    <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='ident'>handle</span>, <span class='ident'>CB_SETCUEBANNER</span>, <span class='number'>0</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>text</span>.<span class='ident'>as_ptr</span>()) ); }
+<span class="doccomment">/// Set the placeholder of a combobox.</span>
+<span class="kw">fn</span> <span class="ident">set_placeholder</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span>(<span class="ident">handle</span>: <span class="ident">HWND</span>, <span class="ident">placeholder</span>: <span class="ident">S</span>) {
+    <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">CB_SETCUEBANNER</span>;
+    <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="ident">to_utf16</span>(<span class="ident">placeholder</span>.<span class="ident">into</span>().<span class="ident">as_str</span>());
+    <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="ident">handle</span>, <span class="ident">CB_SETCUEBANNER</span>, <span class="number">0</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">text</span>.<span class="ident">as_ptr</span>()) ); }
 }</pre>
 </section>
     <section id='search' class="content hidden"></section>

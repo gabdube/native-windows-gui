@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -340,12 +340,12 @@
 <span id="295">295</span>
 <span id="296">296</span>
 <span id="297">297</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     A canvas control where the user can draw stuff.
     This defines the canvas renderer
 */</span>
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -362,27 +362,27 @@
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::{<span class='ident'>Deref</span>, <span class='ident'>DerefMut</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
 
-<span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>FLOAT</span>, <span class='ident'>D2D1_RECT_F</span>, <span class='ident'>D2D1_ROUNDED_RECT</span>, <span class='ident'>D2D1_ELLIPSE</span>, <span class='ident'>D2D1_POINT_2F</span>, 
-  <span class='ident'>D2D1_MATRIX_3X2_F</span>, <span class='ident'>ID2D1Brush</span>, <span class='ident'>ID2D1StrokeStyle</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">FLOAT</span>, <span class="ident">D2D1_RECT_F</span>, <span class="ident">D2D1_ROUNDED_RECT</span>, <span class="ident">D2D1_ELLIPSE</span>, <span class="ident">D2D1_POINT_2F</span>, 
+  <span class="ident">D2D1_MATRIX_3X2_F</span>, <span class="ident">ID2D1Brush</span>, <span class="ident">ID2D1StrokeStyle</span>};
 
-<span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>Error</span>;
-<span class='kw'>use</span> <span class='ident'>defs</span>::{<span class='ident'>Rectangle</span>, <span class='ident'>Ellipse</span>};
-<span class='kw'>use</span> <span class='kw'>super</span>::{<span class='ident'>Canvas</span>, <span class='ident'>CanvasProtected</span>, <span class='ident'>CanvasResources</span>};
+<span class="kw">use</span> <span class="ident">error</span>::<span class="ident">Error</span>;
+<span class="kw">use</span> <span class="ident">defs</span>::{<span class="ident">Rectangle</span>, <span class="ident">Ellipse</span>};
+<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Canvas</span>, <span class="ident">CanvasProtected</span>, <span class="ident">CanvasResources</span>};
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Object that offers a light wrapper over the D2D1 api.
 */</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>CanvasRenderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>+</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='ident'>canvas</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CanvasRenderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">+</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">canvas</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>CanvasRenderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/**
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">CanvasRenderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="doccomment">/**
         Clears the drawing area to the specified color.  
     
         Arguments:  
@@ -391,63 +391,63 @@
         • `b`: Blue component. 0.0 - 1.0  
         • `a`: Alpha component. 0.0 - 1.0  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>clear</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>r</span>:<span class='ident'>f32</span>, <span class='ident'>g</span>:<span class='ident'>f32</span>, <span class='ident'>b</span>: <span class='ident'>f32</span>, <span class='ident'>a</span>: <span class='ident'>f32</span>) {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>D2D1_COLOR_F</span>;
-        <span class='kw'>let</span> <span class='ident'>color</span> <span class='op'>=</span> <span class='ident'>D2D1_COLOR_F</span>{<span class='ident'>r</span>:<span class='ident'>r</span>, <span class='ident'>g</span>:<span class='ident'>g</span>, <span class='ident'>b</span>:<span class='ident'>b</span>, <span class='ident'>a</span>:<span class='ident'>a</span>};
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>Clear</span>(<span class='kw-2'>&amp;</span><span class='ident'>color</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">r</span>:<span class="ident">f32</span>, <span class="ident">g</span>:<span class="ident">f32</span>, <span class="ident">b</span>: <span class="ident">f32</span>, <span class="ident">a</span>: <span class="ident">f32</span>) {
+        <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">D2D1_COLOR_F</span>;
+        <span class="kw">let</span> <span class="ident">color</span> <span class="op">=</span> <span class="ident">D2D1_COLOR_F</span>{<span class="ident">r</span>:<span class="ident">r</span>, <span class="ident">g</span>:<span class="ident">g</span>, <span class="ident">b</span>:<span class="ident">b</span>, <span class="ident">a</span>:<span class="ident">a</span>};
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">Clear</span>(<span class="kw-2">&amp;</span><span class="ident">color</span>); }
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Return the render target size in a tuple of (`width`, `height`)
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_render_size</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>f32</span>, <span class='ident'>f32</span>) {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>D2D1_SIZE_F</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>render_size</span> <span class='op'>=</span> <span class='ident'>D2D1_SIZE_F</span>{<span class='ident'>width</span>: <span class='number'>0.0</span>, <span class='ident'>height</span>: <span class='number'>0.0</span>};
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>GetSize</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>render_size</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_render_size</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">f32</span>, <span class="ident">f32</span>) {
+        <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">D2D1_SIZE_F</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">render_size</span> <span class="op">=</span> <span class="ident">D2D1_SIZE_F</span>{<span class="ident">width</span>: <span class="number">0.0</span>, <span class="ident">height</span>: <span class="number">0.0</span>};
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">GetSize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">render_size</span>); }
         
-        (<span class='ident'>render_size</span>.<span class='ident'>width</span> <span class='kw'>as</span> <span class='ident'>f32</span>, <span class='ident'>render_size</span>.<span class='ident'>height</span> <span class='kw'>as</span> <span class='ident'>f32</span>)
+        (<span class="ident">render_size</span>.<span class="ident">width</span> <span class="kw">as</span> <span class="ident">f32</span>, <span class="ident">render_size</span>.<span class="ident">height</span> <span class="kw">as</span> <span class="ident">f32</span>)
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Set the transformation matrix of the renderer
 
         Arguments:  
         • `m`: The 3x2 matrix.
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_transform</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>m</span>: <span class='kw-2'>&amp;</span>[[<span class='ident'>FLOAT</span>; <span class='number'>2</span>]; <span class='number'>3</span>]) {
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>SetTransform</span>( <span class='kw-2'>&amp;</span><span class='ident'>D2D1_MATRIX_3X2_F</span>{ <span class='ident'>matrix</span>: <span class='kw-2'>*</span><span class='ident'>m</span> } ); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_transform</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">m</span>: <span class="kw-2">&amp;</span>[[<span class="ident">FLOAT</span>; <span class="number">2</span>]; <span class="number">3</span>]) {
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">SetTransform</span>( <span class="kw-2">&amp;</span><span class="ident">D2D1_MATRIX_3X2_F</span>{ <span class="ident">matrix</span>: <span class="kw-2">*</span><span class="ident">m</span> } ); }
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Return the transformation matrix of the renderer
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_transform</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> [[<span class='ident'>FLOAT</span>; <span class='number'>2</span>]; <span class='number'>3</span>] {
-        <span class='kw'>unsafe</span>{ 
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>m</span>: <span class='ident'>D2D1_MATRIX_3X2_F</span> <span class='op'>=</span> <span class='ident'>mem</span>::<span class='ident'>uninitialized</span>();
-            <span class='self'>self</span>.<span class='ident'>GetTransform</span>( <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>m</span> );
-            <span class='ident'>m</span>.<span class='ident'>matrix</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_transform</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> [[<span class="ident">FLOAT</span>; <span class="number">2</span>]; <span class="number">3</span>] {
+        <span class="kw">unsafe</span>{ 
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span>: <span class="ident">D2D1_MATRIX_3X2_F</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">uninitialized</span>();
+            <span class="self">self</span>.<span class="ident">GetTransform</span>( <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span> );
+            <span class="ident">m</span>.<span class="ident">matrix</span>
         }
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Fill a rectangle shape defined by `r` using the brush identified by `brush`  
 
         Arguments:  
         • `brush`: Id of the brush saved in the canvas  
         • `r`: The rectangle shape to draw  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>fill_rectangle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>r</span>: <span class='kw-2'>&amp;</span><span class='ident'>Rectangle</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='ident'>D2D1_RECT_F</span>{<span class='ident'>left</span>: <span class='ident'>r</span>.<span class='ident'>left</span>, <span class='ident'>top</span>: <span class='ident'>r</span>.<span class='ident'>top</span>, <span class='ident'>bottom</span>: <span class='ident'>r</span>.<span class='ident'>bottom</span>, <span class='ident'>right</span>: <span class='ident'>r</span>.<span class='ident'>right</span>};
-        <span class='kw'>let</span> <span class='ident'>brush</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>fill_setup</span>(<span class='ident'>brush</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>d</span>) <span class='op'>=&gt;</span> <span class='ident'>d</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_rectangle</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">brush</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">r</span>: <span class="kw-2">&amp;</span><span class="ident">Rectangle</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">rect</span> <span class="op">=</span> <span class="ident">D2D1_RECT_F</span>{<span class="ident">left</span>: <span class="ident">r</span>.<span class="ident">left</span>, <span class="ident">top</span>: <span class="ident">r</span>.<span class="ident">top</span>, <span class="ident">bottom</span>: <span class="ident">r</span>.<span class="ident">bottom</span>, <span class="ident">right</span>: <span class="ident">r</span>.<span class="ident">right</span>};
+        <span class="kw">let</span> <span class="ident">brush</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">fill_setup</span>(<span class="ident">brush</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=&gt;</span> <span class="ident">d</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>FillRectangle</span>(<span class='kw-2'>&amp;</span><span class='ident'>rect</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>brush</span>) ) };
-        <span class='prelude-val'>Ok</span>(())
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">FillRectangle</span>(<span class="kw-2">&amp;</span><span class="ident">rect</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">brush</span>) ) };
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Fill a rounded rectangle shape defined by `r` using the brush identified by `brush`  
 
         Arguments:  
@@ -455,37 +455,37 @@
         • `r`: The rectangle shape to draw  
         • `radius`: Amount of rounding on the rectangle border. (`width`, `height`)
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>fill_rounded_rectangle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>r</span>: <span class='kw-2'>&amp;</span><span class='ident'>Rectangle</span>, <span class='ident'>radius</span>: (<span class='ident'>f32</span>, <span class='ident'>f32</span>)) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='ident'>D2D1_RECT_F</span>{<span class='ident'>left</span>: <span class='ident'>r</span>.<span class='ident'>left</span>, <span class='ident'>top</span>: <span class='ident'>r</span>.<span class='ident'>top</span>, <span class='ident'>bottom</span>: <span class='ident'>r</span>.<span class='ident'>bottom</span>, <span class='ident'>right</span>: <span class='ident'>r</span>.<span class='ident'>right</span>};
-        <span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='ident'>D2D1_ROUNDED_RECT</span>{ <span class='ident'>rect</span>: <span class='ident'>rect</span>, <span class='ident'>radiusX</span>: <span class='ident'>radius</span>.<span class='number'>0</span>, <span class='ident'>radiusY</span>: <span class='ident'>radius</span>.<span class='number'>1</span> };
-        <span class='kw'>let</span> <span class='ident'>brush</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>fill_setup</span>(<span class='ident'>brush</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>d</span>) <span class='op'>=&gt;</span> <span class='ident'>d</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_rounded_rectangle</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">brush</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">r</span>: <span class="kw-2">&amp;</span><span class="ident">Rectangle</span>, <span class="ident">radius</span>: (<span class="ident">f32</span>, <span class="ident">f32</span>)) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">rect</span> <span class="op">=</span> <span class="ident">D2D1_RECT_F</span>{<span class="ident">left</span>: <span class="ident">r</span>.<span class="ident">left</span>, <span class="ident">top</span>: <span class="ident">r</span>.<span class="ident">top</span>, <span class="ident">bottom</span>: <span class="ident">r</span>.<span class="ident">bottom</span>, <span class="ident">right</span>: <span class="ident">r</span>.<span class="ident">right</span>};
+        <span class="kw">let</span> <span class="ident">rect</span> <span class="op">=</span> <span class="ident">D2D1_ROUNDED_RECT</span>{ <span class="ident">rect</span>: <span class="ident">rect</span>, <span class="ident">radiusX</span>: <span class="ident">radius</span>.<span class="number">0</span>, <span class="ident">radiusY</span>: <span class="ident">radius</span>.<span class="number">1</span> };
+        <span class="kw">let</span> <span class="ident">brush</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">fill_setup</span>(<span class="ident">brush</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=&gt;</span> <span class="ident">d</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>FillRoundedRectangle</span>(<span class='kw-2'>&amp;</span><span class='ident'>rect</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>brush</span>)); }
-        <span class='prelude-val'>Ok</span>(())
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">FillRoundedRectangle</span>(<span class="kw-2">&amp;</span><span class="ident">rect</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">brush</span>)); }
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Fill an ellipse shape defined by `e` using the brush identified by `brush`  
 
         Arguments:  
         • `brush`: Id of the brush saved in the canvas  
         • `e`: The ellipse shape to draw  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>fill_ellipse</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>e</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ellipse</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>ellipse</span> <span class='op'>=</span> <span class='ident'>D2D1_ELLIPSE</span>{<span class='ident'>point</span>: <span class='ident'>D2D1_POINT_2F</span>{ <span class='ident'>x</span>: <span class='ident'>e</span>.<span class='ident'>center</span>.<span class='number'>0</span>, <span class='ident'>y</span>: <span class='ident'>e</span>.<span class='ident'>center</span>.<span class='number'>1</span> } , <span class='ident'>radiusX</span>: <span class='ident'>e</span>.<span class='ident'>radius</span>.<span class='number'>0</span>, <span class='ident'>radiusY</span>: <span class='ident'>e</span>.<span class='ident'>radius</span>.<span class='number'>1</span>};
-        <span class='kw'>let</span> <span class='ident'>brush</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>fill_setup</span>(<span class='ident'>brush</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>d</span>) <span class='op'>=&gt;</span> <span class='ident'>d</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_ellipse</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">brush</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">e</span>: <span class="kw-2">&amp;</span><span class="ident">Ellipse</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">ellipse</span> <span class="op">=</span> <span class="ident">D2D1_ELLIPSE</span>{<span class="ident">point</span>: <span class="ident">D2D1_POINT_2F</span>{ <span class="ident">x</span>: <span class="ident">e</span>.<span class="ident">center</span>.<span class="number">0</span>, <span class="ident">y</span>: <span class="ident">e</span>.<span class="ident">center</span>.<span class="number">1</span> } , <span class="ident">radiusX</span>: <span class="ident">e</span>.<span class="ident">radius</span>.<span class="number">0</span>, <span class="ident">radiusY</span>: <span class="ident">e</span>.<span class="ident">radius</span>.<span class="number">1</span>};
+        <span class="kw">let</span> <span class="ident">brush</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">fill_setup</span>(<span class="ident">brush</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=&gt;</span> <span class="ident">d</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>FillEllipse</span>(<span class='kw-2'>&amp;</span><span class='ident'>ellipse</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>brush</span>)); }
-        <span class='prelude-val'>Ok</span>(())
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">FillEllipse</span>(<span class="kw-2">&amp;</span><span class="ident">ellipse</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">brush</span>)); }
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Draw the outline of a rectangle shape defined by `r` using the brush identified by `brush` and the pen identifed
         by `pen`.
 
@@ -495,19 +495,19 @@
         • `r`: The rectangle shape to draw  
         • `width`: Width of the outline to draw  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>draw_rectangle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>pen</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>r</span>: <span class='kw-2'>&amp;</span><span class='ident'>Rectangle</span>, <span class='ident'>width</span>: <span class='ident'>f32</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='ident'>D2D1_RECT_F</span>{<span class='ident'>left</span>: <span class='ident'>r</span>.<span class='ident'>left</span>, <span class='ident'>top</span>: <span class='ident'>r</span>.<span class='ident'>top</span>, <span class='ident'>bottom</span>: <span class='ident'>r</span>.<span class='ident'>bottom</span>, <span class='ident'>right</span>: <span class='ident'>r</span>.<span class='ident'>right</span>};
-        <span class='kw'>let</span> (<span class='ident'>brush</span>, <span class='ident'>pen</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>draw_setup</span>(<span class='ident'>brush</span>, <span class='ident'>pen</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>d</span>) <span class='op'>=&gt;</span> <span class='ident'>d</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">draw_rectangle</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">brush</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">pen</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">r</span>: <span class="kw-2">&amp;</span><span class="ident">Rectangle</span>, <span class="ident">width</span>: <span class="ident">f32</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">rect</span> <span class="op">=</span> <span class="ident">D2D1_RECT_F</span>{<span class="ident">left</span>: <span class="ident">r</span>.<span class="ident">left</span>, <span class="ident">top</span>: <span class="ident">r</span>.<span class="ident">top</span>, <span class="ident">bottom</span>: <span class="ident">r</span>.<span class="ident">bottom</span>, <span class="ident">right</span>: <span class="ident">r</span>.<span class="ident">right</span>};
+        <span class="kw">let</span> (<span class="ident">brush</span>, <span class="ident">pen</span>) <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">draw_setup</span>(<span class="ident">brush</span>, <span class="ident">pen</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=&gt;</span> <span class="ident">d</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>DrawRectangle</span>(<span class='kw-2'>&amp;</span><span class='ident'>rect</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>brush</span>), <span class='ident'>width</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>pen</span>)); }
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">DrawRectangle</span>(<span class="kw-2">&amp;</span><span class="ident">rect</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">brush</span>), <span class="ident">width</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">pen</span>)); }
 
-        <span class='prelude-val'>Ok</span>(())
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Draw the outline of a rounded rectangle shape defined by `r` using the brush identified by `brush` and the pen identifed
         by `pen`.
 
@@ -518,20 +518,20 @@
         • `width`: Width of the outline to draw  
         • `radius`: Amount of rounding on the rectangle border. (`width`, `height`)  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>draw_rounded_rectangle</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>pen</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>r</span>: <span class='kw-2'>&amp;</span><span class='ident'>Rectangle</span>, <span class='ident'>width</span>: <span class='ident'>f32</span>, <span class='ident'>radius</span>: (<span class='ident'>f32</span>, <span class='ident'>f32</span>)) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='ident'>D2D1_RECT_F</span>{<span class='ident'>left</span>: <span class='ident'>r</span>.<span class='ident'>left</span>, <span class='ident'>top</span>: <span class='ident'>r</span>.<span class='ident'>top</span>, <span class='ident'>bottom</span>: <span class='ident'>r</span>.<span class='ident'>bottom</span>, <span class='ident'>right</span>: <span class='ident'>r</span>.<span class='ident'>right</span>};
-        <span class='kw'>let</span> <span class='ident'>rect</span> <span class='op'>=</span> <span class='ident'>D2D1_ROUNDED_RECT</span>{ <span class='ident'>rect</span>: <span class='ident'>rect</span>, <span class='ident'>radiusX</span>: <span class='ident'>radius</span>.<span class='number'>0</span>, <span class='ident'>radiusY</span>: <span class='ident'>radius</span>.<span class='number'>1</span> };
-        <span class='kw'>let</span> (<span class='ident'>brush</span>, <span class='ident'>pen</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>draw_setup</span>(<span class='ident'>brush</span>, <span class='ident'>pen</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>d</span>) <span class='op'>=&gt;</span> <span class='ident'>d</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">draw_rounded_rectangle</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">brush</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">pen</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">r</span>: <span class="kw-2">&amp;</span><span class="ident">Rectangle</span>, <span class="ident">width</span>: <span class="ident">f32</span>, <span class="ident">radius</span>: (<span class="ident">f32</span>, <span class="ident">f32</span>)) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">rect</span> <span class="op">=</span> <span class="ident">D2D1_RECT_F</span>{<span class="ident">left</span>: <span class="ident">r</span>.<span class="ident">left</span>, <span class="ident">top</span>: <span class="ident">r</span>.<span class="ident">top</span>, <span class="ident">bottom</span>: <span class="ident">r</span>.<span class="ident">bottom</span>, <span class="ident">right</span>: <span class="ident">r</span>.<span class="ident">right</span>};
+        <span class="kw">let</span> <span class="ident">rect</span> <span class="op">=</span> <span class="ident">D2D1_ROUNDED_RECT</span>{ <span class="ident">rect</span>: <span class="ident">rect</span>, <span class="ident">radiusX</span>: <span class="ident">radius</span>.<span class="number">0</span>, <span class="ident">radiusY</span>: <span class="ident">radius</span>.<span class="number">1</span> };
+        <span class="kw">let</span> (<span class="ident">brush</span>, <span class="ident">pen</span>) <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">draw_setup</span>(<span class="ident">brush</span>, <span class="ident">pen</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=&gt;</span> <span class="ident">d</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>DrawRoundedRectangle</span>(<span class='kw-2'>&amp;</span><span class='ident'>rect</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>brush</span>), <span class='ident'>width</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>pen</span>)); }
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">DrawRoundedRectangle</span>(<span class="kw-2">&amp;</span><span class="ident">rect</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">brush</span>), <span class="ident">width</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">pen</span>)); }
 
-        <span class='prelude-val'>Ok</span>(())
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Draw the outline of an ellipse shape defined by `e` using the brush identified by `brush` and the pen identifed
         by `pen`.
 
@@ -541,100 +541,100 @@
         • `e`: The ellipse shape to draw  
         • `width`: Width of the outline to draw  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>draw_ellipse</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>pen</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>e</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ellipse</span>, <span class='ident'>width</span>: <span class='ident'>f32</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>ellipse</span> <span class='op'>=</span> <span class='ident'>D2D1_ELLIPSE</span>{<span class='ident'>point</span>: <span class='ident'>D2D1_POINT_2F</span>{ <span class='ident'>x</span>: <span class='ident'>e</span>.<span class='ident'>center</span>.<span class='number'>0</span>, <span class='ident'>y</span>: <span class='ident'>e</span>.<span class='ident'>center</span>.<span class='number'>1</span> } , <span class='ident'>radiusX</span>: <span class='ident'>e</span>.<span class='ident'>radius</span>.<span class='number'>0</span>, <span class='ident'>radiusY</span>: <span class='ident'>e</span>.<span class='ident'>radius</span>.<span class='number'>1</span>};
-        <span class='kw'>let</span> (<span class='ident'>brush</span>, <span class='ident'>pen</span>) <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>draw_setup</span>(<span class='ident'>brush</span>, <span class='ident'>pen</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>d</span>) <span class='op'>=&gt;</span> <span class='ident'>d</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">draw_ellipse</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">brush</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">pen</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">e</span>: <span class="kw-2">&amp;</span><span class="ident">Ellipse</span>, <span class="ident">width</span>: <span class="ident">f32</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">ellipse</span> <span class="op">=</span> <span class="ident">D2D1_ELLIPSE</span>{<span class="ident">point</span>: <span class="ident">D2D1_POINT_2F</span>{ <span class="ident">x</span>: <span class="ident">e</span>.<span class="ident">center</span>.<span class="number">0</span>, <span class="ident">y</span>: <span class="ident">e</span>.<span class="ident">center</span>.<span class="number">1</span> } , <span class="ident">radiusX</span>: <span class="ident">e</span>.<span class="ident">radius</span>.<span class="number">0</span>, <span class="ident">radiusY</span>: <span class="ident">e</span>.<span class="ident">radius</span>.<span class="number">1</span>};
+        <span class="kw">let</span> (<span class="ident">brush</span>, <span class="ident">pen</span>) <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">draw_setup</span>(<span class="ident">brush</span>, <span class="ident">pen</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=&gt;</span> <span class="ident">d</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='kw'>unsafe</span>{ <span class='self'>self</span>.<span class='ident'>DrawEllipse</span>(<span class='kw-2'>&amp;</span><span class='ident'>ellipse</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>brush</span>), <span class='ident'>width</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>pen</span>)); }
+        <span class="kw">unsafe</span>{ <span class="self">self</span>.<span class="ident">DrawEllipse</span>(<span class="kw-2">&amp;</span><span class="ident">ellipse</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">brush</span>), <span class="ident">width</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">pen</span>)); }
 
-        <span class='prelude-val'>Ok</span>(())
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='kw'>fn</span> <span class='ident'>fill_setup</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1Brush</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>get_resource</span>(<span class='ident'>brush</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>brush</span>) <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>brush</span> {
-                <span class='ident'>CanvasResources</span>::<span class='ident'>SolidBrush</span>(<span class='ident'>b</span>) <span class='op'>=&gt;</span> <span class='kw'>unsafe</span>{ <span class='prelude-val'>Ok</span>(<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>b</span>)) },
-                <span class='ident'>CanvasResources</span>::<span class='ident'>StrokeStyle</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BadResource</span>(<span class='string'>&quot;Resource of type brush required, got Brush.&quot;</span>.<span class='ident'>to_string</span>()))
+    <span class="kw">fn</span> <span class="ident">fill_setup</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">brush</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1Brush</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">get_resource</span>(<span class="ident">brush</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">brush</span>) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="ident">brush</span> {
+                <span class="ident">CanvasResources</span>::<span class="ident">SolidBrush</span>(<span class="ident">b</span>) <span class="op">=&gt;</span> <span class="kw">unsafe</span>{ <span class="prelude-val">Ok</span>(<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">b</span>)) },
+                <span class="ident">CanvasResources</span>::<span class="ident">StrokeStyle</span>(_) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadResource</span>(<span class="string">&quot;Resource of type brush required, got Brush.&quot;</span>.<span class="ident">to_string</span>()))
             },
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>)
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>)
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>draw_setup</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>brush</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>pen</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1Brush</span>, <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>ID2D1StrokeStyle</span>), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>brush</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>get_resource</span>(<span class='ident'>brush</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>brush</span>) <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>brush</span> {
-                <span class='ident'>CanvasResources</span>::<span class='ident'>SolidBrush</span>(<span class='ident'>b</span>) <span class='op'>=&gt;</span> <span class='ident'>b</span>,
-                <span class='ident'>CanvasResources</span>::<span class='ident'>StrokeStyle</span>(_) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BadResource</span>(<span class='string'>&quot;Resource of type brush required, got Pen.&quot;</span>.<span class='ident'>to_string</span>())); }
+    <span class="kw">fn</span> <span class="ident">draw_setup</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">brush</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">pen</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1Brush</span>, <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ID2D1StrokeStyle</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">brush</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">get_resource</span>(<span class="ident">brush</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">brush</span>) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="ident">brush</span> {
+                <span class="ident">CanvasResources</span>::<span class="ident">SolidBrush</span>(<span class="ident">b</span>) <span class="op">=&gt;</span> <span class="ident">b</span>,
+                <span class="ident">CanvasResources</span>::<span class="ident">StrokeStyle</span>(_) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadResource</span>(<span class="string">&quot;Resource of type brush required, got Pen.&quot;</span>.<span class="ident">to_string</span>())); }
             },
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='kw'>let</span> <span class='ident'>pen</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>pen</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>pen</span>) <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>get_resource</span>(<span class='ident'>pen</span>) {
-                <span class='prelude-val'>Ok</span>(<span class='ident'>pen</span>) <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='ident'>pen</span> {
-                    <span class='ident'>CanvasResources</span>::<span class='ident'>StrokeStyle</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> { <span class='ident'>s</span> },
-                    <span class='ident'>CanvasResources</span>::<span class='ident'>SolidBrush</span>(_) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BadResource</span>(<span class='string'>&quot;Resource of type pen required, got Brush.&quot;</span>.<span class='ident'>to_string</span>())); },
+        <span class="kw">let</span> <span class="ident">pen</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">pen</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">pen</span>) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">get_resource</span>(<span class="ident">pen</span>) {
+                <span class="prelude-val">Ok</span>(<span class="ident">pen</span>) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="ident">pen</span> {
+                    <span class="ident">CanvasResources</span>::<span class="ident">StrokeStyle</span>(<span class="ident">s</span>) <span class="op">=&gt;</span> { <span class="ident">s</span> },
+                    <span class="ident">CanvasResources</span>::<span class="ident">SolidBrush</span>(_) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadResource</span>(<span class="string">&quot;Resource of type pen required, got Brush.&quot;</span>.<span class="ident">to_string</span>())); },
                 },
-                <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
             },
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>()
+            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="ident">ptr</span>::<span class="ident">null_mut</span>()
         };
 
-        <span class='kw'>unsafe</span>{ <span class='prelude-val'>Ok</span>(( <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>brush</span>), <span class='ident'>pen</span>)) }
+        <span class="kw">unsafe</span>{ <span class="prelude-val">Ok</span>(( <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">brush</span>), <span class="ident">pen</span>)) }
     }
 
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>Deref</span> <span class='kw'>for</span> <span class='ident'>CanvasRenderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='kw'>type</span> <span class='ident'>Target</span> <span class='op'>=</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>;
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span> <span class='kw'>fn</span> <span class='ident'>deref</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> { <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>canvas</span> }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">CanvasRenderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>;
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span> <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> { <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">canvas</span> }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>DerefMut</span> <span class='kw'>for</span> <span class='ident'>CanvasRenderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span><span class='kw'>fn</span> <span class='ident'>deref_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> { <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>canvas</span> }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">CanvasRenderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span><span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">canvas</span> }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>CanvasRenderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>unsafe</span>{ 
-            <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>D2DERR_RECREATE_TARGET</span>;
-            <span class='kw'>let</span> <span class='ident'>recreate</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>EndDraw</span>(<span class='ident'>ptr</span>::<span class='ident'>null_mut</span>(), <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>()) <span class='op'>==</span> <span class='ident'>D2DERR_RECREATE_TARGET</span>;
-            <span class='self'>self</span>.<span class='ident'>canvas</span>.<span class='ident'>set_must_recreate_target</span>(<span class='ident'>recreate</span>); 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">CanvasRenderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">unsafe</span>{ 
+            <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">D2DERR_RECREATE_TARGET</span>;
+            <span class="kw">let</span> <span class="ident">recreate</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">EndDraw</span>(<span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="ident">ptr</span>::<span class="ident">null_mut</span>()) <span class="op">==</span> <span class="ident">D2DERR_RECREATE_TARGET</span>;
+            <span class="self">self</span>.<span class="ident">canvas</span>.<span class="ident">set_must_recreate_target</span>(<span class="ident">recreate</span>); 
         }
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Protected renderer method (only available in the canvas control module)
 */</span>
-<span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>RendererProtected</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span>  {
-    <span class='kw'>fn</span> <span class='ident'>prepare</span>(<span class='ident'>canvas</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>CanvasRenderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span>;
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RendererProtected</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span>  {
+    <span class="kw">fn</span> <span class="ident">prepare</span>(<span class="ident">canvas</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CanvasRenderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span>: <span class='ident'>Clone</span><span class='op'>+</span><span class='ident'>Hash</span><span class='op'>&gt;</span> <span class='ident'>RendererProtected</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>CanvasRenderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span><span class='op'>&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="ident">RendererProtected</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CanvasRenderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span><span class="op">&gt;</span> {
 
-    <span class='kw'>fn</span> <span class='ident'>prepare</span>(<span class='ident'>canvas</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Canvas</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>CanvasRenderer</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>unsafe</span>{ 
-            <span class='kw'>if</span> <span class='ident'>canvas</span>.<span class='ident'>get_must_recreate_target</span>() {
-                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=</span> <span class='ident'>canvas</span>.<span class='ident'>rebuild</span>() {
-                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>System</span>(<span class='ident'>e</span>));
+    <span class="kw">fn</span> <span class="ident">prepare</span>(<span class="ident">canvas</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Canvas</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CanvasRenderer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span>{ 
+            <span class="kw">if</span> <span class="ident">canvas</span>.<span class="ident">get_must_recreate_target</span>() {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">canvas</span>.<span class="ident">rebuild</span>() {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">System</span>(<span class="ident">e</span>));
                 }
             }
 
-            <span class='kw'>let</span> <span class='ident'>identity</span> <span class='op'>=</span> <span class='ident'>D2D1_MATRIX_3X2_F</span> {
-                <span class='ident'>matrix</span>: [[<span class='number'>1.0</span>, <span class='number'>0.0</span>],
-                         [<span class='number'>0.0</span>, <span class='number'>1.0</span>],
-                         [<span class='number'>0.0</span>, <span class='number'>0.0</span>]]
+            <span class="kw">let</span> <span class="ident">identity</span> <span class="op">=</span> <span class="ident">D2D1_MATRIX_3X2_F</span> {
+                <span class="ident">matrix</span>: [[<span class="number">1.0</span>, <span class="number">0.0</span>],
+                         [<span class="number">0.0</span>, <span class="number">1.0</span>],
+                         [<span class="number">0.0</span>, <span class="number">0.0</span>]]
             };
 
-            <span class='ident'>canvas</span>.<span class='ident'>BeginDraw</span>(); 
-            <span class='ident'>canvas</span>.<span class='ident'>SetTransform</span>(<span class='kw-2'>&amp;</span><span class='ident'>identity</span>);
+            <span class="ident">canvas</span>.<span class="ident">BeginDraw</span>(); 
+            <span class="ident">canvas</span>.<span class="ident">SetTransform</span>(<span class="kw-2">&amp;</span><span class="ident">identity</span>);
         }
 
-        <span class='prelude-val'>Ok</span>( <span class='ident'>CanvasRenderer</span> { <span class='ident'>canvas</span>: <span class='ident'>canvas</span> } )
+        <span class="prelude-val">Ok</span>( <span class="ident">CanvasRenderer</span> { <span class="ident">canvas</span>: <span class="ident">canvas</span> } )
     }
 
 }</pre>

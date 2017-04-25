@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -502,11 +502,23 @@
 <span id="457">457</span>
 <span id="458">458</span>
 <span id="459">459</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     Public type definitions
 */</span>
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -523,91 +535,103 @@
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
 
-<span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>c_int</span>, <span class='ident'>DWORD</span>, <span class='ident'>CW_USEDEFAULT</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">c_int</span>, <span class="ident">DWORD</span>, <span class="ident">CW_USEDEFAULT</span>};
 
-<span class='doccomment'>/**
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">SYSTEMTIME</span>;
+
+<span class="doccomment">/**
     Checkbox checkstate
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>CheckState</span> {
-    <span class='ident'>Checked</span>,
-    <span class='ident'>Unchecked</span>,
-    <span class='ident'>Indeterminate</span> <span class='comment'>// Tristate only</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CheckState</span> {
+    <span class="ident">Checked</span>,
+    <span class="ident">Unchecked</span>,
+    <span class="ident">Indeterminate</span> <span class="comment">// Tristate only</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Mouse buttons
 */</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>MouseButton</span> {
-    <span class='ident'>Left</span>,
-    <span class='ident'>Right</span>,
-    <span class='ident'>Middle</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MouseButton</span> {
+    <span class="ident">Left</span>,
+    <span class="ident">Right</span>,
+    <span class="ident">Middle</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Text align constant on the horizontal axis
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>HTextAlign</span> {
-    <span class='ident'>Left</span>,
-    <span class='ident'>Center</span>,
-    <span class='ident'>Right</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">HTextAlign</span> {
+    <span class="ident">Left</span>,
+    <span class="ident">Center</span>,
+    <span class="ident">Right</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Text align constant on the vertical axis
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>, <span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>VTextAlign</span> {
-    <span class='ident'>Top</span>,
-    <span class='ident'>Center</span>,
-    <span class='ident'>Bottom</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">VTextAlign</span> {
+    <span class="ident">Top</span>,
+    <span class="ident">Center</span>,
+    <span class="ident">Bottom</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Enum of message box buttons (to use with `MessageParams` )
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>MessageButtons</span> {
-    <span class='ident'>AbortTryIgnore</span>,
-    <span class='ident'>CancelTryContinue</span>,
-    <span class='prelude-val'>Ok</span>,
-    <span class='ident'>OkCancel</span>,
-    <span class='ident'>RetryCancel</span>,
-    <span class='ident'>YesNo</span>,
-    <span class='ident'>YesNoCancel</span>,
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MessageButtons</span> {
+    <span class="ident">AbortTryIgnore</span>,
+    <span class="ident">CancelTryContinue</span>,
+    <span class="prelude-val">Ok</span>,
+    <span class="ident">OkCancel</span>,
+    <span class="ident">RetryCancel</span>,
+    <span class="ident">YesNo</span>,
+    <span class="ident">YesNoCancel</span>,
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Enum of message box icons (to use with `MessageParams` )
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>MessageIcons</span> {
-    <span class='ident'>Warning</span>,
-    <span class='ident'>Info</span>,
-    <span class='ident'>Question</span>,
-    <span class='ident'>Error</span>,
-    <span class='prelude-val'>None</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MessageIcons</span> {
+    <span class="ident">Warning</span>,
+    <span class="ident">Info</span>,
+    <span class="ident">Question</span>,
+    <span class="ident">Error</span>,
+    <span class="prelude-val">None</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Return value of `message`. Define the button that the user clicked. If the user 
     cancelled the message box by clicking on X button of the window, `MessageChoice::Cancel` is returned.
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>MessageChoice</span> {
-    <span class='ident'>Abort</span>,
-    <span class='ident'>Cancel</span>,
-    <span class='ident'>Continue</span>,
-    <span class='ident'>Ignore</span>,
-    <span class='ident'>No</span>,
-    <span class='prelude-val'>Ok</span>,
-    <span class='ident'>Retry</span>,
-    <span class='ident'>TryAgain</span>,
-    <span class='ident'>Yes</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MessageChoice</span> {
+    <span class="ident">Abort</span>,
+    <span class="ident">Cancel</span>,
+    <span class="ident">Continue</span>,
+    <span class="ident">Ignore</span>,
+    <span class="ident">No</span>,
+    <span class="prelude-val">Ok</span>,
+    <span class="ident">Retry</span>,
+    <span class="ident">TryAgain</span>,
+    <span class="ident">Yes</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
+    A date struct that can be passed to a date time picker control.
+*/</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PickerDate</span> {
+    <span class="kw">pub</span> <span class="ident">year</span>: <span class="ident">u16</span>,
+    <span class="kw">pub</span> <span class="ident">month</span>: <span class="ident">u16</span>,
+    <span class="kw">pub</span> <span class="ident">day</span>: <span class="ident">u16</span>
+}
+
+<span class="doccomment">/**
     A structure that defines how a messagebox should look and behave. 
 
     Members:  
@@ -616,15 +640,15 @@
     * `buttons`: The button of the message box  
     * `icons`: The message box icon  
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MessageParams</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>title</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>,
-    <span class='kw'>pub</span> <span class='ident'>content</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>,
-    <span class='kw'>pub</span> <span class='ident'>buttons</span>: <span class='ident'>MessageButtons</span>,
-    <span class='kw'>pub</span> <span class='ident'>icons</span>: <span class='ident'>MessageIcons</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MessageParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">title</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="kw">pub</span> <span class="ident">content</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+    <span class="kw">pub</span> <span class="ident">buttons</span>: <span class="ident">MessageButtons</span>,
+    <span class="kw">pub</span> <span class="ident">icons</span>: <span class="ident">MessageIcons</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A enum that dictates how a file dialog should behave
 
     Members:  
@@ -632,14 +656,14 @@
     * `OpenDirectory`: User can select a directory  
     * `Save`: User select the name of a file. If it already exists, a confirmation message will be raised  
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>FileDialogAction</span> {
-    <span class='ident'>Open</span>,
-    <span class='ident'>OpenDirectory</span>,
-    <span class='ident'>Save</span>,
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">FileDialogAction</span> {
+    <span class="ident">Open</span>,
+    <span class="ident">OpenDirectory</span>,
+    <span class="ident">Save</span>,
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Define the state of a progress bar
 
     Members:  
@@ -647,79 +671,79 @@
     * `Paused`: Paused  
     * `Error`: Error   
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>ProgressBarState</span> {
-    <span class='ident'>Normal</span>,
-    <span class='ident'>Paused</span>,
-    <span class='ident'>Error</span>,
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ProgressBarState</span> {
+    <span class="ident">Normal</span>,
+    <span class="ident">Paused</span>,
+    <span class="ident">Error</span>,
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Define a rectangle shape that can be used with canvases
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Rectangle</span> {
-    <span class='kw'>pub</span> <span class='ident'>left</span>: <span class='ident'>f32</span>,
-    <span class='kw'>pub</span> <span class='ident'>top</span>: <span class='ident'>f32</span>,
-    <span class='kw'>pub</span> <span class='ident'>right</span>: <span class='ident'>f32</span>,
-    <span class='kw'>pub</span> <span class='ident'>bottom</span>: <span class='ident'>f32</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Rectangle</span> {
+    <span class="kw">pub</span> <span class="ident">left</span>: <span class="ident">f32</span>,
+    <span class="kw">pub</span> <span class="ident">top</span>: <span class="ident">f32</span>,
+    <span class="kw">pub</span> <span class="ident">right</span>: <span class="ident">f32</span>,
+    <span class="kw">pub</span> <span class="ident">bottom</span>: <span class="ident">f32</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Define a ellipse shape that can be used with canvases
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Ellipse</span> {
-    <span class='kw'>pub</span> <span class='ident'>center</span>: (<span class='ident'>f32</span>, <span class='ident'>f32</span>),
-    <span class='kw'>pub</span> <span class='ident'>radius</span>: (<span class='ident'>f32</span>, <span class='ident'>f32</span>),
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Ellipse</span> {
+    <span class="kw">pub</span> <span class="ident">center</span>: (<span class="ident">f32</span>, <span class="ident">f32</span>),
+    <span class="kw">pub</span> <span class="ident">radius</span>: (<span class="ident">f32</span>, <span class="ident">f32</span>),
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A brush using a single solid color. Used when painting in a canvas
 
     Members:  
     • `color`: The brush color (red, green, blue, alpha)
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>SolidBrush</span> {
-    <span class='kw'>pub</span> <span class='ident'>color</span>: (<span class='ident'>f32</span>, <span class='ident'>f32</span>, <span class='ident'>f32</span>, <span class='ident'>f32</span>)
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SolidBrush</span> {
+    <span class="kw">pub</span> <span class="ident">color</span>: (<span class="ident">f32</span>, <span class="ident">f32</span>, <span class="ident">f32</span>, <span class="ident">f32</span>)
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Cap style used when creating a Pen
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>CapStyle</span> {
-    <span class='ident'>Flat</span> <span class='op'>=</span> <span class='number'>0</span>,
-    <span class='ident'>Square</span> <span class='op'>=</span> <span class='number'>1</span>,
-    <span class='ident'>Round</span> <span class='op'>=</span> <span class='number'>2</span>,
-    <span class='ident'>Triangle</span> <span class='op'>=</span> <span class='number'>3</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CapStyle</span> {
+    <span class="ident">Flat</span> <span class="op">=</span> <span class="number">0</span>,
+    <span class="ident">Square</span> <span class="op">=</span> <span class="number">1</span>,
+    <span class="ident">Round</span> <span class="op">=</span> <span class="number">2</span>,
+    <span class="ident">Triangle</span> <span class="op">=</span> <span class="number">3</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Line join type used when creating a Pen
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>LineJoin</span> {
-    <span class='ident'>D2d1LineJoinMiter</span> <span class='op'>=</span> <span class='number'>0</span>,
-    <span class='ident'>D2d1LineJoinBevel</span> <span class='op'>=</span> <span class='number'>1</span>,
-    <span class='ident'>D2d1LineJoinRound</span> <span class='op'>=</span> <span class='number'>2</span>,
-    <span class='ident'>D2d1LineJoinMiterOrBevel</span> <span class='op'>=</span> <span class='number'>3</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">LineJoin</span> {
+    <span class="ident">Miter</span> <span class="op">=</span> <span class="number">0</span>,
+    <span class="ident">Bevel</span> <span class="op">=</span> <span class="number">1</span>,
+    <span class="ident">Round</span> <span class="op">=</span> <span class="number">2</span>,
+    <span class="ident">MiterOrBevel</span> <span class="op">=</span> <span class="number">3</span>
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Dash style used when creating a Pen
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>DashStyle</span> {
-    <span class='ident'>D2d1DashStyleSolid</span> <span class='op'>=</span> <span class='number'>0</span>,
-    <span class='ident'>D2d1DashStyleDash</span> <span class='op'>=</span> <span class='number'>1</span>,
-    <span class='ident'>D2d1DashStyleDot</span> <span class='op'>=</span> <span class='number'>2</span>,
-    <span class='ident'>D2d1DashStyleDashDot</span> <span class='op'>=</span> <span class='number'>3</span>,
-    <span class='ident'>D2d1DashStyleDashDotDot</span> <span class='op'>=</span> <span class='number'>4</span>,
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DashStyle</span> {
+    <span class="ident">Solid</span> <span class="op">=</span> <span class="number">0</span>,
+    <span class="ident">Dash</span> <span class="op">=</span> <span class="number">1</span>,
+    <span class="ident">Dot</span> <span class="op">=</span> <span class="number">2</span>,
+    <span class="ident">DashDot</span> <span class="op">=</span> <span class="number">3</span>,
+    <span class="ident">DashDotDot</span> <span class="op">=</span> <span class="number">4</span>,
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Describe how lines should be painted. Used when painting in a canvas
     
     Members:  
@@ -732,235 +756,235 @@
     • `dash_offset`: A value that specifies an offset in the dash sequence. A positive dash offset value shifts the dash pattern, in units of stroke width,  
        toward the start of the stroked geometry. A negative dash offset value shifts the dash pattern, in units of stroke width, toward the end of the stroked geometry.
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Pen</span> {
-    <span class='kw'>pub</span> <span class='ident'>start_cap</span>: <span class='ident'>CapStyle</span>,
-    <span class='kw'>pub</span> <span class='ident'>end_cap</span>: <span class='ident'>CapStyle</span>,
-    <span class='kw'>pub</span> <span class='ident'>dash_cap</span>: <span class='ident'>CapStyle</span>,
-    <span class='kw'>pub</span> <span class='ident'>line_join</span>: <span class='ident'>LineJoin</span>,
-    <span class='kw'>pub</span> <span class='ident'>miter_limit</span>: <span class='ident'>f32</span>,
-    <span class='kw'>pub</span> <span class='ident'>dash_style</span>: <span class='ident'>DashStyle</span>,
-    <span class='kw'>pub</span> <span class='ident'>dash_offset</span>: <span class='ident'>f32</span>,
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pen</span> {
+    <span class="kw">pub</span> <span class="ident">start_cap</span>: <span class="ident">CapStyle</span>,
+    <span class="kw">pub</span> <span class="ident">end_cap</span>: <span class="ident">CapStyle</span>,
+    <span class="kw">pub</span> <span class="ident">dash_cap</span>: <span class="ident">CapStyle</span>,
+    <span class="kw">pub</span> <span class="ident">line_join</span>: <span class="ident">LineJoin</span>,
+    <span class="kw">pub</span> <span class="ident">miter_limit</span>: <span class="ident">f32</span>,
+    <span class="kw">pub</span> <span class="ident">dash_style</span>: <span class="ident">DashStyle</span>,
+    <span class="kw">pub</span> <span class="ident">dash_offset</span>: <span class="ident">f32</span>,
 }
 
 
-<span class='comment'>// Special window position constants</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DEFAULT_POSITION</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='ident'>CW_USEDEFAULT</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CENTER_POSITION</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='ident'>CW_USEDEFAULT</span> <span class='op'>+</span> <span class='number'>1</span>;
+<span class="comment">// Special window position constants</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DEFAULT_POSITION</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="ident">CW_USEDEFAULT</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CENTER_POSITION</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="ident">CW_USEDEFAULT</span> <span class="op">+</span> <span class="number">1</span>;
 
-<span class='comment'>// Special window size contants</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DEFAULT_SIZE</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='ident'>CW_USEDEFAULT</span>;
+<span class="comment">// Special window size contants</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DEFAULT_SIZE</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="ident">CW_USEDEFAULT</span>;
 
-<span class='comment'>// Font weight enum</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_DONTCARE</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>0</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_THIN</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>100</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_EXTRALIGHT</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>200</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_LIGHT</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>300</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_NORMAL</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>400</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_MEDIUM</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>500</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_SEMIBOLD</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>600</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_BOLD</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>700</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_EXTRABOLD</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>800</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_WEIGHT_BLACK</span>: <span class='ident'>c_int</span> <span class='op'>=</span> <span class='number'>900</span>;
+<span class="comment">// Font weight enum</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_DONTCARE</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">0</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_THIN</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">100</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_EXTRALIGHT</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">200</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_LIGHT</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">300</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_NORMAL</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">400</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_MEDIUM</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">500</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_SEMIBOLD</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">600</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_BOLD</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">700</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_EXTRABOLD</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">800</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_WEIGHT_BLACK</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">900</span>;
 
-<span class='comment'>// Font decoration constants</span>
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_DECO_NORMAL</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x00</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_DECO_ITALIC</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x01</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_DECO_UNDERLINE</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x02</span>;
-<span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FONT_DECO_STRIKEOUT</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='number'>0x04</span>;
+<span class="comment">// Font decoration constants</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_DECO_NORMAL</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x00</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_DECO_ITALIC</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x01</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_DECO_UNDERLINE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x02</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FONT_DECO_STRIKEOUT</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">0x04</span>;
 
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>keys</span> {
-    <span class='doccomment'>//! Windows virtual key code</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">keys</span> {
+    <span class="doccomment">//! Windows virtual key code</span>
     
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BACK</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x08</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>TAB</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x09</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CLEAR</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x0C</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RETURN</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x0D</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SHIFT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x10</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CONTROL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x11</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ALT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x12</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>PAUSE</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x13</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CAPITAL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x14</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>KANA</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x15</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>HANGUEL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x15</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>HANGUL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x15</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>JUNJA</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x17</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>FINAL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x18</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>HANJA</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x19</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>KANJI</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x19</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ESCAPE</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x1B</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CONVERT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x1C</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NONCONVERT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x1D</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ACCEPT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x1E</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MODECHANGE</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x1F</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SPACE</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x20</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>PRIOR</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x21</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NEXT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x22</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>END</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x23</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>HOME</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x24</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LEFT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x25</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>UP</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x26</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RIGHT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x27</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DOWN</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x28</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SELECT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x29</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>PRINT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x2A</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EXECUTE</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x2B</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SNAPSHOT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x2C</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>INSERT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x2D</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DELETE</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x2E</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>HELP</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x2F</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_0</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x30</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_1</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x31</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_2</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x32</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_3</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x33</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_4</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x34</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_5</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x35</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_6</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x36</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_7</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x37</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_8</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x38</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_9</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x39</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_A</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x41</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_B</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x42</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_C</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x43</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_D</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x44</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_E</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x45</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_F</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x46</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_G</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x47</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_H</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x48</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_I</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x49</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_J</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x4A</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_K</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x4B</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_L</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x4C</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_M</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x4D</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_N</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x4E</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_O</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x4F</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_P</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x50</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_Q</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x51</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_R</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x52</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_S</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x53</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_T</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x54</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_U</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x55</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_V</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x56</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_W</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x57</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_X</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x58</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_Y</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x59</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>_Z</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x5A</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LWIN</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x5B</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RWIN</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x5C</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>APPS</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x5D</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SLEEP</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x5F</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD0</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x60</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD1</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x61</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD2</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x62</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD3</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x63</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD4</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x64</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD5</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x65</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD6</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x66</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD7</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x67</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD8</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x68</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMPAD9</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x69</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MULTIPLY</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x6A</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ADD</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x6B</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SEPARATOR</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x6C</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SUBTRACT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x6D</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DECIMAL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x6E</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>DIVIDE</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x6F</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F1</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x70</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F2</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x71</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F3</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x72</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F4</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x73</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F5</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x74</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F6</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x75</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F7</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x76</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F8</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x77</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F9</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x78</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F10</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x79</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F11</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x7A</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F12</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x7B</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F13</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x7C</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F14</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x7D</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F15</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x7E</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F16</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x7F</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F17</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x80</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F18</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x81</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F19</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x82</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F20</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x83</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F21</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x84</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F22</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x85</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F23</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x86</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>F24</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x87</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NUMLOCK</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x90</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>SCROLL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x91</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_25</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x92</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_26</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x93</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_27</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x94</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_28</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x95</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_29</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0x96</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LSHIFT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA0</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RSHIFT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA1</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LCONTROL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA2</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RCONTROL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA3</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LMENU</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA4</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>RMENU</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA5</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BROWSER_BACK</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA6</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BROWSER_FORWARD</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA7</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BROWSER_REFRESH</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA8</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BROWSER_STOP</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xA9</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BROWSER_SEARCH</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xAA</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BROWSER_FAVORITES</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xAB</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>BROWSER_HOME</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xAC</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>VOLUME_MUTE</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xAD</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>VOLUME_DOWN</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xAE</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>VOLUME_UP</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xAF</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MEDIA_NEXT_TRACK</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xB0</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MEDIA_PREV_TRACK</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xB1</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MEDIA_STOP</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xB2</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>MEDIA_PLAY_PAUSE</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xB3</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LAUNCH_MAIL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xB4</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LAUNCH_MEDIA_SELECT</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xB5</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LAUNCH_APP1</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xB6</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>LAUNCH_APP2</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xB7</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_1</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBA</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_PLUS</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBB</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_COMMA</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBC</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_MINUS</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBD</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_PERIOD</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBE</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_2</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xBF</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_3</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xC0</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_4</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xDB</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_5</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xDC</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_6</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xDD</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_7</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xDE</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_8</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xDF</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_9</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xE1</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_102</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xE2</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_10</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xE3</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_11</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xE4</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>PROCESSKEY</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xE5</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_X</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xE6</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>PACKET</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xE7</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_12</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xE9</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_13</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xEA</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_14</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xEB</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_15</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xEC</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_16</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xED</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_17</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xEE</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_18</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xEF</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_19</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF0</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_20</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF1</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_21</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF2</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_22</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF3</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_23</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF4</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_24</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF5</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ATTN</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF6</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>CRSEL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF7</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EXSEL</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF8</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>EREOF</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xF9</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>PLAY</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xFA</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>ZOOM</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xFB</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>NONAME</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xFC</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>PA1</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xFD</span>;
-    <span class='kw'>pub</span> <span class='kw'>const</span> <span class='ident'>OEM_CLEAR</span>: <span class='ident'>u32</span> <span class='op'>=</span> <span class='number'>0xFE</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BACK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x08</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">TAB</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x09</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CLEAR</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0C</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RETURN</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0D</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SHIFT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x10</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CONTROL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x11</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ALT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x12</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PAUSE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x13</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CAPITAL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x14</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">KANA</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x15</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HANGUEL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x15</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HANGUL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x15</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">JUNJA</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x17</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FINAL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x18</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HANJA</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x19</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">KANJI</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x19</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ESCAPE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1B</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CONVERT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1C</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NONCONVERT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1D</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ACCEPT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1E</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MODECHANGE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1F</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SPACE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x20</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PRIOR</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x21</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NEXT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x22</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">END</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x23</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HOME</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x24</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LEFT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x25</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">UP</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x26</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RIGHT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x27</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DOWN</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x28</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SELECT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x29</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PRINT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x2A</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EXECUTE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x2B</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SNAPSHOT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x2C</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">INSERT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x2D</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DELETE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x2E</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HELP</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x2F</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_0</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x30</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_1</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x31</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_2</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x32</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_3</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x33</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_4</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x34</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_5</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x35</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_6</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x36</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_7</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x37</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_8</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x38</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_9</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x39</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_A</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x41</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_B</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x42</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_C</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x43</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_D</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x44</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_E</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x45</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_F</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x46</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_G</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x47</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_H</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x48</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_I</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x49</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_J</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x4A</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_K</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x4B</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_L</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x4C</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_M</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x4D</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_N</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x4E</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_O</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x4F</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_P</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x50</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_Q</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x51</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_R</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x52</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_S</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x53</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_T</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x54</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_U</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x55</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_V</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x56</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_W</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x57</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_X</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x58</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_Y</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x59</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">_Z</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x5A</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LWIN</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x5B</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RWIN</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x5C</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">APPS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x5D</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SLEEP</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x5F</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD0</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x60</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD1</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x61</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD2</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x62</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD3</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x63</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD4</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x64</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD5</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x65</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD6</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x66</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD7</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x67</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD8</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x68</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMPAD9</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x69</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MULTIPLY</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x6A</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ADD</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x6B</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SEPARATOR</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x6C</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SUBTRACT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x6D</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DECIMAL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x6E</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DIVIDE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x6F</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F1</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x70</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F2</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x71</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F3</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x72</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F4</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x73</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F5</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x74</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F6</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x75</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F7</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x76</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F8</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x77</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F9</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x78</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F10</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x79</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F11</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x7A</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F12</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x7B</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F13</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x7C</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F14</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x7D</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F15</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x7E</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F16</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x7F</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F17</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x80</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F18</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x81</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F19</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x82</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F20</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x83</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F21</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x84</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F22</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x85</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F23</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x86</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">F24</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x87</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NUMLOCK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x90</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SCROLL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x91</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_25</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x92</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_26</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x93</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_27</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x94</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_28</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x95</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_29</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x96</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LSHIFT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA0</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RSHIFT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA1</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LCONTROL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA2</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RCONTROL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA3</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LMENU</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA4</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RMENU</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA5</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BROWSER_BACK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA6</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BROWSER_FORWARD</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA7</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BROWSER_REFRESH</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA8</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BROWSER_STOP</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xA9</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BROWSER_SEARCH</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xAA</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BROWSER_FAVORITES</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xAB</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BROWSER_HOME</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xAC</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VOLUME_MUTE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xAD</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VOLUME_DOWN</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xAE</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VOLUME_UP</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xAF</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MEDIA_NEXT_TRACK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xB0</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MEDIA_PREV_TRACK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xB1</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MEDIA_STOP</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xB2</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MEDIA_PLAY_PAUSE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xB3</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LAUNCH_MAIL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xB4</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LAUNCH_MEDIA_SELECT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xB5</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LAUNCH_APP1</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xB6</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LAUNCH_APP2</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xB7</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_1</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xBA</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_PLUS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xBB</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_COMMA</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xBC</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_MINUS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xBD</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_PERIOD</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xBE</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_2</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xBF</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_3</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xC0</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_4</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xDB</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_5</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xDC</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_6</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xDD</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_7</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xDE</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_8</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xDF</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_9</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xE1</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_102</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xE2</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_10</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xE3</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_11</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xE4</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PROCESSKEY</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xE5</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_X</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xE6</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PACKET</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xE7</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_12</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xE9</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_13</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xEA</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_14</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xEB</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_15</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xEC</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_16</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xED</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_17</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xEE</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_18</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xEF</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_19</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF0</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_20</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF1</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_21</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF2</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_22</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF3</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_23</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF4</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_24</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF5</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ATTN</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF6</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CRSEL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF7</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EXSEL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF8</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EREOF</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xF9</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PLAY</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xFA</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ZOOM</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xFB</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NONAME</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xFC</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PA1</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xFD</span>;
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OEM_CLEAR</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xFE</span>;
 }</pre>
 </section>
     <section id='search' class="content hidden"></section>

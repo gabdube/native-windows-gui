@@ -208,10 +208,10 @@ pub enum CapStyle {
 */
 #[derive(Clone, Debug)]
 pub enum LineJoin {
-    D2d1LineJoinMiter = 0,
-    D2d1LineJoinBevel = 1,
-    D2d1LineJoinRound = 2,
-    D2d1LineJoinMiterOrBevel = 3
+    Miter = 0,
+    Bevel = 1,
+    Round = 2,
+    MiterOrBevel = 3
 }
 
 /**
@@ -219,11 +219,11 @@ pub enum LineJoin {
 */
 #[derive(Clone, Debug)]
 pub enum DashStyle {
-    D2d1DashStyleSolid = 0,
-    D2d1DashStyleDash = 1,
-    D2d1DashStyleDot = 2,
-    D2d1DashStyleDashDot = 3,
-    D2d1DashStyleDashDotDot = 4,
+    Solid = 0,
+    Dash = 1,
+    Dot = 2,
+    DashDot = 3,
+    DashDotDot = 4,
 }
 
 /**

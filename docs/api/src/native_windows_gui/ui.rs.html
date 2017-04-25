@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -818,12 +818,43 @@
 <span id="773">773</span>
 <span id="774">774</span>
 <span id="775">775</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     Public interface over the GUI
 */</span>
 
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -840,546 +871,548 @@
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::{<span class='ident'>Any</span>, <span class='ident'>TypeId</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cell</span>::{<span class='ident'>RefCell</span>, <span class='ident'>Ref</span>, <span class='ident'>RefMut</span>};
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>rc</span>::<span class='ident'>Rc</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">cell</span>::{<span class="ident">RefCell</span>, <span class="ident">Ref</span>, <span class="ident">RefMut</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">rc</span>::<span class="ident">Rc</span>;
 
-<span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>message_handler</span>::<span class='ident'>MessageHandler</span>;
-<span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>PackUserValueArgs</span>, <span class='ident'>PackControlArgs</span>, <span class='ident'>PackResourceArgs</span>, <span class='ident'>UnpackArgs</span>, <span class='ident'>BindArgs</span>, <span class='ident'>UnbindArgs</span>};
-<span class='kw'>use</span> <span class='ident'>controls</span>::{<span class='ident'>ControlT</span>, <span class='ident'>Control</span>, <span class='ident'>AnyHandle</span>};
-<span class='kw'>use</span> <span class='ident'>resources</span>::{<span class='ident'>ResourceT</span>, <span class='ident'>Resource</span>};
-<span class='kw'>use</span> <span class='ident'>events</span>::{<span class='ident'>Event</span>, <span class='ident'>EventCallback</span>, <span class='ident'>EventArgs</span>};
-<span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>Error</span>;
+<span class="kw">use</span> <span class="ident">low</span>::<span class="ident">message_handler</span>::<span class="ident">MessageHandler</span>;
+<span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">PackUserValueArgs</span>, <span class="ident">PackControlArgs</span>, <span class="ident">PackResourceArgs</span>, <span class="ident">UnpackArgs</span>, <span class="ident">BindArgs</span>, <span class="ident">UnbindArgs</span>, <span class="ident">TriggerArgs</span>};
+<span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">ControlT</span>, <span class="ident">Control</span>, <span class="ident">AnyHandle</span>};
+<span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">ResourceT</span>, <span class="ident">Resource</span>};
+<span class="kw">use</span> <span class="ident">events</span>::{<span class="ident">Event</span>, <span class="ident">EventCallback</span>, <span class="ident">EventArgs</span>};
+<span class="kw">use</span> <span class="ident">error</span>::<span class="ident">Error</span>;
 
-<span class='kw'>type</span> <span class='ident'>InnerId</span> <span class='op'>=</span> <span class='ident'>u64</span>;
-<span class='kw'>type</span> <span class='ident'>HandleHash</span> <span class='op'>=</span> <span class='ident'>u64</span>;
+<span class="kw">type</span> <span class="ident">InnerId</span> <span class="op">=</span> <span class="ident">u64</span>;
+<span class="kw">type</span> <span class="ident">HandleHash</span> <span class="op">=</span> <span class="ident">u64</span>;
 
-<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>BoxedCallback</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>EventCallback</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;&gt;</span>;
-<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>CallbackCollection</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Rc</span><span class='op'>&lt;</span><span class='ident'>Vec</span><span class='op'>&lt;</span>(<span class='ident'>InnerId</span>, <span class='ident'>BoxedCallback</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>)<span class='op'>&gt;&gt;</span>;
-<span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>EventCollection</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>Event</span>, <span class='ident'>CallbackCollection</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">BoxedCallback</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">EventCallback</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CallbackCollection</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">InnerId</span>, <span class="ident">BoxedCallback</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>)<span class="op">&gt;&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">EventCollection</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Event</span>, <span class="ident">CallbackCollection</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;&gt;</span>;
 
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Inner window data shared within the thread
 */</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>+</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span> {
-    <span class='comment'>// Underlying message only window that process the Ui events and some other windows events not tied to windows (ex: WM_TIMER)</span>
-    <span class='kw'>pub</span> <span class='ident'>messages</span>: <span class='ident'>MessageHandler</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">+</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="comment">// Underlying message only window that process the Ui events and some other windows events not tied to windows (ex: WM_TIMER)</span>
+    <span class="kw">pub</span> <span class="ident">messages</span>: <span class="ident">MessageHandler</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>,
 
-    <span class='comment'>// Map of inner id to a cell containing the control.</span>
-    <span class='kw'>pub</span> <span class='ident'>controls</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>InnerId</span>, <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Control</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
-    <span class='kw'>pub</span> <span class='ident'>resources</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>InnerId</span>, <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Resource</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
-    <span class='kw'>pub</span> <span class='ident'>user_values</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>InnerId</span>, <span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;&gt;</span><span class='op'>&gt;</span>,
+    <span class="comment">// Map of inner id to a cell containing the control.</span>
+    <span class="kw">pub</span> <span class="ident">controls</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">InnerId</span>, <span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">resources</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">InnerId</span>, <span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Resource</span><span class="op">&gt;&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">user_values</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">InnerId</span>, <span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;&gt;</span><span class="op">&gt;</span>,
 
-    <span class='comment'>// Map the a control events.</span>
-    <span class='kw'>pub</span> <span class='ident'>control_events</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>InnerId</span>, <span class='ident'>EventCollection</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;&gt;</span>,
+    <span class="comment">// Map the a control events.</span>
+    <span class="kw">pub</span> <span class="ident">control_events</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">InnerId</span>, <span class="ident">EventCollection</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;&gt;</span>,
 
-    <span class='comment'>// Map the ui inner id to a tuple of (Public ID, TypeID). Used triggering callbacks and with `get` for type checking</span>
-    <span class='kw'>pub</span> <span class='ident'>inner_public_map</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>InnerId</span>, (<span class='ident'>ID</span>, <span class='ident'>TypeId</span>)<span class='op'>&gt;</span>,
+    <span class="comment">// Map the ui inner id to a tuple of (Public ID, TypeID). Used triggering callbacks and with `get` for type checking</span>
+    <span class="kw">pub</span> <span class="ident">inner_public_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">InnerId</span>, (<span class="ident">ID</span>, <span class="ident">TypeId</span>)<span class="op">&gt;</span>,
 
-    <span class='comment'>// Map the handle of the controls to its ui inner id. Used when matching controls from within the events proc</span>
-    <span class='kw'>pub</span> <span class='ident'>handle_inner_map</span>: <span class='ident'>HashMap</span><span class='op'>&lt;</span><span class='ident'>HandleHash</span>, <span class='ident'>InnerId</span><span class='op'>&gt;</span>
+    <span class="comment">// Map the handle of the controls to its ui inner id. Used when matching controls from within the events proc</span>
+    <span class="kw">pub</span> <span class="ident">handle_inner_map</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">HandleHash</span>, <span class="ident">InnerId</span><span class="op">&gt;</span>
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>other_helper</span>::{<span class='ident'>enable_visual_styles</span>, <span class='ident'>enable_com</span>};
-        <span class='kw'>let</span> <span class='ident'>messages</span>: <span class='ident'>MessageHandler</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>MessageHandler</span>::<span class='ident'>new</span>() {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>msg</span>) <span class='op'>=&gt;</span> <span class='ident'>msg</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">other_helper</span>::{<span class="ident">enable_visual_styles</span>, <span class="ident">enable_com</span>};
+        <span class="kw">let</span> <span class="ident">messages</span>: <span class="ident">MessageHandler</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">MessageHandler</span>::<span class="ident">new</span>() {
+            <span class="prelude-val">Ok</span>(<span class="ident">msg</span>) <span class="op">=&gt;</span> <span class="ident">msg</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='kw'>unsafe</span>{ <span class='ident'>enable_visual_styles</span>(); }
-        <span class='kw'>unsafe</span> { <span class='ident'>enable_com</span>();}
+        <span class="kw">unsafe</span>{ 
+            <span class="ident">enable_visual_styles</span>(); 
+            <span class="ident">enable_com</span>();
+        }
 
-        <span class='prelude-val'>Ok</span>(<span class='ident'>UiInner</span>{
-            <span class='ident'>messages</span>: <span class='ident'>messages</span>,
-            <span class='ident'>user_values</span>: <span class='ident'>HashMap</span>::<span class='ident'>with_capacity</span>(<span class='number'>16</span>),
-            <span class='ident'>controls</span>: <span class='ident'>HashMap</span>::<span class='ident'>with_capacity</span>(<span class='number'>32</span>),
-            <span class='ident'>control_events</span>: <span class='ident'>HashMap</span>::<span class='ident'>with_capacity</span>(<span class='number'>32</span>),
-            <span class='ident'>resources</span>: <span class='ident'>HashMap</span>::<span class='ident'>with_capacity</span>(<span class='number'>16</span>),
-            <span class='ident'>inner_public_map</span>: <span class='ident'>HashMap</span>::<span class='ident'>with_capacity</span>(<span class='number'>64</span>),
-            <span class='ident'>handle_inner_map</span>: <span class='ident'>HashMap</span>::<span class='ident'>with_capacity</span>(<span class='number'>32</span>) })
+        <span class="prelude-val">Ok</span>(<span class="ident">UiInner</span>{
+            <span class="ident">messages</span>: <span class="ident">messages</span>,
+            <span class="ident">user_values</span>: <span class="ident">HashMap</span>::<span class="ident">with_capacity</span>(<span class="number">16</span>),
+            <span class="ident">controls</span>: <span class="ident">HashMap</span>::<span class="ident">with_capacity</span>(<span class="number">32</span>),
+            <span class="ident">control_events</span>: <span class="ident">HashMap</span>::<span class="ident">with_capacity</span>(<span class="number">32</span>),
+            <span class="ident">resources</span>: <span class="ident">HashMap</span>::<span class="ident">with_capacity</span>(<span class="number">16</span>),
+            <span class="ident">inner_public_map</span>: <span class="ident">HashMap</span>::<span class="ident">with_capacity</span>(<span class="number">64</span>),
+            <span class="ident">handle_inner_map</span>: <span class="ident">HashMap</span>::<span class="ident">with_capacity</span>(<span class="number">32</span>) })
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pack_user_value</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>params</span>: <span class='ident'>PackUserValueArgs</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='kw-2'>&amp;</span><span class='ident'>params</span>.<span class='ident'>id</span>);
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>KeyExists</span>)
-        } <span class='kw'>else</span> {
-            <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>insert</span>(<span class='ident'>inner_id</span>, (<span class='ident'>params</span>.<span class='ident'>id</span>, <span class='ident'>params</span>.<span class='ident'>tid</span>) );
-            <span class='self'>self</span>.<span class='ident'>user_values</span>.<span class='ident'>insert</span>(<span class='ident'>inner_id</span>, <span class='ident'>RefCell</span>::<span class='ident'>new</span>(<span class='ident'>params</span>.<span class='ident'>value</span>));
-            <span class='prelude-val'>None</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pack_user_value</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">params</span>: <span class="ident">PackUserValueArgs</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="kw-2">&amp;</span><span class="ident">params</span>.<span class="ident">id</span>);
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">KeyExists</span>)
+        } <span class="kw">else</span> {
+            <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">insert</span>(<span class="ident">inner_id</span>, (<span class="ident">params</span>.<span class="ident">id</span>, <span class="ident">params</span>.<span class="ident">tid</span>) );
+            <span class="self">self</span>.<span class="ident">user_values</span>.<span class="ident">insert</span>(<span class="ident">inner_id</span>, <span class="ident">RefCell</span>::<span class="ident">new</span>(<span class="ident">params</span>.<span class="ident">value</span>));
+            <span class="prelude-val">None</span>
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pack_control</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>params</span>: <span class='ident'>PackControlArgs</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>events</span>::<span class='ident'>hook_window_events</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pack_control</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">params</span>: <span class="ident">PackControlArgs</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">hook_window_events</span>;
 
-        <span class='kw'>let</span> <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='kw-2'>&amp;</span><span class='ident'>params</span>.<span class='ident'>id</span>);
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>KeyExists</span>)
-        } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>tmp_ui</span>: <span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Ui</span>{<span class='ident'>inner</span>: <span class='self'>self</span> <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>};
-            <span class='kw'>match</span> <span class='ident'>params</span>.<span class='ident'>value</span>.<span class='ident'>build</span>(<span class='kw-2'>&amp;</span><span class='ident'>tmp_ui</span>) {
-                <span class='prelude-val'>Ok</span>(<span class='ident'>control</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>let</span> <span class='ident'>handle_hash</span> <span class='op'>=</span> <span class='ident'>UiInner</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>::<span class='ident'>hash_handle</span>(<span class='kw-2'>&amp;</span><span class='ident'>control</span>.<span class='ident'>handle</span>());
+        <span class="kw">let</span> <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="kw-2">&amp;</span><span class="ident">params</span>.<span class="ident">id</span>);
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">KeyExists</span>)
+        } <span class="kw">else</span> {
+            <span class="kw">let</span> <span class="ident">tmp_ui</span>: <span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Ui</span>{<span class="ident">inner</span>: <span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>};
+            <span class="kw">match</span> <span class="ident">params</span>.<span class="ident">value</span>.<span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="ident">tmp_ui</span>) {
+                <span class="prelude-val">Ok</span>(<span class="ident">control</span>) <span class="op">=&gt;</span> {
+                    <span class="kw">let</span> <span class="ident">handle_hash</span> <span class="op">=</span> <span class="ident">UiInner</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>::<span class="ident">hash_handle</span>(<span class="kw-2">&amp;</span><span class="ident">control</span>.<span class="ident">handle</span>());
 
-                    <span class='kw'>match</span> <span class='ident'>control</span>.<span class='ident'>handle</span>() {
-                        <span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>h</span>) <span class='op'>=&gt;</span> <span class='ident'>hook_window_events</span>(<span class='self'>self</span>, <span class='ident'>h</span>), <span class='comment'>// Hook the window events if the handle is a HWND</span>
-                        _ <span class='op'>=&gt;</span> { <span class='comment'>/* Nothing to do for the other controls */</span>}
+                    <span class="kw">match</span> <span class="ident">control</span>.<span class="ident">handle</span>() {
+                        <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> <span class="ident">hook_window_events</span>(<span class="self">self</span>, <span class="ident">h</span>), <span class="comment">// Hook the window events if the handle is a HWND</span>
+                        _ <span class="op">=&gt;</span> { <span class="comment">/* Nothing to do for the other controls */</span>}
                     }
 
-                    <span class='comment'>// Init events</span>
-                    <span class='kw'>let</span> <span class='ident'>events</span> <span class='op'>=</span> <span class='ident'>params</span>.<span class='ident'>value</span>.<span class='ident'>events</span>();
-                    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>event_collection</span>: <span class='ident'>EventCollection</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>HashMap</span>::<span class='ident'>with_capacity</span>(<span class='ident'>events</span>.<span class='ident'>len</span>());
-                    <span class='kw'>for</span> <span class='ident'>e</span> <span class='kw'>in</span> <span class='ident'>events</span> {
-                        <span class='ident'>event_collection</span>.<span class='ident'>insert</span>(<span class='ident'>e</span>, <span class='ident'>Rc</span>::<span class='ident'>new</span>(<span class='ident'>Vec</span>::<span class='ident'>new</span>()));
+                    <span class="comment">// Init events</span>
+                    <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="ident">params</span>.<span class="ident">value</span>.<span class="ident">events</span>();
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">event_collection</span>: <span class="ident">EventCollection</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap</span>::<span class="ident">with_capacity</span>(<span class="ident">events</span>.<span class="ident">len</span>());
+                    <span class="kw">for</span> <span class="ident">e</span> <span class="kw">in</span> <span class="ident">events</span> {
+                        <span class="ident">event_collection</span>.<span class="ident">insert</span>(<span class="ident">e</span>, <span class="ident">Rc</span>::<span class="ident">new</span>(<span class="ident">Vec</span>::<span class="ident">new</span>()));
                     }
 
-                    <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>insert</span>(<span class='ident'>inner_id</span>, (<span class='ident'>params</span>.<span class='ident'>id</span>, <span class='ident'>params</span>.<span class='ident'>value</span>.<span class='ident'>type_id</span>()));
-                    <span class='self'>self</span>.<span class='ident'>controls</span>.<span class='ident'>insert</span>(<span class='ident'>inner_id</span>, <span class='ident'>RefCell</span>::<span class='ident'>new</span>(<span class='ident'>control</span>) );
-                    <span class='self'>self</span>.<span class='ident'>control_events</span>.<span class='ident'>insert</span>(<span class='ident'>inner_id</span>, <span class='ident'>event_collection</span>);
-                    <span class='self'>self</span>.<span class='ident'>handle_inner_map</span>.<span class='ident'>insert</span>(<span class='ident'>handle_hash</span>, <span class='ident'>inner_id</span>);
+                    <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">insert</span>(<span class="ident">inner_id</span>, (<span class="ident">params</span>.<span class="ident">id</span>, <span class="ident">params</span>.<span class="ident">value</span>.<span class="ident">type_id</span>()));
+                    <span class="self">self</span>.<span class="ident">controls</span>.<span class="ident">insert</span>(<span class="ident">inner_id</span>, <span class="ident">RefCell</span>::<span class="ident">new</span>(<span class="ident">control</span>) );
+                    <span class="self">self</span>.<span class="ident">control_events</span>.<span class="ident">insert</span>(<span class="ident">inner_id</span>, <span class="ident">event_collection</span>);
+                    <span class="self">self</span>.<span class="ident">handle_inner_map</span>.<span class="ident">insert</span>(<span class="ident">handle_hash</span>, <span class="ident">inner_id</span>);
 
-                    ::<span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>tmp_ui</span>);
+                    ::<span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">forget</span>(<span class="ident">tmp_ui</span>);
 
-                    <span class='prelude-val'>None</span>
+                    <span class="prelude-val">None</span>
                 },
-                <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { ::<span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>tmp_ui</span>); <span class='prelude-val'>Some</span>(<span class='ident'>e</span>)}
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { ::<span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">forget</span>(<span class="ident">tmp_ui</span>); <span class="prelude-val">Some</span>(<span class="ident">e</span>)}
             }
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pack_resource</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>params</span>: <span class='ident'>PackResourceArgs</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='kw-2'>&amp;</span><span class='ident'>params</span>.<span class='ident'>id</span>);
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>KeyExists</span>)
-        } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>tmp_ui</span>: <span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Ui</span>{<span class='ident'>inner</span>: <span class='self'>self</span> <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>};
-            <span class='kw'>match</span> <span class='ident'>params</span>.<span class='ident'>value</span>.<span class='ident'>build</span>(<span class='kw-2'>&amp;</span><span class='ident'>tmp_ui</span>) {
-                <span class='prelude-val'>Ok</span>(<span class='ident'>resource</span>) <span class='op'>=&gt;</span> {
-                    <span class='kw'>let</span> <span class='ident'>handle_hash</span> <span class='op'>=</span> <span class='ident'>UiInner</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>::<span class='ident'>hash_handle</span>(<span class='kw-2'>&amp;</span><span class='ident'>resource</span>.<span class='ident'>handle</span>());
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pack_resource</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">params</span>: <span class="ident">PackResourceArgs</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="kw-2">&amp;</span><span class="ident">params</span>.<span class="ident">id</span>);
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">KeyExists</span>)
+        } <span class="kw">else</span> {
+            <span class="kw">let</span> <span class="ident">tmp_ui</span>: <span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Ui</span>{<span class="ident">inner</span>: <span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>};
+            <span class="kw">match</span> <span class="ident">params</span>.<span class="ident">value</span>.<span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="ident">tmp_ui</span>) {
+                <span class="prelude-val">Ok</span>(<span class="ident">resource</span>) <span class="op">=&gt;</span> {
+                    <span class="kw">let</span> <span class="ident">handle_hash</span> <span class="op">=</span> <span class="ident">UiInner</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>::<span class="ident">hash_handle</span>(<span class="kw-2">&amp;</span><span class="ident">resource</span>.<span class="ident">handle</span>());
 
-                    <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>insert</span>(<span class='ident'>inner_id</span>, (<span class='ident'>params</span>.<span class='ident'>id</span>, <span class='ident'>params</span>.<span class='ident'>value</span>.<span class='ident'>type_id</span>()));
-                    <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>insert</span>(<span class='ident'>inner_id</span>, <span class='ident'>RefCell</span>::<span class='ident'>new</span>(<span class='ident'>resource</span>) );
-                    <span class='self'>self</span>.<span class='ident'>handle_inner_map</span>.<span class='ident'>insert</span>(<span class='ident'>handle_hash</span>, <span class='ident'>inner_id</span>);
+                    <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">insert</span>(<span class="ident">inner_id</span>, (<span class="ident">params</span>.<span class="ident">id</span>, <span class="ident">params</span>.<span class="ident">value</span>.<span class="ident">type_id</span>()));
+                    <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">insert</span>(<span class="ident">inner_id</span>, <span class="ident">RefCell</span>::<span class="ident">new</span>(<span class="ident">resource</span>) );
+                    <span class="self">self</span>.<span class="ident">handle_inner_map</span>.<span class="ident">insert</span>(<span class="ident">handle_hash</span>, <span class="ident">inner_id</span>);
 
-                    ::<span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>tmp_ui</span>);
-                    <span class='prelude-val'>None</span>
+                    ::<span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">forget</span>(<span class="ident">tmp_ui</span>);
+                    <span class="prelude-val">None</span>
                 },
-                <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { ::<span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>tmp_ui</span>); <span class='prelude-val'>Some</span>(<span class='ident'>e</span>)}
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { ::<span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">forget</span>(<span class="ident">tmp_ui</span>); <span class="prelude-val">Some</span>(<span class="ident">e</span>)}
             }
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>unpack_control</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>id</span>: <span class='ident'>InnerId</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>events</span>::<span class='ident'>unhook_window_events</span>;
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>menu_helper</span>::{<span class='ident'>list_menu_children</span>};
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>list_window_children</span>;
+    <span class="kw">fn</span> <span class="ident">unpack_control</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">InnerId</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">unhook_window_events</span>;
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">menu_helper</span>::{<span class="ident">list_menu_children</span>};
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">list_window_children</span>;
        
 
-        <span class='comment'>// Check if the control is currently borrowed by the user</span>
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(_) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>controls</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>().<span class='ident'>try_borrow_mut</span>() { 
-            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>ControlInUse</span>);
+        <span class="comment">// Check if the control is currently borrowed by the user</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(_) <span class="op">=</span> <span class="self">self</span>.<span class="ident">controls</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>().<span class="ident">try_borrow_mut</span>() { 
+            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">ControlInUse</span>);
         }
 
-        <span class='comment'>// Check if one of the control events is currently being executed</span>
+        <span class="comment">// Check if one of the control events is currently being executed</span>
         {
-            <span class='kw'>let</span> <span class='ident'>events_collection</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>control_events</span>.<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>();
-            <span class='kw'>for</span> <span class='kw-2'>mut</span> <span class='ident'>ec</span> <span class='kw'>in</span> <span class='ident'>events_collection</span>.<span class='ident'>values_mut</span>() {
-                <span class='kw'>if</span> <span class='ident'>Rc</span>::<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>ec</span>).<span class='ident'>is_none</span>() {
-                    <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>ControlInUse</span>);
+            <span class="kw">let</span> <span class="ident">events_collection</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">control_events</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>();
+            <span class="kw">for</span> <span class="kw-2">mut</span> <span class="ident">ec</span> <span class="kw">in</span> <span class="ident">events_collection</span>.<span class="ident">values_mut</span>() {
+                <span class="kw">if</span> <span class="ident">Rc</span>::<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ec</span>).<span class="ident">is_none</span>() {
+                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">ControlInUse</span>);
                 }
             }
         }
 
-        <span class='comment'>// Unpack the children</span>
-        <span class='kw'>let</span> <span class='ident'>handle</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>handle_of</span>(<span class='ident'>id</span>);
-        <span class='kw'>if</span> <span class='ident'>handle</span>.<span class='ident'>is_err</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>handle</span>.<span class='ident'>err</span>().<span class='ident'>unwrap</span>()); }
+        <span class="comment">// Unpack the children</span>
+        <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">handle_of</span>(<span class="ident">id</span>);
+        <span class="kw">if</span> <span class="ident">handle</span>.<span class="ident">is_err</span>() { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">handle</span>.<span class="ident">err</span>().<span class="ident">unwrap</span>()); }
 
-        <span class='kw'>let</span> <span class='ident'>children_ids</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>handle</span>.<span class='ident'>unwrap</span>() {
-            <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU</span>(<span class='ident'>h</span>) <span class='op'>=&gt;</span> <span class='kw'>unsafe</span> {
-                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>children</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>id</span>];
-                <span class='ident'>children</span>.<span class='ident'>append</span>( <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>list_menu_children</span>(<span class='self'>self</span>, <span class='ident'>h</span>) );
-                <span class='ident'>children</span>
+        <span class="kw">let</span> <span class="ident">children_ids</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">handle</span>.<span class="ident">unwrap</span>() {
+            <span class="ident">AnyHandle</span>::<span class="ident">HMENU</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> <span class="kw">unsafe</span> {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">children</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">id</span>];
+                <span class="ident">children</span>.<span class="ident">append</span>( <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">list_menu_children</span>(<span class="self">self</span>, <span class="ident">h</span>) );
+                <span class="ident">children</span>
             },
-            <span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>h</span>) <span class='op'>=&gt;</span> <span class='kw'>unsafe</span> { 
-                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>children</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>id</span>];
-                <span class='ident'>children</span>.<span class='ident'>append</span>( <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>list_window_children</span>(<span class='ident'>h</span>, <span class='self'>self</span> <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) );
-                <span class='ident'>children</span>
+            <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> <span class="kw">unsafe</span> { 
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">children</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">id</span>];
+                <span class="ident">children</span>.<span class="ident">append</span>( <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">list_window_children</span>(<span class="ident">h</span>, <span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) );
+                <span class="ident">children</span>
             },
-            <span class='ident'>AnyHandle</span>::<span class='ident'>HMENU_ITEM</span>(_, _) <span class='op'>|</span> <span class='ident'>AnyHandle</span>::<span class='ident'>HFONT</span>(_) <span class='op'>|</span> <span class='ident'>AnyHandle</span>::<span class='ident'>Custom</span>(_, _) <span class='op'>=&gt;</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>id</span>], <span class='comment'>// These handle can&#39;t have children</span>
+            <span class="ident">AnyHandle</span>::<span class="ident">HMENU_ITEM</span>(_, _) <span class="op">|</span> <span class="ident">AnyHandle</span>::<span class="ident">HFONT</span>(_) <span class="op">|</span> <span class="ident">AnyHandle</span>::<span class="ident">Custom</span>(_, _) <span class="op">=&gt;</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">id</span>], <span class="comment">// These handle can&#39;t have children</span>
         };
        
-        <span class='kw'>for</span> <span class='ident'>id</span> <span class='kw'>in</span> <span class='ident'>children_ids</span>.<span class='ident'>iter</span>().<span class='ident'>rev</span>() {
+        <span class="kw">for</span> <span class="ident">id</span> <span class="kw">in</span> <span class="ident">children_ids</span>.<span class="ident">iter</span>().<span class="ident">rev</span>() {
 
-            <span class='comment'>// Call the destroy callbacks</span>
-            <span class='self'>self</span>.<span class='ident'>trigger</span>(<span class='kw-2'>*</span><span class='ident'>id</span>, <span class='ident'>Event</span>::<span class='ident'>Destroyed</span>, <span class='ident'>EventArgs</span>::<span class='prelude-val'>None</span>);
+            <span class="comment">// Call the destroy callbacks</span>
+            <span class="self">self</span>.<span class="ident">trigger</span>(<span class="kw-2">*</span><span class="ident">id</span>, <span class="ident">Event</span>::<span class="ident">Destroyed</span>, <span class="ident">EventArgs</span>::<span class="prelude-val">None</span>);
 
-            <span class='comment'>// Removes stuff</span>
-            <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>();
-            <span class='self'>self</span>.<span class='ident'>control_events</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>();
-            <span class='kw'>let</span> <span class='ident'>control</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>controls</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>();
-            <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>control</span> <span class='op'>=</span> <span class='ident'>control</span>.<span class='ident'>into_inner</span>();
+            <span class="comment">// Removes stuff</span>
+            <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>();
+            <span class="self">self</span>.<span class="ident">control_events</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">control</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">controls</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">control</span> <span class="op">=</span> <span class="ident">control</span>.<span class="ident">into_inner</span>();
 
-            <span class='kw'>let</span> <span class='ident'>handle_hash</span> <span class='op'>=</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>handle_inner_map</span>.<span class='ident'>iter</span>().<span class='ident'>find</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span>(_, <span class='kw-2'>ref</span> <span class='ident'>v</span>)<span class='op'>|</span> <span class='kw-2'>*</span><span class='ident'>v</span> <span class='op'>==</span> <span class='ident'>id</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Could not match handle while unpacking control&quot;</span>).<span class='number'>0</span>;
-            <span class='self'>self</span>.<span class='ident'>handle_inner_map</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>handle_hash</span>);
+            <span class="kw">let</span> <span class="ident">handle_hash</span> <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">handle_inner_map</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="kw-2">&amp;</span>(_, <span class="kw-2">ref</span> <span class="ident">v</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="ident">id</span>).<span class="ident">expect</span>(<span class="string">&quot;Could not match handle while unpacking control&quot;</span>).<span class="number">0</span>;
+            <span class="self">self</span>.<span class="ident">handle_inner_map</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">handle_hash</span>);
 
-            <span class='comment'>// Unhook the events dispatcher if its a window</span>
-            <span class='kw'>match</span> <span class='ident'>control</span>.<span class='ident'>handle</span>() {
-                <span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='ident'>h</span>) <span class='op'>=&gt;</span> <span class='ident'>unhook_window_events</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>(<span class='ident'>h</span>),
-                _ <span class='op'>=&gt;</span> {<span class='comment'>/* Nothing to free here */</span>}
+            <span class="comment">// Unhook the events dispatcher if its a window</span>
+            <span class="kw">match</span> <span class="ident">control</span>.<span class="ident">handle</span>() {
+                <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> <span class="ident">unhook_window_events</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>(<span class="ident">h</span>),
+                _ <span class="op">=&gt;</span> {<span class="comment">/* Nothing to free here */</span>}
             };
             
-            <span class='comment'>// Free the control custom resources</span>
-            <span class='ident'>control</span>.<span class='ident'>free</span>();
+            <span class="comment">// Free the control custom resources</span>
+            <span class="ident">control</span>.<span class="ident">free</span>();
         }
 
-        <span class='comment'>// Control gets dropped here</span>
-        <span class='prelude-val'>None</span>
+        <span class="comment">// Control gets dropped here</span>
+        <span class="prelude-val">None</span>
     }
 
-    <span class='kw'>fn</span> <span class='ident'>unpack_resource</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>id</span>: <span class='ident'>InnerId</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='comment'>// Check if the resource is currently borrowed by the user</span>
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(_) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>().<span class='ident'>try_borrow_mut</span>() { 
-            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>ResourceInUse</span>);
+    <span class="kw">fn</span> <span class="ident">unpack_resource</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">InnerId</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="comment">// Check if the resource is currently borrowed by the user</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(_) <span class="op">=</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>().<span class="ident">try_borrow_mut</span>() { 
+            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">ResourceInUse</span>);
         }
 
-         <span class='comment'>// Removes stuffs</span>
-        <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>resource</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>resource</span> <span class='op'>=</span> <span class='ident'>resource</span>.<span class='ident'>into_inner</span>();
+         <span class="comment">// Removes stuffs</span>
+        <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">resource</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resource</span> <span class="op">=</span> <span class="ident">resource</span>.<span class="ident">into_inner</span>();
         
-        <span class='comment'>// Free the control custom resources</span>
-        <span class='ident'>resource</span>.<span class='ident'>free</span>();
+        <span class="comment">// Free the control custom resources</span>
+        <span class="ident">resource</span>.<span class="ident">free</span>();
 
-        <span class='prelude-val'>None</span>
+        <span class="prelude-val">None</span>
     }
 
-    <span class='kw'>fn</span> <span class='ident'>unpack_user_value</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>id</span>: <span class='ident'>InnerId</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Err</span>(_) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>user_values</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>().<span class='ident'>try_borrow_mut</span>() { 
-            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>ControlInUse</span>);
+    <span class="kw">fn</span> <span class="ident">unpack_user_value</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">InnerId</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(_) <span class="op">=</span> <span class="self">self</span>.<span class="ident">user_values</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>().<span class="ident">try_borrow_mut</span>() { 
+            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">ControlInUse</span>);
         }
 
-        <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>);
-        <span class='kw'>let</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>user_values</span>.<span class='ident'>remove</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>).<span class='ident'>unwrap</span>();
-        <span class='ident'>value</span>.<span class='ident'>into_inner</span>();
+        <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>);
+        <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">user_values</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>).<span class="ident">unwrap</span>();
+        <span class="ident">value</span>.<span class="ident">into_inner</span>();
     
-        <span class='prelude-val'>None</span>
+        <span class="prelude-val">None</span>
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>unpack</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>params</span>: <span class='ident'>UnpackArgs</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>id</span> <span class='op'>=</span> <span class='ident'>params</span>.<span class='ident'>id</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">params</span>: <span class="ident">UnpackArgs</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">params</span>.<span class="ident">id</span>;
 
-        <span class='comment'>// Test if everything is valid</span>
-        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>KeyNotFound</span>)
-        } <span class='kw'>else</span> {
-            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>controls</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-                <span class='self'>self</span>.<span class='ident'>unpack_control</span>(<span class='ident'>id</span>)
-            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>user_values</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-                <span class='self'>self</span>.<span class='ident'>unpack_user_value</span>(<span class='ident'>id</span>)
-            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-                <span class='self'>self</span>.<span class='ident'>unpack_resource</span>(<span class='ident'>id</span>)
-            } <span class='kw'>else</span> {
-                <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>BadType</span>)
+        <span class="comment">// Test if everything is valid</span>
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">KeyNotFound</span>)
+        } <span class="kw">else</span> {
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">controls</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+                <span class="self">self</span>.<span class="ident">unpack_control</span>(<span class="ident">id</span>)
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">user_values</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+                <span class="self">self</span>.<span class="ident">unpack_user_value</span>(<span class="ident">id</span>)
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+                <span class="self">self</span>.<span class="ident">unpack_resource</span>(<span class="ident">id</span>)
+            } <span class="kw">else</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">BadType</span>)
             }
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bind</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>params</span>: <span class='ident'>BindArgs</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> (<span class='ident'>id</span>, <span class='ident'>cb_id</span>, <span class='ident'>event</span>, <span class='ident'>cb</span>) <span class='op'>=</span> (<span class='ident'>params</span>.<span class='ident'>id</span>, <span class='ident'>params</span>.<span class='ident'>cb_id</span>, <span class='ident'>params</span>.<span class='ident'>event</span>, <span class='ident'>params</span>.<span class='ident'>cb</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bind</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">params</span>: <span class="ident">BindArgs</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> (<span class="ident">id</span>, <span class="ident">cb_id</span>, <span class="ident">event</span>, <span class="ident">cb</span>) <span class="op">=</span> (<span class="ident">params</span>.<span class="ident">id</span>, <span class="ident">params</span>.<span class="ident">cb_id</span>, <span class="ident">params</span>.<span class="ident">event</span>, <span class="ident">params</span>.<span class="ident">cb</span>);
 
-        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>KeyNotFound</span>);
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">KeyNotFound</span>);
         }
 
-        <span class='comment'>// Get the event collection of the control</span>
-        <span class='kw'>let</span> <span class='ident'>events_collection</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>control_events</span>.<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>);
-        <span class='kw'>if</span> <span class='ident'>events_collection</span>.<span class='ident'>is_none</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>ControlRequired</span>); }
+        <span class="comment">// Get the event collection of the control</span>
+        <span class="kw">let</span> <span class="ident">events_collection</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">control_events</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>);
+        <span class="kw">if</span> <span class="ident">events_collection</span>.<span class="ident">is_none</span>() { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">ControlRequired</span>); }
 
-        <span class='comment'>// Get the callback list for the requested event</span>
-        <span class='kw'>let</span> <span class='ident'>callbacks</span> <span class='op'>=</span> <span class='ident'>events_collection</span>.<span class='ident'>unwrap</span>().<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>event</span>);
-        <span class='kw'>if</span> <span class='ident'>callbacks</span>.<span class='ident'>is_none</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>EventNotSupported</span>(<span class='ident'>event</span>)); }
+        <span class="comment">// Get the callback list for the requested event</span>
+        <span class="kw">let</span> <span class="ident">callbacks</span> <span class="op">=</span> <span class="ident">events_collection</span>.<span class="ident">unwrap</span>().<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">event</span>);
+        <span class="kw">if</span> <span class="ident">callbacks</span>.<span class="ident">is_none</span>() { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">EventNotSupported</span>(<span class="ident">event</span>)); }
 
-        <span class='comment'>// Get a mutable reference to the callback list</span>
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>callbacks</span> <span class='op'>=</span> <span class='ident'>callbacks</span>.<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>callbacks</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>callbacks</span>);
-        <span class='kw'>if</span> <span class='ident'>callbacks</span>.<span class='ident'>is_none</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>ControlInUse</span>); }
+        <span class="comment">// Get a mutable reference to the callback list</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">callbacks</span> <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">callbacks</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">callbacks</span>);
+        <span class="kw">if</span> <span class="ident">callbacks</span>.<span class="ident">is_none</span>() { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">ControlInUse</span>); }
 
-        <span class='comment'>// Check if the cb id already exists for the event and if not, push the callback</span>
-        <span class='kw'>let</span> <span class='ident'>callbacks</span> <span class='op'>=</span> <span class='ident'>callbacks</span>.<span class='ident'>unwrap</span>();
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(_) <span class='op'>=</span> <span class='ident'>callbacks</span>.<span class='ident'>iter</span>().<span class='ident'>find</span>(<span class='op'>|</span><span class='op'>&amp;&amp;</span>(<span class='ident'>cb_id2</span>, _)<span class='op'>|</span> <span class='ident'>cb_id2</span> <span class='op'>==</span> <span class='ident'>cb_id</span>) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>KeyExists</span>)
-        } <span class='kw'>else</span> {
-            <span class='ident'>callbacks</span>.<span class='ident'>push</span>((<span class='ident'>cb_id</span>, <span class='ident'>cb</span>)); 
-            <span class='prelude-val'>None</span>
-        }
-    }
-
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>unbind</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>params</span>: <span class='ident'>UnbindArgs</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> (<span class='ident'>id</span>, <span class='ident'>cb_id</span>, <span class='ident'>event</span>) <span class='op'>=</span> (<span class='ident'>params</span>.<span class='ident'>id</span>, <span class='ident'>params</span>.<span class='ident'>cb_id</span>, <span class='ident'>params</span>.<span class='ident'>event</span>);
-
-        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-            <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>KeyNotFound</span>);
-        }
-
-        <span class='comment'>// Get the event collection of the control</span>
-        <span class='kw'>let</span> <span class='ident'>events_collection</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>control_events</span>.<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>);
-        <span class='kw'>if</span> <span class='ident'>events_collection</span>.<span class='ident'>is_none</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>ControlRequired</span>); }
-
-        <span class='comment'>// Get the callback list for the requested event</span>
-        <span class='kw'>let</span> <span class='ident'>callbacks</span> <span class='op'>=</span> <span class='ident'>events_collection</span>.<span class='ident'>unwrap</span>().<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>event</span>);
-        <span class='kw'>if</span> <span class='ident'>callbacks</span>.<span class='ident'>is_none</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>EventNotSupported</span>(<span class='ident'>event</span>)); }
-
-        <span class='comment'>// Get a mutable reference to the callback list</span>
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>callbacks</span> <span class='op'>=</span> <span class='ident'>callbacks</span>.<span class='ident'>unwrap</span>();
-        <span class='kw'>let</span> <span class='ident'>callbacks</span> <span class='op'>=</span> <span class='ident'>Rc</span>::<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>callbacks</span>);
-        <span class='kw'>if</span> <span class='ident'>callbacks</span>.<span class='ident'>is_none</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>ControlInUse</span>); }
-
-        <span class='comment'>// Check if the cb id exists for the event and if it is, remove the callback</span>
-        <span class='kw'>let</span> <span class='ident'>callbacks</span> <span class='op'>=</span> <span class='ident'>callbacks</span>.<span class='ident'>unwrap</span>();
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>index</span>) <span class='op'>=</span> <span class='ident'>callbacks</span>.<span class='ident'>iter</span>().<span class='ident'>position</span>(<span class='op'>|</span><span class='kw-2'>&amp;</span>(<span class='ident'>cb_id2</span>, _)<span class='op'>|</span> <span class='ident'>cb_id2</span> <span class='op'>==</span> <span class='ident'>cb_id</span>) {
-            <span class='ident'>callbacks</span>.<span class='ident'>remove</span>(<span class='ident'>index</span>);
-            <span class='prelude-val'>None</span>
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>KeyNotFound</span>)
+        <span class="comment">// Check if the cb id already exists for the event and if not, push the callback</span>
+        <span class="kw">let</span> <span class="ident">callbacks</span> <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">unwrap</span>();
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(_) <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="op">&amp;&amp;</span>(<span class="ident">cb_id2</span>, _)<span class="op">|</span> <span class="ident">cb_id2</span> <span class="op">==</span> <span class="ident">cb_id</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">KeyExists</span>)
+        } <span class="kw">else</span> {
+            <span class="ident">callbacks</span>.<span class="ident">push</span>((<span class="ident">cb_id</span>, <span class="ident">cb</span>)); 
+            <span class="prelude-val">None</span>
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>trigger</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>id</span>: <span class='ident'>InnerId</span>, <span class='ident'>event</span>: <span class='ident'>Event</span>, <span class='ident'>args</span>: <span class='ident'>EventArgs</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Error</span><span class='op'>&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unbind</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">params</span>: <span class="ident">UnbindArgs</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> (<span class="ident">id</span>, <span class="ident">cb_id</span>, <span class="ident">event</span>) <span class="op">=</span> (<span class="ident">params</span>.<span class="ident">id</span>, <span class="ident">params</span>.<span class="ident">cb_id</span>, <span class="ident">params</span>.<span class="ident">event</span>);
 
-        <span class='kw'>let</span> <span class='ident'>pub_id</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-            <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> (<span class='kw-2'>ref</span> <span class='ident'>pub_id</span>, _)) <span class='op'>=&gt;</span> <span class='ident'>pub_id</span>.<span class='ident'>clone</span>(),
-            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>KeyNotFound</span>); }
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">KeyNotFound</span>);
+        }
+
+        <span class="comment">// Get the event collection of the control</span>
+        <span class="kw">let</span> <span class="ident">events_collection</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">control_events</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>);
+        <span class="kw">if</span> <span class="ident">events_collection</span>.<span class="ident">is_none</span>() { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">ControlRequired</span>); }
+
+        <span class="comment">// Get the callback list for the requested event</span>
+        <span class="kw">let</span> <span class="ident">callbacks</span> <span class="op">=</span> <span class="ident">events_collection</span>.<span class="ident">unwrap</span>().<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">event</span>);
+        <span class="kw">if</span> <span class="ident">callbacks</span>.<span class="ident">is_none</span>() { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">EventNotSupported</span>(<span class="ident">event</span>)); }
+
+        <span class="comment">// Get a mutable reference to the callback list</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">callbacks</span> <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">callbacks</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">callbacks</span>);
+        <span class="kw">if</span> <span class="ident">callbacks</span>.<span class="ident">is_none</span>() { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">ControlInUse</span>); }
+
+        <span class="comment">// Check if the cb id exists for the event and if it is, remove the callback</span>
+        <span class="kw">let</span> <span class="ident">callbacks</span> <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">unwrap</span>();
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">callbacks</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="kw-2">&amp;</span>(<span class="ident">cb_id2</span>, _)<span class="op">|</span> <span class="ident">cb_id2</span> <span class="op">==</span> <span class="ident">cb_id</span>) {
+            <span class="ident">callbacks</span>.<span class="ident">remove</span>(<span class="ident">index</span>);
+            <span class="prelude-val">None</span>
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">KeyNotFound</span>)
+        }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trigger</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">InnerId</span>, <span class="ident">event</span>: <span class="ident">Event</span>, <span class="ident">args</span>: <span class="ident">EventArgs</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> {
+
+        <span class="kw">let</span> <span class="ident">pub_id</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw-2">ref</span> <span class="ident">pub_id</span>, _)) <span class="op">=&gt;</span> <span class="ident">pub_id</span>.<span class="ident">clone</span>(),
+            <span class="prelude-val">None</span> <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">KeyNotFound</span>); }
         };
 
-        <span class='kw'>let</span> <span class='ident'>callback_list</span> <span class='op'>=</span> {
-            <span class='comment'>// Get the event collection of the control</span>
-            <span class='kw'>let</span> <span class='ident'>events_collection</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>control_events</span>.<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>);
-            <span class='kw'>if</span> <span class='ident'>events_collection</span>.<span class='ident'>is_none</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>ControlRequired</span>); }
+        <span class="kw">let</span> <span class="ident">callback_list</span> <span class="op">=</span> {
+            <span class="comment">// Get the event collection of the control</span>
+            <span class="kw">let</span> <span class="ident">events_collection</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">control_events</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>);
+            <span class="kw">if</span> <span class="ident">events_collection</span>.<span class="ident">is_none</span>() { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">ControlRequired</span>); }
 
-            <span class='comment'>// The the callback list for the requested event</span>
-            <span class='kw'>let</span> <span class='ident'>callbacks</span> <span class='op'>=</span> <span class='ident'>events_collection</span>.<span class='ident'>unwrap</span>().<span class='ident'>get_mut</span>(<span class='kw-2'>&amp;</span><span class='ident'>event</span>);
-            <span class='kw'>if</span> <span class='ident'>callbacks</span>.<span class='ident'>is_none</span>() { <span class='kw'>return</span> <span class='prelude-val'>Some</span>(<span class='ident'>Error</span>::<span class='ident'>EventNotSupported</span>(<span class='ident'>event</span>)); }
+            <span class="comment">// Get the callback list for the requested event</span>
+            <span class="kw">let</span> <span class="ident">callbacks</span> <span class="op">=</span> <span class="ident">events_collection</span>.<span class="ident">unwrap</span>().<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">event</span>);
+            <span class="kw">if</span> <span class="ident">callbacks</span>.<span class="ident">is_none</span>() { <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Error</span>::<span class="ident">EventNotSupported</span>(<span class="ident">event</span>)); }
 
-            <span class='comment'>// Return a reference to the callback list. While the reference exists, it will be impossible</span>
-            <span class='comment'>// to push new callback into the event.</span>
-            <span class='ident'>callbacks</span>.<span class='ident'>unwrap</span>().<span class='ident'>clone</span>()
+            <span class="comment">// Return a reference to the callback list. While the reference exists, it will be impossible</span>
+            <span class="comment">// to push new callback into the event.</span>
+            <span class="ident">callbacks</span>.<span class="ident">unwrap</span>().<span class="ident">clone</span>()
         };
 
-        <span class='kw'>let</span> <span class='ident'>tmp_ui</span>: <span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Ui</span>{<span class='ident'>inner</span>: <span class='self'>self</span> <span class='kw'>as</span> <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>};
-        <span class='kw'>for</span> <span class='kw-2'>&amp;</span>( _, <span class='kw-2'>ref</span> <span class='ident'>callback</span>) <span class='kw'>in</span> <span class='ident'>callback_list</span>.<span class='ident'>iter</span>() {
-            (<span class='ident'>callback</span>)(<span class='kw-2'>&amp;</span><span class='ident'>tmp_ui</span>, <span class='kw-2'>&amp;</span><span class='ident'>pub_id</span>, <span class='kw-2'>&amp;</span><span class='ident'>event</span>, <span class='kw-2'>&amp;</span><span class='ident'>args</span>);
+        <span class="kw">let</span> <span class="ident">tmp_ui</span>: <span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Ui</span>{<span class="ident">inner</span>: <span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>};
+        <span class="kw">for</span> <span class="kw-2">&amp;</span>( _, <span class="kw-2">ref</span> <span class="ident">callback</span>) <span class="kw">in</span> <span class="ident">callback_list</span>.<span class="ident">iter</span>() {
+            (<span class="ident">callback</span>)(<span class="kw-2">&amp;</span><span class="ident">tmp_ui</span>, <span class="kw-2">&amp;</span><span class="ident">pub_id</span>, <span class="kw-2">&amp;</span><span class="ident">event</span>, <span class="kw-2">&amp;</span><span class="ident">args</span>);
         }
 
-        ::<span class='ident'>std</span>::<span class='ident'>mem</span>::<span class='ident'>forget</span>(<span class='ident'>tmp_ui</span>);
-        <span class='prelude-val'>None</span>
+        ::<span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">forget</span>(<span class="ident">tmp_ui</span>);
+        <span class="prelude-val">None</span>
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>handle_of</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='ident'>InnerId</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>AnyHandle</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>KeyNotFound</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">handle_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="ident">InnerId</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyHandle</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">KeyNotFound</span>);
         }
         
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>controls</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>v_ref</span>) <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>try_borrow</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Ok</span>( <span class='ident'>v_ref</span>.<span class='ident'>handle</span>() );
-            } <span class='kw'>else</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BorrowError</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">controls</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v_ref</span>) <span class="op">=</span> <span class="ident">v</span>.<span class="ident">try_borrow</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>( <span class="ident">v_ref</span>.<span class="ident">handle</span>() );
+            } <span class="kw">else</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BorrowError</span>);
             }
         }
 
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>id</span>) {
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>v_ref</span>) <span class='op'>=</span> <span class='ident'>v</span>.<span class='ident'>try_borrow</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Ok</span>( <span class='ident'>v_ref</span>.<span class='ident'>handle</span>() );
-            } <span class='kw'>else</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BorrowError</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v_ref</span>) <span class="op">=</span> <span class="ident">v</span>.<span class="ident">try_borrow</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>( <span class="ident">v_ref</span>.<span class="ident">handle</span>() );
+            } <span class="kw">else</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BorrowError</span>);
             }
         }
 
-        <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>ControlOrResourceRequired</span>)
+        <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">ControlOrResourceRequired</span>)
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>inner_id_from_handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>handle</span>: <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>InnerId</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>id</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>handle_inner_map</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>UiInner</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>::<span class='ident'>hash_handle</span>(<span class='ident'>handle</span>)) {
-            <span class='prelude-val'>Some</span>(<span class='kw-2'>*</span><span class='ident'>id</span>) 
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>None</span> 
-            <span class='comment'>//println!(&quot;Couldn&#39;t match the handle {:?} to a inner ID&quot;, handle); // Debug</span>
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inner_id_from_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">handle</span>: <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">InnerId</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">handle_inner_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">UiInner</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>::<span class="ident">hash_handle</span>(<span class="ident">handle</span>)) {
+            <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">id</span>) 
+        } <span class="kw">else</span> {
+            <span class="prelude-val">None</span> 
+            <span class="comment">//println!(&quot;Couldn&#39;t match the handle {:?} to a inner ID&quot;, handle); // Debug</span>
         }
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>types_matches</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>InnerId</span>, <span class='ident'>tid</span>: <span class='ident'>TypeId</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='self'>self</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>get</span>(<span class='ident'>id</span>).<span class='ident'>unwrap</span>().<span class='number'>1</span> <span class='op'>==</span> <span class='ident'>tid</span>
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">types_matches</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">InnerId</span>, <span class="ident">tid</span>: <span class="ident">TypeId</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">inner_public_map</span>.<span class="ident">get</span>(<span class="ident">id</span>).<span class="ident">unwrap</span>().<span class="number">1</span> <span class="op">==</span> <span class="ident">tid</span>
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>hash_id</span>(<span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) <span class='op'>-&gt;</span> <span class='ident'>InnerId</span> {
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hasher</span>;
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>hash_map</span>::<span class='ident'>DefaultHasher</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s1</span> <span class='op'>=</span> <span class='ident'>DefaultHasher</span>::<span class='ident'>new</span>();
-        <span class='ident'>id</span>.<span class='ident'>hash</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>s1</span>);
-        <span class='ident'>s1</span>.<span class='ident'>finish</span>()
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">hash_id</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) <span class="op">-&gt;</span> <span class="ident">InnerId</span> {
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hasher</span>;
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">hash_map</span>::<span class="ident">DefaultHasher</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s1</span> <span class="op">=</span> <span class="ident">DefaultHasher</span>::<span class="ident">new</span>();
+        <span class="ident">id</span>.<span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">s1</span>);
+        <span class="ident">s1</span>.<span class="ident">finish</span>()
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-    <span class='kw'>fn</span> <span class='ident'>hash_handle</span>(<span class='ident'>handle</span>: <span class='kw-2'>&amp;</span><span class='ident'>AnyHandle</span>) <span class='op'>-&gt;</span> <span class='ident'>InnerId</span> {
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hasher</span>;
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>hash_map</span>::<span class='ident'>DefaultHasher</span>;
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>s1</span> <span class='op'>=</span> <span class='ident'>DefaultHasher</span>::<span class='ident'>new</span>();
-        <span class='ident'>handle</span>.<span class='ident'>hash</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>s1</span>);
-        <span class='ident'>s1</span>.<span class='ident'>finish</span>()
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">hash_handle</span>(<span class="ident">handle</span>: <span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>) <span class="op">-&gt;</span> <span class="ident">InnerId</span> {
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hasher</span>;
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">hash_map</span>::<span class="ident">DefaultHasher</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s1</span> <span class="op">=</span> <span class="ident">DefaultHasher</span>::<span class="ident">new</span>();
+        <span class="ident">handle</span>.<span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">s1</span>);
+        <span class="ident">s1</span>.<span class="ident">finish</span>()
     }
 
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
 
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>events</span>::<span class='ident'>unhook_window_events</span>;
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">unhook_window_events</span>;
         
-        <span class='kw'>let</span> <span class='ident'>controls_ids</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>controls</span>.<span class='ident'>keys</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>k</span><span class='op'>|</span> <span class='kw-2'>*</span><span class='ident'>k</span>).<span class='ident'>collect</span>();
-        <span class='kw'>for</span> <span class='ident'>id</span> <span class='kw'>in</span> <span class='ident'>controls_ids</span> {
-            <span class='self'>self</span>.<span class='ident'>unpack</span>(<span class='ident'>UnpackArgs</span>{<span class='ident'>id</span>: <span class='ident'>id</span>});
+        <span class="kw">let</span> <span class="ident">controls_ids</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">controls</span>.<span class="ident">keys</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">k</span>).<span class="ident">collect</span>();
+        <span class="kw">for</span> <span class="ident">id</span> <span class="kw">in</span> <span class="ident">controls_ids</span> {
+            <span class="self">self</span>.<span class="ident">unpack</span>(<span class="ident">UnpackArgs</span>{<span class="ident">id</span>: <span class="ident">id</span>});
         }
 
-        <span class='kw'>let</span> <span class='ident'>resources_ids</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u64</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>resources</span>.<span class='ident'>keys</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>k</span><span class='op'>|</span> <span class='kw-2'>*</span><span class='ident'>k</span>).<span class='ident'>collect</span>();
-        <span class='kw'>for</span> <span class='ident'>id</span> <span class='kw'>in</span> <span class='ident'>resources_ids</span> {
-            <span class='self'>self</span>.<span class='ident'>unpack</span>(<span class='ident'>UnpackArgs</span>{<span class='ident'>id</span>: <span class='ident'>id</span>});
+        <span class="kw">let</span> <span class="ident">resources_ids</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">keys</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">k</span>).<span class="ident">collect</span>();
+        <span class="kw">for</span> <span class="ident">id</span> <span class="kw">in</span> <span class="ident">resources_ids</span> {
+            <span class="self">self</span>.<span class="ident">unpack</span>(<span class="ident">UnpackArgs</span>{<span class="ident">id</span>: <span class="ident">id</span>});
         }
         
-        <span class='ident'>unhook_window_events</span>::<span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>(<span class='self'>self</span>.<span class='ident'>messages</span>.<span class='ident'>hwnd</span>);
+        <span class="ident">unhook_window_events</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>(<span class="self">self</span>.<span class="ident">messages</span>.<span class="ident">hwnd</span>);
 
-        <span class='self'>self</span>.<span class='ident'>messages</span>.<span class='ident'>free</span>();
+        <span class="self">self</span>.<span class="ident">messages</span>.<span class="ident">free</span>();
     }
 
 }
 
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Object that manage the GUI elements
 */</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>+</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span> {
-    <span class='ident'>inner</span>: <span class='kw-2'>*</span><span class='kw-2'>mut</span> <span class='ident'>UiInner</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">+</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="ident">inner</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">UiInner</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>:<span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> { 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>:<span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> { 
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Create a new Ui.
 
         Returns `Ok(ui)` if the initialization was successful  
         Returns `Err(Error::System)` if the system could not initialize the ui
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>events</span>::<span class='ident'>hook_window_events</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">hook_window_events</span>;
 
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>UiInner</span>::<span class='ident'>new</span>() {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>inner</span>) <span class='op'>=&gt;</span> <span class='ident'>Box</span>::<span class='ident'>into_raw</span>(<span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>inner</span>)),
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">UiInner</span>::<span class="ident">new</span>() {
+            <span class="prelude-val">Ok</span>(<span class="ident">inner</span>) <span class="op">=&gt;</span> <span class="ident">Box</span>::<span class="ident">into_raw</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">inner</span>)),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='comment'>// Hook the inner message window. This is basically a SAFE hack to process non nwg events that are sent to ui (ie: WM_TIMER)</span>
-        <span class='comment'>// Window gets unhooked just before inner gets dropped.</span>
-        <span class='kw'>unsafe</span>{
-            <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='ident'>inner</span>;
-            <span class='kw'>let</span> <span class='ident'>hwnd</span> <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>messages</span>.<span class='ident'>hwnd</span>;
-            <span class='ident'>hook_window_events</span>(<span class='ident'>inner</span>, <span class='ident'>hwnd</span>);
+        <span class="comment">// Hook the inner message window. This is basically a SAFE hack to process non nwg events that are sent to ui (ie: WM_TIMER)</span>
+        <span class="comment">// Window gets unhooked just before inner gets dropped.</span>
+        <span class="kw">unsafe</span>{
+            <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">inner</span>;
+            <span class="kw">let</span> <span class="ident">hwnd</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">messages</span>.<span class="ident">hwnd</span>;
+            <span class="ident">hook_window_events</span>(<span class="ident">inner</span>, <span class="ident">hwnd</span>);
         }
 
-        <span class='prelude-val'>Ok</span>( <span class='ident'>Ui</span>{<span class='ident'>inner</span>: <span class='ident'>inner</span>} )
+        <span class="prelude-val">Ok</span>( <span class="ident">Ui</span>{<span class="ident">inner</span>: <span class="ident">inner</span>} )
     }
 
-    <span class='doccomment'>/**
-        Execute the NWG commands waiting in the Ui command queue in the order they w     ere added.
+    <span class="doccomment">/**
+        Execute the NWG commands waiting in the Ui command queue in the order they were added.
 
         Returns `Ok(())` if everything was executed without Errors  
         Returns `Err(Error)` if an error was encountered while executing the commands.  
         As soon as an error is found, the function will return. If there are still commands  
         waiting in the queue, they wont be touched.
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>commit</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>unsafe</span>{ (<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span>).<span class='ident'>messages</span>.<span class='ident'>commit</span>() }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">commit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span>{ (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span>).<span class="ident">messages</span>.<span class="ident">commit</span>() }
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Add an user value to the Ui.  
-        Asynchronous, this only registers the command in the ui message queue.  
+        Delayed, this only registers the command in the ui message queue.  
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.  
 
         Commit returns  
         • `Error::KeyExist` if the key already exists in the ui  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pack_value</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span><span class='op'>+</span><span class='lifetime'>&#39;static</span> <span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>value</span>: <span class='ident'>T</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>NWG_PACK_USER_VALUE</span>};
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pack_value</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span><span class="op">+</span><span class="lifetime">&#39;static</span> <span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">value</span>: <span class="ident">T</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">NWG_PACK_USER_VALUE</span>};
         
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span> };
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>PackUserValueArgs</span>{ <span class='ident'>id</span>: <span class='ident'>id</span>.<span class='ident'>clone</span>(), <span class='ident'>tid</span>: <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(), <span class='ident'>value</span>: <span class='ident'>value</span>.<span class='ident'>into</span>() <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span>};
-        <span class='ident'>inner</span>.<span class='ident'>messages</span>.<span class='ident'>post</span>(<span class='self'>self</span>.<span class='ident'>inner</span>, <span class='ident'>NWG_PACK_USER_VALUE</span>, <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>data</span>) <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> );
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">PackUserValueArgs</span>{ <span class="ident">id</span>: <span class="ident">id</span>.<span class="ident">clone</span>(), <span class="ident">tid</span>: <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(), <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">into</span>() <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;</span>};
+        <span class="ident">inner</span>.<span class="ident">messages</span>.<span class="ident">post</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">NWG_PACK_USER_VALUE</span>, <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">data</span>) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;</span> );
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Add a control to the Ui.  
-        Asynchronous, this only registers the command in the ui message queue.  
+        Delayed, this only registers the command in the ui message queue.  
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         Commit returns  
           • `Error::KeyExist` if the key already exists in the ui  
           • `Error::{Any}` if the template creation fails  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pack_control</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>ControlT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span><span class='op'>+</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>value</span>: <span class='ident'>T</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>NWG_PACK_CONTROL</span>};
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pack_control</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span><span class="op">+</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">value</span>: <span class="ident">T</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">NWG_PACK_CONTROL</span>};
 
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span> };
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>PackControlArgs</span>{ <span class='ident'>id</span>: <span class='ident'>id</span>.<span class='ident'>clone</span>(), <span class='ident'>value</span>: <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>value</span>)};
-        <span class='ident'>inner</span>.<span class='ident'>messages</span>.<span class='ident'>post</span>(<span class='self'>self</span>.<span class='ident'>inner</span>, <span class='ident'>NWG_PACK_CONTROL</span>, <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>data</span>) <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> );
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">PackControlArgs</span>{ <span class="ident">id</span>: <span class="ident">id</span>.<span class="ident">clone</span>(), <span class="ident">value</span>: <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">value</span>)};
+        <span class="ident">inner</span>.<span class="ident">messages</span>.<span class="ident">post</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">NWG_PACK_CONTROL</span>, <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">data</span>) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;</span> );
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Add a resource to the Ui.  
-        Asynchronous, this only registers the command in the ui message queue.  
+        Delayed, this only registers the command in the ui message queue.  
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         Commit returns  
           • `Error::KeyExist` if the key already exists in the ui  
           • `Error::{Any}` if the template creation fails  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>pack_resource</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>ResourceT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span><span class='op'>+</span><span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>value</span>: <span class='ident'>T</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>NWG_PACK_RESOURCE</span>};
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pack_resource</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ResourceT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span><span class="op">+</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">value</span>: <span class="ident">T</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">NWG_PACK_RESOURCE</span>};
 
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span> };
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>PackResourceArgs</span>{ <span class='ident'>id</span>: <span class='ident'>id</span>.<span class='ident'>clone</span>(), <span class='ident'>value</span>: <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>value</span>)};
-        <span class='ident'>inner</span>.<span class='ident'>messages</span>.<span class='ident'>post</span>(<span class='self'>self</span>.<span class='ident'>inner</span>, <span class='ident'>NWG_PACK_RESOURCE</span>, <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>data</span>) <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> );
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">PackResourceArgs</span>{ <span class="ident">id</span>: <span class="ident">id</span>.<span class="ident">clone</span>(), <span class="ident">value</span>: <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">value</span>)};
+        <span class="ident">inner</span>.<span class="ident">messages</span>.<span class="ident">post</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">NWG_PACK_RESOURCE</span>, <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">data</span>) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;</span> );
     }
 
-     <span class='doccomment'>/**
+     <span class="doccomment">/**
         Remove a element from the ui using its ID. The ID can identify a control, a resource or a user value.  
-        Asynchronous, this only registers the command in the ui message queue.   
+        Delayed, this only registers the command in the ui message queue.   
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        Commit returns:  
+        Commit may returns:  
           • `Error::ControlInUse` if the control callbacks are being executed  
           • `Error::ControlInUse` if the object is currently borrowed (using ui.get or ui.get_mut)  
           • `Error::KeyNotFound` if the id do not exists in the Ui  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>unpack</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>NWG_UNPACK</span>};
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">NWG_UNPACK</span>};
         
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span> };
-        <span class='kw'>let</span> <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='ident'>id</span>);
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>UnpackArgs</span>{ <span class='ident'>id</span>: <span class='ident'>inner_id</span> };
-        <span class='ident'>inner</span>.<span class='ident'>messages</span>.<span class='ident'>post</span>(<span class='self'>self</span>.<span class='ident'>inner</span>, <span class='ident'>NWG_UNPACK</span>, <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>data</span>) <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> );
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="kw">let</span> <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">id</span>);
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">UnpackArgs</span>{ <span class="ident">id</span>: <span class="ident">inner_id</span> };
+        <span class="ident">inner</span>.<span class="ident">messages</span>.<span class="ident">post</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">NWG_UNPACK</span>, <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">data</span>) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;</span> );
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Return an immutable reference to the element identified by `id` in the Ui.  
         It is required to give a type `T` to this function as it is needed to cast the underlying value.
         Ex: `ui.get::&lt;u32&gt;(100)`
@@ -1387,105 +1420,105 @@
         Params:  
           • id: The id that identify the element in the ui  
 
-        Commit returns:  
+        Commit may returns:  
           • `Error::KeyNotFound` will be returned if the key was not found in the Ui  
           • `Error::BadType` will be returned if the key exists, but the type do not match  
           • `Error::BorrowError` will be returned if the element was already borrowed mutably  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Ref</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Ref</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
          
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span> };
-        <span class='kw'>let</span> <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='ident'>id</span>);
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="kw">let</span> <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">id</span>);
 
-        <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>inner</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>KeyNotFound</span>); }
-        <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>inner</span>.<span class='ident'>types_matches</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>, <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>()) { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BadType</span>); }
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">inner</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">KeyNotFound</span>); }
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">inner</span>.<span class="ident">types_matches</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>, <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()) { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadType</span>); }
         
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>user_values</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) {
-            <span class='kw'>let</span> <span class='ident'>v_casted</span>: <span class='kw-2'>&amp;</span><span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>v</span>)};
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>v_ref</span>) <span class='op'>=</span> <span class='ident'>v_casted</span>.<span class='ident'>try_borrow</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Ok</span>( <span class='ident'>v_ref</span> );
-            } <span class='kw'>else</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BorrowError</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">user_values</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) {
+            <span class="kw">let</span> <span class="ident">v_casted</span>: <span class="kw-2">&amp;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">v</span>)};
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v_ref</span>) <span class="op">=</span> <span class="ident">v_casted</span>.<span class="ident">try_borrow</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>( <span class="ident">v_ref</span> );
+            } <span class="kw">else</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BorrowError</span>);
             }
         }
 
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>controls</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) {
-            <span class='kw'>let</span> <span class='ident'>v_casted</span>: <span class='kw-2'>&amp;</span><span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>v</span>)};
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>v_ref</span>) <span class='op'>=</span> <span class='ident'>v_casted</span>.<span class='ident'>try_borrow</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Ok</span>( <span class='ident'>v_ref</span> );
-            } <span class='kw'>else</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BorrowError</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">controls</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) {
+            <span class="kw">let</span> <span class="ident">v_casted</span>: <span class="kw-2">&amp;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">v</span>)};
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v_ref</span>) <span class="op">=</span> <span class="ident">v_casted</span>.<span class="ident">try_borrow</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>( <span class="ident">v_ref</span> );
+            } <span class="kw">else</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BorrowError</span>);
             }
         }
 
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>resources</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) {
-            <span class='kw'>let</span> <span class='ident'>v_casted</span>: <span class='kw-2'>&amp;</span><span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>v</span>)};
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>v_ref</span>) <span class='op'>=</span> <span class='ident'>v_casted</span>.<span class='ident'>try_borrow</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Ok</span>( <span class='ident'>v_ref</span> );
-            } <span class='kw'>else</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BorrowError</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">resources</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) {
+            <span class="kw">let</span> <span class="ident">v_casted</span>: <span class="kw-2">&amp;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">v</span>)};
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v_ref</span>) <span class="op">=</span> <span class="ident">v_casted</span>.<span class="ident">try_borrow</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>( <span class="ident">v_ref</span> );
+            } <span class="kw">else</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BorrowError</span>);
             }
         }
 
-        <span class='macro'>unreachable</span><span class='macro'>!</span>()
+        <span class="macro">unreachable</span><span class="macro">!</span>()
     }
 
-    <span class='doccomment'>/**
-        Return an mutable reference to element identified by `id` in the Ui.
+    <span class="doccomment">/**
+        Return an mutable reference to element identified by `id` in the Ui.  
         It is required to give a type `T` to this function as it is needed to cast the underlying value.
         Ex: `ui.get_mut::&lt;u32&gt;(100)`
 
         Params:  
           • id: The id that identify the element in the ui  
 
-        Commit returns:  
+        Commit may returns:  
           • `Error::KeyNotFound` will be returned if the key was not found in the Ui  
           • `Error::BadType` will be returned if the key exists, but the type do not match  
           • `Error::BorrowError` will be returned if the element was already borrowed mutably  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_mut</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='lifetime'>&#39;static</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>RefMut</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_mut</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RefMut</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
          
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span> };
-        <span class='kw'>let</span> <span class='ident'>inner_id</span> <span class='op'>=</span> <span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='ident'>id</span>);
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="kw">let</span> <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">id</span>);
 
-        <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>inner</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>KeyNotFound</span>); }
-        <span class='kw'>if</span> <span class='op'>!</span><span class='ident'>inner</span>.<span class='ident'>types_matches</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>, <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>()) { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BadType</span>); }
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">inner</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">KeyNotFound</span>); }
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">inner</span>.<span class="ident">types_matches</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>, <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()) { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadType</span>); }
         
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>user_values</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) {
-            <span class='kw'>let</span> <span class='ident'>v_casted</span>: <span class='kw-2'>&amp;</span><span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>v</span>)};
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>v_ref</span>) <span class='op'>=</span> <span class='ident'>v_casted</span>.<span class='ident'>try_borrow_mut</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Ok</span>( <span class='ident'>v_ref</span> );
-            } <span class='kw'>else</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BorrowError</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">user_values</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) {
+            <span class="kw">let</span> <span class="ident">v_casted</span>: <span class="kw-2">&amp;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">v</span>)};
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v_ref</span>) <span class="op">=</span> <span class="ident">v_casted</span>.<span class="ident">try_borrow_mut</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>( <span class="ident">v_ref</span> );
+            } <span class="kw">else</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BorrowError</span>);
             }
         }
 
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>controls</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) {
-            <span class='kw'>let</span> <span class='ident'>v_casted</span>: <span class='kw-2'>&amp;</span><span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>v</span>)};
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>v_ref</span>) <span class='op'>=</span> <span class='ident'>v_casted</span>.<span class='ident'>try_borrow_mut</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Ok</span>( <span class='ident'>v_ref</span> );
-            } <span class='kw'>else</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BorrowError</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">controls</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) {
+            <span class="kw">let</span> <span class="ident">v_casted</span>: <span class="kw-2">&amp;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">v</span>)};
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v_ref</span>) <span class="op">=</span> <span class="ident">v_casted</span>.<span class="ident">try_borrow_mut</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>( <span class="ident">v_ref</span> );
+            } <span class="kw">else</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BorrowError</span>);
             }
         }
 
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=</span> <span class='ident'>inner</span>.<span class='ident'>resources</span>.<span class='ident'>get</span>(<span class='kw-2'>&amp;</span><span class='ident'>inner_id</span>) {
-            <span class='kw'>let</span> <span class='ident'>v_casted</span>: <span class='kw-2'>&amp;</span><span class='ident'>RefCell</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;&gt;</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{<span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='ident'>v</span>)};
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>v_ref</span>) <span class='op'>=</span> <span class='ident'>v_casted</span>.<span class='ident'>try_borrow_mut</span>() {
-                <span class='kw'>return</span> <span class='prelude-val'>Ok</span>( <span class='ident'>v_ref</span> );
-            } <span class='kw'>else</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>BorrowError</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">resources</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">inner_id</span>) {
+            <span class="kw">let</span> <span class="ident">v_casted</span>: <span class="kw-2">&amp;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">v</span>)};
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v_ref</span>) <span class="op">=</span> <span class="ident">v_casted</span>.<span class="ident">try_borrow_mut</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>( <span class="ident">v_ref</span> );
+            } <span class="kw">else</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BorrowError</span>);
             }
         }
 
-        <span class='macro'>unreachable</span><span class='macro'>!</span>()
+        <span class="macro">unreachable</span><span class="macro">!</span>()
     }
 
-    <span class='doccomment'>/**
-        Bind/Add a callback to a control event. 
-        Asynchronous, this only registers the command in the ui message queue. 
+    <span class="doccomment">/**
+        Bind/Add a callback to a control event.  
+        Delayed, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
         Params:  
@@ -1494,7 +1527,7 @@
           • event: Type of event to target  
           • cb: The callback  
 
-        Commit returns:  
+        Commit may returns:  
           • `Error::EventNotSupported` if the event is not supported on the callback  
           • `Error::ControlRequired` if the id do not indentify a control  
           • `Error::KeyNotFound` if the id is not in the Ui.  
@@ -1502,38 +1535,67 @@
           • `Error::ControlInUse` if NWG is currently executing the callback of the event  
         
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>bind</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>cb_id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>event</span>: <span class='ident'>Event</span>, <span class='ident'>cb</span>: <span class='ident'>T</span>) <span class='kw'>where</span>
-      <span class='ident'>T</span>: <span class='ident'>Fn</span>(<span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>, <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='kw-2'>&amp;</span><span class='ident'>Event</span>, <span class='kw-2'>&amp;</span><span class='ident'>EventArgs</span>) <span class='op'>-&gt;</span> ()<span class='op'>+</span><span class='lifetime'>&#39;static</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>NWG_BIND</span>};
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bind</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">cb_id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">event</span>: <span class="ident">Event</span>, <span class="ident">cb</span>: <span class="ident">T</span>) <span class="kw">where</span>
+      <span class="ident">T</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="kw-2">&amp;</span><span class="ident">Event</span>, <span class="kw-2">&amp;</span><span class="ident">EventArgs</span>) <span class="op">-&gt;</span> ()<span class="op">+</span><span class="lifetime">&#39;static</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">NWG_BIND</span>};
         
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span> };
-        <span class='kw'>let</span> (<span class='ident'>inner_id</span>, <span class='ident'>cb_inner_id</span>) <span class='op'>=</span> (<span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='ident'>id</span>), <span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='ident'>cb_id</span>));
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>BindArgs</span>{ <span class='ident'>id</span>: <span class='ident'>inner_id</span>, <span class='ident'>cb_id</span>: <span class='ident'>cb_inner_id</span>, <span class='ident'>event</span>: <span class='ident'>event</span>, <span class='ident'>cb</span>: <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>cb</span>)};
-        <span class='ident'>inner</span>.<span class='ident'>messages</span>.<span class='ident'>post</span>(<span class='self'>self</span>.<span class='ident'>inner</span>, <span class='ident'>NWG_BIND</span>, <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>data</span>) <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> );
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="kw">let</span> (<span class="ident">inner_id</span>, <span class="ident">cb_inner_id</span>) <span class="op">=</span> (<span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">id</span>), <span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">cb_id</span>));
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">BindArgs</span>{ <span class="ident">id</span>: <span class="ident">inner_id</span>, <span class="ident">cb_id</span>: <span class="ident">cb_inner_id</span>, <span class="ident">event</span>: <span class="ident">event</span>, <span class="ident">cb</span>: <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">cb</span>)};
+        <span class="ident">inner</span>.<span class="ident">messages</span>.<span class="ident">post</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">NWG_BIND</span>, <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">data</span>) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;</span> );
     }
 
-    <span class='doccomment'>/**
-        Unbind/Remove a callback to a control event.
-        Asynchronous, this only registers the command in the ui message queue. 
+    <span class="doccomment">/**
+        Unbind/Remove a callback to a control event.  
+        Delayed, this only registers the command in the ui message queue. 
         Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
 
-        Commit returns:  
+        Params:  
+          • id: The id that identify the element in the ui  
+          • cb_id: The id that identify the callback  
+          • event: The type of the event to unbind  
+
+        Commit may returns:  
           • `Error::EventNotSupported` if the event is not supported on the callback  
           • `Error::ControlRequired` if the id do not indentify a control  
           • `Error::KeyNotFound` if the id is not in the Ui.  
           • `Error::KeyNotFound` if the cb_id do not exist for the event  
           • `Error::ControlInUse` if NWG is currently executing the callback of the event  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>unbind</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>cb_id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>, <span class='ident'>event</span>: <span class='ident'>Event</span>) {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>defs</span>::{<span class='ident'>NWG_UNBIND</span>};
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unbind</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">cb_id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">event</span>: <span class="ident">Event</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">NWG_UNBIND</span>};
         
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span> };
-        <span class='kw'>let</span> (<span class='ident'>inner_id</span>, <span class='ident'>cb_inner_id</span>) <span class='op'>=</span> (<span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='ident'>id</span>), <span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='ident'>cb_id</span>));
-        <span class='kw'>let</span> <span class='ident'>data</span> <span class='op'>=</span> <span class='ident'>UnbindArgs</span>{ <span class='ident'>id</span>: <span class='ident'>inner_id</span>, <span class='ident'>cb_id</span>: <span class='ident'>cb_inner_id</span>, <span class='ident'>event</span>: <span class='ident'>event</span>};
-        <span class='ident'>inner</span>.<span class='ident'>messages</span>.<span class='ident'>post</span>(<span class='self'>self</span>.<span class='ident'>inner</span>, <span class='ident'>NWG_UNBIND</span>, <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>data</span>) <span class='kw'>as</span> <span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Any</span><span class='op'>&gt;</span> );
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="kw">let</span> (<span class="ident">inner_id</span>, <span class="ident">cb_inner_id</span>) <span class="op">=</span> (<span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">id</span>), <span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">cb_id</span>));
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">UnbindArgs</span>{ <span class="ident">id</span>: <span class="ident">inner_id</span>, <span class="ident">cb_id</span>: <span class="ident">cb_inner_id</span>, <span class="ident">event</span>: <span class="ident">event</span>};
+        <span class="ident">inner</span>.<span class="ident">messages</span>.<span class="ident">post</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">NWG_UNBIND</span>, <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">data</span>) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;</span> );
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
+        Trigger the callbacks bound to a control event.  
+        Delayed, this only registers the command in the ui message queue. 
+        Either call `ui.commit` to execute it now or wait for the command to be executed in the main event loop.
+
+        Params:  
+          • id: The id that identify the control in the ui  
+          • event: The type of the event to trigger  
+          • event_arg: The arguments to send to the callbacks  
+
+        Commit may returns:  
+          • `Error::EventNotSupported` if the event is not supported on the callback  
+          • `Error::ControlRequired` if the id do not indentify a control  
+          • `Error::KeyNotFound` if the id is not in the Ui.   
+    */</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trigger</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="ident">event</span>: <span class="ident">Event</span>, <span class="ident">event_arg</span>: <span class="ident">EventArgs</span>) {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">NWG_TRIGGER</span>};
+        
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="kw">let</span> <span class="ident">inner_id</span> <span class="op">=</span> <span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">id</span>);
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">TriggerArgs</span>{ <span class="ident">id</span>: <span class="ident">inner_id</span>, <span class="ident">event</span>: <span class="ident">event</span>, <span class="ident">args</span>: <span class="ident">event_arg</span>};
+        <span class="ident">inner</span>.<span class="ident">messages</span>.<span class="ident">post</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">NWG_TRIGGER</span>, <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">data</span>) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Any</span><span class="op">&gt;</span> );
+    }
+
+    <span class="doccomment">/**
         Return the underlying handle of a control or a resource.
         While this method is safe, anything done with the returned handle definitely won&#39;t be.
 
@@ -1543,56 +1605,56 @@
           • `Error::ControlOrResourceRequired` if the id indentify a user value  
           • `Error::BorrowError` if the element was already borrowed mutably  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>handle_of</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>AnyHandle</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span> };
-        <span class='ident'>inner</span>.<span class='ident'>handle_of</span>(<span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='ident'>id</span>))
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">handle_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyHandle</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span> };
+        <span class="ident">inner</span>.<span class="ident">handle_of</span>(<span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">id</span>))
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Check if an id exists in the ui
 
         Params:  
           • id -&gt; The ID to check  
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>has_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>id</span>: <span class='kw-2'>&amp;</span><span class='ident'>ID</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw'>unsafe</span>{ <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> (<span class='kw-2'>&amp;</span><span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span>) };
-        <span class='ident'>inner</span>.<span class='ident'>inner_public_map</span>.<span class='ident'>contains_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>UiInner</span>::<span class='ident'>hash_id</span>(<span class='ident'>id</span>))
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">ID</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span>) };
+        <span class="ident">inner</span>.<span class="ident">inner_public_map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">UiInner</span>::<span class="ident">hash_id</span>(<span class="ident">id</span>))
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Return the message window handle of the ui. Useful for controls or functions that requires a window (such as timers)
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>message_handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> ::<span class='ident'>winapi</span>::<span class='ident'>HWND</span> {
-        <span class='kw'>let</span> <span class='ident'>inner</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> (<span class='kw-2'>&amp;</span><span class='kw-2'>*</span><span class='self'>self</span>.<span class='ident'>inner</span>);
-        <span class='ident'>inner</span>.<span class='ident'>messages</span>.<span class='ident'>hwnd</span>
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">message_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> ::<span class="ident">winapi</span>::<span class="ident">HWND</span> {
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span>);
+        <span class="ident">inner</span>.<span class="ident">messages</span>.<span class="ident">hwnd</span>
     }
 
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>Drop</span> <span class='kw'>for</span> <span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>drop</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>unsafe</span>{ <span class='ident'>drop</span>(<span class='ident'>Box</span>::<span class='ident'>from_raw</span>(<span class='self'>self</span>.<span class='ident'>inner</span>)); }
-        <span class='self'>self</span>.<span class='ident'>inner</span> <span class='op'>=</span> <span class='ident'>ptr</span>::<span class='ident'>null_mut</span>();
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">unsafe</span>{ <span class="ident">drop</span>(<span class="ident">Box</span>::<span class="ident">from_raw</span>(<span class="self">self</span>.<span class="ident">inner</span>)); }
+        <span class="self">self</span>.<span class="ident">inner</span> <span class="op">=</span> <span class="ident">ptr</span>::<span class="ident">null_mut</span>();
     }
 }
 
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Dispatch the messages waiting the the system message queue to the associated Uis. This includes NWG custom messages.
 
     Return once a quit event was received.
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>dispatch_events</span>() {
-    <span class='comment'>// Actual code is located under the low module because that&#39;s where most of the unsafe code should be</span>
-    <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>events</span>::<span class='ident'>dispatch_events</span>(); }
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dispatch_events</span>() {
+    <span class="comment">// Actual code is located under the low module because that&#39;s where most of the unsafe code should be</span>
+    <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">dispatch_events</span>(); }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     Send a WM_QUIT to the system queue. Breaks the `dispatch_events` loop.
 */</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>exit</span>() {
-    <span class='comment'>// Actual code is located under the low module because that&#39;s where most of the unsafe code should be</span>
-    <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>events</span>::<span class='ident'>exit</span>(); }
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">exit</span>() {
+    <span class="comment">// Actual code is located under the low module because that&#39;s where most of the unsafe code should be</span>
+    <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">exit</span>(); }
 }</pre>
 </section>
     <section id='search' class="content hidden"></section>

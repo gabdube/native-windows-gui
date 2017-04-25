@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc source">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,7 +43,7 @@
         </form>
     </nav>
 
-    <section id='main' class="content source"><pre class="line-numbers"><span id="1">  1</span>
+    <section id='main' class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -303,11 +303,11 @@
 <span id="258">258</span>
 <span id="259">259</span>
 <span id="260">260</span>
-</pre><pre class='rust '>
-<span class='doccomment'>/*!
+</pre><pre class="rust ">
+<span class="doccomment">/*!
     The progress bar control definition
 */</span>
-<span class='comment'>/*
+<span class="comment">/*
     Copyright (C) 2016  Gabriel Dubé
 
     This program is free software: you can redistribute it and/or modify
@@ -324,20 +324,20 @@
     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>hash</span>::<span class='ident'>Hash</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>any</span>::<span class='ident'>TypeId</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">TypeId</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
 
-<span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>HWND</span>;
-<span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>SendMessageW</span>;
+<span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">HWND</span>;
+<span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">SendMessageW</span>;
 
-<span class='kw'>use</span> <span class='ident'>ui</span>::<span class='ident'>Ui</span>;
-<span class='kw'>use</span> <span class='ident'>controls</span>::{<span class='ident'>Control</span>, <span class='ident'>ControlT</span>, <span class='ident'>ControlType</span>, <span class='ident'>AnyHandle</span>};
-<span class='kw'>use</span> <span class='ident'>error</span>::<span class='ident'>Error</span>;
-<span class='kw'>use</span> <span class='ident'>events</span>::<span class='ident'>Event</span>;
-<span class='kw'>use</span> <span class='ident'>defs</span>::<span class='ident'>ProgressBarState</span>;
+<span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
+<span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">Control</span>, <span class="ident">ControlT</span>, <span class="ident">ControlType</span>, <span class="ident">AnyHandle</span>};
+<span class="kw">use</span> <span class="ident">error</span>::<span class="ident">Error</span>;
+<span class="kw">use</span> <span class="ident">events</span>::<span class="ident">Event</span>;
+<span class="kw">use</span> <span class="ident">defs</span>::<span class="ident">ProgressBarState</span>;
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A template that creates a progress bar
 
     Members:  
@@ -352,217 +352,217 @@
     • `vertical`: If the progress bar should be vertical instead of horizontal
     • `parent`: The progressbar parent  
 */</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ProgressBarT</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> {
-    <span class='kw'>pub</span> <span class='ident'>position</span>: (<span class='ident'>i32</span>, <span class='ident'>i32</span>),
-    <span class='kw'>pub</span> <span class='ident'>size</span>: (<span class='ident'>u32</span>, <span class='ident'>u32</span>),
-    <span class='kw'>pub</span> <span class='ident'>visible</span>: <span class='ident'>bool</span>,
-    <span class='kw'>pub</span> <span class='ident'>disabled</span>: <span class='ident'>bool</span>,
-    <span class='kw'>pub</span> <span class='ident'>range</span>: (<span class='ident'>u32</span>, <span class='ident'>u32</span>),
-    <span class='kw'>pub</span> <span class='ident'>value</span>: <span class='ident'>u32</span>,
-    <span class='kw'>pub</span> <span class='ident'>step</span>: <span class='ident'>u32</span>,
-    <span class='kw'>pub</span> <span class='ident'>state</span>: <span class='ident'>ProgressBarState</span>,
-    <span class='kw'>pub</span> <span class='ident'>vertical</span>: <span class='ident'>bool</span>,
-    <span class='kw'>pub</span> <span class='ident'>parent</span>: <span class='ident'>ID</span>,
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ProgressBarT</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">position</span>: (<span class="ident">i32</span>, <span class="ident">i32</span>),
+    <span class="kw">pub</span> <span class="ident">size</span>: (<span class="ident">u32</span>, <span class="ident">u32</span>),
+    <span class="kw">pub</span> <span class="ident">visible</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">disabled</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">range</span>: (<span class="ident">u32</span>, <span class="ident">u32</span>),
+    <span class="kw">pub</span> <span class="ident">value</span>: <span class="ident">u32</span>,
+    <span class="kw">pub</span> <span class="ident">step</span>: <span class="ident">u32</span>,
+    <span class="kw">pub</span> <span class="ident">state</span>: <span class="ident">ProgressBarState</span>,
+    <span class="kw">pub</span> <span class="ident">vertical</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">parent</span>: <span class="ident">ID</span>,
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>ID</span>: <span class='ident'>Hash</span><span class='op'>+</span><span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>ControlT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>ProgressBarT</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>type_id</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>TypeId</span> { <span class='ident'>TypeId</span>::<span class='ident'>of</span>::<span class='op'>&lt;</span><span class='ident'>ProgressBar</span><span class='op'>&gt;</span>() }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProgressBarT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">ProgressBar</span><span class="op">&gt;</span>() }
 
-    <span class='kw'>fn</span> <span class='ident'>events</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Event</span><span class='op'>&gt;</span> {
-        <span class='macro'>vec</span><span class='macro'>!</span>[<span class='ident'>Event</span>::<span class='ident'>Destroyed</span>, <span class='ident'>Event</span>::<span class='ident'>Moved</span>, <span class='ident'>Event</span>::<span class='ident'>Resized</span>, <span class='ident'>Event</span>::<span class='ident'>Raw</span>]
+    <span class="kw">fn</span> <span class="ident">events</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
+        <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Event</span>::<span class="ident">Destroyed</span>, <span class="ident">Event</span>::<span class="ident">Moved</span>, <span class="ident">Event</span>::<span class="ident">Resized</span>, <span class="ident">Event</span>::<span class="ident">Raw</span>]
     }
 
-    <span class='kw'>fn</span> <span class='ident'>build</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>ui</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ui</span><span class='op'>&lt;</span><span class='ident'>ID</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Box</span><span class='op'>&lt;</span><span class='ident'>Control</span><span class='op'>&gt;</span>, <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>use</span> <span class='ident'>low</span>::<span class='ident'>window_helper</span>::{<span class='ident'>WindowParams</span>, <span class='ident'>build_window</span>, <span class='ident'>handle_of_window</span>};
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>DWORD</span>, <span class='ident'>WS_VISIBLE</span>, <span class='ident'>WS_DISABLED</span>, <span class='ident'>WS_CHILD</span>, <span class='ident'>PBS_VERTICAL</span>};
+    <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">window_helper</span>::{<span class="ident">WindowParams</span>, <span class="ident">build_window</span>, <span class="ident">handle_of_window</span>};
+        <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">DWORD</span>, <span class="ident">WS_VISIBLE</span>, <span class="ident">WS_DISABLED</span>, <span class="ident">WS_CHILD</span>, <span class="ident">PBS_VERTICAL</span>};
 
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>range</span>.<span class='number'>1</span> <span class='op'>&lt;=</span> <span class='self'>self</span>.<span class='ident'>range</span>.<span class='number'>0</span> {
-            <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='string'>&quot;The progress bar range maximum value must be greater than the minimum value&quot;</span>;
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>UserError</span>(<span class='ident'>msg</span>.<span class='ident'>to_string</span>()));
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">range</span>.<span class="number">1</span> <span class="op">&lt;=</span> <span class="self">self</span>.<span class="ident">range</span>.<span class="number">0</span> {
+            <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="string">&quot;The progress bar range maximum value must be greater than the minimum value&quot;</span>;
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">UserError</span>(<span class="ident">msg</span>.<span class="ident">to_string</span>()));
         }
 
-        <span class='kw'>let</span> <span class='ident'>flags</span>: <span class='ident'>DWORD</span> <span class='op'>=</span> <span class='ident'>WS_CHILD</span> <span class='op'>|</span> 
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>visible</span>  { <span class='ident'>WS_VISIBLE</span> }   <span class='kw'>else</span> { <span class='number'>0</span> } <span class='op'>|</span>
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>disabled</span> { <span class='ident'>WS_DISABLED</span> }  <span class='kw'>else</span> { <span class='number'>0</span> } <span class='op'>|</span>
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>vertical</span> { <span class='ident'>PBS_VERTICAL</span> } <span class='kw'>else</span> { <span class='number'>0</span> } ;
+        <span class="kw">let</span> <span class="ident">flags</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">WS_CHILD</span> <span class="op">|</span> 
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">visible</span>  { <span class="ident">WS_VISIBLE</span> }   <span class="kw">else</span> { <span class="number">0</span> } <span class="op">|</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">disabled</span> { <span class="ident">WS_DISABLED</span> }  <span class="kw">else</span> { <span class="number">0</span> } <span class="op">|</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">vertical</span> { <span class="ident">PBS_VERTICAL</span> } <span class="kw">else</span> { <span class="number">0</span> } ;
 
-        <span class='comment'>// Get the parent handle</span>
-        <span class='kw'>let</span> <span class='ident'>parent</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>handle_of_window</span>(<span class='ident'>ui</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>parent</span>, <span class='string'>&quot;The parent of a progress bar must be a window-like control.&quot;</span>) {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>h</span>) <span class='op'>=&gt;</span> <span class='ident'>h</span>,
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> { <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>e</span>); }
+        <span class="comment">// Get the parent handle</span>
+        <span class="kw">let</span> <span class="ident">parent</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">handle_of_window</span>(<span class="ident">ui</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">parent</span>, <span class="string">&quot;The parent of a progress bar must be a window-like control.&quot;</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> <span class="ident">h</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
         };
 
-        <span class='kw'>let</span> <span class='ident'>params</span> <span class='op'>=</span> <span class='ident'>WindowParams</span> {
-            <span class='ident'>title</span>: <span class='string'>&quot;&quot;</span>,
-            <span class='ident'>class_name</span>: <span class='string'>&quot;msctls_progress32&quot;</span>,
-            <span class='ident'>position</span>: <span class='self'>self</span>.<span class='ident'>position</span>.<span class='ident'>clone</span>(),
-            <span class='ident'>size</span>: <span class='self'>self</span>.<span class='ident'>size</span>.<span class='ident'>clone</span>(),
-            <span class='ident'>flags</span>: <span class='ident'>flags</span>,
-            <span class='ident'>ex_flags</span>: <span class='prelude-val'>Some</span>(<span class='number'>0</span>),
-            <span class='ident'>parent</span>: <span class='ident'>parent</span>
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">WindowParams</span> {
+            <span class="ident">title</span>: <span class="string">&quot;&quot;</span>,
+            <span class="ident">class_name</span>: <span class="string">&quot;msctls_progress32&quot;</span>,
+            <span class="ident">position</span>: <span class="self">self</span>.<span class="ident">position</span>.<span class="ident">clone</span>(),
+            <span class="ident">size</span>: <span class="self">self</span>.<span class="ident">size</span>.<span class="ident">clone</span>(),
+            <span class="ident">flags</span>: <span class="ident">flags</span>,
+            <span class="ident">ex_flags</span>: <span class="prelude-val">Some</span>(<span class="number">0</span>),
+            <span class="ident">parent</span>: <span class="ident">parent</span>
         };
 
-        <span class='kw'>match</span> <span class='kw'>unsafe</span>{ <span class='ident'>build_window</span>(<span class='ident'>params</span>) } {
-            <span class='prelude-val'>Ok</span>(<span class='ident'>h</span>) <span class='op'>=&gt;</span> {
-                <span class='kw'>unsafe</span>{ 
-                    <span class='ident'>set_range</span>(<span class='ident'>h</span>, <span class='self'>self</span>.<span class='ident'>range</span>.<span class='number'>0</span>, <span class='self'>self</span>.<span class='ident'>range</span>.<span class='number'>1</span>);
-                    <span class='ident'>set_step</span>(<span class='ident'>h</span>, <span class='self'>self</span>.<span class='ident'>step</span>); 
-                    <span class='ident'>set_value</span>(<span class='ident'>h</span>, <span class='self'>self</span>.<span class='ident'>value</span>);
-                    <span class='ident'>set_state</span>(<span class='ident'>h</span>, <span class='kw-2'>&amp;</span><span class='self'>self</span>.<span class='ident'>state</span>);
+        <span class="kw">match</span> <span class="kw">unsafe</span>{ <span class="ident">build_window</span>(<span class="ident">params</span>) } {
+            <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> {
+                <span class="kw">unsafe</span>{ 
+                    <span class="ident">set_range</span>(<span class="ident">h</span>, <span class="self">self</span>.<span class="ident">range</span>.<span class="number">0</span>, <span class="self">self</span>.<span class="ident">range</span>.<span class="number">1</span>);
+                    <span class="ident">set_step</span>(<span class="ident">h</span>, <span class="self">self</span>.<span class="ident">step</span>); 
+                    <span class="ident">set_value</span>(<span class="ident">h</span>, <span class="self">self</span>.<span class="ident">value</span>);
+                    <span class="ident">set_state</span>(<span class="ident">h</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state</span>);
                 }
-                <span class='prelude-val'>Ok</span>( <span class='ident'>Box</span>::<span class='ident'>new</span>(<span class='ident'>ProgressBar</span>{<span class='ident'>handle</span>: <span class='ident'>h</span>}) )
+                <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">ProgressBar</span>{<span class="ident">handle</span>: <span class="ident">h</span>}) )
             },
-            <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>System</span>(<span class='ident'>e</span>))
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">System</span>(<span class="ident">e</span>))
         }
     }
 }
 
-<span class='doccomment'>/**
+<span class="doccomment">/**
     A standard progress bar
 */</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ProgressBar</span> {
-    <span class='ident'>handle</span>: <span class='ident'>HWND</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ProgressBar</span> {
+    <span class="ident">handle</span>: <span class="ident">HWND</span>
 }
 
-<span class='kw'>impl</span> <span class='ident'>ProgressBar</span> {
+<span class="kw">impl</span> <span class="ident">ProgressBar</span> {
 
-    <span class='doccomment'>/// Return the current range of the progress bar</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_range</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>u32</span>, <span class='ident'>u32</span>) {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>PBM_GETRANGE</span>, <span class='ident'>PBRANGE</span>};
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>range</span> <span class='op'>=</span> <span class='ident'>PBRANGE</span>{<span class='ident'>iLow</span>: <span class='number'>0</span>, <span class='ident'>iHigh</span>: <span class='number'>0</span>};
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>PBM_GETRANGE</span>, <span class='number'>0</span>, <span class='ident'>mem</span>::<span class='ident'>transmute</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>range</span>) ); }
+    <span class="doccomment">/// Return the current range of the progress bar</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">u32</span>, <span class="ident">u32</span>) {
+        <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">PBM_GETRANGE</span>, <span class="ident">PBRANGE</span>};
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">range</span> <span class="op">=</span> <span class="ident">PBRANGE</span>{<span class="ident">iLow</span>: <span class="number">0</span>, <span class="ident">iHigh</span>: <span class="number">0</span>};
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">PBM_GETRANGE</span>, <span class="number">0</span>, <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">range</span>) ); }
 
-        (<span class='ident'>range</span>.<span class='ident'>iLow</span> <span class='kw'>as</span> <span class='ident'>u32</span>, <span class='ident'>range</span>.<span class='ident'>iHigh</span> <span class='kw'>as</span> <span class='ident'>u32</span>)
+        (<span class="ident">range</span>.<span class="ident">iLow</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="ident">range</span>.<span class="ident">iHigh</span> <span class="kw">as</span> <span class="ident">u32</span>)
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Set the extent of the progress bar control. If `min` is bigger than `max`, an error
         will be returned.
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_range</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>min</span>: <span class='ident'>u32</span>, <span class='ident'>max</span>: <span class='ident'>u32</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>Error</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='ident'>max</span> <span class='op'>&lt;=</span> <span class='ident'>min</span> {
-            <span class='kw'>let</span> <span class='ident'>msg</span> <span class='op'>=</span> <span class='string'>&quot;The progress bar range maximum value must be greater than the minimum value&quot;</span>;
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>Error</span>::<span class='ident'>UserError</span>(<span class='ident'>msg</span>.<span class='ident'>to_string</span>()));
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">min</span>: <span class="ident">u32</span>, <span class="ident">max</span>: <span class="ident">u32</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">max</span> <span class="op">&lt;=</span> <span class="ident">min</span> {
+            <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="string">&quot;The progress bar range maximum value must be greater than the minimum value&quot;</span>;
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">UserError</span>(<span class="ident">msg</span>.<span class="ident">to_string</span>()));
         }
-        <span class='kw'>unsafe</span>{ <span class='ident'>set_range</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>min</span>, <span class='ident'>max</span>); }
-        <span class='prelude-val'>Ok</span>(())
+        <span class="kw">unsafe</span>{ <span class="ident">set_range</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">min</span>, <span class="ident">max</span>); }
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='doccomment'>/// Return the current step of the progress bar</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_step</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>PBM_GETSTEP</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>PBM_GETSTEP</span>, <span class='number'>0</span>, <span class='number'>0</span>) <span class='kw'>as</span> <span class='ident'>u32</span> }
+    <span class="doccomment">/// Return the current step of the progress bar</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_step</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">u32</span> {
+        <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">PBM_GETSTEP</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">PBM_GETSTEP</span>, <span class="number">0</span>, <span class="number">0</span>) <span class="kw">as</span> <span class="ident">u32</span> }
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Set the step of the progress bar control. When `step()` is called, the progress bar value
         is increased by the value defined by step.
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_step</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>step</span>: <span class='ident'>u32</span>) {
-        <span class='kw'>unsafe</span>{ <span class='ident'>set_step</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>step</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_step</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">step</span>: <span class="ident">u32</span>) {
+        <span class="kw">unsafe</span>{ <span class="ident">set_step</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">step</span>); }
     }
 
-    <span class='doccomment'>/// Return the current value of the progress bar</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_value</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>u32</span> {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>PBM_GETPOS</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>PBM_GETPOS</span>, <span class='number'>0</span>, <span class='number'>0</span>) <span class='kw'>as</span> <span class='ident'>u32</span> }
+    <span class="doccomment">/// Return the current value of the progress bar</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">u32</span> {
+        <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">PBM_GETPOS</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">PBM_GETPOS</span>, <span class="number">0</span>, <span class="number">0</span>) <span class="kw">as</span> <span class="ident">u32</span> }
     }
 
-    <span class='doccomment'>/// Set the progress bar value</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_value</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>val</span>: <span class='ident'>u32</span>) {
-        <span class='kw'>unsafe</span>{ <span class='ident'>set_value</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>val</span>); }
+    <span class="doccomment">/// Set the progress bar value</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">u32</span>) {
+        <span class="kw">unsafe</span>{ <span class="ident">set_value</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">val</span>); }
     }
 
-    <span class='doccomment'>/// Get the progress bar state</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_state</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ProgressBarState</span> {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>PBM_GETSTATE</span>, <span class='ident'>PBST_ERROR</span>, <span class='ident'>PBST_PAUSED</span>};
-        <span class='kw'>match</span> <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>PBM_GETSTATE</span>, <span class='number'>0</span>, <span class='number'>0</span>) <span class='kw'>as</span> <span class='ident'>i32</span> } {
-            <span class='ident'>PBST_ERROR</span> <span class='op'>=&gt;</span> <span class='ident'>ProgressBarState</span>::<span class='ident'>Error</span>,
-            <span class='ident'>PBST_PAUSED</span> <span class='op'>=&gt;</span> <span class='ident'>ProgressBarState</span>::<span class='ident'>Paused</span>,
-            _ <span class='op'>=&gt;</span> <span class='ident'>ProgressBarState</span>::<span class='ident'>Normal</span>
+    <span class="doccomment">/// Get the progress bar state</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">ProgressBarState</span> {
+        <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">PBM_GETSTATE</span>, <span class="ident">PBST_ERROR</span>, <span class="ident">PBST_PAUSED</span>};
+        <span class="kw">match</span> <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">PBM_GETSTATE</span>, <span class="number">0</span>, <span class="number">0</span>) <span class="kw">as</span> <span class="ident">i32</span> } {
+            <span class="ident">PBST_ERROR</span> <span class="op">=&gt;</span> <span class="ident">ProgressBarState</span>::<span class="ident">Error</span>,
+            <span class="ident">PBST_PAUSED</span> <span class="op">=&gt;</span> <span class="ident">ProgressBarState</span>::<span class="ident">Paused</span>,
+            _ <span class="op">=&gt;</span> <span class="ident">ProgressBarState</span>::<span class="ident">Normal</span>
         }
     }
 
-    <span class='doccomment'>/// Set the progress bar state</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_state</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>state</span>: <span class='ident'>ProgressBarState</span>) {
-        <span class='kw'>unsafe</span>{ <span class='ident'>set_state</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='kw-2'>&amp;</span><span class='ident'>state</span>); }
+    <span class="doccomment">/// Set the progress bar state</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="ident">ProgressBarState</span>) {
+        <span class="kw">unsafe</span>{ <span class="ident">set_state</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="ident">state</span>); }
     }
 
-    <span class='comment'>/* 
+    <span class="comment">/* 
         Add the step value to the progress bar value.
         Once the value reach the maximum value of the progress bar, the value is reverted back to the minimum value.
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>step</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::<span class='ident'>PBM_STEPIT</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>PBM_STEPIT</span>, <span class='number'>0</span>, <span class='number'>0</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">step</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">PBM_STEPIT</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">PBM_STEPIT</span>, <span class="number">0</span>, <span class="number">0</span>); }
     }
 
-    <span class='doccomment'>/**
+    <span class="doccomment">/**
         Add `amount` to the progress bar value
     */</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>advance</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>amount</span>: <span class='ident'>u32</span>) {
-        <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>PBM_DELTAPOS</span>, <span class='ident'>WPARAM</span>};
-        <span class='kw'>unsafe</span>{ <span class='ident'>SendMessageW</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>PBM_DELTAPOS</span>, <span class='ident'>amount</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='number'>0</span>); }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">advance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">u32</span>) {
+        <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">PBM_DELTAPOS</span>, <span class="ident">WPARAM</span>};
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">PBM_DELTAPOS</span>, <span class="ident">amount</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>); }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_visibility</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_visibility</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_visibility</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>visible</span>: <span class='ident'>bool</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_visibility</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>visible</span>); }}
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_position</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>i32</span>, <span class='ident'>i32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_position</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_position</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>x</span>: <span class='ident'>i32</span>, <span class='ident'>y</span>: <span class='ident'>i32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_position</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>x</span>, <span class='ident'>y</span>); }}
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_size</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> (<span class='ident'>u32</span>, <span class='ident'>u32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_size</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_size</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>w</span>: <span class='ident'>u32</span>, <span class='ident'>h</span>: <span class='ident'>u32</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_size</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>w</span>, <span class='ident'>h</span>, <span class='bool-val'>false</span>); } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>get_window_enabled</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) } }
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>set_enabled</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>e</span>:<span class='ident'>bool</span>) { <span class='kw'>unsafe</span>{ ::<span class='ident'>low</span>::<span class='ident'>window_helper</span>::<span class='ident'>set_window_enabled</span>(<span class='self'>self</span>.<span class='ident'>handle</span>, <span class='ident'>e</span>); } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_visibility</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_visibility</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_visibility</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">visible</span>: <span class="ident">bool</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_visibility</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">visible</span>); }}
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">i32</span>, <span class="ident">i32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_position</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">i32</span>, <span class="ident">y</span>: <span class="ident">i32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_position</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">x</span>, <span class="ident">y</span>); }}
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">u32</span>, <span class="ident">u32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_size</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">w</span>: <span class="ident">u32</span>, <span class="ident">h</span>: <span class="ident">u32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_size</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">w</span>, <span class="ident">h</span>, <span class="bool-val">false</span>); } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_enabled</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">e</span>:<span class="ident">bool</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_enabled</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">e</span>); } }
 }
 
-<span class='kw'>impl</span> <span class='ident'>Control</span> <span class='kw'>for</span> <span class='ident'>ProgressBar</span> {
+<span class="kw">impl</span> <span class="ident">Control</span> <span class="kw">for</span> <span class="ident">ProgressBar</span> {
 
-    <span class='kw'>fn</span> <span class='ident'>handle</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>AnyHandle</span> {
-        <span class='ident'>AnyHandle</span>::<span class='ident'>HWND</span>(<span class='self'>self</span>.<span class='ident'>handle</span>)
+    <span class="kw">fn</span> <span class="ident">handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">AnyHandle</span> {
+        <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="self">self</span>.<span class="ident">handle</span>)
     }
 
-    <span class='kw'>fn</span> <span class='ident'>control_type</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ControlType</span> { 
-        <span class='ident'>ControlType</span>::<span class='ident'>ProgressBar</span> 
+    <span class="kw">fn</span> <span class="ident">control_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">ControlType</span> { 
+        <span class="ident">ControlType</span>::<span class="ident">ProgressBar</span> 
     }
 
-    <span class='kw'>fn</span> <span class='ident'>free</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>use</span> <span class='ident'>user32</span>::<span class='ident'>DestroyWindow</span>;
-        <span class='kw'>unsafe</span>{ <span class='ident'>DestroyWindow</span>(<span class='self'>self</span>.<span class='ident'>handle</span>) };
+    <span class="kw">fn</span> <span class="ident">free</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">DestroyWindow</span>;
+        <span class="kw">unsafe</span>{ <span class="ident">DestroyWindow</span>(<span class="self">self</span>.<span class="ident">handle</span>) };
     }
 
 }
 
-<span class='comment'>// Private functions</span>
+<span class="comment">// Private functions</span>
 
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>set_range</span>(<span class='ident'>handle</span>: <span class='ident'>HWND</span>, <span class='ident'>min</span>: <span class='ident'>u32</span>, <span class='ident'>max</span>: <span class='ident'>u32</span>) {
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>PBM_SETRANGE32</span>, <span class='ident'>WPARAM</span>, <span class='ident'>LPARAM</span>};
-    <span class='ident'>SendMessageW</span>(<span class='ident'>handle</span>, <span class='ident'>PBM_SETRANGE32</span>, <span class='ident'>min</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='ident'>max</span> <span class='kw'>as</span> <span class='ident'>LPARAM</span>);
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_range</span>(<span class="ident">handle</span>: <span class="ident">HWND</span>, <span class="ident">min</span>: <span class="ident">u32</span>, <span class="ident">max</span>: <span class="ident">u32</span>) {
+    <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">PBM_SETRANGE32</span>, <span class="ident">WPARAM</span>, <span class="ident">LPARAM</span>};
+    <span class="ident">SendMessageW</span>(<span class="ident">handle</span>, <span class="ident">PBM_SETRANGE32</span>, <span class="ident">min</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="ident">max</span> <span class="kw">as</span> <span class="ident">LPARAM</span>);
 }
 
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>set_step</span>(<span class='ident'>handle</span>: <span class='ident'>HWND</span>, <span class='ident'>step</span>: <span class='ident'>u32</span>) {
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>PBM_SETSTEP</span>, <span class='ident'>WPARAM</span>};
-    <span class='ident'>SendMessageW</span>(<span class='ident'>handle</span>, <span class='ident'>PBM_SETSTEP</span>, <span class='ident'>step</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='number'>0</span>);
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_step</span>(<span class="ident">handle</span>: <span class="ident">HWND</span>, <span class="ident">step</span>: <span class="ident">u32</span>) {
+    <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">PBM_SETSTEP</span>, <span class="ident">WPARAM</span>};
+    <span class="ident">SendMessageW</span>(<span class="ident">handle</span>, <span class="ident">PBM_SETSTEP</span>, <span class="ident">step</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>);
 }
 
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>set_value</span>(<span class='ident'>handle</span>: <span class='ident'>HWND</span>, <span class='ident'>val</span>: <span class='ident'>u32</span>) {
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>PBM_SETPOS</span>, <span class='ident'>WPARAM</span>};
-    <span class='ident'>SendMessageW</span>(<span class='ident'>handle</span>, <span class='ident'>PBM_SETPOS</span>, <span class='ident'>val</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='number'>0</span>);
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_value</span>(<span class="ident">handle</span>: <span class="ident">HWND</span>, <span class="ident">val</span>: <span class="ident">u32</span>) {
+    <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">PBM_SETPOS</span>, <span class="ident">WPARAM</span>};
+    <span class="ident">SendMessageW</span>(<span class="ident">handle</span>, <span class="ident">PBM_SETPOS</span>, <span class="ident">val</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>);
 }
 
-<span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
-<span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>set_state</span>(<span class='ident'>handle</span>: <span class='ident'>HWND</span>, <span class='ident'>state</span>: <span class='kw-2'>&amp;</span><span class='ident'>ProgressBarState</span>) {
-    <span class='kw'>use</span> <span class='ident'>winapi</span>::{<span class='ident'>PBM_SETSTATE</span>, <span class='ident'>WPARAM</span>, <span class='ident'>PBST_NORMAL</span>, <span class='ident'>PBST_ERROR</span>, <span class='ident'>PBST_PAUSED</span>};
-    <span class='kw'>let</span> <span class='ident'>state</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>state</span> {
-        <span class='kw-2'>&amp;</span><span class='ident'>ProgressBarState</span>::<span class='ident'>Normal</span> <span class='op'>=&gt;</span> <span class='ident'>PBST_NORMAL</span>,
-        <span class='kw-2'>&amp;</span><span class='ident'>ProgressBarState</span>::<span class='ident'>Paused</span> <span class='op'>=&gt;</span> <span class='ident'>PBST_PAUSED</span>,
-        <span class='kw-2'>&amp;</span><span class='ident'>ProgressBarState</span>::<span class='ident'>Error</span> <span class='op'>=&gt;</span> <span class='ident'>PBST_ERROR</span>,
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_state</span>(<span class="ident">handle</span>: <span class="ident">HWND</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="ident">ProgressBarState</span>) {
+    <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">PBM_SETSTATE</span>, <span class="ident">WPARAM</span>, <span class="ident">PBST_NORMAL</span>, <span class="ident">PBST_ERROR</span>, <span class="ident">PBST_PAUSED</span>};
+    <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">state</span> {
+        <span class="kw-2">&amp;</span><span class="ident">ProgressBarState</span>::<span class="ident">Normal</span> <span class="op">=&gt;</span> <span class="ident">PBST_NORMAL</span>,
+        <span class="kw-2">&amp;</span><span class="ident">ProgressBarState</span>::<span class="ident">Paused</span> <span class="op">=&gt;</span> <span class="ident">PBST_PAUSED</span>,
+        <span class="kw-2">&amp;</span><span class="ident">ProgressBarState</span>::<span class="ident">Error</span> <span class="op">=&gt;</span> <span class="ident">PBST_ERROR</span>,
     };
 
-    <span class='ident'>SendMessageW</span>(<span class='ident'>handle</span>, <span class='ident'>PBM_SETSTATE</span>, <span class='ident'>state</span> <span class='kw'>as</span> <span class='ident'>WPARAM</span>, <span class='number'>0</span>);
+    <span class="ident">SendMessageW</span>(<span class="ident">handle</span>, <span class="ident">PBM_SETSTATE</span>, <span class="ident">state</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>);
 }</pre>
 </section>
     <section id='search' class="content hidden"></section>

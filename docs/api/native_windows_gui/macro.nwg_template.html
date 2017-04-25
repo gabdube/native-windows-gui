@@ -17,7 +17,7 @@
     
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc macro">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -43,52 +43,45 @@
         </form>
     </nav>
 
-    <section id='main' class="content macro">
-<h1 class='fqn'><span class='in-band'>Macro <a href='index.html'>native_windows_gui</a>::<wbr><a class='macro' href=''>nwg_template</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Macro <a href='index.html'>native_windows_gui</a>::<wbr><a class="macro" href=''>nwg_template</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
                </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#105-128' title='goto source code'>[src]</a></span></h1>
-<pre class='rust macro'>
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>nwg_template</span> {
+<pre class="rust macro">
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_template</span> {
     (
-        <span class='ident'>head</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>n</span>:<span class='ident'>ident</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span><span class='op'>&gt;</span>,
-        <span class='ident'>controls</span>: [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i1</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>c</span>:<span class='ident'>expr</span>) ),<span class='op'>*</span> ];
-        <span class='ident'>events</span>: [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i4</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i5</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>b</span>:<span class='ident'>expr</span>) ),<span class='op'>*</span>  ];
-        <span class='ident'>resources</span>: [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i2</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>r</span>:<span class='ident'>expr</span>) ),<span class='op'>*</span> ];
-        <span class='ident'>values</span>: [ $( (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>i3</span>:<span class='ident'>expr</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>v</span>:<span class='ident'>expr</span>) ),<span class='op'>*</span> ]
-    ) <span class='op'>=&gt;</span> { ... };
+        <span class="ident">head</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span><span class="op">&gt;</span>,
+        <span class="ident">controls</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i1</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ];
+        <span class="ident">events</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i4</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i5</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>:<span class="ident">expr</span>) ),<span class="op">*</span>  ];
+        <span class="ident">resources</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i2</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">r</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ];
+        <span class="ident">values</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i3</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ]
+    ) <span class="op">=&gt;</span> { ... };
 }</pre>
 <div class='docblock'><p>Generates a function that initialize the content of a UI.</p>
-
 <p><strong>head</strong>: Define the name of the function and Ui key type. Ex: <code>my_function&lt;my_type&gt;</code></p>
-
 <p><strong>controls</strong>: A list of controls to add to the Ui. Accepts an array of <code>(ID, Template)</code></p>
-
 <p><strong>events</strong>: A list of events to bind to the controls of the UI. Accepts an array of <code>(ControlID, EventID, Event, Callback)</code></p>
-
 <p><strong>resources</strong>: A list of resources to add to the Ui. Accepts an array of <code>(ID, Template)</code></p>
-
 <p><strong>values</strong>: A list of user values to add to the Ui. Accepts an array of <code>(ID, Template)</code></p>
-
 <p><strong>Return Value</strong>: The function calls <code>commit</code> before returning. If the Ui initialization fails,
 the function will return the error.</p>
+<p>Usage:</p>
 
-<p>Usage: </p>
-
-<pre class='rust rust-example-rendered'>
-<span class='macro'>nwg_template</span><span class='macro'>!</span>(
-        <span class='ident'>head</span>: <span class='ident'>setup_ui</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span><span class='op'>&gt;</span>,
-        <span class='ident'>controls</span>: [ (<span class='string'>&quot;TEST&quot;</span>, <span class='ident'>Control</span>), (<span class='string'>&quot;TEST2&quot;</span>, <span class='ident'>Control</span>) ],
-        <span class='ident'>events</span>: [ 
+<pre class="rust rust-example-rendered">
+    <span class="macro">nwg_template</span><span class="macro">!</span>(
+        <span class="ident">head</span>: <span class="ident">setup_ui</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">controls</span>: [ (<span class="string">&quot;TEST&quot;</span>, <span class="ident">Control</span>), (<span class="string">&quot;TEST2&quot;</span>, <span class="ident">Control</span>) ],
+        <span class="ident">events</span>: [ 
             
-        (<span class='string'>&quot;TEST&quot;</span>, <span class='string'>&quot;ACTION&quot;</span>, <span class='ident'>Event</span>::<span class='ident'>Click</span>, <span class='op'>|</span><span class='ident'>ui</span>, <span class='ident'>caller</span>, <span class='ident'>event</span>, <span class='ident'>args</span><span class='op'>|</span> { 
-            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello World!&quot;</span>); 
+        (<span class="string">&quot;TEST&quot;</span>, <span class="string">&quot;ACTION&quot;</span>, <span class="ident">Event</span>::<span class="ident">Click</span>, <span class="op">|</span><span class="ident">ui</span>, <span class="ident">caller</span>, <span class="ident">event</span>, <span class="ident">args</span><span class="op">|</span> { 
+            <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Hello World!&quot;</span>); 
         })
             
         ],
-        <span class='ident'>resources</span>: [ (<span class='string'>&quot;Font1&quot;</span>, <span class='ident'>Font1</span>), (<span class='string'>&quot;Font1&quot;</span>, <span class='ident'>Font1</span>) ],
-        <span class='ident'>values</span>: [ (<span class='string'>&quot;True&quot;</span>, <span class='bool-val'>true</span>), (<span class='string'>&quot;()&quot;</span>, ()) ]
+        <span class="ident">resources</span>: [ (<span class="string">&quot;Font1&quot;</span>, <span class="ident">Font1</span>), (<span class="string">&quot;Font1&quot;</span>, <span class="ident">Font1</span>) ],
+        <span class="ident">values</span>: [ (<span class="string">&quot;True&quot;</span>, <span class="bool-val">true</span>), (<span class="string">&quot;()&quot;</span>, ()) ]
     );  
 </pre>
 </div></section>
