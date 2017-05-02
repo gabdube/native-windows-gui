@@ -178,7 +178,7 @@
 
     <code>Control_ID</code> is the ID of the control that will trigger the event. <br/><br/>
 
-    <code>Event_ID</code> is a unique that identify the event. <br/><br/>
+    <code>Event_ID</code> is a unique id that identify the event. <br/><br/>
 
     <code>Event_Type</code> Is the event type. See <a href="/native-windows-gui/docs/api/native_windows_gui/enum.Event.html">a list of all events</a>. <br/><br/>
 
@@ -321,19 +321,19 @@ For some technical info, see the <a href="/native-windows-gui/docs/api/native_wi
 
 <code>pack_control</code>, <code>pack_resource</code> and <code>pack_value</code> add an element to the UI. The parameters works like in the <code>nwg_template!</code> macro.<br><br>
 
-pack commands are lazy and will not be executed right away (see commit, just below).
+pack commands will not be executed right away (see commit, just below).
 
 <h3>bind</h3> 
 
-Works jusyt like the <code>events</code> fields of <code>nwg_template!</code>: bind a callback to a control.<br><br>
+Works just like the <code>events</code> fields of <code>nwg_template!</code>: bind a callback to a control.<br><br>
 
-The bind command is lazy and will not be executed right away (see commit, just below).
+The bind command will not be executed right away (see commit, just below).
 
 <h3>get</h3> 
 
 The Ui object will always keep the ownership of the resources and the controls. In order to access a control, it must first be borrowed from the Ui. <br><br>
 
-<code>ui.get</code> and <code>ui.get_mut</code> either borrows a control, a resource or a user value from the Ui. Obviously, any element can be borred immutably
+<code>ui.get</code> and <code>ui.get_mut</code> either borrows a control, a resource or a user value from the Ui. Obviously, any element can be borrowed immutably
 as many time as required, but an element can only be borrowed mutably once. <br><br>
 
 If the UI tries to execute an action on a borrowed element, an error such as <code>Error::ControlInUse</code> will be raised.
