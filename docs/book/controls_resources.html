@@ -51,10 +51,11 @@
 <div id='page-wrapper'>
 <div id='page'>
 
-    <h1 class="title">Controls and resources</h1>
-    In NWG, Uis are filled controls and resources. <br/><br/>
+    <h1 class="title">Controls, resources and values</h1>
+    In NWG, Uis are filled controls and resources and user values. <br/><br/>
     <b>Controls</b> are (usually) visual components that the user can interact with (ex: a Button).<br/><br/>
-    <b>Resources</b> are non visual components that cannot be directly interacted with. Instead, resources must be used by controls. (ex: A Font)
+    <b>Resources</b> are non visual components that cannot be directly interacted with. Instead, resources must be used by controls. (ex: A Font)<br/><br/>
+    <b>Values</b> can be any kind of data. These are application specific values defined by the programmer. 
 
     <h1 id="temp" class="section-header"><a href="#temp">Templates and controls</a></h1>
 
@@ -80,10 +81,12 @@
 
     <h1 id="packing" class="section-header"><a href="#packing">Packing</a></h1>
 
-    In order to send a template to a control, one of the following method must be used <code>pack_control(&amp;ID, &amp;Template)</code>, <code>pack_resource(&amp;Control_ID, &amp;Template)</code>.<br/><br/>
+    In order to send a template to a control, one of the following method must be used <code>pack_control(&amp;ID, Template)</code>, <code>pack_resource(&amp;ID, Template)</code>,<br/>
+    <code>pack_value(&amp;id, Value)</code>.<br/><br/>
 
     • <code>ID</code> is the unique ID that will identify the control in the Ui. Its type must match the type of the Ui. <br/>
-    • <code>Template</code> is the template of the control.<br/><br/>
+    • <code>Template</code> is the template of the control or the resource.<br/>
+    • <code>Value</code> can be anything boxable.<br/><br/>
 
     The <code>pack_*</code> commands are not executed right away. If the command fails inside of a <code>commit</code>, an error will be returned. If many pack commands are
     sent, they will be executed in the order they were sent.<br/>
@@ -99,9 +102,10 @@
     Just like the <code>pack_*</code> commands, the command is not executed right away. The command will fail if the ID is not found in the UI or if the control or the resource
     is currently borrowed.<br/><br/>
 
-    When a control is unpacked from a UI, a special event <code>Destroyed</code> is triggered. During the callback execution, it is ensured that the control and its children are still alive.<br/><br/>
+    When a control is unpacked from a UI, the special event <code>Destroyed</code> is triggered. During the callback execution, it is ensured that the control and its children are still alive.<br/><br/>
 
-    If a control with children is unpacked, the <code>unpack</code> command is also sent to its children in a random order.<br/><br/>
+    If a control with children is unpacked, the <code>unpack</code> command is also sent to its children in a random order.
+    The Ui will unpack the children controls before the parent control.<br/><br/>
 
     Finally, when a UI goes out of scope, <code>unpack</code> commands are sent to every controls, resources and values in a random order.
 
@@ -111,9 +115,35 @@
 <span class="n">ui</span><span class="p">.</span><span class="n">unpack</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"MyValue"</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 
+    <h1 id="get" class="section-header"><a href="#get">Borrowing elements</a></h1>
+
+    In order to access a control, a resource or a value stored in a UI, the component must first be borrowed using the
+    <code>get(&amp;ID)</code> or the <code>get_mut(&amp;ID)</code> methods.<br/><br/>
+
+    The method return a reference to the component. A component can be borrowed many time immutably, but only <b>one</b> mutable
+    borrow can exists at a given time.<br/><br/>
+
+    Finally, while a component is borrowed, some actions cannot be executed on it (ex: unpack).
 
 
-    <h1 id="get" class="section-header"><a href="#get">Borrowing controls</a></h1>
+<div class="syntax"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">your_name</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">get</span>::<span class="o">&lt;</span><span class="n">nwg</span>::<span class="n">TextInput</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"YourName"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">simple_message</span><span class="p">(</span><span class="s">"Hello"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">"Hello {}!"</span><span class="p">,</span><span class="w"> </span><span class="n">your_name</span><span class="p">.</span><span class="n">get_text</span><span class="p">())</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">panic</span><span class="o">!</span><span class="p">()</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+    <h3 id="getmacro" class="section-header"><a href="#handleof">Get macro</a></h3>
+
+    NWG has the <code>nwg_get!</code> and the <code>nwg_get_mut!</code> macros to quicky borrow a component from a Ui.<br/>
+    Note that the macro will panic if the borrow fails.
+
+
+<div class="syntax"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">control</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg_get</span><span class="o">!</span><span class="p">(</span><span class="n">ui</span><span class="p">;</span><span class="w"> </span><span class="p">(</span><span class="s">"MyButton"</span><span class="p">,</span><span class="w"> </span><span class="n">Button</span><span class="p">))</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">control1</span><span class="p">,</span><span class="w"> </span><span class="n">control2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg_get</span><span class="o">!</span><span class="p">(</span><span class="n">ui</span><span class="p">;</span><span class="w"> </span><span class="p">[(</span><span class="s">"MyRadio1"</span><span class="p">,</span><span class="w"> </span><span class="n">RadioButton</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="s">"MyRadio2"</span><span class="p">,</span><span class="w"> </span><span class="n">RadioButton</span><span class="p">)])</span><span class="w"></span>
+</pre></div>
+
 
 
     <br/><br/>
