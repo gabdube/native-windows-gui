@@ -39,7 +39,7 @@
     <li><a href="ui.html"><b>3.1.</b> Ui objects </a></li>
     <li><a href="controls_resources.html"><b>3.2.</b> Controls and resources </a></li>
     <li><a href="events.html"><b>3.3.</b> Events </a></li>
-    <li><a href="basic_tips.html"><b>3.4.</b> Tips </a></li>
+     
 </ul>
 </li>
 </ul>
@@ -325,7 +325,7 @@ pack commands are lazy and will not be executed right away (see commit, just bel
 
 <h3>bind</h3> 
 
-Works the same way of the <code>events</code> part of <code>nwg_template!</code>: bind a callabck to a control.<br><br>
+Works jusyt like the <code>events</code> fields of <code>nwg_template!</code>: bind a callback to a control.<br><br>
 
 The bind command is lazy and will not be executed right away (see commit, just below).
 
@@ -341,7 +341,7 @@ If the UI tries to execute an action on a borrowed element, an error such as <co
 <h3>commit</h3> 
 
 Some NWG ui commands (such as <code>pack_control</code> and <code>bind</code>) wont be executed right away. Many of these commands are
-used when creating a UI.With these conditions, they should never fail and validating each of them individually would be annoying.<br><br>
+used when creating a UI. With these conditions, they should never fail and validating each of them individually would be annoying.<br><br>
 
 When a lazy command is executed, it is stored in the windows event queue. <code>ui.commit()</code> forces the execution of the waiting commands
 and return an error if the initialization failed. <br><br>
