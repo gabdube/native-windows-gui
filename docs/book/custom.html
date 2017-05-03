@@ -4,9 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <title>Native Windows GUI guide - Basics</title>
+    <title>Native Windows GUI guide - Custom</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
     
 </head>
@@ -34,13 +36,11 @@
 </li>
 <li><a href='getting_started.html'><b>2.</b> Getting Started</a>
 </li>
-
 <li><a href="basics.html"><b>3.</b> Basics </a>
 <ul class="section">
     <li><a href="ui.html"><b>3.1.</b> Ui objects </a></li>
     <li><a href="controls_resources.html"><b>3.2.</b> Controls and resources </a></li>
     <li><a href="events.html"><b>3.3.</b> Events </a></li>
-     
 </ul>
 </li>
 
@@ -59,17 +59,21 @@
 <div id='page'>
 
 
-    <h1 class="title">The basics</h1>
-    <p> This sections explains the basic of the NWG api. This includes: an overview of the Ui, the controls and resource creation and destruction, binding and unbinding Events
-        and a few tips on how to borrow controls.
+    <h1 class="title">Custom controls</h1>
+    <p>
+        NWG has multiple way to create custom controls (aka: user controls). It ranges from very unsafe and powerful to 
+        not unsafe and less powerful<br/><br/>
+
+        There are a few reason to use custom controls: create an easy interface over a complex system, create eye candy controls (à la Electron) or 
+        create a custom calendar...
     </p>
 
     <p>Here are the sub chapters:</p>
 
 <ul>
-<li><a href="ui.html">Ui</a> - Overview of the UI structure</li>
-<li><a href="controls_resources.html">Controls</a> -  How to create/destroy controls and resources</li>
-<li><a href="events.html">Events</a> -  Binding events and related informations</li>
+<li><a href="canvas.html">Canvas</a> - The canvas is the 100% safe way to create custom controls. It's a Direct2D wrapper.</li>
+<li><a href="lowlevel.html">Custom Module</a> - Use the <code>custom</code> module. Unsafe.</li>
+<li><a href="custom_events.html">Custom events</a> - Define custom events <b>WIP</b>.</li>
 </ul>
 <br/><br/>
 
