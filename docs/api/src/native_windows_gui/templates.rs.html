@@ -1103,7 +1103,7 @@
     Sane defaults for the Label control. Requires a parent.
 
     Defaults:  
-    • text: `&quot;A Label&quot;`  
+    • text: `&quot;&quot;`  
     • position: `(0, 0)`  
     • size: `(100, 30)`  
     • visible: `true`  
@@ -1121,7 +1121,7 @@
     (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
         <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">LabelT</span>{ 
-            <span class="ident">text</span>: <span class="string">&quot;A label&quot;</span>,
+            <span class="ident">text</span>: <span class="string">&quot;&quot;</span>,
             <span class="ident">position</span>: (<span class="number">0</span>, <span class="number">0</span>), <span class="ident">size</span>: (<span class="number">100</span>, <span class="number">30</span>), 
             <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
             <span class="ident">align</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">HTextAlign</span>::<span class="ident">Left</span>,

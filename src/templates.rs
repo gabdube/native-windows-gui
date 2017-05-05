@@ -288,7 +288,7 @@ macro_rules! nwg_combobox {
     Sane defaults for the Label control. Requires a parent.
 
     Defaults:  
-    • text: `"A Label"`  
+    • text: `""`  
     • position: `(0, 0)`  
     • size: `(100, 30)`  
     • visible: `true`  
@@ -306,7 +306,7 @@ macro_rules! nwg_label {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::LabelT{ 
-            text: "A label",
+            text: "",
             position: (0, 0), size: (100, 30), 
             visible: true, disabled: false, 
             align: $crate::constants::HTextAlign::Left,
