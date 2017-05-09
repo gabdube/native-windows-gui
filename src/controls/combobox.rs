@@ -34,6 +34,9 @@ use low::other_helper::{to_utf16, from_utf16};
 /**
     Template that creates a combobox control
 
+    Available events:  
+    Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+
     Members:  
     • `collection`: Item collection of the combobox. The item type must implement `Display`  
     • `position`: The start position of the combobox  

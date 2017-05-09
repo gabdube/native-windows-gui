@@ -36,6 +36,9 @@ use low::other_helper::to_utf16;
 /**
     A template that creates a standard file dialog
 
+    Available events:  
+    Event::Destroyed  
+
     Members:  
     • `title`: The title of the dialog  
     • `parent`: The dialog parent window. While the dialog is running, the parent will be disabled.  

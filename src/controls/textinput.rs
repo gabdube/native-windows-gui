@@ -35,6 +35,9 @@ use events::Event;
 /**
     A template that creates a single line textinput control
 
+    Events:  
+    Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp, Event::ValueChanged, Event::Moved, Event::Resized, Event::Raw  
+
     Members:  
     • `text`: The text of the textinput  
     • `position`: The start position of the textinput  

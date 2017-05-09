@@ -32,6 +32,9 @@ use defs::HTextAlign;
 /**
     A template that creates a standard groupbox
 
+    Available events:  
+    Event::Destroyed, Event::Moved, Event::Resized, Event::Raw  
+
     Members:  
     • `text`: The text of the groupbox  
     • `position`: The start position of groupbox  

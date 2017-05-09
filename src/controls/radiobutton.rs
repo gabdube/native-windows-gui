@@ -33,6 +33,9 @@ use defs::CheckState;
 /**
     A template that creates a standard radio button
 
+    Events:  
+    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+
     Members:  
     • `text`: The text of the radio button  
     • `position`: The start position of the radio button  

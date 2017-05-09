@@ -34,6 +34,9 @@ static mut TIMERS_ID: UINT_PTR = 0;
     A template that creates a timer. Note that because the timer callbacks must be added AFTER
     its creation, it cannot start automatically.
 
+    Events:  
+    Event::Destroyed, Event::Tick  
+
     Members:  
     • `interval`: The timer interval in milliseconds
 */

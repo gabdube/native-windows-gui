@@ -183,6 +183,9 @@
 <span id="138">138</span>
 <span id="139">139</span>
 <span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     A routine executed at a constant interval
@@ -219,6 +222,9 @@
 <span class="doccomment">/**
     A template that creates a timer. Note that because the timer callbacks must be added AFTER
     its creation, it cannot start automatically.
+
+    Events:  
+    Event::Destroyed, Event::Tick  
 
     Members:  
     • `interval`: The timer interval in milliseconds

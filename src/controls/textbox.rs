@@ -37,6 +37,9 @@ use events::Event;
 /**
     A template that creates a multi line textinput control
 
+    Events:  
+    Event: Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp, Event::ValueChanged, Event::Moved, Event::Resized, Event::Raw  
+
     Members:  
     • `text`: The text of the textbox  
     • `position`: The start position of the textbox  

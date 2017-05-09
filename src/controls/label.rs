@@ -32,6 +32,9 @@ use defs::HTextAlign;
 /**
     A template that creates a standard label
 
+    Available events:  
+    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Moved, Event::Resized, Event::Raw  
+
     Members:  
     • `text`: The text of the label  
     • `position`: The start position of the label  
