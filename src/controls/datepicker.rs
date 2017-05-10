@@ -82,7 +82,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for DatePickerT<S, ID> 
     fn type_id(&self) -> TypeId { TypeId::of::<DatePicker>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw]
+        vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw, Event::DateChanged]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

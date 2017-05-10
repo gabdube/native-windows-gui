@@ -66,6 +66,7 @@ pub enum Event {
     Focus,
     Tick,
     Triggered,
+    DateChanged
 }
 
 /**

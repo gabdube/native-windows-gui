@@ -32,6 +32,8 @@ use controls::{ControlType, AnyHandle, Timer};
 /// A magic number to identify the NWG subclass that dispatches events
 const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
 
+// WARNING! This WHOLE section (from parse_listbox_command to parse_command) will be replaced with the events overhaul in NWG BETA2
+
 fn parse_listbox_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
   use low::defs::{LBN_SELCHANGE, LBN_DBLCLK, LBN_SETFOCUS, LBN_KILLFOCUS};
 
@@ -72,6 +74,27 @@ fn parse_static_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> 
   }
 }
 
+fn parse_datepicker_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
+  use winapi::DTN_DATETIMECHANGE;
+  match ncode {
+    DTN_DATETIMECHANGE => {
+      Some((id, Event::DateChanged, EventArgs::None))
+    },
+    _ => None
+  }
+}
+
+/**
+  Parse the common controls notification passed through the `WM_COMMAND` message.
+*/
+#[inline(always)]
+fn parse_notify(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, Event, EventArgs)> {
+  match control_type {
+    ControlType::DatePicker => parse_datepicker_command(id, w as u32),
+    _ => None
+  }
+}
+
 /**
   Parse the common controls notification passed through the `WM_COMMAND` message.
 */
@@ -85,6 +108,7 @@ fn parse_command(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, 
     ControlType::Button => parse_button_command(id, ncode),
     ControlType::TextInput | ControlType::TextBox => parse_edit_command(id, ncode),
     ControlType::Label => parse_static_command(id, ncode),
+    ControlType::DatePicker => parse_datepicker_command(id, ncode),
     _ => None
   }
 }
@@ -98,7 +122,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
   use user32::GetClientRect;
   use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, WM_LBUTTONUP, WM_LBUTTONDOWN, 
     WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, WM_COMMAND, WM_TIMER, WM_MOVE, WM_SIZING, WM_EXITSIZEMOVE, WM_SIZE,
-    WM_PAINT, c_int, LOWORD, HIWORD, RECT};
+    WM_PAINT, WM_NOTIFY, c_int, LOWORD, HIWORD, RECT, NMHDR};
   use low::menu_helper::get_menu_id;
   use low::defs::{NWG_CUSTOM_MIN, NWG_CUSTOM_MAX};
 
@@ -122,6 +146,17 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
         } else {
           None
         }
+      }
+    },
+    WM_NOTIFY => {
+      // WM_NOTIFY is the new WM_COMMAND for the new windows controls
+      let nmdr: &NMHDR = mem::transmute(l);
+      if let Some(id) = inner.inner_id_from_handle( &AnyHandle::HWND(nmdr.hwndFrom) ) {
+        
+        let control_type = (&mut *inner.controls.get(&id).expect("Could not find a control with with the specified type ID").as_ptr()).control_type();
+        parse_notify(id, control_type, nmdr.code as u64)
+      } else {
+        None
       }
     },
     WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP => {
