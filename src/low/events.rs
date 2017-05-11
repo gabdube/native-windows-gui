@@ -153,7 +153,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       let nmdr: &NMHDR = mem::transmute(l);
       if let Some(id) = inner.inner_id_from_handle( &AnyHandle::HWND(nmdr.hwndFrom) ) {
         let control_type = (&mut *inner.controls.get(&id).expect("Could not find a control with with the specified type ID").as_ptr()).control_type();
-        parse_notify(id, control_type, nmdr.code as u64)
+        parse_notify(id, control_type, nmdr.code as WPARAM)
       } else {
         None
       }
