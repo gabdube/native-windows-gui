@@ -8,23 +8,25 @@ NWG uses [retep998/winapi-rs](https://github.com/retep998/winapi-rs) and works o
 rust versions. NWG was tested on Windows 8.1 and Windows 10 using the MSVC ABI build but any version of Microsoft Windows supported by Rust is supposed to be
 supported by NWG (vista and up).
 
-## Is it for you?
+## Why NWG?
 
-Here are true facts about NWG:
+Is native-windows-gui the gui framework you are looking for? It is ...
 
-* If you only want to develop on Windows and want the smallest executable and memory footprint possible, NWG might be for you. 
-* If you LOVE hashmap, you will love NWG. The framework is basically built on a mutant hashmap called the UI (don't worry he's nice and likes too cuddle)
-* If you don't like dependencies, NWG might be for you. NWG only requires some `winapi-rs` crates and do not depends on external "executable" code 
-* If you want a canvas to draw pretty things, NWG has a very powerful (and light) canvas build over Direct2D
-* If you don't like to manage widgets (aka controls, aka stuff the user clicks on), NWG is for you. The UI manages the controls and the resources for you.
-* If you like documentation, NWG has one ( and I think it's pretty good ). Oh and its API is avaible online too: https://gabdube.github.io/native-windows-gui/ 
-* If you want a light and simple API, NWG might be for you (ok, I'm totally biased on this one, external opinion required)
-* -------
-* If you want portability across system, NWG is not for you. Maybe it will work with WINE though...
-* If your GUI has to create controls on the fly, NWG is not really for you. Each UI element requires a unique ID, which make this kind of UI harder to create
-* If you want to deploy a production ready application as soon as possible, NWG might not be for you. The first stable version will take some time to come out.
-* If you want a safe api to create custom control, nwg is not there YET...
-* If you want a UI to track a killers API address, Visual Basic is better (source: CSI)
+* For those who wants to develop on Windows and want the smallest executable and memory footprint possible. 
+* For those who LOVE hashmap. The UI are represented as hashmap-like objects (called the UI)
+* For those who don't like dependencies. NWG only requires some `winapi-rs` crates and do not depends on external "executable" code 
+* For those who want a canvas to draw pretty things, NWG has a very powerful (and light) canvas build over Direct2D
+* For those who don't like to manage widgets (aka controls, aka stuff the user clicks on), NWG is for you. The UI manages the controls and the resources for you.
+* For those who like documentation, NWG has one ( and I think it's pretty good ). Oh and its API is avaible online too: https://gabdube.github.io/native-windows-gui/ 
+* For those who want a light and simple API, NWG might be for you (ok, I'm totally biased on this one, external opinion required)
+
+And it isn't...
+
+* For those who want portability across system. Maybe it will work with WINE though...
+* For those who has to create controls on the fly. Each UI element requires a unique ID, which make this kind of UI harder to create
+* For those who want to deploy a production ready application as soon as possible. The first stable version will take some time to come out.
+* For those who want a safe api to create custom control, nwg is not there YET...
+* For those who want a UI to track a killers API address, Visual Basic is better (source: CSI)
 
 ## Beta notes
 
