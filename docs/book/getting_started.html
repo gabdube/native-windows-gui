@@ -142,7 +142,7 @@
     <h3>UI creation</h3>
     The <code>Ui</code> encapsulate the various components of NWG. Its role is to manage these components so that most of your energy is spent
     developing the actual application instead of the UI. As of <b>BETA 1</b>, an application can instance as many Ui as it requires.
-    <a href="/native-windows-gui/docs/api/native_windows_gui/struct.Ui.html">See the documentation for more information.</a><br/><br/>
+    <a href="https://gabdube.github.io/native-windows-gui/api/native_windows_gui/struct.Ui.html">See the documentation for more information.</a><br/><br/>
 
     The Ui object is basically a generic HashMap, therefore the type of its key must be defined when it is declared. The "best" types are either
     <code>&amp;'static str</code> if the ui is entirely static, or <code>usize</code> if new controls will be created at runtime. The hash values
@@ -156,7 +156,7 @@
     There's absolutely no black magic behind it. For an example of how the last example could look like if it was done without using templates, see
     the example at the end of this page. <br/><br/>
 
-    The base of the template system is the <code>nwg_template!</code> macro (<a href="/native-windows-gui/docs/api/native_windows_gui/macro.nwg_template.html">documentation</a>).
+    The base of the template system is the <code>nwg_template!</code> macro (<a href="https://gabdube.github.io/native-windows-gui/api/native_windows_gui/macro.nwg_template.html">documentation</a>).
     Its role is to define a function that initialize the Ui components.<br/><br/>
 
     The first parameter <code>head</code> defines the type of the Ui that will be accepted and the name of the function
@@ -174,7 +174,7 @@
     <code>Control_ID</code> is the unique ID that will identify the control in the Ui. Its type must match the type of the Ui. <br/><br/>
 
     <code>Control_Template</code> is the template of the control. NWG control templates are structs that define controls. By default, the templates do not
-    have sane default. In order to ease the template definition, NWG has a macro named <code>nwg_[control_name]</code> (ex: <a href="/native-windows-gui/docs/api/native_windows_gui/macro.nwg_button.html">button</a>)
+    have sane default. In order to ease the template definition, NWG has a macro named <code>nwg_[control_name]</code> (ex: <a href="https://gabdube.github.io/native-windows-gui/api/native_windows_gui/macro.nwg_button.html">button</a>)
     for each built-in control.<br><br>
 
     The controls are added in the order defined in the template.
@@ -189,9 +189,9 @@
 
     <code>Event_ID</code> is a unique id that identify the event. <br/><br/>
 
-    <code>Event_Type</code> Is the event type. See <a href="/native-windows-gui/docs/api/native_windows_gui/enum.Event.html">a list of all events</a>. <br/><br/>
+    <code>Event_Type</code> Is the event type. See <a href="https://gabdube.github.io/native-windows-gui/api/native_windows_gui/enum.Event.html">a list of all events</a>. <br/><br/>
 
-    <code>Callback</code> Is the function that will be called. The callback function signature is <a href="/native-windows-gui/docs/api/native_windows_gui/type.EventCallback.html">EventCallback</a><br/><br/>
+    <code>Callback</code> Is the function that will be called. The callback function signature is <a href="https://gabdube.github.io/native-windows-gui/api/native_windows_gui/type.EventCallback.html">EventCallback</a><br/><br/>
 
     There are no limits to the number of callback on a control.
 
@@ -324,7 +324,7 @@
 <h1 id="hello-details" class="section-header"><a href="#hello-details">The big lines</a></h1>
 
 Note that this section only scratch the non-macro features because they are explained in details in the <b>Basics</b> section.<br>
-For some technical info, see the <a href="/native-windows-gui/docs/api/native_windows_gui/struct.Ui.html#method.pack_value">UI api</a>.
+For some technical info, see the <a href="https://gabdube.github.io/native-windows-gui/api/native_windows_gui/struct.Ui.html#method.pack_control">UI api</a>.
 
 <h3>pack_*</h3> 
 
