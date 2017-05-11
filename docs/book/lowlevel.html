@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Custom module</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+
+    <div id="nav">
+        <button id="toggle-nav">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+    </div>
+
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='introduction.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="ui.html"><b>3.1.</b> Ui objects </a></li>
+    <li><a href="controls_resources.html"><b>3.2.</b> Controls and resources </a></li>
+    <li><a href="events.html"><b>3.3.</b> Events </a></li>
+    <li><a href="other_functions.html"><b>3.4.</b> Other functions </a></li>
+</ul>
+</li>
+
+<li><a href="custom.html"><b>4.</b> Custom controls </a>
+<ul class="section">
+    <li><a href="canvas.html"><b>4.1.</b> Canvas </a></li>
+    <li><a href="lowlevel.html"><b>4.2.</b> Custom Module </a></li>
+    <li><a href="custom_events.html"><b>4.3.</b> Custom Events </a></li>
+</ul>
+</li>
+
+</ul>
+</div>
+
+<div id='page-wrapper'>
+<div id='page'>
+
+    <h1 class="title">Custom modules</h1>
+
+    Using custom modules is the most powerful way to create custom controls. It is also pretty unsafe.<br><br>
+
+    Every control in the standard control library is implemented using this method.<br><br>
+
+    For a concrete example, see the <b>custom</b> example or the api of the <code>nwg::custom</code> module.<br>
+
+    <h1 id="req" class="section-header"><a href="#req">Requirements &amp; Concepts</a></h1>
+
+    In order to create new control using the low level module, good knowledge of the Windows API is required.
+    Also, in order to make process easier, the usage of <code>winapi-rs</code> is highly recommended.<br><br>
+
+    Those custom control are defined by defining 2 structures, a <b>template</b> and a <b>control</b> and then by 
+    implementing the <code>ControlT</code> and the <code>Control</code> trait to these structures.<br><br>
+
+    Once this is done, the template and the control can be used like any other controls. Ex: using <code>pack_control</code>.<br>
+
+    <h1 id="temp" class="section-header"><a href="#temp">Template</a></h1>
+
+    The template role is to create the low level object (ex: <code>HWND</code>), wrap in in a Boxed Control and return the result.
+    The template also returns what kind of events the control will support. If a user try to bind a callback to an unsupported event,
+    an error will be raised.<br><br>
+
+    Because NWG event are handled on the UI, <b>the only way</b> for a custom control created this way to system handle events is
+    to do it directly in the WINPROC function.<br><br>
+
+    Because custom events are not yet implemented, it is impossible to create events for those controls.
+    Still, basics events such as <code>Event::KeyUp</code> can be hooked to by the template. To allow the UI to see every message
+    received by the window, allow the <code>Event::Raw</code> event in the template.<br><br>
+
+    Here is a list of event that NWG can listen to for any HWND based control:<br>
+    <code>Destroyed, KeyDown, KeyUp, Char, Closed, MouseUp, MouseDown, Moved, Resized, Paint, Raw</code><br>
+
+    
+<div class="syntax"><pre><span></span><span class="sd">/**</span>
+<span class="sd">    Structures implementing this trait can be used by a Ui to build a Control</span>
+<span class="sd">*/</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="n">ControlT</span><span class="o">&lt;</span><span class="n">ID</span>: <span class="nb">Clone</span><span class="o">+</span><span class="n">Hash</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/**</span>
+<span class="sd">        Should return the TypeId of the generated control. For example a `WindowT` struct returns the TypeId of a `Window` struct.</span>
+<span class="sd">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">type_id</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">TypeId</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/**</span>
+<span class="sd">        Should instance the control and return it as a Box&lt;Control&gt;. If an error is raised, it will be returned by `ui.commit`.</span>
+<span class="sd">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">build</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">ui</span>: <span class="kp">&amp;</span><span class="nc">Ui</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">Control</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/**</span>
+<span class="sd">        Should return the events supported by the control.</span>
+<span class="sd">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">events</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Event</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nb">Vec</span>::<span class="n">new</span><span class="p">()</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+    <h1 id="Control" class="section-header"><a href="#Control">Control</a></h1>
+
+    The role of a control is to wrap a low level handle (such as a <code>HWND</code>). The trait requires a <code>free</code>
+    to free the resources during the build phase of the template and a <code>handle</code> to return the underlying handle of the control.
+
+
+<div class="syntax"><pre><span></span><span class="sd">/**</span>
+<span class="sd">    Structures implementing this trait are controls that can be stored in a Ui</span>
+<span class="sd">*/</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="n">Control</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/**</span>
+<span class="sd">        Should return the underlying handle to the object</span>
+<span class="sd">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">handle</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">AnyHandle</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/**</span>
+<span class="sd">        Should return the type of the control. For custom controls, the return value should be `Undefined` (the default).</span>
+<span class="sd">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">control_type</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">ControlType</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">ControlType</span>::<span class="n">Undefined</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/**</span>
+<span class="sd">        If specified, should free any ressource allocated in the template `build` function. This includes functions like `DestroyWindow`.</span>
+<span class="sd">    */</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">free</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+
+<br/><br/>
+
+</div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>

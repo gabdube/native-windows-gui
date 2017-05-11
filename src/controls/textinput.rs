@@ -1,6 +1,7 @@
 /*!
-    A control where the user can enter text
+    A simple text input control
 */
+
 /*
     Copyright (C) 2016  Gabriel Dubé
 
@@ -19,199 +20,242 @@
 */
 
 use std::hash::Hash;
-
-use controls::ControlTemplate;
-use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
- get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
- set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility, to_utf16, get_control_type};
-use actions::{Action, ActionReturn};
-use events::Event;
-use constants::{HTextAlign, ControlType};
-
-use winapi::{HWND, ES_LEFT, ES_RIGHT, ES_CENTER, WS_BORDER, ES_AUTOHSCROLL, ES_NOHIDESEL,
- ES_PASSWORD, ES_READONLY, EM_SETCUEBANNER, EM_GETCUEBANNER};
-
-/**
-    Configuration properties to create a simple TextInput
-
-    * text: The button text
-    * size: The button size (width, height) in pixels
-    * position: The button position (x, y) in the parent control
-    * parent: The control parent
-*/
-pub struct TextInput<ID: Eq+Clone+Hash> {
-    pub text: String,
-    pub size: (u32, u32),
-    pub position: (i32, i32),
-    pub parent: ID,
-    pub placeholder: Option<String>,
-    pub text_align: HTextAlign,
-    pub password: bool,
-    pub readonly: bool
-}
-
-impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextInput<ID> {
-
-    fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
-        let h_align = match self.text_align {
-            HTextAlign::Left => ES_LEFT,
-            HTextAlign::Right => ES_RIGHT,
-            HTextAlign::Center => ES_CENTER
-        };
-
-        let mut extra = 0;
-        if self.password {
-            extra |= ES_PASSWORD;
-        }
-        if self.readonly {
-            extra |= ES_READONLY;
-        }
-
-        let base = WindowBase::<ID> {
-            text: self.text.clone(),
-            size: self.size.clone(),
-            position: self.position.clone(),
-            visible: true,
-            resizable: false,
-            extra_style: extra | h_align | WS_BORDER | ES_AUTOHSCROLL | ES_NOHIDESEL,
-            class: "EDIT".to_string(),
-            parent: Some(self.parent.clone())
-        };
-
-        let handle = unsafe { create_base::<ID>(ui, base) };
-        match handle {
-            Ok(h) => {
-                 if let Some(placeholder) = self.placeholder.as_ref() {
-                     set_placeholder::<ID>(h, Some(Box::new(placeholder.clone())) );
-                 }
-                 Ok(h)
-            }
-            e => e
-        }
-    }
-
-    fn supported_events(&self) -> Vec<Event> {
-        vec![Event::MouseUp, Event::MouseDown, Event::Focus, Event::ValueChanged, Event::MaxValue,
-             Event::Removed, Event::Resize, Event::Move, Event::KeyDown, Event::KeyUp]
-    }
-
-    fn evaluator(&self) -> ::ActionEvaluator<ID> {
-        Box::new( |ui, id, handle, action| {
-            match action {
-                Action::SetText(t) => set_window_text(handle, *t),
-                Action::GetText => get_window_text(handle),
-                Action::GetPosition => get_window_pos(handle, true),
-                Action::SetPosition(x, y) => set_window_pos(handle, x, y),
-                Action::GetSize => get_window_size(handle),
-                Action::SetSize(w, h) => set_window_size(handle, w, h),
-                Action::GetParent => get_window_parent(handle),
-                Action::SetParent(p) => set_window_parent(ui, handle, p, true),
-                Action::GetEnabled => get_window_enabled(handle),
-                Action::SetEnabled(e) => set_window_enabled(handle, e),
-                Action::GetVisibility => get_window_visibility(handle),
-                Action::SetVisibility(v) => set_window_visibility(handle, v),
-                Action::Reset => set_window_text(handle, "".to_string()),
-                Action::GetControlType => get_control_type(handle),
-
-                Action::GetTextLimit => get_text_limit(handle),
-                Action::SetTextLimit(l) => set_text_limit(handle, l),
-                Action::GetSelectedBounds => get_select_bounds(handle),
-                Action::SetSelectedBounds(b) => set_select_bounds(handle, b),
-                Action::GetReadonly => get_readonly(handle),
-                Action::SetReadonly(r) => set_readonly(handle, r),
-                Action::Undo => undo_text(handle),
-                Action::GetPlaceholder => get_placeholder(handle),
-                Action::SetPlaceholder(p) => set_placeholder(handle, p),
-
-                _ => ActionReturn::NotSupported
-            }
-        })
-    }
-
-    fn control_type(&self) -> ControlType {
-        ControlType::TextInput
-    }
-
-
-}
-
-use winapi::{EM_LIMITTEXT, EM_GETLIMITTEXT, UINT, WPARAM, WM_UNDO, EM_GETSEL, DWORD, EM_SETSEL,
- LPARAM, EM_SETREADONLY, GWL_STYLE, LONG_PTR};
-use controls::base::{send_message, get_window_long};
+use std::any::TypeId;
 use std::mem;
 
-fn get_text_limit<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
-    let limit = send_message(handle, EM_GETLIMITTEXT as UINT, 0, 0) as u32;
-    ActionReturn::TextLimit(limit)
+use winapi::{HWND, HFONT, WPARAM};
+use user32::SendMessageW;
+
+use ui::Ui;
+use controls::{Control, ControlT, ControlType, AnyHandle};
+use low::other_helper::to_utf16;
+use error::Error;
+use events::Event;
+
+/**
+    A template that creates a single line textinput control
+
+    Events:  
+    Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp, Event::ValueChanged, Event::Moved, Event::Resized, Event::Raw  
+
+    Members:  
+    • `text`: The text of the textinput  
+    • `position`: The start position of the textinput  
+    • `size`: The start size of the textinput  
+    • `visible`: If the textinput should be visible to the user   
+    • `disabled`: If the user can or can't click on the textinput  
+    • `readonly`: If the user can copty the text but can't edit the textinput content  
+    • `password`: If the textinput should hide its content  
+    • `placeholder`: Some text that is displayed when the actual value is empty  
+    • `limit`: The maximum number of characters that the control can hold  
+    • `parent`: The textinput parent  
+    • `font`: The textinput font. If None, use the system default  
+*/
+#[derive(Clone)]
+pub struct TextInputT<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+Clone> {
+    pub text: S1,
+    pub position: (i32, i32),
+    pub size: (u32, u32),
+    pub visible: bool,
+    pub disabled: bool,
+    pub readonly: bool,
+    pub password: bool,
+    pub placeholder: Option<S2>,
+    pub limit: u32,
+    pub parent: ID,
+    pub font: Option<ID>,
 }
 
-fn set_text_limit<ID: Eq+Clone+Hash>(handle: HWND, limit: u32) -> ActionReturn<ID> {
-    send_message(handle, EM_LIMITTEXT as UINT, limit as WPARAM, 0);
-    ActionReturn::None
+impl<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextInputT<S1, S2, ID> {
+    fn type_id(&self) -> TypeId { TypeId::of::<TextInput>() }
+
+    fn events(&self) -> Vec<Event> {
+        vec![Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp,
+             Event::ValueChanged, Event::Moved, Event::Resized, Event::Raw]
+    }
+
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
+        use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
+        use low::defs::{ES_AUTOHSCROLL, ES_READONLY, ES_PASSWORD, EM_LIMITTEXT};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER};
+
+        let flags: DWORD = WS_CHILD | WS_BORDER | ES_AUTOHSCROLL | 
+        if self.readonly { ES_READONLY } else { 0 } |
+        if self.password { ES_PASSWORD } else { 0 } |
+        if self.visible  { WS_VISIBLE }  else { 0 } |
+        if self.disabled { WS_DISABLED } else { 0 };
+
+        // Get the parent handle
+        let parent = match handle_of_window(ui, &self.parent, "The parent of a textinput must be a window-like control.") {
+            Ok(h) => h,
+            Err(e) => { return Err(e); }
+        };
+
+        // Get the font handle (if any)
+        let font_handle: Option<HFONT> = match self.font.as_ref() {
+            Some(font_id) => 
+                match handle_of_font(ui, &font_id, "The font of a button must be a font resource.") {
+                    Ok(h) => Some(h),
+                    Err(e) => { return Err(e); }
+                },
+            None => None
+        };
+
+        let params = WindowParams {
+            title: self.text.clone().into(),
+            class_name: "EDIT",
+            position: self.position.clone(),
+            size: self.size.clone(),
+            flags: flags,
+            ex_flags: Some(0),
+            parent: parent
+        };
+
+        match unsafe{ build_window(params) } {
+            Ok(h) => {
+                unsafe{ 
+                    set_window_font(h, font_handle, true); 
+                    SendMessageW(h, EM_LIMITTEXT, self.limit as WPARAM, 0);
+                    
+                    if let Some(placeholder) = self.placeholder.as_ref() {
+                        set_placeholder(h, placeholder.clone());
+                    }
+                };
+
+                Ok( Box::new(TextInput{handle: h}) )
+            },
+            Err(e) => Err(Error::System(e))
+        }
+    }
 }
 
-fn undo_text<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
-    send_message(handle, WM_UNDO as UINT, 0, 0);
-    ActionReturn::None
+/**
+    A single line textinput control
+*/
+pub struct TextInput {
+    handle: HWND
 }
 
-fn get_select_bounds<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
-    let mut min: DWORD = 0;
-    let mut max: DWORD = 0;
+impl TextInput {
+
+    /// Set or unset the readonly status on the control
+    pub fn set_readonly(&self, readonly: bool) {
+        use low::window_helper::{set_window_long, get_window_long};
+        use low::defs::ES_READONLY;
+        use winapi::GWL_STYLE;
+
+        let old_style = get_window_long(self.handle, GWL_STYLE) as usize;
+        if readonly {
+            set_window_long(self.handle, GWL_STYLE, old_style|(ES_READONLY as usize));
+        } else {
+            set_window_long(self.handle, GWL_STYLE, old_style&(!ES_READONLY as usize) );
+        }
+    }
     
-    unsafe{ send_message(handle, EM_GETSEL as u32, mem::transmute(&mut min), mem::transmute(&mut max)) };
+    /// Return `true` if the user cannot edit the content of the control or `false` if the user can
+    pub fn get_readonly(&self) -> bool {
+        use low::window_helper::get_window_long;
+        use low::defs::ES_READONLY;
+        use winapi::GWL_STYLE;
 
-    ActionReturn::SelectBounds((min as u32, max as u32))
-}
+        let style = get_window_long(self.handle, GWL_STYLE) as u32;
 
-fn set_select_bounds<ID: Eq+Clone+Hash>(handle: HWND, bounds: (u32, u32)) -> ActionReturn<ID> {
-    send_message(handle, EM_SETSEL as u32, bounds.0 as WPARAM, bounds.1 as LPARAM);
-    ActionReturn::None
-}
-
-fn get_readonly<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> { 
-    let read_only = ES_READONLY as LONG_PTR;
-    ActionReturn::Readonly( get_window_long(handle, GWL_STYLE) & read_only == read_only )
-}
-
-fn set_readonly<ID: Eq+Clone+Hash>(handle: HWND, readonly: bool) -> ActionReturn<ID> {
-    send_message(handle, EM_SETREADONLY as u32, readonly as WPARAM, 0);
-    ActionReturn::None
-}
-
-fn set_placeholder<ID: Eq+Clone+Hash>(handle: HWND, placeholder: Option<Box<String>> ) -> ActionReturn<ID> {
-    let ptr: LPARAM;
-    if let Some(placeholder) = placeholder {
-        let placeholder_raw = to_utf16(*placeholder);
-        ptr = unsafe{ mem::transmute(placeholder_raw.as_ptr()) };
-        send_message(handle, EM_SETCUEBANNER, 0, ptr);
-    } else {
-        let null_string: [u16; 1] = [0];
-        ptr = unsafe{ mem::transmute(null_string.as_ptr()) };
-        send_message(handle, EM_SETCUEBANNER, 0, ptr);
-    }
-    ActionReturn::None
-}
-
-fn get_placeholder<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
-    use std::ffi::OsString;
-    use std::os::windows::ffi::OsStringExt;
-
-    // There are no way to get the placeholder length, so the length must be guessed.
-    // 256 characters should be enough.
-    let mut buffer: [u16; 256] = [0; 256];
-    let ptr: WPARAM = unsafe{ mem::transmute(buffer.as_mut_ptr()) };
-
-    send_message(handle, EM_GETCUEBANNER, ptr, 256);
-
-    let end_index = buffer.iter().enumerate().find(|&(index, i)| *i == 0).unwrap_or((256, &0)).0;
-    if end_index > 1 {
-        let text = OsString::from_wide(&(buffer[0..end_index]));
-        let text = text.into_string().unwrap_or("ERROR!".to_string());
-        ActionReturn::Text(Box::new(text))
-    } else {
-        ActionReturn::None
+        (style & ES_READONLY) == ES_READONLY
     }
 
+    /// Add or remove a password mask on the control
+    pub fn set_password(&self, password: bool) {
+        use low::window_helper::{set_window_long, get_window_long};
+        use low::defs::ES_PASSWORD;
+        use winapi::GWL_STYLE;
+
+        let old_style = get_window_long(self.handle, GWL_STYLE) as usize;
+        if password {
+            set_window_long(self.handle, GWL_STYLE, old_style|(ES_PASSWORD as usize));
+        } else {
+            set_window_long(self.handle, GWL_STYLE, old_style&(!ES_PASSWORD as usize) );
+        }
+    }
+
+    /// Return `true` if the control has a password mask or `false` otherwise
+    pub fn get_password(&self) -> bool {
+        use low::window_helper::get_window_long;
+        use low::defs::ES_PASSWORD;
+        use winapi::GWL_STYLE;
+
+        let style = get_window_long(self.handle, GWL_STYLE) as u32;
+
+        (style & ES_PASSWORD) == ES_PASSWORD
+    }
+
+    /// Set the maximum number of characters that the control can hold
+    pub fn set_limit(&self, limit: u32) {
+        use low::defs::EM_LIMITTEXT;
+        unsafe{ SendMessageW(self.handle, EM_LIMITTEXT, limit as WPARAM, 0); }
+    }
+
+    /// Return the maximum number of characters that the control can hold
+    pub fn get_limit(&self) -> u32 {
+        use low::defs::EM_GETLIMITTEXT;
+        unsafe{ SendMessageW(self.handle, EM_GETLIMITTEXT, 0, 0) as u32 }
+    }
+
+    /// Set a new placeholder for the TextInput. To remove the current placeholder, send `""`  
+    /// The maximum length of the placeholder is 255 characters
+    pub fn set_placeholder<'a>(&self, placeholder: &'a str) {
+        set_placeholder(self.handle, placeholder);
+    }
+
+    // Return the current placeholder for the TextInput. If there are no placeholder set, returns None.
+    // EM_GETCUEBANNER IS NOT RELIABLE.
+    /*pub fn get_placeholder(&self) -> Option<String> {
+        use winapi::EM_GETCUEBANNER;
+
+        let mut buffer: [u16; 256] = [0; 256];
+        let mut buffer_size = 256;
+
+        let placeholder_found = unsafe{ SendMessageW(self.handle, EM_GETCUEBANNER, mem::transmute(buffer.as_mut_ptr()), mem::transmute(&mut buffer_size)) };
+
+        if placeholder_found == 1 {
+            Some(from_utf16(&buffer))
+        } else {
+            None
+        }
+    }*/
+    
+
+    pub fn get_text(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
+    pub fn set_text<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
+    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
+    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
+    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
+    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
+    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
+    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, false); } }
+    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
+    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+}
+
+impl Control for TextInput {
+
+    fn handle(&self) -> AnyHandle {
+        AnyHandle::HWND(self.handle)
+    }
+
+    fn control_type(&self) -> ControlType { 
+        ControlType::TextInput 
+    }
+
+    fn free(&mut self) {
+        use user32::DestroyWindow;
+        unsafe{ DestroyWindow(self.handle) };
+    }
+
+}
+
+
+fn set_placeholder<S: Into<String>>(handle: HWND, placeholder: S) {
+    use winapi::EM_SETCUEBANNER;
+    let text = to_utf16(placeholder.into().as_str());
+    unsafe{ SendMessageW(handle, EM_SETCUEBANNER, 0, mem::transmute(text.as_ptr()) ); }
 }

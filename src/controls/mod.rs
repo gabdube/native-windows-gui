@@ -1,6 +1,5 @@
 /*!
-    Holds various wrapper over Windows native controls, each in 
-    their own module.
+    Control trait definition. The base control definitions are located in the submodules.
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -19,74 +18,128 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-pub mod base;
 pub mod window;
+pub mod menu;
 pub mod button;
-pub mod checkbox;
-pub mod groupbox;
-pub mod radiobutton;
 pub mod textinput;
-pub mod combobox;
-pub mod label;
-pub mod frame;
 pub mod textbox;
+pub mod checkbox;
+pub mod radiobutton;
+pub mod label;
+pub mod listbox;
+pub mod combobox;
+pub mod groupbox;
+pub mod progress_bar;
+pub mod datepicker;
+pub mod file_dialog;
+pub mod timer;
+pub mod canvas;
 
-pub use controls::window::Window;
-pub use controls::button::Button;
-pub use controls::checkbox::CheckBox;
-pub use controls::groupbox::GroupBox;
-pub use controls::radiobutton::RadioButton;
-pub use controls::textinput::TextInput;
-pub use controls::combobox::ComboBox;
-pub use controls::label::Label;
-pub use controls::frame::Frame;
-pub use controls::textbox::TextBox;
-
+use std::any::TypeId;
 use std::hash::Hash;
-use winapi::HWND;
 
-use constants::ControlType;
+use winapi::{HWND, HMENU, UINT, HFONT};
+
+pub use controls::window::{WindowT, Window};
+pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem, SeparatorT, Separator};
+pub use controls::button::{ButtonT, Button};
+pub use controls::textinput::{TextInputT, TextInput};
+pub use controls::textbox::{TextBoxT, TextBox};
+pub use controls::checkbox::{CheckBoxT, CheckBox};
+pub use controls::radiobutton::{RadioButtonT, RadioButton};
+pub use controls::label::{LabelT, Label};
+pub use controls::listbox::{ListBoxT, ListBox};
+pub use controls::combobox::{ComboBoxT, ComboBox};
+pub use controls::groupbox::{GroupBoxT, GroupBox};
+pub use controls::progress_bar::{ProgressBarT, ProgressBar};
+pub use controls::file_dialog::{FileDialogT, FileDialog};
+pub use controls::timer::{TimerT, Timer};
+pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
+pub use controls::datepicker::{DatePickerT, DatePicker};
+use ui::Ui;
+use events::Event;
+use error::Error;
 
 /**
-    Trait that is shared by all control templates
+    A type that expose the different underlying handle into one type
 */
-pub trait ControlTemplate<ID: Eq+Clone+Hash > {
-
-    /**
-        Create a new control from the template data.
-    */
-    fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()>;
-
-    /**
-        Return the function that will be used to evaluates the control actions
-    */
-    fn evaluator(&self) -> ::ActionEvaluator<ID>;
-
-    /**
-        Return the list of callback supported by this control
-    */
-    fn supported_events(&self) -> Vec<::events::Event>;
-
-    /**
-        Return the type of the control. This is used for reflecting
-        and because the window proc need to know the control to dispatch
-        the events correctly
-    */
-    fn control_type(&self) -> ControlType;
+#[derive(Clone, Hash, Debug)]
+#[allow(non_camel_case_types)]
+pub enum AnyHandle {
+    HWND(HWND),
+    HMENU(HMENU),
+    HMENU_ITEM(HMENU, UINT),
+    HFONT(HFONT),
+    Custom(TypeId, usize)
 }
 
-pub fn set_handle_data<T>(handle: HWND, data: T) {
-    unsafe { base::set_handle_data(handle, data); }
+/**
+    An enum that list type names for the common controls.
+
+    This is used internally to differentiate the common control notification codes.
+*/
+#[derive(Clone, Debug)]
+pub enum ControlType {
+    Window,
+    Button,
+    TextInput,
+    TextBox,
+    CheckBox,
+    RadioButton,
+    ListBox,
+    Label,
+    ProgressBar,
+    Menu,
+    MenuItem,
+    Timer,
+    ComboBox,
+    GroupBox,
+    NumericInput,
+    DatePicker,
+    FileDialog,
+    Canvas,
+    Undefined  // Control is not a common control
 }
 
-pub fn get_handle_data<'a, T>(handle: HWND) -> &'a mut T {
-    unsafe { base::get_handle_data(handle).unwrap() }
+/**
+    Structures implementing this trait can be used by a Ui to build a Control
+*/
+pub trait ControlT<ID: Clone+Hash> {
+
+    /**
+        Should return the TypeId of the generated control. For example a `WindowT` struct returns the TypeId of a `Window` struct.
+    */
+    fn type_id(&self) -> TypeId;
+
+    /**
+        Should instance the control and return it as a Box<Control>. If an error is raised, it will be returned by `ui.commit`.
+    */
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error>;
+
+    /**
+        Should return the events supported by the control.
+    */
+    fn events(&self) -> Vec<Event> { Vec::new() }
 }
 
-pub fn free_handle_data<T>(handle: HWND) {
-    unsafe { base::free_handle_data::<T>(handle); }
-}
+/**
+    Structures implementing this trait are controls that can be stored in a Ui
+*/
+pub trait Control {
 
-pub fn free_handle<ID: Eq+Clone+Hash>(handle: HWND) {
-    unsafe { base::free_handle::<ID>(handle); }
+    /**
+        Should return the underlying handle to the object
+    */
+    fn handle(&self) -> AnyHandle;
+
+    /**
+        Should return the type of the control. For custom controls, the return value should be `Undefined` (the default).
+    */
+    fn control_type(&self) -> ControlType { ControlType::Undefined }
+
+    /**
+        If specified, should free any ressource allocated in the template `build` function. This includes functions like `DestroyWindow`.
+    */
+    fn free(&mut self) {}
+
 }

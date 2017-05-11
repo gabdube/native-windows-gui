@@ -1,5 +1,5 @@
 /*!
-    A simple label
+    Label control definition
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -19,86 +19,130 @@
 */
 
 use std::hash::Hash;
+use std::any::TypeId;
 
-use controls::ControlTemplate;
-use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
- get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
- set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility, get_control_type};
-use actions::{Action, ActionReturn};
-use constants::{HTextAlign, ControlType, SS_NOTIFY, SS_LEFT, SS_RIGHT, SS_CENTER};
+use winapi::{HWND, HFONT};
+
+use ui::Ui;
+use controls::{Control, ControlT, ControlType, AnyHandle};
+use error::Error;
 use events::Event;
-
-use winapi::{HWND};
-
+use defs::HTextAlign;
 
 /**
-    Configuration properties to create simple label
+    A template that creates a standard label
 
-    * text: The label text
-    * size: The label size (width, height) in pixels
-    * position: The label position (x, y) in the parent control
-    * parent: The control parent
-    * text_align: The label text alignment
+    Available events:  
+    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Moved, Event::Resized, Event::Raw  
+
+    Members:  
+    • `text`: The text of the label  
+    • `position`: The start position of the label  
+    • `size`: The start size of the label  
+    • `visible`: If the label should be visible to the user  
+    • `disabled`: If the user can or can't click on the label  
+    • `align`: The text align of the label
+    • `parent`: The label parent  
+    • `font`: The label font. If None, use the system default  
 */
-pub struct Label<ID: Eq+Clone+Hash> {
-    pub text: String,
-    pub size: (u32, u32),
+#[derive(Clone)]
+pub struct LabelT<S: Clone+Into<String>, ID: Hash+Clone> {
+    pub text: S,
     pub position: (i32, i32),
+    pub size: (u32, u32),
+    pub visible: bool,
+    pub disabled: bool,
+    pub align: HTextAlign,
     pub parent: ID,
-    pub text_align: HTextAlign,
+    pub font: Option<ID>,
 }
 
-impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Label<ID> {
+impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for LabelT<S, ID> {
+    fn type_id(&self) -> TypeId { TypeId::of::<Label>() }
 
-    fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
-        let h_align = match self.text_align {
-            HTextAlign::Left => SS_LEFT,
-            HTextAlign::Right => SS_RIGHT,
-            HTextAlign::Center => SS_CENTER
+    fn events(&self) -> Vec<Event> {
+        vec![Event::Destroyed, Event::Click, Event::DoubleClick, Event::Moved, Event::Resized, Event::Raw]
+    }
+
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
+        use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
+        use low::defs::{SS_NOTIFY, SS_NOPREFIX, SS_LEFT, SS_RIGHT, SS_CENTER};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD};
+
+        let flags: DWORD = WS_CHILD | SS_NOTIFY | SS_NOPREFIX | 
+        if self.visible    { WS_VISIBLE }   else { 0 } |
+        if self.disabled   { WS_DISABLED }  else { 0 } |
+        match self.align   { HTextAlign::Center=>SS_CENTER, HTextAlign::Left=>SS_LEFT, HTextAlign::Right=>SS_RIGHT };
+
+        // Get the parent handle
+        let parent = match handle_of_window(ui, &self.parent, "The parent of a label must be a window-like control.") {
+            Ok(h) => h,
+            Err(e) => { return Err(e); }
         };
 
-        let base = WindowBase::<ID> {
-            text: self.text.clone(),
-            size: self.size.clone(),
+        // Get the font handle (if any)
+        let font_handle: Option<HFONT> = match self.font.as_ref() {
+            Some(font_id) => 
+                match handle_of_font(ui, &font_id, "The font of a label must be a font resource.") {
+                    Ok(h) => Some(h),
+                    Err(e) => { return Err(e); }
+                },
+            None => None
+        };
+
+        let params = WindowParams {
+            title: self.text.clone().into(),
+            class_name: "STATIC",
             position: self.position.clone(),
-            visible: true,
-            resizable: false,
-            extra_style: SS_NOTIFY | h_align,
-            class: "STATIC".to_string(),
-            parent: Some(self.parent.clone())
+            size: self.size.clone(),
+            flags: flags,
+            ex_flags: Some(0),
+            parent: parent
         };
 
-        unsafe { create_base::<ID>(ui, base) }
+        match unsafe{ build_window(params) } {
+            Ok(h) => {
+                unsafe{ set_window_font(h, font_handle, true); }
+                Ok( Box::new(Label{handle: h}) )
+            },
+            Err(e) => Err(Error::System(e))
+        }
+    }
+}
+
+/**
+    A standard label
+*/
+pub struct Label {
+    handle: HWND
+}
+
+impl Label {
+    pub fn get_text(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
+    pub fn set_text<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
+    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
+    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
+    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
+    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
+    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
+    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, false); } }
+    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
+    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+}
+
+impl Control for Label {
+
+    fn handle(&self) -> AnyHandle {
+        AnyHandle::HWND(self.handle)
     }
 
-    fn supported_events(&self) -> Vec<Event> {
-        vec![Event::MouseUp, Event::MouseDown, Event::Removed, Event::Resize, Event::Move, Event::Click]
+    fn control_type(&self) -> ControlType { 
+        ControlType::Label 
     }
 
-    fn evaluator(&self) -> ::ActionEvaluator<ID> {
-        Box::new( |ui, id, handle, action| {
-            match action {
-                Action::SetText(t) => set_window_text(handle, *t),
-                Action::GetText => get_window_text(handle),
-                Action::GetPosition => get_window_pos(handle, true),
-                Action::SetPosition(x, y) => set_window_pos(handle, x, y),
-                Action::GetSize => get_window_size(handle),
-                Action::SetSize(w, h) => set_window_size(handle, w, h),
-                Action::GetParent => get_window_parent(handle),
-                Action::SetParent(p) => set_window_parent(ui, handle, p, true),
-                Action::GetEnabled => get_window_enabled(handle),
-                Action::SetEnabled(e) => set_window_enabled(handle, e),
-                Action::GetVisibility => get_window_visibility(handle),
-                Action::SetVisibility(v) => set_window_visibility(handle, v),
-                Action::GetControlType => get_control_type(handle),
-                _ => ActionReturn::NotSupported
-            }
-        })
-    }
-
-    fn control_type(&self) -> ControlType {
-        ControlType::Label
+    fn free(&mut self) {
+        use user32::DestroyWindow;
+        unsafe{ DestroyWindow(self.handle) };
     }
 
 }

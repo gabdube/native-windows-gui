@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `FileDialog` struct in crate `native_windows_gui`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, FileDialog">
+
+    <title>native_windows_gui::FileDialog - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'FileDialog', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>native_windows_gui</a>::<wbr><a class="struct" href=''>FileDialog</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/native_windows_gui/controls/file_dialog.rs.html#149-154' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct FileDialog { /* fields omitted */ }</pre><div class='docblock'><p>A file dialog control</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class="struct" href="../native_windows_gui/struct.FileDialog.html" title="struct native_windows_gui::FileDialog">FileDialog</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/file_dialog.rs.html#157-304' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.get_selected_item' class="method"><span id='get_selected_item.v' class='invisible'><code>fn <a href='#method.get_selected_item' class='fnname'>get_selected_item</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return the item selected in the dialog by the user.</p>
+<p>Failures:<br />
+• <code>Error::System</code> if the dialog was not called<br />
+• <code>Error::System</code> if there was a system error while reading the selected item<br />
+• <code>Error::UserError</code> if the dialog has the <code>multiselect</code> flag  </p>
+</div><h4 id='method.get_selected_items' class="method"><span id='get_selected_items.v' class='invisible'><code>fn <a href='#method.get_selected_items' class='fnname'>get_selected_items</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return the selected items in the dialog by the user.</p>
+<p>Failures:<br />
+• <code>Error::System</code> if the dialog was not called<br />
+• <code>Error::System</code> if there was a system error while reading the selected items<br />
+• <code>Error::UserError</code> if the dialog has <code>Save</code> for action  </p>
+</div><h4 id='method.action' class="method"><span id='action.v' class='invisible'><code>fn <a href='#method.action' class='fnname'>action</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/constants/enum.FileDialogAction.html" title="enum native_windows_gui::constants::FileDialogAction">FileDialogAction</a></code></span></h4>
+<div class='docblock'><p>Return the action type executed by this dialog</p>
+</div><h4 id='method.get_multiselect' class="method"><span id='get_multiselect.v' class='invisible'><code>fn <a href='#method.get_multiselect' class='fnname'>get_multiselect</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<div class='docblock'><p>Return <code>true</code> if the dialog accepts multiple values or <code>false</code> otherwise</p>
+</div><h4 id='method.set_multiselect' class="method"><span id='set_multiselect.v' class='invisible'><code>fn <a href='#method.set_multiselect' class='fnname'>set_multiselect</a>(&amp;mut self, multiselect: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
+<div class='docblock'><p>Set the multiselect flag of the dialog.</p>
+<p>Failures:<br />
+• <code>Error::System</code> if there was a system error while setting the new flag value<br />
+• <code>Error::UserError</code> if the dialog has <code>Save</code> for action  </p>
+</div><h4 id='method.set_default_folder' class="method"><span id='set_default_folder.v' class='invisible'><code>fn <a href='#method.set_default_folder' class='fnname'>set_default_folder</a>&lt;'a&gt;(&amp;self, folder: &amp;'a <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
+<div class='docblock'><p>Set the first opened folder when the dialog is shown. This value is overriden by the user after the dialog ran.<br />
+Call <code>clear_client_data</code> to fix that.</p>
+<p>Failures:
+• <code>Error::UserError</code>: if the default folder do not identify a folder<br />
+• <code>Error::System</code>: if the folder do not exists  </p>
+</div><h4 id='method.set_filters' class="method"><span id='set_filters.v' class='invisible'><code>fn <a href='#method.set_filters' class='fnname'>set_filters</a>&lt;'a&gt;(&amp;self, filters: &amp;'a <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
+<div class='docblock'><p>Filter the files that the user can select (In a <code>Open</code> dialog) in the dialog or which extension to add to the saved file (in a <code>Save</code> dialog).<br />
+This can only be set ONCE (the initialization counts) and won't work if the dialog is <code>OpenDirectory</code>.</p>
+<p>The <code>filters</code> value must be a '|' separated string having this format: &quot;Test(<em>.txt;</em>.rs)|Any(<em>.</em>)&quot;<br />
+Where the fist part is the &quot;human name&quot; and the second part is a filter for the system.</p>
+</div><h4 id='method.set_title' class="method"><span id='set_title.v' class='invisible'><code>fn <a href='#method.set_title' class='fnname'>set_title</a>&lt;'a&gt;(&amp;self, title: &amp;'a <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>)</code></span></h4>
+<div class='docblock'><p>Change the dialog title</p>
+</div><h4 id='method.clear_client_data' class="method"><span id='clear_client_data.v' class='invisible'><code>fn <a href='#method.clear_client_data' class='fnname'>clear_client_data</a>(&amp;self)</code></span></h4>
+<div class='docblock'><p>Instructs the dialog to clear all persisted state information (such as the last folder visited).</p>
+</div><h4 id='method.run' class="method"><span id='run.v' class='invisible'><code>fn <a href='#method.run' class='fnname'>run</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<div class='docblock'><p>Display the dialog. Return true if the dialog was accepted or false if it was cancelled</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="../native_windows_gui/custom/trait.Control.html" title="trait native_windows_gui::custom::Control">Control</a> for <a class="struct" href="../native_windows_gui/struct.FileDialog.html" title="struct native_windows_gui::FileDialog">FileDialog</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/file_dialog.rs.html#306-324' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.handle' class="method"><span id='handle.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#tymethod.handle' class='fnname'>handle</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/custom/enum.AnyHandle.html" title="enum native_windows_gui::custom::AnyHandle">AnyHandle</a></code></span></h4>
+<div class='docblock'><p>Should return the underlying handle to the object</p>
+</div><h4 id='method.control_type' class="method"><span id='control_type.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#method.control_type' class='fnname'>control_type</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/constants/enum.ControlType.html" title="enum native_windows_gui::constants::ControlType">ControlType</a></code></span></h4>
+<div class='docblock'><p>Should return the type of the control. For custom controls, the return value should be <code>Undefined</code> (the default).</p>
+</div><h4 id='method.free' class="method"><span id='free.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#method.free' class='fnname'>free</a>(&amp;mut self)</code></span></h4>
+<div class='docblock'><p>If specified, should free any ressource allocated in the template <code>build</code> function. This includes functions like <code>DestroyWindow</code>.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "native_windows_gui";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

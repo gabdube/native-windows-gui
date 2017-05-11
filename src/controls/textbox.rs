@@ -1,6 +1,11 @@
 /*!
-    A multiline text edit
+    A simple text box control
+
+    This is basically a multiline text input but I want to differenciate the two controls
+    because they have a few difference and I want to keep each control in its own file with
+    no superclass.
 */
+
 /*
     Copyright (C) 2016  Gabriel Dubé
 
@@ -19,146 +24,179 @@
 */
 
 use std::hash::Hash;
+use std::any::TypeId;
 
-use controls::ControlTemplate;
-use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
- get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
- set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility, get_control_type};
-use actions::{Action, ActionReturn};
+use winapi::{HWND, HFONT, WPARAM};
+use user32::SendMessageW;
+
+use ui::Ui;
+use controls::{Control, ControlT, ControlType, AnyHandle};
+use error::Error;
 use events::Event;
-use constants::{ControlType};
-
-use winapi::{HWND, WS_BORDER, ES_AUTOHSCROLL, ES_READONLY, ES_MULTILINE, ES_AUTOVSCROLL};
 
 /**
-    Configuration properties to create a simple TextInput
+    A template that creates a multi line textinput control
 
-    * text: The button text
-    * size: The button size (width, height) in pixels
-    * position: The button position (x, y) in the parent control
-    * parent: The control parent
+    Events:  
+    Event: Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp, Event::ValueChanged, Event::Moved, Event::Resized, Event::Raw  
+
+    Members:  
+    • `text`: The text of the textbox  
+    • `position`: The start position of the textbox  
+    • `size`: The start size of the textbox  
+    • `visible`: If the textbox should be visible to the user   
+    • `disabled`: If the user can or can't click on the textbox  
+    • `readonly`: If the user can copty the text but can't edit the textbox content  
+    • `limit`: The maximum number of characters that the control can hold  
+    • `scrollbars`: A tuple to defined whether to show scrollbars or not (show horizontal, show vertical)
+    • `parent`: The textbox parent  
+    • `font`: The textbox font. If None, use the system default  
 */
-pub struct TextBox<ID: Eq+Clone+Hash> {
-    pub text: String,
-    pub size: (u32, u32),
+#[derive(Clone)]
+pub struct TextBoxT<S1: Clone+Into<String>, ID: Hash+Clone> {
+    pub text: S1,
     pub position: (i32, i32),
+    pub size: (u32, u32),
+    pub visible: bool,
+    pub disabled: bool,
+    pub readonly: bool,
+    pub limit: u32,
+    pub scrollbars: (bool, bool),
     pub parent: ID,
-    pub readonly: bool
+    pub font: Option<ID>,
 }
 
-impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for TextBox<ID> {
+impl<S1: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextBoxT<S1, ID> {
+    fn type_id(&self) -> TypeId { TypeId::of::<TextBox>() }
 
-    fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
-        let mut extra = 0;
-        if self.readonly {
-            extra |= ES_READONLY;
-        }
+    fn events(&self) -> Vec<Event> {
+        vec![Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp,
+             Event::ValueChanged, Event::Moved, Event::Resized, Event::Raw]
+    }
 
-        let base = WindowBase::<ID> {
-            text: self.text.clone(),
-            size: self.size.clone(),
-            position: self.position.clone(),
-            visible: true,
-            resizable: false,
-            extra_style: extra | WS_BORDER | ES_AUTOHSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-            class: "EDIT".to_string(),
-            parent: Some(self.parent.clone())
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
+        use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
+        use low::defs::{ES_AUTOHSCROLL, ES_AUTOVSCROLL, ES_READONLY, EM_LIMITTEXT, ES_MULTILINE};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER, WS_HSCROLL, WS_VSCROLL};
+
+        let flags: DWORD = WS_CHILD | WS_BORDER | ES_AUTOHSCROLL | ES_MULTILINE | ES_AUTOVSCROLL |
+        if self.readonly { ES_READONLY } else { 0 } |
+        if self.visible  { WS_VISIBLE }  else { 0 } |
+        if self.scrollbars.0 { WS_HSCROLL } else { 0 } |
+        if self.scrollbars.1 { WS_VSCROLL } else { 0 } |
+        if self.disabled { WS_DISABLED } else { 0 };
+
+        // Get the parent handle
+        let parent = match handle_of_window(ui, &self.parent, "The parent of a textinput must be a window-like control.") {
+            Ok(h) => h,
+            Err(e) => { return Err(e); }
         };
 
-        let handle = unsafe { create_base::<ID>(ui, base) };
-        match handle {
+        // Get the font handle (if any)
+        let font_handle: Option<HFONT> = match self.font.as_ref() {
+            Some(font_id) => 
+                match handle_of_font(ui, &font_id, "The font of a button must be a font resource.") {
+                    Ok(h) => Some(h),
+                    Err(e) => { return Err(e); }
+                },
+            None => None
+        };
+
+        let params = WindowParams {
+            title: self.text.clone().into(),
+            class_name: "EDIT",
+            position: self.position.clone(),
+            size: self.size.clone(),
+            flags: flags,
+            ex_flags: Some(0),
+            parent: parent
+        };
+
+        match unsafe{ build_window(params) } {
             Ok(h) => {
-                 Ok(h)
-            }
-            e => e
+                unsafe{ 
+                    set_window_font(h, font_handle, true); 
+                    SendMessageW(h, EM_LIMITTEXT, self.limit as WPARAM, 0);
+                };
+
+                Ok( Box::new(TextBox{handle: h}) )
+            },
+            Err(e) => Err(Error::System(e))
         }
     }
+}
 
-    fn supported_events(&self) -> Vec<Event> {
-        vec![Event::MouseUp, Event::MouseDown, Event::Focus, Event::ValueChanged, Event::MaxValue,
-             Event::Removed, Event::Resize, Event::Move, Event::KeyDown, Event::KeyUp]
+/**
+    A multi line textinput control
+*/
+pub struct TextBox {
+    handle: HWND
+}
+
+impl TextBox {
+
+    /// Set or unset the readonly status on the control
+    pub fn set_readonly(&self, readonly: bool) {
+        use low::window_helper::{set_window_long, get_window_long};
+        use low::defs::ES_READONLY;
+        use winapi::GWL_STYLE;
+
+        let old_style = get_window_long(self.handle, GWL_STYLE) as usize;
+        if readonly {
+            set_window_long(self.handle, GWL_STYLE, old_style|(ES_READONLY as usize));
+        } else {
+            set_window_long(self.handle, GWL_STYLE, old_style&(!ES_READONLY as usize) );
+        }
     }
-
-    fn evaluator(&self) -> ::ActionEvaluator<ID> {
-        Box::new( |ui, id, handle, action| {
-            match action {
-                Action::SetText(t) => set_window_text(handle, *t),
-                Action::GetText => get_window_text(handle),
-                Action::GetPosition => get_window_pos(handle, true),
-                Action::SetPosition(x, y) => set_window_pos(handle, x, y),
-                Action::GetSize => get_window_size(handle),
-                Action::SetSize(w, h) => set_window_size(handle, w, h),
-                Action::GetParent => get_window_parent(handle),
-                Action::SetParent(p) => set_window_parent(ui, handle, p, true),
-                Action::GetEnabled => get_window_enabled(handle),
-                Action::SetEnabled(e) => set_window_enabled(handle, e),
-                Action::GetVisibility => get_window_visibility(handle),
-                Action::SetVisibility(v) => set_window_visibility(handle, v),
-                Action::Reset => set_window_text(handle, "".to_string()),
-                Action::GetControlType => get_control_type(handle),
-
-                Action::GetTextLimit => get_text_limit(handle),
-                Action::SetTextLimit(l) => set_text_limit(handle, l),
-                Action::GetSelectedBounds => get_select_bounds(handle),
-                Action::SetSelectedBounds(b) => set_select_bounds(handle, b),
-                Action::GetReadonly => get_readonly(handle),
-                Action::SetReadonly(r) => set_readonly(handle, r),
-                Action::Undo => undo_text(handle),
-
-                _ => ActionReturn::NotSupported
-            }
-        })
-    }
-
-    fn control_type(&self) -> ControlType {
-        ControlType::TextBox
-    }
-
-
-}
-
-use winapi::{EM_LIMITTEXT, EM_GETLIMITTEXT, UINT, WPARAM, WM_UNDO, EM_GETSEL, DWORD, EM_SETSEL,
- LPARAM, EM_SETREADONLY, GWL_STYLE, LONG_PTR};
-use controls::base::{send_message, get_window_long};
-use std::mem;
-
-fn get_text_limit<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
-    let limit = send_message(handle, EM_GETLIMITTEXT as UINT, 0, 0) as u32;
-    ActionReturn::TextLimit(limit)
-}
-
-fn set_text_limit<ID: Eq+Clone+Hash>(handle: HWND, limit: u32) -> ActionReturn<ID> {
-    send_message(handle, EM_LIMITTEXT as UINT, limit as WPARAM, 0);
-    ActionReturn::None
-}
-
-fn undo_text<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
-    send_message(handle, WM_UNDO as UINT, 0, 0);
-    ActionReturn::None
-}
-
-fn get_select_bounds<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> {
-    let mut min: DWORD = 0;
-    let mut max: DWORD = 0;
     
-    unsafe{ send_message(handle, EM_GETSEL as u32, mem::transmute(&mut min), mem::transmute(&mut max)) };
+    /// Return `true` if the user cannot edit the content of the control or `false` if the user can
+    pub fn get_readonly(&self) -> bool {
+        use low::window_helper::get_window_long;
+        use low::defs::ES_READONLY;
+        use winapi::GWL_STYLE;
 
-    ActionReturn::SelectBounds((min as u32, max as u32))
+        let style = get_window_long(self.handle, GWL_STYLE) as u32;
+
+        (style & ES_READONLY) == ES_READONLY
+    }
+
+    /// Set the maximum number of characters that the control can hold
+    pub fn set_limit(&self, limit: u32) {
+        use low::defs::EM_LIMITTEXT;
+        unsafe{ SendMessageW(self.handle, EM_LIMITTEXT, limit as WPARAM, 0); }
+    }
+
+    /// Return the maximum number of characters that the control can hold
+    pub fn get_limit(&self) -> u32 {
+        use low::defs::EM_GETLIMITTEXT;
+        unsafe{ SendMessageW(self.handle, EM_GETLIMITTEXT, 0, 0) as u32 }
+    }
+
+    pub fn get_text(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
+    pub fn set_text<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
+    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
+    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
+    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
+    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
+    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
+    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, false); } }
+    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
+    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
 }
 
-fn set_select_bounds<ID: Eq+Clone+Hash>(handle: HWND, bounds: (u32, u32)) -> ActionReturn<ID> {
-    send_message(handle, EM_SETSEL as u32, bounds.0 as WPARAM, bounds.1 as LPARAM);
-    ActionReturn::None
-}
+impl Control for TextBox {
 
-fn get_readonly<ID: Eq+Clone+Hash>(handle: HWND) -> ActionReturn<ID> { 
-    let read_only = ES_READONLY as LONG_PTR;
-    ActionReturn::Readonly( get_window_long(handle, GWL_STYLE) & read_only == read_only )
-}
+    fn handle(&self) -> AnyHandle {
+        AnyHandle::HWND(self.handle)
+    }
 
-fn set_readonly<ID: Eq+Clone+Hash>(handle: HWND, readonly: bool) -> ActionReturn<ID> {
-    send_message(handle, EM_SETREADONLY as u32, readonly as WPARAM, 0);
-    ActionReturn::None
-}
+    fn control_type(&self) -> ControlType { 
+        ControlType::TextBox 
+    }
 
+    fn free(&mut self) {
+        use user32::DestroyWindow;
+        unsafe{ DestroyWindow(self.handle) };
+    }
+
+}

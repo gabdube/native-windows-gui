@@ -1,5 +1,5 @@
 /*!
-    Callback definitions
+    High level events definitions
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -18,68 +18,68 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use std::hash::Hash;
+use std::time::Duration;
 
-pub type Ef0<ID> = Box<Fn(&mut ::Ui<ID>, &ID)>;
-pub type Ef1<ID, A> = Box<Fn(&mut ::Ui<ID>, &ID, A)>;
-pub type Ef2<ID, A, B> = Box<Fn(&mut ::Ui<ID>, &ID, A, B)>;
-pub type Ef4<ID, A, B, C, D> = Box<Fn(&mut ::Ui<ID>, &ID, A, B, C, D)>;
+use ui::Ui;
+use defs::MouseButton;
 
-#[derive(Hash, PartialEq, Eq, Clone)]
+/**
+The function signature for the event callback
+
+Arguments:  
+  • 1: A reference to the Ui  
+  • 2: A reference to the ID of the control  
+  • 3: A reference to the event type that was called  
+  • 4: A reference to the arguments passed with the controls  
+*/
+pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
+
+/**
+    Events name definition
+*/
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
-    MouseUp,
-    MouseDown,
+
+    // NWG special events
+    Destroyed,
+
+    // System events
     KeyDown,
     KeyUp,
-    Resize,
-    Move,
+    Char,
+    Closed,
+    MouseUp,
+    MouseDown,
+    Moved,
+    Resized,
+    Paint,
+    Raw,
+
+    // Default control specific events
     Click,
-    Focus,
-    ValueChanged,
-    MaxValue,
-    Removed,
+    DoubleClick,
     MenuOpen,
     MenuClose,
     SelectionChanged,
-    Unknown,
-    Last
-}
-
-pub enum EventCallback<ID: Eq+Hash+Clone> {
-    MouseUp(Ef4<ID, i32, i32, u32, u32>),
-    MouseDown(Ef4<ID, i32, i32, u32, u32>),
-    KeyDown(Ef1<ID, u32>),
-    KeyUp(Ef1<ID, u32>),
-    Resize(Ef4<ID, i32, i32, u32, u32>),
-    Move(Ef2<ID, i32, i32>),
-    Click(Ef0<ID>),
-    Focus(Ef1<ID, bool>),
-    Removed(Ef0<ID>),
-    ValueChanged(Ef0<ID>),
-    MenuOpen(Ef0<ID>),
-    MenuClose(Ef0<ID>),
-    MaxValue(Ef0<ID>),
-    SelectionChanged(Ef2<ID, u32, String>),
+    ValueChanged,
+    LimitReached,
+    Focus,
+    Tick,
+    Triggered,
+    DateChanged
 }
 
 /**
-    Map callbacks to an application event
+    Events arguments definition. If an event do not have arguments, EventArgs::None is passed.
 */
-pub fn map_callback<ID: Eq+Hash+Clone>(cb: &EventCallback<ID>) -> Event {
-    match cb {
-        &EventCallback::MouseUp(_) => Event::MouseUp,
-        &EventCallback::MouseDown(_) => Event::MouseDown,
-        &EventCallback::KeyUp(_) => Event::KeyUp,
-        &EventCallback::KeyDown(_) => Event::KeyDown,
-        &EventCallback::Click(_) => Event::Click,
-        &EventCallback::Focus(_) => Event::Focus,
-        &EventCallback::ValueChanged(_) => Event::ValueChanged,
-        &EventCallback::MaxValue(_) => Event::MaxValue,
-        &EventCallback::Removed(_) => Event::Removed,
-        &EventCallback::MenuOpen(_) => Event::MenuOpen,
-        &EventCallback::MenuClose(_) => Event::MenuClose,
-        &EventCallback::SelectionChanged(_) => Event::SelectionChanged,
-        &EventCallback::Resize(_) => Event::Resize,
-        &EventCallback::Move(_) => Event::Move,
-    }
+pub enum EventArgs {
+    Key(u32),
+    Char(char),
+    MouseClick{btn: MouseButton, pos: (i32, i32)},
+    Focus(bool),
+    Tick(Duration),
+    Position(i32, i32),
+    Size(u32, u32),
+    Raw(u32, usize, usize), // MSG, WPARAM, LPARAM
+    None
 }

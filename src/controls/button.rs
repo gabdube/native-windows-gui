@@ -1,5 +1,5 @@
 /*!
-    A simple button
+    Button control definition
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -19,92 +19,125 @@
 */
 
 use std::hash::Hash;
+use std::any::TypeId;
 
-use controls::ControlTemplate;
-use controls::base::{WindowBase, create_base, set_window_text, get_window_text,
- get_window_pos, set_window_pos, get_window_size, set_window_size, get_window_parent,
- set_window_parent, get_window_enabled, set_window_enabled, get_window_visibility,
- set_window_visibility, get_control_type};
-use actions::{Action, ActionReturn};
+use winapi::{HWND, HFONT};
+
+use ui::Ui;
+use controls::{Control, ControlT, ControlType, AnyHandle};
+use error::Error;
 use events::Event;
-use constants::{HTextAlign, VTextAlign, ControlType};
-
-use winapi::{HWND, BS_NOTIFY, BS_LEFT, BS_RIGHT, BS_TOP, BS_CENTER, BS_BOTTOM};
 
 /**
-    Configuration properties to create simple button
+    A template that creates a standard button
 
-    * text: The button text
-    * size: The button size (width, height) in pixels
-    * position: The button position (x, y) in the parent control
-    * parent: The control parent
-    * text_align: text alignment inside the button
+    Available events:  
+    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+
+    Members:  
+    • `text`: The text of the button  
+    • `position`: The start position of the button  
+    • `size`: The start size of the button  
+    • `visible`: If the button should be visible to the user   
+    • `disabled`: If the user can or can't click on the button  
+    • `parent`: The button parent  
+    • `font`: The button font. If None, use the system default  
 */
-pub struct Button<ID: Eq+Clone+Hash> {
-    pub text: String,
-    pub size: (u32, u32),
+#[derive(Clone)]
+pub struct ButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
+    pub text: S,
     pub position: (i32, i32),
+    pub size: (u32, u32),
+    pub visible: bool,
+    pub disabled: bool,
     pub parent: ID,
-    pub text_align: (HTextAlign, VTextAlign),
+    pub font: Option<ID>,
 }
 
-impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Button<ID> {
+impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
+    fn type_id(&self) -> TypeId { TypeId::of::<Button>() }
 
-    fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> {
-        let h_align = match self.text_align.0 {
-            HTextAlign::Left => BS_LEFT,
-            HTextAlign::Right => BS_RIGHT,
-            HTextAlign::Center => BS_CENTER
+    fn events(&self) -> Vec<Event> {
+        vec![Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]
+    }
+
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
+        use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY, BS_TEXT};
+
+        let flags: DWORD = WS_CHILD | BS_NOTIFY | BS_TEXT |
+        if self.visible    { WS_VISIBLE }   else { 0 } |
+        if self.disabled   { WS_DISABLED }  else { 0 };
+
+        // Get the parent handle
+        let parent = match handle_of_window(ui, &self.parent, "The parent of a button must be a window-like control.") {
+            Ok(h) => h,
+            Err(e) => { return Err(e); }
         };
 
-        let v_align = match self.text_align.1 {
-            VTextAlign::Top => BS_TOP,
-            VTextAlign::Bottom => BS_BOTTOM,
-            VTextAlign::Center => BS_CENTER
+        // Get the font handle (if any)
+        let font_handle: Option<HFONT> = match self.font.as_ref() {
+            Some(font_id) => 
+                match handle_of_font(ui, &font_id, "The font of a button must be a font resource.") {
+                    Ok(h) => Some(h),
+                    Err(e) => { return Err(e); }
+                },
+            None => None
         };
 
-        let base = WindowBase::<ID> {
-            text: self.text.clone(),
-            size: self.size.clone(),
+        let params = WindowParams {
+            title: self.text.clone().into(),
+            class_name: "BUTTON",
             position: self.position.clone(),
-            visible: true,
-            resizable: false,
-            extra_style: BS_NOTIFY | h_align | v_align,
-            class: "BUTTON".to_string(),
-            parent: Some(self.parent.clone())
+            size: self.size.clone(),
+            flags: flags,
+            ex_flags: Some(0),
+            parent: parent
         };
 
-        unsafe { create_base::<ID>(ui, base) }
+        match unsafe{ build_window(params) } {
+            Ok(h) => {
+                unsafe{ set_window_font(h, font_handle, true); }
+                Ok( Box::new(Button{handle: h}) )
+            },
+            Err(e) => Err(Error::System(e))
+        }
+    }
+}
+
+/**
+    A standard button
+*/
+pub struct Button {
+    handle: HWND
+}
+
+impl Button {
+    pub fn get_text(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
+    pub fn set_text<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
+    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
+    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
+    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
+    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
+    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
+    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, false); } }
+    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
+    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+}
+
+impl Control for Button {
+
+    fn handle(&self) -> AnyHandle {
+        AnyHandle::HWND(self.handle)
     }
 
-    fn supported_events(&self) -> Vec<Event> {
-        vec![Event::Click, Event::Focus, Event::MouseUp, Event::MouseDown, Event::Removed, Event::Resize,
-             Event::Move, Event::KeyDown, Event::KeyUp]
+    fn control_type(&self) -> ControlType { 
+        ControlType::Button 
     }
 
-    fn evaluator(&self) -> ::ActionEvaluator<ID> {
-        Box::new( |ui, id, handle, action| {
-            match action {
-                Action::SetText(t) => set_window_text(handle, *t),
-                Action::GetText => get_window_text(handle),
-                Action::GetPosition => get_window_pos(handle, true),
-                Action::SetPosition(x, y) => set_window_pos(handle, x, y),
-                Action::GetSize => get_window_size(handle),
-                Action::SetSize(w, h) => set_window_size(handle, w, h),
-                Action::GetParent => get_window_parent(handle),
-                Action::SetParent(p) => set_window_parent(ui, handle, p, true),
-                Action::GetEnabled => get_window_enabled(handle),
-                Action::SetEnabled(e) => set_window_enabled(handle, e),
-                Action::GetVisibility => get_window_visibility(handle),
-                Action::SetVisibility(v) => set_window_visibility(handle, v),
-                Action::GetControlType => get_control_type(handle),
-                _ => ActionReturn::NotSupported
-            }
-        })
-    }
-
-    fn control_type(&self) -> ControlType {
-        ControlType::Button
+    fn free(&mut self) {
+        use user32::DestroyWindow;
+        unsafe{ DestroyWindow(self.handle) };
     }
 
 }

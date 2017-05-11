@@ -1,5 +1,5 @@
 /*!
-    A blank custom control.
+    Window control definition
 */
 /*
     Copyright (C) 2016  Gabriel Dubé
@@ -18,176 +18,197 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use std::any::TypeId;
 use std::hash::Hash;
-use std::mem;
-use std::ptr;
 
-use controls::ControlTemplate;
-use controls::base::{WindowBase, create_base, set_window_text, get_window_text, show_message,
-  get_window_pos, set_window_pos, get_window_size, set_window_size,
-  get_window_enabled, set_window_enabled, get_window_visibility,
-  set_window_visibility, get_window_display, set_window_display, get_window_children,
-  get_window_descendant, get_control_type, close_window, to_utf16, set_handle_data_off,
-  get_handle_data_off, destroy_control, free_handle_data_off};
-use actions::{Action, ActionReturn};
+use winapi::HWND;
+
+use ui::Ui;
+use controls::{Control, ControlT, ControlType, AnyHandle};
+use error::Error;
 use events::Event;
-use constants::ControlType;
 
-use winapi::{HWND, HBRUSH, HINSTANCE, WNDCLASSEXW, UINT, CS_HREDRAW, CS_VREDRAW, IDC_ARROW,
-  COLOR_WINDOW, WPARAM, LPARAM, LRESULT, WM_CLOSE, WM_CREATE};
-
-use user32::{RegisterClassExW, LoadCursorW, PostQuitMessage, DefWindowProcW};
-use kernel32::{GetLastError, GetModuleHandleW};
-
-const CLASS_NAME: &'static str = "RustWindow";
+/// System class identifier
+const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
 
 /**
-    Configuration properties to create a window
+    A template that will create a window.
 
-    * caption: Window title (in the upper bar)
-    * size: Window size (width, height) in pixels
-    * position: Starting position (x, y) of the window 
-    * visible: If the window should be visible from the start
-    * resizable: If the window should be resizable by the user
+    Events:  
+    Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp, Event::Moved, Event::Resized, Event::Raw
+
+    Members:  
+      • `title` : The title of the window (in the title bar)  
+      • `position` : Starting posiion of the window after it is created  
+      • `size` : Starting size of the window after it is created  
+      • `resizable` : If the user can resize the window or not  
+      • `visible` : If the user can see the window or not  
+      • `disabled` : If the window is enabled or not. A disabled window do not process events  
+      • `exit_on_close` : If NWG should break the event processing loop when this window is closed  
 */
-pub struct Window {
-    pub caption: String,
-    pub size: (u32, u32),
+#[derive(Clone)]
+pub struct WindowT<S: Clone+Into<String>> {
+    pub title: S,
     pub position: (i32, i32),
-    pub visible: bool,
+    pub size: (u32, u32),
     pub resizable: bool,
+    pub visible: bool,
+    pub disabled: bool,
     pub exit_on_close: bool
 }
 
-struct PrivateWindowData {
-    pub exit_on_close: bool
+impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
+    fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
+
+    fn events(&self) -> Vec<Event> {
+        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp,
+             Event::Moved, Event::Resized, Event::Raw]
+    }
+
+    #[allow(unused_variables)]
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
+        unsafe{
+            if let Err(e) = build_sysclass() { return Err(e); }
+            match build_window(&self) {
+                Ok(h) => { Ok( Box::new(Window{handle: h}) as Box<Control> ) },
+                Err(e) => Err(e)
+            }
+        } // unsafe
+    }
 }
 
-impl<ID: Eq+Clone+Hash > ControlTemplate<ID> for Window {
+/**
+    A window control.
+*/
+#[allow(dead_code)]
+pub struct Window {
+    handle: HWND,
+}
 
-    fn create(&self, ui: &mut ::Ui<ID>, id: ID) -> Result<HWND, ()> { 
-        if unsafe { !register_custom_class::<ID>() } {
-            return Err(());
-        }
+impl Window {
+    /**
+        Close the window as if the user clicked on the X button. This do **NOT** remove the window from the ui,
+        it only set it hidden. In order to also destroy the window, add an unpack statement on the **Closed** event.
+    */
+    pub fn close(&self) {
+        use user32::PostMessageW;
+        use winapi::WM_CLOSE;
 
-        let base = WindowBase::<ID> {
-            text: self.caption.clone(),
-            size: self.size.clone(),
-            position: self.position.clone(),
-            visible: self.visible,
-            resizable: self.resizable,
-            extra_style: 0,
-            class: CLASS_NAME.to_string(),
-            parent: None
-        };
-
-        if let Ok(handle) = unsafe{ create_base::<ID>(ui, base) } {
-            unsafe{ set_handle_data_off(handle, PrivateWindowData{exit_on_close: self.exit_on_close}, 0); }
-            Ok(handle)
-        } else {
-            Err(())
-        } 
+        unsafe{ PostMessageW(self.handle, WM_CLOSE, 0, 0) };
     }
 
-    fn supported_events(&self) -> Vec<Event> {
-        vec![Event::MouseUp, Event::MouseDown, Event::Focus, Event::Removed, Event::Resize, Event::Move,
-            Event::KeyDown, Event::KeyUp]
-    }
+    /// Activate the window and set it above the other windows
+    pub fn activate(&self) { unsafe{ 
+        use user32::SetForegroundWindow;
+        SetForegroundWindow(self.handle); 
+    } }
 
-    fn evaluator(&self) -> ::ActionEvaluator<ID> {
-        Box::new( |ui, id, handle, action| {
-            match action {
-                Action::Message(p) => show_message(handle, *p),
-                Action::GetText => get_window_text(handle),
-                Action::SetText(t) => set_window_text(handle, *t),
-                Action::GetPosition => get_window_pos(handle, false),
-                Action::SetPosition(x, y) => set_window_pos(handle, x, y),
-                Action::GetSize => get_window_size(handle),
-                Action::SetSize(w, h) => set_window_size(handle, w, h),
-                Action::GetChildren => get_window_children(handle),
-                Action::GetDescendants => get_window_descendant(handle),
-                Action::GetEnabled => get_window_enabled(handle),
-                Action::SetEnabled(e) => set_window_enabled(handle, e),
-                Action::GetVisibility => get_window_visibility(handle),
-                Action::SetVisibility(v) => set_window_visibility(handle, v),
-                Action::GetControlType => get_control_type(handle),
+    pub fn get_title(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
+    pub fn set_title<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
+    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
+    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
+    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
+    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
+    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
+    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, true); } }
+    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
+    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+}
 
-                Action::GetWindowDisplay => get_window_display(handle),
-                Action::SetWindowDisplay(d) => set_window_display(handle, d),
-                
-                Action::Close => close_window(handle),
+impl Control for Window {
 
-                _ => ActionReturn::NotSupported
-            }            
-        })
+    fn handle(&self) -> AnyHandle {
+        AnyHandle::HWND(self.handle)
     }
 
     fn control_type(&self) -> ControlType {
-        ControlType::Window
+        ControlType::Window 
+    }
+
+    fn free(&mut self) {
+        use user32::DestroyWindow;
+        unsafe{ DestroyWindow(self.handle) };
     }
 
 }
 
 
-/**
-    Register a new window class. Return true if the class already exists 
-    or the creation was successful and false if it failed.
+/*
+    Private unsafe control methods
 */
-unsafe fn register_custom_class<ID: Eq+Clone+Hash>() -> bool {
-    let name = to_utf16(CLASS_NAME.to_string());
-    let hmod = GetModuleHandleW(ptr::null());
-    let class =
-        WNDCLASSEXW {
-            cbSize: mem::size_of::<WNDCLASSEXW>() as UINT,
-            style: CS_HREDRAW | CS_VREDRAW,
-            lpfnWndProc: Some(wndproc::<ID>), 
-            cbClsExtra: 0,
-            cbWndExtra: mem::size_of::<usize>() as i32,
-            hInstance: hmod as HINSTANCE,
-            hIcon: ptr::null_mut(),
-            hCursor: LoadCursorW(ptr::null_mut(), IDC_ARROW),
-            hbrBackground: mem::transmute(COLOR_WINDOW as HBRUSH),
-            lpszMenuName: ptr::null(),
-            lpszClassName: name.as_ptr(),
-            hIconSm: ptr::null_mut()
-        };
 
+use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 
-    let class_token = RegisterClassExW(&class);
-    if class_token == 0 && GetLastError() != 1410 {
-        // If the class registration failed and the reason is not that
-        // the class already exists (1410), return false.
-        false
-    } else {
-        true
-    }
-}
+#[allow(unused_variables)]
+unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
+    use winapi::{WM_CREATE, WM_CLOSE, GWL_USERDATA};
+    use user32::{DefWindowProcW, PostQuitMessage, ShowWindow};
+    use low::window_helper::get_window_long;
 
-/**
-    Handle the WM_CLOSE event on a window. If exit_on_close is set,
-    nwg will free all its resources by itself, but if exit_on_close is not
-    set, the window must be manually destroyed.
-*/
-unsafe fn handle_close<ID: Eq+Clone+Hash>(handle: HWND) -> LRESULT {
-    if let Some(d) = get_handle_data_off::<PrivateWindowData>(handle, 0) {
-        free_handle_data_off::<PrivateWindowData>(handle, 0);
-        if d.exit_on_close { 
-            PostQuitMessage(0); 
-        } else {
-            destroy_control::<ID>(handle).unwrap();
+    let handled = match msg {
+        WM_CREATE => true,
+        WM_CLOSE => {
+            ShowWindow(hwnd, 0);
+
+            let exit_on_close = get_window_long(hwnd, GWL_USERDATA) & 0x01 == 1;
+            if exit_on_close {
+                PostQuitMessage(0);
+            }
+            true
         }
+        _ => false
+    };
+
+    if handled {
+        0
+    } else {
+        DefWindowProcW(hwnd, msg, w, l)
     }
+}
 
-    0 
-} 
+#[inline(always)]
+unsafe fn build_sysclass() -> Result<(), Error> {
+    use low::window_helper::{SysclassParams, build_sysclass};
+    let params = SysclassParams { 
+        class_name: WINDOW_CLASS_NAME,
+        sysproc: Some(window_sysproc),
+        background: None, style: None
+    };
+    
+    if let Err(e) = build_sysclass(params) {
+        Err(Error::System(e))
+    } else {
+        Ok(())
+    }
+}
 
-/**
-    Custom window procedure for Window types.
-*/
-unsafe extern "system" fn wndproc<ID: Eq+Clone+Hash>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    match msg {
-        WM_CREATE => 0,
-        WM_CLOSE => handle_close::<ID>(hwnd),
-        _ =>  DefWindowProcW(hwnd, msg, w, l)
+#[inline(always)]
+unsafe fn build_window<S: Clone+Into<String>>(t: &WindowT<S>) -> Result<HWND, Error> {
+    use low::window_helper::{WindowParams, build_window, set_window_long};
+    use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_OVERLAPPED, WS_MINIMIZEBOX,
+      WS_MAXIMIZEBOX, WS_SYSMENU, GWL_USERDATA, WS_CLIPCHILDREN};
+
+    let fixed_window: DWORD = WS_CLIPCHILDREN| WS_SYSMENU | WS_CAPTION | WS_OVERLAPPED | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+    let flags: DWORD = 
+    if t.visible    { WS_VISIBLE }   else { 0 } |
+    if t.disabled   { WS_DISABLED }  else { 0 } |
+    if !t.resizable { fixed_window } else { WS_OVERLAPPEDWINDOW } ;
+
+    let params = WindowParams {
+        title: t.title.clone().into(),
+        class_name: WINDOW_CLASS_NAME,
+        position: t.position.clone(),
+        size: t.size.clone(),
+        flags: flags,
+        ex_flags: None,
+        parent: ::std::ptr::null_mut()
+    };
+
+    match build_window(params) {
+        Ok(h) => {
+            set_window_long(h, GWL_USERDATA, t.exit_on_close as usize);
+            Ok(h)
+        },
+        Err(e) => Err(Error::System(e))
     }
 }

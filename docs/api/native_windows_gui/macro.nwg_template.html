@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `nwg_template` macro in crate `native_windows_gui`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, nwg_template">
+
+    <title>native_windows_gui::nwg_template - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc macro">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'nwg_template', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Macro <a href='index.html'>native_windows_gui</a>::<wbr><a class="macro" href=''>nwg_template</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#105-128' title='goto source code'>[src]</a></span></h1>
+<pre class="rust macro">
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_template</span> {
+    (
+        <span class="ident">head</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span><span class="op">&gt;</span>,
+        <span class="ident">controls</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i1</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ];
+        <span class="ident">events</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i4</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i5</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>:<span class="ident">expr</span>) ),<span class="op">*</span>  ];
+        <span class="ident">resources</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i2</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">r</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ];
+        <span class="ident">values</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i3</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ]
+    ) <span class="op">=&gt;</span> { ... };
+}</pre>
+<div class='docblock'><p>Generates a function that initialize the content of a UI.</p>
+<p><strong>head</strong>: Define the name of the function and Ui key type. Ex: <code>my_function&lt;my_type&gt;</code></p>
+<p><strong>controls</strong>: A list of controls to add to the Ui. Accepts an array of <code>(ID, Template)</code></p>
+<p><strong>events</strong>: A list of events to bind to the controls of the UI. Accepts an array of <code>(ControlID, EventID, Event, Callback)</code></p>
+<p><strong>resources</strong>: A list of resources to add to the Ui. Accepts an array of <code>(ID, Template)</code></p>
+<p><strong>values</strong>: A list of user values to add to the Ui. Accepts an array of <code>(ID, Template)</code></p>
+<p><strong>Return Value</strong>: The function calls <code>commit</code> before returning. If the Ui initialization fails,
+the function will return the error.</p>
+<p>Usage:</p>
+
+<pre class="rust rust-example-rendered">
+    <span class="macro">nwg_template</span><span class="macro">!</span>(
+        <span class="ident">head</span>: <span class="ident">setup_ui</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">controls</span>: [ (<span class="string">&quot;TEST&quot;</span>, <span class="ident">Control</span>), (<span class="string">&quot;TEST2&quot;</span>, <span class="ident">Control</span>) ],
+        <span class="ident">events</span>: [ 
+            
+        (<span class="string">&quot;TEST&quot;</span>, <span class="string">&quot;ACTION&quot;</span>, <span class="ident">Event</span>::<span class="ident">Click</span>, <span class="op">|</span><span class="ident">ui</span>, <span class="ident">caller</span>, <span class="ident">event</span>, <span class="ident">args</span><span class="op">|</span> { 
+            <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Hello World!&quot;</span>); 
+        })
+            
+        ],
+        <span class="ident">resources</span>: [ (<span class="string">&quot;Font1&quot;</span>, <span class="ident">Font1</span>), (<span class="string">&quot;Font1&quot;</span>, <span class="ident">Font1</span>) ],
+        <span class="ident">values</span>: [ (<span class="string">&quot;True&quot;</span>, <span class="bool-val">true</span>), (<span class="string">&quot;()&quot;</span>, ()) ]
+    );  
+</pre>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "native_windows_gui";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

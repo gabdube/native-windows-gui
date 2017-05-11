@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Basics</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+
+    <div id="nav">
+        <button id="toggle-nav">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+    </div>
+
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='introduction.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="ui.html"><b>3.1.</b> Ui objects </a></li>
+    <li><a href="controls_resources.html"><b>3.2.</b> Controls and resources </a></li>
+    <li><a href="events.html"><b>3.3.</b> Events </a></li>
+    <li><a href="other_functions.html"><b>3.4.</b> Other functions </a></li>
+</ul>
+</li>
+
+<li><a href="custom.html"><b>4.</b> Custom controls </a>
+<ul class="section">
+    <li><a href="canvas.html"><b>4.1.</b> Canvas </a></li>
+    <li><a href="lowlevel.html"><b>4.2.</b> Custom Module </a></li>
+    <li><a href="custom_events.html"><b>4.3.</b> Custom Events </a></li>
+</ul>
+</li>
+
+</ul>
+</div>
+
+<div id='page-wrapper'>
+<div id='page'>
+
+    <h1 class="title">The Ui</h1>
+
+     As seen in getting started, the Ui is a HashMap-like container that manages a set of control, resources and user values. Any action that touch a GUI pass through the Ui object<br><br>
+
+     <h1 id="creation" class="section-header"><a href="#creation">Creation</a></h1>
+     A Ui object is created using the <code>Ui::new</code>. If, for any reason, the library fails to allocate the system resources required to the Ui object, a <code>nwg::constants::Error</code>
+     will be raised. Also, the Ui requires a type <code>ID</code> for its keys.
+
+     <pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">ui</span>: <span class="nc">Ui</span><span class="o">&lt;</span><span class="kt">usize</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Ui</span>::<span class="n">new</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">"Ui creation failed"</span><span class="p">);</span><span class="w"></span></pre>
+     <br>
+
+     <h1 id="ids" class="section-header"><a href="#ids">The ID</a></h1>
+     In a Ui object, components are identified by a <b>unique</b> ID. The type of the ID is defined by the user when the Ui is first defined. The ID type must implement the
+     <code>Hash+Clone</code> traits. Chances are, the ids will be referenced <b>alot</b> in the UI code (for borrowing controls for example), as such small types that can be hidden
+     behind a <code>const</code> are preferred (example: <code>&amp;'static str</code>, <code>u64</code>, or maybe enums). <br><br>
+
+     <b>Ids are only required to be unique within the UI</b>. For example, two Uis can have a control identified by <code>"foo"</code>. <br><br>
+
+     <h1 id="commit" class="section-header"><a href="#commit">Commit</a></h1>
+
+     Some NWG ui commands (such as <code>pack_control</code> and <code>bind</code>) wont be executed right away. Many of these commands are used when initializing a UI and, under these conditions,
+     they should never fail. Validating each of them individually would be annoying so the validation is executed when <code>commit</code> is called.<br><br>
+
+     When <code>commit</code> is called, only NWG custom messages are touched. Any other messages ( ex: <code>WM_KEYPRESS</code> ) will be ignored.<br><br>
+
+     If a nwg command fails in a commit, commit will <b>immediatly</b> return the error that was raised and will stop the execution of any other waiting command.<br><br> 
+
+     Finally, because NWG custom commands are just like any other Windows message, they will be executed normally in the event loop. If a command fails under these circumstances,
+     <b>the errors will be ignored</b> (might be a good idea to log them somewhere though). 
+
+
+
+<div class="syntax"><pre><span></span><span class="n">ui</span><span class="p">.</span><span class="n">commit</span><span class="p">().</span><span class="n">is_ok</span><span class="p">()</span><span class="w"></span>
+</pre></div>
+    <br>
+
+     <h1 id="misc" class="section-header"><a href="#misc">Misc functions</a></h1>
+
+     The Ui has some functions to probe its resources and controls.
+
+     <h3 id="hasid" class="section-header"><a href="#hasid">has_id</a></h3>
+     Can be used to check whether the Ui has an object identified by a key.
+
+<div class="syntax"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">found</span>: <span class="kt">bool</span> <span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">has_id</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"AButton"</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+
+    <h3 id="handleof" class="section-header"><a href="#handleof">handle_of</a></h3>
+     Can be used to retrieve the low level handle (ex: <code>HWND</code>) of a control. Will return an error if the ID do not exists in the UI, if the ID identify a user value
+     or if the control is borrowed.<br>
+     While the function is <b>not</b> marked as unsafe, anything done to the handle will most likely be. The handle is returned in a <code>nwg::custom::AnyHandle</code> enum.
+     
+
+<div class="syntax"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">AnyHandle</span>::<span class="n">HWND</span><span class="p">(</span><span class="n">handle</span><span class="p">))</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span>::<span class="n">handle_of</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"MyButton"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w"> </span><span class="p">...</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+
+
+</div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>
