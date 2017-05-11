@@ -95,6 +95,10 @@ nwg_template!(
             if dialog.run() {
                 file_path.set_text(&dialog.get_selected_item().unwrap());
             }
+        }),
+
+        ("DatePicker", "DD", Event::DateChanged, |app,_,_,_| {
+            println!("{:?}", nwg_get!(app; ("DatePicker", nwg::DatePicker)).get_value());
         })
     ];
     resources: [

@@ -75,9 +75,9 @@ fn parse_static_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> 
 }
 
 fn parse_datepicker_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
-  use winapi::DTN_DATETIMECHANGE;
+  use winapi::DTN_CLOSEUP;
   match ncode {
-    DTN_DATETIMECHANGE => {
+    DTN_CLOSEUP => {  // DTN_DATETIMECHANGE is sent twice so instead we catch DTN_CLOSEUP ¯\_(ツ)_/¯
       Some((id, Event::DateChanged, EventArgs::None))
     },
     _ => None
@@ -152,7 +152,6 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       // WM_NOTIFY is the new WM_COMMAND for the new windows controls
       let nmdr: &NMHDR = mem::transmute(l);
       if let Some(id) = inner.inner_id_from_handle( &AnyHandle::HWND(nmdr.hwndFrom) ) {
-        
         let control_type = (&mut *inner.controls.get(&id).expect("Could not find a control with with the specified type ID").as_ptr()).control_type();
         parse_notify(id, control_type, nmdr.code as u64)
       } else {
