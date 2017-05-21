@@ -8,6 +8,8 @@ NWG uses [retep998/winapi-rs](https://github.com/retep998/winapi-rs) and works o
 rust versions. NWG was tested on Windows 8.1 and Windows 10 using the MSVC ABI build but any version of Microsoft Windows supported by Rust is supposed to be
 supported by NWG (vista and up).
 
+**NWG will not compile on the GNU toolchain**. The reason is the comctl32.lib do not include a function required by NWG.
+
 ## Why NWG?
 
 Is native-windows-gui the gui framework you are looking for? It is ...
