@@ -19,6 +19,7 @@
 */
 
 use std::time::Duration;
+use std::any::TypeId;
 
 use ui::Ui;
 use defs::MouseButton;
@@ -33,6 +34,10 @@ Arguments:
   • 4: A reference to the arguments passed with the controls  
 */
 pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
+
+/**
+*/
+pub type EventType = (TypeId, usize);
 
 /**
     Events name definition
