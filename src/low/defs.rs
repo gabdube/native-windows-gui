@@ -44,6 +44,8 @@ pub const NWG_PACK_RESOURCE:     UINT = 0x405;  /// Message sent when packing a 
 pub const NWG_TRIGGER:           UINT = 0x406;  /// Message sent when triggering an event
 pub const NWG_CUSTOM_MAX:        UINT = 0x407;  /// Maximum custom event value
 
+pub const NWG_DESTROY:           UINT = 0x420;  /// NWG `Destroy` event identifier
+
 // Value returned by a window proc if the message execution failed/succeeded
 
 pub const COMMIT_SUCCESS: LRESULT = 0;

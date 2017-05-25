@@ -42,6 +42,7 @@ pub mod custom {
     */
     pub use controls::{ControlT, Control, AnyHandle};
     pub use resources::{ResourceT, Resource};
+    pub use events::{SystemEventUnpackProc, CommandEventUnpackProc, NotifyEventUnpackProc, system_event_unpack_no_args};
     pub use low::window_helper::{build_window, build_sysclass, SysclassParams, WindowParams, set_window_long, get_window_long,
     get_window_text, set_window_text, get_window_visibility, set_window_visibility, get_window_position, set_window_position,
     get_window_size, set_window_size, get_window_enabled, set_window_enabled};
