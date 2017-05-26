@@ -23,14 +23,115 @@ use std::ptr;
 use std::hash::Hash;
 use std::any::TypeId;
 
-use winapi::{HWND, HMENU, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, DWORD};
+use winapi::{HWND, HMENU, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, DWORD, WORD};
+use winapi::{WM_MOVE, WM_SIZING, WM_SIZE, WM_EXITSIZEMOVE, WM_PAINT, WM_UNICHAR, WM_CHAR,
+  WM_CLOSE, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, WM_LBUTTONDOWN, WM_RBUTTONDOWN,
+  WM_MBUTTONDOWN, WM_KEYDOWN, WM_KEYUP, BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS};
 
 use ui::UiInner;
 use events::{Event, EventArgs};
 use controls::{ControlType, AnyHandle, Timer};
+use low::defs::{NWG_DESTROY, CBN_SELCHANGE, CBN_KILLFOCUS, CBN_SETFOCUS};
 
 /// A magic number to identify the NWG subclass that dispatches events
 const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
+
+
+// Definition of common system events
+pub const Destroyed: Event = Event::System(NWG_DESTROY, &system_event_unpack_no_args);
+pub const Paint: Event = Event::System(WM_PAINT, &system_event_unpack_no_args);
+pub const Close: Event = Event::System(WM_CLOSE, &system_event_unpack_no_args);
+pub const Moved: Event = Event::System(WM_MOVE, &unpack_move);
+pub const KeyDown: Event = Event::System(WM_KEYDOWN, &unpack_key);
+pub const KeyUp: Event = Event::System(WM_KEYUP, &unpack_key);
+pub const Resized: Event = Event::SystemGroup(&[WM_SIZING, WM_SIZE, WM_EXITSIZEMOVE], &unpack_size);
+pub const Char: Event = Event::SystemGroup(&[WM_UNICHAR, WM_CHAR], &unpack_char);
+pub const MouseUp: Event = Event::SystemGroup(&[WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP], &unpack_mouseclick);
+pub const MouseDown: Event = Event::SystemGroup(&[WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN], &unpack_mouseclick);
+
+// Button events
+pub const BtnClick: Event = Event::Command(BN_CLICKED, &command_event_unpack_no_args);
+pub const BtnDoubleClick: Event = Event::Command(BN_DBLCLK, &command_event_unpack_no_args);
+pub const BtnFocus: Event = Event::CommandGroup(&[BN_SETFOCUS, BN_KILLFOCUS], &unpack_btn_focus);
+
+// Combobox events
+pub const CbnFocus: Event = Event::CommandGroup(&[CBN_SETFOCUS, CBN_KILLFOCUS], &unpack_cbn_focus);
+pub const CbnSelectionChanged: Event = Event::Command(CBN_SELCHANGE, &unpack_cbn_sel_change);
+
+// Event unpackers for events that have no arguments
+pub fn system_event_unpack_no_args(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> { Some(EventArgs::None) }
+pub fn command_event_unpack_no_args(hwnd: HWND, ncode: WORD) -> Option<EventArgs> { Some(EventArgs::None) }
+pub fn notify_event_unpack_no_args(hwnd: HWND) -> EventArgs { EventArgs::None }
+
+// Event unpackers for the events defined above
+fn unpack_move(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
+    use winapi::{LOWORD, HIWORD};
+    
+    let (x, y) = (LOWORD(l as u32), HIWORD(l as u32));
+    Some(EventArgs::Position(x as i32, y as i32))
+}
+
+fn unpack_size(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
+    use winapi::RECT;
+    use user32::GetClientRect;
+
+    let mut r: RECT = mem::uninitialized();
+
+    GetClientRect(hwnd, &mut r);
+    let w: u32 = (r.right-r.left) as u32;
+    let h: u32 = (r.bottom-r.top) as u32;
+
+    Some(EventArgs::Size(w, h))
+}
+
+fn unpack_char(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
+    use winapi::UNICODE_NOCHAR;
+
+    if w == UNICODE_NOCHAR { 
+      return None; 
+    } 
+
+    if let Some(c) = ::std::char::from_u32(w as u32) {
+      Some( EventArgs::Char( c ) )
+    } else {
+      None
+    }
+}
+
+fn unpack_mouseclick(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
+  use defs::MouseButton;
+  use winapi::{GET_X_LPARAM, GET_Y_LPARAM};
+
+  let btn = match msg {
+    WM_LBUTTONUP | WM_LBUTTONDOWN => MouseButton::Left,
+    WM_RBUTTONUP | WM_RBUTTONDOWN => MouseButton::Right,
+    WM_MBUTTONUP | WM_MBUTTONDOWN => MouseButton::Middle,
+    _ => MouseButton::Left
+  };
+
+  let x = GET_X_LPARAM(l) as i32; 
+  let y = GET_Y_LPARAM(l) as i32;
+
+  Some(EventArgs::MouseClick{btn: btn, pos: (x, y)})
+}
+
+fn unpack_key(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
+   Some(EventArgs::Key(w as u32))
+}
+
+fn unpack_btn_focus(hwnd: HWND, ncode: WORD) -> Option<EventArgs> {
+    Some(EventArgs::Focus(ncode==BN_SETFOCUS))
+}
+
+fn unpack_cbn_focus(hwnd: HWND, ncode: WORD) -> Option<EventArgs> {
+    Some(EventArgs::Focus(ncode==CBN_SETFOCUS))
+}
+
+fn unpack_cbn_sel_change(hwnd: HWND, ncode: WORD) -> Option<EventArgs> {
+  unimplemented!()
+}
+
+
 
 // WARNING! This WHOLE section (from parse_listbox_command to parse_command) will be replaced with the events overhaul in NWG BETA2
 
@@ -41,16 +142,6 @@ fn parse_listbox_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)>
     LBN_SELCHANGE => Some((id, Event::SelectionChanged, EventArgs::None)),
     LBN_DBLCLK => Some((id, Event::DoubleClick, EventArgs::None)),
     LBN_SETFOCUS | LBN_KILLFOCUS => Some((id, Event::Focus, EventArgs::Focus(ncode==LBN_SETFOCUS))),
-    _ => None
-  }
-}
-
-fn parse_button_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
-  use low::defs::{BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS};
-  match ncode {
-    BN_CLICKED => Some((id, Event::Click, EventArgs::None)),
-    BN_DBLCLK => Some((id, Event::DoubleClick, EventArgs::None)),
-    BN_SETFOCUS | BN_KILLFOCUS => Some((id, Event::Focus, EventArgs::Focus(ncode==BN_SETFOCUS))),
     _ => None
   }
 }
@@ -105,7 +196,6 @@ fn parse_command(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, 
   let ncode = HIWORD(w as DWORD) as u32;
   match control_type {
     ControlType::ListBox => parse_listbox_command(id, ncode),
-    ControlType::Button => parse_button_command(id, ncode),
     ControlType::TextInput | ControlType::TextBox => parse_edit_command(id, ncode),
     ControlType::Label => parse_static_command(id, ncode),
     ControlType::DatePicker => parse_datepicker_command(id, ncode),
@@ -130,10 +220,6 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
   let inner_id: u64;
 
   let callback_data = match msg {
-    WM_PAINT => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_PAINT)");;
-      Some( (inner_id, Event::Paint, EventArgs::None) )
-    },
     WM_COMMAND => {
       if l == 0 { 
         None 
@@ -158,19 +244,6 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
         None
       }
     },
-    WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_LBUTTONUP | WM_RBUTTONUP  | WM_MBUTTONUP)");;
-      Some( (inner_id, Event::MouseUp, parse_mouse_click(msg, l)) )
-    },
-    WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN)");;
-      Some( (inner_id, Event::MouseDown, parse_mouse_click(msg, l)) )
-    },
-    WM_KEYDOWN | WM_KEYUP => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_KEYDOWN | WM_KEYUP)");;
-      let evt = if msg == WM_KEYDOWN { Event::KeyDown } else { Event::KeyUp };
-      Some( (inner_id, evt, EventArgs::Key(w as u32)) )
-    },
     WM_MENUCOMMAND => {
       let parent_menu: HMENU = mem::transmute(l);
       let handle = AnyHandle::HMENU_ITEM(parent_menu, get_menu_id(parent_menu, w as c_int));
@@ -181,15 +254,6 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       } else {
         None
       }  
-    },
-    WM_UNICHAR | WM_CHAR => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_UNICHAR | WM_CHAR)");;
-      if w == UNICODE_NOCHAR { return 1; } 
-      if let Some(c) = ::std::char::from_u32(w as u32) {
-        Some( (inner_id, Event::Char, EventArgs::Char( c )) )
-      } else {
-        None
-      }
     },
     WM_TIMER => {
       let handle = AnyHandle::Custom(TypeId::of::<Timer>(), w as usize);
@@ -202,32 +266,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
       } else {
         None
       }
-    },
-    WM_MOVE => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_MOVE)");
-      let (x, y) = (LOWORD(l as u32), HIWORD(l as u32));
-      Some( (inner_id, Event::Moved, EventArgs::Position(x as i32, y as i32)) )
-    },
-    WM_SIZING | WM_SIZE => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_SIZING)");
-      let mut r: RECT = mem::uninitialized();
-      GetClientRect(hwnd, &mut r);
-      let w: u32 = (r.right-r.left) as u32;
-      let h: u32 = (r.bottom-r.top) as u32;
-      Some( (inner_id, Event::Resized, EventArgs::Size(w, h)) )
-    },
-    WM_EXITSIZEMOVE => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_SIZING)");
-      let mut r: RECT = mem::uninitialized();
-      GetClientRect(hwnd, &mut r);
-      let w: u32 = (r.right-r.left) as u32;
-      let h: u32 = (r.bottom-r.top) as u32;
-      Some( (inner_id, Event::Resized, EventArgs::Size(w, h)) )
     }
-    WM_CLOSE => {
-      inner_id = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ).expect("Could not match system handle to ui control (msg: WM_CLOSE)");
-      Some( (inner_id, Event::Closed, EventArgs::None) )
-    },
     _ => { None }
   };
 
@@ -238,7 +277,7 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
   // Trigger a raw event 
   if msg < NWG_CUSTOM_MIN || msg > NWG_CUSTOM_MAX {
     if let Some(inner_id) = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ) {
-      inner.trigger(inner_id, Event::Raw, EventArgs::Raw(msg, w as usize, l as usize));
+      inner.trigger(inner_id, Event::Any, EventArgs::Raw(msg, w as usize, l as usize));
     }
   }
 
@@ -318,22 +357,4 @@ pub unsafe fn exit() {
   use winapi::WM_QUIT;
 
   PostMessageW(ptr::null_mut(), WM_QUIT, 0, 0);
-}
-
-fn parse_mouse_click(msg: UINT, l: LPARAM) -> EventArgs {
-  use defs::MouseButton;
-  use winapi::{WM_LBUTTONUP, WM_LBUTTONDOWN, WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, 
-    GET_X_LPARAM, GET_Y_LPARAM};
-
-  let btn = match msg {
-    WM_LBUTTONUP | WM_LBUTTONDOWN => MouseButton::Left,
-    WM_RBUTTONUP | WM_RBUTTONDOWN => MouseButton::Right,
-    WM_MBUTTONUP | WM_MBUTTONDOWN => MouseButton::Middle,
-    _ => MouseButton::Left
-  };
-
-  let x = GET_X_LPARAM(l) as i32; 
-  let y = GET_Y_LPARAM(l) as i32;
-
-  EventArgs::MouseClick{btn: btn, pos: (x, y)}
 }

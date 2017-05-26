@@ -26,9 +26,10 @@ use user32::SendMessageW;
 use winapi::{HWND, HFONT, WPARAM};
 
 use ui::Ui;
-use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use controls::{Control, ControlT, ControlType, AnyHandle};
+use events::{Event, Destroyed, Moved, Resized};
+use events::combobox::{Focus};
 use low::other_helper::{to_utf16, from_utf16};
 
 /**
@@ -62,7 +63,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> ControlT<I
     fn type_id(&self) -> TypeId { TypeId::of::<ComboBox<D>>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]
+        vec![Destroyed, Moved, Resized, Event::SelectionChanged, Focus, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

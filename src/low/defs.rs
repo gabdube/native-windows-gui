@@ -23,8 +23,8 @@
 use std::hash::Hash;
 use std::any::{Any, TypeId};
 
-use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, MENUITEMINFOW, IShellItem, HRESULT, IUnknownVtbl,
- IUnknown, PCWSTR, IBindCtx, REFIID, D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory,c_void};
+use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, WORD, MENUITEMINFOW, IShellItem, HRESULT, IUnknownVtbl,
+ IUnknown, PCWSTR, IBindCtx, REFIID, D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory, c_void, c_int};
 use std::ops::{Deref, DerefMut};
 
 
@@ -70,6 +70,10 @@ pub const ACTCTX_FLAG_RESOURCE_NAME_VALID: u32 = 0x008;
 pub const ACTCTX_FLAG_SET_PROCESS_DEFAULT: u32 = 0x010;
 pub const ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID: u32 = 0x004;
 
+pub const CBN_SETFOCUS: WORD = 3;
+pub const CBN_KILLFOCUS: WORD = 4;
+pub const CBN_SELCHANGE: WORD = 1;
+
 pub const LB_ADDSTRING: UINT = 384;
 pub const LB_INSERTSTRING: UINT = 385;
 pub const LB_DELETESTRING: UINT = 386;
@@ -95,11 +99,6 @@ pub const LBN_SELCHANGE: UINT = 1;
 pub const LBN_DBLCLK: UINT = 2;
 pub const LBN_SETFOCUS: UINT = 4;
 pub const LBN_KILLFOCUS: UINT = 5;
-
-pub const BN_CLICKED: UINT = 0;
-pub const BN_DBLCLK: UINT = 5;
-pub const BN_SETFOCUS: UINT = 6;
-pub const BN_KILLFOCUS: UINT = 7;
 
 pub const BM_SETCHECK: UINT = 241;
 pub const BM_GETCHECK: UINT = 240;
