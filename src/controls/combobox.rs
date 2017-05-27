@@ -29,7 +29,7 @@ use ui::Ui;
 use error::Error;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use events::{Event, Destroyed, Moved, Resized};
-use events::combobox::{Focus};
+use events::combobox::{Focus, SelectionChanged};
 use low::other_helper::{to_utf16, from_utf16};
 
 /**
@@ -63,7 +63,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> ControlT<I
     fn type_id(&self) -> TypeId { TypeId::of::<ComboBox<D>>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Moved, Resized, Event::SelectionChanged, Focus, Event::Any]
+        vec![Destroyed, Moved, Resized, SelectionChanged, Focus, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

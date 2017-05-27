@@ -31,7 +31,7 @@ use winapi::{WM_MOVE, WM_SIZING, WM_SIZE, WM_EXITSIZEMOVE, WM_PAINT, WM_UNICHAR,
 use ui::UiInner;
 use events::{Event, EventArgs};
 use controls::{ControlType, AnyHandle, Timer};
-use low::defs::{NWG_DESTROY, CBN_SELCHANGE, CBN_KILLFOCUS, CBN_SETFOCUS};
+use low::defs::{NWG_DESTROY, CBN_SELCHANGE, CBN_KILLFOCUS, CBN_SETFOCUS, STN_CLICKED, STN_DBLCLK};
 
 /// A magic number to identify the NWG subclass that dispatches events
 const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
@@ -40,7 +40,7 @@ const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
 // Definition of common system events
 pub const Destroyed: Event = Event::System(NWG_DESTROY, &system_event_unpack_no_args);
 pub const Paint: Event = Event::System(WM_PAINT, &system_event_unpack_no_args);
-pub const Close: Event = Event::System(WM_CLOSE, &system_event_unpack_no_args);
+pub const Closed: Event = Event::System(WM_CLOSE, &system_event_unpack_no_args);
 pub const Moved: Event = Event::System(WM_MOVE, &unpack_move);
 pub const KeyDown: Event = Event::System(WM_KEYDOWN, &unpack_key);
 pub const KeyUp: Event = Event::System(WM_KEYUP, &unpack_key);
@@ -56,7 +56,11 @@ pub const BtnFocus: Event = Event::CommandGroup(&[BN_SETFOCUS, BN_KILLFOCUS], &u
 
 // Combobox events
 pub const CbnFocus: Event = Event::CommandGroup(&[CBN_SETFOCUS, CBN_KILLFOCUS], &unpack_cbn_focus);
-pub const CbnSelectionChanged: Event = Event::Command(CBN_SELCHANGE, &unpack_cbn_sel_change);
+pub const CbnSelectionChanged: Event = Event::Command(CBN_SELCHANGE, &command_event_unpack_no_args);
+
+// Static events
+pub const StnClick: Event = Event::Command(STN_CLICKED, &command_event_unpack_no_args);
+pub const StnDoubleClick: Event = Event::Command(STN_DBLCLK, &command_event_unpack_no_args);
 
 // Event unpackers for events that have no arguments
 pub fn system_event_unpack_no_args(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> { Some(EventArgs::None) }
@@ -127,12 +131,6 @@ fn unpack_cbn_focus(hwnd: HWND, ncode: WORD) -> Option<EventArgs> {
     Some(EventArgs::Focus(ncode==CBN_SETFOCUS))
 }
 
-fn unpack_cbn_sel_change(hwnd: HWND, ncode: WORD) -> Option<EventArgs> {
-  unimplemented!()
-}
-
-
-
 // WARNING! This WHOLE section (from parse_listbox_command to parse_command) will be replaced with the events overhaul in NWG BETA2
 
 fn parse_listbox_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
@@ -156,14 +154,6 @@ fn parse_edit_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
   }
 }
 
-fn parse_static_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
-  use low::defs::{STN_CLICKED, STN_DBLCLK};
-  match ncode {
-    STN_CLICKED => Some((id, Event::Click, EventArgs::None)),
-    STN_DBLCLK => Some((id, Event::DoubleClick, EventArgs::None)),
-    _ => None
-  }
-}
 
 fn parse_datepicker_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
   use winapi::DTN_CLOSEUP;

@@ -27,7 +27,7 @@ use user32::SendMessageW;
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed, Moved, Resized};
 use defs::{HTextAlign, CheckState, PickerDate};
 use low::other_helper::to_utf16;
 
@@ -82,7 +82,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for DatePickerT<S, ID> 
     fn type_id(&self) -> TypeId { TypeId::of::<DatePicker>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw, Event::DateChanged]
+        vec![Destroyed, Moved, Resized, DateChanged, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

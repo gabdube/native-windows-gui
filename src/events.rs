@@ -26,15 +26,22 @@ use winapi::{HWND, UINT, WORD, LPARAM, WPARAM};
 
 use ui::Ui;
 use defs::MouseButton;
-pub use low::events::{Destroyed, Paint, Close, Moved, KeyDown, KeyUp, Resized,
+pub use low::events::{Destroyed, Paint, Closed, Moved, KeyDown, KeyUp, Resized,
   Char, MouseUp, MouseDown};
 
-pub mod buttons {
+pub mod button {
     pub use low::events::{BtnClick as Click, BtnDoubleClick as DoubleClick, BtnFocus as Focus};
 }
 
+pub use self::button as checkbox; // Checkboxes use the same events of the buttons
+pub use self::button as radiobutton; // Radiobuttons use the same events of the buttons
+
 pub mod combobox {
     pub use low::events::{CbnFocus as Focus, CbnSelectionChanged as SelectionChanged};
+}
+
+pub mod label {
+    pub use low::events::{StnClick as Click, StnDoubleClick as DoubleClick};
 }
 
 /**

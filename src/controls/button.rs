@@ -27,7 +27,7 @@ use ui::Ui;
 use error::Error;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use events::{Event, Destroyed, Moved, Resized};
-use events::buttons::{Click, DoubleClick, Focus};
+use events::button::{Click, DoubleClick, Focus};
 
 /**
     A template that creates a standard button

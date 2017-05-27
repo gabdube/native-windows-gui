@@ -28,7 +28,7 @@ use ui::Ui;
 use error::Error;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use events::{Event, Destroyed, Moved, Resized};
-use events::buttons::{Click, DoubleClick, Focus};
+use events::checkbox::{Click, DoubleClick, Focus};
 use defs::CheckState;
 
 

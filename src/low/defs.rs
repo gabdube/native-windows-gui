@@ -144,8 +144,8 @@ pub const EN_KILLFOCUS: UINT = 512;
 pub const EN_UPDATE: UINT = 1024;
 pub const EN_MAXTEXT: UINT = 1281;
 
-pub const STN_CLICKED: UINT = 0;
-pub const STN_DBLCLK: UINT = 1;
+pub const STN_CLICKED: WORD = 0;
+pub const STN_DBLCLK: WORD = 1;
 
 pub const IDABORT: i32 = 3;
 pub const IDCANCEL: i32 = 2;
