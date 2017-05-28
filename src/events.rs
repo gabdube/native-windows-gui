@@ -20,7 +20,6 @@
 
 use std::time::Duration;
 use std::any::TypeId;
-use std::mem;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
@@ -28,6 +27,7 @@ use winapi::{HWND, UINT, WORD, DWORD, LPARAM, WPARAM};
 
 use ui::Ui;
 use defs::MouseButton;
+use low::events::hash_fn_ptr;
 
 // System events that can be applied to any HWND based control
 pub use low::events::{Destroyed, Paint, Closed, Moved, KeyDown, KeyUp, Resized, Char, MouseUp, MouseDown};
@@ -42,6 +42,8 @@ pub mod datepicker { pub use low::events::DateChanged; }
 pub mod listbox { pub use low::events::{LbnSelectionChanged as SelectionChanged, LbnDoubleClick as DoubleClick, LbnFocus as Focus}; }
 pub mod textbox { pub use low::events::{EnFocus as Focus, EnLimit as Limit, EnValueChanged as ValueChanged}; }
 pub use self::textbox as textinput; // Textinput use the same events of the textbox
+
+pub use self::Event::Any as Any;
 
 /**
 The function signature for the event callback
@@ -144,7 +146,7 @@ impl fmt::Debug for Event {
 impl Hash for Event {
     fn hash<H: Hasher>(&self, state: &mut H) {
         match self {
-            &Event::Any => Event::Any.hash(state),
+            &Event::Any => 1.hash(state),
             &Event::System(id, fnptr) => { id.hash(state); hash_fn_ptr(&fnptr, state); },
             &Event::SystemGroup(ids, fnptr) => { ids.hash(state); hash_fn_ptr(&fnptr, state); },
             &Event::Command(id, fnptr) => { id.hash(state); hash_fn_ptr(&fnptr, state); },
@@ -152,18 +154,6 @@ impl Hash for Event {
             &Event::Notify(id, fnptr) => { id.hash(state); hash_fn_ptr(&fnptr, state); },
             &Event::Custom(tid, id) => { tid.hash(state); id.hash(state); },
         }
-    }
-}
-
-/**
-    Hash the function pointer of an events. Assumes the pointer as a size of [usize; 2].
-    There's a test that check this.
-*/
-#[inline(always)]
-fn hash_fn_ptr<T: Sized, H: Hasher>(fnptr: &T, state: &mut H) {
-    unsafe{
-        let ptr_v: [usize; 2] = mem::transmute_copy(fnptr);
-        ptr_v.hash(state);
     }
 }
 

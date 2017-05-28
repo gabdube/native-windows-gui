@@ -18,7 +18,8 @@ use std::any::TypeId;
 use std::hash::Hash;
 
 use nwg::custom::{Control, ControlT, AnyHandle, SysclassParams, build_sysclass, WindowParams, build_window};
-use nwg::{Error, Event, Ui, simple_message, fatal_message, dispatch_events};
+use nwg::{Error, Ui, simple_message, fatal_message, dispatch_events};
+use nwg::events as nwge;
 
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT};
 
@@ -39,10 +40,10 @@ impl<ID: Hash+Clone> ControlT<ID> for MyCustomWindowT {
         TypeId::of::<MyCustomWindow>() 
     }
 
-    fn events(&self) -> Vec<Event> {
+    fn events(&self) -> Vec<nwge::Event> {
         // This method must return an vec of events type that NWG will listen to for each instance of the control
 
-        vec![Event::Closed]
+        vec![nwge::Closed]
     }
 
     #[allow(unused_variables)]
@@ -144,7 +145,7 @@ fn main() {
     app.pack_control(&"AButton", nwg_button!(parent="MyCustomWindow"; text="Test"; position=(10,10); size=(480, 480)) );
 
     // Bind an event
-    app.bind(&"MyCustomWindow", &"ExitNWG", Event::Closed, |_,_,_,_| {
+    app.bind(&"MyCustomWindow", &"ExitNWG", nwge::Closed, |_,_,_,_| {
         simple_message("Hello", "Goodbye!");
         nwg::exit();
     });

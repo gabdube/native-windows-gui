@@ -21,7 +21,7 @@
 
 use std::mem;
 use std::ptr;
-use std::hash::Hash;
+use std::hash::{Hash, Hasher};
 
 use winapi::{HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, WORD};
 
@@ -250,4 +250,16 @@ pub unsafe fn exit() {
   use winapi::WM_QUIT;
 
   PostMessageW(ptr::null_mut(), WM_QUIT, 0, 0);
+}
+
+/**
+    Hash the function pointer of an events. Assumes the pointer as a size of [usize; 2].
+    There's a test that check this.
+*/
+#[inline(always)]
+pub fn hash_fn_ptr<T: Sized, H: Hasher>(fnptr: &T, state: &mut H) {
+    unsafe{
+        let ptr_v: [usize; 2] = mem::transmute_copy(fnptr);
+        ptr_v.hash(state);
+    }
 }

@@ -7,7 +7,8 @@
 
 #[macro_use] extern crate native_windows_gui as nwg;
 
-use nwg::{Event, Ui, simple_message, fatal_message, dispatch_events};
+use nwg::{Ui, simple_message, fatal_message, dispatch_events};
+use nwg::events as nwge;
 use nwg::constants::HTextAlign;
 
 // Identifiers for static controls/resources/values
@@ -44,7 +45,7 @@ nwg_template!(
         (MsgSelect, nwg_textinput!(parent=ControlsGroup; position=(130, 50); size=(250, 22); text="Hello World!"; font=Some(TextFont)))
     ];
     events: [
-        (AddNewButton, AddCallback, Event::Click, |ui,_,_,_| {
+        (AddNewButton, AddCallback, nwge::button::Click, |ui,_,_,_| {
             // Borrow references to the controls and values that will be used.
             let (mut button_list, mut next_id) = nwg_get_mut!(ui; [
                 (ButtonList, Vec<usize>),
@@ -71,7 +72,7 @@ nwg_template!(
             // Bind a callback
             let msg_txt = msg.get_text();
             let next_event_id = new_id+1000;
-            ui.bind(&new_id, &next_event_id, Event::Click, move |_,_,_,_|{
+            ui.bind(&new_id, &next_event_id, nwge::button::Click, move |_,_,_,_|{
                 simple_message("Dynamic button!", &msg_txt);
             });
 
@@ -84,7 +85,7 @@ nwg_template!(
             // pack & bind will be processed by the event loop after this closure returns.
         }),
 
-        (ClearButtons, ClearCallback, Event::Click, |ui,_,_,_| {
+        (ClearButtons, ClearCallback, nwge::button::Click, |ui,_,_,_| {
             let (mut button_list, mut next_id) = nwg_get_mut!(ui; [
                 (ButtonList, Vec<usize>),
                 (NextId, usize)

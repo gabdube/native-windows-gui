@@ -5,7 +5,8 @@
 
 extern crate native_windows_gui as nwg;
 
-use nwg::{Ui, Error, Event, simple_message, fatal_message, dispatch_events};
+use nwg::{Ui, Error, simple_message, fatal_message, dispatch_events};
+use nwg::events as nwge;
 
 pub fn setup_ui(ui: &Ui<&'static str>) -> Result<(), Error> {
 
@@ -68,7 +69,7 @@ pub fn setup_ui(ui: &Ui<&'static str>) -> Result<(), Error> {
     ui.pack_control(&"HelloButton", hellbtn);
 
     // events:
-    ui.bind(&"HelloButton", &"SaySomething", Event::Click, |ui,_,_,_| {
+    ui.bind(&"HelloButton", &"SaySomething", nwge::button::Click, |ui,_,_,_| {
         if let Ok(your_name) = ui.get::<nwg::TextInput>(&"YourName") {
             simple_message("Hello", &format!("Hello {}!", your_name.get_text()) );
         } else {

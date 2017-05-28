@@ -4,7 +4,8 @@
 
 #[macro_use] extern crate native_windows_gui as nwg;
 
-use nwg::{Event, Ui, fatal_message, dispatch_events};
+use nwg::{Ui, fatal_message, dispatch_events};
+use nwg::events as nwge;
 use std::thread;
 use std::time::Duration;
 
@@ -15,7 +16,7 @@ nwg_template!(
         ("SleepButton", nwg_button!( parent="Sleep"; text="SLEEP"; size=(200, 200); position=(0, 0) ))
     ];
     events: [
-        ("SleepButton", "Sleep", Event::Click, |ui,_,_,_| {
+        ("SleepButton", "Sleep", nwge::button::Click, |ui,_,_,_| {
             let btn = nwg_get!(ui; ("SleepButton", nwg::Button));
             btn.set_text("SLEEPING!");
             thread::sleep(Duration::from_millis(5000));

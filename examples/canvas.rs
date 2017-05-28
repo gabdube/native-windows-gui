@@ -4,8 +4,9 @@
 
 #[macro_use] extern crate native_windows_gui as nwg;
 
-use nwg::{Event, EventArgs, Ui, fatal_message, dispatch_events};
+use nwg::{EventArgs, Ui, fatal_message, dispatch_events};
 use nwg::constants as nwgc;
+use nwg::events as nwge;
 
 nwg_template!(
     head: setup_ui<&'static str>,
@@ -14,7 +15,7 @@ nwg_template!(
         ("Canvas", nwg_canvas!( parent="MainWindow"; size=(500,500)))
     ];
     events: [
-        ("Canvas", "Paint", Event::Paint, |app, _, _, _| {
+        ("Canvas", "Paint", nwge::Paint, |app, _, _, _| {
             let mut canvas = nwg_get_mut!(app; ("Canvas", nwg::Canvas<&'static str>));
 
             // Get the renderer and clear the last scene
@@ -39,7 +40,7 @@ nwg_template!(
             renderer.fill_ellipse(&"SolidBrush3", &e1).unwrap();
         }),
 
-        ("MainWindow", "ResizeCanvas", Event::Resized, |app, _, _, args| {
+        ("MainWindow", "ResizeCanvas", nwge::Resized, |app, _, _, args| {
             match args {
                 &EventArgs::Size(w, h) => {
                     let mut canvas = nwg_get_mut!(app; ("Canvas", nwg::Canvas<&'static str>));

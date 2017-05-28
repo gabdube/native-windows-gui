@@ -92,7 +92,7 @@ macro_rules! nwg_get_mut {
                 ("MainWindow", nwg_window!( title="Template Example"; size=(280, 105) ))
             ];
             events: [ 
-                ("MainWindow", "ACTION", nwg::Event::Resized, |ui, caller, event, args| { 
+                ("MainWindow", "ACTION", nwg::events::Resized, |ui, caller, event, args| { 
                     println!("Hello World!"); 
                 })
             ];

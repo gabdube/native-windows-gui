@@ -29,11 +29,11 @@ extern crate ole32;
 mod low;
 mod defs;
 mod error;
-mod events;
 mod controls;
 mod resources;
 mod ui;
 
+pub mod events;
 pub mod templates;
 
 pub mod custom {
@@ -58,8 +58,8 @@ pub mod constants {
     pub use controls::ControlType;
 }
 
+pub use events::EventArgs;
 pub use error::{Error, SystemError};
-pub use events::{EventCallback, Event, EventArgs};
 pub use low::other_helper::{message, simple_message, fatal_message, error_message};
 pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
  RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput,
