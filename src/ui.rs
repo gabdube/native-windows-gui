@@ -30,7 +30,7 @@ use low::message_handler::MessageHandler;
 use low::defs::{PackUserValueArgs, PackControlArgs, PackResourceArgs, UnpackArgs, BindArgs, UnbindArgs, TriggerArgs};
 use controls::{ControlT, Control, AnyHandle};
 use resources::{ResourceT, Resource};
-use events::{Event, EventCallback, EventArgs};
+use events::{Event, EventCallback, EventArgs, Destroyed};
 use error::Error;
 
 type InnerId = u64;
@@ -200,7 +200,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
         for id in children_ids.iter().rev() {
 
             // Call the destroy callbacks
-            self.trigger(*id, Event::Destroyed, EventArgs::None);
+            self.trigger(*id, Destroyed, EventArgs::None);
 
             // Removes stuff
             self.inner_public_map.remove(&id).unwrap();

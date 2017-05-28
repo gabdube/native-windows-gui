@@ -95,10 +95,10 @@ pub const LBS_NOSEL: UINT = 0x4000;
 pub const LBS_HASSTRINGS: UINT = 64;
 pub const LBS_MULTIPLESEL: UINT = 8;
 
-pub const LBN_SELCHANGE: UINT = 1;
-pub const LBN_DBLCLK: UINT = 2;
-pub const LBN_SETFOCUS: UINT = 4;
-pub const LBN_KILLFOCUS: UINT = 5;
+pub const LBN_SELCHANGE: WORD = 1;
+pub const LBN_DBLCLK: WORD = 2;
+pub const LBN_SETFOCUS: WORD = 4;
+pub const LBN_KILLFOCUS: WORD = 5;
 
 pub const BM_SETCHECK: UINT = 241;
 pub const BM_GETCHECK: UINT = 240;
@@ -139,10 +139,10 @@ pub const ES_MULTILINE: UINT = 4;
 pub const EM_LIMITTEXT: UINT = 197;
 pub const EM_GETLIMITTEXT: UINT = 213;
 
-pub const EN_SETFOCUS: UINT = 256;
-pub const EN_KILLFOCUS: UINT = 512;
-pub const EN_UPDATE: UINT = 1024;
-pub const EN_MAXTEXT: UINT = 1281;
+pub const EN_SETFOCUS: WORD = 256;
+pub const EN_KILLFOCUS: WORD = 512;
+pub const EN_UPDATE: WORD = 1024;
+pub const EN_MAXTEXT: WORD = 1281;
 
 pub const STN_CLICKED: WORD = 0;
 pub const STN_DBLCLK: WORD = 1;

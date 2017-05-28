@@ -28,6 +28,7 @@ use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::{Event, Destroyed, Moved, Resized};
+use events::datepicker::DateChanged;
 use defs::{HTextAlign, CheckState, PickerDate};
 use low::other_helper::to_utf16;
 

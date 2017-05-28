@@ -125,7 +125,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<MenuItem>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Event::Triggered]
+        vec![Destroyed]  //TODOL: Event::Triggered
     }
 
    #[allow(unused_variables)]

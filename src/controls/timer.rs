@@ -26,7 +26,7 @@ use winapi::{HWND, UINT_PTR, ULONG_PTR, UINT, DWORD};
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed};
 
 static mut TIMERS_ID: UINT_PTR = 0; 
 
@@ -49,7 +49,7 @@ impl<ID: Hash+Clone> ControlT<ID> for TimerT {
     fn type_id(&self) -> TypeId { TypeId::of::<Timer>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Tick]
+        vec![Destroyed] // TODO: Event::Tick
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

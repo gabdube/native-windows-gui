@@ -17,21 +17,25 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#![allow(non_upper_case_globals, unused_variables)]
 
 use std::mem;
 use std::ptr;
 use std::hash::Hash;
-use std::any::TypeId;
 
-use winapi::{HWND, HMENU, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, DWORD, WORD};
+use winapi::{HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, WORD};
+
 use winapi::{WM_MOVE, WM_SIZING, WM_SIZE, WM_EXITSIZEMOVE, WM_PAINT, WM_UNICHAR, WM_CHAR,
   WM_CLOSE, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, WM_LBUTTONDOWN, WM_RBUTTONDOWN,
-  WM_MBUTTONDOWN, WM_KEYDOWN, WM_KEYUP, BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS};
+  WM_MBUTTONDOWN, WM_KEYDOWN, WM_KEYUP, BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS,
+  DTN_CLOSEUP};
 
 use ui::UiInner;
 use events::{Event, EventArgs};
-use controls::{ControlType, AnyHandle, Timer};
-use low::defs::{NWG_DESTROY, CBN_SELCHANGE, CBN_KILLFOCUS, CBN_SETFOCUS, STN_CLICKED, STN_DBLCLK};
+use controls::{AnyHandle};
+use low::defs::{NWG_DESTROY, CBN_SELCHANGE, CBN_KILLFOCUS, CBN_SETFOCUS, STN_CLICKED, STN_DBLCLK,
+  LBN_SELCHANGE, LBN_DBLCLK, LBN_SETFOCUS, LBN_KILLFOCUS, EN_SETFOCUS, EN_KILLFOCUS, EN_UPDATE,
+  EN_MAXTEXT};
 
 /// A magic number to identify the NWG subclass that dispatches events
 const EVENTS_DISPATCH_ID: UINT_PTR = 2465;
@@ -62,10 +66,23 @@ pub const CbnSelectionChanged: Event = Event::Command(CBN_SELCHANGE, &command_ev
 pub const StnClick: Event = Event::Command(STN_CLICKED, &command_event_unpack_no_args);
 pub const StnDoubleClick: Event = Event::Command(STN_DBLCLK, &command_event_unpack_no_args);
 
+// Datepicker events
+pub const DateChanged: Event = Event::Notify(DTN_CLOSEUP, &notify_event_unpack_no_args);
+
+// Listbox events
+pub const LbnSelectionChanged: Event = Event::Command(LBN_SELCHANGE, &command_event_unpack_no_args);
+pub const LbnDoubleClick: Event = Event::Command(LBN_DBLCLK, &command_event_unpack_no_args);
+pub const LbnFocus: Event = Event::CommandGroup(&[LBN_SETFOCUS, LBN_KILLFOCUS], &unpack_lbn_focus);
+
+// Textedit events
+pub const EnValueChanged: Event = Event::Command(EN_UPDATE, &command_event_unpack_no_args);
+pub const EnLimit: Event = Event::Command(EN_MAXTEXT, &command_event_unpack_no_args);
+pub const EnFocus: Event = Event::CommandGroup(&[EN_SETFOCUS, EN_KILLFOCUS], &unpack_en_focus);
+
 // Event unpackers for events that have no arguments
 pub fn system_event_unpack_no_args(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> { Some(EventArgs::None) }
 pub fn command_event_unpack_no_args(hwnd: HWND, ncode: WORD) -> Option<EventArgs> { Some(EventArgs::None) }
-pub fn notify_event_unpack_no_args(hwnd: HWND) -> EventArgs { EventArgs::None }
+pub fn notify_event_unpack_no_args(hwnd: HWND) -> Option<EventArgs> { Some(EventArgs::None) }
 
 // Event unpackers for the events defined above
 fn unpack_move(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
@@ -79,9 +96,9 @@ fn unpack_size(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs>
     use winapi::RECT;
     use user32::GetClientRect;
 
-    let mut r: RECT = mem::uninitialized();
+    let mut r: RECT = unsafe{ mem::uninitialized() };
 
-    GetClientRect(hwnd, &mut r);
+    unsafe{ GetClientRect(hwnd, &mut r); }
     let w: u32 = (r.right-r.left) as u32;
     let h: u32 = (r.bottom-r.top) as u32;
 
@@ -131,66 +148,12 @@ fn unpack_cbn_focus(hwnd: HWND, ncode: WORD) -> Option<EventArgs> {
     Some(EventArgs::Focus(ncode==CBN_SETFOCUS))
 }
 
-// WARNING! This WHOLE section (from parse_listbox_command to parse_command) will be replaced with the events overhaul in NWG BETA2
-
-fn parse_listbox_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
-  use low::defs::{LBN_SELCHANGE, LBN_DBLCLK, LBN_SETFOCUS, LBN_KILLFOCUS};
-
-  match ncode {
-    LBN_SELCHANGE => Some((id, Event::SelectionChanged, EventArgs::None)),
-    LBN_DBLCLK => Some((id, Event::DoubleClick, EventArgs::None)),
-    LBN_SETFOCUS | LBN_KILLFOCUS => Some((id, Event::Focus, EventArgs::Focus(ncode==LBN_SETFOCUS))),
-    _ => None
-  }
+fn unpack_lbn_focus(hwnd: HWND, ncode: WORD) -> Option<EventArgs> {
+    Some(EventArgs::Focus(ncode==LBN_SETFOCUS))
 }
 
-fn parse_edit_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
-  use low::defs::{EN_SETFOCUS, EN_KILLFOCUS, EN_UPDATE, EN_MAXTEXT};
-  match ncode {
-    EN_UPDATE => Some((id, Event::ValueChanged, EventArgs::None)),
-    EN_MAXTEXT => Some((id, Event::LimitReached, EventArgs::None)),
-    EN_SETFOCUS | EN_KILLFOCUS => Some((id, Event::Focus, EventArgs::Focus(ncode==EN_SETFOCUS))),
-    _ => None
-  }
-}
-
-
-fn parse_datepicker_command(id: u64, ncode: u32) -> Option<(u64, Event, EventArgs)> {
-  use winapi::DTN_CLOSEUP;
-  match ncode {
-    DTN_CLOSEUP => {  // DTN_DATETIMECHANGE is sent twice so instead we catch DTN_CLOSEUP ¯\_(ツ)_/¯
-      Some((id, Event::DateChanged, EventArgs::None))
-    },
-    _ => None
-  }
-}
-
-/**
-  Parse the common controls notification passed through the `WM_COMMAND` message.
-*/
-#[inline(always)]
-fn parse_notify(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, Event, EventArgs)> {
-  match control_type {
-    ControlType::DatePicker => parse_datepicker_command(id, w as u32),
-    _ => None
-  }
-}
-
-/**
-  Parse the common controls notification passed through the `WM_COMMAND` message.
-*/
-#[inline(always)]
-fn parse_command(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, Event, EventArgs)> {
-  use winapi::HIWORD;
-
-  let ncode = HIWORD(w as DWORD) as u32;
-  match control_type {
-    ControlType::ListBox => parse_listbox_command(id, ncode),
-    ControlType::TextInput | ControlType::TextBox => parse_edit_command(id, ncode),
-    ControlType::Label => parse_static_command(id, ncode),
-    ControlType::DatePicker => parse_datepicker_command(id, ncode),
-    _ => None
-  }
+fn unpack_en_focus(hwnd: HWND, ncode: WORD) -> Option<EventArgs> {
+    Some(EventArgs::Focus(ncode==EN_SETFOCUS))
 }
 
 /**
@@ -199,70 +162,10 @@ fn parse_command(id: u64, control_type: ControlType, w: WPARAM) -> Option<(u64, 
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
   use comctl32::DefSubclassProc;
-  use user32::GetClientRect;
-  use winapi::{WM_KEYDOWN, WM_KEYUP, WM_UNICHAR, WM_CHAR, UNICODE_NOCHAR, WM_MENUCOMMAND, WM_CLOSE, WM_LBUTTONUP, WM_LBUTTONDOWN, 
-    WM_RBUTTONUP, WM_RBUTTONDOWN, WM_MBUTTONUP, WM_MBUTTONDOWN, WM_COMMAND, WM_TIMER, WM_MOVE, WM_SIZING, WM_EXITSIZEMOVE, WM_SIZE,
-    WM_PAINT, WM_NOTIFY, c_int, LOWORD, HIWORD, RECT, NMHDR};
-  use low::menu_helper::get_menu_id;
   use low::defs::{NWG_CUSTOM_MIN, NWG_CUSTOM_MAX};
 
   let inner: &mut UiInner<ID> = mem::transmute(data);
   let inner_id: u64;
-
-  let callback_data = match msg {
-    WM_COMMAND => {
-      if l == 0 { 
-        None 
-      } else {
-        // Somehow, WM_COMMAND messages get sent while freeing and so inner_id_from_handle can fail...
-        let nhandle: HWND = mem::transmute(l);
-        if let Some(id) = inner.inner_id_from_handle( &AnyHandle::HWND(nhandle) ) {
-          let control_type = (&mut *inner.controls.get(&id).expect("Could not find a control with with the specified type ID").as_ptr()).control_type();
-          parse_command(id, control_type, w)
-        } else {
-          None
-        }
-      }
-    },
-    WM_NOTIFY => {
-      // WM_NOTIFY is the new WM_COMMAND for the new windows controls
-      let nmdr: &NMHDR = mem::transmute(l);
-      if let Some(id) = inner.inner_id_from_handle( &AnyHandle::HWND(nmdr.hwndFrom) ) {
-        let control_type = (&mut *inner.controls.get(&id).expect("Could not find a control with with the specified type ID").as_ptr()).control_type();
-        parse_notify(id, control_type, nmdr.code as WPARAM)
-      } else {
-        None
-      }
-    },
-    WM_MENUCOMMAND => {
-      let parent_menu: HMENU = mem::transmute(l);
-      let handle = AnyHandle::HMENU_ITEM(parent_menu, get_menu_id(parent_menu, w as c_int));
-
-      // Custom controls might have their own way to handle the message
-      if let Some(inner_id) = inner.inner_id_from_handle( &handle ) { 
-        Some( (inner_id, Event::Triggered, EventArgs::None) )
-      } else {
-        None
-      }  
-    },
-    WM_TIMER => {
-      let handle = AnyHandle::Custom(TypeId::of::<Timer>(), w as usize);
-
-      // Here I assume WM_TIMER will only be sent by built-in timers. Using a user event might be a better idea.
-      // Custom controls might have their own way to handle the message
-      if let Some(inner_id) = inner.inner_id_from_handle( &handle ) {
-        let timer: &mut Box<Timer> = mem::transmute( inner.controls.get(&inner_id).unwrap().as_ptr() );
-        Some( (inner_id, Event::Tick, EventArgs::Tick(timer.elapsed())) )
-      } else {
-        None
-      }
-    }
-    _ => { None }
-  };
-
-  if let Some((inner_id, evt, params)) = callback_data {
-    inner.trigger(inner_id, evt, params);
-  }
 
   // Trigger a raw event 
   if msg < NWG_CUSTOM_MIN || msg > NWG_CUSTOM_MAX {
