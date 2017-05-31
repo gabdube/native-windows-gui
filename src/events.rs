@@ -74,6 +74,15 @@ pub type CommandEventUnpackProc = Fn(HWND, WORD) -> Option<EventArgs>;
 */
 pub type NotifyEventUnpackProc = Fn(HWND) -> Option<EventArgs>;
 
+/**
+    An enum that can hold the required parameters of the events unpack functions
+*/
+pub enum EventParam {
+    SystemParam(HWND, UINT, WPARAM, LPARAM),
+    CommandParam(HWND, WORD),
+    NotifyParam(HWND),
+    None
+}
 
 /**
     An enum that list different way to handle message by the Windows system
@@ -168,6 +177,6 @@ pub enum EventArgs {
     Tick(Duration),
     Position(i32, i32),
     Size(u32, u32),
-    Raw(u32, usize, usize), // MSG, WPARAM, LPARAM
+    Raw(u32, WPARAM, LPARAM), // MSG, WPARAM, LPARAM
     None
 }

@@ -28,10 +28,10 @@ use winapi::{HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, WORD};
 use winapi::{WM_MOVE, WM_SIZING, WM_SIZE, WM_EXITSIZEMOVE, WM_PAINT, WM_UNICHAR, WM_CHAR,
   WM_CLOSE, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, WM_LBUTTONDOWN, WM_RBUTTONDOWN,
   WM_MBUTTONDOWN, WM_KEYDOWN, WM_KEYUP, BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS,
-  DTN_CLOSEUP};
+  DTN_CLOSEUP, WM_COMMAND, WM_NOTIFY, WM_USER};
 
-use ui::UiInner;
-use events::{Event, EventArgs};
+use ui::{UiInner, EventHandlerCollection};
+use events::{Event, EventArgs, EventParam};
 use controls::{AnyHandle};
 use low::defs::{NWG_DESTROY, CBN_SELCHANGE, CBN_KILLFOCUS, CBN_SETFOCUS, STN_CLICKED, STN_DBLCLK,
   LBN_SELCHANGE, LBN_DBLCLK, LBN_SETFOCUS, LBN_KILLFOCUS, EN_SETFOCUS, EN_KILLFOCUS, EN_UPDATE,
@@ -161,20 +161,99 @@ fn unpack_en_focus(hwnd: HWND, ncode: WORD) -> Option<EventArgs> {
 */
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
-  use comctl32::DefSubclassProc;
-  use low::defs::{NWG_CUSTOM_MIN, NWG_CUSTOM_MAX};
+    use comctl32::DefSubclassProc;
+    use low::defs::{NWG_CUSTOM_MIN, NWG_CUSTOM_MAX};
 
-  let inner: &mut UiInner<ID> = mem::transmute(data);
-  let inner_id: u64;
+    let inner: &mut UiInner<ID> = mem::transmute(data);
+    let inner_id: u64;
 
-  // Trigger a raw event 
-  if msg < NWG_CUSTOM_MIN || msg > NWG_CUSTOM_MAX {
-    if let Some(inner_id) = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ) {
-      inner.trigger(inner_id, Event::Any, EventArgs::Raw(msg, w as usize, l as usize));
+    if let Some(events) = inner.event_handlers(msg as u32) {
+        let handle = build_handle(hwnd, msg, w, l);
+        let params = build_events_params(&handle, hwnd, msg, w, l);
+        if let Some(inner_id) = inner.inner_id_from_handle( &handle ) {
+            println!("TEST");
+            for event in events.iter() {
+                if let Some(args) = build_args(event, &params) {
+                    inner.trigger(inner_id, *event, args);
+                }
+            }
+        }
     }
-  }
+    
+    // Trigger the `Any` event 
+    if msg < NWG_CUSTOM_MIN || msg > NWG_CUSTOM_MAX {
+      if let Some(inner_id) = inner.inner_id_from_handle( &AnyHandle::HWND(hwnd) ) {
+        inner.trigger(inner_id, Event::Any, EventArgs::Raw(msg, w, l));
+      }
+    }
 
-  DefSubclassProc(hwnd, msg, w, l)
+    DefSubclassProc(hwnd, msg, w, l)
+}
+
+#[inline(always)]
+fn build_handle(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> AnyHandle {
+    use winapi::NMHDR;
+
+    if msg == WM_COMMAND {
+        AnyHandle::HWND( unsafe{ mem::transmute(l) } )
+    } else if msg == WM_NOTIFY {
+        let nmdr: &NMHDR = unsafe{ mem::transmute(l) };
+        AnyHandle::HWND(nmdr.hwndFrom)
+    } else if msg < WM_USER {
+        AnyHandle::HWND(hwnd)
+    } else {
+        AnyHandle::HWND(hwnd)
+    }
+}
+
+#[inline(always)]
+fn build_events_params(handle: &AnyHandle, hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> EventParam {
+    use winapi::{HIWORD, DWORD};
+
+    if msg == WM_COMMAND {
+        let ncode: WORD = HIWORD(w as DWORD);
+        match handle {
+            &AnyHandle::HWND(hwnd) => EventParam::CommandParam(hwnd, ncode),
+            _ => unreachable!()
+        }
+    } else if msg == WM_NOTIFY {
+        match handle {
+            &AnyHandle::HWND(hwnd) => EventParam::NotifyParam(hwnd),
+            _ => unreachable!()
+        }
+    } else if msg < WM_USER {
+        match handle { 
+            &AnyHandle::HWND(hwnd) => EventParam::SystemParam(hwnd, msg, w, l),
+            _ => EventParam::None
+        }
+    } else {
+        EventParam::None
+    }
+}
+
+#[inline(always)]
+fn build_args(event: &Event, params: &EventParam) -> Option<EventArgs> {
+    match params {
+        &EventParam::SystemParam(hwnd, msg, w, l) => {
+            match event {
+                &Event::System(_, fnptr) | &Event::SystemGroup(_, fnptr) => (fnptr)(hwnd, msg, w, l),
+                _ => { unreachable!(); }
+            }
+        },
+        &EventParam::CommandParam(hwnd, ncode) => {
+            match event {
+                &Event::Command(_, fnptr) | &Event::CommandGroup(_, fnptr) => (fnptr)(hwnd, ncode),
+                _ => { unreachable!(); }
+            }
+        }
+        &EventParam::NotifyParam(hwnd) => {
+            match event {
+                &Event::Notify(_, fnptr) => (fnptr)(hwnd),
+                _ => { unreachable!(); }
+            }
+        }
+        &EventParam::None => None
+    }
 }
 
 /**
