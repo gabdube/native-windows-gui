@@ -310,7 +310,10 @@ impl<ID: Hash+Clone> UiInner<ID> {
         let push_event = |id: u32, defs: &mut EventDefinitionsCollection| {
             if let Some(mut event_vec) = defs.get_mut(&id) {
                 match Rc::get_mut(event_vec) {
-                    Some(ev) => ev.push(event.clone()),
+                    Some(ev) => {
+                        if ev.iter().any(|&e| e == event) { return }
+                        ev.push(event.clone())
+                    },
                     None => unreachable!() // If getting a mutable reference to the callback list passed (see above), it is ensured that this will work
                 }
                 return;
@@ -360,6 +363,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
         } else {
             Some(Error::KeyNotFound)
         }
+
+        // Note that event definition are not removed
     }
 
     pub fn trigger(&mut self, id: InnerId, event: Event, args: EventArgs) -> Option<Error> {

@@ -77,14 +77,9 @@ nwg_template!(
             }
         }),
 
-        ("Timer", "UpdateLabel", nwge::timer::Tick, |app,_,_,args|{
-            let label = nwg_get!(app; ("TimerLabel", nwg::Label));
-            let elapsed = match args { 
-                &EventArgs::Tick(ref d) => d,
-                _ => unreachable!()
-            };
-
-            label.set_text(format!("Time elapsed: {:?} seconds", elapsed.as_secs()).as_ref());
+        ("Timer", "UpdateLabel", nwge::timer::Tick, |app,_,_,_|{
+            let (label, timer) = nwg_get!(app; [("TimerLabel", nwg::Label), ("Timer", nwg::Timer)]);
+            label.set_text(format!("Time elapsed: {:?} seconds", timer.elapsed().as_secs()).as_ref());
         }),
 
         ("FileDialogButton", "ChooseFile", nwge::button::Click, |app,_,_,_|{
