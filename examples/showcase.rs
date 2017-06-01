@@ -54,13 +54,13 @@ nwg_template!(
             }
         }),
 
-        /*("NestedAction", "SayHello", Event::Triggered, |_,_,_,_| {
+        ("NestedAction", "SayHello", nwge::menu::Triggered, |_,_,_,_| {
             nwg::simple_message("Hello", "Hello World!");
         }),
 
-        ("QuitItem", "Quit", Event::Triggered, |_,_,_,_| {
+        ("QuitItem", "Quit", nwge::menu::Triggered, |_,_,_,_| {
             nwg_exit()
-        }),*/
+        }),
 
         ("TimerButton", "Start Timer", nwge::button::Click, |app,_,_,_|{
             let (mut timer, btn) = nwg_get_mut!(app; [
@@ -77,7 +77,7 @@ nwg_template!(
             }
         }),
 
-        /*("Timer", "UpdateLabel", Event::Tick, |app,_,_,args|{
+        ("Timer", "UpdateLabel", nwge::timer::Tick, |app,_,_,args|{
             let label = nwg_get!(app; ("TimerLabel", nwg::Label));
             let elapsed = match args { 
                 &EventArgs::Tick(ref d) => d,
@@ -85,7 +85,7 @@ nwg_template!(
             };
 
             label.set_text(format!("Time elapsed: {:?} seconds", elapsed.as_secs()).as_ref());
-        }),*/
+        }),
 
         ("FileDialogButton", "ChooseFile", nwge::button::Click, |app,_,_,_|{
             let (dialog, file_path) = nwg_get_mut!(app; [

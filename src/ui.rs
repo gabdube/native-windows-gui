@@ -310,29 +310,22 @@ impl<ID: Hash+Clone> UiInner<ID> {
         let push_event = |id: u32, defs: &mut EventDefinitionsCollection| {
             if let Some(mut event_vec) = defs.get_mut(&id) {
                 match Rc::get_mut(event_vec) {
-                    Some(ev) => ev.push(event),
+                    Some(ev) => ev.push(event.clone()),
                     None => unreachable!() // If getting a mutable reference to the callback list passed (see above), it is ensured that this will work
                 }
                 return;
             }
             
-            defs.insert(id, Rc::new(vec![event]));
+            defs.insert(id, Rc::new(vec![event.clone()]));
         };
 
         match event {
-            Event::System(id, _) | Event::Notify(id, _) => push_event(id, &mut self.events_definitions),
-            Event::Command(id, _) => push_event(id as u32, &mut self.events_definitions),
-            Event::SystemGroup(ids, _) => {
+            Event::Single(id, _, _) => push_event(id, &mut self.events_definitions),
+            Event::Group(ids, _, _) => {
                 for id in ids {
                     push_event(*id, &mut self.events_definitions);
                 }
-            }
-            Event::CommandGroup(ids, _) => {
-                for id in ids {
-                    push_event((*id) as u32, &mut self.events_definitions);
-                }
             },
-            Event::Custom(_, _) => { unimplemented!() }
             Event::Any => { /* Any is not stored */ }
         }
 

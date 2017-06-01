@@ -27,6 +27,7 @@ use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
 use events::{Event, Destroyed};
+use events::timer::Tick;
 
 static mut TIMERS_ID: UINT_PTR = 0; 
 
@@ -49,7 +50,7 @@ impl<ID: Hash+Clone> ControlT<ID> for TimerT {
     fn type_id(&self) -> TypeId { TypeId::of::<Timer>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Destroyed] // TODO: Event::Tick
+        vec![Destroyed, Tick]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
