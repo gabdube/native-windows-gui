@@ -808,32 +808,16 @@ fn sizeof_events_unpack_function() {
 
     // When function pointers are hashed, they are interpreted as [usize;2]
     // This test makes sure that its always the case
-    if let &nwge::Event::Command(_, ref fnptr) = &nwge::button::Click {
-        assert!(size_of_val(fnptr) == size_of::<[usize; 2]>());
+    if let &nwge::Event::Single(_, ref fnptr1, ref fnptr2) = &nwge::KeyDown {
+        assert!(size_of_val(fnptr1) == size_of::<[usize; 2]>());
+        assert!(size_of_val(fnptr2) == size_of::<[usize; 2]>());
     } else {
         panic!("What?")
     }
 
-    if let &nwge::Event::CommandGroup(_, ref fnptr) = &nwge::combobox::Focus {
-        assert!(size_of_val(fnptr) == size_of::<[usize; 2]>());
-    } else {
-        panic!("What?")
-    }
-
-    if let &nwge::Event::System(_, ref fnptr) = &nwge::Moved {
-        assert!(size_of_val(fnptr) == size_of::<[usize; 2]>());
-    } else {
-        panic!("What?")
-    }
-
-    if let &nwge::Event::SystemGroup(_, ref fnptr) = &nwge::Resized {
-        assert!(size_of_val(fnptr) == size_of::<[usize; 2]>());
-    } else {
-        panic!("What?")
-    }
-
-    if let &nwge::Event::Notify(_, ref fnptr) = &nwge::datepicker::DateChanged {
-        assert!(size_of_val(fnptr) == size_of::<[usize; 2]>());
+    if let &nwge::Event::Group(_, ref fnptr1, ref fnptr2) = &nwge::MouseDown {
+        assert!(size_of_val(fnptr1) == size_of::<[usize; 2]>());
+        assert!(size_of_val(fnptr2) == size_of::<[usize; 2]>());
     } else {
         panic!("What?")
     }
