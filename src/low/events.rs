@@ -58,8 +58,13 @@ pub type HandleProc = Fn(HWND, UINT, WPARAM, LPARAM) -> Option<AnyHandle>;
 */
 #[derive(Clone, Copy)]
 pub enum Event {
+    /// A special identifier that catches every system messages
     Any,
+
+    /// Wrap a single system message identified by the first paramater
     Single(UINT, &'static UnpackProc, &'static HandleProc),
+
+    /// Wrap a group of system messages identified by the first paramater
     Group(&'static [UINT], &'static UnpackProc, &'static HandleProc)
 }
 

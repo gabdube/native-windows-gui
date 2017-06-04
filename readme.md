@@ -75,7 +75,8 @@ cargo run --example templating
 
 #[macro_use] extern crate native_windows_gui as nwg;
 
-use nwg::{Event, Ui, simple_message, fatal_message, dispatch_events};
+use nwg::{Ui, simple_message, fatal_message, dispatch_events};
+use nwg::events as nwge;
 
 nwg_template!(
     head: setup_ui<&'static str>,
@@ -95,7 +96,7 @@ nwg_template!(
            position=(5, 45); size=(270, 50); font=Some("MainFont") ))
     ];
     events: [
-        ("HelloButton", "SaySomething", Event::Click, |ui,_,_,_| {
+        ("HelloButton", "SaySomething", nwge::button::Click, |ui,_,_,_| {
             let your_name = nwg_get!(ui; ("YourName", nwg::TextInput));
             simple_message("Hello", &format!("Hello {}!", your_name.get_text()) );
         })

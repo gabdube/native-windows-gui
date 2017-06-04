@@ -7,6 +7,8 @@
     <title>Native Windows GUI guide - Custom events</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
     
 </head>
@@ -67,7 +69,71 @@
 
     <h1 class="title">Custom events</h1>
 
-    The ability to define custom events is currently in progress. It will be implemented in the <b>BETA2</b> release.
+    Custom events can be created to teach NWG how to handle a certain system message.<br><br>
+
+    <b>Warning</b>: Custom events is a new feature and therefore, it is <b>unstable</b>.
+
+    <h1 id="ids" class="section-header"><a href="#ids">The Event enum</a></h1> 
+
+    Defining a new event is done by defining a <code>nwg::custom::Event</code> constant. There are two kinds of Event member that can be used:
+    <code>Single</code> and <code>Group</code>. Single will wrap a single event message and Group can wrap a list of messages.<br><br>
+
+    Both event enum also requires two function pointers: a <code>UnpackProc</code> function and a <code>HandleProc</code>. <br><br>
+
+    Here's the Event enum definition:
+
+    <pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">Event</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="sd">/// A special identifier that catches every system messages</span>
+<span class="w">    </span><span class="n">Any</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Wrap a single system message identified by the first paramater</span>
+<span class="w">    </span><span class="n">Single</span><span class="p">(</span><span class="n">UINT</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="n">UnpackProc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="n">HandleProc</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Wrap a group of system messages identified by the first paramater</span>
+<span class="w">    </span><span class="n">Group</span><span class="p">(</span><span class="o">&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="p">[</span><span class="n">UINT</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="n">UnpackProc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="n">HandleProc</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre>
+
+    <h1 id="unpack" class="section-header"><a href="#unpack">The Unpack Proc</a></h1> 
+
+    The unpack procedure tells NWG how to interprete the raw message parameters. Returns a <code>EventParams</code> enum if the arguments
+    were parsed successfully or <code>None</code> if they were not.<br><br>
+
+    See the <a href="/native-windows-gui/api/native_windows_gui/enum.EventArgs.html">EventArgs enum docs</a> for a possible list of arguments to return. Note: The EventArgs enum will most likely change before the final release.
+
+    <pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">type</span> <span class="nc">UnpackProc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Fn</span><span class="p">(</span><span class="n">HWND</span><span class="p">,</span><span class="w"> </span><span class="n">UINT</span><span class="p">,</span><span class="w"> </span><span class="n">WPARAM</span><span class="p">,</span><span class="w"> </span><span class="n">LPARAM</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;</span><span class="n">EventArgs</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+</pre>
+
+    <h1 id="handle" class="section-header"><a href="#handle">The Handle Proc</a></h1> 
+
+    The handle proc tells nwg how to identify a control in a UI by returning a AnyHandle enum value. Returns a <code>AnyHandle</code> enum if the arguments
+    were parsed successfully or <code>None</code> if they were not. The Handle returned must be equal to the <code>handle</code> of the Control trait. <br><br>
+
+    See the <a href="/native-windows-gui/api/native_windows_gui/custom/enum.AnyHandle.html">AnyHandle enum docs</a> for a possible list of handle type to return.
+
+    <pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">type</span> <span class="nc">HandleProc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Fn</span><span class="p">(</span><span class="n">HWND</span><span class="p">,</span><span class="w"> </span><span class="n">UINT</span><span class="p">,</span><span class="w"> </span><span class="n">WPARAM</span><span class="p">,</span><span class="w"> </span><span class="n">LPARAM</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;</span><span class="n">AnyHandle</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+</pre>
+
+    <h1 id="utils" class="section-header"><a href="#utils">Utilities</a></h1> 
+
+    Nwg export a few values that will most likely be used by custom events under the <code>custom</code> module:
+
+    <ol>
+        <li><b>event_unpack_no_args</b>: An unpack proc that simple returns <code>EventArgs::None</code></li>
+        <li><b>hwnd_handle</b>: An handle proc that simple returns <code>AnyHandle::HWND(hwnd)</code> where <b>hwnd</b> is the hwnd paramter passed the the window proc.</li>
+        <li><b>command_handle</b>: An unpack proc that wraps the <code>WM_COMMAND</code> message. Must be specialized in another function to filter to good message.</li>
+        <li><b>notify_handle</b>: Same as command_handle, but for the <code>WM_NOTIFY</code> message</li>
+    </ol>
+    
+    Example of <code>command_handle</code> to wrap a button click event:
+    <pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">BtnClick</span>: <span class="nc">Event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Event</span>::<span class="n">Single</span><span class="p">(</span><span class="w"></span>
+<span class="w">  </span><span class="n">WM_COMMAND</span><span class="p">,</span><span class="w"> </span>
+<span class="w">  </span><span class="o">&amp;</span><span class="n">event_unpack_no_args</span><span class="p">,</span><span class="w"> </span>
+<span class="w">  </span><span class="o">&amp;|</span><span class="n">h</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">l</span><span class="o">|</span><span class="p">{</span><span class="w"> </span>
+<span class="w">      </span><span class="n">command_handle</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">BN_CLICKED</span><span class="p">)</span><span class="w"> </span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">);</span><span class="w"></span>
+</pre>
 
 <br/><br/>
 

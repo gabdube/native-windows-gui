@@ -151,7 +151,25 @@
 <div class="syntax"><pre><span></span><span class="n">ui</span><span class="p">.</span><span class="n">trigger</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"MyWindow"</span><span class="p">,</span><span class="w"> </span><span class="n">nwge</span>::<span class="n">MouseDown</span><span class="p">,</span><span class="w"> </span><span class="n">EventArgs</span>::<span class="nb">None</span><span class="p">);</span><span class="w"></span>
 </pre></div><br/>
 
+    <h1 id="any" class="section-header"><a href="#any">Catching Any events</a></h1>
 
+    NWG has a special event type named <code>event::Any</code> which can be used by any <code>HWND</code> based control. By binding a callback to this
+    event, any messages sent to the control will trigger the callback. The messages low level informations (<code>MSG, WPARAM, LPARAM</code>) are then 
+    passed in the <b>args</b> parameter in a <code>EventArgs::Raw</code> (see <a href="/native-windows-gui/api/native_windows_gui/enum.EventArgs.html">the docs</a>)
+
+    <pre><span></span><span class="p">(</span><span class="s">"RandomStuffTextBox"</span><span class="p">,</span><span class="w"> </span><span class="s">"AllSystemEvents"</span><span class="p">,</span><span class="w"> </span><span class="n">nwge</span>::<span class="n">Any</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">args</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">EventArgs</span>::<span class="n">Raw</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">),</span><span class="w"></span>
+<span class="w">         </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">unreachable</span><span class="o">!</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0x0100</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// WM_KEYDOWN</span>
+<span class="w">        </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">"The virtual key {:?} was pressed"</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}),</span><span class="w"></span>
+</pre>
+
+    </br></br>
 
 </div>
 </div>
