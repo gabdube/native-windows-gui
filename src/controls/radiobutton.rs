@@ -27,14 +27,15 @@ use user32::SendMessageW;
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed, Moved, Resized};
+use events::radiobutton::{Click, DoubleClick, Focus};
 use defs::CheckState;
 
 /**
     A template that creates a standard radio button
 
     Events:  
-    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+    `Destroyed, Moved, Resized, Click, DoubleClick, Focus, Any`
 
     Members:  
     • `text`: The text of the radio button  
@@ -63,7 +64,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for RadioButtonT<S, ID>
     fn type_id(&self) -> TypeId { TypeId::of::<RadioButton>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]
+        vec![Destroyed, Moved, Resized, Click, DoubleClick, Focus, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

@@ -71,13 +71,21 @@
     Whenever a user interacts with a control, an event might be triggered (ex: when a someone clicks on a button). Events
     can have associated callbacks which will be executed when the event is triggered.<br><br>
 
-    The callback signatures must match the <code>EventCallack</code> type. Because of this, a single callback can
+    The callback signatures must match the <a href="/native-windows-gui/api/native_windows_gui/type.EventCallback.html">EventCallack</a> type. Because of this, a single callback can
     be bound to multiple events or controls.<br><br>
 
     The api documentation list the supported events of each control under their template documentation.<br><br>
 
-    <b>Unstable warning</b>: currently, events are listed in a enum. This method is a bit too restrictive so the enum will likely become a module. Most of the changes
-    will happen under the hood and won't affect the events interface in any major way.<br><br>
+   <h1 id="idd" class="section-header"><a href="#idd">Event identifiers</a></h1>
+
+   Events are identified by constants of type <code>Event</code>. All built-in events are located under the <code>nwg::events</code>
+   module. Built-in events specific to built-in controls are located under a submodule. Ex: <code>nwg::events::button::Click</code>.<br><br>
+
+   Events identifiers should be considered magic values. The chapter <a href="/native-windows-gui/book/custom_events.html">custom events</a> goes deeper in the event identifier definition.<br><br>
+
+   For a list of every events supported by NWG, see the <a href="TODO">documentation of the events module.</a><br><br>
+
+   For ease of use, the events module path should be shortened to <code>nwge</code>.
 
    <h1 id="bind" class="section-header"><a href="#bind">Binding callbacks</a></h1>
 
@@ -95,7 +103,7 @@
    many reasons. See the api documentation of the method for the details.
 
 
-<div class="syntax"><pre><span></span><span class="n">ui</span><span class="p">.</span><span class="n">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"HelloButton"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="s">"SaySomething"</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span>::<span class="n">Click</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">ui</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="syntax"><pre><span></span><span class="n">ui</span><span class="p">.</span><span class="n">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"HelloButton"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="s">"SaySomething"</span><span class="p">,</span><span class="w"> </span><span class="n">nwge::button</span>::<span class="n">Click</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">ui</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">your_name</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">get</span>::<span class="o">&lt;</span><span class="n">nwg</span>::<span class="n">TextInput</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"YourName"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="n">simple_message</span><span class="p">(</span><span class="s">"Hello"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">"Hello {}!"</span><span class="p">,</span><span class="w"> </span><span class="n">your_name</span><span class="p">.</span><span class="n">get_text</span><span class="p">())</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -116,7 +124,7 @@
     The command is not executed right away. Use <code>commit</code> to force the execution. The command can fail due to
     many reasons. See the api documentation of the method for the details.
 
-<div class="syntax"><pre><span></span><span class="n">ui</span><span class="p">.</span><span class="n">unbind</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"HelloButton"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="s">"SaySomething"</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span>::<span class="n">Click</span><span class="p">);</span><span class="w"></span>
+<div class="syntax"><pre><span></span><span class="n">ui</span><span class="p">.</span><span class="n">unbind</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"HelloButton"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="s">"SaySomething"</span><span class="p">,</span><span class="w"> </span><span class="n">nwge::button</span>::<span class="n">Click</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 
    <h1 id="listen" class="section-header"><a href="#listen">Listening for events</a></h1>
@@ -140,10 +148,28 @@
     because of this, but the programmer callbacks can.
 
 
-<div class="syntax"><pre><span></span><span class="n">ui</span><span class="p">.</span><span class="n">trigger</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"MyWindow"</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span>::<span class="n">MouseDown</span><span class="p">,</span><span class="w"> </span><span class="n">EventArgs</span>::<span class="nb">None</span><span class="p">);</span><span class="w"></span>
+<div class="syntax"><pre><span></span><span class="n">ui</span><span class="p">.</span><span class="n">trigger</span><span class="p">(</span><span class="o">&amp;</span><span class="s">"MyWindow"</span><span class="p">,</span><span class="w"> </span><span class="n">nwge</span>::<span class="n">MouseDown</span><span class="p">,</span><span class="w"> </span><span class="n">EventArgs</span>::<span class="nb">None</span><span class="p">);</span><span class="w"></span>
 </pre></div><br/>
 
+    <h1 id="any" class="section-header"><a href="#any">Catching Any events</a></h1>
 
+    NWG has a special event type named <code>event::Any</code> which can be used by any <code>HWND</code> based control. By binding a callback to this
+    event, any messages sent to the control will trigger the callback. The messages low level informations (<code>MSG, WPARAM, LPARAM</code>) are then 
+    passed in the <b>args</b> parameter in a <code>EventArgs::Raw</code> (see <a href="/native-windows-gui/api/native_windows_gui/enum.EventArgs.html">the docs</a>)
+
+    <pre><span></span><span class="p">(</span><span class="s">"RandomStuffTextBox"</span><span class="p">,</span><span class="w"> </span><span class="s">"AllSystemEvents"</span><span class="p">,</span><span class="w"> </span><span class="n">nwge</span>::<span class="n">Any</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">args</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">EventArgs</span>::<span class="n">Raw</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">),</span><span class="w"></span>
+<span class="w">         </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">unreachable</span><span class="o">!</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0x0100</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// WM_KEYDOWN</span>
+<span class="w">        </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">"The virtual key {:?} was pressed"</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}),</span><span class="w"></span>
+</pre>
+
+    </br></br>
 
 </div>
 </div>

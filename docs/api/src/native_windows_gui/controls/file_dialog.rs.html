@@ -510,15 +510,15 @@
 <span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
 <span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">Control</span>, <span class="ident">ControlT</span>, <span class="ident">ControlType</span>, <span class="ident">AnyHandle</span>};
 <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="ident">SystemError</span>};
-<span class="kw">use</span> <span class="ident">events</span>::<span class="ident">Event</span>;
+<span class="kw">use</span> <span class="ident">events</span>::{<span class="ident">Event</span>, <span class="ident">Destroyed</span>};
 <span class="kw">use</span> <span class="ident">defs</span>::<span class="ident">FileDialogAction</span>;
 <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">other_helper</span>::<span class="ident">to_utf16</span>;
 
 <span class="doccomment">/**
     A template that creates a standard file dialog
 
-    Available events:  
-    Event::Destroyed  
+    Events:  
+    `Destroyed`  
 
     Members:  
     • `title`: The title of the dialog  
@@ -549,7 +549,7 @@
     <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">FileDialog</span><span class="op">&gt;</span>() }
 
     <span class="kw">fn</span> <span class="ident">events</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
-        <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Event</span>::<span class="ident">Destroyed</span>]
+        <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Destroyed</span>]
     }
 
     <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
@@ -971,7 +971,6 @@
         window.rootPath = "../../../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
     <script defer src="../../../search-index.js"></script>
 </body>

@@ -48,22 +48,24 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#692-708' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#699-715' title='goto source code'>[src]</a></span></h1>
 <pre class="rust macro">
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_filedialog</span> {
     ($( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="kw-2">*</span>) <span class="op">=&gt;</span> { ... };
 }</pre>
 <div class='docblock'><p>Sane defaults for the FileDialog control.</p>
-<p>Defaults:<br />
-• parent: <code>None</code><br />
-• title: <code>&quot;Open file&quot;</code><br />
-• action: <code>FileDialogAction::Open</code><br />
-• multiselect: <code>false</code><br />
-• default_folder: <code>None</code><br />
-• filters: <code>None</code></p>
-<p>Usage:<br />
-<code>nwg_filedialog!()</code><br />
-<code>nwg_filedialog!(parent=&quot;MyParent&quot;; title=&quot;Hey buddy!&quot;)</code><br />
+
+<p>Defaults:<br>
+• parent: <code>None</code><br>
+• title: <code>&quot;Open file&quot;</code><br>
+• action: <code>FileDialogAction::Open</code><br>
+• multiselect: <code>false</code><br>
+• default_folder: <code>None</code><br>
+• filters: <code>None</code>  </p>
+
+<p>Usage:<br>
+<code>nwg_filedialog!()</code><br>
+<code>nwg_filedialog!(parent=&quot;MyParent&quot;; title=&quot;Hey buddy!&quot;)</code><br>
 <code>nwg_filedialog!(\* Any combinations of the template properties*\)</code>    </p>
 </div></section>
     <section id='search' class="content hidden"></section>
@@ -122,7 +124,6 @@
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

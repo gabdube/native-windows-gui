@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'Canvas', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Struct Canvas</p><div class="block items"><ul><li><a href="#methods">Methods</a></li><li><a href="#deref-methods">Methods from Deref&lt;Target=ID2D1HwndRenderTarget&gt;</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'Canvas', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -56,25 +56,28 @@
 In very very <strong>very</strong> rare case, the renderer creation can fail.</p>
 </div><h4 id='method.create_solid_brush' class="method"><span id='create_solid_brush.v' class='invisible'><code>fn <a href='#method.create_solid_brush' class='fnname'>create_solid_brush</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;name: &amp;ID, <br>&nbsp;&nbsp;&nbsp;&nbsp;brush: &amp;<a class="struct" href="../native_windows_gui/constants/struct.SolidBrush.html" title="struct native_windows_gui::constants::SolidBrush">SolidBrush</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Create a solid brush into the canvas and add it under the selected <code>name</code>.</p>
-<p>Errors:<br />
-• <code>Error::System</code> if the canvas could not create the brush.<br />
+
+<p>Errors:<br>
+• <code>Error::System</code> if the canvas could not create the brush.<br>
 • <code>Error::KeyExists</code> if the a resource with the specified name already exists  </p>
 </div><h4 id='method.create_pen' class="method"><span id='create_pen.v' class='invisible'><code>fn <a href='#method.create_pen' class='fnname'>create_pen</a>(&amp;mut self, name: &amp;ID, pen: &amp;<a class="struct" href="../native_windows_gui/constants/struct.Pen.html" title="struct native_windows_gui::constants::Pen">Pen</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Create a pen into the canvas and add it under the selected <code>name</code>.</p>
-<p>Errors:<br />
-• <code>Error::System</code> if the canvas could not create the brush.<br />
+
+<p>Errors:<br>
+• <code>Error::System</code> if the canvas could not create the brush.<br>
 • <code>Error::KeyExists</code> if the a resource with the specified name already exists  </p>
 </div><h4 id='method.redraw' class="method"><span id='redraw.v' class='invisible'><code>fn <a href='#method.redraw' class='fnname'>redraw</a>(&amp;self)</code></span></h4>
 <div class='docblock'><p>Redraw the canvas</p>
 </div><h4 id='method.set_render_size' class="method"><span id='set_render_size.v' class='invisible'><code>fn <a href='#method.set_render_size' class='fnname'>set_render_size</a>(&amp;mut self, w: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>, h: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</code></span></h4>
-<div class='docblock'><p>Set the render target resolution.<br />
+<div class='docblock'><p>Set the render target resolution.<br>
 If the control size do not match the render target size, the result will be upscaled or downscaled</p>
 </div><h4 id='method.get_dpi' class="method"><span id='get_dpi.v' class='invisible'><code>fn <a href='#method.get_dpi' class='fnname'>get_dpi</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a></code></span></h4>
-<div class='docblock'><p>Return the render target's dots per inch (DPI).</p>
+<div class='docblock'><p>Return the render target&#39;s dots per inch (DPI).</p>
 </div><h4 id='method.set_dpi' class="method"><span id='set_dpi.v' class='invisible'><code>fn <a href='#method.set_dpi' class='fnname'>set_dpi</a>(&amp;mut self, dpix: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, fpiy: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>)</code></span></h4>
-<div class='docblock'><p>Sets the dots per inch (DPI) of the render target.</p>
-<p>Arguments:<br />
-• <code>dpix</code>:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.<br />
+<div class='docblock'><p>Sets the dots per inch (DPI) of the render target.   </p>
+
+<p>Arguments:<br>
+• <code>dpix</code>:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.<br>
 • <code>dpiy</code>:  A value greater than or equal to zero that specifies the vertical DPI of the render target.  </p>
 </div><h4 id='method.get_visibility' class="method"><span id='get_visibility.v' class='invisible'><code>fn <a href='#method.get_visibility' class='fnname'>get_visibility</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
 <h4 id='method.set_visibility' class="method"><span id='set_visibility.v' class='invisible'><code>fn <a href='#method.set_visibility' class='fnname'>set_visibility</a>(&amp;self, visible: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>)</code></span></h4>
@@ -159,7 +162,6 @@ If the control size do not match the render target size, the result will be upsc
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

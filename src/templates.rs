@@ -84,19 +84,26 @@ macro_rules! nwg_get_mut {
     Usage: 
 
     ```rust  
+       #[macro_use] extern crate native_windows_gui as nwg;
+
         nwg_template!(
-            head: setup_ui<&'static str>,
-            controls: [ ("TEST", Control), ("TEST2", Control) ],
+            head: setup_ui2<&'static str>,
+            controls: [ 
+                ("MainWindow", nwg_window!( title="Template Example"; size=(280, 105) ))
+            ];
             events: [ 
-            
-            ("TEST", "ACTION", Event::Click, |ui, caller, event, args| { 
-                println!("Hello World!"); 
-            })
-            
-            ],
-            resources: [ ("Font1", Font1), ("Font1", Font1) ],
+                ("MainWindow", "ACTION", nwg::events::Resized, |ui, caller, event, args| { 
+                    println!("Hello World!"); 
+                })
+            ];
+            resources: [ 
+                ("MainFont", nwg_font!(family="Arial"; size=27)),
+                ("TextFont", nwg_font!(family="Arial"; size=17))
+            ];
             values: [ ("True", true), ("()", ()) ]
-        );  
+        ); 
+
+        fn main() {}
 
     ```
 

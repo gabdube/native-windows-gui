@@ -26,14 +26,15 @@ use winapi::{HWND, HFONT};
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed, Moved, Resized};
+use events::label::{Click, DoubleClick};
 use defs::HTextAlign;
 
 /**
     A template that creates a standard label
 
     Available events:  
-    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Moved, Event::Resized, Event::Raw  
+    `Destroyed, Moved, Resized, Click, DoubleClick, Any`
 
     Members:  
     • `text`: The text of the label  
@@ -61,7 +62,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for LabelT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Label>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Click, Event::DoubleClick, Event::Moved, Event::Resized, Event::Raw]
+        vec![Destroyed, Moved, Resized, Click, DoubleClick,  Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

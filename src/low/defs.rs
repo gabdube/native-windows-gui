@@ -23,8 +23,8 @@
 use std::hash::Hash;
 use std::any::{Any, TypeId};
 
-use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, MENUITEMINFOW, IShellItem, HRESULT, IUnknownVtbl,
- IUnknown, PCWSTR, IBindCtx, REFIID, D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory,c_void};
+use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, WORD, MENUITEMINFOW, IShellItem, HRESULT, IUnknownVtbl,
+ IUnknown, PCWSTR, IBindCtx, REFIID, D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory, c_void, c_int};
 use std::ops::{Deref, DerefMut};
 
 
@@ -43,6 +43,8 @@ pub const NWG_UNBIND:            UINT = 0x404;  /// Message sent when unbinding 
 pub const NWG_PACK_RESOURCE:     UINT = 0x405;  /// Message sent when packing a resource
 pub const NWG_TRIGGER:           UINT = 0x406;  /// Message sent when triggering an event
 pub const NWG_CUSTOM_MAX:        UINT = 0x407;  /// Maximum custom event value
+
+pub const NWG_DESTROY:           UINT = 0x420;  /// NWG `Destroy` event identifier
 
 // Value returned by a window proc if the message execution failed/succeeded
 
@@ -68,6 +70,10 @@ pub const ACTCTX_FLAG_RESOURCE_NAME_VALID: u32 = 0x008;
 pub const ACTCTX_FLAG_SET_PROCESS_DEFAULT: u32 = 0x010;
 pub const ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID: u32 = 0x004;
 
+pub const CBN_SETFOCUS: WORD = 3;
+pub const CBN_KILLFOCUS: WORD = 4;
+pub const CBN_SELCHANGE: WORD = 1;
+
 pub const LB_ADDSTRING: UINT = 384;
 pub const LB_INSERTSTRING: UINT = 385;
 pub const LB_DELETESTRING: UINT = 386;
@@ -89,15 +95,10 @@ pub const LBS_NOSEL: UINT = 0x4000;
 pub const LBS_HASSTRINGS: UINT = 64;
 pub const LBS_MULTIPLESEL: UINT = 8;
 
-pub const LBN_SELCHANGE: UINT = 1;
-pub const LBN_DBLCLK: UINT = 2;
-pub const LBN_SETFOCUS: UINT = 4;
-pub const LBN_KILLFOCUS: UINT = 5;
-
-pub const BN_CLICKED: UINT = 0;
-pub const BN_DBLCLK: UINT = 5;
-pub const BN_SETFOCUS: UINT = 6;
-pub const BN_KILLFOCUS: UINT = 7;
+pub const LBN_SELCHANGE: WORD = 1;
+pub const LBN_DBLCLK: WORD = 2;
+pub const LBN_SETFOCUS: WORD = 4;
+pub const LBN_KILLFOCUS: WORD = 5;
 
 pub const BM_SETCHECK: UINT = 241;
 pub const BM_GETCHECK: UINT = 240;
@@ -138,13 +139,13 @@ pub const ES_MULTILINE: UINT = 4;
 pub const EM_LIMITTEXT: UINT = 197;
 pub const EM_GETLIMITTEXT: UINT = 213;
 
-pub const EN_SETFOCUS: UINT = 256;
-pub const EN_KILLFOCUS: UINT = 512;
-pub const EN_UPDATE: UINT = 1024;
-pub const EN_MAXTEXT: UINT = 1281;
+pub const EN_SETFOCUS: WORD = 256;
+pub const EN_KILLFOCUS: WORD = 512;
+pub const EN_UPDATE: WORD = 1024;
+pub const EN_MAXTEXT: WORD = 1281;
 
-pub const STN_CLICKED: UINT = 0;
-pub const STN_DBLCLK: UINT = 1;
+pub const STN_CLICKED: WORD = 0;
+pub const STN_DBLCLK: WORD = 1;
 
 pub const IDABORT: i32 = 3;
 pub const IDCANCEL: i32 = 2;

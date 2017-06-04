@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'custom', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+        <p class='location'>Module custom</p><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class='location'><a href='../index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'custom', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -48,7 +48,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../../src/native_windows_gui/lib.rs.html#39-49' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../../src/native_windows_gui/lib.rs.html#39-50' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Custom control creation resources</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
@@ -57,7 +57,6 @@
                                   title='struct native_windows_gui::custom::SysclassParams'>SysclassParams</a></td>
                            <td class='docblock-short'>
                                 <p>Params used to build a system class</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -65,7 +64,6 @@
                                   title='struct native_windows_gui::custom::WindowParams'>WindowParams</a></td>
                            <td class='docblock-short'>
                                 <p>Params used to build a system window</p>
-
                            </td>
                        </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
@@ -74,7 +72,13 @@
                                   title='enum native_windows_gui::custom::AnyHandle'>AnyHandle</a></td>
                            <td class='docblock-short'>
                                 <p>A type that expose the different underlying handle into one type</p>
-
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.Event.html"
+                                  title='enum native_windows_gui::custom::Event'>Event</a></td>
+                           <td class='docblock-short'>
+                                <p>An enum that define events that can be used by NWG</p>
                            </td>
                        </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
 <table>
@@ -83,7 +87,6 @@
                                   title='trait native_windows_gui::custom::Control'>Control</a></td>
                            <td class='docblock-short'>
                                 <p>Structures implementing this trait are controls that can be stored in a Ui</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -91,7 +94,6 @@
                                   title='trait native_windows_gui::custom::ControlT'>ControlT</a></td>
                            <td class='docblock-short'>
                                 <p>Structures implementing this trait can be used by a Ui to build a Control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -99,7 +101,6 @@
                                   title='trait native_windows_gui::custom::Resource'>Resource</a></td>
                            <td class='docblock-short'>
                                 <p>Structures implementing this trait are resources that can be stored in a Ui</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -107,7 +108,6 @@
                                   title='trait native_windows_gui::custom::ResourceT'>ResourceT</a></td>
                            <td class='docblock-short'>
                                 <p>Structures implementing this trait can be used by a Ui to build a Resource</p>
-
                            </td>
                        </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
@@ -117,7 +117,6 @@
                            <td class='docblock-short'>
                                 <p>Try to create a system class using the parameters provided in <code>SysclassParams</code>. Will not fail if
 the system class already exists.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -125,7 +124,21 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::build_window'>build_window</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Try to create a system class using the parameters provided in <code>WindowParams</code>.</p>
-
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.command_handle.html"
+                                  title='fn native_windows_gui::custom::command_handle'>command_handle</a></td>
+                           <td class='docblock-short'>
+                                <p>HandleProc for events using a WM_COMMAND message. Will return None if cmd do not match the WM_COMMAND code
+Should be used in a closure like this <code>&amp;|h,m,w,l|{ command_handle(h,m,w,l,BN_CLICKED) }</code></p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.event_unpack_no_args.html"
+                                  title='fn native_windows_gui::custom::event_unpack_no_args'>event_unpack_no_args</a></td>
+                           <td class='docblock-short'>
+                                <p>UnpackProc for events that have no arguments</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -133,7 +146,6 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::get_window_enabled'>get_window_enabled</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Get the window enabled state</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -148,7 +160,6 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::get_window_position'>get_window_position</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Get window position</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -156,7 +167,6 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::get_window_size'>get_window_size</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Get window size</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -164,7 +174,6 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::get_window_text'>get_window_text</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Get the window text</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -172,7 +181,20 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::get_window_visibility'>get_window_visibility</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Get window visibility</p>
-
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.hwnd_handle.html"
+                                  title='fn native_windows_gui::custom::hwnd_handle'>hwnd_handle</a></td>
+                           <td class='docblock-short'>
+                                <p>HandleProc for events that simply wrap the hwnd parameter</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.notify_handle.html"
+                                  title='fn native_windows_gui::custom::notify_handle'>notify_handle</a></td>
+                           <td class='docblock-short'>
+                                <p>HandleProc for events using a WM_NOTIFY message. Will return None if cmd do not match the WM_COMMAND code</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -180,7 +202,6 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::set_window_enabled'>set_window_enabled</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Set the window enabled state</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -195,7 +216,6 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::set_window_position'>set_window_position</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Set window position</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -203,7 +223,6 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::set_window_size'>set_window_size</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Set window size</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -211,7 +230,6 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::set_window_text'>set_window_text</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Set the window text</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -219,7 +237,23 @@ the system class already exists.</p>
                                   title='fn native_windows_gui::custom::set_window_visibility'>set_window_visibility</a><a title='unsafe function' href='#'><sup>⚠</sup></a></td>
                            <td class='docblock-short'>
                                 <p>Set window visibility</p>
-
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="type" href="type.HandleProc.html"
+                                  title='type native_windows_gui::custom::HandleProc'>HandleProc</a></td>
+                           <td class='docblock-short'>
+                                <p>A procedure signature that takes raw message parameters and output a Handle
+Can return None if the handle could not be parsed</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="type" href="type.UnpackProc.html"
+                                  title='type native_windows_gui::custom::UnpackProc'>UnpackProc</a></td>
+                           <td class='docblock-short'>
+                                <p>A procedure signature that takes raw message parameters and output a EventArgs structure.
+Can return None if the parameters could not be parsed</p>
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>
@@ -278,7 +312,6 @@ the system class already exists.</p>
         window.rootPath = "../../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>

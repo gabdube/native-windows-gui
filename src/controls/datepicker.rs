@@ -27,7 +27,8 @@ use user32::SendMessageW;
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed, Moved, Resized};
+use events::datepicker::DateChanged;
 use defs::{HTextAlign, CheckState, PickerDate};
 use low::other_helper::to_utf16;
 
@@ -50,6 +51,9 @@ use low::other_helper::to_utf16;
 
     Furthermore, any string enclosed in `'` can be used in the format to display text.  
     For example, to display the current date with the format `'Today is: Tuesday Mar 23, 1996`, the format string is `'Today is: 'dddd MMM dd', 'yyyy`. 
+
+    Events:  
+    `Destroyed, Moved, Resized, DateChanged, Any`  
 
     Members:  
     • `value`: The value of the dtp. If None, either use the current system time or show nothing (if optional is true)
@@ -82,7 +86,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for DatePickerT<S, ID> 
     fn type_id(&self) -> TypeId { TypeId::of::<DatePicker>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw, Event::DateChanged]
+        vec![Destroyed, Moved, Resized, DateChanged, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

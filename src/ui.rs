@@ -30,7 +30,7 @@ use low::message_handler::MessageHandler;
 use low::defs::{PackUserValueArgs, PackControlArgs, PackResourceArgs, UnpackArgs, BindArgs, UnbindArgs, TriggerArgs};
 use controls::{ControlT, Control, AnyHandle};
 use resources::{ResourceT, Resource};
-use events::{Event, EventCallback, EventArgs};
+use events::{Event, EventCallback, EventArgs, Destroyed};
 use error::Error;
 
 type InnerId = u64;
@@ -39,6 +39,9 @@ type HandleHash = u64;
 pub type BoxedCallback<ID> = Box<EventCallback<ID>>;
 pub type CallbackCollection<ID> = Rc<Vec<(InnerId, BoxedCallback<ID>)>>;
 pub type EventCollection<ID> = HashMap<Event, CallbackCollection<ID>>;
+
+pub type EventHandlerCollection = Rc<Vec<Event>>;
+pub type EventDefinitionsCollection = HashMap<u32, EventHandlerCollection>;
 
 
 /**
@@ -55,6 +58,7 @@ pub struct UiInner<ID: Hash+Clone+'static> {
 
     // Map the a control events.
     pub control_events: HashMap<InnerId, EventCollection<ID>>,
+    pub events_definitions: HashMap<u32, Rc<Vec<Event>>>,
 
     // Map the ui inner id to a tuple of (Public ID, TypeID). Used triggering callbacks and with `get` for type checking
     pub inner_public_map: HashMap<InnerId, (ID, TypeId)>,
@@ -82,6 +86,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
             user_values: HashMap::with_capacity(16),
             controls: HashMap::with_capacity(32),
             control_events: HashMap::with_capacity(32),
+            events_definitions: HashMap::with_capacity(32),
             resources: HashMap::with_capacity(16),
             inner_public_map: HashMap::with_capacity(64),
             handle_inner_map: HashMap::with_capacity(32) })
@@ -200,7 +205,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
         for id in children_ids.iter().rev() {
 
             // Call the destroy callbacks
-            self.trigger(*id, Event::Destroyed, EventArgs::None);
+            self.trigger(*id, Destroyed, EventArgs::None);
 
             // Removes stuff
             self.inner_public_map.remove(&id).unwrap();
@@ -296,11 +301,38 @@ impl<ID: Hash+Clone> UiInner<ID> {
         // Check if the cb id already exists for the event and if not, push the callback
         let callbacks = callbacks.unwrap();
         if let Some(_) = callbacks.iter().find(|&&(cb_id2, _)| cb_id2 == cb_id) {
-            Some(Error::KeyExists)
+            return Some(Error::KeyExists);
         } else {
             callbacks.push((cb_id, cb)); 
-            None
         }
+
+        // Update the event definitions of the ui
+        let push_event = |id: u32, defs: &mut EventDefinitionsCollection| {
+            if let Some(mut event_vec) = defs.get_mut(&id) {
+                match Rc::get_mut(event_vec) {
+                    Some(ev) => {
+                        if ev.iter().any(|&e| e == event) { return }
+                        ev.push(event.clone())
+                    },
+                    None => unreachable!() // If getting a mutable reference to the callback list passed (see above), it is ensured that this will work
+                }
+                return;
+            }
+            
+            defs.insert(id, Rc::new(vec![event.clone()]));
+        };
+
+        match event {
+            Event::Single(id, _, _) => push_event(id, &mut self.events_definitions),
+            Event::Group(ids, _, _) => {
+                for id in ids {
+                    push_event(*id, &mut self.events_definitions);
+                }
+            },
+            Event::Any => { /* Any is not stored */ }
+        }
+
+        None
     }
 
     pub fn unbind(&mut self, params: UnbindArgs) -> Option<Error> {
@@ -331,6 +363,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
         } else {
             Some(Error::KeyNotFound)
         }
+
+        // Note that event definition are not removed
     }
 
     pub fn trigger(&mut self, id: InnerId, event: Event, args: EventArgs) -> Option<Error> {
@@ -385,6 +419,11 @@ impl<ID: Hash+Clone> UiInner<ID> {
         }
 
         Err(Error::ControlOrResourceRequired)
+    }
+
+    #[inline(always)]
+    pub fn event_handlers(&self, msg: u32) -> Option<EventHandlerCollection> {
+        self.events_definitions.get(&msg).cloned()
     }
 
     #[inline(always)]

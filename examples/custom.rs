@@ -17,10 +17,15 @@ extern crate winapi;
 use std::any::TypeId;
 use std::hash::Hash;
 
-use nwg::custom::{Control, ControlT, AnyHandle, SysclassParams, build_sysclass, WindowParams, build_window};
-use nwg::{Error, Event, Ui, simple_message, fatal_message, dispatch_events};
+use nwg::custom::{Control, ControlT, AnyHandle, SysclassParams, build_sysclass, WindowParams, Event, build_window, hwnd_handle, event_unpack_no_args};
+use nwg::{Error, Ui, simple_message, fatal_message, dispatch_events};
+use nwg::events as nwge;
 
 use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT};
+
+// A custom event that tracks the WM_MOUSEWHEEL message
+#[allow(non_upper_case_globals)]
+const MouseWheel: Event = Event::Single(winapi::WM_MOUSEWHEEL, &event_unpack_no_args, &hwnd_handle);
 
 // The control template. Aka the configuration object that is sent to an UI.
 pub struct MyCustomWindowT;
@@ -39,10 +44,10 @@ impl<ID: Hash+Clone> ControlT<ID> for MyCustomWindowT {
         TypeId::of::<MyCustomWindow>() 
     }
 
-    fn events(&self) -> Vec<Event> {
+    fn events(&self) -> Vec<nwge::Event> {
         // This method must return an vec of events type that NWG will listen to for each instance of the control
 
-        vec![Event::Closed]
+        vec![nwge::Closed, MouseWheel]
     }
 
     #[allow(unused_variables)]
@@ -144,9 +149,14 @@ fn main() {
     app.pack_control(&"AButton", nwg_button!(parent="MyCustomWindow"; text="Test"; position=(10,10); size=(480, 480)) );
 
     // Bind an event
-    app.bind(&"MyCustomWindow", &"ExitNWG", Event::Closed, |_,_,_,_| {
+    app.bind(&"MyCustomWindow", &"ExitNWG", nwge::Closed, |_,_,_,_| {
         simple_message("Hello", "Goodbye!");
         nwg::exit();
+    });
+
+    // Bind the custom event
+    app.bind(&"MyCustomWindow", &"Wheel", MouseWheel, |_,control,_,_| {
+        println!("Mouse wheel event catched on control {:?}", control);
     });
 
     dispatch_events();

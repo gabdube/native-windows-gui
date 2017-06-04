@@ -26,7 +26,7 @@ use winapi::HWND;
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed, Moved, Resized, Char, Closed, KeyDown, KeyUp, MouseUp, MouseDown};
 
 /// System class identifier
 const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
@@ -35,7 +35,7 @@ const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
     A template that will create a window.
 
     Events:  
-    Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp, Event::Moved, Event::Resized, Event::Raw
+    `Destroyed, KeyDown, KeyUp, Char, Closed, MouseDown, MouseUp, Moved, Resized, Any`  
 
     Members:  
       • `title` : The title of the window (in the title bar)  
@@ -61,8 +61,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp,
-             Event::Moved, Event::Resized, Event::Raw]
+        vec![Destroyed, KeyDown, KeyUp, Char, Closed, MouseDown, MouseUp, Moved, Resized, Event::Any]
     }
 
     #[allow(unused_variables)]

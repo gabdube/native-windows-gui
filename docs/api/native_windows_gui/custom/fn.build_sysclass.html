@@ -51,7 +51,9 @@
                </span><a class='srclink' href='../../src/native_windows_gui/low/window_helper.rs.html#77-119' title='goto source code'>[src]</a></span></h1>
 <pre class='rust fn'>pub unsafe fn build_sysclass&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;p: <a class="struct" href="../../native_windows_gui/custom/struct.SysclassParams.html" title="struct native_windows_gui::custom::SysclassParams">SysclassParams</a>&lt;S&gt;<br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../../native_windows_gui/enum.SystemError.html" title="enum native_windows_gui::SystemError">SystemError</a>&gt;</pre><div class='docblock'><p>Try to create a system class using the parameters provided in <code>SysclassParams</code>. Will not fail if
 the system class already exists.</p>
+
 <p>Returns <code>Err(SystemError::SysclassCreationFailed)</code> if the system class creation failed.</p>
+
 <p>Note that if the system class window proc used is malformed, the program will most likely segfault.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
@@ -110,7 +112,6 @@ the system class already exists.</p>
         window.rootPath = "../../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>

@@ -26,14 +26,14 @@ use winapi::{HWND, HFONT};
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed, Moved, Resized};
 use defs::HTextAlign;
 
 /**
     A template that creates a standard groupbox
 
-    Available events:  
-    Event::Destroyed, Event::Moved, Event::Resized, Event::Raw  
+    Events:  
+    `Destroyed, Moved, Resized, Any`  
 
     Members:  
     • `text`: The text of the groupbox  
@@ -60,7 +60,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for GroupBoxT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<GroupBox>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw]
+        vec![Destroyed, Moved, Resized, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

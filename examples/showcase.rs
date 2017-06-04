@@ -4,8 +4,9 @@
 
 #[macro_use] extern crate native_windows_gui as nwg;
 
-use nwg::{Ui, Event, EventArgs, dispatch_events, exit as nwg_exit};
+use nwg::{Ui, EventArgs, dispatch_events, exit as nwg_exit};
 use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, CheckState, FileDialogAction, HTextAlign, PickerDate};
+use nwg::events as nwge;
 
 nwg_template!(
     head: setup_ui<&'static str>,
@@ -42,7 +43,7 @@ nwg_template!(
         ("DatePicker", nwg_datepicker!(parent="MainWindow"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(230, 220); size=(240, 25); font=Some("Font1")))
     ];
     events: [
-        ("RandomStuffTextBox", "AllSystemEvents", Event::Raw, |_,_,_,args| {
+        ("RandomStuffTextBox", "AllSystemEvents", nwge::Any, |_,_,_,args| {
             let (msg, w) = match args {
                 &EventArgs::Raw(msg, w, _) => (msg, w),
                 _ => unreachable!()
@@ -53,15 +54,15 @@ nwg_template!(
             }
         }),
 
-        ("NestedAction", "SayHello", Event::Triggered, |_,_,_,_| {
+        ("NestedAction", "SayHello", nwge::menu::Triggered, |_,_,_,_| {
             nwg::simple_message("Hello", "Hello World!");
         }),
 
-        ("QuitItem", "Quit", Event::Triggered, |_,_,_,_| {
+        ("QuitItem", "Quit", nwge::menu::Triggered, |_,_,_,_| {
             nwg_exit()
         }),
 
-        ("TimerButton", "Start Timer", Event::Click, |app,_,_,_|{
+        ("TimerButton", "Start Timer", nwge::button::Click, |app,_,_,_|{
             let (mut timer, btn) = nwg_get_mut!(app; [
                 ("Timer", nwg::Timer),
                 ("TimerButton", nwg::Button)
@@ -76,17 +77,12 @@ nwg_template!(
             }
         }),
 
-        ("Timer", "UpdateLabel", Event::Tick, |app,_,_,args|{
-            let label = nwg_get!(app; ("TimerLabel", nwg::Label));
-            let elapsed = match args { 
-                &EventArgs::Tick(ref d) => d,
-                _ => unreachable!()
-            };
-
-            label.set_text(format!("Time elapsed: {:?} seconds", elapsed.as_secs()).as_ref());
+        ("Timer", "UpdateLabel", nwge::timer::Tick, |app,_,_,_|{
+            let (label, timer) = nwg_get!(app; [("TimerLabel", nwg::Label), ("Timer", nwg::Timer)]);
+            label.set_text(format!("Time elapsed: {:?} seconds", timer.elapsed().as_secs()).as_ref());
         }),
 
-        ("FileDialogButton", "ChooseFile", Event::Click, |app,_,_,_|{
+        ("FileDialogButton", "ChooseFile", nwge::button::Click, |app,_,_,_|{
             let (dialog, file_path) = nwg_get_mut!(app; [
                 ("FileDialog", nwg::FileDialog),
                 ("FilePathInput", nwg::TextInput)
@@ -97,7 +93,7 @@ nwg_template!(
             }
         }),
 
-        ("DatePicker", "DD", Event::DateChanged, |app,_,_,_| {
+        ("DatePicker", "DD", nwge::datepicker::DateChanged, |app,_,_,_| {
             println!("{:?}", nwg_get!(app; ("DatePicker", nwg::DatePicker)).get_value());
         })
     ];

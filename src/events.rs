@@ -23,6 +23,26 @@ use std::time::Duration;
 use ui::Ui;
 use defs::MouseButton;
 
+use winapi::{WPARAM, LPARAM};
+
+// System events that can be applied to any HWND based control
+pub use low::events::{Event, Destroyed, Paint, Closed, Moved, KeyDown, KeyUp, Resized, Char, MouseUp, MouseDown};
+
+// Control specfic events
+pub mod button { pub use low::events::{BtnClick as Click, BtnDoubleClick as DoubleClick, BtnFocus as Focus}; }
+pub use self::button as checkbox; // Checkboxes use the same events of the buttons
+pub use self::button as radiobutton; // Radiobuttons use the same events of the buttons
+pub mod combobox { pub use low::events::{CbnFocus as Focus, CbnSelectionChanged as SelectionChanged}; }
+pub mod label { pub use low::events::{StnClick as Click, StnDoubleClick as DoubleClick}; }
+pub mod datepicker { pub use low::events::DateChanged; }
+pub mod listbox { pub use low::events::{LbnSelectionChanged as SelectionChanged, LbnDoubleClick as DoubleClick, LbnFocus as Focus}; }
+pub mod textbox { pub use low::events::{EnFocus as Focus, EnLimit as Limit, EnValueChanged as ValueChanged}; }
+pub use self::textbox as textinput; // Textinput use the same events of the textbox
+pub mod menu { pub use low::events::MenuTrigger as Triggered; }
+pub mod timer { pub use low::events::TimerTick as Tick; }
+
+pub use self::Event::Any as Any;
+
 /**
 The function signature for the event callback
 
@@ -35,41 +55,6 @@ Arguments:
 pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
 
 /**
-    Events name definition
-*/
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum Event {
-
-    // NWG special events
-    Destroyed,
-
-    // System events
-    KeyDown,
-    KeyUp,
-    Char,
-    Closed,
-    MouseUp,
-    MouseDown,
-    Moved,
-    Resized,
-    Paint,
-    Raw,
-
-    // Default control specific events
-    Click,
-    DoubleClick,
-    MenuOpen,
-    MenuClose,
-    SelectionChanged,
-    ValueChanged,
-    LimitReached,
-    Focus,
-    Tick,
-    Triggered,
-    DateChanged
-}
-
-/**
     Events arguments definition. If an event do not have arguments, EventArgs::None is passed.
 */
 pub enum EventArgs {
@@ -80,6 +65,6 @@ pub enum EventArgs {
     Tick(Duration),
     Position(i32, i32),
     Size(u32, u32),
-    Raw(u32, usize, usize), // MSG, WPARAM, LPARAM
+    Raw(u32, WPARAM, LPARAM), // MSG, WPARAM, LPARAM
     None
 }

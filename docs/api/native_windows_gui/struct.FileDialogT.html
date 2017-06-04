@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'FileDialogT', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Struct FileDialogT</p><div class="block items"><ul><li><a href="#fields">Fields</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'FileDialogT', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -57,21 +57,24 @@
     pub default_folder: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;S&gt;,
     pub filters: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;S&gt;,
 }</pre><div class='docblock'><p>A template that creates a standard file dialog</p>
-<p>Available events:<br />
-Event::Destroyed</p>
-<p>Members:<br />
-• <code>title</code>: The title of the dialog<br />
-• <code>parent</code>: The dialog parent window. While the dialog is running, the parent will be disabled.<br />
-• <code>action</code>: The action that the dialog will execute. It can be <code>Open</code>, <code>OpenDirectory</code> or <code>Save</code><br />
-• <code>multiselect</code>: The user can select more than one choice.<br />
-• <code>default_folder</code>: If defined, this defines the default folder that is openened when <code>run</code> is called<br />
+
+<p>Events:<br>
+<code>Destroyed</code>  </p>
+
+<p>Members:<br>
+• <code>title</code>: The title of the dialog<br>
+• <code>parent</code>: The dialog parent window. While the dialog is running, the parent will be disabled.<br>
+• <code>action</code>: The action that the dialog will execute. It can be <code>Open</code>, <code>OpenDirectory</code> or <code>Save</code><br>
+• <code>multiselect</code>: The user can select more than one choice.<br>
+• <code>default_folder</code>: If defined, this defines the default folder that is openened when <code>run</code> is called<br>
 • <code>filters</code>: If defined, filter the files that the user can select (In a <code>Open</code> dialog) or which extension to add to the saved file (in a <code>Save</code> dialog)</p>
-<p>Failures:<br />
-• <code>Error::UserError</code>: if the default folder do not identify a folder<br />
-• <code>Error::UserError</code>: if the extension filter format is not valid<br />
-• <code>Error::System</code>: if the folder do not exists<br />
+
+<p>Failures:<br>
+• <code>Error::UserError</code>: if the default folder do not identify a folder<br>
+• <code>Error::UserError</code>: if the extension filter format is not valid<br>
+• <code>Error::System</code>: if the folder do not exists<br>
 • <code>Error::System</code>: if the extensions filters could not be set  </p>
-</div><h2 class='fields'>Fields</h2><span id='structfield.title' class="structfield">
+</div><h2 id='fields' class='fields'>Fields</h2><span id='structfield.title' class="structfield">
                            <span id='title.v' class='invisible'>
                            <code>title: S</code>
                            </span></span><span id='structfield.parent' class="structfield">
@@ -97,7 +100,7 @@ Event::Destroyed</p>
 </div></div><h3 class='impl'><span class='in-band'><code>impl&lt;S1:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;, ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; <a class="trait" href="../native_windows_gui/custom/trait.ControlT.html" title="trait native_windows_gui::custom::ControlT">ControlT</a>&lt;ID&gt; for <a class="struct" href="../native_windows_gui/struct.FileDialogT.html" title="struct native_windows_gui::FileDialogT">FileDialogT</a>&lt;S1, ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/file_dialog.rs.html#67-144' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.type_id' class="method"><span id='type_id.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#tymethod.type_id' class='fnname'>type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></code></span></h4>
 <div class='docblock'><p>Should return the TypeId of the generated control. For example a <code>WindowT</code> struct returns the TypeId of a <code>Window</code> struct.</p>
-</div><h4 id='method.events' class="method"><span id='events.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../native_windows_gui/enum.Event.html" title="enum native_windows_gui::Event">Event</a>&gt;</code></span></h4>
+</div><h4 id='method.events' class="method"><span id='events.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../native_windows_gui/events/enum.Event.html" title="enum native_windows_gui::events::Event">Event</a>&gt;</code></span></h4>
 <div class='docblock'><p>Should return the events supported by the control.</p>
 </div><h4 id='method.build' class="method"><span id='build.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#tymethod.build' class='fnname'>build</a>(&amp;self, ui: &amp;<a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;<a class="trait" href="../native_windows_gui/custom/trait.Control.html" title="trait native_windows_gui::custom::Control">Control</a>&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Should instance the control and return it as a Box. If an error is raised, it will be returned by <code>ui.commit</code>.</p>
@@ -158,7 +161,6 @@ Event::Destroyed</p>
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

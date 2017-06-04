@@ -29,11 +29,11 @@ extern crate ole32;
 mod low;
 mod defs;
 mod error;
-mod events;
 mod controls;
 mod resources;
 mod ui;
 
+pub mod events;
 pub mod templates;
 
 pub mod custom {
@@ -42,6 +42,7 @@ pub mod custom {
     */
     pub use controls::{ControlT, Control, AnyHandle};
     pub use resources::{ResourceT, Resource};
+    pub use low::events::{Event, UnpackProc, HandleProc, event_unpack_no_args, hwnd_handle, command_handle, notify_handle};
     pub use low::window_helper::{build_window, build_sysclass, SysclassParams, WindowParams, set_window_long, get_window_long,
     get_window_text, set_window_text, get_window_visibility, set_window_visibility, get_window_position, set_window_position,
     get_window_size, set_window_size, get_window_enabled, set_window_enabled};
@@ -56,8 +57,8 @@ pub mod constants {
     pub use controls::ControlType;
 }
 
+pub use events::EventArgs;
 pub use error::{Error, SystemError};
-pub use events::{EventCallback, Event, EventArgs};
 pub use low::other_helper::{message, simple_message, fatal_message, error_message};
 pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
  RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput,

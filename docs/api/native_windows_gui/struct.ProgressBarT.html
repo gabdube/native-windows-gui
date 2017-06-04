@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'ProgressBarT', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Struct ProgressBarT</p><div class="block items"><ul><li><a href="#fields">Fields</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'ProgressBarT', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -61,20 +61,22 @@
     pub vertical: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>,
     pub parent: ID,
 }</pre><div class='docblock'><p>A template that creates a progress bar</p>
-<p>Events:<br />
-Event::Destroyed, Event::Moved, Event::Resized, Event::Raw</p>
-<p>Members:<br />
-• <code>position</code>: The start position of the progressbar<br />
-• <code>size</code>: The start size of the progressbar<br />
-• <code>visible</code>: If the progressbar should be visible to the user<br />
-• <code>disabled</code>: If the user can or can't click on the progressbar<br />
-• <code>range</code>: The minimum and the maximum value of the progress bar<br />
-• <code>position</code>: The starting position of the progress bar<br />
-• <code>step</code>: Amount of value to add when <code>step</code> is called<br />
+
+<p>Events:<br>
+<code>Destroyed, Moved, Resized, Any</code>  </p>
+
+<p>Members:<br>
+• <code>position</code>: The start position of the progressbar<br>
+• <code>size</code>: The start size of the progressbar<br>
+• <code>visible</code>: If the progressbar should be visible to the user<br>
+• <code>disabled</code>: If the user can or can&#39;t click on the progressbar<br>
+• <code>range</code>: The minimum and the maximum value of the progress bar<br>
+• <code>position</code>: The starting position of the progress bar<br>
+• <code>step</code>: Amount of value to add when <code>step</code> is called<br>
 • <code>state</code>: The state of the progress bar.
 • <code>vertical</code>: If the progress bar should be vertical instead of horizontal
 • <code>parent</code>: The progressbar parent  </p>
-</div><h2 class='fields'>Fields</h2><span id='structfield.position' class="structfield">
+</div><h2 id='fields' class='fields'>Fields</h2><span id='structfield.position' class="structfield">
                            <span id='position.v' class='invisible'>
                            <code>position: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a></code>
                            </span></span><span id='structfield.size' class="structfield">
@@ -112,7 +114,7 @@ Event::Destroyed, Event::Moved, Event::Resized, Event::Raw</p>
 </div></div><h3 class='impl'><span class='in-band'><code>impl&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; <a class="trait" href="../native_windows_gui/custom/trait.ControlT.html" title="trait native_windows_gui::custom::ControlT">ControlT</a>&lt;ID&gt; for <a class="struct" href="../native_windows_gui/struct.ProgressBarT.html" title="struct native_windows_gui::ProgressBarT">ProgressBarT</a>&lt;ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/progress_bar.rs.html#66-116' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.type_id' class="method"><span id='type_id.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#tymethod.type_id' class='fnname'>type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></code></span></h4>
 <div class='docblock'><p>Should return the TypeId of the generated control. For example a <code>WindowT</code> struct returns the TypeId of a <code>Window</code> struct.</p>
-</div><h4 id='method.events' class="method"><span id='events.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../native_windows_gui/enum.Event.html" title="enum native_windows_gui::Event">Event</a>&gt;</code></span></h4>
+</div><h4 id='method.events' class="method"><span id='events.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../native_windows_gui/events/enum.Event.html" title="enum native_windows_gui::events::Event">Event</a>&gt;</code></span></h4>
 <div class='docblock'><p>Should return the events supported by the control.</p>
 </div><h4 id='method.build' class="method"><span id='build.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#tymethod.build' class='fnname'>build</a>(&amp;self, ui: &amp;<a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;<a class="trait" href="../native_windows_gui/custom/trait.Control.html" title="trait native_windows_gui::custom::Control">Control</a>&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Should instance the control and return it as a Box. If an error is raised, it will be returned by <code>ui.commit</code>.</p>
@@ -173,7 +175,6 @@ Event::Destroyed, Event::Moved, Event::Resized, Event::Raw</p>
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

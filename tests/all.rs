@@ -5,6 +5,8 @@ extern crate native_windows_gui as nwg;
 
 use nwg::*;
 use nwg::constants::*;
+use nwg::events::*;
+use nwg::events as nwge;
 
 fn setup_ui() -> Ui<u64> { Ui::new().unwrap() }
 fn window() -> WindowT<&'static str> {  WindowT{title: "", position:(-600,-600), size:(100, 100), resizable:true, visible:true, disabled:false, exit_on_close:true} }
@@ -191,8 +193,8 @@ fn test_ui_unpack() {
     ui.pack_resource(&1004, default_font());
     ui.pack_control(&1005, ButtonT{text: "TEST", position:(10, 10), size: (100, 30), visible: true, disabled: false, parent: 1001, font: None});
     
-    ui.bind(&1001, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) += 1; } } );
-    ui.bind(&1005, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) += 1; } } );
+    ui.bind(&1001, &5000, Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) += 1; } } );
+    ui.bind(&1005, &5000, Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) += 1; } } );
 
     ui.commit().expect("Commit was not successful");
 
@@ -238,9 +240,9 @@ fn test_ui_bind() {
     ui.pack_control(&1003, MenuItemT{text: "", parent: 1001, disabled: false});
 
     // Binding successful
-    ui.bind(&1001, &5000, Event::Destroyed, |ui, id, _, _|{
+    ui.bind(&1001, &5000, Destroyed, |ui, id, _, _|{
         // When event callbacks are being dipatched, it is impossible to bind a new callback on the same control with the same event
-        ui.bind(&1001, &5001, Event::Destroyed, |_, _, _, _|{});
+        ui.bind(&1001, &5001, Destroyed, |_, _, _, _|{});
         let r = ui.commit();
         assert!(r.is_err() && r.err().unwrap() == Error::ControlInUse, "Commit was successful");
 
@@ -251,7 +253,7 @@ fn test_ui_bind() {
 
         // On other control or on other events, binding new callback is permitted
         // Still binding new events in a destroy callback is a horrible idea, because, unless specified, the NWG destroy order is random.
-        ui.bind(&1002, &5001, Event::KeyDown, |_, _, _, _|{ } );
+        ui.bind(&1002, &5001, KeyDown, |_, _, _, _|{ } );
         ui.commit().expect("Commit was not successful");
         exit();
     });
@@ -259,22 +261,22 @@ fn test_ui_bind() {
     ui.commit().expect("Commit was not successful");
 
     // Cannot bind events to user values
-    ui.bind(&1000, &5000, Event::Destroyed, |_, _, _, _|{});
+    ui.bind(&1000, &5000, Destroyed, |_, _, _, _|{});
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::ControlRequired, "Commit was successful");
 
     // Key not in Ui
-    ui.bind(&1005, &5000, Event::Destroyed, |_, _, _, _|{});
+    ui.bind(&1005, &5000, Destroyed, |_, _, _, _|{});
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
 
     // Event not supported
-    ui.bind(&1003, &5000, Event::MouseUp, |_, _, _, _|{});
+    ui.bind(&1003, &5000, MouseUp, |_, _, _, _|{});
     let r = ui.commit();
-    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::MouseUp), "Commit was successful");
+    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(MouseUp), "Commit was successful");
 
     // Callback id already exists
-    ui.bind(&1001, &5000, Event::Destroyed, |_, _, _, _|{});
+    ui.bind(&1001, &5000, Destroyed, |_, _, _, _|{});
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyExists, "Commit was successful");
 
@@ -291,39 +293,39 @@ fn test_ui_unbind() {
     ui.pack_control(&1002, MenuItemT{text: "", parent: 1000, disabled: false});
     ui.pack_value(&1001, 5u32);
 
-    ui.bind(&1000, &5000, Event::Destroyed, |_, _, _, _|{});
+    ui.bind(&1000, &5000, Destroyed, |_, _, _, _|{});
     ui.commit().expect("Commit was not successful");
 
-    ui.unbind(&1000, &5000, Event::Destroyed);
+    ui.unbind(&1000, &5000, Destroyed);
     ui.commit().expect("Commit was not successful");
 
     // Should be able to rebind destroyed callbacks
-    ui.bind(&1000, &5000, Event::Destroyed, |_, _, _, _|{});
+    ui.bind(&1000, &5000, Destroyed, |_, _, _, _|{});
     ui.commit().expect("Commit was not successful");
 
     // Cannot unbind events to user values
-    ui.unbind(&1001, &5000, Event::Destroyed);
+    ui.unbind(&1001, &5000, Destroyed);
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::ControlRequired, "Commit was successful");
 
     // Key not in Ui
-    ui.unbind(&1005, &5000, Event::Destroyed);
+    ui.unbind(&1005, &5000, Destroyed);
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
 
     // Event not supported
-    ui.unbind(&1002, &5000, Event::MouseUp);
+    ui.unbind(&1002, &5000, MouseUp);
     let r = ui.commit();
-    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::MouseUp), "Commit was successful");
+    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(MouseUp), "Commit was successful");
 
     // Callback do not exists
-    ui.unbind(&1000, &5001, Event::Destroyed);
+    ui.unbind(&1000, &5001, Destroyed);
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
 
-    ui.bind(&1000, &5001, Event::Destroyed, |ui, id, _, _|{
+    ui.bind(&1000, &5001, Destroyed, |ui, id, _, _|{
         // When event callbacks are being dipatched, it is impossible to unbind a callbacks on the same control with the same event
-        ui.unbind(&1000, &5000, Event::Destroyed);
+        ui.unbind(&1000, &5000, Destroyed);
         let r = ui.commit();
         assert!(r.is_err() && r.err().unwrap() == Error::ControlInUse, "Commit was successful");
     });
@@ -342,28 +344,28 @@ fn test_user_trigger() {
     
     ui.pack_value(&1001, 5u32);
     ui.pack_control(&1000, window());
-    ui.bind(&1000, &5000, Event::MouseDown, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
-    ui.bind(&1000, &5000, Event::MouseUp, move |ui, _, _, _|{ 
-        ui.trigger(&1000, Event::MouseDown, EventArgs::None);
+    ui.bind(&1000, &5000, MouseDown, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
+    ui.bind(&1000, &5000, MouseUp, move |ui, _, _, _|{ 
+        ui.trigger(&1000, MouseDown, EventArgs::None);
         let r = ui.commit().expect("Commit was not successful");;
     });
    
-    ui.trigger(&1000, Event::MouseDown, EventArgs::None);
+    ui.trigger(&1000, MouseDown, EventArgs::None);
     ui.commit().expect("Commit was not successful");
 
-    ui.trigger(&1030, Event::MouseDown, EventArgs::None);
+    ui.trigger(&1030, MouseDown, EventArgs::None);
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
 
-    ui.trigger(&1001, Event::MouseDown, EventArgs::None);
+    ui.trigger(&1001, MouseDown, EventArgs::None);
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::ControlRequired, "Commit was successful");
 
-    ui.trigger(&1000, Event::SelectionChanged, EventArgs::None);
+    ui.trigger(&1000, nwge::listbox::SelectionChanged, EventArgs::None);
     let r = ui.commit();
-    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(Event::SelectionChanged), "Commit was successful");
+    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(nwge::listbox::SelectionChanged), "Commit was successful");
 
-    ui.trigger(&1000, Event::MouseUp, EventArgs::None);
+    ui.trigger(&1000, MouseUp, EventArgs::None);
     let r = ui.commit();
 
     assert!(flag_set, "Flag was not set");
@@ -377,7 +379,7 @@ fn test_window_control_user_close() {
     let x = &mut callback_executed as *mut bool;
 
     ui.pack_control(&1000, window());
-    ui.bind(&1000, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
+    ui.bind(&1000, &5000, Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
     ui.commit().expect("Commit was not successful");
 
     assert!(ui.has_id(&1000), "ID 1000 was not found in id after commit");
@@ -397,7 +399,7 @@ fn test_drop_callback() {
         let x = &mut callback_executed as *mut bool;
         let ui = setup_ui();
         ui.pack_control(&1000, window());
-        ui.bind(&1000, &5000, Event::Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
+        ui.bind(&1000, &5000, Destroyed, move |_, _, _, _|{ unsafe{ *(&mut *x) = true; } });
         ui.commit().expect("Commit was not successful");
     }
 
@@ -412,38 +414,38 @@ fn test_menus() {
     let x = &mut free_count as *mut u8;
 
     ui.pack_control(&1000, window());
-    ui.bind(&1000, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1000, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     
     ui.pack_control(&1001, MenuT{ text: "Test1", parent: 1000, disabled: false  });
-    ui.bind(&1001, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1001, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
     ui.pack_control(&2003, MenuItemT{ text: "TestItem4", parent: 1000, disabled: false  });
-    ui.bind(&2003, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&2003, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
     
     ui.pack_control(&1002, MenuT{ text: "Test2", parent: 1000, disabled: false  });
     ui.pack_control(&1003, MenuT{ text: "Test3", parent: 1002, disabled: false  });
     ui.pack_control(&1004, MenuT{ text: "Test4", parent: 1002, disabled: false  });
     ui.pack_control(&2000, MenuItemT{ text: "TestItem1", parent: 1002, disabled: false  });
-    ui.bind(&1002, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
-    ui.bind(&1003, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
-    ui.bind(&1004, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
-    ui.bind(&2000, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1002, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1003, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1004, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&2000, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
     ui.pack_control(&1005, MenuT{ text: "Test5", parent: 1000, disabled: false });
     ui.pack_control(&1006, MenuT{ text: "Test6", parent: 1005, disabled: false });
     ui.pack_control(&1007, MenuT{ text: "Test7", parent: 1006, disabled: false });
     ui.pack_control(&2001, MenuItemT{ text: "TestItem2", parent: 1007, disabled: false  });
-    ui.bind(&1005, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
-    ui.bind(&1006, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
-    ui.bind(&1007, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
-    ui.bind(&2001, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1005, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1006, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1007, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&2001, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
     ui.pack_control(&1008, MenuT{ text: "Test8", parent: 1000, disabled: false });
     ui.pack_control(&1009, MenuT{ text: "Test9", parent: 1008, disabled: false });
     ui.pack_control(&2002, MenuItemT{ text: "TestItem3", parent: 1000, disabled: false  });
-    ui.bind(&1008, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
-    ui.bind(&1009, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
-    ui.bind(&2002, &10_000, Event::Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1008, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&1009, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
+    ui.bind(&2002, &10_000, Destroyed, move |_,_,_,_|{ unsafe{  *(&mut *x) += 1 } });
 
     ui.commit().expect("Commit was not successful");
 
@@ -798,4 +800,27 @@ fn text_textinput() {
         tinput.set_limit(10_000);
         assert!(tinput.get_limit() == 10_000);
     }
+}
+
+#[test]
+fn sizeof_events_unpack_function() {
+    use std::mem::{size_of_val, size_of};
+
+    // When function pointers are hashed, they are interpreted as [usize;2]
+    // This test makes sure that its always the case
+    if let &nwge::Event::Single(_, ref fnptr1, ref fnptr2) = &nwge::KeyDown {
+        assert!(size_of_val(fnptr1) == size_of::<[usize; 2]>());
+        assert!(size_of_val(fnptr2) == size_of::<[usize; 2]>());
+    } else {
+        panic!("What?")
+    }
+
+    if let &nwge::Event::Group(_, ref fnptr1, ref fnptr2) = &nwge::MouseDown {
+        assert!(size_of_val(fnptr1) == size_of::<[usize; 2]>());
+        assert!(size_of_val(fnptr2) == size_of::<[usize; 2]>());
+    } else {
+        panic!("What?")
+    }
+
+   
 }

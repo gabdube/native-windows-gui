@@ -31,11 +31,14 @@ use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget};
 use ui::Ui;
 use controls::{Control, ControlT};
 use error::{Error, SystemError};
-use events::Event;
+use events::{Event, Destroyed, Moved, Resized, KeyDown, KeyUp, Char, MouseDown, MouseUp, Paint};
 use super::{Canvas, CanvasProtected};
 
 /**
     A template that creates a canvas
+
+    Events supported:  
+    `Destroyed, KeyDown, KeyUp, Char, MouseDown, MouseUp, Moved, Resized, Paint, Any`
 
     Members:  
     • `parent`: The canvas parent.
@@ -56,8 +59,7 @@ impl<ID: Hash+Clone+'static> ControlT<ID> for CanvasT<ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Canvas<ID>>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::MouseDown, Event::MouseUp,
-             Event::Moved, Event::Resized, Event::Paint, Event::Raw]
+        vec![Destroyed, KeyDown, KeyUp, Char, MouseDown, MouseUp, Moved, Resized, Paint, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

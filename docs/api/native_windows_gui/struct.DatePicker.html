@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'DatePicker', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Struct DatePicker</p><div class="block items"><ul><li><a href="#methods">Methods</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'DatePicker', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -48,27 +48,27 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/controls/datepicker.rs.html#148-150' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/controls/datepicker.rs.html#152-154' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct DatePicker { /* fields omitted */ }</pre><div class='docblock'><p>A simple date picker control. Do not handle timezone. It is recomended to use a specialized date time library to
 use with this control.</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class="struct" href="../native_windows_gui/struct.DatePicker.html" title="struct native_windows_gui::DatePicker">DatePicker</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/datepicker.rs.html#152-273' title='goto source code'>[src]</a></span></h3>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class="struct" href="../native_windows_gui/struct.DatePicker.html" title="struct native_windows_gui::DatePicker">DatePicker</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/datepicker.rs.html#156-277' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.set_format' class="method"><span id='set_format.v' class='invisible'><code>fn <a href='#method.set_format' class='fnname'>set_format</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;&gt;(&amp;self, format: &amp;S)</code></span></h4>
 <div class='docblock'><p>Set the format of the date time picker. Use the format specified in the DTP template.</p>
 </div><h4 id='method.get_checkstate' class="method"><span id='get_checkstate.v' class='invisible'><code>fn <a href='#method.get_checkstate' class='fnname'>get_checkstate</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/constants/enum.CheckState.html" title="enum native_windows_gui::constants::CheckState">CheckState</a></code></span></h4>
-<div class='docblock'><p>Return the check state of the checkbox of the control (if optional was set to true).<br />
+<div class='docblock'><p>Return the check state of the checkbox of the control (if optional was set to true).<br>
 If the date time picker is not optional, return false.</p>
 </div><h4 id='method.get_value' class="method"><span id='get_value.v' class='invisible'><code>fn <a href='#method.get_value' class='fnname'>get_value</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../native_windows_gui/constants/struct.PickerDate.html" title="struct native_windows_gui::constants::PickerDate">PickerDate</a>&gt;</code></span></h4>
-<div class='docblock'><p>Return the time set in the control in a <code>PickerDate</code> structure.<br />
-Return None if <code>optional</code> was set and the checkbox is not checked.<br />
+<div class='docblock'><p>Return the time set in the control in a <code>PickerDate</code> structure.<br>
+Return None if <code>optional</code> was set and the checkbox is not checked.<br>
 Note: use <code>get_date_string</code> to get the text value of the control.</p>
 </div><h4 id='method.set_value' class="method"><span id='set_value.v' class='invisible'><code>fn <a href='#method.set_value' class='fnname'>set_value</a>(&amp;self, date: &amp;<a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../native_windows_gui/constants/struct.PickerDate.html" title="struct native_windows_gui::constants::PickerDate">PickerDate</a>&gt;)</code></span></h4>
-<div class='docblock'><p>Set the time set in the control in a <code>PickerDate</code> structure.<br />
+<div class='docblock'><p>Set the time set in the control in a <code>PickerDate</code> structure.<br>
 If <code>None</code> is passed, clears the checkbox.</p>
 </div><h4 id='method.get_align' class="method"><span id='get_align.v' class='invisible'><code>fn <a href='#method.get_align' class='fnname'>get_align</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/constants/enum.HTextAlign.html" title="enum native_windows_gui::constants::HTextAlign">HTextAlign</a></code></span></h4>
-<div class='docblock'><p>Get the alignment of the calendar popup.
+<div class='docblock'><p>Get the alignment of the calendar popup. 
 For some reason, it is impossible to retrive the TextEdit handle, therefore getting its alignment is impossible.</p>
 </div><h4 id='method.set_align' class="method"><span id='set_align.v' class='invisible'><code>fn <a href='#method.set_align' class='fnname'>set_align</a>(&amp;self, align: &amp;<a class="enum" href="../native_windows_gui/constants/enum.HTextAlign.html" title="enum native_windows_gui::constants::HTextAlign">HTextAlign</a>)</code></span></h4>
-<div class='docblock'><p>Change the alignment of the calendar popup.
+<div class='docblock'><p>Change the alignment of the calendar popup. 
 For some reason, it is impossible to retrive the TextEdit handle, therefore setting its alignment is impossible.</p>
 </div><h4 id='method.close_calendar' class="method"><span id='close_calendar.v' class='invisible'><code>fn <a href='#method.close_calendar' class='fnname'>close_calendar</a>(&amp;self)</code></span></h4>
 <div class='docblock'><p>Close the calendar popup if it is open  </p>
@@ -81,7 +81,7 @@ For some reason, it is impossible to retrive the TextEdit handle, therefore sett
 <h4 id='method.set_size' class="method"><span id='set_size.v' class='invisible'><code>fn <a href='#method.set_size' class='fnname'>set_size</a>(&amp;self, w: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>, h: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</code></span></h4>
 <h4 id='method.get_enabled' class="method"><span id='get_enabled.v' class='invisible'><code>fn <a href='#method.get_enabled' class='fnname'>get_enabled</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
 <h4 id='method.set_enabled' class="method"><span id='set_enabled.v' class='invisible'><code>fn <a href='#method.set_enabled' class='fnname'>set_enabled</a>(&amp;self, e: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>)</code></span></h4>
-</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="../native_windows_gui/custom/trait.Control.html" title="trait native_windows_gui::custom::Control">Control</a> for <a class="struct" href="../native_windows_gui/struct.DatePicker.html" title="struct native_windows_gui::DatePicker">DatePicker</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/datepicker.rs.html#275-290' title='goto source code'>[src]</a></span></h3>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="../native_windows_gui/custom/trait.Control.html" title="trait native_windows_gui::custom::Control">Control</a> for <a class="struct" href="../native_windows_gui/struct.DatePicker.html" title="struct native_windows_gui::DatePicker">DatePicker</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/datepicker.rs.html#279-294' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.handle' class="method"><span id='handle.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#tymethod.handle' class='fnname'>handle</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/custom/enum.AnyHandle.html" title="enum native_windows_gui::custom::AnyHandle">AnyHandle</a></code></span></h4>
 <div class='docblock'><p>Should return the underlying handle to the object</p>
 </div><h4 id='method.control_type' class="method"><span id='control_type.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#method.control_type' class='fnname'>control_type</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/constants/enum.ControlType.html" title="enum native_windows_gui::constants::ControlType">ControlType</a></code></span></h4>
@@ -145,7 +145,6 @@ For some reason, it is impossible to retrive the TextEdit handle, therefore sett
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

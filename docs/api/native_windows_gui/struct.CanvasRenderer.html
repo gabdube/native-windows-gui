@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'CanvasRenderer', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Struct CanvasRenderer</p><div class="block items"><ul><li><a href="#methods">Methods</a></li><li><a href="#deref-methods">Methods from Deref&lt;Target=Canvas<ID>&gt;</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'CanvasRenderer', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -52,85 +52,96 @@
 <pre class='rust struct'>pub struct CanvasRenderer&lt;'a, ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + 'a&gt; { /* fields omitted */ }</pre><div class='docblock'><p>Object that offers a light wrapper over the D2D1 api.</p>
 </div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;'a, ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a>&gt; <a class="struct" href="../native_windows_gui/struct.CanvasRenderer.html" title="struct native_windows_gui::CanvasRenderer">CanvasRenderer</a>&lt;'a, ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/canvas/renderer.rs.html#41-246' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.clear' class="method"><span id='clear.v' class='invisible'><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self, r: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, g: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, b: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, a: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>)</code></span></h4>
-<div class='docblock'><p>Clears the drawing area to the specified color.</p>
-<p>Arguments:<br />
-• <code>r</code>: Red component. 0.0 - 1.0<br />
-• <code>g</code>: Green component. 0.0 - 1.0<br />
-• <code>b</code>: Blue component. 0.0 - 1.0<br />
+<div class='docblock'><p>Clears the drawing area to the specified color.  </p>
+
+<p>Arguments:<br>
+• <code>r</code>: Red component. 0.0 - 1.0<br>
+• <code>g</code>: Green component. 0.0 - 1.0<br>
+• <code>b</code>: Blue component. 0.0 - 1.0<br>
 • <code>a</code>: Alpha component. 0.0 - 1.0  </p>
 </div><h4 id='method.get_render_size' class="method"><span id='get_render_size.v' class='invisible'><code>fn <a href='#method.get_render_size' class='fnname'>get_render_size</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a></code></span></h4>
 <div class='docblock'><p>Return the render target size in a tuple of (<code>width</code>, <code>height</code>)</p>
 </div><h4 id='method.set_transform' class="method"><span id='set_transform.v' class='invisible'><code>fn <a href='#method.set_transform' class='fnname'>set_transform</a>(&amp;mut self, m: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.array.html">[</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.array.html">[</a>FLOAT<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.array.html">; 2]</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.array.html">; 3]</a>)</code></span></h4>
 <div class='docblock'><p>Set the transformation matrix of the renderer</p>
-<p>Arguments:<br />
+
+<p>Arguments:<br>
 • <code>m</code>: The 3x2 matrix.</p>
 </div><h4 id='method.get_transform' class="method"><span id='get_transform.v' class='invisible'><code>fn <a href='#method.get_transform' class='fnname'>get_transform</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.array.html">[</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.array.html">[</a>FLOAT<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.array.html">; 2]</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.array.html">; 3]</a></code></span></h4>
 <div class='docblock'><p>Return the transformation matrix of the renderer</p>
 </div><h4 id='method.fill_rectangle' class="method"><span id='fill_rectangle.v' class='invisible'><code>fn <a href='#method.fill_rectangle' class='fnname'>fill_rectangle</a>(&amp;mut self, brush: &amp;ID, r: &amp;<a class="struct" href="../native_windows_gui/constants/struct.Rectangle.html" title="struct native_windows_gui::constants::Rectangle">Rectangle</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Fill a rectangle shape defined by <code>r</code> using the brush identified by <code>brush</code></p>
-<p>Arguments:<br />
-• <code>brush</code>: Id of the brush saved in the canvas<br />
+<div class='docblock'><p>Fill a rectangle shape defined by <code>r</code> using the brush identified by <code>brush</code>  </p>
+
+<p>Arguments:<br>
+• <code>brush</code>: Id of the brush saved in the canvas<br>
 • <code>r</code>: The rectangle shape to draw  </p>
 </div><h4 id='method.fill_rounded_rectangle' class="method"><span id='fill_rounded_rectangle.v' class='invisible'><code>fn <a href='#method.fill_rounded_rectangle' class='fnname'>fill_rounded_rectangle</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;brush: &amp;ID, <br>&nbsp;&nbsp;&nbsp;&nbsp;r: &amp;<a class="struct" href="../native_windows_gui/constants/struct.Rectangle.html" title="struct native_windows_gui::constants::Rectangle">Rectangle</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;radius: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Fill a rounded rectangle shape defined by <code>r</code> using the brush identified by <code>brush</code></p>
-<p>Arguments:<br />
-• <code>brush</code>: Id of the brush saved in the canvas<br />
-• <code>r</code>: The rectangle shape to draw<br />
+<div class='docblock'><p>Fill a rounded rectangle shape defined by <code>r</code> using the brush identified by <code>brush</code>  </p>
+
+<p>Arguments:<br>
+• <code>brush</code>: Id of the brush saved in the canvas<br>
+• <code>r</code>: The rectangle shape to draw<br>
 • <code>radius</code>: Amount of rounding on the rectangle border. (<code>width</code>, <code>height</code>)</p>
 </div><h4 id='method.fill_ellipse' class="method"><span id='fill_ellipse.v' class='invisible'><code>fn <a href='#method.fill_ellipse' class='fnname'>fill_ellipse</a>(&amp;mut self, brush: &amp;ID, e: &amp;<a class="struct" href="../native_windows_gui/constants/struct.Ellipse.html" title="struct native_windows_gui::constants::Ellipse">Ellipse</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Fill an ellipse shape defined by <code>e</code> using the brush identified by <code>brush</code></p>
-<p>Arguments:<br />
-• <code>brush</code>: Id of the brush saved in the canvas<br />
+<div class='docblock'><p>Fill an ellipse shape defined by <code>e</code> using the brush identified by <code>brush</code>  </p>
+
+<p>Arguments:<br>
+• <code>brush</code>: Id of the brush saved in the canvas<br>
 • <code>e</code>: The ellipse shape to draw  </p>
 </div><h4 id='method.draw_rectangle' class="method"><span id='draw_rectangle.v' class='invisible'><code>fn <a href='#method.draw_rectangle' class='fnname'>draw_rectangle</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;brush: &amp;ID, <br>&nbsp;&nbsp;&nbsp;&nbsp;pen: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;ID&gt;, <br>&nbsp;&nbsp;&nbsp;&nbsp;r: &amp;<a class="struct" href="../native_windows_gui/constants/struct.Rectangle.html" title="struct native_windows_gui::constants::Rectangle">Rectangle</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;width: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Draw the outline of a rectangle shape defined by <code>r</code> using the brush identified by <code>brush</code> and the pen identifed
 by <code>pen</code>.</p>
-<p>Arguments:<br />
-• <code>brush</code>: Id of the brush saved in the canvas<br />
-• <code>pen</code>: Id of the pen saved in the canvas<br />
-• <code>r</code>: The rectangle shape to draw<br />
+
+<p>Arguments:<br>
+• <code>brush</code>: Id of the brush saved in the canvas<br>
+• <code>pen</code>: Id of the pen saved in the canvas<br>
+• <code>r</code>: The rectangle shape to draw<br>
 • <code>width</code>: Width of the outline to draw  </p>
 </div><h4 id='method.draw_rounded_rectangle' class="method"><span id='draw_rounded_rectangle.v' class='invisible'><code>fn <a href='#method.draw_rounded_rectangle' class='fnname'>draw_rounded_rectangle</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;brush: &amp;ID, <br>&nbsp;&nbsp;&nbsp;&nbsp;pen: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;ID&gt;, <br>&nbsp;&nbsp;&nbsp;&nbsp;r: &amp;<a class="struct" href="../native_windows_gui/constants/struct.Rectangle.html" title="struct native_windows_gui::constants::Rectangle">Rectangle</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;width: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;radius: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Draw the outline of a rounded rectangle shape defined by <code>r</code> using the brush identified by <code>brush</code> and the pen identifed
 by <code>pen</code>.</p>
-<p>Arguments:<br />
-• <code>brush</code>: Id of the brush saved in the canvas<br />
-• <code>pen</code>: Id of the pen saved in the canvas<br />
-• <code>r</code>: The rectangle shape to draw<br />
-• <code>width</code>: Width of the outline to draw<br />
+
+<p>Arguments:<br>
+• <code>brush</code>: Id of the brush saved in the canvas<br>
+• <code>pen</code>: Id of the pen saved in the canvas<br>
+• <code>r</code>: The rectangle shape to draw<br>
+• <code>width</code>: Width of the outline to draw<br>
 • <code>radius</code>: Amount of rounding on the rectangle border. (<code>width</code>, <code>height</code>)  </p>
 </div><h4 id='method.draw_ellipse' class="method"><span id='draw_ellipse.v' class='invisible'><code>fn <a href='#method.draw_ellipse' class='fnname'>draw_ellipse</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;brush: &amp;ID, <br>&nbsp;&nbsp;&nbsp;&nbsp;pen: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;ID&gt;, <br>&nbsp;&nbsp;&nbsp;&nbsp;e: &amp;<a class="struct" href="../native_windows_gui/constants/struct.Ellipse.html" title="struct native_windows_gui::constants::Ellipse">Ellipse</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;width: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Draw the outline of an ellipse shape defined by <code>e</code> using the brush identified by <code>brush</code> and the pen identifed
 by <code>pen</code>.</p>
-<p>Arguments:<br />
-• <code>brush</code>: Id of the brush saved in the canvas<br />
-• <code>pen</code>: Id of the pen saved in the canvas<br />
-• <code>e</code>: The ellipse shape to draw<br />
+
+<p>Arguments:<br>
+• <code>brush</code>: Id of the brush saved in the canvas<br>
+• <code>pen</code>: Id of the pen saved in the canvas<br>
+• <code>e</code>: The ellipse shape to draw<br>
 • <code>width</code>: Width of the outline to draw  </p>
 </div></div><h2 id='deref-methods'>Methods from <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html" title="trait core::ops::Deref">Deref</a>&lt;Target = <a class="struct" href="../native_windows_gui/struct.Canvas.html" title="struct native_windows_gui::Canvas">Canvas</a>&lt;ID&gt;&gt;</h2><div class='impl-items'><h4 id='method.renderer' class="method"><span id='renderer.v' class='invisible'><code>fn <a href='#method.renderer' class='fnname'>renderer</a>&lt;'a&gt;(&amp;'a mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../native_windows_gui/struct.CanvasRenderer.html" title="struct native_windows_gui::CanvasRenderer">CanvasRenderer</a>&lt;'a, ID&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Make the canvas &quot;paint ready&quot; and return an object to paint to it.
 In very very <strong>very</strong> rare case, the renderer creation can fail.</p>
 </div><h4 id='method.create_solid_brush' class="method"><span id='create_solid_brush.v' class='invisible'><code>fn <a href='#method.create_solid_brush' class='fnname'>create_solid_brush</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;name: &amp;ID, <br>&nbsp;&nbsp;&nbsp;&nbsp;brush: &amp;<a class="struct" href="../native_windows_gui/constants/struct.SolidBrush.html" title="struct native_windows_gui::constants::SolidBrush">SolidBrush</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Create a solid brush into the canvas and add it under the selected <code>name</code>.</p>
-<p>Errors:<br />
-• <code>Error::System</code> if the canvas could not create the brush.<br />
+
+<p>Errors:<br>
+• <code>Error::System</code> if the canvas could not create the brush.<br>
 • <code>Error::KeyExists</code> if the a resource with the specified name already exists  </p>
 </div><h4 id='method.create_pen' class="method"><span id='create_pen.v' class='invisible'><code>fn <a href='#method.create_pen' class='fnname'>create_pen</a>(&amp;mut self, name: &amp;ID, pen: &amp;<a class="struct" href="../native_windows_gui/constants/struct.Pen.html" title="struct native_windows_gui::constants::Pen">Pen</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Create a pen into the canvas and add it under the selected <code>name</code>.</p>
-<p>Errors:<br />
-• <code>Error::System</code> if the canvas could not create the brush.<br />
+
+<p>Errors:<br>
+• <code>Error::System</code> if the canvas could not create the brush.<br>
 • <code>Error::KeyExists</code> if the a resource with the specified name already exists  </p>
 </div><h4 id='method.redraw' class="method"><span id='redraw.v' class='invisible'><code>fn <a href='#method.redraw' class='fnname'>redraw</a>(&amp;self)</code></span></h4>
 <div class='docblock'><p>Redraw the canvas</p>
 </div><h4 id='method.set_render_size' class="method"><span id='set_render_size.v' class='invisible'><code>fn <a href='#method.set_render_size' class='fnname'>set_render_size</a>(&amp;mut self, w: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>, h: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</code></span></h4>
-<div class='docblock'><p>Set the render target resolution.<br />
+<div class='docblock'><p>Set the render target resolution.<br>
 If the control size do not match the render target size, the result will be upscaled or downscaled</p>
 </div><h4 id='method.get_dpi' class="method"><span id='get_dpi.v' class='invisible'><code>fn <a href='#method.get_dpi' class='fnname'>get_dpi</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a></code></span></h4>
-<div class='docblock'><p>Return the render target's dots per inch (DPI).</p>
+<div class='docblock'><p>Return the render target&#39;s dots per inch (DPI).</p>
 </div><h4 id='method.set_dpi' class="method"><span id='set_dpi.v' class='invisible'><code>fn <a href='#method.set_dpi' class='fnname'>set_dpi</a>(&amp;mut self, dpix: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, fpiy: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>)</code></span></h4>
-<div class='docblock'><p>Sets the dots per inch (DPI) of the render target.</p>
-<p>Arguments:<br />
-• <code>dpix</code>:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.<br />
+<div class='docblock'><p>Sets the dots per inch (DPI) of the render target.   </p>
+
+<p>Arguments:<br>
+• <code>dpix</code>:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.<br>
 • <code>dpiy</code>:  A value greater than or equal to zero that specifies the vertical DPI of the render target.  </p>
 </div><h4 id='method.get_visibility' class="method"><span id='get_visibility.v' class='invisible'><code>fn <a href='#method.get_visibility' class='fnname'>get_visibility</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
 <h4 id='method.set_visibility' class="method"><span id='set_visibility.v' class='invisible'><code>fn <a href='#method.set_visibility' class='fnname'>set_visibility</a>(&amp;self, visible: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>)</code></span></h4>
@@ -208,7 +219,6 @@ If the control size do not match the render target size, the result will be upsc
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

@@ -92,7 +92,7 @@ do not have any particular properties:
 </pre></div>
 
 The canvas control accept a wide range of events, enabling it to respond easily to any user input: 
-<code>Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::MouseDown, Event::MouseUp, Event::Moved, Event::Resized, Event::Paint, Event::Raw</code>
+<code>Destroyed, KeyDown,KeyUp, Char, MouseDown, MouseUp, Moved, Resized, Paint, Any</code>
 
 <h1 id="res" class="section-header"><a href="#res">Resources creation</a></h1> 
 
@@ -138,7 +138,7 @@ Once the renderer is acquired, functions like <code>clear</code>, <code>get_rend
 Finally, methods like <code>draw_*</code> and <code>fill_*</code> can be used to draw the outline or fill a shape.<br>
 
 
-<div class="syntax"><pre><span></span><span class="p">(</span><span class="s">"Canvas"</span><span class="p">,</span><span class="w"> </span><span class="s">"Paint"</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span>::<span class="n">Paint</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">app</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="syntax"><pre><span></span><span class="p">(</span><span class="s">"Canvas"</span><span class="p">,</span><span class="w"> </span><span class="s">"Paint"</span><span class="p">,</span><span class="w"> </span><span class="n">nwge</span>::<span class="n">Paint</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">app</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">canvas</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg_get_mut</span><span class="o">!</span><span class="p">(</span><span class="n">app</span><span class="p">;</span><span class="w"> </span><span class="p">(</span><span class="s">"Canvas"</span><span class="p">,</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Canvas</span><span class="o">&lt;&amp;</span><span class="nb">'static</span><span class="w"> </span><span class="kt">str</span><span class="o">&gt;</span><span class="p">));</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">// Get the renderer and clear the last scene</span>

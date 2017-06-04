@@ -24,15 +24,16 @@ use std::any::TypeId;
 use winapi::{HWND, HFONT};
 
 use ui::Ui;
-use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use controls::{Control, ControlT, ControlType, AnyHandle};
+use events::{Event, Destroyed, Moved, Resized};
+use events::button::{Click, DoubleClick, Focus};
 
 /**
     A template that creates a standard button
 
     Available events:  
-    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+    `Destroyed, Moved, Resized, Click, DoubleClick, Focus, Any`
 
     Members:  
     • `text`: The text of the button  
@@ -58,7 +59,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Button>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]
+        vec![Destroyed, Moved, Resized, Click, DoubleClick, Focus, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

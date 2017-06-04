@@ -113,20 +113,6 @@
 <span id="68">68</span>
 <span id="69">69</span>
 <span id="70">70</span>
-<span id="71">71</span>
-<span id="72">72</span>
-<span id="73">73</span>
-<span id="74">74</span>
-<span id="75">75</span>
-<span id="76">76</span>
-<span id="77">77</span>
-<span id="78">78</span>
-<span id="79">79</span>
-<span id="80">80</span>
-<span id="81">81</span>
-<span id="82">82</span>
-<span id="83">83</span>
-<span id="84">84</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     High level events definitions
@@ -153,6 +139,26 @@
 <span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
 <span class="kw">use</span> <span class="ident">defs</span>::<span class="ident">MouseButton</span>;
 
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">WPARAM</span>, <span class="ident">LPARAM</span>};
+
+<span class="comment">// System events that can be applied to any HWND based control</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">Event</span>, <span class="ident">Destroyed</span>, <span class="ident">Paint</span>, <span class="ident">Closed</span>, <span class="ident">Moved</span>, <span class="ident">KeyDown</span>, <span class="ident">KeyUp</span>, <span class="ident">Resized</span>, <span class="ident">Char</span>, <span class="ident">MouseUp</span>, <span class="ident">MouseDown</span>};
+
+<span class="comment">// Control specfic events</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">button</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">BtnClick</span> <span class="kw">as</span> <span class="ident">Click</span>, <span class="ident">BtnDoubleClick</span> <span class="kw">as</span> <span class="ident">DoubleClick</span>, <span class="ident">BtnFocus</span> <span class="kw">as</span> <span class="ident">Focus</span>}; }
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">button</span> <span class="kw">as</span> <span class="ident">checkbox</span>; <span class="comment">// Checkboxes use the same events of the buttons</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">button</span> <span class="kw">as</span> <span class="ident">radiobutton</span>; <span class="comment">// Radiobuttons use the same events of the buttons</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">combobox</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">CbnFocus</span> <span class="kw">as</span> <span class="ident">Focus</span>, <span class="ident">CbnSelectionChanged</span> <span class="kw">as</span> <span class="ident">SelectionChanged</span>}; }
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">label</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">StnClick</span> <span class="kw">as</span> <span class="ident">Click</span>, <span class="ident">StnDoubleClick</span> <span class="kw">as</span> <span class="ident">DoubleClick</span>}; }
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">datepicker</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">DateChanged</span>; }
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">listbox</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">LbnSelectionChanged</span> <span class="kw">as</span> <span class="ident">SelectionChanged</span>, <span class="ident">LbnDoubleClick</span> <span class="kw">as</span> <span class="ident">DoubleClick</span>, <span class="ident">LbnFocus</span> <span class="kw">as</span> <span class="ident">Focus</span>}; }
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">textbox</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">EnFocus</span> <span class="kw">as</span> <span class="ident">Focus</span>, <span class="ident">EnLimit</span> <span class="kw">as</span> <span class="ident">Limit</span>, <span class="ident">EnValueChanged</span> <span class="kw">as</span> <span class="ident">ValueChanged</span>}; }
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">textbox</span> <span class="kw">as</span> <span class="ident">textinput</span>; <span class="comment">// Textinput use the same events of the textbox</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">menu</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">MenuTrigger</span> <span class="kw">as</span> <span class="ident">Triggered</span>; }
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">timer</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">TimerTick</span> <span class="kw">as</span> <span class="ident">Tick</span>; }
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">Event</span>::<span class="ident">Any</span> <span class="kw">as</span> <span class="ident">Any</span>;
+
 <span class="doccomment">/**
 The function signature for the event callback
 
@@ -165,40 +171,6 @@ Arguments:
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">EventCallback</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="ident">ID</span>, <span class="kw-2">&amp;</span><span class="ident">Event</span>, <span class="kw-2">&amp;</span><span class="ident">EventArgs</span>) <span class="op">-&gt;</span> ();
 
 <span class="doccomment">/**
-    Events name definition
-*/</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Event</span> {
-
-    <span class="comment">// NWG special events</span>
-    <span class="ident">Destroyed</span>,
-
-    <span class="comment">// System events</span>
-    <span class="ident">KeyDown</span>,
-    <span class="ident">KeyUp</span>,
-    <span class="ident">Char</span>,
-    <span class="ident">Closed</span>,
-    <span class="ident">MouseUp</span>,
-    <span class="ident">MouseDown</span>,
-    <span class="ident">Moved</span>,
-    <span class="ident">Resized</span>,
-    <span class="ident">Paint</span>,
-    <span class="ident">Raw</span>,
-
-    <span class="comment">// Default control specific events</span>
-    <span class="ident">Click</span>,
-    <span class="ident">DoubleClick</span>,
-    <span class="ident">MenuOpen</span>,
-    <span class="ident">MenuClose</span>,
-    <span class="ident">SelectionChanged</span>,
-    <span class="ident">ValueChanged</span>,
-    <span class="ident">LimitReached</span>,
-    <span class="ident">Focus</span>,
-    <span class="ident">Tick</span>,
-    <span class="ident">Triggered</span>,
-}
-
-<span class="doccomment">/**
     Events arguments definition. If an event do not have arguments, EventArgs::None is passed.
 */</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">EventArgs</span> {
@@ -209,7 +181,7 @@ Arguments:
     <span class="ident">Tick</span>(<span class="ident">Duration</span>),
     <span class="ident">Position</span>(<span class="ident">i32</span>, <span class="ident">i32</span>),
     <span class="ident">Size</span>(<span class="ident">u32</span>, <span class="ident">u32</span>),
-    <span class="ident">Raw</span>(<span class="ident">u32</span>, <span class="ident">usize</span>, <span class="ident">usize</span>), <span class="comment">// MSG, WPARAM, LPARAM</span>
+    <span class="ident">Raw</span>(<span class="ident">u32</span>, <span class="ident">WPARAM</span>, <span class="ident">LPARAM</span>), <span class="comment">// MSG, WPARAM, LPARAM</span>
     <span class="prelude-val">None</span>
 }</pre>
 </section>
@@ -269,7 +241,6 @@ Arguments:
         window.rootPath = "../../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>

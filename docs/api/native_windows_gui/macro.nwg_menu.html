@@ -48,18 +48,20 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#387-394' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#394-401' title='goto source code'>[src]</a></span></h1>
 <pre class="rust macro">
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_menu</span> {
     (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { ... };
 }</pre>
 <div class='docblock'><p>Sane defaults for the Menu control. Requires a window parent.</p>
-<p>Defaults:<br />
-• text: <code>&quot;Menu&quot;</code><br />
-• disabled: <code>false</code></p>
-<p>Usage:<br />
-<code>nwg_menu!(parent=&quot;MyParent&quot;;)</code><br />
-<code>nwg_menu!(parent=&quot;MyParent&quot;; text=&quot;AAA&quot;)</code><br />
+
+<p>Defaults:<br>
+• text: <code>&quot;Menu&quot;</code><br>
+• disabled: <code>false</code>  </p>
+
+<p>Usage:<br>
+<code>nwg_menu!(parent=&quot;MyParent&quot;;)</code><br>
+<code>nwg_menu!(parent=&quot;MyParent&quot;; text=&quot;AAA&quot;)</code><br>
 <code>nwg_menu!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)</code>    </p>
 </div></section>
     <section id='search' class="content hidden"></section>
@@ -118,7 +120,6 @@
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

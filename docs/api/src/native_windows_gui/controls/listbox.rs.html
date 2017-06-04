@@ -434,6 +434,7 @@
 <span id="389">389</span>
 <span id="390">390</span>
 <span id="391">391</span>
+<span id="392">392</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Simple listbox control definition
@@ -466,14 +467,15 @@
 <span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
 <span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">Control</span>, <span class="ident">ControlT</span>, <span class="ident">ControlType</span>, <span class="ident">AnyHandle</span>};
 <span class="kw">use</span> <span class="ident">error</span>::<span class="ident">Error</span>;
-<span class="kw">use</span> <span class="ident">events</span>::<span class="ident">Event</span>;
+<span class="kw">use</span> <span class="ident">events</span>::{<span class="ident">Event</span>, <span class="ident">Destroyed</span>, <span class="ident">Moved</span>, <span class="ident">Resized</span>};
+<span class="kw">use</span> <span class="ident">events</span>::<span class="ident">listbox</span>::{<span class="ident">SelectionChanged</span>, <span class="ident">DoubleClick</span>, <span class="ident">Focus</span>};
 <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">other_helper</span>::{<span class="ident">to_utf16</span>, <span class="ident">from_utf16</span>};
 
 <span class="doccomment">/**
     Template that creates a listbox control
 
     Available events:  
-    Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+    `Destroyed, Moved, Resized, SelectionChanged, DoubleClick, Focus, Any`
 
     Members:  
     • `collection`: Item collection of the listbox. The item type must implement `Display`  
@@ -503,7 +505,7 @@
     <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">ListBox</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;&gt;</span>() }
 
     <span class="kw">fn</span> <span class="ident">events</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
-        <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Event</span>::<span class="ident">Destroyed</span>, <span class="ident">Event</span>::<span class="ident">SelectionChanged</span>, <span class="ident">Event</span>::<span class="ident">DoubleClick</span>, <span class="ident">Event</span>::<span class="ident">Focus</span>, <span class="ident">Event</span>::<span class="ident">Moved</span>, <span class="ident">Event</span>::<span class="ident">Resized</span>, <span class="ident">Event</span>::<span class="ident">Raw</span>]
+        <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Destroyed</span>, <span class="ident">Moved</span>, <span class="ident">Resized</span>, <span class="ident">SelectionChanged</span>, <span class="ident">DoubleClick</span>, <span class="ident">Focus</span>, <span class="ident">Event</span>::<span class="ident">Any</span>]
     }
 
     <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
@@ -883,7 +885,6 @@
         window.rootPath = "../../../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
     <script defer src="../../../search-index.js"></script>
 </body>

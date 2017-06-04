@@ -29,14 +29,15 @@ use winapi::{HWND, HFONT, WPARAM};
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed, Moved, Resized};
+use events::listbox::{SelectionChanged, DoubleClick, Focus};
 use low::other_helper::{to_utf16, from_utf16};
 
 /**
     Template that creates a listbox control
 
     Available events:  
-    Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+    `Destroyed, Moved, Resized, SelectionChanged, DoubleClick, Focus, Any`
 
     Members:  
     • `collection`: Item collection of the listbox. The item type must implement `Display`  
@@ -66,7 +67,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
     fn type_id(&self) -> TypeId { TypeId::of::<ListBox<D>>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]
+        vec![Destroyed, Moved, Resized, SelectionChanged, DoubleClick, Focus, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

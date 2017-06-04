@@ -27,7 +27,8 @@ use winapi::{HMENU, UINT, BOOL};
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed};
+use events::menu::Triggered;
 
 static mut MENU_ITEMS_ID: UINT = 0; 
 
@@ -35,7 +36,7 @@ static mut MENU_ITEMS_ID: UINT = 0;
     A template to create menu controls
 
     Events:  
-    Event::Destroyed  
+    `Destroyed`  
 
     Members:  
       • `text` : The menu text  
@@ -52,7 +53,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Menu>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed]
+        vec![Destroyed]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
@@ -125,7 +126,7 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<MenuItem>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Triggered]
+        vec![Destroyed, Triggered]
     }
 
    #[allow(unused_variables)]
@@ -196,7 +197,7 @@ impl<ID: Hash+Clone> ControlT<ID> for SeparatorT<ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Separator>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed]
+        vec![Destroyed]
     }
 
    #[allow(unused_variables)]

@@ -378,6 +378,7 @@
 <span id="333">333</span>
 <span id="334">334</span>
 <span id="335">335</span>
+<span id="336">336</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Types, constants and extern functions used in the low-level part of NWG
@@ -404,8 +405,8 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>};
 
-<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">UINT</span>, <span class="ident">LRESULT</span>, <span class="ident">DWORD</span>, <span class="ident">HBRUSH</span>, <span class="ident">ULONG_PTR</span>, <span class="ident">HMENU</span>, <span class="ident">BOOL</span>, <span class="ident">c_int</span>, <span class="ident">MENUITEMINFOW</span>, <span class="ident">IShellItem</span>, <span class="ident">HRESULT</span>, <span class="ident">IUnknownVtbl</span>,
- <span class="ident">IUnknown</span>, <span class="ident">PCWSTR</span>, <span class="ident">IBindCtx</span>, <span class="ident">REFIID</span>, <span class="ident">D2D1_FACTORY_TYPE</span>, <span class="ident">D2D1_FACTORY_OPTIONS</span>, <span class="ident">ID2D1Factory</span>,<span class="ident">c_void</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">UINT</span>, <span class="ident">LRESULT</span>, <span class="ident">DWORD</span>, <span class="ident">HBRUSH</span>, <span class="ident">ULONG_PTR</span>, <span class="ident">HMENU</span>, <span class="ident">BOOL</span>, <span class="ident">WORD</span>, <span class="ident">MENUITEMINFOW</span>, <span class="ident">IShellItem</span>, <span class="ident">HRESULT</span>, <span class="ident">IUnknownVtbl</span>,
+ <span class="ident">IUnknown</span>, <span class="ident">PCWSTR</span>, <span class="ident">IBindCtx</span>, <span class="ident">REFIID</span>, <span class="ident">D2D1_FACTORY_TYPE</span>, <span class="ident">D2D1_FACTORY_OPTIONS</span>, <span class="ident">ID2D1Factory</span>, <span class="ident">c_void</span>, <span class="ident">c_int</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
 
 
@@ -424,6 +425,8 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_PACK_RESOURCE</span>:     <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x405</span>;  <span class="doccomment">/// Message sent when packing a resource</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_TRIGGER</span>:           <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x406</span>;  <span class="doccomment">/// Message sent when triggering an event</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_CUSTOM_MAX</span>:        <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x407</span>;  <span class="doccomment">/// Maximum custom event value</span>
+
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NWG_DESTROY</span>:           <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0x420</span>;  <span class="doccomment">/// NWG `Destroy` event identifier</span>
 
 <span class="comment">// Value returned by a window proc if the message execution failed/succeeded</span>
 
@@ -449,6 +452,10 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ACTCTX_FLAG_SET_PROCESS_DEFAULT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x010</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x004</span>;
 
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CBN_SETFOCUS</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">3</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CBN_KILLFOCUS</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CBN_SELCHANGE</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">1</span>;
+
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_ADDSTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">384</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_INSERTSTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">385</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LB_DELETESTRING</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">386</span>;
@@ -470,15 +477,10 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBS_HASSTRINGS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">64</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBS_MULTIPLESEL</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">8</span>;
 
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_SELCHANGE</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_DBLCLK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">2</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_SETFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">4</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_KILLFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">5</span>;
-
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BN_CLICKED</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BN_DBLCLK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">5</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BN_SETFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">6</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BN_KILLFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">7</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_SELCHANGE</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">1</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_DBLCLK</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">2</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_SETFOCUS</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LBN_KILLFOCUS</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">5</span>;
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BM_SETCHECK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">241</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BM_GETCHECK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">240</span>;
@@ -519,13 +521,13 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EM_LIMITTEXT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">197</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EM_GETLIMITTEXT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">213</span>;
 
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_SETFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">256</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_KILLFOCUS</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">512</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_UPDATE</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1024</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_MAXTEXT</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1281</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_SETFOCUS</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">256</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_KILLFOCUS</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">512</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_UPDATE</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">1024</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EN_MAXTEXT</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">1281</span>;
 
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STN_CLICKED</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">0</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STN_DBLCLK</span>: <span class="ident">UINT</span> <span class="op">=</span> <span class="number">1</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STN_CLICKED</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">0</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STN_DBLCLK</span>: <span class="ident">WORD</span> <span class="op">=</span> <span class="number">1</span>;
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDABORT</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">3</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IDCANCEL</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">2</span>;
@@ -771,7 +773,6 @@
         window.rootPath = "../../../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
     <script defer src="../../../search-index.js"></script>
 </body>

@@ -28,14 +28,14 @@ use user32::SendMessageW;
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::Event;
+use events::{Event, Destroyed, Moved, Resized};
 use defs::ProgressBarState;
 
 /**
     A template that creates a progress bar
 
     Events:  
-    Event::Destroyed, Event::Moved, Event::Resized, Event::Raw  
+    `Destroyed, Moved, Resized, Any`  
 
     Members:  
     • `position`: The start position of the progressbar  
@@ -67,7 +67,7 @@ impl<ID: Hash+Clone> ControlT<ID> for ProgressBarT<ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<ProgressBar>() }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw]
+        vec![Destroyed, Moved, Resized, Event::Any]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

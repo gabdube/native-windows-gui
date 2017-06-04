@@ -812,6 +812,13 @@
 <span id="767">767</span>
 <span id="768">768</span>
 <span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Macro based template system.
@@ -899,19 +906,26 @@
     Usage: 
 
     ```rust  
+       #[macro_use] extern crate native_windows_gui as nwg;
+
         nwg_template!(
-            head: setup_ui&lt;&amp;&#39;static str&gt;,
-            controls: [ (&quot;TEST&quot;, Control), (&quot;TEST2&quot;, Control) ],
+            head: setup_ui2&lt;&amp;&#39;static str&gt;,
+            controls: [ 
+                (&quot;MainWindow&quot;, nwg_window!( title=&quot;Template Example&quot;; size=(280, 105) ))
+            ];
             events: [ 
-            
-            (&quot;TEST&quot;, &quot;ACTION&quot;, Event::Click, |ui, caller, event, args| { 
-                println!(&quot;Hello World!&quot;); 
-            })
-            
-            ],
-            resources: [ (&quot;Font1&quot;, Font1), (&quot;Font1&quot;, Font1) ],
+                (&quot;MainWindow&quot;, &quot;ACTION&quot;, nwg::events::Resized, |ui, caller, event, args| { 
+                    println!(&quot;Hello World!&quot;); 
+                })
+            ];
+            resources: [ 
+                (&quot;MainFont&quot;, nwg_font!(family=&quot;Arial&quot;; size=27)),
+                (&quot;TextFont&quot;, nwg_font!(family=&quot;Arial&quot;; size=17))
+            ];
             values: [ (&quot;True&quot;, true), (&quot;()&quot;, ()) ]
-        );  
+        ); 
+
+        fn main() {}
 
     ```
 
@@ -1639,7 +1653,6 @@
         window.rootPath = "../../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>
