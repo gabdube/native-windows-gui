@@ -110,6 +110,7 @@
 <span id="65">65</span>
 <span id="66">66</span>
 <span id="67">67</span>
+<span id="68">68</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     A very high level native gui library for Windows.
@@ -142,11 +143,11 @@
 <span class="kw">mod</span> <span class="ident">low</span>;
 <span class="kw">mod</span> <span class="ident">defs</span>;
 <span class="kw">mod</span> <span class="ident">error</span>;
-<span class="kw">mod</span> <span class="ident">events</span>;
 <span class="kw">mod</span> <span class="ident">controls</span>;
 <span class="kw">mod</span> <span class="ident">resources</span>;
 <span class="kw">mod</span> <span class="ident">ui</span>;
 
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">events</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">templates</span>;
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">custom</span> {
@@ -155,6 +156,7 @@
     */</span>
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">ControlT</span>, <span class="ident">Control</span>, <span class="ident">AnyHandle</span>};
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">ResourceT</span>, <span class="ident">Resource</span>};
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">Event</span>, <span class="ident">UnpackProc</span>, <span class="ident">HandleProc</span>, <span class="ident">event_unpack_no_args</span>, <span class="ident">hwnd_handle</span>, <span class="ident">command_handle</span>, <span class="ident">notify_handle</span>};
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">window_helper</span>::{<span class="ident">build_window</span>, <span class="ident">build_sysclass</span>, <span class="ident">SysclassParams</span>, <span class="ident">WindowParams</span>, <span class="ident">set_window_long</span>, <span class="ident">get_window_long</span>,
     <span class="ident">get_window_text</span>, <span class="ident">set_window_text</span>, <span class="ident">get_window_visibility</span>, <span class="ident">set_window_visibility</span>, <span class="ident">get_window_position</span>, <span class="ident">set_window_position</span>,
     <span class="ident">get_window_size</span>, <span class="ident">set_window_size</span>, <span class="ident">get_window_enabled</span>, <span class="ident">set_window_enabled</span>};
@@ -169,8 +171,8 @@
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controls</span>::<span class="ident">ControlType</span>;
 }
 
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">events</span>::<span class="ident">EventArgs</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="ident">SystemError</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">events</span>::{<span class="ident">EventCallback</span>, <span class="ident">Event</span>, <span class="ident">EventArgs</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">other_helper</span>::{<span class="ident">message</span>, <span class="ident">simple_message</span>, <span class="ident">fatal_message</span>, <span class="ident">error_message</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">WindowT</span>, <span class="ident">Window</span>, <span class="ident">MenuT</span>, <span class="ident">Menu</span>, <span class="ident">MenuItemT</span>, <span class="ident">MenuItem</span>, <span class="ident">ButtonT</span>, <span class="ident">Button</span>, <span class="ident">ListBoxT</span>, <span class="ident">ListBox</span>, <span class="ident">CheckBoxT</span>, <span class="ident">CheckBox</span>,
  <span class="ident">RadioButtonT</span>, <span class="ident">RadioButton</span>, <span class="ident">TimerT</span>, <span class="ident">Timer</span>, <span class="ident">LabelT</span>, <span class="ident">Label</span>, <span class="ident">ComboBoxT</span>, <span class="ident">ComboBox</span>, <span class="ident">SeparatorT</span>, <span class="ident">Separator</span>, <span class="ident">TextInputT</span>, <span class="ident">TextInput</span>,
@@ -235,7 +237,6 @@
         window.rootPath = "../../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>

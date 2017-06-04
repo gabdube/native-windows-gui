@@ -48,25 +48,27 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#656-673' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#663-680' title='goto source code'>[src]</a></span></h1>
 <pre class="rust macro">
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_datepicker</span> {
     (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { ... };
 }</pre>
 <div class='docblock'><p>Sane defaults for the DatePicker control. Requires a parent.</p>
-<p>Defaults:<br />
+
+<p>Defaults:<br>
 • value: Todays date
-• position: <code>(0, 0)</code><br />
-• size: <code>(100, 30)</code><br />
-• visible: <code>true</code><br />
-• disabled: <code>false</code><br />
-• font: <code>None</code><br />
-• align: <code>HTextAlign::Left</code><br />
-• format: The system locale format in a short format (ex: 2017-01-01)<br />
-• optional: <code>false</code></p>
-<p>Usage:<br />
-<code>nwg_DatePicker!(parent=&quot;MyParent&quot;;)</code><br />
-<code>nwg_DatePicker!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))</code><br />
+• position: <code>(0, 0)</code><br>
+• size: <code>(100, 30)</code><br>
+• visible: <code>true</code><br>
+• disabled: <code>false</code><br>
+• font: <code>None</code><br>
+• align: <code>HTextAlign::Left</code><br>
+• format: The system locale format in a short format (ex: 2017-01-01)<br>
+• optional: <code>false</code>  </p>
+
+<p>Usage:<br>
+<code>nwg_DatePicker!(parent=&quot;MyParent&quot;;)</code><br>
+<code>nwg_DatePicker!(parent=&quot;MyParent&quot;; visible=false; size=(10, 10))</code><br>
 <code>nwg_DatePicker!(parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)</code>    </p>
 </div></section>
     <section id='search' class="content hidden"></section>
@@ -125,7 +127,6 @@
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'Ui', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Struct Ui</p><div class="block items"><ul><li><a href="#methods">Methods</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'Ui', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -48,123 +48,141 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/ui.rs.html#451-453' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/ui.rs.html#490-492' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct Ui&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + 'static&gt; { /* fields omitted */ }</pre><div class='docblock'><p>Object that manage the GUI elements</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; <a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/ui.rs.html#455-780' title='goto source code'>[src]</a></span></h3>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; <a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/ui.rs.html#494-819' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.new' class="method"><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Create a new Ui.</p>
-<p>Returns <code>Ok(ui)</code> if the initialization was successful<br />
+
+<p>Returns <code>Ok(ui)</code> if the initialization was successful<br>
 Returns <code>Err(Error::System)</code> if the system could not initialize the ui</p>
 </div><h4 id='method.commit' class="method"><span id='commit.v' class='invisible'><code>fn <a href='#method.commit' class='fnname'>commit</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Execute the NWG commands waiting in the Ui command queue in the order they were added.</p>
-<p>Returns <code>Ok(())</code> if everything was executed without Errors<br />
-Returns <code>Err(Error)</code> if an error was encountered while executing the commands.<br />
-As soon as an error is found, the function will return. If there are still commands<br />
+
+<p>Returns <code>Ok(())</code> if everything was executed without Errors<br>
+Returns <code>Err(Error)</code> if an error was encountered while executing the commands.<br>
+As soon as an error is found, the function will return. If there are still commands<br>
 waiting in the queue, they wont be touched.</p>
 </div><h4 id='method.pack_value' class="method"><span id='pack_value.v' class='invisible'><code>fn <a href='#method.pack_value' class='fnname'>pack_value</a>&lt;T:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;T&gt;&gt; + 'static&gt;(&amp;self, id: &amp;ID, value: T)</code></span></h4>
-<div class='docblock'><p>Add an user value to the Ui.<br />
-Delayed, this only registers the command in the ui message queue.<br />
-Either call <code>ui.commit</code> to execute it now or wait for the command to be executed in the main event loop.</p>
-<p>Commit returns<br />
+<div class='docblock'><p>Add an user value to the Ui.<br>
+Delayed, this only registers the command in the ui message queue.<br>
+Either call <code>ui.commit</code> to execute it now or wait for the command to be executed in the main event loop.  </p>
+
+<p>Commit returns<br>
 • <code>Error::KeyExist</code> if the key already exists in the ui  </p>
 </div><h4 id='method.pack_control' class="method"><span id='pack_control.v' class='invisible'><code>fn <a href='#method.pack_control' class='fnname'>pack_control</a>&lt;T:&nbsp;<a class="trait" href="../native_windows_gui/custom/trait.ControlT.html" title="trait native_windows_gui::custom::ControlT">ControlT</a>&lt;ID&gt; + 'static&gt;(&amp;self, id: &amp;ID, value: T)</code></span></h4>
-<div class='docblock'><p>Add a control to the Ui.<br />
-Delayed, this only registers the command in the ui message queue.<br />
+<div class='docblock'><p>Add a control to the Ui.<br>
+Delayed, this only registers the command in the ui message queue.<br>
 Either call <code>ui.commit</code> to execute it now or wait for the command to be executed in the main event loop.</p>
-<p>Commit returns<br />
-• <code>Error::KeyExist</code> if the key already exists in the ui<br />
-• <code>Error::{Any}</code> if the template creation fails  </p>
+
+<p>Commit returns<br>
+  • <code>Error::KeyExist</code> if the key already exists in the ui<br>
+  • <code>Error::{Any}</code> if the template creation fails  </p>
 </div><h4 id='method.pack_resource' class="method"><span id='pack_resource.v' class='invisible'><code>fn <a href='#method.pack_resource' class='fnname'>pack_resource</a>&lt;T:&nbsp;<a class="trait" href="../native_windows_gui/custom/trait.ResourceT.html" title="trait native_windows_gui::custom::ResourceT">ResourceT</a>&lt;ID&gt; + 'static&gt;(&amp;self, id: &amp;ID, value: T)</code></span></h4>
-<div class='docblock'><p>Add a resource to the Ui.<br />
-Delayed, this only registers the command in the ui message queue.<br />
+<div class='docblock'><p>Add a resource to the Ui.<br>
+Delayed, this only registers the command in the ui message queue.<br>
 Either call <code>ui.commit</code> to execute it now or wait for the command to be executed in the main event loop.</p>
-<p>Commit returns<br />
-• <code>Error::KeyExist</code> if the key already exists in the ui<br />
-• <code>Error::{Any}</code> if the template creation fails  </p>
+
+<p>Commit returns<br>
+  • <code>Error::KeyExist</code> if the key already exists in the ui<br>
+  • <code>Error::{Any}</code> if the template creation fails  </p>
 </div><h4 id='method.unpack' class="method"><span id='unpack.v' class='invisible'><code>fn <a href='#method.unpack' class='fnname'>unpack</a>(&amp;self, id: &amp;ID)</code></span></h4>
-<div class='docblock'><p>Remove a element from the ui using its ID. The ID can identify a control, a resource or a user value.<br />
-Delayed, this only registers the command in the ui message queue.<br />
+<div class='docblock'><p>Remove a element from the ui using its ID. The ID can identify a control, a resource or a user value.<br>
+Delayed, this only registers the command in the ui message queue.<br>
 Either call <code>ui.commit</code> to execute it now or wait for the command to be executed in the main event loop.</p>
-<p>Commit may returns:<br />
-• <code>Error::ControlInUse</code> if the control callbacks are being executed<br />
-• <code>Error::ControlInUse</code> if the object is currently borrowed (using ui.get or ui.get_mut)<br />
-• <code>Error::KeyNotFound</code> if the id do not exists in the Ui  </p>
+
+<p>Commit may returns:<br>
+  • <code>Error::ControlInUse</code> if the control callbacks are being executed<br>
+  • <code>Error::ControlInUse</code> if the object is currently borrowed (using ui.get or ui.get_mut)<br>
+  • <code>Error::KeyNotFound</code> if the id do not exists in the Ui  </p>
 </div><h4 id='method.get' class="method"><span id='get.v' class='invisible'><code>fn <a href='#method.get' class='fnname'>get</a>&lt;T:&nbsp;'static&gt;(&amp;self, id: &amp;ID) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/core/cell/struct.Ref.html" title="struct core::cell::Ref">Ref</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;T&gt;&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Return an immutable reference to the element identified by <code>id</code> in the Ui.<br />
+<div class='docblock'><p>Return an immutable reference to the element identified by <code>id</code> in the Ui.<br>
 It is required to give a type <code>T</code> to this function as it is needed to cast the underlying value.
 Ex: <code>ui.get::&lt;u32&gt;(100)</code></p>
-<p>Params:<br />
-• id: The id that identify the element in the ui</p>
-<p>Commit may returns:<br />
-• <code>Error::KeyNotFound</code> will be returned if the key was not found in the Ui<br />
-• <code>Error::BadType</code> will be returned if the key exists, but the type do not match<br />
-• <code>Error::BorrowError</code> will be returned if the element was already borrowed mutably  </p>
+
+<p>Params:<br>
+  • id: The id that identify the element in the ui  </p>
+
+<p>Commit may returns:<br>
+  • <code>Error::KeyNotFound</code> will be returned if the key was not found in the Ui<br>
+  • <code>Error::BadType</code> will be returned if the key exists, but the type do not match<br>
+  • <code>Error::BorrowError</code> will be returned if the element was already borrowed mutably  </p>
 </div><h4 id='method.get_mut' class="method"><span id='get_mut.v' class='invisible'><code>fn <a href='#method.get_mut' class='fnname'>get_mut</a>&lt;T:&nbsp;'static&gt;(&amp;self, id: &amp;ID) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/core/cell/struct.RefMut.html" title="struct core::cell::RefMut">RefMut</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;T&gt;&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Return an mutable reference to element identified by <code>id</code> in the Ui.<br />
+<div class='docblock'><p>Return an mutable reference to element identified by <code>id</code> in the Ui.<br>
 It is required to give a type <code>T</code> to this function as it is needed to cast the underlying value.
 Ex: <code>ui.get_mut::&lt;u32&gt;(100)</code></p>
-<p>Params:<br />
-• id: The id that identify the element in the ui</p>
-<p>Commit may returns:<br />
-• <code>Error::KeyNotFound</code> will be returned if the key was not found in the Ui<br />
-• <code>Error::BadType</code> will be returned if the key exists, but the type do not match<br />
-• <code>Error::BorrowError</code> will be returned if the element was already borrowed mutably  </p>
-</div><h4 id='method.bind' class="method"><span id='bind.v' class='invisible'><code>fn <a href='#method.bind' class='fnname'>bind</a>&lt;T&gt;(&amp;self, id: &amp;ID, cb_id: &amp;ID, event: <a class="enum" href="../native_windows_gui/enum.Event.html" title="enum native_windows_gui::Event">Event</a>, cb: T) <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html" title="trait core::ops::Fn">Fn</a>(&amp;<a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;, &amp;ID, &amp;<a class="enum" href="../native_windows_gui/enum.Event.html" title="enum native_windows_gui::Event">Event</a>, &amp;<a class="enum" href="../native_windows_gui/enum.EventArgs.html" title="enum native_windows_gui::EventArgs">EventArgs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a> + 'static,&nbsp;</span></code></span></h4>
-<div class='docblock'><p>Bind/Add a callback to a control event.<br />
-Delayed, this only registers the command in the ui message queue.
+
+<p>Params:<br>
+  • id: The id that identify the element in the ui  </p>
+
+<p>Commit may returns:<br>
+  • <code>Error::KeyNotFound</code> will be returned if the key was not found in the Ui<br>
+  • <code>Error::BadType</code> will be returned if the key exists, but the type do not match<br>
+  • <code>Error::BorrowError</code> will be returned if the element was already borrowed mutably  </p>
+</div><h4 id='method.bind' class="method"><span id='bind.v' class='invisible'><code>fn <a href='#method.bind' class='fnname'>bind</a>&lt;T&gt;(&amp;self, id: &amp;ID, cb_id: &amp;ID, event: <a class="enum" href="../native_windows_gui/events/enum.Event.html" title="enum native_windows_gui::events::Event">Event</a>, cb: T) <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html" title="trait core::ops::Fn">Fn</a>(&amp;<a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;, &amp;ID, &amp;<a class="enum" href="../native_windows_gui/events/enum.Event.html" title="enum native_windows_gui::events::Event">Event</a>, &amp;<a class="enum" href="../native_windows_gui/events/enum.EventArgs.html" title="enum native_windows_gui::events::EventArgs">EventArgs</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a> + 'static,&nbsp;</span></code></span></h4>
+<div class='docblock'><p>Bind/Add a callback to a control event.<br>
+Delayed, this only registers the command in the ui message queue. 
 Either call <code>ui.commit</code> to execute it now or wait for the command to be executed in the main event loop.</p>
-<p>Params:<br />
-• id: The id that identify the element in the ui<br />
-• cb_id: An id the identify the callback (to use with unbind)<br />
-• event: Type of event to target<br />
-• cb: The callback</p>
-<p>Commit may returns:<br />
-• <code>Error::EventNotSupported</code> if the event is not supported on the callback<br />
-• <code>Error::ControlRequired</code> if the id do not indentify a control<br />
-• <code>Error::KeyNotFound</code> if the id is not in the Ui.<br />
-• <code>Error::KeyExists</code> if the cb_id is not unique for the event type.<br />
-• <code>Error::ControlInUse</code> if NWG is currently executing the callback of the event  </p>
-</div><h4 id='method.unbind' class="method"><span id='unbind.v' class='invisible'><code>fn <a href='#method.unbind' class='fnname'>unbind</a>(&amp;self, id: &amp;ID, cb_id: &amp;ID, event: <a class="enum" href="../native_windows_gui/enum.Event.html" title="enum native_windows_gui::Event">Event</a>)</code></span></h4>
-<div class='docblock'><p>Unbind/Remove a callback to a control event.<br />
-Delayed, this only registers the command in the ui message queue.
+
+<p>Params:<br>
+  • id: The id that identify the element in the ui<br>
+  • cb_id: An id the identify the callback (to use with unbind)<br>
+  • event: Type of event to target<br>
+  • cb: The callback  </p>
+
+<p>Commit may returns:<br>
+  • <code>Error::EventNotSupported</code> if the event is not supported on the callback<br>
+  • <code>Error::ControlRequired</code> if the id do not indentify a control<br>
+  • <code>Error::KeyNotFound</code> if the id is not in the Ui.<br>
+  • <code>Error::KeyExists</code> if the cb_id is not unique for the event type.<br>
+  • <code>Error::ControlInUse</code> if NWG is currently executing the callback of the event  </p>
+</div><h4 id='method.unbind' class="method"><span id='unbind.v' class='invisible'><code>fn <a href='#method.unbind' class='fnname'>unbind</a>(&amp;self, id: &amp;ID, cb_id: &amp;ID, event: <a class="enum" href="../native_windows_gui/events/enum.Event.html" title="enum native_windows_gui::events::Event">Event</a>)</code></span></h4>
+<div class='docblock'><p>Unbind/Remove a callback to a control event.<br>
+Delayed, this only registers the command in the ui message queue. 
 Either call <code>ui.commit</code> to execute it now or wait for the command to be executed in the main event loop.</p>
-<p>Params:<br />
-• id: The id that identify the element in the ui<br />
-• cb_id: The id that identify the callback<br />
-• event: The type of the event to unbind</p>
-<p>Commit may returns:<br />
-• <code>Error::EventNotSupported</code> if the event is not supported on the callback<br />
-• <code>Error::ControlRequired</code> if the id do not indentify a control<br />
-• <code>Error::KeyNotFound</code> if the id is not in the Ui.<br />
-• <code>Error::KeyNotFound</code> if the cb_id do not exist for the event<br />
-• <code>Error::ControlInUse</code> if NWG is currently executing the callback of the event  </p>
-</div><h4 id='method.trigger' class="method"><span id='trigger.v' class='invisible'><code>fn <a href='#method.trigger' class='fnname'>trigger</a>(&amp;self, id: &amp;ID, event: <a class="enum" href="../native_windows_gui/enum.Event.html" title="enum native_windows_gui::Event">Event</a>, event_arg: <a class="enum" href="../native_windows_gui/enum.EventArgs.html" title="enum native_windows_gui::EventArgs">EventArgs</a>)</code></span></h4>
-<div class='docblock'><p>Trigger the callbacks bound to a control event.<br />
-Delayed, this only registers the command in the ui message queue.
+
+<p>Params:<br>
+  • id: The id that identify the element in the ui<br>
+  • cb_id: The id that identify the callback<br>
+  • event: The type of the event to unbind  </p>
+
+<p>Commit may returns:<br>
+  • <code>Error::EventNotSupported</code> if the event is not supported on the callback<br>
+  • <code>Error::ControlRequired</code> if the id do not indentify a control<br>
+  • <code>Error::KeyNotFound</code> if the id is not in the Ui.<br>
+  • <code>Error::KeyNotFound</code> if the cb_id do not exist for the event<br>
+  • <code>Error::ControlInUse</code> if NWG is currently executing the callback of the event  </p>
+</div><h4 id='method.trigger' class="method"><span id='trigger.v' class='invisible'><code>fn <a href='#method.trigger' class='fnname'>trigger</a>(&amp;self, id: &amp;ID, event: <a class="enum" href="../native_windows_gui/events/enum.Event.html" title="enum native_windows_gui::events::Event">Event</a>, event_arg: <a class="enum" href="../native_windows_gui/events/enum.EventArgs.html" title="enum native_windows_gui::events::EventArgs">EventArgs</a>)</code></span></h4>
+<div class='docblock'><p>Trigger the callbacks bound to a control event.<br>
+Delayed, this only registers the command in the ui message queue. 
 Either call <code>ui.commit</code> to execute it now or wait for the command to be executed in the main event loop.</p>
-<p>Params:<br />
-• id: The id that identify the control in the ui<br />
-• event: The type of the event to trigger<br />
-• event_arg: The arguments to send to the callbacks</p>
-<p>Commit may returns:<br />
-• <code>Error::EventNotSupported</code> if the event is not supported on the callback<br />
-• <code>Error::ControlRequired</code> if the id do not indentify a control<br />
-• <code>Error::KeyNotFound</code> if the id is not in the Ui.   </p>
+
+<p>Params:<br>
+  • id: The id that identify the control in the ui<br>
+  • event: The type of the event to trigger<br>
+  • event_arg: The arguments to send to the callbacks  </p>
+
+<p>Commit may returns:<br>
+  • <code>Error::EventNotSupported</code> if the event is not supported on the callback<br>
+  • <code>Error::ControlRequired</code> if the id do not indentify a control<br>
+  • <code>Error::KeyNotFound</code> if the id is not in the Ui.   </p>
 </div><h4 id='method.handle_of' class="method"><span id='handle_of.v' class='invisible'><code>fn <a href='#method.handle_of' class='fnname'>handle_of</a>(&amp;self, id: &amp;ID) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="../native_windows_gui/custom/enum.AnyHandle.html" title="enum native_windows_gui::custom::AnyHandle">AnyHandle</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Return the underlying handle of a control or a resource.
-While this method is safe, anything done with the returned handle definitely won't be.</p>
-<p>Returns:<br />
-• <code>Ok(AnyHandle)</code> if the control or the resource is found<br />
-• <code>Error::KeyNotFound</code> if the id is not in the Ui.<br />
-• <code>Error::ControlOrResourceRequired</code> if the id indentify a user value<br />
-• <code>Error::BorrowError</code> if the element was already borrowed mutably  </p>
+While this method is safe, anything done with the returned handle definitely won&#39;t be.</p>
+
+<p>Returns:<br>
+  • <code>Ok(AnyHandle)</code> if the control or the resource is found<br>
+  • <code>Error::KeyNotFound</code> if the id is not in the Ui.<br>
+  • <code>Error::ControlOrResourceRequired</code> if the id indentify a user value<br>
+  • <code>Error::BorrowError</code> if the element was already borrowed mutably  </p>
 </div><h4 id='method.has_id' class="method"><span id='has_id.v' class='invisible'><code>fn <a href='#method.has_id' class='fnname'>has_id</a>(&amp;self, id: &amp;ID) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
 <div class='docblock'><p>Check if an id exists in the ui</p>
-<p>Params:<br />
-• id -&gt; The ID to check  </p>
+
+<p>Params:<br>
+  • id -&gt; The ID to check  </p>
 </div><h4 id='method.message_handle' class="method"><span id='message_handle.v' class='invisible'><code>unsafe fn <a href='#method.message_handle' class='fnname'>message_handle</a>(&amp;self) -&gt; HWND</code></span></h4>
 <div class='docblock'><p>Return the message window handle of the ui. Useful for controls or functions that requires a window (such as timers)</p>
-</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html" title="trait core::ops::Drop">Drop</a> for <a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/ui.rs.html#782-787' title='goto source code'>[src]</a></span></h3>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html" title="trait core::ops::Drop">Drop</a> for <a class="struct" href="../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/ui.rs.html#821-826' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.drop' class="method"><span id='drop.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></span></h4>
 <div class='docblock'><p>A method called when the value goes out of scope. <a href="https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop">Read more</a></p>
 </div></div></section>
@@ -224,7 +242,6 @@ While this method is safe, anything done with the returned handle definitely won
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

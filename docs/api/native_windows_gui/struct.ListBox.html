@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'ListBox', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Struct ListBox</p><div class="block items"><ul><li><a href="#methods">Methods</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'ListBox', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -48,9 +48,9 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/controls/listbox.rs.html#136-139' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/controls/listbox.rs.html#137-140' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ListBox&lt;D:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a>&gt; { /* fields omitted */ }</pre><div class='docblock'><p>A listbox control</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;D:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a>&gt; <a class="struct" href="../native_windows_gui/struct.ListBox.html" title="struct native_windows_gui::ListBox">ListBox</a>&lt;D&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/listbox.rs.html#141-374' title='goto source code'>[src]</a></span></h3>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;D:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a>&gt; <a class="struct" href="../native_windows_gui/struct.ListBox.html" title="struct native_windows_gui::ListBox">ListBox</a>&lt;D&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/listbox.rs.html#142-375' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.len' class="method"><span id='len.v' class='invisible'><code>fn <a href='#method.len' class='fnname'>len</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a></code></span></h4>
 <div class='docblock'><p>Return the number of items in the inner collection</p>
 </div><h4 id='method.collection' class="method"><span id='collection.v' class='invisible'><code>fn <a href='#method.collection' class='fnname'>collection</a>(&amp;self) -&gt; &amp;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;D&gt;</code></span></h4>
@@ -63,13 +63,13 @@ If the inner listbox is changed, <code>listbox.sync</code> must be called to sho
 </div><h4 id='method.push' class="method"><span id='push.v' class='invisible'><code>fn <a href='#method.push' class='fnname'>push</a>(&amp;mut self, item: D)</code></span></h4>
 <div class='docblock'><p>Add an item at the end of the listbox. Updates both the inner collection and the ui.</p>
 </div><h4 id='method.remove' class="method"><span id='remove.v' class='invisible'><code>fn <a href='#method.remove' class='fnname'>remove</a>(&amp;mut self, index: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; D</code></span></h4>
-<div class='docblock'><p>Remove an item from the inner collection and the listbox. Return the removed item.<br />
+<div class='docblock'><p>Remove an item from the inner collection and the listbox. Return the removed item.<br>
 <code>Panics</code> if index is out of bounds.</p>
 </div><h4 id='method.insert' class="method"><span id='insert.v' class='invisible'><code>fn <a href='#method.insert' class='fnname'>insert</a>(&amp;mut self, index: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>, item: D)</code></span></h4>
-<div class='docblock'><p>Insert an item at the selected position in the lisbox and the inner collection.<br />
+<div class='docblock'><p>Insert an item at the selected position in the lisbox and the inner collection.<br>
 If index is -1, the item is added at the end of the list.</p>
 </div><h4 id='method.get_selected_index' class="method"><span id='get_selected_index.v' class='invisible'><code>fn <a href='#method.get_selected_index' class='fnname'>get_selected_index</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;</code></span></h4>
-<div class='docblock'><p>Return the index of currently selected item.<br />
+<div class='docblock'><p>Return the index of currently selected item.<br>
 Return None if there is no selected item
 If the listbox can have more than one selected item, use <code>get_selected_indexes</code></p>
 </div><h4 id='method.get_selected_indexes' class="method"><span id='get_selected_indexes.v' class='invisible'><code>fn <a href='#method.get_selected_indexes' class='fnname'>get_selected_indexes</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;</code></span></h4>
@@ -78,22 +78,22 @@ If nothing is selected or the listbox do not support multiple selection, the ret
 </div><h4 id='method.index_selected' class="method"><span id='index_selected.v' class='invisible'><code>fn <a href='#method.index_selected' class='fnname'>index_selected</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
 <div class='docblock'><p>Return true if <code>index</code> is currently selected in the listbox</p>
 </div><h4 id='method.set_selected_index' class="method"><span id='set_selected_index.v' class='invisible'><code>fn <a href='#method.set_selected_index' class='fnname'>set_selected_index</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>)</code></span></h4>
-<div class='docblock'><p>Set the selected index in a single choice listbox.<br />
-For multi-select listbox use <code>set_index_selected</code> or <code>set_range_selected</code><br />
+<div class='docblock'><p>Set the selected index in a single choice listbox.<br>
+For multi-select listbox use <code>set_index_selected</code> or <code>set_range_selected</code><br>
 If <code>index</code> is <code>usize::max_value</code>, remove the selected index from the listbox</p>
 </div><h4 id='method.set_index_selected' class="method"><span id='set_index_selected.v' class='invisible'><code>fn <a href='#method.set_index_selected' class='fnname'>set_index_selected</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>, selected: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>)</code></span></h4>
 <div class='docblock'><p>Set the selected state of the item located at index. Only work for multi-select listbox
 For single listbox, use <code>set_selected_index</code>
 If index is <code>usize::max_value</code>, the change is applied to every item.</p>
 </div><h4 id='method.set_range_selected' class="method"><span id='set_range_selected.v' class='invisible'><code>fn <a href='#method.set_range_selected' class='fnname'>set_range_selected</a>(&amp;self, index_min: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>, index_max: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>, selected: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>)</code></span></h4>
-<div class='docblock'><p>Select or unselect a range of index in the list box. The range is inclusive. Only work if the listbox can have multiple items selected.<br />
+<div class='docblock'><p>Select or unselect a range of index in the list box. The range is inclusive. Only work if the listbox can have multiple items selected.<br>
 For single listbox, use <code>set_selected_index</code></p>
 </div><h4 id='method.len_selected' class="method"><span id='len_selected.v' class='invisible'><code>fn <a href='#method.len_selected' class='fnname'>len_selected</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a></code></span></h4>
 <div class='docblock'><p>Return the number of selected items.</p>
 </div><h4 id='method.clear' class="method"><span id='clear.v' class='invisible'><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self)</code></span></h4>
 <div class='docblock'><p>Remove every item in the inner collection and in the listbox</p>
 </div><h4 id='method.find_string' class="method"><span id='find_string.v' class='invisible'><code>fn <a href='#method.find_string' class='fnname'>find_string</a>&lt;'a&gt;(&amp;self, text: &amp;'a <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>, full_match: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>&gt;</code></span></h4>
-<div class='docblock'><p>Try to find an item with the text <code>text</code> in the collection. If one is found, return its index else, returns None.<br />
+<div class='docblock'><p>Try to find an item with the text <code>text</code> in the collection. If one is found, return its index else, returns None.<br>
 If <code>full_match</code> is true, the text must match exactly otherwise it only needs to match the beginning.
 The search is NOT case sensitive.</p>
 </div><h4 id='method.get_string' class="method"><span id='get_string.v' class='invisible'><code>fn <a href='#method.get_string' class='fnname'>get_string</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;</code></span></h4>
@@ -114,7 +114,7 @@ The search is NOT case sensitive.</p>
 <h4 id='method.set_size' class="method"><span id='set_size.v' class='invisible'><code>fn <a href='#method.set_size' class='fnname'>set_size</a>(&amp;self, w: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>, h: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</code></span></h4>
 <h4 id='method.get_enabled' class="method"><span id='get_enabled.v' class='invisible'><code>fn <a href='#method.get_enabled' class='fnname'>get_enabled</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
 <h4 id='method.set_enabled' class="method"><span id='set_enabled.v' class='invisible'><code>fn <a href='#method.set_enabled' class='fnname'>set_enabled</a>(&amp;self, e: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>)</code></span></h4>
-</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;D:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a>&gt; <a class="trait" href="../native_windows_gui/custom/trait.Control.html" title="trait native_windows_gui::custom::Control">Control</a> for <a class="struct" href="../native_windows_gui/struct.ListBox.html" title="struct native_windows_gui::ListBox">ListBox</a>&lt;D&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/listbox.rs.html#376-391' title='goto source code'>[src]</a></span></h3>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;D:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a>&gt; <a class="trait" href="../native_windows_gui/custom/trait.Control.html" title="trait native_windows_gui::custom::Control">Control</a> for <a class="struct" href="../native_windows_gui/struct.ListBox.html" title="struct native_windows_gui::ListBox">ListBox</a>&lt;D&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/listbox.rs.html#377-392' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.handle' class="method"><span id='handle.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#tymethod.handle' class='fnname'>handle</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/custom/enum.AnyHandle.html" title="enum native_windows_gui::custom::AnyHandle">AnyHandle</a></code></span></h4>
 <div class='docblock'><p>Should return the underlying handle to the object</p>
 </div><h4 id='method.control_type' class="method"><span id='control_type.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.Control.html#method.control_type' class='fnname'>control_type</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/constants/enum.ControlType.html" title="enum native_windows_gui::constants::ControlType">ControlType</a></code></span></h4>
@@ -178,7 +178,6 @@ The search is NOT case sensitive.</p>
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

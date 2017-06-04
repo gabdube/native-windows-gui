@@ -48,7 +48,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#105-128' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#112-135' title='goto source code'>[src]</a></span></h1>
 <pre class="rust macro">
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_template</span> {
     (
@@ -59,30 +59,44 @@
         <span class="ident">values</span>: [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i3</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span>) ),<span class="op">*</span> ]
     ) <span class="op">=&gt;</span> { ... };
 }</pre>
-<div class='docblock'><p>Generates a function that initialize the content of a UI.</p>
+<div class='docblock'><p>Generates a function that initialize the content of a UI. </p>
+
 <p><strong>head</strong>: Define the name of the function and Ui key type. Ex: <code>my_function&lt;my_type&gt;</code></p>
+
 <p><strong>controls</strong>: A list of controls to add to the Ui. Accepts an array of <code>(ID, Template)</code></p>
+
 <p><strong>events</strong>: A list of events to bind to the controls of the UI. Accepts an array of <code>(ControlID, EventID, Event, Callback)</code></p>
+
 <p><strong>resources</strong>: A list of resources to add to the Ui. Accepts an array of <code>(ID, Template)</code></p>
+
 <p><strong>values</strong>: A list of user values to add to the Ui. Accepts an array of <code>(ID, Template)</code></p>
+
 <p><strong>Return Value</strong>: The function calls <code>commit</code> before returning. If the Ui initialization fails,
 the function will return the error.</p>
-<p>Usage:</p>
+
+<p>Usage: </p>
 
 <pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">macro_use</span>]</span> <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">native_windows_gui</span> <span class="kw">as</span> <span class="ident">nwg</span>;
+
     <span class="macro">nwg_template</span><span class="macro">!</span>(
-        <span class="ident">head</span>: <span class="ident">setup_ui</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>,
-        <span class="ident">controls</span>: [ (<span class="string">&quot;TEST&quot;</span>, <span class="ident">Control</span>), (<span class="string">&quot;TEST2&quot;</span>, <span class="ident">Control</span>) ],
+        <span class="ident">head</span>: <span class="ident">setup_ui2</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">controls</span>: [ 
+            (<span class="string">&quot;MainWindow&quot;</span>, <span class="macro">nwg_window</span><span class="macro">!</span>( <span class="ident">title</span><span class="op">=</span><span class="string">&quot;Template Example&quot;</span>; <span class="ident">size</span><span class="op">=</span>(<span class="number">280</span>, <span class="number">105</span>) ))
+        ];
         <span class="ident">events</span>: [ 
-            
-        (<span class="string">&quot;TEST&quot;</span>, <span class="string">&quot;ACTION&quot;</span>, <span class="ident">Event</span>::<span class="ident">Click</span>, <span class="op">|</span><span class="ident">ui</span>, <span class="ident">caller</span>, <span class="ident">event</span>, <span class="ident">args</span><span class="op">|</span> { 
-            <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Hello World!&quot;</span>); 
-        })
-            
-        ],
-        <span class="ident">resources</span>: [ (<span class="string">&quot;Font1&quot;</span>, <span class="ident">Font1</span>), (<span class="string">&quot;Font1&quot;</span>, <span class="ident">Font1</span>) ],
+            (<span class="string">&quot;MainWindow&quot;</span>, <span class="string">&quot;ACTION&quot;</span>, <span class="ident">nwg</span>::<span class="ident">events</span>::<span class="ident">Resized</span>, <span class="op">|</span><span class="ident">ui</span>, <span class="ident">caller</span>, <span class="ident">event</span>, <span class="ident">args</span><span class="op">|</span> { 
+                <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Hello World!&quot;</span>); 
+            })
+        ];
+        <span class="ident">resources</span>: [ 
+            (<span class="string">&quot;MainFont&quot;</span>, <span class="macro">nwg_font</span><span class="macro">!</span>(<span class="ident">family</span><span class="op">=</span><span class="string">&quot;Arial&quot;</span>; <span class="ident">size</span><span class="op">=</span><span class="number">27</span>)),
+            (<span class="string">&quot;TextFont&quot;</span>, <span class="macro">nwg_font</span><span class="macro">!</span>(<span class="ident">family</span><span class="op">=</span><span class="string">&quot;Arial&quot;</span>; <span class="ident">size</span><span class="op">=</span><span class="number">17</span>))
+        ];
         <span class="ident">values</span>: [ (<span class="string">&quot;True&quot;</span>, <span class="bool-val">true</span>), (<span class="string">&quot;()&quot;</span>, ()) ]
-    );  
+    ); 
+
+    <span class="kw">fn</span> <span class="ident">main</span>() {}
 </pre>
 </div></section>
     <section id='search' class="content hidden"></section>
@@ -141,7 +155,6 @@ the function will return the error.</p>
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

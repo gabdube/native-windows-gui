@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'></p><script>window.sidebarCurrent = {name: 'native_windows_gui', ty: 'mod', relpath: '../'};</script>
+        <p class='location'>Crate native_windows_gui</p><div class="block items"><ul><li><a href="#reexports">Reexports</a></li><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#functions">Functions</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'native_windows_gui', ty: 'mod', relpath: '../'};</script>
     </nav>
 
     <nav class="sub">
@@ -48,16 +48,16 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/lib.rs.html#1-67' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/lib.rs.html#1-68' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>A very high level native gui library for Windows.</p>
-</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use events::<a class="enum" href="../native_windows_gui/events/enum.EventArgs.html" title="enum native_windows_gui::events::EventArgs">EventArgs</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
                        <tr class=' module-item'>
                            <td><a class="mod" href="constants/index.html"
                                   title='mod native_windows_gui::constants'>constants</a></td>
                            <td class='docblock-short'>
                                 <p>Controls constants</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -65,7 +65,13 @@
                                   title='mod native_windows_gui::custom'>custom</a></td>
                            <td class='docblock-short'>
                                 <p>Custom control creation resources</p>
-
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="mod" href="events/index.html"
+                                  title='mod native_windows_gui::events'>events</a></td>
+                           <td class='docblock-short'>
+                                <p>High level events definitions</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -73,7 +79,6 @@
                                   title='mod native_windows_gui::templates'>templates</a></td>
                            <td class='docblock-short'>
                                 <p>Macro based template system.</p>
-
                            </td>
                        </tr></table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
 <table>
@@ -82,7 +87,6 @@
                                   title='macro native_windows_gui::nwg_button'>nwg_button</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the Button control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -90,7 +94,6 @@
                                   title='macro native_windows_gui::nwg_canvas'>nwg_canvas</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the Canvas control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -98,7 +101,6 @@
                                   title='macro native_windows_gui::nwg_checkbox'>nwg_checkbox</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the CheckBox control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -106,7 +108,6 @@
                                   title='macro native_windows_gui::nwg_combobox'>nwg_combobox</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the Combobox control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -114,7 +115,6 @@
                                   title='macro native_windows_gui::nwg_datepicker'>nwg_datepicker</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the DatePicker control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -122,7 +122,6 @@
                                   title='macro native_windows_gui::nwg_filedialog'>nwg_filedialog</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the FileDialog control.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -130,23 +129,20 @@
                                   title='macro native_windows_gui::nwg_font'>nwg_font</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the Font resource.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="macro" href="macro.nwg_get.html"
                                   title='macro native_windows_gui::nwg_get'>nwg_get</a></td>
                            <td class='docblock-short'>
-                                <p>Return controls from the Ui. Panics if one of the controls could not be retrieved.</p>
-
+                                <p>Return controls from the Ui. Panics if one of the controls could not be retrieved.  </p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="macro" href="macro.nwg_get_mut.html"
                                   title='macro native_windows_gui::nwg_get_mut'>nwg_get_mut</a></td>
                            <td class='docblock-short'>
-                                <p>Return controls from the Ui. Panics if one of the controls could not be retrieved.</p>
-
+                                <p>Return controls from the Ui. Panics if one of the controls could not be retrieved.  </p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -154,7 +150,6 @@
                                   title='macro native_windows_gui::nwg_groupbox'>nwg_groupbox</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the GroupBox control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -162,7 +157,6 @@
                                   title='macro native_windows_gui::nwg_label'>nwg_label</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the Label control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -170,7 +164,6 @@
                                   title='macro native_windows_gui::nwg_listbox'>nwg_listbox</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the ListBox control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -178,7 +171,6 @@
                                   title='macro native_windows_gui::nwg_menu'>nwg_menu</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the Menu control. Requires a window parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -186,7 +178,6 @@
                                   title='macro native_windows_gui::nwg_menuitem'>nwg_menuitem</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the MenuItem control. Requires a menu parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -194,7 +185,6 @@
                                   title='macro native_windows_gui::nwg_progressbar'>nwg_progressbar</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the ProgressBar control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -202,7 +192,6 @@
                                   title='macro native_windows_gui::nwg_radiobutton'>nwg_radiobutton</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the RadioButton control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -210,15 +199,13 @@
                                   title='macro native_windows_gui::nwg_separator'>nwg_separator</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the Separator control. Requires a menu parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="macro" href="macro.nwg_template.html"
                                   title='macro native_windows_gui::nwg_template'>nwg_template</a></td>
                            <td class='docblock-short'>
-                                <p>Generates a function that initialize the content of a UI.</p>
-
+                                <p>Generates a function that initialize the content of a UI. </p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -226,7 +213,6 @@
                                   title='macro native_windows_gui::nwg_textbox'>nwg_textbox</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the TextBox control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -234,7 +220,6 @@
                                   title='macro native_windows_gui::nwg_textinput'>nwg_textinput</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the TextInput control. Requires a parent.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -242,7 +227,6 @@
                                   title='macro native_windows_gui::nwg_timer'>nwg_timer</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the Timer control.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -250,7 +234,6 @@
                                   title='macro native_windows_gui::nwg_window'>nwg_window</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the Window control.</p>
-
                            </td>
                        </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
@@ -259,7 +242,6 @@
                                   title='struct native_windows_gui::Button'>Button</a></td>
                            <td class='docblock-short'>
                                 <p>A standard button</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -267,7 +249,6 @@
                                   title='struct native_windows_gui::ButtonT'>ButtonT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a standard button</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -275,7 +256,6 @@
                                   title='struct native_windows_gui::Canvas'>Canvas</a></td>
                            <td class='docblock-short'>
                                 <p>A blank control that can be painted to</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -283,7 +263,6 @@
                                   title='struct native_windows_gui::CanvasRenderer'>CanvasRenderer</a></td>
                            <td class='docblock-short'>
                                 <p>Object that offers a light wrapper over the D2D1 api.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -291,7 +270,6 @@
                                   title='struct native_windows_gui::CanvasT'>CanvasT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a canvas</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -299,7 +277,6 @@
                                   title='struct native_windows_gui::CheckBox'>CheckBox</a></td>
                            <td class='docblock-short'>
                                 <p>A standard checkbox</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -307,7 +284,6 @@
                                   title='struct native_windows_gui::CheckBoxT'>CheckBoxT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a standard checkbox</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -315,7 +291,6 @@
                                   title='struct native_windows_gui::ComboBox'>ComboBox</a></td>
                            <td class='docblock-short'>
                                 <p>A combobox control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -323,7 +298,6 @@
                                   title='struct native_windows_gui::ComboBoxT'>ComboBoxT</a></td>
                            <td class='docblock-short'>
                                 <p>Template that creates a combobox control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -332,15 +306,13 @@
                            <td class='docblock-short'>
                                 <p>A simple date picker control. Do not handle timezone. It is recomended to use a specialized date time library to
 use with this control.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class="struct" href="struct.DatePickerT.html"
                                   title='struct native_windows_gui::DatePickerT'>DatePickerT</a></td>
                            <td class='docblock-short'>
-                                <p>A template that creates a standard date picker (dtp)</p>
-
+                                <p>A template that creates a standard date picker (dtp)  </p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -348,7 +320,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::FileDialog'>FileDialog</a></td>
                            <td class='docblock-short'>
                                 <p>A file dialog control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -356,7 +327,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::FileDialogT'>FileDialogT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a standard file dialog</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -364,7 +334,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::Font'>Font</a></td>
                            <td class='docblock-short'>
                                 <p>A font resource</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -372,7 +341,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::FontT'>FontT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that can create a font resource</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -380,7 +348,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::GroupBox'>GroupBox</a></td>
                            <td class='docblock-short'>
                                 <p>A groupbox</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -388,7 +355,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::GroupBoxT'>GroupBoxT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a standard groupbox</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -396,7 +362,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::Label'>Label</a></td>
                            <td class='docblock-short'>
                                 <p>A standard label</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -404,7 +369,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::LabelT'>LabelT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a standard label</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -412,7 +376,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::ListBox'>ListBox</a></td>
                            <td class='docblock-short'>
                                 <p>A listbox control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -420,7 +383,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::ListBoxT'>ListBoxT</a></td>
                            <td class='docblock-short'>
                                 <p>Template that creates a listbox control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -428,7 +390,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::Menu'>Menu</a></td>
                            <td class='docblock-short'>
                                 <p>A menu control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -436,7 +397,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::MenuItem'>MenuItem</a></td>
                            <td class='docblock-short'>
                                 <p>A menu item control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -444,7 +404,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::MenuItemT'>MenuItemT</a></td>
                            <td class='docblock-short'>
                                 <p>A template to create menuitems</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -452,7 +411,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::MenuT'>MenuT</a></td>
                            <td class='docblock-short'>
                                 <p>A template to create menu controls</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -460,7 +418,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::ProgressBar'>ProgressBar</a></td>
                            <td class='docblock-short'>
                                 <p>A standard progress bar</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -468,7 +425,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::ProgressBarT'>ProgressBarT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a progress bar</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -476,7 +432,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::RadioButton'>RadioButton</a></td>
                            <td class='docblock-short'>
                                 <p>A standard radio button</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -484,7 +439,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::RadioButtonT'>RadioButtonT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a standard radio button</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -492,7 +446,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::Separator'>Separator</a></td>
                            <td class='docblock-short'>
                                 <p>A separator control.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -500,7 +453,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::SeparatorT'>SeparatorT</a></td>
                            <td class='docblock-short'>
                                 <p>A menu item separator.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -508,7 +460,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::TextBox'>TextBox</a></td>
                            <td class='docblock-short'>
                                 <p>A multi line textinput control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -516,7 +467,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::TextBoxT'>TextBoxT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a multi line textinput control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -524,7 +474,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::TextInput'>TextInput</a></td>
                            <td class='docblock-short'>
                                 <p>A single line textinput control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -532,7 +481,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::TextInputT'>TextInputT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a single line textinput control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -540,7 +488,6 @@ use with this control.</p>
                                   title='struct native_windows_gui::Timer'>Timer</a></td>
                            <td class='docblock-short'>
                                 <p>A timer control</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -549,7 +496,6 @@ use with this control.</p>
                            <td class='docblock-short'>
                                 <p>A template that creates a timer. Note that because the timer callbacks must be added AFTER
 its creation, it cannot start automatically.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -557,7 +503,6 @@ its creation, it cannot start automatically.</p>
                                   title='struct native_windows_gui::Ui'>Ui</a></td>
                            <td class='docblock-short'>
                                 <p>Object that manage the GUI elements</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -565,7 +510,6 @@ its creation, it cannot start automatically.</p>
                                   title='struct native_windows_gui::Window'>Window</a></td>
                            <td class='docblock-short'>
                                 <p>A window control.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -573,7 +517,6 @@ its creation, it cannot start automatically.</p>
                                   title='struct native_windows_gui::WindowT'>WindowT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that will create a window.</p>
-
                            </td>
                        </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
@@ -582,23 +525,6 @@ its creation, it cannot start automatically.</p>
                                   title='enum native_windows_gui::Error'>Error</a></td>
                            <td class='docblock-short'>
                                 <p>Error class that regroup errors generated by NWG</p>
-
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class="enum" href="enum.Event.html"
-                                  title='enum native_windows_gui::Event'>Event</a></td>
-                           <td class='docblock-short'>
-                                <p>Events name definition</p>
-
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class="enum" href="enum.EventArgs.html"
-                                  title='enum native_windows_gui::EventArgs'>EventArgs</a></td>
-                           <td class='docblock-short'>
-                                <p>Events arguments definition. If an event do not have arguments, EventArgs::None is passed.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -606,7 +532,6 @@ its creation, it cannot start automatically.</p>
                                   title='enum native_windows_gui::SystemError'>SystemError</a></td>
                            <td class='docblock-short'>
                                 <p>Error class that regroups errors generated by the system</p>
-
                            </td>
                        </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table>
@@ -615,7 +540,6 @@ its creation, it cannot start automatically.</p>
                                   title='fn native_windows_gui::dispatch_events'>dispatch_events</a></td>
                            <td class='docblock-short'>
                                 <p>Dispatch the messages waiting the the system message queue to the associated Uis. This includes NWG custom messages.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -623,7 +547,6 @@ its creation, it cannot start automatically.</p>
                                   title='fn native_windows_gui::error_message'>error_message</a></td>
                            <td class='docblock-short'>
                                 <p>Display a simple error message box. The message box has for style <code>MessageButtons::Ok</code> and <code>MessageIcons::Error</code> .</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -631,7 +554,6 @@ its creation, it cannot start automatically.</p>
                                   title='fn native_windows_gui::exit'>exit</a></td>
                            <td class='docblock-short'>
                                 <p>Send a WM_QUIT to the system queue. Breaks the <code>dispatch_events</code> loop.</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -639,7 +561,6 @@ its creation, it cannot start automatically.</p>
                                   title='fn native_windows_gui::fatal_message'>fatal_message</a></td>
                            <td class='docblock-short'>
                                 <p>Display a message box and then panic. The message box has for style <code>MessageButtons::Ok</code> and <code>MessageIcons::Error</code> .</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -647,7 +568,6 @@ its creation, it cannot start automatically.</p>
                                   title='fn native_windows_gui::message'>message</a></td>
                            <td class='docblock-short'>
                                 <p>Create an application wide message box</p>
-
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -655,16 +575,6 @@ its creation, it cannot start automatically.</p>
                                   title='fn native_windows_gui::simple_message'>simple_message</a></td>
                            <td class='docblock-short'>
                                 <p>Display a simple message box. The message box has for style <code>MessageButtons::Ok</code> and <code>MessageIcons::Info</code> .</p>
-
-                           </td>
-                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
-<table>
-                       <tr class=' module-item'>
-                           <td><a class="type" href="type.EventCallback.html"
-                                  title='type native_windows_gui::EventCallback'>EventCallback</a></td>
-                           <td class='docblock-short'>
-                                <p>The function signature for the event callback</p>
-
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>
@@ -723,7 +633,6 @@ its creation, it cannot start automatically.</p>
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

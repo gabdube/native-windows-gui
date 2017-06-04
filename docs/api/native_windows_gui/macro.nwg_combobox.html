@@ -48,26 +48,29 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#256-285' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/templates.rs.html#263-292' title='goto source code'>[src]</a></span></h1>
 <pre class="rust macro">
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">nwg_combobox</span> {
     (<span class="ident">data</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>, <span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { ... };
     (<span class="ident">parent</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">p</span>:<span class="ident">expr</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">ident</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">expr</span> );<span class="op">*</span> ) <span class="op">=&gt;</span> { ... };
 }</pre>
 <div class='docblock'><p>Sane defaults for the Combobox control. Requires a parent.</p>
+
 <p><code>Data</code> parameter can be ommited if a default collection is passed.</p>
-<p>Defaults:<br />
-• collection: <code>[]</code><br />
-• position: <code>(0, 0)</code><br />
-• size: <code>(100, 30)</code><br />
-• visible: <code>true</code><br />
-• disabled: <code>false</code><br />
-• placeholder: <code>None</code><br />
+
+<p>Defaults:<br>
+• collection: <code>[]</code><br>
+• position: <code>(0, 0)</code><br>
+• size: <code>(100, 30)</code><br>
+• visible: <code>true</code><br>
+• disabled: <code>false</code><br>
+• placeholder: <code>None</code><br>
 • font: <code>None</code></p>
-<p>Usage:<br />
-<code>nwg_combobox!(data=String; parent=&quot;MyParent&quot;;)</code><br />
-<code>nwg_combobox!(parent=&quot;MyParent&quot;; visible=false; collection=vec![&quot;TEST&quot;, &quot;TEST2&quot;])</code><br />
-<code>nwg_combobox!(data=&amp;'static str; parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)</code>    </p>
+
+<p>Usage:<br>
+<code>nwg_combobox!(data=String; parent=&quot;MyParent&quot;;)</code><br>
+<code>nwg_combobox!(parent=&quot;MyParent&quot;; visible=false; collection=vec![&quot;TEST&quot;, &quot;TEST2&quot;])</code><br>
+<code>nwg_combobox!(data=&amp;&#39;static str; parent=&quot;MyParent&quot;; \* Any combinations of the template properties*\)</code>    </p>
 </div></section>
     <section id='search' class="content hidden"></section>
 
@@ -125,7 +128,6 @@
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

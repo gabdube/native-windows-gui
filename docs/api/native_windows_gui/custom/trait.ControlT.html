@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>native_windows_gui</a>::<wbr><a href='index.html'>custom</a></p><script>window.sidebarCurrent = {name: 'ControlT', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Trait ControlT</p><div class="block items"><ul><li><a href="#required-methods">Required Methods</a></li><li><a href="#provided-methods">Provided Methods</a></li><li><a href="#implementors">Implementors</a></li></ul></div><p class='location'><a href='../index.html'>native_windows_gui</a>::<wbr><a href='index.html'>custom</a></p><script>window.sidebarCurrent = {name: 'ControlT', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -53,7 +53,7 @@
     fn <a href='#tymethod.type_id' class='fnname'>type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a>;
     fn <a href='#tymethod.build' class='fnname'>build</a>(&amp;self, ui: &amp;<a class="struct" href="../../native_windows_gui/struct.Ui.html" title="struct native_windows_gui::Ui">Ui</a>&lt;ID&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;<a class="trait" href="../../native_windows_gui/custom/trait.Control.html" title="trait native_windows_gui::custom::Control">Control</a>&gt;, <a class="enum" href="../../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;;
 
-    fn <a href='#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../../native_windows_gui/enum.Event.html" title="enum native_windows_gui::Event">Event</a>&gt; { ... }
+    fn <a href='#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../../native_windows_gui/events/enum.Event.html" title="enum native_windows_gui::events::Event">Event</a>&gt; { ... }
 }</pre><div class='docblock'><p>Structures implementing this trait can be used by a Ui to build a Control</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
@@ -63,7 +63,7 @@
 </div></div>
             <h2 id='provided-methods'>Provided Methods</h2>
             <div class='methods'>
-        <h3 id='method.events' class='method'><span id='events.v' class='invisible'><code>fn <a href='#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../../native_windows_gui/enum.Event.html" title="enum native_windows_gui::Event">Event</a>&gt;</code></span></h3><div class='docblock'><p>Should return the events supported by the control.</p>
+        <h3 id='method.events' class='method'><span id='events.v' class='invisible'><code>fn <a href='#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../../native_windows_gui/events/enum.Event.html" title="enum native_windows_gui::events::Event">Event</a>&gt;</code></span></h3><div class='docblock'><p>Should return the events supported by the control.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
@@ -144,7 +144,6 @@
         window.rootPath = "../../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     <script defer src="../../search-index.js"></script>
 </body>

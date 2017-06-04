@@ -29,7 +29,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'FileDialog', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Struct FileDialog</p><div class="block items"><ul><li><a href="#methods">Methods</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>native_windows_gui</a></p><script>window.sidebarCurrent = {name: 'FileDialog', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -52,36 +52,41 @@
 <pre class='rust struct'>pub struct FileDialog { /* fields omitted */ }</pre><div class='docblock'><p>A file dialog control</p>
 </div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class="struct" href="../native_windows_gui/struct.FileDialog.html" title="struct native_windows_gui::FileDialog">FileDialog</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/file_dialog.rs.html#157-304' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.get_selected_item' class="method"><span id='get_selected_item.v' class='invisible'><code>fn <a href='#method.get_selected_item' class='fnname'>get_selected_item</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Return the item selected in the dialog by the user.</p>
-<p>Failures:<br />
-• <code>Error::System</code> if the dialog was not called<br />
-• <code>Error::System</code> if there was a system error while reading the selected item<br />
+<div class='docblock'><p>Return the item selected in the dialog by the user. </p>
+
+<p>Failures:<br>
+• <code>Error::System</code> if the dialog was not called<br>
+• <code>Error::System</code> if there was a system error while reading the selected item<br>
 • <code>Error::UserError</code> if the dialog has the <code>multiselect</code> flag  </p>
 </div><h4 id='method.get_selected_items' class="method"><span id='get_selected_items.v' class='invisible'><code>fn <a href='#method.get_selected_items' class='fnname'>get_selected_items</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>&gt;, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
 <div class='docblock'><p>Return the selected items in the dialog by the user.</p>
-<p>Failures:<br />
-• <code>Error::System</code> if the dialog was not called<br />
-• <code>Error::System</code> if there was a system error while reading the selected items<br />
+
+<p>Failures:<br>
+• <code>Error::System</code> if the dialog was not called<br>
+• <code>Error::System</code> if there was a system error while reading the selected items<br>
 • <code>Error::UserError</code> if the dialog has <code>Save</code> for action  </p>
 </div><h4 id='method.action' class="method"><span id='action.v' class='invisible'><code>fn <a href='#method.action' class='fnname'>action</a>(&amp;self) -&gt; <a class="enum" href="../native_windows_gui/constants/enum.FileDialogAction.html" title="enum native_windows_gui::constants::FileDialogAction">FileDialogAction</a></code></span></h4>
 <div class='docblock'><p>Return the action type executed by this dialog</p>
 </div><h4 id='method.get_multiselect' class="method"><span id='get_multiselect.v' class='invisible'><code>fn <a href='#method.get_multiselect' class='fnname'>get_multiselect</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
 <div class='docblock'><p>Return <code>true</code> if the dialog accepts multiple values or <code>false</code> otherwise</p>
 </div><h4 id='method.set_multiselect' class="method"><span id='set_multiselect.v' class='invisible'><code>fn <a href='#method.set_multiselect' class='fnname'>set_multiselect</a>(&amp;mut self, multiselect: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Set the multiselect flag of the dialog.</p>
-<p>Failures:<br />
-• <code>Error::System</code> if there was a system error while setting the new flag value<br />
+<div class='docblock'><p>Set the multiselect flag of the dialog. </p>
+
+<p>Failures:<br>
+• <code>Error::System</code> if there was a system error while setting the new flag value<br>
 • <code>Error::UserError</code> if the dialog has <code>Save</code> for action  </p>
 </div><h4 id='method.set_default_folder' class="method"><span id='set_default_folder.v' class='invisible'><code>fn <a href='#method.set_default_folder' class='fnname'>set_default_folder</a>&lt;'a&gt;(&amp;self, folder: &amp;'a <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Set the first opened folder when the dialog is shown. This value is overriden by the user after the dialog ran.<br />
+<div class='docblock'><p>Set the first opened folder when the dialog is shown. This value is overriden by the user after the dialog ran.<br>
 Call <code>clear_client_data</code> to fix that.</p>
+
 <p>Failures:
-• <code>Error::UserError</code>: if the default folder do not identify a folder<br />
+• <code>Error::UserError</code>: if the default folder do not identify a folder<br>
 • <code>Error::System</code>: if the folder do not exists  </p>
 </div><h4 id='method.set_filters' class="method"><span id='set_filters.v' class='invisible'><code>fn <a href='#method.set_filters' class='fnname'>set_filters</a>&lt;'a&gt;(&amp;self, filters: &amp;'a <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="enum" href="../native_windows_gui/enum.Error.html" title="enum native_windows_gui::Error">Error</a>&gt;</code></span></h4>
-<div class='docblock'><p>Filter the files that the user can select (In a <code>Open</code> dialog) in the dialog or which extension to add to the saved file (in a <code>Save</code> dialog).<br />
-This can only be set ONCE (the initialization counts) and won't work if the dialog is <code>OpenDirectory</code>.</p>
-<p>The <code>filters</code> value must be a '|' separated string having this format: &quot;Test(<em>.txt;</em>.rs)|Any(<em>.</em>)&quot;<br />
+<div class='docblock'><p>Filter the files that the user can select (In a <code>Open</code> dialog) in the dialog or which extension to add to the saved file (in a <code>Save</code> dialog).<br>
+This can only be set ONCE (the initialization counts) and won&#39;t work if the dialog is <code>OpenDirectory</code>.  </p>
+
+<p>The <code>filters</code> value must be a &#39;|&#39; separated string having this format: &quot;Test(<em>.txt;</em>.rs)|Any(<em>.</em>)&quot;<br>
 Where the fist part is the &quot;human name&quot; and the second part is a filter for the system.</p>
 </div><h4 id='method.set_title' class="method"><span id='set_title.v' class='invisible'><code>fn <a href='#method.set_title' class='fnname'>set_title</a>&lt;'a&gt;(&amp;self, title: &amp;'a <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>)</code></span></h4>
 <div class='docblock'><p>Change the dialog title</p>
@@ -153,7 +158,6 @@ Where the fist part is the &quot;human name&quot; and the second part is a filte
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>

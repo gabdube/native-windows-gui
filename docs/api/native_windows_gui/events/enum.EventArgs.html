@@ -1,10 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta http-equiv="refresh" content="0;URL=../../native_windows_gui/enum.EventArgs.html">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `EventArgs` enum in crate `native_windows_gui`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, EventArgs">
+
+    <title>native_windows_gui::events::EventArgs - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
 </head>
-<body>
-    <p>Redirecting to <a href="../../native_windows_gui/enum.EventArgs.html">../../native_windows_gui/enum.EventArgs.html</a>...</p>
-    <script>location.replace("../../native_windows_gui/enum.EventArgs.html" + location.search + location.hash);</script>
+<body class="rustdoc enum">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Enum EventArgs</p><div class="block items"><ul><li><a href="#variants">Variants</a></li></ul></div><p class='location'><a href='../index.html'>native_windows_gui</a>::<wbr><a href='index.html'>events</a></p><script>window.sidebarCurrent = {name: 'EventArgs', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>native_windows_gui</a>::<wbr><a href='index.html'>events</a>::<wbr><a class="enum" href=''>EventArgs</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/native_windows_gui/events.rs.html#60-70' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum EventArgs {
+    Key(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>),
+    Char(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.char.html">char</a>),
+    MouseClick {
+        btn: <a class="enum" href="../../native_windows_gui/constants/enum.MouseButton.html" title="enum native_windows_gui::constants::MouseButton">MouseButton</a>,
+        pos: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a>,
+    },
+    Focus(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>),
+    Tick(<a class="struct" href="https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html" title="struct std::time::duration::Duration">Duration</a>),
+    Position(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>,&nbsp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>),
+    Size(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>,&nbsp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>),
+    Raw(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>,&nbsp;WPARAM,&nbsp;LPARAM),
+    None,
+}</pre><div class='docblock'><p>Events arguments definition. If an event do not have arguments, EventArgs::None is passed.</p>
+</div><h2 id='variants' class='variants'>Variants</h2>
+<span id='variant.Key' class='variant'><span id='Key.v' class='invisible'><code>Key(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</code></span></span><span id='variant.Char' class='variant'><span id='Char.v' class='invisible'><code>Char(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.char.html">char</a>)</code></span></span><span id='variant.MouseClick' class='variant'><span id='MouseClick.v' class='invisible'><code>MouseClick</code></span></span><span class='docblock autohide sub-variant' id='variant.MouseClick.fields'><h3 class='fields'>Fields of <code>MouseClick</code></h3>
+
+                           <table><tr><td id='variant.MouseClick.field.btn'><span id='MouseClick.v.btn.v' class='invisible'><code>btn:&nbsp;<a class="enum" href="../../native_windows_gui/constants/enum.MouseButton.html" title="enum native_windows_gui::constants::MouseButton">MouseButton</a></code></span></td><td></td></tr><tr><td id='variant.MouseClick.field.pos'><span id='MouseClick.v.pos.v' class='invisible'><code>pos:&nbsp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a></code></span></td><td></td></tr></table></span><span id='variant.Focus' class='variant'><span id='Focus.v' class='invisible'><code>Focus(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>)</code></span></span><span id='variant.Tick' class='variant'><span id='Tick.v' class='invisible'><code>Tick(<a class="struct" href="https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html" title="struct std::time::duration::Duration">Duration</a>)</code></span></span><span id='variant.Position' class='variant'><span id='Position.v' class='invisible'><code>Position(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>,&nbsp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>)</code></span></span><span id='variant.Size' class='variant'><span id='Size.v' class='invisible'><code>Size(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>,&nbsp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</code></span></span><span id='variant.Raw' class='variant'><span id='Raw.v' class='invisible'><code>Raw(<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>,&nbsp;WPARAM,&nbsp;LPARAM)</code></span></span><span id='variant.None' class='variant'><span id='None.v' class='invisible'><code>None</code></span></span></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "native_windows_gui";
+    </script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
 </body>
 </html>

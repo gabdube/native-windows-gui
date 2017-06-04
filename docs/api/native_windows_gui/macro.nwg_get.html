@@ -54,10 +54,12 @@
     ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>:<span class="ident">ident</span>; (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>) ) <span class="op">=&gt;</span> { ... };
     ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ui</span>:<span class="ident">ident</span>; [ $( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">n</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>) ),<span class="op">*</span> ] ) <span class="op">=&gt;</span> { ... };
 }</pre>
-<div class='docblock'><p>Return controls from the Ui. Panics if one of the controls could not be retrieved.</p>
+<div class='docblock'><p>Return controls from the Ui. Panics if one of the controls could not be retrieved.  </p>
+
 <p>To avoid the panic, use <code>ui.get</code> directly.</p>
-<p>Usage:<br />
-<code>let control = nwg_get!(ui; (control ID, control type))</code><br />
+
+<p>Usage:<br>
+<code>let control = nwg_get!(ui; (control ID, control type))</code><br>
 <code>let (control1, control2) = nwg_get!(ui; [(control1_ID, control1 type), (control2_ID, control2_type)])</code>  </p>
 </div></section>
     <section id='search' class="content hidden"></section>
@@ -116,7 +118,6 @@
         window.rootPath = "../";
         window.currentCrate = "native_windows_gui";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
     <script defer src="../search-index.js"></script>
 </body>
