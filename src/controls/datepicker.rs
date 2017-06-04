@@ -52,6 +52,9 @@ use low::other_helper::to_utf16;
     Furthermore, any string enclosed in `'` can be used in the format to display text.  
     For example, to display the current date with the format `'Today is: Tuesday Mar 23, 1996`, the format string is `'Today is: 'dddd MMM dd', 'yyyy`. 
 
+    Events:  
+    `Destroyed, Moved, Resized, DateChanged, Any`  
+
     Members:  
     • `value`: The value of the dtp. If None, either use the current system time or show nothing (if optional is true)
     • `position`: The start position of the dtp  

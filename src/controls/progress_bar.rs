@@ -35,7 +35,7 @@ use defs::ProgressBarState;
     A template that creates a progress bar
 
     Events:  
-    Event::Destroyed, Event::Moved, Event::Resized, Event::Raw  
+    `Destroyed, Moved, Resized, Any`  
 
     Members:  
     • `position`: The start position of the progressbar  

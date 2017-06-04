@@ -346,6 +346,9 @@
 <span id="301">301</span>
 <span id="302">302</span>
 <span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Date picker control definition.
@@ -400,6 +403,9 @@
 
     Furthermore, any string enclosed in `&#39;` can be used in the format to display text.  
     For example, to display the current date with the format `&#39;Today is: Tuesday Mar 23, 1996`, the format string is `&#39;Today is: &#39;dddd MMM dd&#39;, &#39;yyyy`. 
+
+    Events:  
+    `Destroyed, Moved, Resized, DateChanged, Any`  
 
     Members:  
     • `value`: The value of the dtp. If None, either use the current system time or show nothing (if optional is true)

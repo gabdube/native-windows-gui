@@ -35,7 +35,7 @@ const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
     A template that will create a window.
 
     Events:  
-    Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp, Event::Moved, Event::Resized, Event::Raw
+    `Destroyed, KeyDown, KeyUp, Char, Closed, MouseDown, MouseUp, Moved, Resized, Any`  
 
     Members:  
       • `title` : The title of the window (in the title bar)  

@@ -36,7 +36,7 @@ static mut MENU_ITEMS_ID: UINT = 0;
     A template to create menu controls
 
     Events:  
-    Event::Destroyed  
+    `Destroyed`  
 
     Members:  
       • `text` : The menu text  

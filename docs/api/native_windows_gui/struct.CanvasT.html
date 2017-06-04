@@ -48,7 +48,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/controls/canvas/canvas_t.rs.html#47-53' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/controls/canvas/canvas_t.rs.html#50-56' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct CanvasT&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; {
     pub parent: ID,
     pub position: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a>,
@@ -56,6 +56,9 @@
     pub visible: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>,
     pub disabled: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>,
 }</pre><div class='docblock'><p>A template that creates a canvas</p>
+
+<p>Events supported:<br>
+<code>Destroyed, KeyDown, KeyUp, Char, MouseDown, MouseUp, Moved, Resized, Paint, Any</code></p>
 
 <p>Members:<br>
 • <code>parent</code>: The canvas parent.
@@ -78,7 +81,7 @@
                            </span></span><span id='structfield.disabled' class="structfield">
                            <span id='disabled.v' class='invisible'>
                            <code>disabled: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code>
-                           </span></span><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + 'static&gt; <a class="trait" href="../native_windows_gui/custom/trait.ControlT.html" title="trait native_windows_gui::custom::ControlT">ControlT</a>&lt;ID&gt; for <a class="struct" href="../native_windows_gui/struct.CanvasT.html" title="struct native_windows_gui::CanvasT">CanvasT</a>&lt;ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/canvas/canvas_t.rs.html#55-73' title='goto source code'>[src]</a></span></h3>
+                           </span></span><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;ID:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html" title="trait core::hash::Hash">Hash</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> + 'static&gt; <a class="trait" href="../native_windows_gui/custom/trait.ControlT.html" title="trait native_windows_gui::custom::ControlT">ControlT</a>&lt;ID&gt; for <a class="struct" href="../native_windows_gui/struct.CanvasT.html" title="struct native_windows_gui::CanvasT">CanvasT</a>&lt;ID&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/native_windows_gui/controls/canvas/canvas_t.rs.html#58-76' title='goto source code'>[src]</a></span></h3>
 <div class='impl-items'><h4 id='method.type_id' class="method"><span id='type_id.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#tymethod.type_id' class='fnname'>type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></code></span></h4>
 <div class='docblock'><p>Should return the TypeId of the generated control. For example a <code>WindowT</code> struct returns the TypeId of a <code>Window</code> struct.</p>
 </div><h4 id='method.events' class="method"><span id='events.v' class='invisible'><code>fn <a href='../native_windows_gui/custom/trait.ControlT.html#method.events' class='fnname'>events</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html" title="struct collections::vec::Vec">Vec</a>&lt;<a class="enum" href="../native_windows_gui/events/enum.Event.html" title="enum native_windows_gui::events::Event">Event</a>&gt;</code></span></h4>

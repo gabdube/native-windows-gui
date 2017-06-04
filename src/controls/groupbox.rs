@@ -32,8 +32,8 @@ use defs::HTextAlign;
 /**
     A template that creates a standard groupbox
 
-    Available events:  
-    Event::Destroyed, Event::Moved, Event::Resized, Event::Raw  
+    Events:  
+    `Destroyed, Moved, Resized, Any`  
 
     Members:  
     • `text`: The text of the groupbox  

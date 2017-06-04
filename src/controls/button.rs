@@ -33,7 +33,7 @@ use events::button::{Click, DoubleClick, Focus};
     A template that creates a standard button
 
     Available events:  
-    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+    `Destroyed, Moved, Resized, Click, DoubleClick, Focus, Any`
 
     Members:  
     • `text`: The text of the button  

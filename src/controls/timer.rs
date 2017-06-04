@@ -36,7 +36,7 @@ static mut TIMERS_ID: UINT_PTR = 0;
     its creation, it cannot start automatically.
 
     Events:  
-    Event::Destroyed, Event::Tick  
+    `Destroyed, Tick`   
 
     Members:  
     • `interval`: The timer interval in milliseconds

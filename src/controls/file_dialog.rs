@@ -36,8 +36,8 @@ use low::other_helper::to_utf16;
 /**
     A template that creates a standard file dialog
 
-    Available events:  
-    Event::Destroyed  
+    Events:  
+    `Destroyed`  
 
     Members:  
     • `title`: The title of the dialog  

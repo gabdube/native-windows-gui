@@ -37,6 +37,9 @@ use super::{Canvas, CanvasProtected};
 /**
     A template that creates a canvas
 
+    Events supported:  
+    `Destroyed, KeyDown, KeyUp, Char, MouseDown, MouseUp, Moved, Resized, Paint, Any`
+
     Members:  
     • `parent`: The canvas parent.
     • `position` : Starting posiion of the canvas after it is created  
