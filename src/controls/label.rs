@@ -33,7 +33,7 @@ use defs::HTextAlign;
 /**
     A template that creates a standard label
 
-    Available events:  
+    Rvents:  
     `Destroyed, Moved, Resized, Click, DoubleClick, Any`
 
     Members:  

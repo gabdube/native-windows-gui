@@ -34,6 +34,7 @@ pub use self::button as checkbox; // Checkboxes use the same events of the butto
 pub use self::button as radiobutton; // Radiobuttons use the same events of the buttons
 pub mod combobox { pub use low::events::{CbnFocus as Focus, CbnSelectionChanged as SelectionChanged}; }
 pub mod label { pub use low::events::{StnClick as Click, StnDoubleClick as DoubleClick}; }
+pub use self::label as image_frame;
 pub mod datepicker { pub use low::events::DateChanged; }
 pub mod listbox { pub use low::events::{LbnSelectionChanged as SelectionChanged, LbnDoubleClick as DoubleClick, LbnFocus as Focus}; }
 pub mod textbox { pub use low::events::{EnFocus as Focus, EnLimit as Limit, EnValueChanged as ValueChanged}; }

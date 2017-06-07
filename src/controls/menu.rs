@@ -279,9 +279,13 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
             enable_menuitem(parent_h, None, None, !t.disabled);
 
             Ok( ( h, AnyHandle::HMENU(parent_h) ) )
+
         },
         AnyHandle::HMENU_ITEM(_, _) => Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string())),
         AnyHandle::HFONT(_) =>  Err(Error::BadParent("Window or menu parent required, got Font".to_string())),
+        AnyHandle::HICON(_) =>  Err(Error::BadParent("Window or menu parent required, got Icon".to_string())),
+        AnyHandle::HCURSOR(_) =>  Err(Error::BadParent("Window or menu parent required, got Cursor".to_string())),
+        AnyHandle::HANDLE(_, spec) =>  Err(Error::BadParent( format!("Window or menu parent required, got generic handle of type {:?}", spec))),
         AnyHandle::Custom(_, _) =>  Err(Error::BadParent("Window or menu parent required, got custom control".to_string())),
    }
 }

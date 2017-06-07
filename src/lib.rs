@@ -63,6 +63,7 @@ pub use low::other_helper::{message, simple_message, fatal_message, error_messag
 pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
  RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput,
  FileDialogT, FileDialog, CanvasT, Canvas, CanvasRenderer, TextBoxT, TextBox, GroupBoxT, GroupBox, ProgressBarT, ProgressBar,
- DatePickerT, DatePicker};
-pub use resources::{FontT, Font};
+ DatePickerT, DatePicker, ImageFrameT, ImageFrame};
+ 
+pub use resources::{FontT, Font, ImageT, Image};
 pub use ui::{Ui, dispatch_events, exit};

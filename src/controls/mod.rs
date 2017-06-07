@@ -31,6 +31,7 @@ pub mod combobox;
 pub mod groupbox;
 pub mod progress_bar;
 pub mod datepicker;
+pub mod image_frame;
 pub mod file_dialog;
 pub mod timer;
 pub mod canvas;
@@ -38,7 +39,7 @@ pub mod canvas;
 use std::any::TypeId;
 use std::hash::Hash;
 
-use winapi::{HWND, HMENU, UINT, HFONT};
+use winapi::{HWND, HANDLE, HCURSOR, HICON, HMENU, UINT, HFONT};
 
 pub use controls::window::{WindowT, Window};
 pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem, SeparatorT, Separator};
@@ -56,6 +57,7 @@ pub use controls::file_dialog::{FileDialogT, FileDialog};
 pub use controls::timer::{TimerT, Timer};
 pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
 pub use controls::datepicker::{DatePickerT, DatePicker};
+pub use controls::image_frame::{ImageFrameT, ImageFrame};
 use ui::Ui;
 use events::Event;
 use error::Error;
@@ -70,13 +72,23 @@ pub enum AnyHandle {
     HMENU(HMENU),
     HMENU_ITEM(HMENU, UINT),
     HFONT(HFONT),
+    HCURSOR(HCURSOR),
+    HICON(HICON),
+    HANDLE(HANDLE, HandleSpec),
     Custom(TypeId, usize)
 }
 
 /**
-    An enum that list type names for the common controls.
+    Because the `HANDLE` type is too generic and can be used by alot of different resources,
+    NWG store additinal information to remember the type of resource it holds
+*/
+#[derive(Clone, Hash, Debug)]
+pub enum HandleSpec {
+    Bitmap
+}
 
-    This is used internally to differentiate the common control notification codes.
+/**
+    An enum that list type names for the common controls.
 */
 #[derive(Clone, Debug)]
 pub enum ControlType {
@@ -98,6 +110,7 @@ pub enum ControlType {
     DatePicker,
     FileDialog,
     Canvas,
+    ImageFrame,
     Undefined  // Control is not a common control
 }
 

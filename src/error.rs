@@ -31,6 +31,7 @@ pub enum SystemError {
     WindowCreationFail,
     UiCreation,
     FontCreation,
+    ImageCreation,
     ComInstanceCreation(String),
     ComError(String),
 }
@@ -45,6 +46,7 @@ impl SystemError {
             &SystemError::WindowCreationFail => format!("Failed to create a system window for a control"),
             &SystemError::UiCreation => format!("The system could not initialize the Ui"),
             &SystemError::FontCreation => format!("Failed to create a system font"),
+            &SystemError::ImageCreation => format!("Failed to create a system image"),
             &SystemError::ComInstanceCreation(ref name) => format!("Failed to create a COM instance for {}", name),
             &SystemError::ComError(ref details) => format!("An error ocurred while executing a COM method, {}", details),
         };

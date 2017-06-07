@@ -199,7 +199,8 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
                 children
             },
-            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) | AnyHandle::Custom(_, _) => vec![id], // These handle can't have children
+            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) | AnyHandle::Custom(_, _) | AnyHandle::HANDLE(_,_) |
+            AnyHandle::HCURSOR(_) | AnyHandle::HICON(_) => vec![id], // These handle can't have children
         };
        
         for id in children_ids.iter().rev() {

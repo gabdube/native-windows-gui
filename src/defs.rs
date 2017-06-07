@@ -162,6 +162,17 @@ pub enum ProgressBarState {
 }
 
 /**
+    Define a type of image to use when importing an image resource
+*/
+#[derive(Clone, PartialEq, Debug)]
+pub enum ImageType {
+    Bitmap,
+    Icon,
+    Cursor
+}
+
+
+/**
     Define a rectangle shape that can be used with canvases
 */
 #[derive(Clone)]

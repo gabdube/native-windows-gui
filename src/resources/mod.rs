@@ -19,6 +19,7 @@
 */
 
 pub mod font;
+pub mod image;
 
 use std::any::TypeId;
 use std::hash::Hash;
@@ -27,7 +28,8 @@ use ui::Ui;
 use controls::AnyHandle;
 use error::Error;
 
-pub use resources::font::{FontT, Font};
+pub use self::font::{FontT, Font};
+pub use self::image::{ImageT, Image};
 
 /**
     Structures implementing this trait can be used by a Ui to build a Resource

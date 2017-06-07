@@ -5,7 +5,7 @@
 #[macro_use] extern crate native_windows_gui as nwg;
 
 use nwg::{Ui, EventArgs, dispatch_events, exit as nwg_exit};
-use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, CheckState, FileDialogAction, HTextAlign, PickerDate};
+use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, CheckState, FileDialogAction, HTextAlign, PickerDate, ImageType};
 use nwg::events as nwge;
 
 nwg_template!(
@@ -40,7 +40,8 @@ nwg_template!(
         ("RandomStuffTextBox", nwg_textbox!(parent="MainWindow"; position=(10, 185); size=(200, 60); scrollbars=(false, true))),
         ("InstallCatLabel", nwg_label!(parent="MainWindow"; text="Installing cat.exe ..."; position=(230, 160); size=(180, 25); font=Some("Font1") )),
         ("CatProgress", nwg_progressbar!(parent="MainWindow"; position=(230, 190); size=(240, 25); range=(0, 100); value=85)),
-        ("DatePicker", nwg_datepicker!(parent="MainWindow"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(230, 220); size=(240, 25); font=Some("Font1")))
+        ("DatePicker", nwg_datepicker!(parent="MainWindow"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(230, 220); size=(240, 25); font=Some("Font1"))),
+        ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(10, 250); size=(75,75)))
     ];
     events: [
         ("RandomStuffTextBox", "AllSystemEvents", nwge::Any, |_,_,_,args| {
@@ -95,11 +96,16 @@ nwg_template!(
 
         ("DatePicker", "DD", nwge::datepicker::DateChanged, |app,_,_,_| {
             println!("{:?}", nwg_get!(app; ("DatePicker", nwg::DatePicker)).get_value());
+        }),
+
+        ("RustLogoFrame", "Logo", nwge::image_frame::Click, |_,_,_,_| {
+            println!("The rust logo!");
         })
     ];
     resources: [
         ("Font1", nwg_font!(family="Calibri"; size=20 )),
-        ("Font2", nwg_font!(family="Arial"; size=17; weight=FONT_WEIGHT_BLACK; decoration=FONT_DECO_ITALIC))
+        ("Font2", nwg_font!(family="Arial"; size=17; weight=FONT_WEIGHT_BLACK; decoration=FONT_DECO_ITALIC)),
+        ("RustLogo", nwg_image!(source="img\\rust-logo.bmp"; image_type=ImageType::Bitmap)) // Make sure to use '\\' and not '/'
     ];
     values: []
 );

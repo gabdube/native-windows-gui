@@ -6,6 +6,8 @@ For more information also see:
   * https://gabdube.github.io/native-windows-gui/book/events.html (events basics)
   * https://gabdube.github.io/native-windows-gui/book/custom_events.html (defining custom events)
   * https://github.com/gabdube/native-windows-gui/blob/master/examples/templating.rs (simple example)
+* The ability to load bitmap, ico and cursor resources in the **Image resource**
+* The **ImageFrame** control to display a bitmap in a window
 
 # BETA 1 (0.2.0)
 

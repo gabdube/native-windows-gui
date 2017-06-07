@@ -742,6 +742,37 @@ macro_rules! nwg_canvas {
     }}
 }
 
+/**
+    Sane defaults for the ImageFrame control. Requires a parent.
+
+    Defaults:  
+    • position: `(0, 0)`  
+    • size: `(100, 100)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • image: `None`  
+
+    Usage:  
+    `nwg_image_frame!(parent="MyParent";)`  
+    `nwg_image_frame!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_image_frame!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
+#[macro_export]
+macro_rules! nwg_image_frame {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::ImageFrameT{ 
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false, 
+            parent: $p, image: None
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }}
+}
+
 
 //---- Resources ----//
 
@@ -767,6 +798,34 @@ macro_rules! nwg_font {
             family: "Arial", size: 12,
             weight: $crate::constants::FONT_WEIGHT_NORMAL,
             decoration: $crate::constants::FONT_DECO_NORMAL,
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }}
+}
+
+/**
+    Sane defaults for the Image resource.  
+    The `source` attribute is required.
+
+    Defaults:  
+    • image_type: `ImageType::Bitmap`  
+    • size: `(0,0)`
+
+    Usage:  
+    `nwg_image!(source="test.bmp")`  
+    `nwg_image!(source="test.ico"; image_type=ImageType::Icon)`   
+*/
+#[macro_export]
+macro_rules! nwg_image {
+    (source=$s:expr; $( $i:ident=$v:expr );*) => { {
+        let mut t = 
+        $crate::ImageT{ 
+            source: $s,
+            image_type: $crate::constants::ImageType::Bitmap,
+            size: (0, 0)
         };
         
         $( t.$i = $v; );*

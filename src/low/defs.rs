@@ -112,6 +112,9 @@ pub const SS_RIGHT: UINT = 2;
 pub const SS_LEFT: UINT = 0;
 pub const SS_CENTER: UINT = 1;   
 pub const SS_NOPREFIX: UINT = 128;
+pub const SS_BITMAP: UINT = 14;
+
+pub const STM_SETIMAGE: UINT = 370;
 
 pub const CBS_DROPDOWNLIST: UINT = 3;
 pub const CBS_HASSTRINGS: UINT = 512;
