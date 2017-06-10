@@ -433,7 +433,15 @@ impl<ID: Hash+Clone> UiInner<ID> {
             Some(*id) 
         } else {
             None 
-            //println!("Couldn't match the handle {:?} to a inner ID", handle); // Debug
+        }
+    }
+
+    #[inline(always)]
+    pub fn id_from_handle(&self, handle: &AnyHandle) -> Result<ID, Error> {
+        if let Some(id) = self.inner_id_from_handle(handle) {
+            Ok(self.inner_public_map.get(&id).unwrap().0.clone())  // if inner_id_from_handle returns something, unwrap can never fail here
+        } else {
+            Err(Error::KeyNotFound)
         }
     }
 
@@ -752,7 +760,7 @@ impl<ID:Hash+Clone> Ui<ID> {
     */
     pub fn unbind(&self, id: &ID, cb_id: &ID, event: Event) {
         use low::defs::{NWG_UNBIND};
-        
+
         let inner = unsafe{ &mut *self.inner };
         let (inner_id, cb_inner_id) = (UiInner::hash_id(id), UiInner::hash_id(cb_id));
         let data = UnbindArgs{ id: inner_id, cb_id: cb_inner_id, event: event};
@@ -807,6 +815,28 @@ impl<ID:Hash+Clone> Ui<ID> {
     pub fn has_id(&self, id: &ID) -> bool {
         let inner = unsafe{ &mut (&*self.inner) };
         inner.inner_public_map.contains_key(&UiInner::hash_id(id))
+    }
+
+    /**
+        Check if the ui has an handle
+
+        Params:
+          • h -> The handle to check
+    */
+    pub fn has_handle(&self, h: &AnyHandle) -> bool {
+        let inner = unsafe{ &mut (&*self.inner) };
+        inner.inner_id_from_handle(h).is_some()
+    }
+
+    /**
+        Return the public id associated with an handle
+
+        Params:
+          • h -> The handle to check
+    */
+    pub fn id_from_handle(&self, h: &AnyHandle) -> Result<ID, Error> {
+        let inner = unsafe{ &mut (&*self.inner) };
+        inner.id_from_handle(h)
     }
 
     /**

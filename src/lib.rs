@@ -18,8 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #![cfg(windows)]
-
 extern crate winapi;
+
 extern crate user32;
 extern crate kernel32;
 extern crate comctl32;

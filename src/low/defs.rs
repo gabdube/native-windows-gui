@@ -115,6 +115,7 @@ pub const SS_NOPREFIX: UINT = 128;
 pub const SS_BITMAP: UINT = 14;
 
 pub const STM_SETIMAGE: UINT = 370;
+pub const STM_GETIMAGE: UINT = 371;
 
 pub const CBS_DROPDOWNLIST: UINT = 3;
 pub const CBS_HASSTRINGS: UINT = 512;

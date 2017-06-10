@@ -1,6 +1,8 @@
 #![allow(unused_must_use)]
 #![allow(unused_variables)]
 
+extern crate winapi;
+
 extern crate native_windows_gui as nwg;
 
 use nwg::*;
@@ -335,9 +337,33 @@ fn test_ui_unbind() {
     dispatch_events();
 }
 
+#[test]
+fn test_ui_handle_queries() {
+    use nwg::custom::Control;
+
+    let ui = setup_ui();
+
+    ui.pack_control(&1000, window());
+    ui.commit().expect("Commit was not successful");
+
+    {
+        let window = ui.get::<nwg::Window>(&1000).expect("Control not found");
+        let window_handle = window.handle();
+        let bad_handle = nwg::custom::AnyHandle::HWND(234252 as winapi::HWND);
+
+        assert!(ui.has_handle(&window_handle), "Handle not found");
+        assert!(ui.id_from_handle(&window_handle).expect("Handle not found!") == 1000, "Handle value do not match");
+
+        assert!(ui.has_handle(&bad_handle) == false);
+        let r = ui.id_from_handle(&bad_handle);
+        assert!(r.is_err(), "id_from_handle did not return an error");
+        assert!(r.err() == Some(Error::KeyNotFound), "Error should have been Error::KeyNotFound")
+    }
+
+}
 
 #[test]
-fn test_user_trigger() {
+fn test_ui_trigger() {
     let ui = setup_ui();
     let mut flag_set: bool = false;
     let x = &mut flag_set as *mut bool;
@@ -681,11 +707,6 @@ fn test_listbox() {
         assert!(lb.get_selected_indexes() == [0,1,2,3], "Selected indexes do not match");
     }
     
-}
-
-#[test]
-fn test_timer() {
-    // TODO
 }
 
 #[test]

@@ -41,7 +41,7 @@ nwg_template!(
         ("InstallCatLabel", nwg_label!(parent="MainWindow"; text="Installing cat.exe ..."; position=(230, 160); size=(180, 25); font=Some("Font1") )),
         ("CatProgress", nwg_progressbar!(parent="MainWindow"; position=(230, 190); size=(240, 25); range=(0, 100); value=85)),
         ("DatePicker", nwg_datepicker!(parent="MainWindow"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(230, 220); size=(240, 25); font=Some("Font1"))),
-        ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(10, 250); size=(75,75)))
+        ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(10, 250); size=(100,100)))
     ];
     events: [
         ("RandomStuffTextBox", "AllSystemEvents", nwge::Any, |_,_,_,args| {
@@ -98,14 +98,20 @@ nwg_template!(
             println!("{:?}", nwg_get!(app; ("DatePicker", nwg::DatePicker)).get_value());
         }),
 
-        ("RustLogoFrame", "Logo", nwge::image_frame::Click, |_,_,_,_| {
-            println!("The rust logo!");
+        ("RustLogoFrame", "Logo", nwge::image_frame::Click, |app,_,_,_| {
+            let img = nwg_get!(app; ("RustLogoFrame", nwg::ImageFrame<&'static str>));
+            if let Some("RustLogo") = img.get_image(app) {
+                img.set_image(app, Some(&"RustMascot")).unwrap();
+            } else {
+                img.set_image(app, Some(&"RustLogo")).unwrap();
+            }
         })
     ];
     resources: [
         ("Font1", nwg_font!(family="Calibri"; size=20 )),
         ("Font2", nwg_font!(family="Arial"; size=17; weight=FONT_WEIGHT_BLACK; decoration=FONT_DECO_ITALIC)),
-        ("RustLogo", nwg_image!(source="img\\rust-logo.bmp"; image_type=ImageType::Bitmap)) // Make sure to use '\\' and not '/'
+        ("RustLogo", nwg_image!(source="img\\rust-logo.bmp"; image_type=ImageType::Bitmap)), // Make sure to use '\\' and not '/'
+        ("RustMascot", nwg_image!(source="img\\rust-mascot.bmp"; image_type=ImageType::Bitmap; size=(100, 100))) // Make sure to use '\\' and not '/'
     ];
     values: []
 );

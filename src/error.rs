@@ -69,6 +69,7 @@ pub enum Error {
     KeyExists,
     KeyNotFound,
     BadType,
+    BadUi(String),
     BadParent(String),
     BadResource(String),
     BorrowError,
@@ -88,6 +89,7 @@ impl Error {
         match self {
             &Error::KeyExists => format!("The same key already exists in the UI"),
             &Error::KeyNotFound => format!("The key was not found in the ui"),
+            &Error::BadUi(ref r) => format!("Ui error: {}", r),
             &Error::BadType => format!("The key exists in the Ui, but the type requested did not match the type of the underlying object"),
             &Error::BadParent(ref r) => format!("Could not make sense of the requested parent: {}", r),
             &Error::BadResource(ref r) => format!("Could not make sense of the requested resource: {}", r),
