@@ -514,6 +514,17 @@
 <span id="469">469</span>
 <span id="470">470</span>
 <span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Public type definitions
@@ -677,6 +688,17 @@
     <span class="ident">Paused</span>,
     <span class="ident">Error</span>,
 }
+
+<span class="doccomment">/**
+    Define a type of image to use when importing an image resource
+*/</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ImageType</span> {
+    <span class="ident">Bitmap</span>,
+    <span class="ident">Icon</span>,
+    <span class="ident">Cursor</span>
+}
+
 
 <span class="doccomment">/**
     Define a rectangle shape that can be used with canvases

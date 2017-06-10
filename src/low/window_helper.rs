@@ -392,6 +392,16 @@ pub fn handle_of_font<ID: Clone+Hash>(ui: &Ui<ID>, id: &ID, err: &'static str) -
     }
 } 
 
+#[inline(always)]
+pub unsafe fn toggle_console(visible: bool) {
+    use kernel32::GetConsoleWindow;
+
+    let console = GetConsoleWindow();
+    if console.is_null() { return; }
+
+    set_window_visibility(console, visible);
+}
+
 #[cfg(target_arch = "x86")] use winapi::LONG;
 #[cfg(target_arch = "x86_64")] use winapi::LONG_PTR;
 

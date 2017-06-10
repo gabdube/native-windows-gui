@@ -113,6 +113,7 @@
 <span id="68">68</span>
 <span id="69">69</span>
 <span id="70">70</span>
+<span id="71">71</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     High level events definitions
@@ -150,6 +151,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">button</span> <span class="kw">as</span> <span class="ident">radiobutton</span>; <span class="comment">// Radiobuttons use the same events of the buttons</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">combobox</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">CbnFocus</span> <span class="kw">as</span> <span class="ident">Focus</span>, <span class="ident">CbnSelectionChanged</span> <span class="kw">as</span> <span class="ident">SelectionChanged</span>}; }
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">label</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">StnClick</span> <span class="kw">as</span> <span class="ident">Click</span>, <span class="ident">StnDoubleClick</span> <span class="kw">as</span> <span class="ident">DoubleClick</span>}; }
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">label</span> <span class="kw">as</span> <span class="ident">image_frame</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">datepicker</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::<span class="ident">DateChanged</span>; }
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">listbox</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">LbnSelectionChanged</span> <span class="kw">as</span> <span class="ident">SelectionChanged</span>, <span class="ident">LbnDoubleClick</span> <span class="kw">as</span> <span class="ident">DoubleClick</span>, <span class="ident">LbnFocus</span> <span class="kw">as</span> <span class="ident">Focus</span>}; }
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">textbox</span> { <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">events</span>::{<span class="ident">EnFocus</span> <span class="kw">as</span> <span class="ident">Focus</span>, <span class="ident">EnLimit</span> <span class="kw">as</span> <span class="ident">Limit</span>, <span class="ident">EnValueChanged</span> <span class="kw">as</span> <span class="ident">ValueChanged</span>}; }

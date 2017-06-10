@@ -874,3 +874,10 @@ pub fn exit() {
     // Actual code is located under the low module because that's where most of the unsafe code should be
     unsafe{ ::low::events::exit(); }
 }
+
+/**
+    Toggle the console visibility
+*/
+pub fn toggle_console(visible: bool) {
+    unsafe{ ::low::window_helper::toggle_console(visible) }
+}

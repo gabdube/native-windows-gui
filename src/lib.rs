@@ -66,4 +66,4 @@ pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, B
  DatePickerT, DatePicker, ImageFrameT, ImageFrame};
  
 pub use resources::{FontT, Font, ImageT, Image};
-pub use ui::{Ui, dispatch_events, exit};
+pub use ui::{Ui, dispatch_events, exit, toggle_console};

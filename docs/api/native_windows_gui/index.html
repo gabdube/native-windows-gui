@@ -48,7 +48,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a class='srclink' href='../src/native_windows_gui/lib.rs.html#1-68' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/native_windows_gui/lib.rs.html#1-69' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>A very high level native gui library for Windows.</p>
 </div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
 <table><tr><td><code>pub use events::<a class="enum" href="../native_windows_gui/events/enum.EventArgs.html" title="enum native_windows_gui::events::EventArgs">EventArgs</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
@@ -150,6 +150,21 @@
                                   title='macro native_windows_gui::nwg_groupbox'>nwg_groupbox</a></td>
                            <td class='docblock-short'>
                                 <p>Sane defaults for the GroupBox control. Requires a parent.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="macro" href="macro.nwg_image.html"
+                                  title='macro native_windows_gui::nwg_image'>nwg_image</a></td>
+                           <td class='docblock-short'>
+                                <p>Sane defaults for the Image resource.<br>
+The <code>source</code> attribute is required.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="macro" href="macro.nwg_image_frame.html"
+                                  title='macro native_windows_gui::nwg_image_frame'>nwg_image_frame</a></td>
+                           <td class='docblock-short'>
+                                <p>Sane defaults for the ImageFrame control. Requires a parent.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -355,6 +370,34 @@ use with this control.</p>
                                   title='struct native_windows_gui::GroupBoxT'>GroupBoxT</a></td>
                            <td class='docblock-short'>
                                 <p>A template that creates a standard groupbox</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Image.html"
+                                  title='struct native_windows_gui::Image'>Image</a></td>
+                           <td class='docblock-short'>
+                                <p>An image resource. May represent a bitmap, an icon or a cursor</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.ImageFrame.html"
+                                  title='struct native_windows_gui::ImageFrame'>ImageFrame</a></td>
+                           <td class='docblock-short'>
+                                <p>A frame that display a bitmap image loaded from a Image resource.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.ImageFrameT.html"
+                                  title='struct native_windows_gui::ImageFrameT'>ImageFrameT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a ImageFrame control.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.ImageT.html"
+                                  title='struct native_windows_gui::ImageT'>ImageT</a></td>
+                           <td class='docblock-short'>
+                                <p>A template that creates a image resource</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
@@ -575,6 +618,13 @@ its creation, it cannot start automatically.</p>
                                   title='fn native_windows_gui::simple_message'>simple_message</a></td>
                            <td class='docblock-short'>
                                 <p>Display a simple message box. The message box has for style <code>MessageButtons::Ok</code> and <code>MessageIcons::Info</code> .</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.toggle_console.html"
+                                  title='fn native_windows_gui::toggle_console'>toggle_console</a></td>
+                           <td class='docblock-short'>
+                                <p>Toggle the console visibility</p>
                            </td>
                        </tr></table></section>
     <section id='search' class="content hidden"></section>

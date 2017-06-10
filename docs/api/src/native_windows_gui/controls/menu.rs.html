@@ -411,6 +411,10 @@
 <span id="366">366</span>
 <span id="367">367</span>
 <span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Menu control definition that integrates with the built-in window type
@@ -693,9 +697,13 @@
             <span class="ident">enable_menuitem</span>(<span class="ident">parent_h</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="op">!</span><span class="ident">t</span>.<span class="ident">disabled</span>);
 
             <span class="prelude-val">Ok</span>( ( <span class="ident">h</span>, <span class="ident">AnyHandle</span>::<span class="ident">HMENU</span>(<span class="ident">parent_h</span>) ) )
+
         },
         <span class="ident">AnyHandle</span>::<span class="ident">HMENU_ITEM</span>(_, _) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="string">&quot;Window or menu parent required, got MenuItem&quot;</span>.<span class="ident">to_string</span>())),
         <span class="ident">AnyHandle</span>::<span class="ident">HFONT</span>(_) <span class="op">=&gt;</span>  <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="string">&quot;Window or menu parent required, got Font&quot;</span>.<span class="ident">to_string</span>())),
+        <span class="ident">AnyHandle</span>::<span class="ident">HICON</span>(_) <span class="op">=&gt;</span>  <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="string">&quot;Window or menu parent required, got Icon&quot;</span>.<span class="ident">to_string</span>())),
+        <span class="ident">AnyHandle</span>::<span class="ident">HCURSOR</span>(_) <span class="op">=&gt;</span>  <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="string">&quot;Window or menu parent required, got Cursor&quot;</span>.<span class="ident">to_string</span>())),
+        <span class="ident">AnyHandle</span>::<span class="ident">HANDLE</span>(_, <span class="ident">spec</span>) <span class="op">=&gt;</span>  <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadParent</span>( <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Window or menu parent required, got generic handle of type {:?}&quot;</span>, <span class="ident">spec</span>))),
         <span class="ident">AnyHandle</span>::<span class="ident">Custom</span>(_, _) <span class="op">=&gt;</span>  <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadParent</span>(<span class="string">&quot;Window or menu parent required, got custom control&quot;</span>.<span class="ident">to_string</span>())),
    }
 }

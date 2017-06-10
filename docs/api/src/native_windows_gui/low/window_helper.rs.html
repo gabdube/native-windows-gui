@@ -467,6 +467,16 @@
 <span id="422">422</span>
 <span id="423">423</span>
 <span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Various helper functions to create and interact with system window.
@@ -861,6 +871,16 @@
         <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>)
     }
 } 
+
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">toggle_console</span>(<span class="ident">visible</span>: <span class="ident">bool</span>) {
+    <span class="kw">use</span> <span class="ident">kernel32</span>::<span class="ident">GetConsoleWindow</span>;
+
+    <span class="kw">let</span> <span class="ident">console</span> <span class="op">=</span> <span class="ident">GetConsoleWindow</span>();
+    <span class="kw">if</span> <span class="ident">console</span>.<span class="ident">is_null</span>() { <span class="kw">return</span>; }
+
+    <span class="ident">set_window_visibility</span>(<span class="ident">console</span>, <span class="ident">visible</span>);
+}
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>)]</span> <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">LONG</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>)]</span> <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">LONG_PTR</span>;

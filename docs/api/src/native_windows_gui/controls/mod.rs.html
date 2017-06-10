@@ -188,6 +188,19 @@
 <span id="143">143</span>
 <span id="144">144</span>
 <span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Control trait definition. The base control definitions are located in the submodules.
@@ -222,6 +235,7 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">groupbox</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">progress_bar</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">datepicker</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">image_frame</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">file_dialog</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">timer</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">canvas</span>;
@@ -229,7 +243,7 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">TypeId</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
 
-<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HWND</span>, <span class="ident">HMENU</span>, <span class="ident">UINT</span>, <span class="ident">HFONT</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HWND</span>, <span class="ident">HANDLE</span>, <span class="ident">HCURSOR</span>, <span class="ident">HICON</span>, <span class="ident">HMENU</span>, <span class="ident">UINT</span>, <span class="ident">HFONT</span>};
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controls</span>::<span class="ident">window</span>::{<span class="ident">WindowT</span>, <span class="ident">Window</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controls</span>::<span class="ident">menu</span>::{<span class="ident">MenuT</span>, <span class="ident">Menu</span>, <span class="ident">MenuItemT</span>, <span class="ident">MenuItem</span>, <span class="ident">SeparatorT</span>, <span class="ident">Separator</span>};
@@ -247,6 +261,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controls</span>::<span class="ident">timer</span>::{<span class="ident">TimerT</span>, <span class="ident">Timer</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controls</span>::<span class="ident">canvas</span>::{<span class="ident">CanvasT</span>, <span class="ident">Canvas</span>, <span class="ident">CanvasRenderer</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controls</span>::<span class="ident">datepicker</span>::{<span class="ident">DatePickerT</span>, <span class="ident">DatePicker</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controls</span>::<span class="ident">image_frame</span>::{<span class="ident">ImageFrameT</span>, <span class="ident">ImageFrame</span>};
 <span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
 <span class="kw">use</span> <span class="ident">events</span>::<span class="ident">Event</span>;
 <span class="kw">use</span> <span class="ident">error</span>::<span class="ident">Error</span>;
@@ -261,13 +276,23 @@
     <span class="ident">HMENU</span>(<span class="ident">HMENU</span>),
     <span class="ident">HMENU_ITEM</span>(<span class="ident">HMENU</span>, <span class="ident">UINT</span>),
     <span class="ident">HFONT</span>(<span class="ident">HFONT</span>),
+    <span class="ident">HCURSOR</span>(<span class="ident">HCURSOR</span>),
+    <span class="ident">HICON</span>(<span class="ident">HICON</span>),
+    <span class="ident">HANDLE</span>(<span class="ident">HANDLE</span>, <span class="ident">HandleSpec</span>),
     <span class="ident">Custom</span>(<span class="ident">TypeId</span>, <span class="ident">usize</span>)
 }
 
 <span class="doccomment">/**
-    An enum that list type names for the common controls.
+    Because the `HANDLE` type is too generic and can be used by alot of different resources,
+    NWG store additinal information to remember the type of resource it holds
+*/</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Hash</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">HandleSpec</span> {
+    <span class="ident">Bitmap</span>
+}
 
-    This is used internally to differentiate the common control notification codes.
+<span class="doccomment">/**
+    An enum that list type names for the common controls.
 */</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ControlType</span> {
@@ -289,6 +314,7 @@
     <span class="ident">DatePicker</span>,
     <span class="ident">FileDialog</span>,
     <span class="ident">Canvas</span>,
+    <span class="ident">ImageFrame</span>,
     <span class="ident">Undefined</span>  <span class="comment">// Control is not a common control</span>
 }
 

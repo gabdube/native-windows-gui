@@ -70,6 +70,16 @@
 
     NWG also has a few functions that are not located under the UI object.
 
+    <h1 id="con" class="section-header"><a href="#con">Hiding the console</a></h1>
+
+    As of Rust <code>1.18</code>, the crate attribute <code>#![windows_subsystem(windows)]</code> can be used to create an executable without a console.</br></br>
+
+    The function <code>nwg::toggle_console</code> can also be used to hide or show the console window. Note that the console will still flash even if this function is called
+    at the start of the program.
+
+    <pre><span></span><span class="n">nwg</span>::<span class="n">toggle_console</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span><span class="w"></span>
+</pre>
+
     <h1 id="msg" class="section-header"><a href="#msg">Messages box functions</a></h1>
 
     NWG has a function to display a message box and 3 functions that wrap it for more common purpose. <br><br>

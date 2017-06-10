@@ -34,9 +34,9 @@ use low::other_helper::to_utf16;
     A template that creates a image resource
 
     Params:  
-    • `source`: The path to the image resource
-    • `_type`: The type of the resource to load
-    • `size`: The size of the image to load. If left to (0, 0), use the original resource size.
+    • `source`: The path to the image resource  
+    • `_type`: The type of the resource to load  
+    • `size`: The size of the image to load. If left to (0, 0), use the original resource size.  
 */
 #[derive(Clone)]
 pub struct ImageT<S: Clone+Into<String>> {
