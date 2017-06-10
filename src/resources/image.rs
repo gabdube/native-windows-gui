@@ -21,7 +21,7 @@ use std::any::TypeId;
 use std::hash::Hash;
 use std::ptr;
 
-use winapi::{HANDLE, IMAGE_BITMAP, IMAGE_CURSOR, IMAGE_ICON, LR_LOADFROMFILE, c_int};
+use winapi::{HANDLE, c_int};
 
 use ui::Ui;
 use controls::{AnyHandle, HandleSpec};
@@ -35,12 +35,15 @@ use low::other_helper::to_utf16;
 
     Params:  
     • `source`: The path to the image resource  
+    • `strict`: If set to `true`, the image creation will fail if the source cannot be read.  
+                If not, the resource creation will not fails and the Windows `Error` default icon will be loaded instead.
     • `_type`: The type of the resource to load  
     • `size`: The size of the image to load. If left to (0, 0), use the original resource size.  
 */
 #[derive(Clone)]
 pub struct ImageT<S: Clone+Into<String>> {
     pub source: S,
+    pub strict: bool,
     pub image_type: ImageType,
     pub size: (c_int, c_int)
 }
@@ -50,22 +53,35 @@ impl<ID: Clone+Hash, S: Clone+Into<String>> ResourceT<ID> for ImageT<S> {
 
     #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Resource>, Error> {
+        use winapi::{LR_LOADFROMFILE, LR_DEFAULTSIZE, LR_SHARED, IMAGE_BITMAP, IMAGE_CURSOR, IMAGE_ICON};
         use user32::LoadImageW;
+        use low::defs::OIC_HAND;
+        use low::other_helper::get_system_error;
 
         let filepath = to_utf16(self.source.clone().into().as_ref());
         let (width, height) = self.size;
-        let res_type = match self.image_type {
+        let mut res_type = self.image_type.clone();
+        let c_res_type = match self.image_type {
             ImageType::Bitmap => IMAGE_BITMAP,
             ImageType::Cursor => IMAGE_CURSOR,
             ImageType::Icon => IMAGE_ICON
         };
 
-        let handle = unsafe{ LoadImageW(ptr::null_mut(), filepath.as_ptr(), res_type, width, height, LR_LOADFROMFILE) };
+        let mut handle = unsafe{ LoadImageW(ptr::null_mut(), filepath.as_ptr(), c_res_type, width, height, LR_LOADFROMFILE) };
+        if handle.is_null() {
+            let (code, _) = unsafe{ get_system_error() } ;
+            if code == 2 && !self.strict {
+                // If the file was not found (err code: 2) and the loading is not strict, replace the image by the system error icon
+                let hand_resource = (OIC_HAND as usize) as *const u16;
+                handle = unsafe{ LoadImageW(ptr::null_mut(), hand_resource, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE|LR_SHARED) };
+                res_type = ImageType::Icon;
+            }
+        }
 
         if handle.is_null() {
             Err(Error::System(SystemError::ImageCreation))
         } else {
-            Ok( Box::new( Image{ handle: handle, image_type: self.image_type.clone() } ) )
+            Ok( Box::new( Image{ handle: handle, image_type: res_type } ) )
         }
 
     }

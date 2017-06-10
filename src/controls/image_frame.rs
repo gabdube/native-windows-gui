@@ -19,14 +19,14 @@
 */
 use std::hash::Hash;
 use std::any::TypeId;
-use std::marker::PhantomData;
 use std::ptr;
 
-use winapi::{HWND, HANDLE, WPARAM, IMAGE_BITMAP};
+use winapi::{HWND, HANDLE, WPARAM, IMAGE_BITMAP, IMAGE_ICON};
 use user32::SendMessageW;
 
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle, HandleSpec};
+use defs::ImageType;
 use error::Error;
 use events::{Event, Destroyed, Moved, Resized};
 use events::image_frame::{Click, DoubleClick};
@@ -56,7 +56,7 @@ pub struct ImageFrameT<ID: Hash+Clone> {
 }
 
 impl<ID: Hash+Clone+'static> ControlT<ID> for ImageFrameT<ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<ImageFrame<ID>>() }
+    fn type_id(&self) -> TypeId { TypeId::of::<ImageFrame>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Destroyed, Moved, Resized, Click, DoubleClick, Event::Any]
@@ -64,10 +64,10 @@ impl<ID: Hash+Clone+'static> ControlT<ID> for ImageFrameT<ID> {
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, handle_of_window};
-        use low::defs::{SS_NOTIFY, SS_BITMAP};
+        use low::defs::{SS_NOTIFY, SS_BITMAP, SS_CENTERIMAGE, SS_ICON};
         use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD};
 
-        let flags: DWORD = WS_CHILD | SS_NOTIFY |  SS_BITMAP | 
+        let mut flags: DWORD = WS_CHILD | SS_NOTIFY | 
         if self.visible    { WS_VISIBLE }   else { 0 } |
         if self.disabled   { WS_DISABLED }  else { 0 };
 
@@ -81,9 +81,10 @@ impl<ID: Hash+Clone+'static> ControlT<ID> for ImageFrameT<ID> {
         let image = if let &Some(ref img) = &self.image {
             match ui.handle_of(img) {
                 Ok(AnyHandle::HANDLE(h, spec)) => match spec {
-                    HandleSpec::Bitmap => h
+                    HandleSpec::Bitmap => { flags |= SS_CENTERIMAGE | SS_BITMAP; h}
                 },
-                Ok(h) => { return Err(Error::BadResource(format!("Image frame image must be a bitmap, got {:?}", h))); },
+                Ok(AnyHandle::HICON(h)) => { flags |= SS_CENTERIMAGE | SS_ICON; h as HANDLE }
+                Ok(h) => { return Err(Error::BadResource(format!("Image frame image must be a bitmap or icon, got {:?}", h))); },
                 Err(e) => { return Err(e); }
             }
         } else {
@@ -102,8 +103,14 @@ impl<ID: Hash+Clone+'static> ControlT<ID> for ImageFrameT<ID> {
 
         match unsafe{ build_window(params) } {
             Ok(h) => {
-                unsafe{ set_image(h, image); }
-                Ok( Box::new(ImageFrame::<ID>{handle: h, p: PhantomData}) )
+                let image_type = if flags & SS_ICON == SS_ICON {
+                    ImageType::Icon
+                } else {
+                    ImageType::Bitmap
+                };
+                
+                unsafe{ set_image(h, image, &image_type); }
+                Ok( Box::new(ImageFrame{handle: h, image_type: image_type}) )
             },
             Err(e) => Err(Error::System(e))
         }
@@ -112,14 +119,15 @@ impl<ID: Hash+Clone+'static> ControlT<ID> for ImageFrameT<ID> {
 
 
 /**
-    A frame that display a bitmap image loaded from a Image resource.
+    A frame that display a Image resource. Once created, the type of the image resource cannot be changed.  
+    For example: an ImageFrame that can display icons will not be able to display bitmaps
 */
-pub struct ImageFrame<ID: Hash+Clone> {
+pub struct ImageFrame {
     handle: HWND,
-    p: PhantomData<ID>
+    image_type: ImageType,
 }
 
-impl<ID: Hash+Clone> ImageFrame<ID> {
+impl ImageFrame {
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
     pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
     pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
@@ -129,9 +137,9 @@ impl<ID: Hash+Clone> ImageFrame<ID> {
     pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
     pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
 
-    /// Set the image of image frame  
+    /// Set the image of image frame. The new image resource must match the image type of the frame
     /// Pass `None` as an argument to remove the image.
-    pub fn set_image(&self, ui: &Ui<ID>, img: Option<&ID>) -> Result<(), Error> {
+    pub fn set_image<ID: Hash+Clone>(&self, ui: &Ui<ID>, img: Option<&ID>) -> Result<(), Error> {
         if !ui.has_handle(&self.handle()){
             return Err(Error::BadUi("Image resource and control must be in the same Ui.".to_string()));
         }
@@ -140,6 +148,7 @@ impl<ID: Hash+Clone> ImageFrame<ID> {
             match ui.handle_of(id) {
                 Ok(h) => match h {
                     AnyHandle::HANDLE(j, HandleSpec::Bitmap) => j,
+                    AnyHandle::HICON(h) => h as HANDLE,
                     h => { return Err(Error::BadResource(format!("An Image resource is required, got {:?}", h))) }
                 },
                 Err(e) => { return Err(e); }
@@ -149,30 +158,48 @@ impl<ID: Hash+Clone> ImageFrame<ID> {
         };
 
         unsafe{
-            set_image(self.handle, img_handle);
+            set_image(self.handle, img_handle, &self.image_type);
         }
 
         Ok(())
     }
 
     /// Return the resource identifier of the control image    
-    /// Return `None` if the control do not have an image. Will also return `None` if the UI is unrelated to the control.
-    pub fn get_image(&self, ui: &Ui<ID>) -> Option<ID> {
+    /// Return `None` if the control do not have an image. Will also return `None` if the UI passed as a parameter is unrelated to the control.
+    pub fn get_image<ID: Hash+Clone>(&self, ui: &Ui<ID>) -> Option<ID> {
         use low::defs::STM_GETIMAGE;
+        use winapi::HICON;
 
-        let image_handle = unsafe{ SendMessageW(self.handle, STM_GETIMAGE, IMAGE_BITMAP as WPARAM, 0) as HANDLE };
+        let w_type = match &self.image_type {
+            &ImageType::Bitmap => IMAGE_BITMAP,
+            &ImageType::Icon => IMAGE_ICON,
+            _ => unreachable!() // unimplemented
+        };
+
+        let image_handle = unsafe{ SendMessageW(self.handle, STM_GETIMAGE, w_type as WPARAM, 0) as HANDLE };
         if image_handle.is_null() {
             return None;
         }
 
-        match ui.id_from_handle(&AnyHandle::HANDLE(image_handle, HandleSpec::Bitmap)) {
+        let handle = match &self.image_type {
+            &ImageType::Bitmap => AnyHandle::HANDLE(image_handle, HandleSpec::Bitmap),
+            &ImageType::Icon => AnyHandle::HICON(image_handle as HICON),
+            _ => unreachable!() // unimplemented
+        };
+
+        match ui.id_from_handle(&handle) {
             Ok(id) => Some(id),
             Err(_) => None
         }
     }
+
+    /// Get the type of the image resource that the frame can display
+    pub fn get_image_type(&self) -> ImageType {
+        self.image_type.clone()
+    }
 }
 
-impl<ID: Hash+Clone> Control for ImageFrame<ID> {
+impl Control for ImageFrame {
 
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
@@ -192,9 +219,15 @@ impl<ID: Hash+Clone> Control for ImageFrame<ID> {
 /**
     Set the image of an image frame
 */
-unsafe fn set_image(hwnd: HWND, image: HANDLE) {
+unsafe fn set_image(hwnd: HWND, image: HANDLE, _type: &ImageType) {
     use winapi::LPARAM;
     use low::defs::STM_SETIMAGE;
 
-    SendMessageW(hwnd, STM_SETIMAGE, IMAGE_BITMAP as WPARAM, image as LPARAM);
+    let w_type = match _type {
+        &ImageType::Bitmap => IMAGE_BITMAP,
+        &ImageType::Icon => IMAGE_ICON,
+        _ => unreachable!() // unimplemented
+    };
+
+    SendMessageW(hwnd, STM_SETIMAGE, w_type as WPARAM, image as LPARAM);
 }

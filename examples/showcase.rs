@@ -99,7 +99,8 @@ nwg_template!(
         }),
 
         ("RustLogoFrame", "Logo", nwge::image_frame::Click, |app,_,_,_| {
-            let img = nwg_get!(app; ("RustLogoFrame", nwg::ImageFrame<&'static str>));
+            let img = nwg_get_mut!(app; ("RustLogoFrame", nwg::ImageFrame));
+
             if let Some("RustLogo") = img.get_image(app) {
                 img.set_image(app, Some(&"RustMascot")).unwrap();
             } else {

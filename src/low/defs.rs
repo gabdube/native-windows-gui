@@ -113,6 +113,9 @@ pub const SS_LEFT: UINT = 0;
 pub const SS_CENTER: UINT = 1;   
 pub const SS_NOPREFIX: UINT = 128;
 pub const SS_BITMAP: UINT = 14;
+pub const SS_CENTERIMAGE: UINT = 512;
+pub const SS_ICON: UINT = 3;
+pub const SS_REALSIZEIMAGE: UINT = 0x800;
 
 pub const STM_SETIMAGE: UINT = 370;
 pub const STM_GETIMAGE: UINT = 371;
@@ -165,6 +168,8 @@ pub const SFGAO_FOLDER: u32 = 0x20000000;
 
 pub const STATE_SYSTEM_CHECKED: u32 = 0x10;
 pub const STATE_SYSTEM_INVISIBLE: u32 = 0x8000;
+
+pub const OIC_HAND: u16 = 32513;
 
 // System structs
 #[repr(C)]

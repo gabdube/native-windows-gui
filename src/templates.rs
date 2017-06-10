@@ -824,6 +824,7 @@ macro_rules! nwg_image {
         let mut t = 
         $crate::ImageT{ 
             source: $s,
+            strict: false,
             image_type: $crate::constants::ImageType::Bitmap,
             size: (0, 0)
         };
