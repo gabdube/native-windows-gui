@@ -8,15 +8,28 @@ use nwg::{Event, Ui, fatal_message, dispatch_events};
 use std::thread;
 use std::time::Duration;
 
+#[derive(Debug, Clone, Hash)]
+pub enum MultiThreadingId {
+    // Controls
+    SleepWindow,
+    TestWindow,
+    SleepButton,
+
+    // Events
+    Sleep
+}
+
+use MultiThreadingId::*;
+
 nwg_template!(
-    head: setup_sleep_window<&'static str>,
+    head: setup_sleep_window<MultiThreadingId>,
     controls: [
-        ("Sleep", nwg_window!( title="Sleep"; size=(200, 200); position=(200, 200) )),
-        ("SleepButton", nwg_button!( parent="Sleep"; text="SLEEP"; size=(200, 200); position=(0, 0) ))
+        (SleepWindow, nwg_window!( title="Sleep"; size=(200, 200); position=(200, 200) )),
+        (SleepButton, nwg_button!( parent=SleepWindow; text="SLEEP"; size=(200, 200); position=(0, 0) ))
     ];
     events: [
-        ("SleepButton", "Sleep", Event::Click, |ui,_,_,_| {
-            let btn = nwg_get!(ui; ("SleepButton", nwg::Button));
+        (SleepButton, Sleep, Event::Click, |ui,_,_,_| {
+            let btn = nwg_get!(ui; (SleepButton, nwg::Button));
             btn.set_text("SLEEPING!");
             thread::sleep(Duration::from_millis(5000));
             btn.set_text("SLEEP");
@@ -27,9 +40,9 @@ nwg_template!(
 );
 
 nwg_template!(
-    head: setup_test_window<&'static str>,
+    head: setup_test_window<MultiThreadingId>,
     controls: [
-        ("Test", nwg_window!( title="Test"; size=(200, 200); position=(420, 200) ))
+        (TestWindow, nwg_window!( title="Test"; size=(200, 200); position=(420, 200) ))
     ];
     events: [];
     resources: [];
@@ -38,7 +51,7 @@ nwg_template!(
 
 fn main() {
     // Create the main window on the current thread
-    let app: Ui<&'static str>;
+    let app: Ui<MultiThreadingId>;
     match Ui::new() {
         Ok(_app) => { app = _app; },
         Err(e) => { fatal_message("Fatal Error", &format!("{:?}", e) ); }
@@ -50,7 +63,7 @@ fn main() {
 
     // Create another ui on a new thread
     let t = thread::spawn(||{
-        let app2: Ui<&'static str>;
+        let app2: Ui<MultiThreadingId>;
         match Ui::new() {
             Ok(_app2) => { app2 = _app2; },
             Err(e) => { fatal_message("Fatal Error", &format!("{:?}", e) ); }

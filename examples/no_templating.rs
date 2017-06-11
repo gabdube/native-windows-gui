@@ -7,7 +7,25 @@ extern crate native_windows_gui as nwg;
 
 use nwg::{Ui, Error, Event, simple_message, fatal_message, dispatch_events};
 
-pub fn setup_ui(ui: &Ui<&'static str>) -> Result<(), Error> {
+#[derive(Debug, Clone, Hash)]
+pub enum AppId {
+    // Controls
+    MainWindow,
+    NameInput, 
+    HelloButton,
+    Label(u8), 
+
+    // Events
+    SayHello,
+
+    // Resources
+    MainFont,
+    TextFont
+}
+
+use AppId::*; // Shortcut
+
+pub fn setup_ui(ui: &Ui<AppId>) -> Result<(), Error> {
 
     // nwg_font!(family="Arial"; size=27)
     let f1 = nwg::FontT {
@@ -37,7 +55,7 @@ pub fn setup_ui(ui: &Ui<&'static str>) -> Result<(), Error> {
         position: (5,15), size: (80, 25),
         visible: true, disabled: false,
         align: nwg::constants::HTextAlign::Left,
-        parent: "MainWindow", font: Some("TextFont")
+        parent: MainWindow, font: Some(TextFont)
     };
 
     // nwg_textinput!( parent="MainWindow"; [..] font=Some("TextFont") )
@@ -46,7 +64,7 @@ pub fn setup_ui(ui: &Ui<&'static str>) -> Result<(), Error> {
         position: (85,13), size: (185,22),
         visible: true, disabled: false, readonly: false, password: false,
         limit: 32_767, placeholder: None,
-        parent: "MainWindow", font: Some("TextFont")
+        parent: MainWindow, font: Some(TextFont)
     };
 
     // nwg_button!( parent="MainWindow"; [..] font=Some("MainFont") )
@@ -54,22 +72,22 @@ pub fn setup_ui(ui: &Ui<&'static str>) -> Result<(), Error> {
         text: "Hello World!",
         position: (5, 45), size: (270, 50),
         visible: true, disabled: false,
-        parent: "MainWindow", font: Some("MainFont")
+        parent: MainWindow, font: Some(MainFont)
     };
 
     // resources: 
-    ui.pack_resource(&"MainFont", f1);
-    ui.pack_resource(&"TextFont", f2);
+    ui.pack_resource(&MainFont, f1);
+    ui.pack_resource(&TextFont, f2);
 
     // controls:
-    ui.pack_control(&"MainWindow", window);
-    ui.pack_control(&"Label1", label);
-    ui.pack_control(&"YourName", tedit);
-    ui.pack_control(&"HelloButton", hellbtn);
+    ui.pack_control(&MainWindow, window);
+    ui.pack_control(&Label(0), label);
+    ui.pack_control(&NameInput, tedit);
+    ui.pack_control(&HelloButton, hellbtn);
 
     // events:
-    ui.bind(&"HelloButton", &"SaySomething", Event::Click, |ui,_,_,_| {
-        if let Ok(your_name) = ui.get::<nwg::TextInput>(&"YourName") {
+    ui.bind(&HelloButton, &SayHello, Event::Click, |ui,_,_,_| {
+        if let Ok(your_name) = ui.get::<nwg::TextInput>(&NameInput) {
             simple_message("Hello", &format!("Hello {}!", your_name.get_text()) );
         } else {
             panic!()
@@ -80,7 +98,7 @@ pub fn setup_ui(ui: &Ui<&'static str>) -> Result<(), Error> {
 }
 
 fn main() {
-    let app: Ui<&'static str>;
+    let app: Ui<AppId>;
 
     match Ui::new() {
         Ok(_app) => { app = _app; },

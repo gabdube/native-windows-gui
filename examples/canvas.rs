@@ -7,15 +7,32 @@
 use nwg::{Event, EventArgs, Ui, fatal_message, dispatch_events};
 use nwg::constants as nwgc;
 
+#[derive(Debug, Clone, Hash)]
+pub enum CanvasId {
+    // Controls
+    MainWindow,
+    Canvas,
+
+    // Event
+    Paint,
+    ResizeCanvas,
+
+    // Canvas resources
+    SolidBrush(u8),
+    DashedPen(u8)
+}
+
+use CanvasId::*;
+
 nwg_template!(
-    head: setup_ui<&'static str>,
+    head: setup_ui<CanvasId>,
     controls: [
-        ("MainWindow", nwg_window!( title="Canvas Example"; size=(500, 500); resizable=true )),
-        ("Canvas", nwg_canvas!( parent="MainWindow"; size=(500,500)))
+        (MainWindow, nwg_window!( title="Canvas Example"; size=(500, 500); resizable=true )),
+        (Canvas, nwg_canvas!( parent=MainWindow; size=(500,500)))
     ];
     events: [
-        ("Canvas", "Paint", Event::Paint, |app, _, _, _| {
-            let mut canvas = nwg_get_mut!(app; ("Canvas", nwg::Canvas<&'static str>));
+        (Canvas, Paint, Event::Paint, |app, _, _, _| {
+            let mut canvas = nwg_get_mut!(app; (Canvas, nwg::Canvas<CanvasId>));
 
             // Get the renderer and clear the last scene
             let mut renderer = canvas.renderer().unwrap();
@@ -32,17 +49,17 @@ nwg_template!(
             let e2 = nwgc::Ellipse{ center: (0.0, 0.0), radius: (190.0, 190.0) };
 
             // Draw the shapes
-            renderer.draw_ellipse(&"SolidBrush2", Some(&"DashedPen"), &e2, 6.0).unwrap();
-            renderer.draw_rectangle(&"SolidBrush3", None, &r3, 3.0).unwrap();
-            renderer.fill_rectangle(&"SolidBrush2", &r2).unwrap();
-            renderer.fill_rounded_rectangle(&"SolidBrush1", &r1, (15.0, 15.0)).unwrap();
-            renderer.fill_ellipse(&"SolidBrush3", &e1).unwrap();
+            renderer.draw_ellipse(&SolidBrush(1), Some(&DashedPen(0)), &e2, 6.0).unwrap();
+            renderer.draw_rectangle(&SolidBrush(2), None, &r3, 3.0).unwrap();
+            renderer.fill_rectangle(&SolidBrush(1), &r2).unwrap();
+            renderer.fill_rounded_rectangle(&SolidBrush(0), &r1, (15.0, 15.0)).unwrap();
+            renderer.fill_ellipse(&SolidBrush(2), &e1).unwrap();
         }),
 
-        ("MainWindow", "ResizeCanvas", Event::Resized, |app, _, _, args| {
+        (MainWindow, ResizeCanvas, Event::Resized, |app, _, _, args| {
             match args {
                 &EventArgs::Size(w, h) => {
-                    let mut canvas = nwg_get_mut!(app; ("Canvas", nwg::Canvas<&'static str>));
+                    let mut canvas = nwg_get_mut!(app; (Canvas, nwg::Canvas<CanvasId>));
                     canvas.set_size(w, h);
                     canvas.set_render_size(w, h);
                 },
@@ -54,8 +71,8 @@ nwg_template!(
     values: []
 );
 
-fn setup_canvas_resources(app: &Ui<&'static str>) {
-    let mut canvas = nwg_get_mut!(app; ("Canvas", nwg::Canvas<&'static str>));
+fn setup_canvas_resources(app: &Ui<CanvasId>) {
+    let mut canvas = nwg_get_mut!(app; (Canvas, nwg::Canvas<CanvasId>));
 
     let b1 = nwgc::SolidBrush{color:(0.0, 0.7, 1.0, 1.0)};
     let b2 = nwgc::SolidBrush{color:(0.0, 1.0, 0.5, 1.0)};
@@ -70,14 +87,14 @@ fn setup_canvas_resources(app: &Ui<&'static str>) {
         dash_offset: 5.0
     };
 
-    canvas.create_solid_brush(&"SolidBrush1", &b1).expect("Failed to create brush 1");
-    canvas.create_solid_brush(&"SolidBrush2", &b2).expect("Failed to create brush 2");
-    canvas.create_solid_brush(&"SolidBrush3", &b3).expect("Failed to create brush 3");
-    canvas.create_pen(&"DashedPen", &p1).expect("Failed to create pen");
+    canvas.create_solid_brush(&SolidBrush(0), &b1).expect("Failed to create brush 1");
+    canvas.create_solid_brush(&SolidBrush(1), &b2).expect("Failed to create brush 2");
+    canvas.create_solid_brush(&SolidBrush(2), &b3).expect("Failed to create brush 3");
+    canvas.create_pen(&DashedPen(0), &p1).expect("Failed to create pen");
 }
 
 fn main() {
-    let app: Ui<&'static str>;
+    let app: Ui<CanvasId>;
 
     match Ui::new() {
         Ok(_app) => { app = _app;  },
