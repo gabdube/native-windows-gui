@@ -20,8 +20,10 @@
 
 use std::any::TypeId;
 use std::hash::Hash;
+use std::ptr;
 
-use winapi::HWND;
+use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT, WM_SETICON, WM_GETICON, HICON};
+use user32::SendMessageW;
 
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
@@ -47,17 +49,18 @@ const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
       • `exit_on_close` : If NWG should break the event processing loop when this window is closed  
 */
 #[derive(Clone)]
-pub struct WindowT<S: Clone+Into<String>> {
+pub struct WindowT<ID: Hash+Clone, S: Clone+Into<String>> {
     pub title: S,
     pub position: (i32, i32),
     pub size: (u32, u32),
     pub resizable: bool,
     pub visible: bool,
     pub disabled: bool,
-    pub exit_on_close: bool
+    pub exit_on_close: bool,
+    pub icon: Option<ID>
 }
 
-impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
+impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<ID, S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
     fn events(&self) -> Vec<Event> {
@@ -67,9 +70,24 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
     #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         unsafe{
+            // Extract the icon handle
+            let icon = if let &Some(ref i) = &self.icon {
+                match ui.handle_of(i) {
+                    Ok(AnyHandle::HICON(h)) => h,
+                    Ok(h) =>  { return Err(Error::BadResource(format!("An icon resource is required, got {:?}", h))) },
+                    Err(e) => { return Err(e); }
+                }
+            } else {
+                ptr::null_mut()
+            };
+            
+            // Build the window handle
             if let Err(e) = build_sysclass() { return Err(e); }
             match build_window(&self) {
-                Ok(h) => { Ok( Box::new(Window{handle: h}) as Box<Control> ) },
+                Ok(h) => { 
+                    SendMessageW(h, WM_SETICON, 0, icon as LPARAM);
+                    Ok( Box::new(Window{handle: h}) as Box<Control> ) 
+                },
                 Err(e) => Err(e)
             }
         } // unsafe
@@ -101,6 +119,40 @@ impl Window {
         use user32::SetForegroundWindow;
         SetForegroundWindow(self.handle); 
     } }
+
+    /// Set the window icon. Pass `None` to remove the icon
+    pub fn set_icon<ID: Hash+Clone>(&self, ui: &Ui<ID>, icon: Option<&ID>) -> Result<(), Error> {
+        if !ui.has_handle(&self.handle()) {
+            return Err(Error::BadUi("Icon resource and control must be in the same Ui.".to_string()));
+        }
+
+        let icon = if let Some(id) = icon {
+            match ui.handle_of(id) {
+                Ok(AnyHandle::HICON(h)) => h,
+                Ok(h) => { return Err(Error::BadResource(format!("An icon resource is required, got {:?}", h))) },
+                Err(e) => { return Err(e); }
+            }
+        } else {
+            ptr::null_mut()
+        };
+
+        unsafe{ SendMessageW(self.handle, WM_SETICON, 0, icon as LPARAM); }
+
+        Ok(())
+    }
+
+    /// Return the window icon identifier in the UI or None if there are no icon set
+    pub fn get_icon<ID: Hash+Clone>(&self, ui: &Ui<ID>) -> Option<ID> {
+        let icon = unsafe{ SendMessageW(self.handle, WM_GETICON, 0, 0) as HICON };
+        if icon.is_null() {
+            return None;
+        }
+
+        match ui.id_from_handle(&AnyHandle::HICON(icon)) {
+            Ok(id) => Some(id),
+            Err(_) => None
+        }
+    }
 
     pub fn get_title(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
     pub fn set_title<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
@@ -135,8 +187,6 @@ impl Control for Window {
 /*
     Private unsafe control methods
 */
-
-use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 
 #[allow(unused_variables)]
 unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
@@ -182,7 +232,7 @@ unsafe fn build_sysclass() -> Result<(), Error> {
 }
 
 #[inline(always)]
-unsafe fn build_window<S: Clone+Into<String>>(t: &WindowT<S>) -> Result<HWND, Error> {
+unsafe fn build_window<ID: Hash+Clone, S: Clone+Into<String>>(t: &WindowT<ID, S>) -> Result<HWND, Error> {
     use low::window_helper::{WindowParams, build_window, set_window_long};
     use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_OVERLAPPED, WS_MINIMIZEBOX,
       WS_MAXIMIZEBOX, WS_SYSMENU, GWL_USERDATA, WS_CLIPCHILDREN};

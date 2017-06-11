@@ -878,6 +878,8 @@
 <span id="833">833</span>
 <span id="834">834</span>
 <span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Macro based template system.
@@ -1027,7 +1029,8 @@
     • resizable: `false`  
     • visible: `true`  
     • disabled: `false`  
-    • exit_on_close: `true`
+    • exit_on_close: `true`  
+    • icon: `None`  
 
     Usage:  
     `nwg_window!()`  
@@ -1042,7 +1045,7 @@
             <span class="ident">title</span>: <span class="string">&quot;Native Windows GUI&quot;</span>, 
             <span class="ident">position</span>: (<span class="number">100</span>, <span class="number">100</span>), <span class="ident">size</span>: (<span class="number">800</span>, <span class="number">600</span>), 
             <span class="ident">resizable</span>: <span class="bool-val">false</span>, <span class="ident">visible</span>: <span class="bool-val">true</span>, <span class="ident">disabled</span>: <span class="bool-val">false</span>, 
-            <span class="ident">exit_on_close</span>: <span class="bool-val">true</span>
+            <span class="ident">exit_on_close</span>: <span class="bool-val">true</span>, <span class="ident">icon</span>: <span class="prelude-val">None</span>
         };
         
         $( <span class="ident">t</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>; );<span class="op">*</span>
@@ -1693,7 +1696,7 @@
 
     Defaults:  
     • image_type: `ImageType::Bitmap`  
-    • size: `(0,0)`
+    • size: `(0,0)`  
 
     Usage:  
     `nwg_image!(source=&quot;test.bmp&quot;)`  
@@ -1705,6 +1708,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> 
         <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">ImageT</span>{ 
             <span class="ident">source</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>,
+            <span class="ident">strict</span>: <span class="bool-val">false</span>,
             <span class="ident">image_type</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">constants</span>::<span class="ident">ImageType</span>::<span class="ident">Bitmap</span>,
             <span class="ident">size</span>: (<span class="number">0</span>, <span class="number">0</span>)
         };

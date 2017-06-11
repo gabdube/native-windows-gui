@@ -146,7 +146,8 @@ pub fn $n(ui: &$crate::Ui<$t>) -> Result<(), $crate::Error> {
     • resizable: `false`  
     • visible: `true`  
     • disabled: `false`  
-    • exit_on_close: `true`
+    • exit_on_close: `true`  
+    • icon: `None`  
 
     Usage:  
     `nwg_window!()`  
@@ -161,7 +162,7 @@ macro_rules! nwg_window {
             title: "Native Windows GUI", 
             position: (100, 100), size: (800, 600), 
             resizable: false, visible: true, disabled: false, 
-            exit_on_close: true
+            exit_on_close: true, icon: None
         };
         
         $( t.$i = $v; );*
@@ -812,7 +813,7 @@ macro_rules! nwg_font {
 
     Defaults:  
     • image_type: `ImageType::Bitmap`  
-    • size: `(0,0)`
+    • size: `(0,0)`  
 
     Usage:  
     `nwg_image!(source="test.bmp")`  

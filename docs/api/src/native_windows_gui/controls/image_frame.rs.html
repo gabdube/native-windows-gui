@@ -243,6 +243,35 @@
 <span id="198">198</span>
 <span id="199">199</span>
 <span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     A frame that can display a Bitmap image
@@ -265,14 +294,14 @@
 */</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">TypeId</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
 
-<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HWND</span>, <span class="ident">HANDLE</span>, <span class="ident">WPARAM</span>, <span class="ident">IMAGE_BITMAP</span>};
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HWND</span>, <span class="ident">HANDLE</span>, <span class="ident">WPARAM</span>, <span class="ident">IMAGE_BITMAP</span>, <span class="ident">IMAGE_ICON</span>};
 <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">SendMessageW</span>;
 
 <span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
 <span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">Control</span>, <span class="ident">ControlT</span>, <span class="ident">ControlType</span>, <span class="ident">AnyHandle</span>, <span class="ident">HandleSpec</span>};
+<span class="kw">use</span> <span class="ident">defs</span>::<span class="ident">ImageType</span>;
 <span class="kw">use</span> <span class="ident">error</span>::<span class="ident">Error</span>;
 <span class="kw">use</span> <span class="ident">events</span>::{<span class="ident">Event</span>, <span class="ident">Destroyed</span>, <span class="ident">Moved</span>, <span class="ident">Resized</span>};
 <span class="kw">use</span> <span class="ident">events</span>::<span class="ident">image_frame</span>::{<span class="ident">Click</span>, <span class="ident">DoubleClick</span>};
@@ -302,7 +331,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">+</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ImageFrameT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">ImageFrame</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;&gt;</span>() }
+    <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">ImageFrame</span><span class="op">&gt;</span>() }
 
     <span class="kw">fn</span> <span class="ident">events</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
         <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Destroyed</span>, <span class="ident">Moved</span>, <span class="ident">Resized</span>, <span class="ident">Click</span>, <span class="ident">DoubleClick</span>, <span class="ident">Event</span>::<span class="ident">Any</span>]
@@ -310,10 +339,10 @@
 
     <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">window_helper</span>::{<span class="ident">WindowParams</span>, <span class="ident">build_window</span>, <span class="ident">handle_of_window</span>};
-        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">SS_NOTIFY</span>, <span class="ident">SS_BITMAP</span>};
+        <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::{<span class="ident">SS_NOTIFY</span>, <span class="ident">SS_BITMAP</span>, <span class="ident">SS_CENTERIMAGE</span>, <span class="ident">SS_ICON</span>};
         <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">DWORD</span>, <span class="ident">WS_VISIBLE</span>, <span class="ident">WS_DISABLED</span>, <span class="ident">WS_CHILD</span>};
 
-        <span class="kw">let</span> <span class="ident">flags</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">WS_CHILD</span> <span class="op">|</span> <span class="ident">SS_NOTIFY</span> <span class="op">|</span>  <span class="ident">SS_BITMAP</span> <span class="op">|</span> 
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flags</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">WS_CHILD</span> <span class="op">|</span> <span class="ident">SS_NOTIFY</span> <span class="op">|</span> 
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">visible</span>    { <span class="ident">WS_VISIBLE</span> }   <span class="kw">else</span> { <span class="number">0</span> } <span class="op">|</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">disabled</span>   { <span class="ident">WS_DISABLED</span> }  <span class="kw">else</span> { <span class="number">0</span> };
 
@@ -326,10 +355,9 @@
         <span class="comment">// Get the image handle</span>
         <span class="kw">let</span> <span class="ident">image</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">img</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">image</span> {
             <span class="kw">match</span> <span class="ident">ui</span>.<span class="ident">handle_of</span>(<span class="ident">img</span>) {
-                <span class="prelude-val">Ok</span>(<span class="ident">AnyHandle</span>::<span class="ident">HANDLE</span>(<span class="ident">h</span>, <span class="ident">spec</span>)) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="ident">spec</span> {
-                    <span class="ident">HandleSpec</span>::<span class="ident">Bitmap</span> <span class="op">=&gt;</span> <span class="ident">h</span>
-                },
-                <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadResource</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Image frame image must be a bitmap, got {:?}&quot;</span>, <span class="ident">h</span>))); },
+                <span class="prelude-val">Ok</span>(<span class="ident">AnyHandle</span>::<span class="ident">HANDLE</span>(<span class="ident">h</span>, <span class="ident">HandleSpec</span>::<span class="ident">Bitmap</span>)) <span class="op">=&gt;</span>  { <span class="ident">flags</span> <span class="op">|=</span> <span class="ident">SS_CENTERIMAGE</span> <span class="op">|</span> <span class="ident">SS_BITMAP</span>; <span class="ident">h</span>},
+                <span class="prelude-val">Ok</span>(<span class="ident">AnyHandle</span>::<span class="ident">HICON</span>(<span class="ident">h</span>)) <span class="op">=&gt;</span> { <span class="ident">flags</span> <span class="op">|=</span> <span class="ident">SS_CENTERIMAGE</span> <span class="op">|</span> <span class="ident">SS_ICON</span>; <span class="ident">h</span> <span class="kw">as</span> <span class="ident">HANDLE</span> }
+                <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadResource</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Image frame image must be a bitmap or icon, got {:?}&quot;</span>, <span class="ident">h</span>))); },
                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
             }
         } <span class="kw">else</span> {
@@ -348,8 +376,14 @@
 
         <span class="kw">match</span> <span class="kw">unsafe</span>{ <span class="ident">build_window</span>(<span class="ident">params</span>) } {
             <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> {
-                <span class="kw">unsafe</span>{ <span class="ident">set_image</span>(<span class="ident">h</span>, <span class="ident">image</span>); }
-                <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">ImageFrame</span>::<span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>{<span class="ident">handle</span>: <span class="ident">h</span>, <span class="ident">p</span>: <span class="ident">PhantomData</span>}) )
+                <span class="kw">let</span> <span class="ident">image_type</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">flags</span> <span class="op">&amp;</span> <span class="ident">SS_ICON</span> <span class="op">==</span> <span class="ident">SS_ICON</span> {
+                    <span class="ident">ImageType</span>::<span class="ident">Icon</span>
+                } <span class="kw">else</span> {
+                    <span class="ident">ImageType</span>::<span class="ident">Bitmap</span>
+                };
+                
+                <span class="kw">unsafe</span>{ <span class="ident">set_image</span>(<span class="ident">h</span>, <span class="ident">image</span>, <span class="kw-2">&amp;</span><span class="ident">image_type</span>); }
+                <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">ImageFrame</span>{<span class="ident">handle</span>: <span class="ident">h</span>, <span class="ident">image_type</span>: <span class="ident">image_type</span>}) )
             },
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">System</span>(<span class="ident">e</span>))
         }
@@ -358,14 +392,15 @@
 
 
 <span class="doccomment">/**
-    A frame that display a bitmap image loaded from a Image resource.
+    A frame that display a Image resource. Once created, the type of the image resource cannot be changed.  
+    For example: an ImageFrame that can display icons will not be able to display bitmaps
 */</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ImageFrame</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ImageFrame</span> {
     <span class="ident">handle</span>: <span class="ident">HWND</span>,
-    <span class="ident">p</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>
+    <span class="ident">image_type</span>: <span class="ident">ImageType</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">ImageFrame</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">ImageFrame</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_visibility</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_visibility</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_visibility</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">visible</span>: <span class="ident">bool</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_visibility</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">visible</span>); }}
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> (<span class="ident">i32</span>, <span class="ident">i32</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_position</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
@@ -375,19 +410,18 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_enabled</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">e</span>:<span class="ident">bool</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_enabled</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">e</span>); } }
 
-    <span class="doccomment">/// Set the image of image frame  </span>
+    <span class="doccomment">/// Set the image of image frame. The new image resource must match the image type of the frame</span>
     <span class="doccomment">/// Pass `None` as an argument to remove the image.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_image</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">img</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">ui</span>.<span class="ident">has_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handle</span>()){
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_image</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">img</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">ui</span>.<span class="ident">has_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handle</span>()) {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadUi</span>(<span class="string">&quot;Image resource and control must be in the same Ui.&quot;</span>.<span class="ident">to_string</span>()));
         }
 
         <span class="kw">let</span> <span class="ident">img_handle</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span> <span class="ident">img</span> {
             <span class="kw">match</span> <span class="ident">ui</span>.<span class="ident">handle_of</span>(<span class="ident">id</span>) {
-                <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="ident">h</span> {
-                    <span class="ident">AnyHandle</span>::<span class="ident">HANDLE</span>(<span class="ident">j</span>, <span class="ident">HandleSpec</span>::<span class="ident">Bitmap</span>) <span class="op">=&gt;</span> <span class="ident">j</span>,
-                    <span class="ident">h</span> <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadResource</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;An Image resource is required, got {:?}&quot;</span>, <span class="ident">h</span>))) }
-                },
+                <span class="prelude-val">Ok</span>(<span class="ident">AnyHandle</span>::<span class="ident">HANDLE</span>(<span class="ident">h</span>, <span class="ident">HandleSpec</span>::<span class="ident">Bitmap</span>)) <span class="op">=&gt;</span> <span class="ident">h</span>,
+                <span class="prelude-val">Ok</span>(<span class="ident">AnyHandle</span>::<span class="ident">HICON</span>(<span class="ident">h</span>)) <span class="op">=&gt;</span> <span class="ident">h</span> <span class="kw">as</span> <span class="ident">HANDLE</span>,
+                <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadResource</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;An Image resource is required, got {:?}&quot;</span>, <span class="ident">h</span>))) },
                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
             }
         } <span class="kw">else</span> {
@@ -395,30 +429,48 @@
         };
 
         <span class="kw">unsafe</span>{
-            <span class="ident">set_image</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">img_handle</span>);
+            <span class="ident">set_image</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">img_handle</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">image_type</span>);
         }
 
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Return the resource identifier of the control image    </span>
-    <span class="doccomment">/// Return `None` if the control do not have an image. Will also return `None` if the UI is unrelated to the control.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_image</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Return `None` if the control do not have an image. Will also return `None` if the UI passed as a parameter is unrelated to the control.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_image</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">STM_GETIMAGE</span>;
+        <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">HICON</span>;
 
-        <span class="kw">let</span> <span class="ident">image_handle</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">STM_GETIMAGE</span>, <span class="ident">IMAGE_BITMAP</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>) <span class="kw">as</span> <span class="ident">HANDLE</span> };
+        <span class="kw">let</span> <span class="ident">w_type</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">image_type</span> {
+            <span class="kw-2">&amp;</span><span class="ident">ImageType</span>::<span class="ident">Bitmap</span> <span class="op">=&gt;</span> <span class="ident">IMAGE_BITMAP</span>,
+            <span class="kw-2">&amp;</span><span class="ident">ImageType</span>::<span class="ident">Icon</span> <span class="op">=&gt;</span> <span class="ident">IMAGE_ICON</span>,
+            _ <span class="op">=&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>() <span class="comment">// unimplemented</span>
+        };
+
+        <span class="kw">let</span> <span class="ident">image_handle</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">STM_GETIMAGE</span>, <span class="ident">w_type</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="number">0</span>) <span class="kw">as</span> <span class="ident">HANDLE</span> };
         <span class="kw">if</span> <span class="ident">image_handle</span>.<span class="ident">is_null</span>() {
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
 
-        <span class="kw">match</span> <span class="ident">ui</span>.<span class="ident">id_from_handle</span>(<span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HANDLE</span>(<span class="ident">image_handle</span>, <span class="ident">HandleSpec</span>::<span class="ident">Bitmap</span>)) {
+        <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">image_type</span> {
+            <span class="kw-2">&amp;</span><span class="ident">ImageType</span>::<span class="ident">Bitmap</span> <span class="op">=&gt;</span> <span class="ident">AnyHandle</span>::<span class="ident">HANDLE</span>(<span class="ident">image_handle</span>, <span class="ident">HandleSpec</span>::<span class="ident">Bitmap</span>),
+            <span class="kw-2">&amp;</span><span class="ident">ImageType</span>::<span class="ident">Icon</span> <span class="op">=&gt;</span> <span class="ident">AnyHandle</span>::<span class="ident">HICON</span>(<span class="ident">image_handle</span> <span class="kw">as</span> <span class="ident">HICON</span>),
+            _ <span class="op">=&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>() <span class="comment">// unimplemented</span>
+        };
+
+        <span class="kw">match</span> <span class="ident">ui</span>.<span class="ident">id_from_handle</span>(<span class="kw-2">&amp;</span><span class="ident">handle</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">id</span>) <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>),
             <span class="prelude-val">Err</span>(_) <span class="op">=&gt;</span> <span class="prelude-val">None</span>
         }
     }
+
+    <span class="doccomment">/// Get the type of the image resource that the frame can display</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_image_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">ImageType</span> {
+        <span class="self">self</span>.<span class="ident">image_type</span>.<span class="ident">clone</span>()
+    }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Control</span> <span class="kw">for</span> <span class="ident">ImageFrame</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">Control</span> <span class="kw">for</span> <span class="ident">ImageFrame</span> {
 
     <span class="kw">fn</span> <span class="ident">handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">AnyHandle</span> {
         <span class="ident">AnyHandle</span>::<span class="ident">HWND</span>(<span class="self">self</span>.<span class="ident">handle</span>)
@@ -438,11 +490,17 @@
 <span class="doccomment">/**
     Set the image of an image frame
 */</span>
-<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_image</span>(<span class="ident">hwnd</span>: <span class="ident">HWND</span>, <span class="ident">image</span>: <span class="ident">HANDLE</span>) {
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_image</span>(<span class="ident">hwnd</span>: <span class="ident">HWND</span>, <span class="ident">image</span>: <span class="ident">HANDLE</span>, <span class="ident">_type</span>: <span class="kw-2">&amp;</span><span class="ident">ImageType</span>) {
     <span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">LPARAM</span>;
     <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">defs</span>::<span class="ident">STM_SETIMAGE</span>;
 
-    <span class="ident">SendMessageW</span>(<span class="ident">hwnd</span>, <span class="ident">STM_SETIMAGE</span>, <span class="ident">IMAGE_BITMAP</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="ident">image</span> <span class="kw">as</span> <span class="ident">LPARAM</span>);
+    <span class="kw">let</span> <span class="ident">w_type</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">_type</span> {
+        <span class="kw-2">&amp;</span><span class="ident">ImageType</span>::<span class="ident">Bitmap</span> <span class="op">=&gt;</span> <span class="ident">IMAGE_BITMAP</span>,
+        <span class="kw-2">&amp;</span><span class="ident">ImageType</span>::<span class="ident">Icon</span> <span class="op">=&gt;</span> <span class="ident">IMAGE_ICON</span>,
+        _ <span class="op">=&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>() <span class="comment">// unimplemented</span>
+    };
+
+    <span class="ident">SendMessageW</span>(<span class="ident">hwnd</span>, <span class="ident">STM_SETIMAGE</span>, <span class="ident">w_type</span> <span class="kw">as</span> <span class="ident">WPARAM</span>, <span class="ident">image</span> <span class="kw">as</span> <span class="ident">LPARAM</span>);
 }</pre>
 </section>
     <section id='search' class="content hidden"></section>

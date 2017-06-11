@@ -11,7 +11,7 @@ use nwg::events as nwge;
 nwg_template!(
     head: setup_ui<&'static str>,
     controls: [
-        ("MainWindow", nwg_window!(title="Nwg Showcase"; position=(100, 100); size=(500, 400))),
+        ("MainWindow", nwg_window!(title="Nwg Showcase"; position=(100, 100); size=(500, 400); icon=Some("RustLogoIcon"))),
         ("FileMenu", nwg_menu!(parent="MainWindow"; text="&File")),
         ("TestSubmenu1", nwg_menu!(parent="FileMenu"; text="&Submenu")),
         ("TestDisabledSubmenu", nwg_menu!(parent="FileMenu"; text="Disabled Submenu"; disabled=true)),
@@ -99,8 +99,8 @@ nwg_template!(
         }),
 
         ("RustLogoFrame", "Logo", nwge::image_frame::Click, |app,_,_,_| {
-            let img = nwg_get_mut!(app; ("RustLogoFrame", nwg::ImageFrame));
-
+            let img = nwg_get!(app; ("RustLogoFrame", nwg::ImageFrame));
+            
             if let Some("RustLogo") = img.get_image(app) {
                 img.set_image(app, Some(&"RustMascot")).unwrap();
             } else {
@@ -112,7 +112,8 @@ nwg_template!(
         ("Font1", nwg_font!(family="Calibri"; size=20 )),
         ("Font2", nwg_font!(family="Arial"; size=17; weight=FONT_WEIGHT_BLACK; decoration=FONT_DECO_ITALIC)),
         ("RustLogo", nwg_image!(source="img\\rust-logo.bmp"; image_type=ImageType::Bitmap)), // Make sure to use '\\' and not '/'
-        ("RustMascot", nwg_image!(source="img\\rust-mascot.bmp"; image_type=ImageType::Bitmap; size=(100, 100))) // Make sure to use '\\' and not '/'
+        ("RustMascot", nwg_image!(source="img\\rust-mascot.bmp"; image_type=ImageType::Bitmap; size=(100, 100))), // Make sure to use '\\' and not '/'
+        ("RustLogoIcon", nwg_image!(source="img\\rust-logo.ico"; image_type=ImageType::Icon))
     ];
     values: []
 );

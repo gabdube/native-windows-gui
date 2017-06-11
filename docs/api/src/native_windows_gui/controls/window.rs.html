@@ -256,6 +256,56 @@
 <span id="211">211</span>
 <span id="212">212</span>
 <span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
 </pre><pre class="rust ">
 <span class="doccomment">/*!
     Window control definition
@@ -279,8 +329,10 @@
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">TypeId</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::<span class="ident">Hash</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
 
-<span class="kw">use</span> <span class="ident">winapi</span>::<span class="ident">HWND</span>;
+<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">HWND</span>, <span class="ident">UINT</span>, <span class="ident">WPARAM</span>, <span class="ident">LPARAM</span>, <span class="ident">LRESULT</span>, <span class="ident">WM_SETICON</span>, <span class="ident">WM_GETICON</span>, <span class="ident">HICON</span>};
+<span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">SendMessageW</span>;
 
 <span class="kw">use</span> <span class="ident">ui</span>::<span class="ident">Ui</span>;
 <span class="kw">use</span> <span class="ident">controls</span>::{<span class="ident">Control</span>, <span class="ident">ControlT</span>, <span class="ident">ControlType</span>, <span class="ident">AnyHandle</span>};
@@ -306,17 +358,18 @@
       • `exit_on_close` : If NWG should break the event processing loop when this window is closed  
 */</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WindowT</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WindowT</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span>, <span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> {
     <span class="kw">pub</span> <span class="ident">title</span>: <span class="ident">S</span>,
     <span class="kw">pub</span> <span class="ident">position</span>: (<span class="ident">i32</span>, <span class="ident">i32</span>),
     <span class="kw">pub</span> <span class="ident">size</span>: (<span class="ident">u32</span>, <span class="ident">u32</span>),
     <span class="kw">pub</span> <span class="ident">resizable</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">visible</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">disabled</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">exit_on_close</span>: <span class="ident">bool</span>
+    <span class="kw">pub</span> <span class="ident">exit_on_close</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">icon</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WindowT</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">ControlT</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WindowT</span><span class="op">&lt;</span><span class="ident">ID</span>, <span class="ident">S</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">type_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">TypeId</span> { <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">Window</span><span class="op">&gt;</span>() }
 
     <span class="kw">fn</span> <span class="ident">events</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
@@ -326,9 +379,24 @@
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
     <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span>{
+            <span class="comment">// Extract the icon handle</span>
+            <span class="kw">let</span> <span class="ident">icon</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">i</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">icon</span> {
+                <span class="kw">match</span> <span class="ident">ui</span>.<span class="ident">handle_of</span>(<span class="ident">i</span>) {
+                    <span class="prelude-val">Ok</span>(<span class="ident">AnyHandle</span>::<span class="ident">HICON</span>(<span class="ident">h</span>)) <span class="op">=&gt;</span> <span class="ident">h</span>,
+                    <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span>  { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadResource</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;An icon resource is required, got {:?}&quot;</span>, <span class="ident">h</span>))) },
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
+                }
+            } <span class="kw">else</span> {
+                <span class="ident">ptr</span>::<span class="ident">null_mut</span>()
+            };
+            
+            <span class="comment">// Build the window handle</span>
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">build_sysclass</span>() { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
             <span class="kw">match</span> <span class="ident">build_window</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-                <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> { <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Window</span>{<span class="ident">handle</span>: <span class="ident">h</span>}) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span> ) },
+                <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> { 
+                    <span class="ident">SendMessageW</span>(<span class="ident">h</span>, <span class="ident">WM_SETICON</span>, <span class="number">0</span>, <span class="ident">icon</span> <span class="kw">as</span> <span class="ident">LPARAM</span>);
+                    <span class="prelude-val">Ok</span>( <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">Window</span>{<span class="ident">handle</span>: <span class="ident">h</span>}) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Control</span><span class="op">&gt;</span> ) 
+                },
                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>)
             }
         } <span class="comment">// unsafe</span>
@@ -360,6 +428,40 @@
         <span class="kw">use</span> <span class="ident">user32</span>::<span class="ident">SetForegroundWindow</span>;
         <span class="ident">SetForegroundWindow</span>(<span class="self">self</span>.<span class="ident">handle</span>); 
     } }
+
+    <span class="doccomment">/// Set the window icon. Pass `None` to remove the icon</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_icon</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>, <span class="ident">icon</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">ui</span>.<span class="ident">has_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handle</span>()) {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadUi</span>(<span class="string">&quot;Icon resource and control must be in the same Ui.&quot;</span>.<span class="ident">to_string</span>()));
+        }
+
+        <span class="kw">let</span> <span class="ident">icon</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span> <span class="ident">icon</span> {
+            <span class="kw">match</span> <span class="ident">ui</span>.<span class="ident">handle_of</span>(<span class="ident">id</span>) {
+                <span class="prelude-val">Ok</span>(<span class="ident">AnyHandle</span>::<span class="ident">HICON</span>(<span class="ident">h</span>)) <span class="op">=&gt;</span> <span class="ident">h</span>,
+                <span class="prelude-val">Ok</span>(<span class="ident">h</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">BadResource</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;An icon resource is required, got {:?}&quot;</span>, <span class="ident">h</span>))) },
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>); }
+            }
+        } <span class="kw">else</span> {
+            <span class="ident">ptr</span>::<span class="ident">null_mut</span>()
+        };
+
+        <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">WM_SETICON</span>, <span class="number">0</span>, <span class="ident">icon</span> <span class="kw">as</span> <span class="ident">LPARAM</span>); }
+
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Return the window icon identifier in the UI or None if there are no icon set</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_icon</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ui</span>: <span class="kw-2">&amp;</span><span class="ident">Ui</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ID</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">icon</span> <span class="op">=</span> <span class="kw">unsafe</span>{ <span class="ident">SendMessageW</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">WM_GETICON</span>, <span class="number">0</span>, <span class="number">0</span>) <span class="kw">as</span> <span class="ident">HICON</span> };
+        <span class="kw">if</span> <span class="ident">icon</span>.<span class="ident">is_null</span>() {
+            <span class="kw">return</span> <span class="prelude-val">None</span>;
+        }
+
+        <span class="kw">match</span> <span class="ident">ui</span>.<span class="ident">id_from_handle</span>(<span class="kw-2">&amp;</span><span class="ident">AnyHandle</span>::<span class="ident">HICON</span>(<span class="ident">icon</span>)) {
+            <span class="prelude-val">Ok</span>(<span class="ident">id</span>) <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>),
+            <span class="prelude-val">Err</span>(_) <span class="op">=&gt;</span> <span class="prelude-val">None</span>
+        }
+    }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_title</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">String</span> { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">get_window_text</span>(<span class="self">self</span>.<span class="ident">handle</span>) } }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_title</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">text</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) { <span class="kw">unsafe</span>{ ::<span class="ident">low</span>::<span class="ident">window_helper</span>::<span class="ident">set_window_text</span>(<span class="self">self</span>.<span class="ident">handle</span>, <span class="ident">text</span>); } }
@@ -394,8 +496,6 @@
 <span class="comment">/*
     Private unsafe control methods
 */</span>
-
-<span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">UINT</span>, <span class="ident">WPARAM</span>, <span class="ident">LPARAM</span>, <span class="ident">LRESULT</span>};
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
 <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;system&quot;</span> <span class="kw">fn</span> <span class="ident">window_sysproc</span>(<span class="ident">hwnd</span>: <span class="ident">HWND</span>, <span class="ident">msg</span>: <span class="ident">UINT</span>, <span class="ident">w</span>: <span class="ident">WPARAM</span>, <span class="ident">l</span>: <span class="ident">LPARAM</span>) <span class="op">-&gt;</span> <span class="ident">LRESULT</span> {
@@ -441,7 +541,7 @@
 }
 
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">build_window</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">WindowT</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HWND</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">build_window</span><span class="op">&lt;</span><span class="ident">ID</span>: <span class="ident">Hash</span><span class="op">+</span><span class="ident">Clone</span>, <span class="ident">S</span>: <span class="ident">Clone</span><span class="op">+</span><span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">WindowT</span><span class="op">&lt;</span><span class="ident">ID</span>, <span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HWND</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">use</span> <span class="ident">low</span>::<span class="ident">window_helper</span>::{<span class="ident">WindowParams</span>, <span class="ident">build_window</span>, <span class="ident">set_window_long</span>};
     <span class="kw">use</span> <span class="ident">winapi</span>::{<span class="ident">DWORD</span>, <span class="ident">WS_VISIBLE</span>, <span class="ident">WS_DISABLED</span>, <span class="ident">WS_OVERLAPPEDWINDOW</span>, <span class="ident">WS_CAPTION</span>, <span class="ident">WS_OVERLAPPED</span>, <span class="ident">WS_MINIMIZEBOX</span>,
       <span class="ident">WS_MAXIMIZEBOX</span>, <span class="ident">WS_SYSMENU</span>, <span class="ident">GWL_USERDATA</span>, <span class="ident">WS_CLIPCHILDREN</span>};

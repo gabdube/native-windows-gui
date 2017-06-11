@@ -80,9 +80,7 @@ impl<ID: Hash+Clone+'static> ControlT<ID> for ImageFrameT<ID> {
         // Get the image handle
         let image = if let &Some(ref img) = &self.image {
             match ui.handle_of(img) {
-                Ok(AnyHandle::HANDLE(h, spec)) => match spec {
-                    HandleSpec::Bitmap => { flags |= SS_CENTERIMAGE | SS_BITMAP; h}
-                },
+                Ok(AnyHandle::HANDLE(h, HandleSpec::Bitmap)) =>  { flags |= SS_CENTERIMAGE | SS_BITMAP; h},
                 Ok(AnyHandle::HICON(h)) => { flags |= SS_CENTERIMAGE | SS_ICON; h as HANDLE }
                 Ok(h) => { return Err(Error::BadResource(format!("Image frame image must be a bitmap or icon, got {:?}", h))); },
                 Err(e) => { return Err(e); }
@@ -140,17 +138,15 @@ impl ImageFrame {
     /// Set the image of image frame. The new image resource must match the image type of the frame
     /// Pass `None` as an argument to remove the image.
     pub fn set_image<ID: Hash+Clone>(&self, ui: &Ui<ID>, img: Option<&ID>) -> Result<(), Error> {
-        if !ui.has_handle(&self.handle()){
+        if !ui.has_handle(&self.handle()) {
             return Err(Error::BadUi("Image resource and control must be in the same Ui.".to_string()));
         }
 
         let img_handle = if let Some(id) = img {
             match ui.handle_of(id) {
-                Ok(h) => match h {
-                    AnyHandle::HANDLE(j, HandleSpec::Bitmap) => j,
-                    AnyHandle::HICON(h) => h as HANDLE,
-                    h => { return Err(Error::BadResource(format!("An Image resource is required, got {:?}", h))) }
-                },
+                Ok(AnyHandle::HANDLE(h, HandleSpec::Bitmap)) => h,
+                Ok(AnyHandle::HICON(h)) => h as HANDLE,
+                Ok(h) => { return Err(Error::BadResource(format!("An Image resource is required, got {:?}", h))) },
                 Err(e) => { return Err(e); }
             }
         } else {
