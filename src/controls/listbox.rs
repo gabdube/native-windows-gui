@@ -71,7 +71,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
+        use low::window_helper::{WindowParams, build_window, set_window_font_raw, handle_of_window, handle_of_font};
         use low::defs::{LB_ADDSTRING, LBS_HASSTRINGS, LBS_MULTIPLESEL, LBS_NOSEL, LBS_NOTIFY};
         use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER, WS_VSCROLL, WS_HSCROLL};
         use user32::SendMessageW;
@@ -112,7 +112,7 @@ impl<D: Clone+Display+'static, ID: Hash+Clone> ControlT<ID> for ListBoxT<D, ID> 
             Ok(h) => {
                 unsafe{
                     // Set font 
-                    set_window_font(h, font_handle, true); 
+                    set_window_font_raw(h, font_handle, true); 
 
                     // Init collection
                     let collection: Vec<D> = self.collection.iter().map(
@@ -372,6 +372,8 @@ impl<D: Clone+Display> ListBox<D> {
     pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, true); } }
     pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
     pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+    pub fn get_font<ID: Hash+Clone>(&self, ui: &Ui<ID>) -> Option<ID> { unsafe{ ::low::window_helper::get_window_font(self.handle, ui) } }
+    pub fn set_font<ID: Hash+Clone>(&self, ui: &Ui<ID>, f: Option<&ID>) -> Result<(), Error> { unsafe{ ::low::window_helper::set_window_font(self.handle, ui, f) } }
 }
 
 impl<D: Clone+Display> Control for ListBox<D> {

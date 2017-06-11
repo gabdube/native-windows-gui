@@ -63,7 +63,7 @@ impl<ID: Hash+Clone> ControlT<ID> for NumericInputT<ID> {
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        use low::window_helper::{set_window_font, handle_of_window, handle_of_font};
+        use low::window_helper::{set_window_font_raw, handle_of_window, handle_of_font};
 
         return Err(Error::Unimplemented);
 
@@ -97,7 +97,7 @@ impl<ID: Hash+Clone> ControlT<ID> for NumericInputT<ID> {
 
         unsafe{ 
             hook(edit_handle);
-            set_window_font(edit_handle, font_handle, true); 
+            set_window_font_raw(edit_handle, font_handle, true); 
         }
 
         Ok(Box::new(

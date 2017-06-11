@@ -29,7 +29,7 @@ pub fn setup_ui(ui: &Ui<&'static str>) -> Result<(), Error> {
         title: "No template",
         position: (100, 100), size: (280, 105),
         resizable: false, visible: true, disabled: false,
-        exit_on_close: true
+        exit_on_close: true, icon: None
     };
 
     // nwg_label!( parent="MainWindow"; [...] font=Some("TextFont") )

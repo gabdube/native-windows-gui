@@ -5,13 +5,15 @@ extern crate winapi;
 
 extern crate native_windows_gui as nwg;
 
+use std::hash::Hash;
+
 use nwg::*;
 use nwg::constants::*;
 use nwg::events::*;
 use nwg::events as nwge;
 
 fn setup_ui() -> Ui<u64> { Ui::new().unwrap() }
-fn window() -> WindowT<&'static str> {  WindowT{title: "", position:(-600,-600), size:(100, 100), resizable:true, visible:true, disabled:false, exit_on_close:true} }
+fn window<T: Hash+Clone>() -> WindowT<T, &'static str> {  WindowT{title: "", position:(-600,-600), size:(100, 100), resizable:true, visible:true, disabled:false, exit_on_close:true, icon: None} }
 fn default_font() -> FontT<&'static str> { FontT{ family: "Arial", size: 10, weight: FONT_WEIGHT_BOLD, decoration: FONT_DECO_ITALIC|FONT_DECO_STRIKEOUT } }
 
 macro_rules! test_visibility {

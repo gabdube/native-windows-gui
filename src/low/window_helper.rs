@@ -23,6 +23,7 @@ use std::mem;
 use std::hash::Hash;
 
 use winapi::{HWND, HFONT, HBRUSH, WNDPROC, DWORD, LPARAM, BOOL, c_int};
+use user32::SendMessageW;
 
 use ui::{UiInner, Ui};
 use controls::{AnyHandle};
@@ -236,13 +237,51 @@ pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInne
 }
 
 /// Set the font of a window
-pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: bool) {
-    use user32::SendMessageW;
+pub unsafe fn set_window_font_raw(handle: HWND, font_handle: Option<HFONT>, redraw: bool) {
     use winapi::{WM_SETFONT, LPARAM};
 
     let font_handle = font_handle.unwrap_or(ptr::null_mut());
 
     SendMessageW(handle, WM_SETFONT, mem::transmute(font_handle), redraw as LPARAM);
+}
+
+/// Set the font of a window for a HWND based control  
+/// Send `None` to remove the font from the control.
+#[inline(always)]
+pub unsafe fn set_window_font<ID: Hash+Clone>(handle: HWND, ui: &Ui<ID>, f: Option<&ID>) -> Result<(), Error> {
+    use winapi::{WM_SETFONT, LPARAM, WPARAM};
+
+    if !ui.has_handle(&AnyHandle::HWND(handle)) {
+        return Err(Error::BadUi("Font resource and control must be in the same Ui.".to_string()));
+    }
+
+    let font = if let Some(id) = f {
+        match ui.handle_of(id) {
+            Ok(AnyHandle::HFONT(h)) => h,
+            Ok(h) => { return Err(Error::BadResource(format!("An font resource is required, got {:?}", h))) },
+            Err(e) => { return Err(e); }
+        }
+    } else {
+        ptr::null_mut()
+    };
+
+    SendMessageW(handle, WM_SETFONT, font as WPARAM, 1);
+
+    Ok(())
+}
+
+/// Return the identifier of a window font
+#[inline(always)]
+pub unsafe fn get_window_font<ID: Hash+Clone>(handle: HWND, ui: &Ui<ID>) -> Option<ID> {
+    use winapi::WM_GETFONT;
+
+    let font = SendMessageW(handle, WM_GETFONT, 0, 0) as HFONT;
+    if font.is_null() { return None; }
+
+    match ui.id_from_handle(&AnyHandle::HFONT(font)) {
+        Ok(id) => Some(id),
+        Err(_) => None
+    }
 }
 
 /// Get the window text
