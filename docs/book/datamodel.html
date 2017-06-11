@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Data Model</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+
+    <div id="nav">
+        <button id="toggle-nav">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+    </div>
+
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='introduction.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="ui.html"><b>3.1.</b> Ui objects </a></li>
+    <li><a href="controls_resources.html"><b>3.2.</b> Controls and resources </a></li>
+    <li><a href="events.html"><b>3.3.</b> Events </a></li>
+    <li><a href="other_functions.html"><b>3.4.</b> Other functions </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="datamodel.html"><b>4.1.</b> Data model </a></li>
+    <li><a href="idstype.html"><b>4.2.</b> Ui ID types </a></li>
+</ul>
+</li>
+
+<li><a href="custom.html"><b>5.</b> Custom controls </a>
+<ul class="section">
+    <li><a href="canvas.html"><b>5.1.</b> Canvas </a></li>
+    <li><a href="lowlevel.html"><b>5.2.</b> Custom Module </a></li>
+    <li><a href="custom_events.html"><b>5.3.</b> Custom Events </a></li>
+</ul>
+</li>
+
+</ul>
+</div>
+
+<div id='page-wrapper'>
+<div id='page'>
+
+
+    <h1 class="title">Data model</h1>
+
+    NWG is a GUI framework, and not an application framework. As such, the application code and the UI code should be decoupled.<br><br>
+    This chapter gives an example on how to structure small or moderately sized applications. The <b>rustup</b> utility
+    is used as an example of application code.<br><br>
+
+    Another chapter will be released once NWG will be ready for bigger applications.
+
+    <h1 id="tree" class="section-header"><a href="#tree">Project Tree</a></h1> 
+
+    The first step to have a nicely decouped application is to create two base modules: <b>one for the ui and 
+    another for the application</b>.<br>
+
+    <ul>
+        <li><b>rustup_wrapper</b>: The module containing the functions to communicate with the rustup binary</li>
+        <li><b>rustup_ui</b>: The module that contains the main UI template and its initialization.</li>
+        <li><b>main</b>: The program entry point.</li>
+    </ul>
+    <code>
+    rustup-ui/<br>
+    -- rustup_wrapper.rs<br>
+    -- rustup_ui.rs<br>
+    -- main.rs<br>
+    </code>
+    <br>
+
+    <h1 id="wrapper" class="section-header"><a href="#wrapper">rustup_wrapper.rs</a></h1> 
+
+    For simplicity, lets say the <b>rustup_wrapper</b> file will only define a <code>RustupWrapper</code> structure
+    with methods that call the original binary and return the output.
+
+
+<div class="syntax"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">RustupWrapper</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w"> </span><span class="c1">// private fields...</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">RustupWrapper</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">init</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">RustupWrapper</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">show</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">default</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">toolchain</span>: <span class="nb">String</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span><span class="w"> </span><span class="nb">String</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="c1">// etc...</span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+
+    <h1 id="ui" class="section-header"><a href="#ui">rustup_ui.rs</a></h1> 
+
+    The <b>rustup_ui</b> module will define the ui template using <code>nwg_template</code> and export a single functions:
+    <code>create_ui</code>. Its function will be to create the ui, initalize it with the template, pack the RustupWrapper
+    object and finally initalizing the ui components that depends on the wrapper object<br>
+
+
+<div class="syntax"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">APP</span>: <span class="kt">usize</span> <span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">ShowToolchainsBtn</span>: <span class="kt">usize</span> <span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">ShowToolchainsCallback</span>: <span class="kt">usize</span> <span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"></span>
+<span class="c1">// other ids...</span>
+
+<span class="n">nwg_template</span><span class="o">!</span><span class="p">(</span><span class="w"></span>
+<span class="w"> </span><span class="n">head</span>: <span class="nc">setup_ui</span><span class="o">&lt;</span><span class="kt">usize</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w"> </span><span class="n">controls</span>: <span class="p">[</span><span class="w"></span>
+<span class="w"> </span><span class="c1">//...</span>
+<span class="w">   </span><span class="p">(</span><span class="n">ShowToolchainsBtn</span><span class="p">,</span><span class="w"> </span><span class="n">nwg_button</span><span class="o">!</span><span class="p">(</span><span class="cm">/*..*/</span><span class="p">)),</span><span class="w"></span>
+<span class="w"> </span><span class="c1">//...</span>
+<span class="w">  </span><span class="n">events</span>: <span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="p">(</span><span class="n">ShowToolchainsBtn</span><span class="p">,</span><span class="w"> </span><span class="n">ShowToolchainsCallback</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span>::<span class="n">Click</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">ui</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">       </span><span class="kd">let</span><span class="w"> </span><span class="n">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg_get</span><span class="o">!</span><span class="p">(</span><span class="n">ui</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">RustupWrapper</span><span class="p">));</span><span class="w"></span>
+<span class="w">       </span><span class="kd">let</span><span class="w"> </span><span class="n">installed_toochains</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">show</span><span class="p">();</span><span class="w"></span>
+<span class="w">       </span><span class="c1">// insert values into a listbox...</span>
+<span class="w">    </span><span class="p">}),</span><span class="w"></span>
+<span class="w"> </span><span class="c1">//...</span>
+<span class="p">);</span><span class="w"></span>
+
+<span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">create_ui</span><span class="p">(</span><span class="n">app</span>: <span class="nc">RustupWrapper</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Ui</span><span class="o">&lt;</span><span class="kt">usize</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Error</span><span class="o">&gt;</span><span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="n">ui</span>: <span class="nc">Ui</span><span class="o">&lt;</span><span class="kt">usize</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">match</span><span class="w"> </span><span class="n">Ui</span>::<span class="n">new</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nb">Ok</span><span class="p">(</span><span class="n">_ui</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_ui</span><span class="p">;</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">setup_ui</span><span class="p">(</span><span class="o">&amp;</span><span class="n">app</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">ui</span><span class="p">.</span><span class="n">pack_value</span><span class="p">(</span><span class="n">APP</span><span class="p">,</span><span class="w"> </span><span class="n">app</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">ui</span><span class="p">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">ShowToolchainsBtn</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span>::<span class="n">Click</span><span class="p">,</span><span class="w"> </span><span class="n">EventArgs</span>::<span class="nb">None</span><span class="p">);</span><span class="w"></span>
+<span class="w"> </span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nb">Ok</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+    <h1 id="main" class="section-header"><a href="#main">main.rs</a></h1> 
+    Finally, <code>main.rs</code> will load both module and do the required initialization
+
+
+<div class="syntax"><pre><span></span><span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">native_windows_gui</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">nwg</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">rustup_wrapper</span><span class="p">;</span><span class="w"></span>
+<span class="k">mod</span> <span class="nn">rustup_ui</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="kd">let</span><span class="w"> </span><span class="n">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rustup_wrapper</span>::<span class="n">RustupWrapper</span>::<span class="n">init</span><span class="p">();</span><span class="w"></span>
+<span class="w">   </span><span class="kd">let</span><span class="w"> </span><span class="n">ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rustup_ui</span>::<span class="n">create_ui</span><span class="p">(</span><span class="n">app</span><span class="p">).</span><span class="n">expect</span><span class="p">(</span><span class="s">"Something went wrong"</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">   </span><span class="n">nwg</span>::<span class="n">dispatch_events</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+    <h1 id="mind" class="section-header"><a href="#mind">Things to keep in mind</a></h1> 
+
+    <ul>
+        <li>Don't ever use globals</li>
+        <li>If you need to pass a UI control to your application code, that's a bad sign</li>
+        <li>If you need to pass a UI to your application code, that's just bad</li>
+        <li>Ui ids definitions should be private in the UI modules</li>
+        <li>Callbacks defined in a template should be kept small (<50 LOC)</li>
+        <li>Custom controls should have their own module </li>
+        <li>Don't ever use globals</li>
+    </ul>
+
+
+<br/><br/>
+
+</div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>
