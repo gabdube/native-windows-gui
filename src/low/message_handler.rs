@@ -233,6 +233,13 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
     }
 }
 
+/// Create a unique class name for a inner window based on its type.
+/// If a unique class is not used per Ui with different type, a NWG message could get posted
+/// to the wrong message proc and then the application would crash
+fn class_name<ID: Hash+Clone+'static>() -> String {
+    format!("{}-{:?}", MESSAGE_HANDLE_CLASS_NAME, ::std::any::TypeId::of::<ID>())
+}
+
 
 /**
     Create the message handler window class.
@@ -243,7 +250,7 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
 unsafe fn setup_class<ID: Hash+Clone+'static>() -> Result<(), SystemError> {
     use low::window_helper::{SysclassParams, build_sysclass};
     let params = SysclassParams{ 
-        class_name: MESSAGE_HANDLE_CLASS_NAME, 
+        class_name: class_name::<ID>(), 
         sysproc: Some(message_window_proc::<ID>),
         background: Some(ptr::null_mut()), style: None
     };
@@ -261,7 +268,7 @@ unsafe fn setup_class<ID: Hash+Clone+'static>() -> Result<(), SystemError> {
     * If the window creation is successful, returns `Ok(window_handle)`  
     * If the window creation fails, returns `Err(SystemError::UiCreation)`
 */
-unsafe fn create_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
+unsafe fn create_window<ID: Hash+Clone+'static>() -> Result<HWND, SystemError> {
     use kernel32::GetModuleHandleW;
     use user32::CreateWindowExW;
     use winapi::HWND_MESSAGE;
@@ -269,7 +276,7 @@ unsafe fn create_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
     let hmod = GetModuleHandleW(ptr::null_mut());
     if hmod.is_null() { return Err(SystemError::UiCreation); }
 
-    let class_name = to_utf16(MESSAGE_HANDLE_CLASS_NAME);
+    let class_name = to_utf16(&class_name::<ID>());
     let window_name = to_utf16("");
 
     let handle = CreateWindowExW (

@@ -10,9 +10,13 @@ For more information also see:
   * The **Image** resource to load bitmap, ico and cursor files
 * New controls:
   * The **ImageFrame** control to display a bitmap in a window
+* New methods for `Window`:
+  * `set_icon` and `get_icon`: Allow the user to set or get the window icon  
 * New methods for `UI`:
   * `has_handle`: Check if the ui has an object identified by an handle
   * `id_from_handle`: Return the `ID` associated with an HANDLE
+* New methods for **most built-in controls**:
+  * `set_font` and `get_font`: Allow the user to set the font or get the font identifier of many built-in controls  
 * New methods:
   * `toggle_console`: Hide or show the program console
 

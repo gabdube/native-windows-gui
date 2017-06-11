@@ -249,7 +249,7 @@ pub unsafe fn set_window_font_raw(handle: HWND, font_handle: Option<HFONT>, redr
 /// Send `None` to remove the font from the control.
 #[inline(always)]
 pub unsafe fn set_window_font<ID: Hash+Clone>(handle: HWND, ui: &Ui<ID>, f: Option<&ID>) -> Result<(), Error> {
-    use winapi::{WM_SETFONT, LPARAM, WPARAM};
+    use winapi::{WM_SETFONT, WPARAM};
 
     if !ui.has_handle(&AnyHandle::HWND(handle)) {
         return Err(Error::BadUi("Font resource and control must be in the same Ui.".to_string()));
