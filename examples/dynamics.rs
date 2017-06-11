@@ -11,35 +11,44 @@ use nwg::{Event, Ui, simple_message, fatal_message, dispatch_events};
 use nwg::constants::HTextAlign;
 
 // Identifiers for static controls/resources/values
-const MainWindow: usize = 0;
-const ControlsGroup: usize = 1;
-const AddNewButton: usize = 2;
-const ClearButtons: usize = 3;
-const Label1: usize = 4;
-const Label2: usize = 5;
-const TextSelect: usize = 6;
-const MsgSelect: usize = 7;
+#[derive(Debug, Clone, Hash)]
+pub enum UiId {
+    // Static controls
+    MainWindow,
+    ControlsGroup,
+    AddNewButton,
+    ClearButtons,
+    Label(u8),
+    TextSelect,
+    MsgSelect,
 
-const TextFont: usize = 20;
+    // Dynamic controls & events
+    Buttons(usize),
+    ButtonsEvents(usize),
 
-const ButtonList: usize = 30;
-const NextId: usize = 31;
+    // Resources
+    TextFont,
 
-const AddCallback: usize = 40;
-const ClearCallback: usize = 41;
+    // Values
+    ButtonList,
+    NextId,
 
-// Identifiers for the dynamic buttons
-const MinDynamicButtonsId: usize = 1000;
+    // Events
+    AddCallback,
+    ClearCallback
+}
+
+use UiId::*;
 
 nwg_template!(
-    head: setup_ui<usize>,
+    head: setup_ui<UiId>,
     controls: [
         (MainWindow, nwg_window!( title="Button creator!"; size=(400, 305); resizable=true )),
         (ControlsGroup, nwg_groupbox!(parent=MainWindow; position=(5, 5); align=HTextAlign::Center; size=(390, 130); text="Controls"; font=Some(TextFont))),
         (AddNewButton, nwg_button!(parent=ControlsGroup; position=(235, 95); size=(150, 30); text="Create button"; font=Some(TextFont))),
         (ClearButtons, nwg_button!(parent=ControlsGroup; position=(80, 95); size=(150, 30); text="Clear buttons"; font=Some(TextFont))),
-        (Label1, nwg_label!(parent=ControlsGroup; position=(48, 20); size=(80, 25); text="New text:"; font=Some(TextFont))),
-        (Label2, nwg_label!(parent=ControlsGroup; position=(10, 50); size=(100, 25); text="New message:"; font=Some(TextFont))),
+        (Label(0), nwg_label!(parent=ControlsGroup; position=(48, 20); size=(80, 25); text="New text:"; font=Some(TextFont))),
+        (Label(1), nwg_label!(parent=ControlsGroup; position=(10, 50); size=(100, 25); text="New message:"; font=Some(TextFont))),
         (TextSelect, nwg_textinput!(parent=ControlsGroup; position=(130, 20); size=(250, 22); text="Click me!"; font=Some(TextFont))),
         (MsgSelect, nwg_textinput!(parent=ControlsGroup; position=(130, 50); size=(250, 22); text="Hello World!"; font=Some(TextFont)))
     ];
@@ -58,6 +67,7 @@ nwg_template!(
 
             // Add a new button to the Ui
             let new_id = **next_id;
+            let next_control_id = Buttons(new_id);
             let height_offset = 140 + (30 * (button_list.len() / 2)) as i32;
             let width_offset = if new_id % 2 == 0 { 5 } else { 200 };
             let t = nwg::ButtonT {
@@ -66,12 +76,12 @@ nwg_template!(
                 visible: true, disabled: false, 
                 parent:  MainWindow, font: Some(TextFont)
             };
-            ui.pack_control(&new_id, t);
+            ui.pack_control(&next_control_id, t);
 
             // Bind a callback
             let msg_txt = msg.get_text();
-            let next_event_id = new_id+1000;
-            ui.bind(&new_id, &next_event_id, Event::Click, move |_,_,_,_|{
+            let next_event_id = ButtonsEvents(new_id);
+            ui.bind(&next_control_id, &next_event_id, Event::Click, move |_,_,_,_|{
                 simple_message("Dynamic button!", &msg_txt);
             });
 
@@ -91,12 +101,12 @@ nwg_template!(
             ]);
 
             for id in (*button_list).iter() {
-                ui.unpack(id);
+                ui.unpack( &Buttons(*id) );
             }
 
             // Reset the existing ids to default
             button_list.clear();
-            **next_id = MinDynamicButtonsId;
+            **next_id = 0;
         })
     ];
     resources: [
@@ -104,12 +114,12 @@ nwg_template!(
     ];
     values: [
         (ButtonList, Vec::<usize>::with_capacity(16)),  // The "nwg way" assumes global are evil, especially if they are mutable
-        (NextId, MinDynamicButtonsId)                   // Any variable that needs to be accessible to a UI should be stored in the values.
+        (NextId, 0usize)                                     // Any variable that needs to be accessible to a UI should be stored in the values.
     ]
 );
 
 fn main() {
-    let app: Ui<usize>;
+    let app: Ui<UiId>;
 
     match Ui::new() {
         Ok(_app) => { app = _app; },

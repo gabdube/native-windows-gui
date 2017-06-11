@@ -29,9 +29,22 @@ nwg_template!(
     head: setup_ui<AppId>,
     controls: [
         (MainWindow, nwg_window!( title="Template Example"; size=(280, 105) )),
-        (Label(0), nwg_label!( parent=MainWindow; text="Your Name: "; position=(5,15); size=(80, 25); font=Some(TextFont) )),
-        (NameInput, nwg_textinput!( parent=MainWindow; position=(85,13); size=(185,22); font=Some(TextFont) )),
-        (HelloButton, nwg_button!( parent=MainWindow; text="Hello World!"; position=(5, 45); size=(270, 50); font=Some(MainFont) ))
+        (Label(0), nwg_label!(
+             parent=MainWindow;
+             text="Your Name: ";
+             position=(5,15); size=(80, 25);
+             font=Some(TextFont) )),
+
+        (NameInput, nwg_textinput!( 
+             parent=MainWindow; 
+             position=(85,13); size=(185,22); 
+             font=Some(TextFont) )),
+
+        (HelloButton, nwg_button!( 
+             parent=MainWindow; 
+             text="Hello World!"; 
+             position=(5, 45); size=(270, 50); 
+             font=Some(MainFont) ))
     ];
     events: [
         (HelloButton, SayHello, Event::Click, |ui,_,_,_| {
