@@ -27,16 +27,14 @@ use user32::SendMessageW;
 use ui::Ui;
 use error::Error;
 use controls::{Control, ControlT, ControlType, AnyHandle};
-use events::{Event, Destroyed, Moved, Resized};
-use events::checkbox::{Click, DoubleClick, Focus};
 use defs::CheckState;
 
 
 /**
     A template that creates a standard checkbox
 
-    Available events:  
-    `Destroyed, Moved, Resized, Click, DoubleClick, Focus, Any`  
+    Control specific events:  
+    `checkbox::Click, checkbox::DoubleClick, checkbox::Focus`
 
     Members:  
     • `text`: The text of the checkbox  
@@ -64,10 +62,6 @@ pub struct CheckBoxT<S: Clone+Into<String>, ID: Hash+Clone> {
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for CheckBoxT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<CheckBox>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Moved, Resized, Click, DoubleClick, Focus, Event::Any]
-    }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font_raw, handle_of_window, handle_of_font};

@@ -121,11 +121,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                     }
 
                     // Init events
-                    let events = params.value.events();
-                    let mut event_collection: EventCollection<ID> = HashMap::with_capacity(events.len());
-                    for e in events {
-                        event_collection.insert(e, Rc::new(Vec::new()));
-                    }
+                    let event_collection: EventCollection<ID> = HashMap::new();
 
                     self.inner_public_map.insert(inner_id, (params.id, params.value.type_id()));
                     self.controls.insert(inner_id, RefCell::new(control) );
@@ -291,11 +287,17 @@ impl<ID: Hash+Clone> UiInner<ID> {
         if events_collection.is_none() { return Some(Error::ControlRequired); }
 
         // Get the callback list for the requested event
-        let callbacks = events_collection.unwrap().get_mut(&event);
-        if callbacks.is_none() { return Some(Error::EventNotSupported(event)); }
+        let mut callbacks = {
+            let mut cb = events_collection.unwrap();
+            if cb.contains_key(&event) {
+                cb.get_mut(&event).unwrap()
+            } else {
+                cb.insert(event.clone(),  Rc::new(Vec::with_capacity(1)));
+                cb.get_mut(&event).unwrap()
+            }
+        };
 
         // Get a mutable reference to the callback list
-        let mut callbacks = callbacks.unwrap();
         let callbacks = Rc::get_mut(&mut callbacks);
         if callbacks.is_none() { return Some(Error::ControlInUse); }
 
@@ -349,7 +351,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
         // Get the callback list for the requested event
         let callbacks = events_collection.unwrap().get_mut(&event);
-        if callbacks.is_none() { return Some(Error::EventNotSupported(event)); }
+        if callbacks.is_none() { return Some(Error::KeyNotFound); }
 
         // Get a mutable reference to the callback list
         let mut callbacks = callbacks.unwrap();
@@ -382,7 +384,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
             // Get the callback list for the requested event
             let callbacks = events_collection.unwrap().get_mut(&event);
-            if callbacks.is_none() { return Some(Error::EventNotSupported(event)); }
+            if callbacks.is_none() { return None; }
 
             // Return a reference to the callback list. While the reference exists, it will be impossible
             // to push new callback into the event.

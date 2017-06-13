@@ -28,14 +28,12 @@ use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle, HandleSpec};
 use defs::ImageType;
 use error::Error;
-use events::{Event, Destroyed, Moved, Resized};
-use events::image_frame::{Click, DoubleClick};
 
 /**
     A template that creates a ImageFrame control.
 
-    Rvents:  
-    `Destroyed, Moved, Resized, Any`
+    Control specific events:  
+    `image_frame::Click, image_frame::DoubleClick`
 
     Members:  
     • `position`: The start position of the label  
@@ -57,10 +55,6 @@ pub struct ImageFrameT<ID: Hash+Clone> {
 
 impl<ID: Hash+Clone+'static> ControlT<ID> for ImageFrameT<ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<ImageFrame>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Moved, Resized, Click, DoubleClick, Event::Any]
-    }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, handle_of_window};

@@ -26,15 +26,13 @@ use winapi::{HWND, HFONT};
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::{Event, Destroyed, Moved, Resized};
-use events::label::{Click, DoubleClick};
 use defs::HTextAlign;
 
 /**
     A template that creates a standard label
 
-    Rvents:  
-    `Destroyed, Moved, Resized, Click, DoubleClick, Any`
+    Control specific events:  
+    `label::Click, label::DoubleClick`
 
     Members:  
     • `text`: The text of the label  
@@ -60,10 +58,6 @@ pub struct LabelT<S: Clone+Into<String>, ID: Hash+Clone> {
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for LabelT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Label>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Moved, Resized, Click, DoubleClick,  Event::Any]
-    }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font_raw, handle_of_window, handle_of_font};

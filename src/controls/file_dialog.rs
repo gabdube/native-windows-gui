@@ -29,15 +29,13 @@ use winapi::shobjidl::IFileDialog;
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::{Error, SystemError};
-use events::{Event, Destroyed};
 use defs::FileDialogAction;
 use low::other_helper::to_utf16;
 
 /**
     A template that creates a standard file dialog
 
-    Events:  
-    `Destroyed`  
+    Control specific events: None    
 
     Members:  
     • `title`: The title of the dialog  
@@ -66,10 +64,6 @@ pub struct FileDialogT<S: Clone+Into<String>, ID: Hash+Clone> {
 
 impl<S1: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for FileDialogT<S1, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<FileDialog>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed]
-    }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use ole32::{CoCreateInstance};

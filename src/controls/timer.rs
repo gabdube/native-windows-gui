@@ -26,8 +26,6 @@ use winapi::{HWND, UINT_PTR, ULONG_PTR, UINT, DWORD};
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::{Event, Destroyed};
-use events::timer::Tick;
 
 static mut TIMERS_ID: UINT_PTR = 0; 
 
@@ -35,8 +33,8 @@ static mut TIMERS_ID: UINT_PTR = 0;
     A template that creates a timer. Note that because the timer callbacks must be added AFTER
     its creation, it cannot start automatically.
 
-    Events:  
-    `Destroyed, Tick`   
+    Control specific events:   
+    `textinput::Tick` 
 
     Members:  
     • `interval`: The timer interval in milliseconds
@@ -48,10 +46,6 @@ pub struct TimerT {
 
 impl<ID: Hash+Clone> ControlT<ID> for TimerT {
     fn type_id(&self) -> TypeId { TypeId::of::<Timer>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Tick]
-    }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         Ok(Box::new(Timer{

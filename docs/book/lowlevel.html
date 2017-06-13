@@ -87,19 +87,7 @@
     <h1 id="temp" class="section-header"><a href="#temp">Template</a></h1>
 
     The template role is to create the low level object (ex: <code>HWND</code>), wrap in in a Boxed Control and return the result.
-    The template also returns what kind of events the control will support. If a user try to bind a callback to an unsupported event,
-    an error will be raised.<br><br>
-
-    Because NWG event are handled on the UI, <b>the only way</b> for a custom control created this way to system handle events is
-    to do it directly in the WINPROC function.<br><br>
-
-    Because custom events are not yet implemented, it is impossible to create events for those controls.
-    Still, basics events such as <code>Event::KeyUp</code> can be hooked to by the template. To allow the UI to see every message
-    received by the window, allow the <code>Event::Raw</code> event in the template.<br><br>
-
-    Here is a list of event that NWG can listen to for any HWND based control:<br>
-    <code>Destroyed, KeyDown, KeyUp, Char, Closed, MouseUp, MouseDown, Moved, Resized, Paint, Raw</code><br>
-
+    <br><br>
     
 <div class="syntax"><pre><span></span><span class="sd">/**</span>
 <span class="sd">    Structures implementing this trait can be used by a Ui to build a Control</span>
@@ -115,11 +103,6 @@
 <span class="sd">        Should instance the control and return it as a Box&lt;Control&gt;. If an error is raised, it will be returned by `ui.commit`.</span>
 <span class="sd">    */</span><span class="w"></span>
 <span class="w">    </span><span class="k">fn</span> <span class="nf">build</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">ui</span>: <span class="kp">&amp;</span><span class="nc">Ui</span><span class="o">&lt;</span><span class="n">ID</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">Control</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
-
-<span class="w">    </span><span class="sd">/**</span>
-<span class="sd">        Should return the events supported by the control.</span>
-<span class="sd">    */</span><span class="w"></span>
-<span class="w">    </span><span class="k">fn</span> <span class="nf">events</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Event</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nb">Vec</span>::<span class="n">new</span><span class="p">()</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 

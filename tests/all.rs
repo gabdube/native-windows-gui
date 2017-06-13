@@ -274,11 +274,6 @@ fn test_ui_bind() {
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
 
-    // Event not supported
-    ui.bind(&1003, &5000, MouseUp, |_, _, _, _|{});
-    let r = ui.commit();
-    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(MouseUp), "Commit was successful");
-
     // Callback id already exists
     ui.bind(&1001, &5000, Destroyed, |_, _, _, _|{});
     let r = ui.commit();
@@ -316,11 +311,6 @@ fn test_ui_unbind() {
     ui.unbind(&1005, &5000, Destroyed);
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::KeyNotFound, "Commit was successful");
-
-    // Event not supported
-    ui.unbind(&1002, &5000, MouseUp);
-    let r = ui.commit();
-    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(MouseUp), "Commit was successful");
 
     // Callback do not exists
     ui.unbind(&1000, &5001, Destroyed);
@@ -388,10 +378,6 @@ fn test_ui_trigger() {
     ui.trigger(&1001, MouseDown, EventArgs::None);
     let r = ui.commit();
     assert!(r.is_err() && r.err().unwrap() == Error::ControlRequired, "Commit was successful");
-
-    ui.trigger(&1000, nwge::listbox::SelectionChanged, EventArgs::None);
-    let r = ui.commit();
-    assert!(r.is_err() && r.err().unwrap() == Error::EventNotSupported(nwge::listbox::SelectionChanged), "Commit was successful");
 
     ui.trigger(&1000, MouseUp, EventArgs::None);
     let r = ui.commit();

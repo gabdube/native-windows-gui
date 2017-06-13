@@ -30,14 +30,12 @@ use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use low::other_helper::to_utf16;
 use error::Error;
-use events::{Event, Destroyed, Char, KeyUp, KeyDown, MouseDown, MouseUp, Moved, Resized};
-use events::textinput::{Focus, ValueChanged};
 
 /**
     A template that creates a single line textinput control
 
-    Events:  
-    `Destroyed, Char, KeyDown, KeyUp, MouseDown, MouseUp, Moved, Resized, ValueChanged, Focus, Any`  
+    Control specific events:  
+    `textinput::ValueChanged, textinput::Focus` 
 
     Members:  
     • `text`: The text of the textinput  
@@ -69,10 +67,6 @@ pub struct TextInputT<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+C
 
 impl<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextInputT<S1, S2, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<TextInput>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Char, KeyDown, KeyUp, MouseDown, MouseUp, Moved, Resized, ValueChanged, Focus, Event::Any]
-    }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font_raw, handle_of_window, handle_of_font};

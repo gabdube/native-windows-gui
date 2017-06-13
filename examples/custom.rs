@@ -44,12 +44,6 @@ impl<ID: Hash+Clone> ControlT<ID> for MyCustomWindowT {
         TypeId::of::<MyCustomWindow>() 
     }
 
-    fn events(&self) -> Vec<nwge::Event> {
-        // This method must return an vec of events type that NWG will listen to for each instance of the control
-
-        vec![nwge::Closed, MouseWheel]
-    }
-
     #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use winapi::{WS_HSCROLL, WS_VISIBLE, WS_VSCROLL, WS_OVERLAPPEDWINDOW};

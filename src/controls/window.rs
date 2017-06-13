@@ -28,16 +28,12 @@ use user32::SendMessageW;
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::{Event, Destroyed, Moved, Resized, Char, Closed, KeyDown, KeyUp, MouseUp, MouseDown};
 
 /// System class identifier
 const WINDOW_CLASS_NAME: &'static str = "NWG_BUILTIN_WINDOW";
 
 /**
     A template that will create a window.
-
-    Events:  
-    `Destroyed, KeyDown, KeyUp, Char, Closed, MouseDown, MouseUp, Moved, Resized, Any`  
 
     Members:  
       • `title` : The title of the window (in the title bar)  
@@ -62,10 +58,6 @@ pub struct WindowT<ID: Hash+Clone, S: Clone+Into<String>> {
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<ID, S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed, KeyDown, KeyUp, Char, Closed, MouseDown, MouseUp, Moved, Resized, Event::Any]
-    }
 
     #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

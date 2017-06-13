@@ -59,7 +59,6 @@ pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
 pub use controls::datepicker::{DatePickerT, DatePicker};
 pub use controls::image_frame::{ImageFrameT, ImageFrame};
 use ui::Ui;
-use events::Event;
 use error::Error;
 
 /**
@@ -129,10 +128,6 @@ pub trait ControlT<ID: Clone+Hash> {
     */
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error>;
 
-    /**
-        Should return the events supported by the control.
-    */
-    fn events(&self) -> Vec<Event> { Vec::new() }
 }
 
 /**

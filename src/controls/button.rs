@@ -26,14 +26,12 @@ use winapi::{HWND, HFONT};
 use ui::Ui;
 use error::Error;
 use controls::{Control, ControlT, ControlType, AnyHandle};
-use events::{Event, Destroyed, Moved, Resized};
-use events::button::{Click, DoubleClick, Focus};
 
 /**
     A template that creates a standard button
 
-    Available events:  
-    `Destroyed, Moved, Resized, Click, DoubleClick, Focus, Any`
+    Control specific events:  
+    `button::Click, button::DoubleClick, button::Focus`
 
     Members:  
     • `text`: The text of the button  
@@ -57,10 +55,6 @@ pub struct ButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Button>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Moved, Resized, Click, DoubleClick, Focus, Event::Any]
-    }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font_raw, handle_of_window, handle_of_font};

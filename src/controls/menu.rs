@@ -27,16 +27,13 @@ use winapi::{HMENU, UINT, BOOL};
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::{Event, Destroyed};
-use events::menu::Triggered;
 
 static mut MENU_ITEMS_ID: UINT = 0; 
 
 /**
     A template to create menu controls
 
-    Events:  
-    `Destroyed`  
+    Control specific events: None  
 
     Members:  
       • `text` : The menu text  
@@ -51,10 +48,6 @@ pub struct MenuT<S: Clone+Into<String>, ID: Hash+Clone> {
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Menu>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed]
-    }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         let handle_result = unsafe { build_menu(ui, self) };
@@ -111,6 +104,9 @@ impl Control for Menu {
 /**
     A template to create menuitems
 
+    Control specific events:  
+    `menu::Triggered`
+
     Members:  
       • `text` : The menu text  
       • `parent` : ID of the parent control to add the menu to  
@@ -124,10 +120,6 @@ pub struct MenuItemT<S: Clone+Into<String>, ID: Hash+Clone> {
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<MenuItem>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Triggered]
-    }
 
    #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
@@ -185,6 +177,8 @@ impl Control for MenuItem {
 /**
     A menu item separator.
 
+    Control specific events: None  
+
     Member:  
     * parent: The parent. Must point to a `Menu` control
 */
@@ -195,10 +189,6 @@ pub struct SeparatorT<ID: Hash+Clone> {
 
 impl<ID: Hash+Clone> ControlT<ID> for SeparatorT<ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<Separator>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed]
-    }
 
    #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {

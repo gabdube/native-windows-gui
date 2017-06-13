@@ -32,14 +32,12 @@ use user32::SendMessageW;
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
 use error::Error;
-use events::{Event, Destroyed, Char, KeyUp, KeyDown, MouseDown, MouseUp, Moved, Resized};
-use events::textbox::{Focus, ValueChanged};
 
 /**
     A template that creates a multi line textinput control
 
-    Events:  
-    `Destroyed, Char, KeyDown, KeyUp, MouseDown, MouseUp, Moved, Resized, ValueChanged, Focus, Any`  
+    Control specific events:  
+    `textbox::ValueChanged, textbox::Focus` 
 
     Members:  
     • `text`: The text of the textbox  
@@ -69,10 +67,6 @@ pub struct TextBoxT<S1: Clone+Into<String>, ID: Hash+Clone> {
 
 impl<S1: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextBoxT<S1, ID> {
     fn type_id(&self) -> TypeId { TypeId::of::<TextBox>() }
-
-    fn events(&self) -> Vec<Event> {
-        vec![Destroyed, Char, KeyDown, KeyUp, MouseDown, MouseUp, Moved, Resized, ValueChanged, Focus, Event::Any]
-    }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font_raw, handle_of_window, handle_of_font};
