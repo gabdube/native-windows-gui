@@ -28,6 +28,10 @@ And it isn't...
 * For those who want a safe api to create custom control, nwg is not there YET...
 * For those who want a UI to track a killers API address, Visual Basic is better (source: CSI)
 
+# License
+
+NWG use the MIT license
+
 # Installation
 To use NWG in your project add it to cargo.toml: 
 

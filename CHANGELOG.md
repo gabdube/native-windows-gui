@@ -1,5 +1,6 @@
 # BETA 2 (0.3.0)
 
+* License switch: GPLv3 to MIT 
 * **Breaking!** New way to handle events. Allow custom event definition and improve the event dispatching loop.  
 For example, instead of `nwg::Event::Click`, use `nwg::events::button::Click`. 
 For more information also see: 
