@@ -91,6 +91,7 @@ pub const BST_CHECKED: UINT = 1;
 pub const BST_INDETERMINATE: UINT = 2;
 pub const BST_UNCHECKED: UINT = 0;
 
+pub const SS_BLACKFRAME: UINT = 7;
 pub const SS_NOTIFY: UINT = 256;
 pub const SS_RIGHT: UINT = 2;
 pub const SS_LEFT: UINT = 0;

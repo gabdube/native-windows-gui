@@ -757,6 +757,66 @@ macro_rules! nwg_image_frame {
     }}
 }
 
+/**
+    Sane defaults for the TreeView control. Requires a parent.
+
+    Defaults:  
+    • position: `(0, 0)`  
+    • size: `(100, 100)`  
+    • visible: `true`  
+    • disabled: `false`  
+
+    Usage:  
+    `nwg_tree_view!(parent="MyParent";)`  
+    `nwg_tree_view!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_tree_view!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
+#[macro_export]
+macro_rules! nwg_tree_view {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::TreeViewT{ 
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false, 
+            parent: $p
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }}
+}
+
+/**
+    Sane defaults for the Frame control. Requires a parent.
+
+    Defaults:  
+    • position: `(0, 0)`  
+    • size: `(100, 100)`  
+    • visible: `true`  
+    • disabled: `false`  
+
+    Usage:  
+    `nwg_frame!(parent="MyParent";)`  
+    `nwg_frame!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_frame!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
+#[macro_export]
+macro_rules! nwg_frame {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::FrameT{ 
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false, 
+            parent: $p
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }}
+}
+
 
 //---- Resources ----//
 

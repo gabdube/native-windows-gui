@@ -41,7 +41,8 @@ nwg_template!(
         ("InstallCatLabel", nwg_label!(parent="MainWindow"; text="Installing cat.exe ..."; position=(230, 160); size=(180, 25); font=Some("Font1") )),
         ("CatProgress", nwg_progressbar!(parent="MainWindow"; position=(230, 190); size=(240, 25); range=(0, 100); value=85)),
         ("DatePicker", nwg_datepicker!(parent="MainWindow"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(230, 220); size=(240, 25); font=Some("Font1"))),
-        ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(10, 250); size=(100,100)))
+        ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(165, 250); size=(100,100))),
+        ("TreeView", nwg_tree_view!(parent="MainWindow"; position=(10, 250); size=(150, 100)))
     ];
     events: [
         ("RandomStuffTextBox", "AllSystemEvents", nwge::Any, |_,_,_,args| {

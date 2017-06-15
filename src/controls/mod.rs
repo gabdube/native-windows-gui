@@ -19,6 +19,8 @@ pub mod image_frame;
 pub mod file_dialog;
 pub mod timer;
 pub mod canvas;
+pub mod treeview;
+pub mod frame;
 
 use std::any::TypeId;
 use std::hash::Hash;
@@ -42,6 +44,8 @@ pub use controls::timer::{TimerT, Timer};
 pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
 pub use controls::datepicker::{DatePickerT, DatePicker};
 pub use controls::image_frame::{ImageFrameT, ImageFrame};
+pub use controls::treeview::{TreeViewT, TreeView};
+pub use controls::frame::{FrameT, Frame};
 use ui::Ui;
 use error::Error;
 
@@ -94,6 +98,8 @@ pub enum ControlType {
     FileDialog,
     Canvas,
     ImageFrame,
+    TreeView,
+    Frame,
     Undefined  // Control is not a common control
 }
 
