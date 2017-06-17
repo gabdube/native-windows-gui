@@ -11,7 +11,7 @@ use std::rc::Rc;
 
 use low::message_handler::MessageHandler;
 use low::defs::{PackUserValueArgs, PackControlArgs, PackResourceArgs, UnpackArgs, BindArgs, UnbindArgs, TriggerArgs};
-use controls::{ControlT, Control, AnyHandle};
+use controls::{ControlT, Control, AnyHandle, ControlType};
 use resources::{ResourceT, Resource};
 use events::{Event, EventCallback, EventArgs, Destroyed};
 use error::Error;
@@ -144,8 +144,9 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     fn unpack_control(&mut self, id: InnerId) -> Option<Error> {
         use low::events::unhook_window_events;
-        use low::menu_helper::{list_menu_children};
+        use low::menu_helper::list_menu_children;
         use low::window_helper::list_window_children;
+        use controls::treeview::list_tree_item_children;
        
 
         // Check if the control is currently borrowed by the user
@@ -178,9 +179,10 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
                 children
             },
-            AnyHandle::HTREE_ITEM(_,_) => {
-                println!("TODO");
-                vec![id]
+            AnyHandle::HTREE_ITEM(handle, tree) => {
+                let mut children = vec![id];
+                children.append( &mut list_tree_item_children(tree, handle, self) );
+                children
             },
             AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) | AnyHandle::Custom(_, _) | AnyHandle::HANDLE(_,_) |
             AnyHandle::HCURSOR(_) | AnyHandle::HICON(_) => vec![id], // These handle can't have children
@@ -437,6 +439,24 @@ impl<ID: Hash+Clone> UiInner<ID> {
     #[inline(always)]
     pub fn types_matches(&self, id: &InnerId, tid: TypeId) -> bool {
         self.inner_public_map.get(id).unwrap().1 == tid
+    }
+
+    #[inline(always)]
+    pub fn type_of_control(&self, id: &ID) -> Result<ControlType, Error> {
+        let id = UiInner::<ID>::hash_id(id);
+        if !self.inner_public_map.contains_key(&id) {
+            return Err(Error::KeyNotFound);
+        }
+
+        if let Some(control_cell) = self.controls.get(&id) {
+            if let Ok(control) = control_cell.try_borrow() {
+                Ok(control.control_type())
+            } else {
+                Err(Error::BorrowError)
+            }
+        } else {
+            Err(Error::ControlRequired)
+        }
     }
 
     #[inline(always)]
@@ -804,6 +824,17 @@ impl<ID:Hash+Clone> Ui<ID> {
     pub fn has_id(&self, id: &ID) -> bool {
         let inner = unsafe{ &mut (&*self.inner) };
         inner.inner_public_map.contains_key(&UiInner::hash_id(id))
+    }
+
+    /**
+        Return the type of the control identified by `ID`
+
+        Params:  
+            • id -> The ID to check   
+    */
+    pub fn type_of_control(&self, id: &ID) -> Result<ControlType, Error> {
+        let inner = unsafe{ &mut (&*self.inner) };
+        inner.type_of_control(id)
     }
 
     /**

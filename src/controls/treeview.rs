@@ -7,10 +7,10 @@ use std::any::TypeId;
 use std::ptr;
 use std::mem;
 
-use winapi::{c_int, HWND, UINT, HTREEITEM};
+use winapi::{c_int, HWND, UINT, HTREEITEM, WPARAM, LPARAM};
 use user32::SendMessageW;
 
-use ui::Ui;
+use ui::{UiInner, Ui};
 use error::{Error, SystemError};
 use controls::{Control, ControlT, ControlType, AnyHandle};
 
@@ -41,7 +41,7 @@ impl<ID: Hash+Clone> ControlT<ID> for TreeViewT<ID> {
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{handle_of_window, build_window, WindowParams};
-        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER, TVS_HASLINES};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_BORDER, TVS_HASLINES, TVS_HASBUTTONS, TVS_LINESATROOT};
 
         // Get the parent handle
         let parent = match handle_of_window(ui, &self.parent, "The parent of a treeview must be a window-like control.") {
@@ -49,7 +49,7 @@ impl<ID: Hash+Clone> ControlT<ID> for TreeViewT<ID> {
             Err(e) => { return Err(e); }
         };
 
-        let flags: DWORD = WS_CHILD | WS_BORDER | TVS_HASLINES |
+        let flags: DWORD = WS_CHILD | WS_BORDER | TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT |
         if self.visible    { WS_VISIBLE }   else { 0 } |
         if self.disabled   { WS_DISABLED }  else { 0 };
 
@@ -126,22 +126,28 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TreeViewItemT<S, ID
     fn type_id(&self) -> TypeId { TypeId::of::<TreeViewItem>() }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        let parent_handle = ui.handle_of(&self.parent);
         let tree_handle: HWND;
+        let parent_handle = ui.handle_of(&self.parent);
         
         // Check if the parent handle is valid
         match &parent_handle {
-            &Ok(AnyHandle::HWND(_)) | &Ok(AnyHandle::HTREE_ITEM(_, _)) => { /* OK */ },
+            &Ok(AnyHandle::HWND(_)) => {
+                match ui.type_of_control(&self.parent) {
+                    Ok(ControlType::TreeView) => { /* OK */ },
+                    Ok(t) => { return Err(Error::BadParent(format!("TreeView or TreeViewItem parent required got \"{:?}\" control", t))); }
+                    Err(e) => { return Err(e); }
+                }
+            },
+            &Ok(AnyHandle::HTREE_ITEM(_, _)) => { /* OK */ },
             &Ok(ref h) => { return Err(Error::BadParent(format!("TreeView or TreeViewItem parent required got \"{}\" control", h.human_name()))); },
             &Err(ref e) => { return Err(e.clone()); }
         }
 
         // Build the insert information
-        let mut insert = InsertItemOptions {
-            tree: ptr::null_mut(),
-            parent: ptr::null_mut(),
+        let mut insert = ItemOptions {
+            tree: ptr::null_mut(), parent: ptr::null_mut(), item: ptr::null_mut(),
             text: Some(self.text.clone().into()),
-            integral: None
+            integral: None, has_children: false
         };
 
         // Create the item
@@ -184,27 +190,33 @@ impl Control for TreeViewItem {
     }
 
     fn free(&mut self) {
-        
+        use winapi::TVM_DELETEITEM;
+
+        unsafe{ SendMessageW(self.tree, TVM_DELETEITEM, 0, self.handle as LPARAM); }
     }
 }
 
 
 // Private functions / structures / enum
-use winapi::{TVIF_TEXT, TVIF_INTEGRAL};
+use winapi::{TVIF_TEXT, TVIF_INTEGRAL, TVIF_CHILDREN, TVIF_HANDLE};
+use low::other_helper::to_utf16;
 
-struct InsertItemOptions {
+struct ItemOptions {
     tree: HWND,
     parent: HTREEITEM,
+    item: HTREEITEM,
     text: Option<String>,
-    integral: Option<c_int>
+    integral: Option<c_int>,
+    has_children: bool
 }
 
-impl InsertItemOptions {
+impl ItemOptions {
     fn mask(&self) -> UINT {
-        let mut mask: UINT = 0;
+        let mut mask: UINT = TVIF_CHILDREN;
 
         if self.text.is_some() { mask |= TVIF_TEXT; }
         if self.integral.is_some() { mask |= TVIF_INTEGRAL; }
+        if !self.item.is_null() { mask |= TVIF_HANDLE; }
 
         mask
     }
@@ -212,14 +224,12 @@ impl InsertItemOptions {
 }
 
 #[allow(unused_variables)]
-unsafe fn insert_item(i: InsertItemOptions) -> Result<HTREEITEM, SystemError> {
-    use winapi::{TVI_LAST, TVM_INSERTITEMW, TVINSERTSTRUCTW, TVITEMEXW, TVI_ROOT};
-    use low::other_helper::to_utf16;
+unsafe fn update_item(i: ItemOptions) {
+    use winapi::{TVM_SETITEMW, TVITEMEXW};
 
     let mask = i.mask();
-    let parent = i.parent;
-    let insert_loc = if parent.is_null() { TVI_ROOT } else { TVI_LAST };
-    let integral = i.integral.unwrap_or(1);
+    let children = i.has_children as c_int;
+    let integral = i.integral.unwrap_or(0); 
     let (text_ptr, text) = match &i.text {
         &Some(ref t) => {
             let mut text_raw = to_utf16(t);
@@ -227,6 +237,50 @@ unsafe fn insert_item(i: InsertItemOptions) -> Result<HTREEITEM, SystemError> {
         },
         &None => (ptr::null_mut(), Vec::new())
     };
+
+    let mut item = TVITEMEXW{
+        mask: mask,
+        hItem: i.item,
+        state: 0,
+        stateMask: 0,
+        pszText: text_ptr,
+        cchTextMax: 0,
+        iImage: 0,
+        iSelectedImage: 0,
+        cChildren: children,
+        lParam: 0,
+        iIntegral: integral,
+        uStateEx: 0,
+        hwnd: ptr::null_mut(), iExpandedImage: 0, iReserved: 0    
+    };
+
+    SendMessageW(i.tree, TVM_SETITEMW, 0, mem::transmute(&mut item));
+}
+
+#[allow(unused_variables)]
+unsafe fn insert_item(i: ItemOptions) -> Result<HTREEITEM, SystemError> {
+    use winapi::{TVI_LAST, TVM_INSERTITEMW, TVINSERTSTRUCTW, TVITEMEXW, TVI_ROOT};
+
+    let mask = i.mask();
+    let parent = i.parent;
+    let insert_loc = if parent.is_null() { TVI_ROOT } else { TVI_LAST };
+    let integral = i.integral.unwrap_or(0);
+    let (text_ptr, text) = match &i.text {
+        &Some(ref t) => {
+            let mut text_raw = to_utf16(t);
+            (text_raw.as_mut_ptr(), text_raw)
+        },
+        &None => (ptr::null_mut(), Vec::new())
+    };
+
+    // If parent is not null, update the item to indicates that it has children
+    if !parent.is_null() {
+        let update = ItemOptions {
+            tree: i.tree, parent: ptr::null_mut(), item: parent,
+            text: None, integral: None, has_children: true
+        };
+        update_item(update);
+    }
 
     let mut insert_data = TVINSERTSTRUCTW {
         hParent: parent,
@@ -244,9 +298,7 @@ unsafe fn insert_item(i: InsertItemOptions) -> Result<HTREEITEM, SystemError> {
             lParam: 0,
             iIntegral: integral,
             uStateEx: 0,
-            hwnd: ptr::null_mut(),
-            iExpandedImage: 0,
-            iReserved: 0    
+            hwnd: ptr::null_mut(), iExpandedImage: 0, iReserved: 0    
         }
     };
 
@@ -256,4 +308,27 @@ unsafe fn insert_item(i: InsertItemOptions) -> Result<HTREEITEM, SystemError> {
     } else {
         Ok(tree_item)
     }
+}
+
+/**
+    Return a list of tree item ids
+*/
+pub fn list_tree_item_children<ID: Hash+Clone>(tree: HWND, item: HTREEITEM, ui: &mut UiInner<ID>) -> Vec<u64> {
+    use winapi::{TVM_GETNEXTITEM, TVGN_CHILD, TVGN_NEXT};
+
+    let mut children = Vec::with_capacity(10);
+    unsafe{
+        let mut child_item = SendMessageW(tree, TVM_GETNEXTITEM, TVGN_CHILD as WPARAM, item as LPARAM) as HTREEITEM;
+        while !child_item.is_null() {
+            children.append(&mut list_tree_item_children(tree, child_item, ui));
+            
+            if let Some(id) = ui.inner_id_from_handle(&AnyHandle::HTREE_ITEM(child_item, tree)) {
+                children.push(id);
+            }
+
+            child_item = SendMessageW(tree, TVM_GETNEXTITEM, TVGN_NEXT as WPARAM, child_item as LPARAM) as HTREEITEM;
+        }
+    }
+
+    children
 }

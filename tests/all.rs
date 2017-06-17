@@ -765,7 +765,7 @@ fn test_combobox() {
 }
 
 #[test]
-fn text_textinput() {
+fn test_textinput() {
     let ui = setup_ui();
 
     let ti_t = TextInputT::<_, &'static str, _> {
@@ -808,6 +808,65 @@ fn text_textinput() {
         assert!(tinput.get_limit() == 10);
         tinput.set_limit(10_000);
         assert!(tinput.get_limit() == 10_000);
+    }
+}
+
+#[test]
+fn test_treeview() {
+    let ui = setup_ui();
+
+    let treeview_t: TreeViewT<u64> = TreeViewT {
+        position: (0, 0), size: (200, 200),
+        visible: true, disabled: false, 
+        parent: 1000
+    };
+
+    let tree_item_t1 = TreeViewItemT{ text: "test", parent: 1001u64 };
+    let tree_item_t2 = TreeViewItemT{ text: "test", parent: 1002u64 };
+    let tree_item_t3 = TreeViewItemT{ text: "test", parent: 1002u64 };
+    let tree_item_t4 = TreeViewItemT{ text: "test", parent: 1002u64 };
+    let tree_item_t5 = TreeViewItemT{ text: "test", parent: 1004u64 };
+
+    
+    ui.pack_control(&1000, window());
+    ui.pack_control(&1001, treeview_t);
+    ui.pack_control(&1002, tree_item_t1.clone());
+    ui.pack_control(&1003, tree_item_t2.clone());
+    ui.pack_control(&1004, tree_item_t3.clone());
+    ui.pack_control(&1005, tree_item_t4.clone());
+    ui.pack_control(&1006, tree_item_t5.clone());
+    ui.pack_control(&1100, MenuItemT{text: "", parent: 1000, disabled: false});
+    ui.commit().expect("Commit was not successful");
+
+    let bad_tree_item_t1 = TreeViewItemT{ text: "test", parent: 1000u64 };
+    let bad_tree_item_t2 = TreeViewItemT{ text: "test", parent: 1100u64 };
+
+    ui.pack_control(&2000, bad_tree_item_t1);
+    match ui.commit() { Err(Error::BadParent(_)) => {}, r => panic!("Should have returned Error::BadParent, got {:?}", r) }
+
+    ui.pack_control(&2001, bad_tree_item_t2);
+    match ui.commit() { Err(Error::BadParent(_)) => {}, r => panic!("Should have returned Error::BadParent, got {:?}", r) }
+
+
+    // Should unpack treeitem and its children
+    ui.unpack(&1002);
+    ui.commit().expect("Commit was not successful");
+    for i in [1002, 1003, 1004, 1006].iter() {
+        assert!(!ui.has_id(i), "Tree item {:?} was found in the UI", i);
+    }
+
+    // Should unpack treeview and its treeitems
+    ui.pack_control(&1002, tree_item_t1);
+    ui.pack_control(&1003, tree_item_t2);
+    ui.pack_control(&1004, tree_item_t3);
+    ui.pack_control(&1005, tree_item_t4);
+    ui.pack_control(&1006, tree_item_t5);
+    ui.commit().expect("Commit was not successful");
+
+    ui.unpack(&1001);
+    ui.commit().expect("Commit was not successful");
+    for i in [1001, 1002, 1003, 1004, 1006].iter() {
+        assert!(!ui.has_id(i), "Tree item {:?} was found in the UI", i);
     }
 }
 

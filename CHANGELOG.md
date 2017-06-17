@@ -21,6 +21,7 @@ For more information also see:
 * The **ImageFrame** control to display a bitmap in a window
 * The **Frame** control to display a bordered frame inside another window
 * The **TreeView** control. To display tree hierarchy of data
+* The **TreeViewItem** control. To display an item in a tree view control
 
 
 ## Existsing control changes
@@ -30,6 +31,7 @@ For more information also see:
 * **UI**
   * `has_handle`: Check if the ui has an object identified by an handle
   * `id_from_handle`: Return the `ID` associated with an HANDLE
+  * `type_of_control`: Return the `ControlType` associated with a control
 
 * **Most controls**
   * `set_font` and `get_font`: Allow the user to set the font or get the font identifier of many built-in controls  

@@ -64,11 +64,17 @@ nwg_template!(
         ("DatePicker", nwg_datepicker!(parent="MainWindow"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(230, 220); size=(240, 25); font=Some("Font1"))),
         
         // ImageFrame
-        ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(165, 250); size=(100,100))),
+        ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(195, 250); size=(100,100))),
         
         // TreeView
-        ("TreeView", nwg_tree_view!(parent="MainWindow"; position=(10, 250); size=(150, 100))),
-        ("Tree_Root", nwg_tree_view_item!(parent="TreeView"; text="Root"))
+        ("TreeView", nwg_tree_view!(parent="MainWindow"; position=(10, 250); size=(180, 120))),
+        ("Tree_Root", nwg_tree_view_item!(parent="TreeView"; text="Department")),
+        ("TreeDirector", nwg_tree_view_item!(parent="Tree_Root"; text="Director & Associate")),
+        ("TreeBob", nwg_tree_view_item!(parent="TreeDirector"; text="Bob Stalone")),
+        ("TreeJob", nwg_tree_view_item!(parent="TreeDirector"; text="Job Drake")),
+        ("TreeManagement", nwg_tree_view_item!(parent="Tree_Root"; text="Management")),
+        ("TreeSally", nwg_tree_view_item!(parent="TreeManagement"; text="Sally Foo")),
+        ("TreeTI", nwg_tree_view_item!(parent="Tree_Root"; text="TI"))
     ];
     events: [
         ("RandomStuffTextBox", "AllSystemEvents", nwge::Any, |_,_,_,args| {
@@ -146,7 +152,7 @@ nwg_template!(
 );
 
 pub fn main() {
-    let mut app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
+    let app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
     
     // Pack the control in the application
     if let Err(e) = setup_ui(&app) {

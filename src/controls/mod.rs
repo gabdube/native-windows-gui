@@ -96,7 +96,7 @@ pub enum HandleSpec {
 /**
     An enum that list type names for the common controls.
 */
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ControlType {
     Window,
     Button,
