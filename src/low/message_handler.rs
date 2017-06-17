@@ -194,17 +194,6 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
         _ => (false, None)
     };
 
-    /*Evaluates other messages
-    processed |= match msg {
-        WM_TIMER => {
-            let handle = AnyHandle::Custom(TypeId::of::<Timer>(), l as usize);
-            let id = ui.inner_id_from_handle(&handle);
-            ui.trigger(id, Event::Tick, EventArgs::None);
-            true
-        },
-        _ => {false}
-    };*/
-
     if processed {
         if error.is_some() {
             ui.messages.last_error = error;

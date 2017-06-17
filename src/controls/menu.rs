@@ -221,10 +221,14 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
     use low::menu_helper::{use_menu_command, enable_menuitem};
     use low::other_helper::to_utf16;
 
-    let ph_result = ui.handle_of(&t.parent);
-    if ph_result.is_err() { return Err(ph_result.err().unwrap()); }
+    let parent_handle = ui.handle_of(&t.parent);
+    match &parent_handle {
+        &Ok(AnyHandle::HWND(_)) | &Ok(AnyHandle::HMENU(_)) => { /* OK */ },
+        &Ok(ref h) => { return Err(Error::BadParent(format!("TreeView or TreeViewItem parent required got \"{}\"", h.human_name()))); },
+        &Err(ref e) => { return Err(e.clone()); }
+    }
 
-    match ph_result.unwrap() {
+    match parent_handle.unwrap() {
         AnyHandle::HWND(parent_h) => {
             let mut menubar = GetMenu(parent_h);
             if menubar.is_null() {
@@ -255,12 +259,7 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
             Ok( ( h, AnyHandle::HMENU(parent_h) ) )
 
         },
-        AnyHandle::HMENU_ITEM(_, _) => Err(Error::BadParent("Window or menu parent required, got MenuItem".to_string())),
-        AnyHandle::HFONT(_) =>  Err(Error::BadParent("Window or menu parent required, got Font".to_string())),
-        AnyHandle::HICON(_) =>  Err(Error::BadParent("Window or menu parent required, got Icon".to_string())),
-        AnyHandle::HCURSOR(_) =>  Err(Error::BadParent("Window or menu parent required, got Cursor".to_string())),
-        AnyHandle::HANDLE(_, spec) =>  Err(Error::BadParent( format!("Window or menu parent required, got generic handle of type {:?}", spec))),
-        AnyHandle::Custom(_, _) =>  Err(Error::BadParent("Window or menu parent required, got custom control".to_string())),
+        _ => unreachable!()
    }
 }
 

@@ -25,7 +25,7 @@ pub mod frame;
 use std::any::TypeId;
 use std::hash::Hash;
 
-use winapi::{HWND, HANDLE, HCURSOR, HICON, HMENU, UINT, HFONT};
+use winapi::{HWND, HANDLE, HCURSOR, HICON, HMENU, UINT, HFONT, HTREEITEM};
 
 pub use controls::window::{WindowT, Window};
 pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem, SeparatorT, Separator};
@@ -44,7 +44,7 @@ pub use controls::timer::{TimerT, Timer};
 pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
 pub use controls::datepicker::{DatePickerT, DatePicker};
 pub use controls::image_frame::{ImageFrameT, ImageFrame};
-pub use controls::treeview::{TreeViewT, TreeView};
+pub use controls::treeview::{TreeViewT, TreeView, TreeViewItemT, TreeViewItem};
 pub use controls::frame::{FrameT, Frame};
 use ui::Ui;
 use error::Error;
@@ -58,11 +58,30 @@ pub enum AnyHandle {
     HWND(HWND),
     HMENU(HMENU),
     HMENU_ITEM(HMENU, UINT),
+    HTREE_ITEM(HTREEITEM, HWND),
     HFONT(HFONT),
     HCURSOR(HCURSOR),
     HICON(HICON),
     HANDLE(HANDLE, HandleSpec),
     Custom(TypeId, usize)
+}
+
+impl AnyHandle {
+    pub fn human_name(&self) -> String {
+        match self {
+            &AnyHandle::HWND(_) => "Window-like",
+            &AnyHandle::HMENU(_) => "Menu",
+            &AnyHandle::HMENU_ITEM(_,_) => "Menu item",
+            &AnyHandle::HTREE_ITEM(_,_) => "TreeView item",
+            &AnyHandle::HFONT(_) => "Font",
+            &AnyHandle::HCURSOR(_) => "Cursor",
+            &AnyHandle::HICON(_) => "Icon",
+            &AnyHandle::HANDLE(_, ref s) => match s {
+                &HandleSpec::Bitmap => "Bitmap"
+            },
+            &AnyHandle::Custom(_, _) => "Custom"
+        }.to_string()
+    }
 }
 
 /**
@@ -99,6 +118,7 @@ pub enum ControlType {
     Canvas,
     ImageFrame,
     TreeView,
+    TreeViewItem,
     Frame,
     Undefined  // Control is not a common control
 }

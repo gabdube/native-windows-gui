@@ -245,7 +245,7 @@ macro_rules! nwg_checkbox {
 */
 #[macro_export]
 macro_rules! nwg_combobox {
-    (data=$t:ty, parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+    (data=$t:ty; parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::ComboBoxT::<$t>{ 
             collection: [],
@@ -784,7 +784,33 @@ macro_rules! nwg_tree_view {
         $( t.$i = $v; );*
 
         t
-    }}
+    }};
+}
+
+/**
+    Sane defaults for the TreeViewItem control. Requires a parent.
+
+    Defaults:  
+    • text: `Item`
+
+    Usage:  
+    `nwg_tree_view_item!(parent="MyParent";)`  
+    `nwg_tree_view_item!(parent="MyParent"; text="AAA"; )`  
+    `nwg_tree_view_item!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
+#[macro_export]
+macro_rules! nwg_tree_view_item {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::TreeViewItemT{ 
+            text:"Item",
+            parent: $p
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }};
 }
 
 /**

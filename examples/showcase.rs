@@ -11,7 +11,10 @@ use nwg::events as nwge;
 nwg_template!(
     head: setup_ui<&'static str>,
     controls: [
+        // Window
         ("MainWindow", nwg_window!(title="Nwg Showcase"; position=(100, 100); size=(500, 400); icon=Some("RustLogoIcon"))),
+        
+        // Menus
         ("FileMenu", nwg_menu!(parent="MainWindow"; text="&File")),
         ("TestSubmenu1", nwg_menu!(parent="FileMenu"; text="&Submenu")),
         ("TestDisabledSubmenu", nwg_menu!(parent="FileMenu"; text="Disabled Submenu"; disabled=true)),
@@ -21,28 +24,51 @@ nwg_template!(
         ("S1", nwg_separator!(parent="FileMenu")),
         ("QuitItem", nwg_menuitem!(parent="FileMenu"; text="&Quit")),
         ("WindowAction", nwg_menuitem!(parent="MainWindow"; text="&Action")),
+        
+        // Timers
         ("TimerButton", nwg_button!(parent="MainWindow"; text="Start timer"; position=(10,85); size=(100, 30); font=Some("Font2"))),
         ("TimerLabel", nwg_label!(parent="MainWindow"; text="Time elapsed: 0 seconds"; position=(120, 90); size=(200, 25); font=Some("Font2"))),
         ("Timer", nwg_timer!(interval=500)),
+        
+        // File dialog
         ("FileDialogButton", nwg_button!(parent="MainWindow"; text="Browse File"; position=(10,120); size=(100, 30); font=Some("Font1"))),
-        ("FilePathInput", nwg_textinput!(parent="MainWindow"; position=(120, 125); size=(300, 24); readonly=true; font=Some("Font1"))),
+        ("FilePathInput", nwg_textinput!(parent="MainWindow"; position=(120, 125); size=(360, 24); readonly=true; font=Some("Font1"))),
         ("FileDialog", nwg_filedialog!(parent=Some("MainWindow"); action=FileDialogAction::Open; filters=Some("Test(*.txt;*.rs)|Any(*.*)"))),
+        
+        // List
         ("NameList", nwg_listbox!(parent="MainWindow"; position=(10, 10); size=(100, 60); collection=vec!["A Listbox", "Jimmy", "Sam", "Coconut", "Waldo", "David", "John"])),
+        
+        // Checkbox & radios
         ("HappyCheckBox", nwg_checkbox!(parent="MainWindow"; text="I am happy"; position=(120, 10); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
         ("TriCheckBox", nwg_checkbox!(parent="MainWindow"; text="Three states"; position=(240, 10); size=(110, 30); tristate=true; checkstate=CheckState::Indeterminate; font=Some("Font1"))),
         ("CatRadio", nwg_radiobutton!(parent="MainWindow"; text="I have a cat"; position=(120, 50); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
         ("DogRadio", nwg_radiobutton!(parent="MainWindow"; text="I have a dog"; position=(240, 50); size=(110, 30); font=Some("Font1"))),
+        
+        // Groupbox
         ("YesNoGroup", nwg_groupbox!(parent="MainWindow"; text="Choose one"; position=(360, 40); size=(130, 80);  align=HTextAlign::Center; font=Some("Font1") )),
         ("YesRadio", nwg_radiobutton!(parent="YesNoGroup"; text="Yes"; position=(10, 20); size=(110, 30); font=Some("Font1"))),
         ("NoRadio", nwg_radiobutton!(parent="YesNoGroup"; text="No"; position=(10, 45); size=(110, 30); font=Some("Font1"))),
+        
+        // Combobox
         ("SchoolSupplyComboBox ", nwg_combobox!(parent="MainWindow"; position=(360, 10); size=(130, 30); placeholder=Some("Choose plz"); font=Some("Font1"); collection=vec!["Pencil", "Eraser", "Scissor", "Calculator", "Notebook"])),
+        
+        // Textbox
         ("RandomStuffLabel", nwg_label!(parent="MainWindow"; text="Write some notes in here:"; position=(10, 160); size=(180, 25); font=Some("Font1"))),
         ("RandomStuffTextBox", nwg_textbox!(parent="MainWindow"; position=(10, 185); size=(200, 60); scrollbars=(false, true))),
+        
+        // Progress bar
         ("InstallCatLabel", nwg_label!(parent="MainWindow"; text="Installing cat.exe ..."; position=(230, 160); size=(180, 25); font=Some("Font1") )),
         ("CatProgress", nwg_progressbar!(parent="MainWindow"; position=(230, 190); size=(240, 25); range=(0, 100); value=85)),
+        
+        // Date picker
         ("DatePicker", nwg_datepicker!(parent="MainWindow"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(230, 220); size=(240, 25); font=Some("Font1"))),
+        
+        // ImageFrame
         ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(165, 250); size=(100,100))),
-        ("TreeView", nwg_tree_view!(parent="MainWindow"; position=(10, 250); size=(150, 100)))
+        
+        // TreeView
+        ("TreeView", nwg_tree_view!(parent="MainWindow"; position=(10, 250); size=(150, 100))),
+        ("Tree_Root", nwg_tree_view_item!(parent="TreeView"; text="Root"))
     ];
     events: [
         ("RandomStuffTextBox", "AllSystemEvents", nwge::Any, |_,_,_,args| {
@@ -120,7 +146,7 @@ nwg_template!(
 );
 
 pub fn main() {
-    let app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
+    let mut app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
     
     // Pack the control in the application
     if let Err(e) = setup_ui(&app) {
