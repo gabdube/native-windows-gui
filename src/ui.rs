@@ -144,15 +144,6 @@ impl<ID: Hash+Clone> UiInner<ID> {
 
     fn unpack_control(&mut self, id: InnerId) -> Option<Error> {
         use low::events::unhook_window_events;
-        use low::menu_helper::list_menu_children;
-        use low::window_helper::list_window_children;
-        use controls::treeview::list_tree_item_children;
-       
-
-        // Check if the control is currently borrowed by the user
-        if let Err(_) = self.controls.get(&id).unwrap().try_borrow_mut() { 
-            return Some(Error::ControlInUse);
-        }
 
         // Check if one of the control events is currently being executed
         {
@@ -165,30 +156,20 @@ impl<ID: Hash+Clone> UiInner<ID> {
         }
 
         // Unpack the children
-        let handle = self.handle_of(id);
-        if handle.is_err() { return Some(handle.err().unwrap()); }
-
-        let children_ids: Vec<u64> = match handle.unwrap() {
-            AnyHandle::HMENU(h) => unsafe {
-                let mut children = vec![id];
-                children.append( &mut list_menu_children(self, h) );
-                children
+        let control_to_free = match self.handle_of(id) {
+            Ok(handle) => {
+                let mut handles_to_free: Vec<AnyHandle> = vec![handle];
+                match self.children_of(id) {
+                    Ok(mut children) => handles_to_free.append(&mut children),
+                    Err(_) => { unreachable!(); } // Prior validation ensure that children_of will never fail
+                }
+                handles_to_free
             },
-            AnyHandle::HWND(h) => unsafe { 
-                let mut children = vec![id];
-                children.append( &mut list_window_children(h, self as *mut UiInner<ID>) );
-                children
-            },
-            AnyHandle::HTREE_ITEM(handle, tree) => {
-                let mut children = vec![id];
-                children.append( &mut list_tree_item_children(tree, handle, self) );
-                children
-            },
-            AnyHandle::HMENU_ITEM(_, _) | AnyHandle::HFONT(_) | AnyHandle::Custom(_, _) | AnyHandle::HANDLE(_,_) |
-            AnyHandle::HCURSOR(_) | AnyHandle::HICON(_) => vec![id], // These handle can't have children
+            Err(e) => { return Some(e); }
         };
-       
-        for id in children_ids.iter().rev() {
+
+        let ids_to_free: Vec<InnerId> = control_to_free.iter().filter_map(|handle|{ self.inner_id_from_handle(handle) }).collect();
+        for id in ids_to_free.iter().rev() {
 
             // Call the destroy callbacks
             self.trigger(*id, Destroyed, EventArgs::None);
@@ -411,6 +392,22 @@ impl<ID: Hash+Clone> UiInner<ID> {
         }
 
         Err(Error::ControlOrResourceRequired)
+    }
+
+    pub fn children_of(&self, id: InnerId) -> Result<Vec<AnyHandle>, Error> {
+        if !self.inner_public_map.contains_key(&id) {
+            return Err(Error::KeyNotFound);
+        }
+        
+        if let Some(v) = self.controls.get(&id) {
+            if let Ok(v_ref) = v.try_borrow() {
+                return Ok( v_ref.children() );
+            } else {
+                return Err(Error::BorrowError);
+            }
+        }
+
+        Err(Error::ControlRequired)
     }
 
     #[inline(always)]

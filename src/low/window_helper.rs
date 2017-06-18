@@ -25,7 +25,7 @@ use std::hash::Hash;
 use winapi::{HWND, HFONT, HBRUSH, WNDPROC, DWORD, LPARAM, BOOL, c_int};
 use user32::SendMessageW;
 
-use ui::{UiInner, Ui};
+use ui::Ui;
 use controls::{AnyHandle};
 use low::other_helper::to_utf16;
 use error::{Error, SystemError};
@@ -204,14 +204,9 @@ unsafe fn fix_overlapped_window_size(handle: HWND, size: (u32, u32)) {
 }
 
 
-unsafe extern "system" fn list_children_window<ID: Clone+Hash+'static>(handle: HWND, params: LPARAM) -> BOOL {
-    let &mut (inner, ref mut ids): &mut (*mut UiInner<ID>, Vec<u64>) = mem::transmute(params);
-
-    // Check if the window belongs to the ui
-    if let Some(id) = ::low::events::window_id(handle, inner) {
-        ids.push(id)
-    }
-
+unsafe extern "system" fn list_children_window(handle: HWND, params: LPARAM) -> BOOL {
+    let handles: &mut Vec<AnyHandle> = mem::transmute(params);
+    handles.push(AnyHandle::HWND(handle));
     1
 }
 
@@ -219,21 +214,21 @@ unsafe extern "system" fn list_children_window<ID: Clone+Hash+'static>(handle: H
     Return the children control found in the window. Includes the window menubar if one is present.
 */
 #[allow(unused_variables)]
-pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInner<ID>) -> Vec<u64> {
+pub unsafe fn list_window_children(handle: HWND) -> Vec<AnyHandle> {
     use user32::{GetMenu, EnumChildWindows};
     use low::menu_helper::list_menu_children;
 
-    let mut children = Vec::new();
+    let mut children: Vec<AnyHandle> = Vec::new();
 
     let menu = GetMenu(handle);
     if !menu.is_null() {
-        children.append(&mut list_menu_children((&*ui), menu) );
+        children.append( &mut list_menu_children(menu) );
     }
 
-    let mut params: (*mut UiInner<ID>, Vec<u64>) = (ui, children);
-    EnumChildWindows(handle, Some(list_children_window::<ID>), mem::transmute(&mut params));
+    let mut params: Vec<AnyHandle> = children;
+    EnumChildWindows(handle, Some(list_children_window), mem::transmute(&mut params));
 
-    params.1
+    params
 }
 
 /// Set the font of a window

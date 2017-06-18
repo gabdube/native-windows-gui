@@ -10,7 +10,7 @@ use std::mem;
 use winapi::{c_int, HWND, UINT, HTREEITEM, WPARAM, LPARAM};
 use user32::SendMessageW;
 
-use ui::{UiInner, Ui};
+use ui::Ui;
 use error::{Error, SystemError};
 use controls::{Control, ControlT, ControlType, AnyHandle};
 
@@ -100,6 +100,10 @@ impl Control for TreeView {
         ControlType::TreeView 
     }
 
+    fn children(&self) -> Vec<AnyHandle> {
+        unsafe{ list_tree_children(self.handle) }
+    }
+
     fn free(&mut self) {
         use user32::DestroyWindow;
         unsafe{ DestroyWindow(self.handle) };
@@ -187,6 +191,10 @@ impl Control for TreeViewItem {
 
     fn control_type(&self) -> ControlType { 
         ControlType::TreeViewItem 
+    }
+
+    fn children(&self) -> Vec<AnyHandle> {
+        unsafe{ list_tree_item_children(self.tree, self.handle) }
     }
 
     fn free(&mut self) {
@@ -311,24 +319,32 @@ unsafe fn insert_item(i: ItemOptions) -> Result<HTREEITEM, SystemError> {
 }
 
 /**
-    Return a list of tree item ids
+    Return a list of tree item handles
 */
-pub fn list_tree_item_children<ID: Hash+Clone>(tree: HWND, item: HTREEITEM, ui: &mut UiInner<ID>) -> Vec<u64> {
+unsafe fn list_tree_item_children(tree: HWND, item: HTREEITEM) -> Vec<AnyHandle> {
     use winapi::{TVM_GETNEXTITEM, TVGN_CHILD, TVGN_NEXT};
 
     let mut children = Vec::with_capacity(10);
-    unsafe{
-        let mut child_item = SendMessageW(tree, TVM_GETNEXTITEM, TVGN_CHILD as WPARAM, item as LPARAM) as HTREEITEM;
-        while !child_item.is_null() {
-            children.append(&mut list_tree_item_children(tree, child_item, ui));
-            
-            if let Some(id) = ui.inner_id_from_handle(&AnyHandle::HTREE_ITEM(child_item, tree)) {
-                children.push(id);
-            }
-
-            child_item = SendMessageW(tree, TVM_GETNEXTITEM, TVGN_NEXT as WPARAM, child_item as LPARAM) as HTREEITEM;
-        }
+    let mut child_item = SendMessageW(tree, TVM_GETNEXTITEM, TVGN_CHILD as WPARAM, item as LPARAM) as HTREEITEM;
+    while !child_item.is_null() {
+        children.push(AnyHandle::HTREE_ITEM(child_item, tree));
+        children.append(&mut list_tree_item_children(tree, child_item));
+        child_item = SendMessageW(tree, TVM_GETNEXTITEM, TVGN_NEXT as WPARAM, child_item as LPARAM) as HTREEITEM;
     }
+
+    children
+}
+
+/**
+    Return a list of of every treeitem handle in a tree
+*/
+unsafe fn list_tree_children(tree: HWND) -> Vec<AnyHandle> {
+    use winapi::{TVM_GETNEXTITEM, TVGN_ROOT};
+
+    let mut children = Vec::with_capacity(10);
+    let root_item = SendMessageW(tree, TVM_GETNEXTITEM, TVGN_ROOT as WPARAM, 0) as HTREEITEM;
+    children.push(AnyHandle::HTREE_ITEM(root_item, tree));
+    children.append(&mut list_tree_item_children(tree, root_item));
 
     children
 }

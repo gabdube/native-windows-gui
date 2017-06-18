@@ -30,7 +30,8 @@ pub mod custom {
     pub use low::events::{Event, UnpackProc, HandleProc, event_unpack_no_args, hwnd_handle, command_handle, notify_handle};
     pub use low::window_helper::{build_window, build_sysclass, SysclassParams, WindowParams, set_window_long, get_window_long,
     get_window_text, set_window_text, get_window_visibility, set_window_visibility, get_window_position, set_window_position,
-    get_window_size, set_window_size, get_window_enabled, set_window_enabled, set_window_font, get_window_font};
+    get_window_size, set_window_size, get_window_enabled, set_window_enabled, set_window_font, get_window_font, list_window_children};
+    pub use low::menu_helper::list_menu_children;
 
 }
 

@@ -13,6 +13,9 @@ For more information also see:
   * https://gabdube.github.io/native-windows-gui/book/events.html (events basics)
   * https://gabdube.github.io/native-windows-gui/book/custom_events.html (defining custom events)
   * https://github.com/gabdube/native-windows-gui/blob/master/examples/templating.rs (simple example)
+* Uis no longuer implictly free the children when unpacking a control. Instead the children handles
+  must be returned in a `Vec` by the `Control.children` method. This method can be ignored if the
+  control can't have children.
 
 
 ## New resources and controls

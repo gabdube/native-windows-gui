@@ -118,6 +118,11 @@ impl Control for GroupBox {
         ControlType::GroupBox 
     }
 
+    fn children(&self) -> Vec<AnyHandle> {
+        use low::window_helper::list_window_children;
+        unsafe{ list_window_children(self.handle) }
+    }
+
     fn free(&mut self) {
         use user32::DestroyWindow;
         unsafe{ DestroyWindow(self.handle) };

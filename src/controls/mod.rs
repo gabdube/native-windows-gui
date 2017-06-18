@@ -156,6 +156,13 @@ pub trait Control {
     fn control_type(&self) -> ControlType { ControlType::Undefined }
 
     /**
+        Should return a list of any children control.  
+        Called when unpacking a control to get its children. Handle that do not belong to NWG will be ignored.
+    */
+    fn children(&self) -> Vec<AnyHandle> { Vec::new() }
+
+
+    /**
         If specified, should free any ressource allocated in the template `build` function. This includes functions like `DestroyWindow`.
     */
     fn free(&mut self) {}

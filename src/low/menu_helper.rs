@@ -3,21 +3,19 @@
 */
 use std::ptr;
 use std::mem;
-use std::hash::Hash;
 
 use winapi::{HMENU, DWORD, HBRUSH, c_int, UINT, BOOL};
 
-use ui::UiInner;
 use controls::AnyHandle;
 
 /**
     List the children of a menu and return a list of their IDs. The function is recursive and so 
     it list the ids for the whole menu tree.
 */
-pub unsafe fn list_menu_children<ID: Hash+Clone>(ui: &UiInner<ID>, menu: HMENU) -> Vec<u64> { 
+pub unsafe fn list_menu_children(menu: HMENU) -> Vec<AnyHandle> { 
     use low::defs::{GetMenuItemCount, GetSubMenu, GetMenuItemID};
 
-    let mut children: Vec<u64> = Vec::new();
+    let mut children: Vec<AnyHandle> = Vec::new();
     let children_count = GetMenuItemCount(menu);
 
     for i in 0..children_count {
@@ -25,14 +23,12 @@ pub unsafe fn list_menu_children<ID: Hash+Clone>(ui: &UiInner<ID>, menu: HMENU) 
         if sub_menu.is_null() {
             // Get a menu item ID
             let handle = AnyHandle::HMENU_ITEM(menu, GetMenuItemID(menu, i));
-            let id = ui.inner_id_from_handle(&handle) .expect("Could not match menu handle to menu control");
-            children.push( id );
+            children.push( handle );
         } else {
             // Get the menu ID
             let handle = AnyHandle::HMENU(sub_menu);
-            let id = ui.inner_id_from_handle(&handle).expect("Could not match menu handle to menu control");
-            children.push( id );
-            children.append( &mut list_menu_children(ui, sub_menu) );
+            children.push( handle );
+            children.append( &mut list_menu_children(sub_menu) );
         }
     }
 

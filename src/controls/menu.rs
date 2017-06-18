@@ -73,6 +73,11 @@ impl Control for Menu {
         ControlType::Menu
     }
 
+    fn children(&self) -> Vec<AnyHandle> {
+        use low::menu_helper::list_menu_children;
+        unsafe{ list_menu_children(self.handle) }
+    }
+
     fn free(&mut self) {
         use user32::DestroyMenu;
         use low::menu_helper::remove_menu_from_parent;
