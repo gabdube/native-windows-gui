@@ -26,7 +26,7 @@ use defs::MouseButton;
 use winapi::{WPARAM, LPARAM};
 
 // System events that can be applied to any HWND based control
-pub use low::events::{Event, Destroyed, Paint, Closed, Moved, KeyDown, KeyUp, Resized, Char, MouseUp, MouseDown};
+pub use low::events::{Event, Destroyed, Paint, Closed, Moved, KeyDown, KeyUp, Resized, Char, MouseUp, MouseDown, MouseMove};
 
 // Control specfic events
 pub mod button { pub use low::events::{BtnClick as Click, BtnDoubleClick as DoubleClick, BtnFocus as Focus}; }
@@ -41,6 +41,7 @@ pub mod textbox { pub use low::events::{EnFocus as Focus, EnLimit as Limit, EnVa
 pub use self::textbox as textinput; // Textinput use the same events of the textbox
 pub mod menu { pub use low::events::MenuTrigger as Triggered; }
 pub mod timer { pub use low::events::TimerTick as Tick; }
+pub mod treeview { pub use low::events::TreeViewSelectionChanged as SelectionChanged; }
 
 pub use self::Event::Any as Any;
 

@@ -14,6 +14,7 @@ extern crate ole32;
 mod low;
 mod defs;
 mod error;
+mod cursor;
 mod controls;
 mod resources;
 mod ui;
@@ -53,3 +54,4 @@ pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, B
  
 pub use resources::{FontT, Font, ImageT, Image};
 pub use ui::{Ui, dispatch_events, exit, toggle_console};
+pub use cursor::Cursor;

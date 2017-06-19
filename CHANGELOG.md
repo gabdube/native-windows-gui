@@ -13,10 +13,10 @@ For more information also see:
   * https://gabdube.github.io/native-windows-gui/book/events.html (events basics)
   * https://gabdube.github.io/native-windows-gui/book/custom_events.html (defining custom events)
   * https://github.com/gabdube/native-windows-gui/blob/master/examples/templating.rs (simple example)
+* Events are no longer restrained on controls. This means that it is now possible to extend builtin controls with custom user events!
 * Uis no longuer implictly free the children when unpacking a control. Instead the children handles
   must be returned in a `Vec` by the `Control.children` method. This method can be ignored if the
   control can't have children.
-
 
 ## New resources and controls
 
@@ -43,6 +43,9 @@ For more information also see:
 ## Other methods
 
 * `toggle_console`: Hide or show the program console
+* The `Cursor` struct. A fieldless struct to interface over the system cursor.
+    * `get_position`: Return the cursor position in the screen
+    * `set_position`: Set the cursor position in the screen
 
 
 # BETA 1 (0.2.0)

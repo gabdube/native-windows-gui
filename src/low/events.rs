@@ -12,7 +12,7 @@ use winapi::{HWND, UINT, DWORD, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, WO
 use winapi::{WM_MOVE, WM_SIZING, WM_SIZE, WM_EXITSIZEMOVE, WM_PAINT, WM_UNICHAR, WM_CHAR,
   WM_CLOSE, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, WM_LBUTTONDOWN, WM_RBUTTONDOWN,
   WM_MBUTTONDOWN, WM_KEYDOWN, WM_KEYUP, BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS,
-  DTN_CLOSEUP, WM_COMMAND, WM_NOTIFY, WM_TIMER, WM_MENUCOMMAND};
+  DTN_CLOSEUP, WM_COMMAND, WM_NOTIFY, WM_TIMER, WM_MENUCOMMAND, TVN_SELCHANGEDW, WM_MOUSEMOVE};
 
 use ui::UiInner;
 use events::EventArgs;
@@ -142,6 +142,7 @@ pub const Resized: Event = Event::Group(&[WM_SIZING, WM_SIZE, WM_EXITSIZEMOVE], 
 pub const Char: Event = Event::Group(&[WM_UNICHAR, WM_CHAR], &unpack_char, &hwnd_handle);
 pub const MouseUp: Event = Event::Group(&[WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP], &unpack_mouseclick, &hwnd_handle);
 pub const MouseDown: Event = Event::Group(&[WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN], &unpack_mouseclick, &hwnd_handle);
+pub const MouseMove: Event = Event::Single(WM_MOUSEMOVE, &unpack_mousemove, &hwnd_handle);
 
 // Button events
 pub const BtnClick: Event = Event::Single(WM_COMMAND, &event_unpack_no_args, &|h,m,w,l|{ command_handle(h,m,w,l,BN_CLICKED) });
@@ -174,6 +175,9 @@ pub const TimerTick: Event = Event::Single(WM_TIMER, &event_unpack_no_args, &|h,
 
 // Menu item events
 pub const MenuTrigger: Event = Event::Single(WM_MENUCOMMAND, &event_unpack_no_args, &menuitem_handle);
+
+// TreeView events
+pub const TreeViewSelectionChanged: Event = Event::Single(WM_NOTIFY, &event_unpack_no_args, &|h,m,w,l|{ notify_handle(h,m,w,l, TVN_SELCHANGEDW) });
 
 // Event unpackers for the events defined above
 fn unpack_move(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
@@ -208,6 +212,13 @@ fn unpack_char(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs>
     } else {
       None
     }
+}
+
+fn unpack_mousemove(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
+    use winapi::{GET_X_LPARAM, GET_Y_LPARAM};
+    let x = GET_X_LPARAM(l) as i32; 
+    let y = GET_Y_LPARAM(l) as i32;
+    Some(EventArgs::Position(x, y))
 }
 
 fn unpack_mouseclick(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {

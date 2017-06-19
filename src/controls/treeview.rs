@@ -81,6 +81,26 @@ pub struct TreeView {
 
 impl TreeView {
 
+    /**
+        Return the ID of the currently selected item in the treeview. If none are selected, return `None`.
+
+        Arguments:
+            • ui: The Ui object containing the item and the treeview  
+    */
+    pub fn get_selected_item<ID: Hash+Clone+'static>(&self, ui: &Ui<ID>) -> Option<ID> {
+        use winapi::{TVM_GETNEXTITEM, TVGN_CARET};
+        let selected_item = unsafe{ SendMessageW(self.handle, TVM_GETNEXTITEM, TVGN_CARET, 0) as HTREEITEM };
+        if selected_item.is_null() {
+            None
+        } else {
+            let handle = AnyHandle::HTREE_ITEM(selected_item, self.handle);
+            match ui.id_from_handle(&handle) {
+                Ok(id) => Some(id),
+                Err(_) => None
+            }
+        }
+    }
+
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
     pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
     pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
