@@ -168,7 +168,7 @@ pub enum OemImage {
 /**
     List of system cursors. To use with the `OemImageT` resource template.
 */
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum OemCursor {
     Normal = 32512,
     IBeam = 32513,
@@ -189,7 +189,7 @@ pub enum OemCursor {
 /**
     List of system bitmaps. To use with the `OemImageT` resource template.
 */
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum OemBitmap {
     BtnCorners = 32758,
     BtSize = 32761,
@@ -230,7 +230,7 @@ pub enum OemBitmap {
 /**
     List of system icons. To use with the `OemImageT` resource template.
 */
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum OemIcon {
     Sample = 32512,
     Ques = 32514,

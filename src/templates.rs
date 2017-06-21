@@ -904,3 +904,29 @@ macro_rules! nwg_image {
         t
     }}
 }
+
+/**
+    Sane defaults for the OemImage resource.  
+    The `source` attribute is required.
+
+    Defaults:  
+    • size: `(0,0)`  
+
+    Usage:  
+    `nwg_oem_image!(source=OemImage::Cursor(OemCursor::IBeam))`  
+    `nwg_oem_image!(source=OemImage::Cursor(OemCursor::IBeam); size=(10, 10))`   
+*/
+#[macro_export]
+macro_rules! nwg_oem_image {
+    (source=$s:expr; $( $i:ident=$v:expr );*) => { #[allow(unused_mut)]{
+        let mut t = 
+        $crate::OemImageT{ 
+            source: $s,
+            size: (0, 0)
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }}
+}

@@ -52,6 +52,6 @@ pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, B
  FileDialogT, FileDialog, CanvasT, Canvas, CanvasRenderer, TextBoxT, TextBox, GroupBoxT, GroupBox, ProgressBarT, ProgressBar,
  DatePickerT, DatePicker, ImageFrameT, ImageFrame, TreeViewT, TreeView, TreeViewItemT, TreeViewItem, FrameT, Frame};
  
-pub use resources::{FontT, Font, ImageT, Image};
+pub use resources::{FontT, Font, ImageT, OemImageT, Image};
 pub use ui::{Ui, dispatch_events, exit, toggle_console};
 pub use cursor::Cursor;

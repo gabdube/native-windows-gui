@@ -11,8 +11,58 @@ use ui::Ui;
 use controls::{AnyHandle, HandleSpec};
 use resources::{ResourceT, Resource};
 use error::{Error, SystemError};
-use defs::ImageType;
+use defs::{ImageType, OemImage};
 use low::other_helper::to_utf16;
+
+/**
+    A template that creates a image resource from a global system resource.
+
+    Params:  
+    • `source`: A OemImage image identifier.  
+    • `size`: The size of the image to load. If left to (0, 0), use the original resource size.  
+*/
+pub struct OemImageT {
+    pub source: OemImage,
+    pub size: (c_int, c_int)
+}
+
+impl<ID: Clone+Hash> ResourceT<ID> for OemImageT {
+    fn type_id(&self) -> TypeId { TypeId::of::<Image>() }
+
+    #[allow(unused_variables)]
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Resource>, Error> {
+        use winapi::{LPCWSTR, LR_DEFAULTSIZE, LR_SHARED, IMAGE_BITMAP, IMAGE_CURSOR, IMAGE_ICON};
+        use user32::LoadImageW;
+
+        let (width, height) = self.size;
+        let (res_type, c_res_type, res_identifier) = match &self.source {
+            &OemImage::Bitmap(b) => {
+                (ImageType::Bitmap, IMAGE_BITMAP, (b as usize) as LPCWSTR)
+            },
+            &OemImage::Cursor(c) => {
+                (ImageType::Cursor, IMAGE_CURSOR, (c as usize) as LPCWSTR)
+            },
+            &OemImage::Icon(i) => {
+                (ImageType::Icon, IMAGE_ICON, (i as usize) as LPCWSTR)
+            }
+        };
+
+        let flags = if self.size == (0, 0) {
+            LR_DEFAULTSIZE|LR_SHARED
+        } else {
+            LR_SHARED
+        };
+
+        let handle = unsafe{ LoadImageW(ptr::null_mut(), res_identifier, c_res_type, width, height, flags) };
+
+        if handle.is_null() {
+            Err(Error::System(SystemError::ImageCreation))
+        } else {
+            Ok( Box::new( Image{ handle: handle, image_type: res_type } ) )
+        }
+
+    }
+}
 
 /**
     A template that creates a image resource
