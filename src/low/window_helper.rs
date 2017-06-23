@@ -407,6 +407,15 @@ pub unsafe fn get_window_visibility(handle: HWND) -> bool {
     IsWindowVisible(handle) != 0
 }
 
+/**
+    Send a WM_PAINT event to the window if it must be redrawn
+*/
+#[inline(always)]
+pub unsafe fn update(handle: HWND) {
+    use user32::UpdateWindow;
+    UpdateWindow(handle);
+}
+
 
 #[inline(always)]
 pub fn handle_of_window<ID: Clone+Hash>(ui: &Ui<ID>, id: &ID, err: &'static str) -> Result<HWND, Error> {

@@ -140,6 +140,8 @@ impl Window {
     pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, true); } }
     pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
     pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+    pub fn update(&self) { unsafe{ ::low::window_helper::update(self.handle); } }
+    pub fn focus(&self) { unsafe{ ::user32::SetFocus(self.handle); } }
 }
 
 impl Control for Window {

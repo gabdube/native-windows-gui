@@ -38,6 +38,8 @@ For more information also see:
 
 * **Most controls**
   * `set_font` and `get_font`: Allow the user to set the font or get the font identifier of many built-in controls  
+  * `update`: Force a control to redraw itself.  
+  * `focus`: Sets the keyboard focus to the specified control
 
 
 ## Other methods
@@ -50,7 +52,8 @@ For more information also see:
     * `set`: Get the cursor resource identifier
     * `get_capture`: Capture the mouse for a control
     * `set_capture`: Get the identifier of the control that captures the mouse
-    * `dragging`: Check if the user tries to drag a control. Mostly used with a `set_capture`/`get_capture` pair   
+    * `release`: Release the mouse capture set with `set_capture`
+    * `dragging`: Check if the user tries to drag a control. Mostly used with a `set_capture`/`release` pair   
 
 
 # BETA 1 (0.2.0)

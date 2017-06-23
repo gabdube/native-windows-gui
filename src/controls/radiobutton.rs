@@ -133,6 +133,8 @@ impl RadioButton {
     pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
     pub fn get_font<ID: Hash+Clone>(&self, ui: &Ui<ID>) -> Option<ID> { unsafe{ ::low::window_helper::get_window_font(self.handle, ui) } }
     pub fn set_font<ID: Hash+Clone>(&self, ui: &Ui<ID>, f: Option<&ID>) -> Result<(), Error> { unsafe{ ::low::window_helper::set_window_font(self.handle, ui, f) } }
+    pub fn update(&self) { unsafe{ ::low::window_helper::update(self.handle); } }
+    pub fn focus(&self) { unsafe{ ::user32::SetFocus(self.handle); } }
 }
 
 impl Control for RadioButton {

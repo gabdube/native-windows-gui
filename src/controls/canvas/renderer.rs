@@ -12,7 +12,7 @@ use winapi::{FLOAT, D2D1_RECT_F, D2D1_ROUNDED_RECT, D2D1_ELLIPSE, D2D1_POINT_2F,
   D2D1_MATRIX_3X2_F, ID2D1Brush, ID2D1StrokeStyle};
 
 use error::Error;
-use defs::{Rectangle, Ellipse};
+use defs::canvas::{Rectangle, Ellipse};
 use super::{Canvas, CanvasProtected, CanvasResources};
 
 /**

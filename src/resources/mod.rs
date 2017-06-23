@@ -4,6 +4,7 @@
 
 pub mod font;
 pub mod image;
+pub mod canvas;
 
 use std::any::TypeId;
 use std::hash::Hash;

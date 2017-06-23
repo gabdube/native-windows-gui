@@ -101,14 +101,45 @@ impl TreeView {
         }
     }
 
+    /**
+        Set the selected item in the treeview. If item is null, remove any active item in the tree view.
+
+        Arguments:
+            • ui: The Ui object containing the item and the treeview  
+            • item: A reference to the item to set
+    */
+    pub fn set_selected_item<ID: Hash+Clone+'static>(&self, ui: &Ui<ID>, item: Option<&ID>) -> Result<(), Error> {
+        use winapi::{TVM_SELECTITEM, TVGN_CARET};
+
+        if !ui.has_handle(&self.handle()) {
+            return Err(Error::BadUi("Tree control must be in the same Ui.".to_string()));
+        }
+
+        let item_handle = if let Some(id) = item {
+            match ui.handle_of(id) {
+                Ok(AnyHandle::HTREE_ITEM(item, _)) => item,
+                Ok(h) => { return Err(Error::BadResource(format!("An TreeItem control is required, got {:?}", h))) },
+                Err(e) => { return Err(e); }
+            }
+        } else {
+            ptr::null_mut()
+        };
+
+        unsafe{ SendMessageW(self.handle, TVM_SELECTITEM, TVGN_CARET, item_handle as LPARAM) };
+
+        Ok(())
+    }
+
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
     pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
     pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
     pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
     pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
-    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, false); } }
+    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, true); } }
     pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
     pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+    pub fn update(&self) { unsafe{ ::low::window_helper::update(self.handle); } }
+    pub fn focus(&self) { unsafe{ ::user32::SetFocus(self.handle); } }
 }
 
 impl Control for TreeView {
