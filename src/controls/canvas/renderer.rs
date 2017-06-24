@@ -6,23 +6,29 @@
 use std::hash::Hash;
 use std::ptr;
 use std::mem;
+use std::any::TypeId;
 use std::ops::{Deref, DerefMut};
 
 use winapi::{FLOAT, D2D1_RECT_F, D2D1_ROUNDED_RECT, D2D1_ELLIPSE, D2D1_POINT_2F, 
   D2D1_MATRIX_3X2_F, ID2D1Brush, ID2D1StrokeStyle};
 
+use ui::Ui;
 use error::Error;
+use resources::{Brush};
+use controls::AnyHandle;
 use defs::canvas::{Rectangle, Ellipse};
-use super::{Canvas, CanvasProtected, CanvasResources};
+use super::{Canvas, CanvasProtected};
 
 /**
     Object that offers a light wrapper over the D2D1 api.
 */
-pub struct CanvasRenderer<'a, ID: Clone+Hash+'a> {
+pub struct CanvasRenderer<'a, ID: Clone+Hash+'static> {
+    pub ui: &'a Ui<ID>,
     canvas: &'a mut Canvas<ID>
 }
 
 impl<'a, ID: Clone+Hash> CanvasRenderer<'a, ID> {
+    
     /**
         Clears the drawing area to the specified color.  
     
@@ -195,36 +201,18 @@ impl<'a, ID: Clone+Hash> CanvasRenderer<'a, ID> {
     }
 
     fn fill_setup(&mut self, brush: &ID) -> Result<*mut ID2D1Brush, Error> {
-        match self.get_resource(brush) {
-            Ok(brush) => match brush {
-                CanvasResources::SolidBrush(b) => unsafe{ Ok(mem::transmute(b)) },
-                CanvasResources::StrokeStyle(_) => Err(Error::BadResource("Resource of type brush required, got Brush.".to_string()))
+        match self.ui.handle_of(brush) {
+            Ok(AnyHandle::Custom(t, h)) => {
+                if t == TypeId::of::<Brush>() { Ok(h as *mut ID2D1Brush) }
+                else { Err(Error::BadResource( format!("A brush resource required. Got a custom handle of another type") )) }
             },
+            Ok(h) => Err(Error::BadResource( format!("A brush resource required. Got {}", h.human_name()) )),
             Err(e) => Err(e)
         }
     }
 
     fn draw_setup(&mut self, brush: &ID, pen: Option<&ID>) -> Result<(*mut ID2D1Brush, *mut ID2D1StrokeStyle), Error> {
-        let brush = match self.get_resource(brush) {
-            Ok(brush) => match brush {
-                CanvasResources::SolidBrush(b) => b,
-                CanvasResources::StrokeStyle(_) => { return Err(Error::BadResource("Resource of type brush required, got Pen.".to_string())); }
-            },
-            Err(e) => { return Err(e); }
-        };
-
-        let pen = match pen {
-            Some(pen) => match self.get_resource(pen) {
-                Ok(pen) => match pen {
-                    CanvasResources::StrokeStyle(s) => { s },
-                    CanvasResources::SolidBrush(_) => { return Err(Error::BadResource("Resource of type pen required, got Brush.".to_string())); },
-                },
-                Err(e) => { return Err(e); }
-            },
-            None => ptr::null_mut()
-        };
-
-        unsafe{ Ok(( mem::transmute(brush), pen)) }
+        Err(Error::Unimplemented)
     }
 
 }
@@ -252,12 +240,12 @@ impl<'a, ID: Clone+Hash> Drop for CanvasRenderer<'a, ID> {
     Protected renderer method (only available in the canvas control module)
 */
 pub trait RendererProtected<'a, ID: Clone+Hash>  {
-    fn prepare(canvas: &'a mut Canvas<ID>) -> Result<CanvasRenderer<'a, ID>, Error>;
+    fn prepare(canvas: &'a mut Canvas<ID>, ui: &'a Ui<ID>) -> Result<CanvasRenderer<'a, ID>, Error>;
 }
 
 impl<'a, ID: Clone+Hash> RendererProtected<'a, ID> for CanvasRenderer<'a, ID> {
 
-    fn prepare(canvas: &'a mut Canvas<ID>) -> Result<CanvasRenderer<'a, ID>, Error> {
+    fn prepare(canvas: &'a mut Canvas<ID>, ui: &'a Ui<ID>) -> Result<CanvasRenderer<'a, ID>, Error> {
         unsafe{ 
             if canvas.get_must_recreate_target() {
                 if let Err(e) = canvas.rebuild() {
@@ -275,7 +263,7 @@ impl<'a, ID: Clone+Hash> RendererProtected<'a, ID> for CanvasRenderer<'a, ID> {
             canvas.SetTransform(&identity);
         }
 
-        Ok( CanvasRenderer { canvas: canvas } )
+        Ok( CanvasRenderer { canvas: canvas, ui: ui } )
     }
 
 }

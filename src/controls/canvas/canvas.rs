@@ -7,15 +7,13 @@ use std::hash::Hash;
 use std::ptr;
 use std::ops::{Deref, DerefMut};
 use std::marker::PhantomData;
-use std::collections::HashMap;
 
-use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget, ID2D1SolidColorBrush, ID2D1StrokeStyle, 
-  S_OK, D2D1_MATRIX_3X2_F};
+use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget};
 
 use controls::{Control, ControlType, AnyHandle};
 use error::{Error, SystemError};
 use super::{CanvasRenderer, RendererProtected, build_render_target, CANVAS_CLASS_NAME};
-use defs;
+use ui::Ui;
 
 /**
     A blank control that can be painted to
@@ -33,8 +31,8 @@ impl<ID: Clone+Hash> Canvas<ID> {
         Make the canvas "paint ready" and return an object to paint to it.
         In very very **very** rare case, the renderer creation can fail.
     */
-    pub fn renderer<'a>(&'a mut self) -> Result<CanvasRenderer<'a, ID>, Error> {
-        CanvasRenderer::prepare(self)
+    pub fn renderer<'a>(&'a mut self, ui: &'a Ui<ID>) -> Result<CanvasRenderer<'a, ID>, Error> {
+        CanvasRenderer::prepare(self, ui)
     }
 
     /**
@@ -84,16 +82,6 @@ impl<ID: Clone+Hash> Canvas<ID> {
     */
     pub fn get_render_target(&self) -> *mut ID2D1HwndRenderTarget {
         self.render_target
-    }
-
-    /// Hash an ID before inserting it in the canvas resources
-    #[inline(always)]
-    fn hash_id(id: &ID) -> u64 {
-        use std::hash::Hasher;
-        use std::collections::hash_map::DefaultHasher;
-        let mut s1 = DefaultHasher::new();
-        id.hash(&mut s1);
-        s1.finish()
     }
 
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }

@@ -4,10 +4,10 @@
 use std::hash::Hash;
 use std::any::TypeId;
 
-use super::defs::{BrushType};
-use controls::{AnyHandle, ControlType};
+use super::defs::{BrushType, SolidBrush};
+use controls::{Canvas, AnyHandle, ControlType};
 use resources::{ResourceT, Resource};
-use error::Error;
+use error::{Error, SystemError};
 use ui::Ui;
 
 use winapi::{ID2D1SolidColorBrush};
@@ -20,8 +20,8 @@ use winapi::{ID2D1SolidColorBrush};
     • `btype`: The type of the brush to create. 
 */
 pub struct BrushT<ID: Hash+Clone> {
-    canvas: ID,
-    btype: BrushType
+    pub canvas: ID,
+    pub btype: BrushType
 }
 
 impl<ID: Hash+Clone> ResourceT<ID> for BrushT<ID> {
@@ -37,7 +37,22 @@ impl<ID: Hash+Clone> ResourceT<ID> for BrushT<ID> {
             Err(e) => { return Err(e); }
         }
 
-        Err(Error::Unimplemented)
+        let rt = match ui.get::<Canvas<ID>>(&self.canvas) {
+            Ok(c) => c.get_render_target(),
+            Err(_) => { unreachable!(); } // ui.type_of_control already check this
+        };
+
+        let rt = unsafe{&mut * rt};
+        let handle = match &self.btype {
+            &BrushType::SolidBrush(ref c) => create_solid_brush(rt, c)
+        };
+
+        match handle {
+            Ok(h) => { 
+                Ok(Box::new( Brush{ handle: h } ))
+            },
+            Err(e) => { Err(e) }
+        }
     }
 }
 
@@ -46,11 +61,11 @@ impl<ID: Hash+Clone> ResourceT<ID> for BrushT<ID> {
     A brush resource
 */
 pub struct Brush {
-    handle: CanvasHandle
+    handle: BrushHandle
 }
 
 #[derive(Clone, Copy)]
-enum CanvasHandle {
+enum BrushHandle {
     SolidBrush(*mut ID2D1SolidColorBrush)
 }
 
@@ -61,7 +76,7 @@ impl Resource for Brush {
     */
     fn handle(&self) -> AnyHandle {
         let handle = match self.handle {
-            CanvasHandle::SolidBrush(h) => h as usize
+            BrushHandle::SolidBrush(h) => h as usize
         };
 
         AnyHandle::Custom(TypeId::of::<Brush>(), handle)
@@ -78,7 +93,22 @@ impl Resource for Brush {
 
 
 // Private functions
+use winapi::{ID2D1HwndRenderTarget, D2D1_MATRIX_3X2_F, S_OK};
+use std::ptr;
 
-fn create_solid_brush() {
-    
+fn create_solid_brush(rt: &mut ID2D1HwndRenderTarget, b: &SolidBrush) -> Result<BrushHandle, Error> {
+    use winapi::{D2D1_COLOR_F, D2D1_BRUSH_PROPERTIES};
+
+    let c = &b.color;
+    let color = D2D1_COLOR_F{r: c.0, g: c.1, b: c.2, a: c.3};
+    let identity = D2D1_MATRIX_3X2_F {matrix: [[1.0, 0.0],[0.0, 1.0],[0.0, 0.0]]};
+    let property = D2D1_BRUSH_PROPERTIES { opacity: 1.0, transform: identity};
+    let mut brush: *mut ID2D1SolidColorBrush = ptr::null_mut();
+    let result = unsafe{ rt.CreateSolidColorBrush(&color, &property, &mut brush) };
+
+    if result == S_OK {
+        Ok(BrushHandle::SolidBrush(brush))
+    } else {
+        Err(Error::System(SystemError::ComError("Failed to import brush".to_string())))
+    }
 }
