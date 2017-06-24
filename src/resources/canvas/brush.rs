@@ -19,6 +19,7 @@ use winapi::{ID2D1SolidColorBrush};
     • `canvas`: The canvas control that will use the resource
     • `btype`: The type of the brush to create. 
 */
+#[derive(Clone)]
 pub struct BrushT<ID: Hash+Clone> {
     pub canvas: ID,
     pub btype: BrushType

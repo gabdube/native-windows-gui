@@ -50,8 +50,8 @@ nwg_template!(
             let e2 = canvas::Ellipse{ center: (0.0, 0.0), radius: (190.0, 190.0) };
 
             // Draw the shapes
-            //renderer.draw_ellipse(&SolidBrush(1), Some(&DashedPen(0)), &e2, 6.0).unwrap();
-            //renderer.draw_rectangle(&SolidBrush(2), None, &r3, 3.0).unwrap();
+            renderer.draw_ellipse(&SolidBrush(1), Some(&DashedPen(0)), &e2, 6.0).unwrap();
+            renderer.draw_rectangle(&SolidBrush(2), None, &r3, 3.0).unwrap();
             renderer.fill_rectangle(&SolidBrush(1), &r2).unwrap();
             renderer.fill_rounded_rectangle(&SolidBrush(0), &r1, (15.0, 15.0)).unwrap();
             renderer.fill_ellipse(&SolidBrush(2), &e1).unwrap();
@@ -75,21 +75,24 @@ nwg_template!(
 fn setup_canvas_resources(app: &Ui<CanvasId>) -> Result<(), Error> {
     use nwg::constants::canvas::*;
 
-    app.pack_resource(&SolidBrush(0), nwg::BrushT{
+    let b1 = nwg::BrushT{canvas: Canvas, btype: BrushType::SolidBrush(SolidBrush{color:(0.0, 0.7, 1.0, 1.0)}) };
+    let b2 = nwg::BrushT{canvas: Canvas, btype: BrushType::SolidBrush(SolidBrush{color:(0.0, 1.0, 0.5, 1.0)}) };
+    let b3 = nwg::BrushT{canvas: Canvas, btype: BrushType::SolidBrush(SolidBrush{color:(1.0, 1.0, 0.0, 1.0)}) };
+    let p1 = nwg::PenT{
         canvas: Canvas,
-        btype: BrushType::SolidBrush(SolidBrush{color:(0.0, 0.7, 1.0, 1.0)})
-    });
+        start_cap: CapStyle::Round,
+        end_cap: CapStyle::Round,
+        dash_cap: CapStyle::Round,
+        line_join: LineJoin::Round,
+        miter_limit: 0.0,
+        dash_style: DashStyle::Dash,
+        dash_offset: 5.0
+    };
 
-    app.pack_resource(&SolidBrush(1), nwg::BrushT{
-        canvas: Canvas,
-        btype: BrushType::SolidBrush(SolidBrush{color:(0.0, 1.0, 0.5, 1.0)})
-    });
-
-    app.pack_resource(&SolidBrush(2), nwg::BrushT{
-        canvas: Canvas,
-        btype: BrushType::SolidBrush(SolidBrush{color:(1.0, 1.0, 0.0, 1.0)})
-    });
-
+    app.pack_resource(&SolidBrush(0), b1);
+    app.pack_resource(&SolidBrush(1), b2);
+    app.pack_resource(&SolidBrush(2), b3);
+    app.pack_resource(&DashedPen(0), p1);
 
     app.commit()
 }

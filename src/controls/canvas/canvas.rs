@@ -80,9 +80,12 @@ impl<ID: Clone+Hash> Canvas<ID> {
     /**
         Get the inner render target of the canvas. This is used when building canvas resources.
     */
-    pub fn get_render_target(&self) -> *mut ID2D1HwndRenderTarget {
-        self.render_target
-    }
+    pub fn get_render_target(&self) -> *mut ID2D1HwndRenderTarget { self.render_target }
+
+    /**
+        Get the inner factory of the canvas. This is used when building canvas resources.
+    */
+    pub fn get_factory(&self) -> *mut ID2D1Factory { self.factory }
 
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
     pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}

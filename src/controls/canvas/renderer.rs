@@ -14,7 +14,7 @@ use winapi::{FLOAT, D2D1_RECT_F, D2D1_ROUNDED_RECT, D2D1_ELLIPSE, D2D1_POINT_2F,
 
 use ui::Ui;
 use error::Error;
-use resources::{Brush};
+use resources::{Brush, Pen};
 use controls::AnyHandle;
 use defs::canvas::{Rectangle, Ellipse};
 use super::{Canvas, CanvasProtected};
@@ -212,7 +212,28 @@ impl<'a, ID: Clone+Hash> CanvasRenderer<'a, ID> {
     }
 
     fn draw_setup(&mut self, brush: &ID, pen: Option<&ID>) -> Result<(*mut ID2D1Brush, *mut ID2D1StrokeStyle), Error> {
-        Err(Error::Unimplemented)
+        let brush = match self.ui.handle_of(brush) {
+            Ok(AnyHandle::Custom(t, h)) => {
+                if t == TypeId::of::<Brush>() { h as *mut ID2D1Brush }
+                else { return Err(Error::BadResource( format!("A brush resource required. Got a custom handle of another type") )); }
+            },
+            Ok(h) => { return Err(Error::BadResource( format!("A brush resource required. Got {}", h.human_name()) )) },
+            Err(e) => { return Err(e); }
+        };
+
+        let pen = match pen {
+            Some(p) => match self.ui.handle_of(p) {
+                Ok(AnyHandle::Custom(t, h)) => {
+                    if t == TypeId::of::<Pen>() { h as *mut ID2D1StrokeStyle }
+                    else { return Err(Error::BadResource( format!("A brush resource required. Got a custom handle of another type") )); }
+                },
+                Ok(h) => { return Err(Error::BadResource( format!("A pen resource required. Got {}", h.human_name()) )) },
+                Err(e) => { return Err(e); }
+            },
+            None => ptr::null_mut()
+        };
+
+        Ok((brush, pen))
     }
 
 }

@@ -15,7 +15,7 @@ use error::Error;
 
 pub use self::font::{FontT, Font};
 pub use self::image::{ImageT, OemImageT, Image};
-pub use self::canvas::{BrushT, Brush};
+pub use self::canvas::{BrushT, Brush, PenT, Pen};
 
 /**
     Structures implementing this trait can be used by a Ui to build a Resource

@@ -17,6 +17,9 @@ For more information also see:
 * Uis no longuer implictly free the children when unpacking a control. Instead the children handles
   must be returned in a `Vec` by the `Control.children` method. This method can be ignored if the
   control can't have children.
+* Reworked the `Canvas` control internals. Now the canvas resource are normal NWG resources.
+For more information also see: 
+  * https://gabdube.github.io/native-windows-gui/book/canvas.html (canvas basics)
 
 ## New resources and controls
 
