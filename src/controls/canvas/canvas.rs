@@ -109,6 +109,11 @@ impl<ID: Clone+Hash> Control for Canvas<ID> {
         ControlType::Canvas 
     }
 
+    fn children(&self) -> Vec<AnyHandle> {
+        use low::window_helper::list_window_children;
+        unsafe{ list_window_children(self.handle) }
+    }
+
     fn free(&mut self) {
         unsafe{
             use user32::{DestroyWindow, UnregisterClassW};

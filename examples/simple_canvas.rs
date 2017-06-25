@@ -75,9 +75,18 @@ nwg_template!(
 fn setup_canvas_resources(app: &Ui<CanvasId>) -> Result<(), Error> {
     use nwg::constants::canvas::*;
 
-    let b1 = nwg::BrushT{canvas: Canvas, btype: BrushType::SolidBrush(SolidBrush{color:(0.0, 0.7, 1.0, 1.0)}) };
-    let b2 = nwg::BrushT{canvas: Canvas, btype: BrushType::SolidBrush(SolidBrush{color:(0.0, 1.0, 0.5, 1.0)}) };
-    let b3 = nwg::BrushT{canvas: Canvas, btype: BrushType::SolidBrush(SolidBrush{color:(1.0, 1.0, 0.0, 1.0)}) };
+    let b1 = nwg::BrushT{
+        canvas: Canvas, 
+        btype: BrushType::SolidBrush(SolidBrush{color:(0.0, 0.7, 1.0, 1.0)})
+    };
+    let b2 = nwg::BrushT{
+        canvas: Canvas,
+        btype: BrushType::SolidBrush(SolidBrush{color:(0.0, 1.0, 0.5, 1.0)})
+    };
+    let b3 = nwg::BrushT{
+        canvas: Canvas,
+        btype: BrushType::SolidBrush(SolidBrush{color:(1.0, 1.0, 0.0, 1.0)}) 
+    };
     let p1 = nwg::PenT{
         canvas: Canvas,
         start_cap: CapStyle::Round,
