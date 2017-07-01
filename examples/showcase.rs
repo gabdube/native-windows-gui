@@ -133,7 +133,10 @@ nwg_template!(
 
         ("RustLogoFrame", "Logo", nwge::image_frame::Click, |app,_,_,_| {
             let img = nwg_get!(app; ("RustLogoFrame", nwg::ImageFrame));
-            
+
+            let x = nwg_get!(app; ("TreeManagement", nwg::TreeViewItem));
+            println!("{} {}", x.get_selected(), x.get_expanded());
+
             if let Some("RustLogo") = img.get_image(app) {
                 img.set_image(app, Some(&"RustMascot")).unwrap();
             } else {

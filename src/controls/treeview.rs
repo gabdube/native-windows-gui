@@ -201,8 +201,8 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TreeViewItemT<S, ID
         // Build the insert information
         let mut insert = ItemOptions {
             tree: ptr::null_mut(), parent: ptr::null_mut(), item: ptr::null_mut(),
-            text: Some(self.text.clone().into()),
-            integral: None, has_children: false
+            text: Some(self.text.clone().into()), state: None,
+            integral: None, has_children: Some(false)
         };
 
         // Create the item
@@ -235,6 +235,34 @@ pub struct TreeViewItem {
     handle: HTREEITEM
 }
 
+impl TreeViewItem {
+
+    pub fn set_text<'a, S: Into<String>>(&self, text: S) {
+        let options = ItemOptions {
+            tree: self.tree, parent: ptr::null_mut(), item: self.handle,
+            text: Some(text.into()), integral: None, has_children: None, state: None
+        };
+        
+        unsafe{ update_item(options); }
+    }
+
+    pub fn get_text(&self) -> String {
+        let options = unsafe{ get_item( self.tree, self.handle, TVIF_TEXT|TVIF_HANDLE) };
+        options.text.unwrap()
+    }
+
+    pub fn get_selected(&self) -> bool {
+        let options = unsafe{ get_item( self.tree, self.handle, TVIF_STATE|TVIF_HANDLE) };
+        options.state.unwrap().selected
+    }
+
+    pub fn get_expanded(&self) -> bool {
+        let options = unsafe{ get_item( self.tree, self.handle, TVIF_STATE|TVIF_HANDLE) };
+        options.state.unwrap().expanded
+    }
+
+}
+
 impl Control for TreeViewItem {
     fn handle(&self) -> AnyHandle {
         AnyHandle::HTREE_ITEM(self.handle, self.tree)
@@ -257,25 +285,32 @@ impl Control for TreeViewItem {
 
 
 // Private functions / structures / enum
-use winapi::{TVIF_TEXT, TVIF_INTEGRAL, TVIF_CHILDREN, TVIF_HANDLE};
-use low::other_helper::to_utf16;
+use winapi::{TVIF_TEXT, TVIF_INTEGRAL, TVIF_CHILDREN, TVIF_HANDLE, TVIF_STATE};
+use low::other_helper::{to_utf16, from_utf16};
+
+struct ItemState {
+    expanded: bool,
+    selected: bool
+}
 
 struct ItemOptions {
     tree: HWND,
     parent: HTREEITEM,
     item: HTREEITEM,
+    state: Option<ItemState>,
     text: Option<String>,
     integral: Option<c_int>,
-    has_children: bool
+    has_children: Option<bool>
 }
 
 impl ItemOptions {
     fn mask(&self) -> UINT {
-        let mut mask: UINT = TVIF_CHILDREN;
+        let mut mask: UINT = 0;
 
         if self.text.is_some() { mask |= TVIF_TEXT; }
         if self.integral.is_some() { mask |= TVIF_INTEGRAL; }
         if !self.item.is_null() { mask |= TVIF_HANDLE; }
+        if self.has_children.is_some() { mask |= TVIF_CHILDREN; }
 
         mask
     }
@@ -287,7 +322,7 @@ unsafe fn update_item(i: ItemOptions) {
     use winapi::{TVM_SETITEMW, TVITEMEXW};
 
     let mask = i.mask();
-    let children = i.has_children as c_int;
+    let children = i.has_children.unwrap_or(false) as c_int;
     let integral = i.integral.unwrap_or(0); 
     let (text_ptr, text) = match &i.text {
         &Some(ref t) => {
@@ -297,7 +332,7 @@ unsafe fn update_item(i: ItemOptions) {
         &None => (ptr::null_mut(), Vec::new())
     };
 
-    let mut item = TVITEMEXW{
+    let mut item = TVITEMEXW {
         mask: mask,
         hItem: i.item,
         state: 0,
@@ -314,6 +349,50 @@ unsafe fn update_item(i: ItemOptions) {
     };
 
     SendMessageW(i.tree, TVM_SETITEMW, 0, mem::transmute(&mut item));
+}
+
+unsafe fn get_item(tree: HWND, item: HTREEITEM, mask: u32) -> ItemOptions {
+    use winapi::{TVITEMEXW, TVM_GETITEMW, TVIS_SELECTED, TVIS_EXPANDED};
+
+    let mut options = ItemOptions {
+        tree: ptr::null_mut(), parent: ptr::null_mut(), item: item,
+        text: None, integral: None, has_children: None, state: None
+    };
+
+    let mut textbuffer: [u16; 256] = [0; 256];
+
+    let mut item = TVITEMEXW {
+        mask: mask,
+        hItem: item,
+        state: 0,
+        stateMask: 0,
+        pszText: textbuffer.as_mut_ptr(),
+        cchTextMax: 255,
+        iImage: 0,
+        iSelectedImage: 0,
+        cChildren: 0,
+        lParam: 0,
+        iIntegral: 0,
+        uStateEx: 0,
+        hwnd: ptr::null_mut(), iExpandedImage: 0, iReserved: 0    
+    };
+
+    SendMessageW(tree, TVM_GETITEMW, 0, mem::transmute(&mut item));
+
+    if mask & TVIF_TEXT == TVIF_TEXT {
+        options.text = Some( from_utf16(&textbuffer) );
+    }
+
+    if mask & TVIF_STATE == TVIF_STATE {
+        options.state = Some(
+            ItemState {
+                expanded: item.state & TVIS_EXPANDED == TVIS_EXPANDED,
+                selected: item.state & TVIS_SELECTED == TVIS_SELECTED
+            }
+        );
+    }
+
+    options
 }
 
 #[allow(unused_variables)]
@@ -336,7 +415,8 @@ unsafe fn insert_item(i: ItemOptions) -> Result<HTREEITEM, SystemError> {
     if !parent.is_null() {
         let update = ItemOptions {
             tree: i.tree, parent: ptr::null_mut(), item: parent,
-            text: None, integral: None, has_children: true
+            text: None, integral: None, has_children: Some(true),
+            state: None
         };
         update_item(update);
     }
