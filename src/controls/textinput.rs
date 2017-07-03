@@ -117,16 +117,8 @@ impl TextInput {
 
     /// Set or unset the readonly status on the control
     pub fn set_readonly(&self, readonly: bool) {
-        use low::window_helper::{set_window_long, get_window_long};
-        use low::defs::ES_READONLY;
-        use winapi::GWL_STYLE;
-
-        let old_style = get_window_long(self.handle, GWL_STYLE) as usize;
-        if readonly {
-            set_window_long(self.handle, GWL_STYLE, old_style|(ES_READONLY as usize));
-        } else {
-            set_window_long(self.handle, GWL_STYLE, old_style&(!ES_READONLY as usize) );
-        }
+        use winapi::{EM_SETREADONLY, UINT};
+        unsafe{ SendMessageW(self.handle, EM_SETREADONLY as UINT, readonly as WPARAM, 0); }
     }
     
     /// Return `true` if the user cannot edit the content of the control or `false` if the user can

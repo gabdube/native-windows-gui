@@ -71,6 +71,26 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<ID, S> {
 }
 
 /**
+    A template that wraps a window created outside of nwg
+
+    Members:  
+          • `handle` : The external window handle
+*/
+#[derive(Clone)]
+pub struct ExternWindowT {
+    pub handle: HWND
+}
+
+impl<ID: Hash+Clone> ControlT<ID> for ExternWindowT {
+    fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
+
+    #[allow(unused_variables)]
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
+        Ok( Box::new(Window{handle: self.handle}) as Box<Control> ) 
+    }
+}
+
+/**
     A window control.
 */
 #[allow(dead_code)]
@@ -220,7 +240,7 @@ unsafe fn build_window<ID: Hash+Clone, S: Clone+Into<String>>(t: &WindowT<ID, S>
     use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_OVERLAPPEDWINDOW, WS_CAPTION, WS_OVERLAPPED, WS_MINIMIZEBOX,
       WS_MAXIMIZEBOX, WS_SYSMENU, GWL_USERDATA, WS_CLIPCHILDREN};
 
-    let fixed_window: DWORD = WS_CLIPCHILDREN| WS_SYSMENU | WS_CAPTION | WS_OVERLAPPED | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+    let fixed_window: DWORD = WS_CLIPCHILDREN | WS_SYSMENU | WS_CAPTION | WS_OVERLAPPED | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
     let flags: DWORD = 
     if t.visible    { WS_VISIBLE }   else { 0 } |
     if t.disabled   { WS_DISABLED }  else { 0 } |

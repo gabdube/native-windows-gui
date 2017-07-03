@@ -35,6 +35,10 @@ use low::other_helper::to_utf16;
     • `Error::System`: if the folder do not exists  
     • `Error::System`: if the extensions filters could not be set  
 
+
+    Example of filters:
+    "txt files (*.txt)", "Test(.txt;.rs)|Any(.)"
+
 */
 #[derive(Clone)]
 pub struct FileDialogT<S: Clone+Into<String>, ID: Hash+Clone> {

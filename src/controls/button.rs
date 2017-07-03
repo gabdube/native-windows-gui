@@ -42,9 +42,9 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for ButtonT<S, ID> {
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         use low::window_helper::{WindowParams, build_window, set_window_font_raw, handle_of_window, handle_of_font};
-        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY, BS_TEXT};
+        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY, BS_TEXT, WS_CLIPSIBLINGS, WS_CLIPCHILDREN};
 
-        let flags: DWORD = WS_CHILD | BS_NOTIFY | BS_TEXT |
+        let flags: DWORD = WS_CHILD | BS_NOTIFY | BS_TEXT | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
         if self.visible    { WS_VISIBLE }   else { 0 } |
         if self.disabled   { WS_DISABLED }  else { 0 };
 
