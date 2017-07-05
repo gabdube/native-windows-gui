@@ -4,6 +4,7 @@
 
 use winapi::{c_int, DWORD, CW_USEDEFAULT};
 
+#[cfg(feature = "canvas")]
 pub mod canvas {
     /*!
         Constants and types for the resources linked to a Canvas control

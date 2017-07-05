@@ -25,3 +25,28 @@ ole32-sys = "0.2.0"
 
 [build-dependencies]
 winapi-build = "0.1.1"
+
+[features]
+canvas = []
+
+[[example]]
+name="simple_canvas"
+required-features = ["canvas"]
+
+[[example]]
+name="custom"
+
+[[example]]
+name="multithreading"
+
+[[example]]
+name="no_templating"
+
+[[example]]
+name="showcase"
+
+[[example]]
+name="templating"
+
+[[example]]
+name="dynamics"

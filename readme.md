@@ -17,7 +17,7 @@ Is native-windows-gui the gui framework you are looking for? It is ...
 * For those who wants to develop on Windows and want the smallest executable and memory footprint possible. 
 * For those who don't like dependencies. NWG only requires some `winapi-rs` crates and do not depends on external "executable" code 
 * For those who want a canvas to draw pretty things, NWG has a very powerful (and light) canvas build over Direct2D
-* For those who don't like to manage widgets (aka controls, aka stuff the user clicks on), NWG is for you. The UI manages the controls and the resources for you.
+* For those who don't like to manage widgets (aka controls, aka stuff the user clicks on), NWG is for you. The UI manages the controls and the resources.
 * For those who like documentation, NWG has one ( and I think it's pretty good ). Oh and its API is available online too: https://gabdube.github.io/native-windows-gui/ 
 * For those who want a light and simple API, NWG might be for you
 
@@ -62,8 +62,9 @@ Having cargo installed and in your PATH, execute the following code to run the i
 git clone git@github.com:gabdube/native-windows-gui.git
 cd native-windows-gui
 cargo run --example showcase
-cargo run --example canvas
+cargo run --example dynamics
 cargo run --example templating
+cargo run --example simple_canvas --features=canvas
 ```
 
 ![A GUI](/img/showcase.png "Image")  

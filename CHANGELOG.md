@@ -20,6 +20,8 @@ For more information also see:
 * Reworked the `Canvas` control internals. Now the canvas resource are simple NWG resources.
 For more information also see: 
   * https://gabdube.github.io/native-windows-gui/book/canvas.html (canvas basics)
+* The `Canvas` control is now feature gated behind the feature `canvas`. This is because `d2d1.lib` is not included with the gnu version
+  and requires a few extra (annoying) steps. 
 
 ## New resources and controls
 

@@ -49,10 +49,15 @@ pub use error::{Error, SystemError};
 pub use low::other_helper::{message, simple_message, fatal_message, error_message};
 pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
  RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput,
- FileDialogT, FileDialog, CanvasT, Canvas, CanvasRenderer, TextBoxT, TextBox, GroupBoxT, GroupBox, ProgressBarT, ProgressBar,
- DatePickerT, DatePicker, ImageFrameT, ImageFrame, TreeViewT, TreeView, TreeViewItemT, TreeViewItem, FrameT, Frame,
- ContextMenuT, ContextMenu};
- 
-pub use resources::{FontT, Font, ImageT, OemImageT, Image, BrushT, Brush, PenT, Pen};
+ FileDialogT, FileDialog, TextBoxT, TextBox, GroupBoxT, GroupBox, ProgressBarT, ProgressBar, DatePickerT, DatePicker, ImageFrameT,
+ ImageFrame, TreeViewT, TreeView, TreeViewItemT, TreeViewItem, FrameT, Frame, ContextMenuT, ContextMenu};
+
+pub use resources::{FontT, Font, ImageT, OemImageT, Image};
 pub use ui::{Ui, dispatch_events, exit, toggle_console};
 pub use cursor::Cursor;
+
+#[cfg(feature = "canvas")]
+pub use controls::{CanvasT, Canvas, CanvasRenderer};
+
+#[cfg(feature = "canvas")]
+pub use resources::{BrushT, Brush, PenT, Pen};

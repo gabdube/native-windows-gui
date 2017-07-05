@@ -4,7 +4,7 @@
 
 pub mod font;
 pub mod image;
-pub mod canvas;
+#[cfg(feature = "canvas")] pub mod canvas;
 
 use std::any::TypeId;
 use std::hash::Hash;
@@ -15,7 +15,7 @@ use error::Error;
 
 pub use self::font::{FontT, Font};
 pub use self::image::{ImageT, OemImageT, Image};
-pub use self::canvas::{BrushT, Brush, PenT, Pen};
+#[cfg(feature = "canvas")] pub use self::canvas::{BrushT, Brush, PenT, Pen};
 
 /**
     Structures implementing this trait can be used by a Ui to build a Resource

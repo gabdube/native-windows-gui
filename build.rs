@@ -1,4 +1,6 @@
 extern crate build;
 fn main() {
-    build::link("d2d1", true)
+    if cfg!(feature = "canvas") {
+        build::link("d2d1", true);
+    }
 }

@@ -286,11 +286,11 @@ extern "system" {
     pub fn GetMenuItemID(menu: HMENU, index: c_int) -> UINT;
     pub fn SetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
     pub fn GetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
+    pub fn TrackPopupMenuEx(hmenu: HMENU, fuFlags: UINT, x: c_int, y: c_int, hwnd: HWND, lptpm: *mut c_void) -> BOOL;
 
     pub fn SHCreateItemFromParsingName(pszPath: PCWSTR, pbc: *mut IBindCtx, riid: REFIID, ppv: *mut *mut c_void) -> HRESULT;
 
-    pub fn TrackPopupMenuEx(hmenu: HMENU, fuFlags: UINT, x: c_int, y: c_int, hwnd: HWND, lptpm: *mut c_void);
-
+    #[cfg(feature = "canvas")]
     pub fn D2D1CreateFactory(
         factoryType: D2D1_FACTORY_TYPE,
 		riid: REFIID, 
