@@ -28,6 +28,7 @@ For more information also see:
 * The **Frame** control to display a bordered frame inside another window
 * The **TreeView** control. To display tree hierarchy of data
 * The **TreeViewItem** control. To display an item in a tree view control
+* The **ContextMenu** control. A pop-up menu that can be shown anywhere in screen. usually pops when the user right click the mouse.
 
 
 ## Existsing control changes

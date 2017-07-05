@@ -421,6 +421,20 @@ macro_rules! nwg_separator {
 }
 
 /**
+    Sane defaults for the ContextMenu control. 
+    This control do not have any parameters for now.
+
+    Usage:  
+    `nwg_contextmenu!()`   
+*/
+#[macro_export]
+macro_rules! nwg_contextmenu {
+    () => { {
+        $crate::ContextMenuT
+    }}
+}
+
+/**
     Sane defaults for the RadioButton control. Requires a parent.
 
     Defaults:  

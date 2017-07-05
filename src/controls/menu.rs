@@ -5,8 +5,9 @@
 use std::hash::Hash;
 use std::any::TypeId;
 use std::mem;
+use std::ptr;
 
-use winapi::{HMENU, UINT, BOOL};
+use winapi::{HWND, HMENU, UINT, BOOL};
 
 use ui::Ui;
 use controls::{Control, ControlT, ControlType, AnyHandle};
@@ -84,6 +85,77 @@ impl Control for Menu {
 
         unsafe{ remove_menu_from_parent(self.handle, &self.parent) };
 
+        unsafe{ DestroyMenu(self.handle) };
+    }
+
+}
+
+/**
+    A template to create context menu for controls. The menu that appears when the user right click on a control.
+
+    Control specific events: None  
+    Members: None
+*/
+#[derive(Clone)]
+pub struct ContextMenuT;
+
+impl<ID: Hash+Clone> ControlT<ID> for ContextMenuT {
+    fn type_id(&self) -> TypeId { TypeId::of::<ContextMenu>() }
+
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
+        let handle_result = unsafe { build_context_menu(ui) };
+        match handle_result {
+            Ok((h, parent)) => {
+                 Ok( Box::new(ContextMenu{handle: h, parent: parent}) as Box<Control> ) 
+            },
+            Err(e) => Err(e)
+        }
+    }
+}
+
+
+/**
+    A context menu control
+*/
+pub struct ContextMenu {
+    handle: HMENU,
+    parent: HWND,
+}
+
+impl ContextMenu {
+
+    /**
+        Show the menu at the selected position.
+
+        Params:
+        * `x`: The absolute x position in the screen where the context menu should pop up
+        * `y`: The absolute x position in the screen where the context menu should pop up
+    */
+    pub fn pop_at(&self, x: i32, y: i32) {
+        use low::defs::{TrackPopupMenuEx, TPM_NOANIMATION, TPM_RIGHTBUTTON, TPM_LEFTALIGN, TPM_TOPALIGN};
+        let flags = TPM_NOANIMATION | TPM_RIGHTBUTTON | TPM_LEFTALIGN | TPM_TOPALIGN;
+        unsafe{ TrackPopupMenuEx(self.handle, flags, x, y, self.parent, ptr::null_mut()); }
+    }
+
+}
+
+impl Control for ContextMenu {
+
+    fn handle(&self) -> AnyHandle {
+        AnyHandle::HMENU(self.handle)
+    }
+
+    fn control_type(&self) -> ControlType {
+        ControlType::Menu
+    }
+
+    fn children(&self) -> Vec<AnyHandle> {
+        use low::menu_helper::list_menu_children;
+        unsafe{ list_menu_children(self.handle) }
+    }
+
+    fn free(&mut self) {
+        use user32::DestroyMenu;
         unsafe{ DestroyMenu(self.handle) };
     }
 
@@ -221,7 +293,7 @@ impl Control for Separator {
 
 #[inline(always)]
 unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &MenuT<S, ID>) -> Result<(HMENU, AnyHandle), Error> {
-    use user32::{CreateMenu, AppendMenuW, GetMenu, SetMenu, DrawMenuBar};
+    use user32::{CreateMenu, CreatePopupMenu, AppendMenuW, GetMenu, SetMenu, DrawMenuBar};
     use winapi::{MF_STRING, MF_POPUP};
     use low::menu_helper::{use_menu_command, enable_menuitem};
     use low::other_helper::to_utf16;
@@ -254,7 +326,7 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
             Ok( ( h, AnyHandle::HWND(parent_h)) )
         },
         AnyHandle::HMENU(parent_h) => {
-            let h = CreateMenu();
+            let h = CreatePopupMenu();
             use_menu_command(h);
 
             let text = to_utf16(t.text.clone().into().as_ref());
@@ -266,6 +338,17 @@ unsafe fn build_menu<S: Clone+Into<String>, ID: Clone+Hash>(ui: &Ui<ID>, t: &Men
         },
         _ => unreachable!()
    }
+}
+
+#[inline(always)]
+unsafe fn build_context_menu<ID: Clone+Hash>(ui: &Ui<ID>) -> Result<(HMENU, HWND), Error> {
+    use user32::CreatePopupMenu;
+    use low::menu_helper::use_menu_command;
+
+    let menu = CreatePopupMenu();
+    use_menu_command(menu);
+
+    Ok((menu, ui.message_handle()))
 }
 
 #[inline(always)]

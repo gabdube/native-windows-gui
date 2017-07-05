@@ -28,7 +28,7 @@ use std::hash::Hash;
 use winapi::{HWND, HANDLE, HCURSOR, HICON, HMENU, UINT, HFONT, HTREEITEM};
 
 pub use controls::window::{WindowT, Window};
-pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem, SeparatorT, Separator};
+pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem, SeparatorT, Separator, ContextMenuT, ContextMenu};
 pub use controls::button::{ButtonT, Button};
 pub use controls::textinput::{TextInputT, TextInput};
 pub use controls::textbox::{TextBoxT, TextBox};

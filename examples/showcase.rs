@@ -24,6 +24,15 @@ nwg_template!(
         ("S1", nwg_separator!(parent="FileMenu")),
         ("QuitItem", nwg_menuitem!(parent="FileMenu"; text="&Quit")),
         ("WindowAction", nwg_menuitem!(parent="MainWindow"; text="&Action")),
+
+        // Context Menu
+        ("Context", nwg_contextmenu!()),
+        ("Action1", nwg_menuitem!(parent="Context"; text="Action 1")),
+        ("Action2", nwg_menuitem!(parent="Context"; text="Action 2")),
+        ("S2", nwg_separator!(parent="Context")),
+        ("TestSubmenu3", nwg_menu!(parent="Context"; text="&Submenu")),
+        ("Action3", nwg_menuitem!(parent="TestSubmenu3"; text="SayHello")),
+        ("Action4", nwg_menuitem!(parent="TestSubmenu3"; text="Disabled :("; disabled=true)),
         
         // Timers
         ("TimerButton", nwg_button!(parent="MainWindow"; text="Start timer"; position=(10,85); size=(100, 30); font=Some("Font2"))),
@@ -92,6 +101,10 @@ nwg_template!(
             nwg::simple_message("Hello", "Hello World!");
         }),
 
+        ("Action3", "SayHello", nwge::menu::Triggered, |_,_,_,_| {
+            nwg::simple_message("Hello", "Hello World!");
+        }),
+
         ("QuitItem", "Quit", nwge::menu::Triggered, |_,_,_,_| {
             nwg_exit()
         }),
@@ -133,16 +146,27 @@ nwg_template!(
 
         ("RustLogoFrame", "Logo", nwge::image_frame::Click, |app,_,_,_| {
             let img = nwg_get!(app; ("RustLogoFrame", nwg::ImageFrame));
-
-            let x = nwg_get!(app; ("TreeManagement", nwg::TreeViewItem));
-            println!("{} {}", x.get_selected(), x.get_expanded());
-
             if let Some("RustLogo") = img.get_image(app) {
                 img.set_image(app, Some(&"RustMascot")).unwrap();
             } else {
                 img.set_image(app, Some(&"RustLogo")).unwrap();
             }
+        }),
+
+        ("MainWindow", "context", nwge::MouseDown, |app, _, _, args| {
+            match args {
+                &EventArgs::MouseClick{ref btn, pos: _} => {
+                    if let nwg::constants::MouseButton::Right = *btn {
+                        // WATCH OUT! The position param of MouseClick use local coordinate, but the `pop_at` method requires global coordinates
+                        // To make sure the menu appears at the right place, always use the `Cursor::get_position` method.
+                        let (x, y) = nwg::Cursor::get_position();   
+                        nwg_get!(app; ("Context", nwg::ContextMenu)).pop_at(x, y);
+                    }
+                },
+                _ => unreachable!()
+            }
         })
+
     ];
     resources: [
         ("Font1", nwg_font!(family="Calibri"; size=20 )),

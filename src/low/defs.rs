@@ -8,7 +8,7 @@ use std::hash::Hash;
 use std::any::{Any, TypeId};
 
 use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, WORD, MENUITEMINFOW, IShellItem, HRESULT, IUnknownVtbl,
- IUnknown, PCWSTR, IBindCtx, REFIID, D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory, c_void, c_int};
+ IUnknown, PCWSTR, IBindCtx, REFIID, D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory, c_void, c_int, HWND};
 use std::ops::{Deref, DerefMut};
 
 
@@ -156,6 +156,15 @@ pub const STATE_SYSTEM_INVISIBLE: u32 = 0x8000;
 
 pub const OIC_HAND: u16 = 32513;
 
+pub const TPM_NOANIMATION: u32 = 0x4000;
+pub const TPM_RIGHTBUTTON: u32 = 0x0002;
+pub const TPM_LEFTALIGN: u32 = 0x0000;
+pub const TPM_CENTERALIGN: u32 = 0x0004;
+pub const TPM_RIGHTALIGN: u32 = 0x0008;
+pub const TPM_TOPALIGN: u32 = 0x0000;
+pub const TPM_VCENTERALIGN: u32 = 0x0010;
+pub const TPM_BOTTOMALIGN: u32 = 0x0020;
+
 // System structs
 #[repr(C)]
 #[allow(non_snake_case)]
@@ -279,6 +288,8 @@ extern "system" {
     pub fn GetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
 
     pub fn SHCreateItemFromParsingName(pszPath: PCWSTR, pbc: *mut IBindCtx, riid: REFIID, ppv: *mut *mut c_void) -> HRESULT;
+
+    pub fn TrackPopupMenuEx(hmenu: HMENU, fuFlags: UINT, x: c_int, y: c_int, hwnd: HWND, lptpm: *mut c_void);
 
     pub fn D2D1CreateFactory(
         factoryType: D2D1_FACTORY_TYPE,
