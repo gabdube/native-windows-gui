@@ -37,6 +37,10 @@ For more information also see:
 
 * **Window**
     * `set_icon` and `get_icon`: Allow the user to set or get the window icon  
+
+* **Frame**
+  * No longuer use the default static control. Allow more flexibility.
+
 * **UI**
   * `has_handle`: Check if the ui has an object identified by an handle
   * `id_from_handle`: Return the `ID` associated with an HANDLE

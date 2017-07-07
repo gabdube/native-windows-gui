@@ -43,7 +43,6 @@ pub struct WindowT<ID: Hash+Clone, S: Clone+Into<String>> {
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<ID, S> {
     fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
-    #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
         unsafe{
             // Extract the icon handle

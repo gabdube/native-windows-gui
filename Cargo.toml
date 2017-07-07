@@ -50,3 +50,6 @@ name="templating"
 
 [[example]]
 name="dynamics"
+
+[[example]]
+name="flicker_test"

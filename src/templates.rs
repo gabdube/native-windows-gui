@@ -835,6 +835,7 @@ macro_rules! nwg_tree_view_item {
     • size: `(100, 100)`  
     • visible: `true`  
     • disabled: `false`  
+    • show_edge: `true`  
 
     Usage:  
     `nwg_frame!(parent="MyParent";)`  
@@ -847,7 +848,7 @@ macro_rules! nwg_frame {
         let mut t = 
         $crate::FrameT{ 
             position: (0, 0), size: (100, 30), 
-            visible: true, disabled: false, 
+            visible: true, disabled: false, show_edge: true,
             parent: $p
         };
         
