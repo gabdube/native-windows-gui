@@ -49,7 +49,7 @@ impl<ID: Hash+Clone> ControlT<ID> for TreeViewT<ID> {
             Err(e) => { return Err(e); }
         };
 
-        let flags: DWORD = WS_CHILD | WS_BORDER | TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT |
+        let flags: DWORD = WS_CHILD | WS_BORDER | TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT  |
         if self.visible    { WS_VISIBLE }   else { 0 } |
         if self.disabled   { WS_DISABLED }  else { 0 };
 
@@ -277,9 +277,16 @@ impl Control for TreeViewItem {
     }
 
     fn free(&mut self) {
-        use winapi::TVM_DELETEITEM;
+        use winapi::{TVM_DELETEITEM, TVM_SELECTITEM, TVGN_CARET};
 
-        unsafe{ SendMessageW(self.tree, TVM_DELETEITEM, 0, self.handle as LPARAM); }
+        // Note: the default behaviour when a selected tree view item is deleted
+        // is to select another item. This can cause major fuckup in NWG because 
+        // this triggers a cascade of callback which can cause borrowing errors.
+        // The fix: The the parent tree selected item to nil.
+        unsafe{ 
+            SendMessageW(self.tree, TVM_SELECTITEM, TVGN_CARET, 0) ;
+            SendMessageW(self.tree, TVM_DELETEITEM, 0, self.handle as LPARAM);
+        };
     }
 }
 

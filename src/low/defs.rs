@@ -8,7 +8,10 @@ use std::hash::Hash;
 use std::any::{Any, TypeId};
 
 use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, WORD, MENUITEMINFOW, IShellItem, HRESULT, IUnknownVtbl,
- IUnknown, PCWSTR, IBindCtx, REFIID, D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory, c_void, c_int, HWND};
+ IUnknown, PCWSTR, IBindCtx, REFIID, c_void, c_int, HWND};
+
+#[cfg(feature = "canvas")] use winapi::{D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory};
+
 use std::ops::{Deref, DerefMut};
 
 

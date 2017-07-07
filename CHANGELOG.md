@@ -54,8 +54,8 @@ For more information also see:
 * The `Cursor` struct. A fieldless struct to interface over the system cursor.
     * `get_position`: Return the cursor position in the screen
     * `set_position`: Set the cursor position in the screen
-    * `get`: Set the cursor look (use an Cursor Image resource)
-    * `set`: Get the cursor resource identifier
+    * `get`: Set the cursor look (using a Cursor Image resource)
+    * `set`: Get the cursor resource identifier (using a Cursor Image resource)
     * `get_capture`: Capture the mouse for a control
     * `set_capture`: Get the identifier of the control that captures the mouse
     * `release`: Release the mouse capture set with `set_capture`
