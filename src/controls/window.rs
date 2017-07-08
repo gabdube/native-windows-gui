@@ -197,7 +197,7 @@ unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
     use low::window_helper::get_window_long;
 
     let handled = match msg {
-        WM_CREATE => true,
+        WM_CREATE  => true,
         WM_CLOSE => {
             ShowWindow(hwnd, 0);
 

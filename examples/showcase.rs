@@ -76,14 +76,14 @@ nwg_template!(
         ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(195, 250); size=(100,100))),
         
         // TreeView
-        ("TreeView", nwg_tree_view!(parent="MainWindow"; position=(10, 250); size=(180, 120))),
-        ("Tree_Root", nwg_tree_view_item!(parent="TreeView"; text="Department")),
-        ("TreeDirector", nwg_tree_view_item!(parent="Tree_Root"; text="Director & Associate")),
-        ("TreeBob", nwg_tree_view_item!(parent="TreeDirector"; text="Bob Stalone")),
-        ("TreeJob", nwg_tree_view_item!(parent="TreeDirector"; text="Job Drake")),
-        ("TreeManagement", nwg_tree_view_item!(parent="Tree_Root"; text="Management")),
-        ("TreeSally", nwg_tree_view_item!(parent="TreeManagement"; text="Sally Foo")),
-        ("TreeTI", nwg_tree_view_item!(parent="Tree_Root"; text="TI"))
+        ("TreeView", nwg_treeview!(parent="MainWindow"; position=(10, 250); size=(180, 120))),
+        ("Tree_Root", nwg_treeview_item!(parent="TreeView"; text="Department")),
+        ("TreeDirector", nwg_treeview_item!(parent="Tree_Root"; text="Director & Associate")),
+        ("TreeBob", nwg_treeview_item!(parent="TreeDirector"; text="Bob Stalone")),
+        ("TreeJob", nwg_treeview_item!(parent="TreeDirector"; text="Job Drake")),
+        ("TreeManagement", nwg_treeview_item!(parent="Tree_Root"; text="Management")),
+        ("TreeSally", nwg_treeview_item!(parent="TreeManagement"; text="Sally Foo")),
+        ("TreeTI", nwg_treeview_item!(parent="Tree_Root"; text="TI"))
     ];
     events: [
         ("RandomStuffTextBox", "AllSystemEvents", nwge::Any, |_,_,_,args| {

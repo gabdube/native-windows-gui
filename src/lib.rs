@@ -50,7 +50,7 @@ pub use low::other_helper::{message, simple_message, fatal_message, error_messag
 pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
  RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput,
  FileDialogT, FileDialog, TextBoxT, TextBox, GroupBoxT, GroupBox, ProgressBarT, ProgressBar, DatePickerT, DatePicker, ImageFrameT,
- ImageFrame, TreeViewT, TreeView, TreeViewItemT, TreeViewItem, FrameT, Frame, ContextMenuT, ContextMenu};
+ ImageFrame, TreeViewT, TreeView, TreeViewItemT, TreeViewItem, TreeItemIterator, FrameT, Frame, ContextMenuT, ContextMenu};
 
 pub use resources::{FontT, Font, ImageT, OemImageT, Image};
 pub use ui::{Ui, dispatch_events, exit, toggle_console};

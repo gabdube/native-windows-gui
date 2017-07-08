@@ -781,12 +781,12 @@ macro_rules! nwg_image_frame {
     • disabled: `false`  
 
     Usage:  
-    `nwg_tree_view!(parent="MyParent";)`  
-    `nwg_tree_view!(parent="MyParent"; visible=false; size=(10, 10))`  
-    `nwg_tree_view!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+    `nwg_treeview!(parent="MyParent";)`  
+    `nwg_treeview!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_treeview!(parent="MyParent"; \* Any combinations of the template properties*\)`    
 */
 #[macro_export]
-macro_rules! nwg_tree_view {
+macro_rules! nwg_treeview {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::TreeViewT{ 
@@ -808,12 +808,12 @@ macro_rules! nwg_tree_view {
     • text: `Item`
 
     Usage:  
-    `nwg_tree_view_item!(parent="MyParent";)`  
-    `nwg_tree_view_item!(parent="MyParent"; text="AAA"; )`  
-    `nwg_tree_view_item!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+    `nwg_treeview_item!(parent="MyParent";)`  
+    `nwg_treeview_item!(parent="MyParent"; text="AAA"; )`  
+    `nwg_treeview_item!(parent="MyParent"; \* Any combinations of the template properties*\)`    
 */
 #[macro_export]
-macro_rules! nwg_tree_view_item {
+macro_rules! nwg_treeview_item {
     (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
         let mut t = 
         $crate::TreeViewItemT{ 

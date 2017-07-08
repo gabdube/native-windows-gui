@@ -18,7 +18,8 @@ use controls::{Control, ControlT, ControlType, AnyHandle};
     A template that creates a treeview
 
     Treeview specific events:  
-    ``
+    `treeview::SelectionChanged, treeview::Click, treeview::DoubleClick, treeview::Focus, treeview::DeleteItem,
+    treeview::ItemChanged, treeview::ItemChanging, treeview::ItemExpanded, treeview::ItemExpanding`
 
     Members:  
         • position: The initial position of the control  
@@ -129,6 +130,45 @@ impl TreeView {
 
         Ok(())
     }
+    
+    /**
+        Return an iterator to iterator over the treeview items. The ui is borrowed during the iteration.  
+        The first returned item is the tree root.
+
+        Arguments:
+            • ui: The Ui that will be used to resolve the items ids            
+
+        Example:
+
+        ```rust
+        #[macro_use] extern crate native_windows_gui as nwg;
+        use nwg::Ui;
+
+        fn iter_items(ui: &Ui<&'static str>) {
+            let tree = nwg_get!(ui; ("TreeView", nwg::TreeView));
+            for id in tree.items(ui) {
+                nwg_get!(ui; (id, nwg::TreeViewItem));
+            }
+        }
+        
+        fn main() {
+            let ui: Ui<&'static str> = Ui::new().expect("Something went wrong");
+            ui.pack_control(&"TEST", nwg_window!(visible=false));
+            ui.pack_control(&"TreeView", nwg_treeview!(parent="TEST";));
+            ui.commit().expect("Something went wrong");
+            iter_items(&ui)
+        }
+        ```
+
+    */
+    pub fn items<'a, ID: Hash+Clone>(&self, ui: &'a Ui<ID>) -> TreeItemIterator<'a, ID> {
+        TreeItemIterator {
+            ui: ui,
+            tree: self.handle,
+            last_item: ptr::null_mut(),
+            next_action: ::winapi::TVGN_ROOT
+        }
+    }
 
     pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
     pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
@@ -164,8 +204,7 @@ impl Control for TreeView {
 /**
     A template that creates a treeview item
 
-    Treeview item specific events:  
-    ``
+    Treeview item specific events:  None
 
     Members:  
         • text: A nwg::Tree collection    
@@ -290,6 +329,56 @@ impl Control for TreeViewItem {
     }
 }
 
+/**
+    An iterator over a TreeView items
+*/
+pub struct TreeItemIterator<'a, ID: Hash+Clone+'static> {
+    pub ui: &'a Ui<ID>,
+    tree: HWND,
+    last_item: HTREEITEM,
+    next_action: WPARAM
+}
+
+impl<'a, ID: Hash+Clone> Iterator for TreeItemIterator<'a, ID> {
+    type Item = ID;
+
+    fn next(&mut self) -> Option<ID> {
+        use winapi::{TVM_GETNEXTITEM, TVGN_ROOT, TVGN_CHILD, TVGN_NEXT, TVGN_PARENT};
+        
+        let mut item_handle: HTREEITEM = ptr::null_mut();
+        let mut action = self.next_action;
+        let mut end_reached = false;
+
+        let mut item_id: Option<ID> = None;
+        let mut handle: AnyHandle;
+
+        while item_id.is_none() && !end_reached {
+            item_handle = unsafe{ SendMessageW(self.tree, TVM_GETNEXTITEM, action, self.last_item as LPARAM) as HTREEITEM };
+            if item_handle.is_null() {
+                // Invalid item returned
+                match action {
+                    TVGN_ROOT | TVGN_PARENT => { end_reached = true; },      // TreeView has no items or the all items have been listed
+                    TVGN_CHILD => { action = TVGN_NEXT },                    // Item has no children, next, check if it has siblings
+                    TVGN_NEXT => { action = TVGN_PARENT },                   // Item has no sibling, next, go back to its parent
+                    _ => unreachable!()
+                }
+            } else if action == TVGN_PARENT {
+                // Rolling back to the last parent. This item was already returned, check if it has other siblings
+                action = TVGN_NEXT;
+                self.last_item = item_handle;
+            } else {
+                // Valid item returned
+                handle = AnyHandle::HTREE_ITEM(item_handle, self.tree); 
+                item_id = self.ui.id_from_handle(&handle).ok();              // If somehow the handle could not be matched to a ui ID, continue to iter
+            }
+        }
+        
+
+        self.next_action = TVGN_CHILD;  // At the next iteration, check the item children
+        self.last_item = item_handle;
+        item_id
+    }
+}
 
 // Private functions / structures / enum
 use winapi::{TVIF_TEXT, TVIF_INTEGRAL, TVIF_CHILDREN, TVIF_HANDLE, TVIF_STATE};

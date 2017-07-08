@@ -43,7 +43,7 @@ pub use controls::file_dialog::{FileDialogT, FileDialog};
 pub use controls::timer::{TimerT, Timer};
 pub use controls::datepicker::{DatePickerT, DatePicker};
 pub use controls::image_frame::{ImageFrameT, ImageFrame};
-pub use controls::treeview::{TreeViewT, TreeView, TreeViewItemT, TreeViewItem};
+pub use controls::treeview::{TreeViewT, TreeView, TreeViewItemT, TreeViewItem, TreeItemIterator};
 pub use controls::frame::{FrameT, Frame};
 #[cfg(feature = "canvas")] pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
 

@@ -12,7 +12,9 @@ use winapi::{HWND, UINT, DWORD, WPARAM, LPARAM, UINT_PTR, DWORD_PTR, LRESULT, WO
 use winapi::{WM_MOVE, WM_SIZING, WM_SIZE, WM_EXITSIZEMOVE, WM_PAINT, WM_UNICHAR, WM_CHAR,
   WM_CLOSE, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, WM_LBUTTONDOWN, WM_RBUTTONDOWN,
   WM_MBUTTONDOWN, WM_KEYDOWN, WM_KEYUP, BN_CLICKED, BN_DBLCLK, BN_SETFOCUS, BN_KILLFOCUS,
-  DTN_CLOSEUP, WM_COMMAND, WM_NOTIFY, WM_TIMER, WM_MENUCOMMAND, TVN_SELCHANGEDW, WM_MOUSEMOVE};
+  DTN_CLOSEUP, WM_COMMAND, WM_NOTIFY, WM_TIMER, WM_MENUCOMMAND, TVN_SELCHANGEDW, WM_MOUSEMOVE,
+  NM_CLICK, NM_DBLCLK, NM_KILLFOCUS, NM_SETFOCUS, TVN_ITEMCHANGEDW, TVN_ITEMCHANGINGW, TVN_ITEMEXPANDEDW,
+  TVN_ITEMEXPANDINGW, TVN_DELETEITEMW};
 
 use ui::UiInner;
 use events::EventArgs;
@@ -123,6 +125,16 @@ pub fn notify_handle(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, cmd: DWORD) ->
     }
 }
 
+/// HandleProc for events using a WM_NOTIFY message. Will return None if cmd do not match the WM_COMMAND code
+pub fn notify_2_handle(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, cmd1: DWORD, cmd2: DWORD) -> Option<AnyHandle> {
+    let nmhdr: &NMHDR = unsafe{ mem::transmute(l) };
+    if cmd1 == nmhdr.code || cmd2 == nmhdr.code {
+        Some(AnyHandle::HWND(nmhdr.hwndFrom)) 
+    } else {
+        None
+    }
+}
+
 fn menuitem_handle(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<AnyHandle> {
     unsafe{
         let parent_menu: HMENU = mem::transmute(l);
@@ -178,6 +190,14 @@ pub const MenuTrigger: Event = Event::Single(WM_MENUCOMMAND, &event_unpack_no_ar
 
 // TreeView events
 pub const TreeViewSelectionChanged: Event = Event::Single(WM_NOTIFY, &event_unpack_no_args, &|h,m,w,l|{ notify_handle(h,m,w,l, TVN_SELCHANGEDW) });
+pub const TreeViewClick: Event = Event::Single(WM_NOTIFY, &event_unpack_no_args, &|h,m,w,l|{ notify_handle(h,m,w,l, NM_CLICK) });
+pub const TreeViewDoubleClick: Event = Event::Single(WM_NOTIFY, &event_unpack_no_args, &|h,m,w,l|{ notify_handle(h,m,w,l, NM_DBLCLK) });
+pub const TreeViewFocus: Event = Event::Single(WM_NOTIFY, &unpack_tree_focus, &|h,m,w,l|{ notify_2_handle(h,m,w,l, NM_KILLFOCUS, NM_SETFOCUS) });
+pub const TreeViewDeleteItem: Event = Event::Single(WM_NOTIFY, &unpack_tree_focus, &|h,m,w,l|{ notify_handle(h,m,w,l, TVN_DELETEITEMW) });
+pub const TreeViewItemChanged: Event = Event::Single(WM_NOTIFY, &unpack_tree_focus, &|h,m,w,l|{ notify_handle(h,m,w,l, TVN_ITEMCHANGEDW) });
+pub const TreeViewItemChanging: Event = Event::Single(WM_NOTIFY, &unpack_tree_focus, &|h,m,w,l|{ notify_handle(h,m,w,l, TVN_ITEMCHANGINGW) });
+pub const TreeViewItemExpanded: Event = Event::Single(WM_NOTIFY, &unpack_tree_focus, &|h,m,w,l|{ notify_handle(h,m,w,l, TVN_ITEMEXPANDEDW) });
+pub const TreeViewItemExpanding: Event = Event::Single(WM_NOTIFY, &unpack_tree_focus, &|h,m,w,l|{ notify_handle(h,m,w,l, TVN_ITEMEXPANDINGW) });
 
 // Event unpackers for the events defined above
 fn unpack_move(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
@@ -240,6 +260,11 @@ fn unpack_mouseclick(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<Even
 
 fn unpack_key(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
    Some(EventArgs::Key(w as u32))
+}
+
+fn unpack_tree_focus(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
+    let nmhdr: &NMHDR = unsafe{ mem::transmute(l) };
+    Some(EventArgs::Focus(nmhdr.code==NM_SETFOCUS))
 }
 
 fn unpack_btn_focus(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> Option<EventArgs> {
