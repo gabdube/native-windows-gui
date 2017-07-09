@@ -165,6 +165,7 @@ impl TreeView {
         TreeItemIterator {
             ui: ui,
             tree: self.handle,
+            item: ptr::null_mut(),
             last_item: ptr::null_mut(),
             next_action: ::winapi::TVGN_ROOT
         }
@@ -276,6 +277,9 @@ pub struct TreeViewItem {
 
 impl TreeViewItem {
 
+    /**
+        Set the text if the treeview item
+    */
     pub fn set_text<'a, S: Into<String>>(&self, text: S) {
         let options = ItemOptions {
             tree: self.tree, parent: ptr::null_mut(), item: self.handle,
@@ -285,19 +289,70 @@ impl TreeViewItem {
         unsafe{ update_item(options); }
     }
 
+    /**
+        Return the text of the treeview item
+    */
     pub fn get_text(&self) -> String {
         let options = unsafe{ get_item( self.tree, self.handle, TVIF_TEXT|TVIF_HANDLE) };
         options.text.unwrap()
     }
 
+    /**
+        Return `true` if the item is currently selected or `false` otherwise
+    */
     pub fn get_selected(&self) -> bool {
         let options = unsafe{ get_item( self.tree, self.handle, TVIF_STATE|TVIF_HANDLE) };
         options.state.unwrap().selected
     }
 
+    /**
+        Return `true` if the item is currently expanded or `false` otherwise
+    */
     pub fn get_expanded(&self) -> bool {
         let options = unsafe{ get_item( self.tree, self.handle, TVIF_STATE|TVIF_HANDLE) };
         options.state.unwrap().expanded
+    }
+
+     
+    /**
+        Return an iterator to iterator over the treeview item children. The ui is borrowed during the iteration.  
+
+        Arguments:
+            • ui: The Ui that will be used to resolve the items ids            
+    */
+    pub fn children<'a, ID: Hash+Clone>(&self, ui: &'a Ui<ID>) -> TreeItemIterator<'a, ID> {
+        TreeItemIterator {
+            ui: ui,
+            tree: self.tree,
+            item: self.handle,
+            last_item: self.handle,
+            next_action: ::winapi::TVGN_CHILD
+        }
+    }
+
+    /**
+        Return the ID of parent of the tree item. Return `None` if the item is the root or if the Ui is not associated with the item.
+    */
+    pub fn parent<ID: Hash+Clone>(&self, ui: &Ui<ID>) -> Option<ID> {
+        use winapi::{TVM_GETNEXTITEM, TVGN_PARENT};
+        let parent = unsafe{ SendMessageW(self.tree, TVM_GETNEXTITEM, TVGN_PARENT as WPARAM, self.handle as LPARAM) as HTREEITEM };
+        if parent.is_null() {
+            None 
+        } else {
+            let handle = AnyHandle::HTREE_ITEM(parent, self.tree);
+            ui.id_from_handle(&handle).ok()
+        }
+    }
+
+    /**
+        Return the identifier of the item tree. Will return an error if the ui is not associated with the tree.
+
+        Arguments:
+            • ui: The Ui that will be used to resolve the tree id     
+    */
+    pub fn tree<ID: Hash+Clone>(&self, ui: &Ui<ID>) -> Result<ID, Error> {
+        let handle = AnyHandle::HWND(self.tree);
+        ui.id_from_handle(&handle)
     }
 
 }
@@ -335,6 +390,7 @@ impl Control for TreeViewItem {
 pub struct TreeItemIterator<'a, ID: Hash+Clone+'static> {
     pub ui: &'a Ui<ID>,
     tree: HWND,
+    item: HTREEITEM,
     last_item: HTREEITEM,
     next_action: WPARAM
 }
@@ -364,8 +420,12 @@ impl<'a, ID: Hash+Clone> Iterator for TreeItemIterator<'a, ID> {
                 }
             } else if action == TVGN_PARENT {
                 // Rolling back to the last parent. This item was already returned, check if it has other siblings
-                action = TVGN_NEXT;
-                self.last_item = item_handle;
+                if item_handle == self.item {
+                    end_reached = true
+                } else {
+                    action = TVGN_NEXT;
+                    self.last_item = item_handle;
+                }  
             } else {
                 // Valid item returned
                 handle = AnyHandle::HTREE_ITEM(item_handle, self.tree); 
