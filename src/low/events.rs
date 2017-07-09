@@ -327,24 +327,22 @@ unsafe extern "system" fn process_events<ID: Hash+Clone+'static>(hwnd: HWND, msg
     Add a subclass that dispatches the system event to the application callbacks to a window control.
 */
 pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, handle: HWND) { unsafe {
-  use comctl32::SetWindowSubclass;
-
   // While definitely questionable in term of safety, the reference to the UiInner is actually (always)
   // a raw pointer belonging to a Ui. Also, when the Ui goes out of scope, every window control
   // gets destroyed BEFORE the UiInner, this guarantees that uinner lives long enough.
   let ui_inner_raw: *mut UiInner<ID> = uiinner as *mut UiInner<ID>;
-  SetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, mem::transmute(ui_inner_raw));
+  set_window_subclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, mem::transmute(ui_inner_raw));
 }}
 
 /**
   Remove a subclass and free the associated data
 */
 pub fn unhook_window_events<ID: Hash+Clone+'static>(handle: HWND) { unsafe {
-  use comctl32::{RemoveWindowSubclass, GetWindowSubclass};
+  use comctl32::RemoveWindowSubclass;
   use winapi::{TRUE, DWORD_PTR};
 
   let mut data: DWORD_PTR = 0;
-  if GetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, &mut data) == TRUE {
+  if get_window_subclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, &mut data) == TRUE {
     RemoveWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID);
   }
 }}
@@ -388,4 +386,84 @@ pub fn hash_fn_ptr<T: Sized, H: Hasher>(fnptr: &T, state: &mut H) {
         let ptr_v: [usize; 2] = mem::transmute_copy(fnptr);
         ptr_v.hash(state);
     }
+}
+
+// GetWindowSubclass workaround
+
+#[cfg(target_env="gnu")]
+mod hackyty_hack {
+    use std::sync::Mutex;
+    use std::collections::HashSet;
+    use winapi::{HWND, SUBCLASSPROC, UINT_PTR, DWORD_PTR, BOOL};
+
+    struct ClassSetMutexPtr(*mut Mutex<HashSet<HWND>>);
+    unsafe impl Sync for ClassSetMutexPtr {}
+
+    static mut subclass_map: Option<ClassSetMutexPtr> = None;
+
+    pub unsafe fn get_window_subclass(handle: HWND, proc_: SUBCLASSPROC, id: UINT_PTR, data: *mut DWORD_PTR) -> BOOL {
+        // GNU cannot link the GetWindowSubclass function, so we have to use a hacky workaround
+        let (ok, need_free) = if let Some(ref ptr) = subclass_map {
+            let ClassSetMutexPtr(ptr) = *ptr;
+            let classes_mut: &mut Mutex<HashSet<HWND>> = &mut *ptr;
+            let mut classes = classes_mut.lock().unwrap();
+            (classes.remove(&handle) as BOOL, classes.is_empty())
+        } else {
+            (0, false)
+        };
+
+        // Free the class set it is empty
+        if need_free {
+            if let Some(ptr) = subclass_map.take() {
+                let ClassSetMutexPtr(ptr) = ptr;
+                let classes_mut = Box::from_raw(ptr);
+                // classes_mut freed here
+            }
+        }
+
+        ok
+    }
+
+    pub unsafe fn set_window_subclass(handle: HWND, proc_: SUBCLASSPROC, id: UINT_PTR, data: DWORD_PTR) -> BOOL {
+        use comctl32::SetWindowSubclass;
+
+        // I hope the creation of the set will not cause race condition...
+        if subclass_map.is_none() {
+            let set_mut = Mutex::new(HashSet::with_capacity(64));
+            let set_mut_ptr = Box::into_raw(Box::new(set_mut));
+            subclass_map = Some( ClassSetMutexPtr(set_mut_ptr) );
+        }
+
+        // Insert the handle in the class set
+        if let Some(ref ptr) = subclass_map {
+            let ClassSetMutexPtr(ptr) = *ptr;
+            let classes_mut: &mut Mutex<HashSet<HWND>> = &mut *ptr;
+            classes_mut.lock().unwrap().insert(handle);
+        }
+
+        SetWindowSubclass(handle, proc_, id, data)
+    }
+}
+
+#[cfg(target_env="gnu")] use self::hackyty_hack::{get_window_subclass, set_window_subclass};
+
+
+#[cfg(target_env="msvc")] use winapi::{SUBCLASSPROC, BOOL};
+
+#[cfg(target_env="msvc")]
+#[inline(always)]
+unsafe fn get_window_subclass(handle: HWND, proc_: SUBCLASSPROC, id: UINT_PTR, data: *mut DWORD_PTR) -> BOOL {
+    use comctl32::GetWindowSubclass;
+
+    // No workaround for msvc
+    GetWindowSubclass(handle, proc_, id, data)
+}
+
+#[cfg(target_env="msvc")]
+#[inline(always)]
+unsafe fn set_window_subclass(handle: HWND, proc_: SUBCLASSPROC, id: UINT_PTR, data: DWORD_PTR) -> BOOL {
+    use comctl32::SetWindowSubclass;
+
+    // No workaround for msvc
+    SetWindowSubclass(handle, proc_, id, data)
 }
