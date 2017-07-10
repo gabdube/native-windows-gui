@@ -214,7 +214,8 @@ impl Control for TreeView {
 #[derive(Clone)]
 pub struct TreeViewItemT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub text: S,
-    pub parent: ID
+    pub parent: ID,
+    pub disabled: bool
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TreeViewItemT<S, ID> {
@@ -263,7 +264,13 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TreeViewItemT<S, ID
 
         match tree_item {
             Ok(h) => {
-                Ok( Box::new(TreeViewItem{handle: h, tree: tree_handle}) )
+                let item = TreeViewItem{handle: h, tree: tree_handle};
+
+                if self.disabled { 
+                    item.set_enabled(false); 
+                }
+
+                Ok( Box::new(item) )
             },
             Err(e) => { Err(Error::System(e)) }
         }
@@ -301,7 +308,7 @@ impl TreeViewItem {
         Return `true` if the item is currently selected or `false` otherwise
     */
     pub fn get_selected(&self) -> bool {
-        let options = unsafe{ get_item( self.tree, self.handle, TVIF_STATE|TVIF_HANDLE) };
+        let options = unsafe{ get_item( self.tree, self.handle, TVIF_STATE|TVIF_STATEEX|TVIF_HANDLE) };
         options.state.unwrap().selected
     }
 
@@ -309,8 +316,36 @@ impl TreeViewItem {
         Return `true` if the item is currently expanded or `false` otherwise
     */
     pub fn get_expanded(&self) -> bool {
-        let options = unsafe{ get_item( self.tree, self.handle, TVIF_STATE|TVIF_HANDLE) };
+        let options = unsafe{ get_item( self.tree, self.handle, TVIF_STATE|TVIF_STATEEX|TVIF_HANDLE) };
         options.state.unwrap().expanded
+    }
+
+    /**
+        Return `true` if the item is enabled or `false` otherwise
+    */
+    pub fn get_enabled(&self) -> bool {
+        let options = unsafe{ get_item( self.tree, self.handle, TVIF_STATE|TVIF_STATEEX|TVIF_HANDLE) };
+        options.state.unwrap().disabled
+    }
+
+    /**
+        Disable or enable the tree item
+
+        Arguments:
+            • `enabled`: If the tree item should be enabled or not        
+    */
+    pub fn set_enabled(&self, enabled: bool) {
+        let state = ItemState{
+            expanded: false, // Note expanded and selected are never set for now
+            selected: false,
+            disabled: !enabled
+        };
+        let options = ItemOptions {
+            tree: self.tree, parent: ptr::null_mut(), item: self.handle,
+            text: None, integral: None, has_children: None, state: Some(state)
+        };
+        
+        unsafe{ update_item(options); }
     }
 
      
@@ -441,12 +476,13 @@ impl<'a, ID: Hash+Clone> Iterator for TreeItemIterator<'a, ID> {
 }
 
 // Private functions / structures / enum
-use winapi::{TVIF_TEXT, TVIF_INTEGRAL, TVIF_CHILDREN, TVIF_HANDLE, TVIF_STATE};
+use winapi::{TVIF_TEXT, TVIF_INTEGRAL, TVIF_CHILDREN, TVIF_HANDLE, TVIF_STATE, TVIF_STATEEX, TVIS_EX_DISABLED};
 use low::other_helper::{to_utf16, from_utf16};
 
 struct ItemState {
     expanded: bool,
-    selected: bool
+    selected: bool,
+    disabled: bool
 }
 
 struct ItemOptions {
@@ -467,6 +503,7 @@ impl ItemOptions {
         if self.integral.is_some() { mask |= TVIF_INTEGRAL; }
         if !self.item.is_null() { mask |= TVIF_HANDLE; }
         if self.has_children.is_some() { mask |= TVIF_CHILDREN; }
+        if self.state.is_some() { mask |= TVIF_STATEEX; }
 
         mask
     }
@@ -488,6 +525,12 @@ unsafe fn update_item(i: ItemOptions) {
         &None => (ptr::null_mut(), Vec::new())
     };
 
+    let state_ex = if let Some(s) = i.state {
+        if s.disabled { TVIS_EX_DISABLED } else { 0 }
+    } else {
+        0
+    };
+
     let mut item = TVITEMEXW {
         mask: mask,
         hItem: i.item,
@@ -500,7 +543,7 @@ unsafe fn update_item(i: ItemOptions) {
         cChildren: children,
         lParam: 0,
         iIntegral: integral,
-        uStateEx: 0,
+        uStateEx: state_ex,
         hwnd: ptr::null_mut(), iExpandedImage: 0, iReserved: 0    
     };
 
@@ -539,11 +582,12 @@ unsafe fn get_item(tree: HWND, item: HTREEITEM, mask: u32) -> ItemOptions {
         options.text = Some( from_utf16(&textbuffer) );
     }
 
-    if mask & TVIF_STATE == TVIF_STATE {
+    if mask & (TVIF_STATE|TVIF_STATEEX) == (TVIF_STATE|TVIF_STATEEX) {
         options.state = Some(
             ItemState {
                 expanded: item.state & TVIS_EXPANDED == TVIS_EXPANDED,
-                selected: item.state & TVIS_SELECTED == TVIS_SELECTED
+                selected: item.state & TVIS_SELECTED == TVIS_SELECTED,
+                disabled: item.uStateEx & TVIS_EX_DISABLED == TVIS_EX_DISABLED
             }
         );
     }

@@ -818,7 +818,8 @@ macro_rules! nwg_treeview_item {
         let mut t = 
         $crate::TreeViewItemT{ 
             text:"Item",
-            parent: $p
+            parent: $p,
+            disabled: false
         };
         
         $( t.$i = $v; );*

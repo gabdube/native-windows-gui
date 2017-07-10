@@ -3,7 +3,7 @@
 ## Announcement
 
 * License switch: GPLv3 to MIT 
-
+* It is now possible to compile NWG on the gnu toolchain
 
 ## Breaking changes
 
