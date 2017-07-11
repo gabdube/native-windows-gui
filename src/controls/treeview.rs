@@ -1,4 +1,4 @@
-/**
+/*!
     A treeview control
 */
 

@@ -20,6 +20,7 @@ pub mod file_dialog;
 pub mod timer;
 pub mod treeview;
 pub mod frame;
+pub mod tabs;
 #[cfg(feature = "canvas")] pub mod canvas;
 
 use std::any::TypeId;
@@ -45,6 +46,7 @@ pub use controls::datepicker::{DatePickerT, DatePicker};
 pub use controls::image_frame::{ImageFrameT, ImageFrame};
 pub use controls::treeview::{TreeViewT, TreeView, TreeViewItemT, TreeViewItem, TreeItemIterator};
 pub use controls::frame::{FrameT, Frame};
+pub use controls::tabs::{TabViewT, TabView, TabT, Tab};
 #[cfg(feature = "canvas")] pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
 
 use ui::Ui;
@@ -121,6 +123,8 @@ pub enum ControlType {
     TreeView,
     TreeViewItem,
     Frame,
+    TabsView,
+    Tab,
     Undefined  // Control is not a common control
 }
 

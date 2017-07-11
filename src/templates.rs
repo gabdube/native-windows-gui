@@ -859,6 +859,63 @@ macro_rules! nwg_frame {
     }}
 }
 
+/**
+    Sane defaults for the TabView control. Requires a parent.
+
+    Defaults:  
+    • position: `(0, 0)`  
+    • size: `(100, 100)`  
+    • visible: `true`  
+    • disabled: `false`  
+    • font: `None`
+
+    Usage:  
+    `nwg_tabsview!(parent="MyParent";)`  
+    `nwg_tabsview!(parent="MyParent"; visible=false; size=(10, 10))`  
+    `nwg_tabsview!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
+#[macro_export]
+macro_rules! nwg_tabsview {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::TabViewT { 
+            position: (0, 0), size: (100, 30), 
+            visible: true, disabled: false,
+            parent: $p, font: None
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }}
+}
+
+/**
+    Sane defaults for the Tab control. Requires a treeview parent.
+
+    Defaults:  
+    • text: "Tab"  
+
+    Usage:  
+    `nwg_tab!(parent="MyParent";)`  
+    `nwg_tab!(parent="MyParent"; text="HAHAHA")`  
+    `nwg_tab!(parent="MyParent"; \* Any combinations of the template properties*\)`    
+*/
+#[macro_export]
+macro_rules! nwg_tab {
+    (parent=$p:expr; $( $i:ident=$v:expr );* ) => { {
+        let mut t = 
+        $crate::TabT { 
+            text: "Tab",
+            parent: $p
+        };
+        
+        $( t.$i = $v; );*
+
+        t
+    }}
+}
+
 
 //---- Resources ----//
 

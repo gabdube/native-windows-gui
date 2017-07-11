@@ -17,6 +17,7 @@ pub enum SystemError {
     TreeItemCreation,
     ComInstanceCreation(String),
     ComError(String),
+    SystemMessageFailed(String)
 }
 
 impl SystemError {
@@ -33,6 +34,7 @@ impl SystemError {
             &SystemError::TreeItemCreation => format!("Failed to create a tree view item"),
             &SystemError::ComInstanceCreation(ref name) => format!("Failed to create a COM instance for {}", name),
             &SystemError::ComError(ref details) => format!("An error ocurred while executing a COM method, {}", details),
+            &SystemError::SystemMessageFailed(ref details) => format!("An error ocurred while executing a system message: {}", details)
         };
 
         format!("{}.\nID {:?} - {}", tr, code, code_txt)
