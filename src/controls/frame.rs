@@ -100,9 +100,10 @@ impl Control for Frame {
 
 }
 
-/*
-    Private unsafe control methods
-*/
+//
+// Private unsafe control methods
+//
+
 use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 
 #[allow(unused_variables)]

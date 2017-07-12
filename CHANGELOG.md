@@ -31,7 +31,8 @@ For more information also see:
 * The **TreeView** control. To display tree hierarchy of data
 * The **TreeViewItem** control. To display an item in a tree view control
 * The **ContextMenu** control. A pop-up menu that can be shown anywhere in screen. usually pops when the user right click the mouse.
-
+* The **TabView** control. A container that display Tab controls
+* The **Tab** control. A special window that can be added to a TabView
 
 ## Existsing control changes
 

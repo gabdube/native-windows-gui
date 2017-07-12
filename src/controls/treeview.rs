@@ -14,6 +14,10 @@ use ui::Ui;
 use error::{Error, SystemError};
 use controls::{Control, ControlT, ControlType, AnyHandle};
 
+//
+// TreeView
+//
+
 /**
     A template that creates a treeview
 
@@ -201,6 +205,10 @@ impl Control for TreeView {
         unsafe{ DestroyWindow(self.handle) };
     }
 }
+
+//
+// TreeViewItem
+//
 
 /**
     A template that creates a treeview item
@@ -419,6 +427,11 @@ impl Control for TreeViewItem {
     }
 }
 
+
+//
+// TreeItemIterator
+//
+
 /**
     An iterator over a TreeView items
 */
@@ -475,7 +488,10 @@ impl<'a, ID: Hash+Clone> Iterator for TreeItemIterator<'a, ID> {
     }
 }
 
+//
 // Private functions / structures / enum
+//
+
 use winapi::{TVIF_TEXT, TVIF_INTEGRAL, TVIF_CHILDREN, TVIF_HANDLE, TVIF_STATE, TVIF_STATEEX, TVIS_EX_DISABLED};
 use low::other_helper::{to_utf16, from_utf16};
 
