@@ -61,6 +61,12 @@
 </ul>
 </li>
 
+<li><a href="appendix.html"><b>5.</b> Appendix </a>
+<ul class="section">
+    <li><a href="gnu_canvas.html"><b>5.1.</b> Canvas on GNU </a></li>
+</ul>
+</li>
+
 </ul>
 </div>
 
@@ -72,9 +78,10 @@
 The Canvas control is a light wrapper over the Direct2D api. As of <b>BETA1</b>, only a few functions have been implemented. More will be added in the <b>BETA2</b>
 release. The Canvas control is planned to wrap the whole Direct2D API. <br><br>
 
-<b>Note 1</b>: The canvas will be feature gated in the first stable release ot when the gnu api branch will be merged <br><br>
+<b>Note 1</b>: The canvas is compiled by passing <code>--features="canvas"</code> <br>
+<b>Note 2</b>: To compile the canvas on the GNU toolchain see <a href="gnu_canvas.html">compiling the gnu toolchain on GNU</a> <br><br>
 
-For a concrete example, see the <a href="https://github.com/gabdube/native-windows-gui/blob/master/examples/canvas.rs"><b>canvas</b></a> example.
+For a concrete example, see the <a href="https://github.com/gabdube/native-windows-gui/blob/master/examples/simple_canvas.rs"><b>canvas</b></a> example.
 
 <h1 id="create" class="section-header"><a href="#create">Creation</a></h1> 
 
