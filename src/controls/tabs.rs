@@ -261,7 +261,7 @@ unsafe extern "system" fn tab_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARA
 
 #[allow(unused_variables)]
 unsafe extern "system" fn container_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::{WM_SIZE, WM_NOTIFY, TCN_SELCHANGE, NMHDR};
+    use winapi::{WM_SIZE, WM_NOTIFY, TCN_SELCHANGE, TCM_GETCURSEL, NMHDR};
     use user32::{DefWindowProcW, EnumChildWindows};
     use low::window_helper::get_window_size;
 
@@ -273,7 +273,9 @@ unsafe extern "system" fn container_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l:
         // Children tab switching is implemented here
         let nmhdr: &NMHDR = mem::transmute(l);
         if nmhdr.code == TCN_SELCHANGE {
-            println!("TODO");
+            let view = get_tabview(hwnd);
+            let index = SendMessageW(view, TCM_GETCURSEL, 0, 0) as i32;
+            switch_tab(view, index);
         }
     }
 
@@ -424,9 +426,10 @@ unsafe fn unhook_view(handle: HWND) {
 // Other Private functions
 //
 
+/// Insert a tab in a view
 unsafe fn insert_tab(view: HWND, child: HWND, text: String) -> Result<(), SystemError> {
-    use winapi::{TCM_INSERTITEMW, TCM_GETITEMCOUNT, TCITEMW, TCIF_TEXT};
-    use low::window_helper::set_window_visibility;
+    use winapi::{TCM_INSERTITEMW, TCM_GETITEMCOUNT, TCITEMW, TCIF_TEXT, GWL_USERDATA};
+    use low::window_helper::{set_window_visibility, set_window_long};
     use low::other_helper::to_utf16;
 
     let mut text = to_utf16(&text);
@@ -445,6 +448,7 @@ unsafe fn insert_tab(view: HWND, child: HWND, text: String) -> Result<(), System
     let count = SendMessageW(view, TCM_GETITEMCOUNT, 0, 0);
 
     if SendMessageW(view, TCM_INSERTITEMW, count as WPARAM, info_ptr) != -1 {
+        set_window_long(child, GWL_USERDATA, (count+1) as usize);
         set_window_visibility(child, count==0); // Set the first tab inserted as visible
         Ok(())
     } else {
@@ -466,4 +470,29 @@ unsafe fn get_tabview(handle: HWND) -> HWND {
     use winapi::GWL_USERDATA;
 
     get_window_long(handle, GWL_USERDATA) as HWND
+}
+
+/// Toggle the visibility of the active and inactive tab.
+unsafe extern "system" fn toggle_children_tabs(handle: HWND, params: LPARAM) -> BOOL {
+    use user32::GetParent;
+    use winapi::GWL_USERDATA;
+    use low::window_helper::{set_window_visibility, get_window_long};
+
+    let &(parent, index): &(HWND, i32) = mem::transmute(params);
+    if GetParent(handle) == parent {
+        let data = get_window_long(handle, GWL_USERDATA) as i32;
+        let visible = data == index+1;
+        set_window_visibility(handle, visible);
+    }
+
+    1
+}
+
+/// Switch the tabview active tab to the selected index
+unsafe fn switch_tab(view: HWND, index: i32) {
+    use user32::EnumChildWindows;
+
+    // Set active tab to visible and the inactive tabs to hidden
+    let data: (HWND, i32) = (view, index);
+    EnumChildWindows(view, Some(toggle_children_tabs), mem::transmute(&data));
 }
