@@ -244,10 +244,20 @@ impl Control for Tab {
 
 #[allow(unused_variables)]
 unsafe extern "system" fn tab_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::{WM_CREATE};
+    use winapi::{WM_CREATE, WM_PAINT, PAINTSTRUCT, COLOR_WINDOW};
+    use user32::{BeginPaint, EndPaint, FillRect};
     use user32::{DefWindowProcW};
 
     let handled = match msg {
+        WM_PAINT => {
+            let mut ps: PAINTSTRUCT = mem::zeroed();
+
+            let hdc = BeginPaint(hwnd, &mut ps); 
+            FillRect(hdc, &ps.rcPaint, mem::transmute(COLOR_WINDOW as usize));
+            EndPaint(hwnd, &ps); 
+
+            return 1;
+        },
         WM_CREATE => true,
         _ => false
     };
@@ -261,22 +271,28 @@ unsafe extern "system" fn tab_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARA
 
 #[allow(unused_variables)]
 unsafe extern "system" fn container_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::{WM_SIZE, WM_NOTIFY, TCN_SELCHANGE, TCM_GETCURSEL, NMHDR};
+    use winapi::{WM_SIZE, WM_NOTIFY, TCN_SELCHANGE, TCM_GETCURSEL, NMHDR, WM_CREATE};
     use user32::{DefWindowProcW, EnumChildWindows};
+    
     use low::window_helper::get_window_size;
 
-    if msg == WM_SIZE {
-        let (w, h) = get_window_size(hwnd);
-        let data: (HWND, u32, u32) = (hwnd, w, h);
-        EnumChildWindows(hwnd, Some(resize_direct_children), mem::transmute(&data));
-    } else if msg == WM_NOTIFY {
-        // Children tab switching is implemented here
-        let nmhdr: &NMHDR = mem::transmute(l);
-        if nmhdr.code == TCN_SELCHANGE {
-            let view = get_tabview(hwnd);
-            let index = SendMessageW(view, TCM_GETCURSEL, 0, 0) as i32;
-            switch_tab(view, index);
-        }
+    match msg {
+        WM_SIZE => {
+            let (w, h) = get_window_size(hwnd);
+            let data: (HWND, u32, u32) = (hwnd, w, h);
+            EnumChildWindows(hwnd, Some(resize_direct_children), mem::transmute(&data));
+        },
+        WM_NOTIFY =>  {
+            // Children tab switching is implemented here
+            let nmhdr: &NMHDR = mem::transmute(l);
+            if nmhdr.code == TCN_SELCHANGE {
+                let view = get_tabview(hwnd);
+                let index = SendMessageW(view, TCM_GETCURSEL, 0, 0) as i32;
+                switch_tab(view, index);
+            }
+        },
+        WM_CREATE => { return 0 },
+        _ => {}
     }
 
     DefWindowProcW(hwnd, msg, w, l)
@@ -386,9 +402,7 @@ unsafe extern "system" fn resize_direct_children(handle: HWND, params: LPARAM) -
 
     let &(parent, w, h): &(HWND, u32, u32) = mem::transmute(params);
     if GetParent(handle) == parent {
-        if w > 10 && h > 35 {
-            set_window_size(handle, w-10, h-35, false);
-        }
+        set_window_size(handle, w, h, false);
     }
 
     1
@@ -405,7 +419,12 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
 
     if msg == WM_SIZE {
         let (w, h) = get_window_size(hwnd);
-        let data: (HWND, u32, u32) = (hwnd, w, h);
+        let mut data: (HWND, u32, u32) = (hwnd, w, h);
+
+        // Margin of the tab
+        if w > 11 {  data.1 -= 11;  }
+        if h > 40 {  data.2 -= 40;  }
+
         EnumChildWindows(hwnd, Some(resize_direct_children), mem::transmute(&data));
     }
 

@@ -341,10 +341,10 @@ pub unsafe fn get_window_position(handle: HWND) -> (i32, i32) {
 /// Set window size
 #[inline(always)]
 pub unsafe fn set_window_size(handle: HWND, w: u32, h: u32, fix: bool) {
-    use user32::SetWindowPos;
-    use winapi::{c_int, SWP_NOZORDER, SWP_NOMOVE, SWP_NOACTIVATE};
+    use user32::{SetWindowPos};
+    use winapi::{c_int, SWP_NOZORDER, SWP_NOMOVE, SWP_NOACTIVATE, SWP_NOCOPYBITS};
 
-    SetWindowPos(handle, ptr::null_mut(), 0, 0, w as c_int, h as c_int, SWP_NOZORDER|SWP_NOMOVE|SWP_NOACTIVATE);
+    SetWindowPos(handle, ptr::null_mut(), 0, 0, w as c_int, h as c_int, SWP_NOZORDER|SWP_NOMOVE|SWP_NOACTIVATE|SWP_NOCOPYBITS);
 
     if fix { fix_overlapped_window_size(handle, (w, h)); }
 }

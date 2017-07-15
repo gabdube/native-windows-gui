@@ -108,8 +108,8 @@ use winapi::{UINT, WPARAM, LPARAM, LRESULT};
 
 #[allow(unused_variables)]
 unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::{UINT, WM_CREATE, WM_PAINT, PAINTSTRUCT};
-    use user32::{DefWindowProcW, DrawEdge, BeginPaint, EndPaint};
+    use winapi::{UINT, WM_CREATE, WM_PAINT, PAINTSTRUCT, RECT, COLOR_WINDOW};
+    use user32::{DefWindowProcW, DrawEdge, BeginPaint, EndPaint, FillRect, GetClientRect};
     use std::mem;
 
     let mut ps: PAINTSTRUCT = mem::uninitialized();
@@ -120,7 +120,10 @@ unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_CREATE => true,
         WM_PAINT => {
             let hdc = BeginPaint(hwnd, &mut ps); 
-            DrawEdge(hdc, &mut ps.rcPaint, EDGE_RAISED, BF_RECT);
+            let mut rect: RECT = mem::zeroed();
+            GetClientRect(hwnd, &mut rect);
+            FillRect(hdc, &ps.rcPaint, mem::transmute(COLOR_WINDOW as usize));
+            DrawEdge(hdc, &mut rect, EDGE_RAISED, BF_RECT);
             EndPaint(hwnd, &ps); 
             true
         },
@@ -138,11 +141,12 @@ unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
 unsafe fn build_sysclass() -> Result<(), Error> {
     use low::window_helper::{SysclassParams, build_sysclass};
     use winapi::CS_DBLCLKS;
+    use std::ptr;
 
     let params = SysclassParams { 
         class_name: WINDOW_CLASS_NAME,
         sysproc: Some(window_sysproc),
-        background: None, style: Some(CS_DBLCLKS)
+        background: Some(ptr::null_mut()), style: Some(CS_DBLCLKS)
     };
     
     if let Err(e) = build_sysclass(params) {

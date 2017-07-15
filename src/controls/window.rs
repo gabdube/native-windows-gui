@@ -192,12 +192,15 @@ impl Control for Window {
 
 #[allow(unused_variables)]
 unsafe extern "system" fn window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::{WM_CREATE, WM_CLOSE, GWL_USERDATA};
+    use winapi::{WM_CREATE, WM_CLOSE, GWL_USERDATA, WM_PAINT};
     use user32::{DefWindowProcW, PostQuitMessage, ShowWindow};
     use low::window_helper::get_window_long;
 
     let handled = match msg {
-        WM_CREATE  => true,
+        WM_CREATE => true,
+        WM_PAINT => {
+            false
+        },
         WM_CLOSE => {
             ShowWindow(hwnd, 0);
 
