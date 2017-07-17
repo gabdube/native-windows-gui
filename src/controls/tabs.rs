@@ -412,20 +412,10 @@ unsafe extern "system" fn resize_direct_children(handle: HWND, params: LPARAM) -
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
     use comctl32::DefSubclassProc;
-    use user32::EnumChildWindows;
     use winapi::{WM_SIZE};
-    use std::mem;
-    use low::window_helper::get_window_size;
 
     if msg == WM_SIZE {
-        let (w, h) = get_window_size(hwnd);
-        let mut data: (HWND, u32, u32) = (hwnd, w, h);
-
-        // Margin of the tab
-        if w > 11 {  data.1 -= 11;  }
-        if h > 40 {  data.2 -= 40;  }
-
-        EnumChildWindows(hwnd, Some(resize_direct_children), mem::transmute(&data));
+        resize_tabview_children(hwnd)
     }
 
     DefSubclassProc(hwnd, msg, w, l)
@@ -439,6 +429,21 @@ unsafe fn hook_view(handle: HWND) {
 unsafe fn unhook_view(handle: HWND) {
     use comctl32::RemoveWindowSubclass;
     RemoveWindowSubclass(handle, Some(process_events), TABVIEWS_SUBCLASS_ID);
+}
+
+unsafe fn resize_tabview_children(view: HWND) {
+    use low::window_helper::get_window_size;
+    use user32::EnumChildWindows;
+    use std::mem;
+
+    let (w, h) = get_window_size(view);
+    let mut data: (HWND, u32, u32) = (view, w, h);
+
+    // Margin of the tab
+    if w > 11 {  data.1 -= 11;  }
+    if h > 40 {  data.2 -= 40;  }
+
+    EnumChildWindows(view, Some(resize_direct_children), mem::transmute(&data));
 }
 
 //
@@ -469,6 +474,7 @@ unsafe fn insert_tab(view: HWND, child: HWND, text: String) -> Result<(), System
     if SendMessageW(view, TCM_INSERTITEMW, count as WPARAM, info_ptr) != -1 {
         set_window_long(child, GWL_USERDATA, (count+1) as usize);
         set_window_visibility(child, count==0); // Set the first tab inserted as visible
+        resize_tabview_children(view);
         Ok(())
     } else {
         Err(SystemError::SystemMessageFailed("Could insert tab in tabview".to_owned()))

@@ -53,7 +53,7 @@ pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, B
  ImageFrame, TreeViewT, TreeView, TreeViewItemT, TreeViewItem, TreeItemIterator, FrameT, Frame, ContextMenuT, ContextMenu,
  TabViewT, TabView, TabT, Tab};
 
-pub use resources::{FontT, Font, ImageT, OemImageT, Image};
+pub use resources::{FontT, Font, ImageT, OemImageT, MemoryImageT, Image};
 pub use ui::{Ui, dispatch_events, exit, toggle_console};
 pub use cursor::Cursor;
 

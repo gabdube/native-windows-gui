@@ -26,7 +26,7 @@ pub use self::textbox as textinput; // Textinput use the same events of the text
 pub mod menu { pub use low::events::MenuTrigger as Triggered; }
 pub mod timer { pub use low::events::TimerTick as Tick; }
 pub mod treeview { pub use low::events::{TreeViewSelectionChanged as SelectionChanged, TreeViewClick as Click, TreeViewDoubleClick as DoubleClick,
- TreeViewFocus as Focus, TreeViewDeleteItem as DeleteItem, TreeViewItemChanged as ItemChnaged, TreeViewItemChanging as ItemChanging,
+ TreeViewFocus as Focus, TreeViewDeleteItem as DeleteItem, TreeViewItemChanged as ItemChanged, TreeViewItemChanging as ItemChanging,
  TreeViewItemExpanded as ItemExpanded, TreeViewItemExpanding as ItemExpanding}; }
 
 pub use self::Event::Any as Any;

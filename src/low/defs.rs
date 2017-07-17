@@ -181,6 +181,12 @@ pub struct MENUINFO {
     pub dwMenuData: ULONG_PTR
 }
 
+#[repr(C)]
+#[allow(non_snake_case)]
+pub struct BITMAPFILEHEADER {
+    
+}
+
 // COM interfaces
 // Unused functions have an empty signature
 

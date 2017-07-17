@@ -5,7 +5,7 @@ use std::any::TypeId;
 use std::hash::Hash;
 use std::ptr;
 
-use winapi::{HANDLE, c_int};
+use winapi::{HANDLE, HBITMAP, HDC, c_int};
 
 use ui::Ui;
 use controls::{AnyHandle, HandleSpec};
@@ -121,6 +121,28 @@ impl<ID: Clone+Hash, S: Clone+Into<String>> ResourceT<ID> for ImageT<S> {
     }
 }
 
+/**
+    A template a create a image from a bitmap file that was loaded in memory.
+    Both the bitmap file header and the bitmap information must be present in
+    the source array
+*/
+#[derive(Clone)]
+pub struct MemoryImageT {
+    pub source: Vec<u8>,
+}
+
+
+impl<ID: Clone+Hash> ResourceT<ID> for MemoryImageT {
+    fn type_id(&self) -> TypeId { TypeId::of::<Image>() }
+
+    #[allow(unused_variables)]
+    fn build(&self, ui: &Ui<ID>) -> Result<Box<Resource>, Error> {
+        match unsafe{ create_dib(self) } {
+            Ok(h) => Ok( Box::new( Image{ handle: h as HANDLE, image_type: ImageType::Bitmap } ) ),
+            Err(e) => Err(e)
+        }
+    }
+}
 
 /**
     An image resource. May represent a bitmap, an icon or a cursor
@@ -160,4 +182,45 @@ impl Resource for Image {
             };
         }
     }
+}
+
+
+// Private functions
+
+unsafe fn create_dib(i: &MemoryImageT) -> Result<HBITMAP, Error> {
+    use winapi::{BITMAPINFO, BITMAPINFOHEADER, DIB_RGB_COLORS, BI_RGB, LONG, DWORD};
+    use gdi32::SetDIBits;
+    use low::defs::BITMAPFILEHEADER;
+    use std::mem;
+    use std::os::raw::c_void;
+
+    // Check the header size requirement
+    let f_header_size = mem::size_of::<BITMAPFILEHEADER>();
+    let i_header_size = mem::size_of::<BITMAPINFOHEADER>();
+    let header_size = f_header_size + i_header_size;
+    if i.source.len() < header_size {
+        let msg = format!("Invalid source. The source size ({} bytes) is smaller than the required headers size ({} bytes).", i.source.len(), header_size);
+        return Err(Error::BadResource(msg));
+    }
+
+    // Read the bitmap file header
+
+    /*let (w, h) = i.size;
+    let header = BITMAPINFOHEADER {
+        biSize: mem::size_of::<BITMAPINFOHEADER>() as DWORD,
+        biWidth: w as LONG, biHeight: h as LONG, 
+        biPlanes: 1, biBitCount: 24, biCompression: BI_RGB,
+        biSizeImage: 0, biXPelsPerMeter: 0, biYPelsPerMeter: 0,
+        biClrUsed: 0, biClrImportant: 0
+    };
+
+    let info = BITMAPINFO {
+        bmiHeader: header,
+        bmiColors: ptr::null_mut()
+    };
+
+    let data_ptr = i.source.as_ptr() as *const c_void;
+    SetDIBits(hdc, bitmap, 0, 0, data_ptr, &info, DIB_RGB_COLORS) != 0*/
+
+    return Err(Error::Unimplemented);
 }

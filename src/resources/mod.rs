@@ -14,7 +14,7 @@ use controls::AnyHandle;
 use error::Error;
 
 pub use self::font::{FontT, Font};
-pub use self::image::{ImageT, OemImageT, Image};
+pub use self::image::{ImageT, OemImageT, MemoryImageT, Image};
 #[cfg(feature = "canvas")] pub use self::canvas::{BrushT, Brush, PenT, Pen};
 
 /**
