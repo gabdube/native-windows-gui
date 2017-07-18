@@ -90,7 +90,7 @@ nwg_template!(
         
         // ImageFrame
         ("RustLogoFrame", nwg_image_frame!(parent="Tab2"; image=Some("RustLogo"); position=(190, 215); size=(100,100))),
-        ("OtherFrame", nwg_image_frame!(parent="Tab2"; image=Some("RustLogo"); position=(295, 215); size=(100,100))),
+        ("OtherFrame", nwg_image_frame!(parent="Tab2"; image=Some("RustLogoMemory"); position=(295, 215); size=(100,100))),
         
         // TreeView
         ("TreeSelected", nwg_textinput!(parent="Tab2"; position=(190, 5); size=(280, 22); placeholder=Some("Selected Item Text"); font=Some("Font1") )),
@@ -195,8 +195,8 @@ nwg_template!(
         ("Font2", nwg_font!(family="Arial"; size=17; weight=FONT_WEIGHT_BLACK; decoration=FONT_DECO_ITALIC)),
         ("RustLogo", nwg_image!(source="img\\rust-logo.bmp"; image_type=ImageType::Bitmap)), // Make sure to use '\\' and not '/'
         ("RustMascot", nwg_image!(source="img\\rust-mascot.bmp"; image_type=ImageType::Bitmap; size=(100, 100))), // Make sure to use '\\' and not '/'
-        ("RustLogoIcon", nwg_image!(source="img\\rust-logo.ico"; image_type=ImageType::Icon))
-        //("RustLogoMemory", nwg::MemoryImageT{source: Vec::from( &EMBED_BMP01[..] )} )
+        ("RustLogoIcon", nwg_image!(source="img\\rust-logo.ico"; image_type=ImageType::Icon)),
+        ("RustLogoMemory", nwg::MemoryImageT{source: Vec::from( &EMBED_BMP01[..] )} )
     ];
     values: []
 );

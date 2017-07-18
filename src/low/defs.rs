@@ -181,10 +181,15 @@ pub struct MENUINFO {
     pub dwMenuData: ULONG_PTR
 }
 
-#[repr(C)]
+#[repr(packed)]
 #[allow(non_snake_case)]
+#[derive(Debug)]
 pub struct BITMAPFILEHEADER {
-    
+    pub bfType: WORD,
+    pub bfSize: DWORD,
+    pub bfReserved1: WORD,
+    pub bfReserved2: WORD,
+    pub bfOffBits: DWORD
 }
 
 // COM interfaces

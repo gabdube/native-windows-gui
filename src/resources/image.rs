@@ -4,8 +4,9 @@
 use std::any::TypeId;
 use std::hash::Hash;
 use std::ptr;
+use std::mem;
 
-use winapi::{HANDLE, HBITMAP, HDC, c_int};
+use winapi::{HANDLE, HBITMAP, c_int};
 
 use ui::Ui;
 use controls::{AnyHandle, HandleSpec};
@@ -188,22 +189,31 @@ impl Resource for Image {
 // Private functions
 
 unsafe fn create_dib(i: &MemoryImageT) -> Result<HBITMAP, Error> {
-    use winapi::{BITMAPINFO, BITMAPINFOHEADER, DIB_RGB_COLORS, BI_RGB, LONG, DWORD};
+    use winapi::{HDC, BITMAPINFO, BITMAPINFOHEADER, DIB_RGB_COLORS, BI_RGB, LONG, DWORD};
     use gdi32::SetDIBits;
     use low::defs::BITMAPFILEHEADER;
-    use std::mem;
     use std::os::raw::c_void;
 
     // Check the header size requirement
-    let f_header_size = mem::size_of::<BITMAPFILEHEADER>();
-    let i_header_size = mem::size_of::<BITMAPINFOHEADER>();
-    let header_size = f_header_size + i_header_size;
+    let fheader_size = mem::size_of::<BITMAPFILEHEADER>();
+    let iheader_size = mem::size_of::<BITMAPINFOHEADER>();
+    let header_size = fheader_size + iheader_size;
     if i.source.len() < header_size {
         let msg = format!("Invalid source. The source size ({} bytes) is smaller than the required headers size ({} bytes).", i.source.len(), header_size);
         return Err(Error::BadResource(msg));
     }
 
     // Read the bitmap file header
+    let src: *const u8 = i.source.as_ptr();
+    let fheader_ptr: *const BITMAPFILEHEADER = mem::transmute(src);
+    let fheader: BITMAPFILEHEADER = ptr::read( fheader_ptr );
+
+    // Read the bitmap info header
+    let iheader_ptr: *const BITMAPINFOHEADER = mem::transmute(src.offset(fheader_size as isize));
+    let iheader: BITMAPINFOHEADER = ptr::read( iheader_ptr );
+
+    println!("{:?}", fheader);
+    println!("{:?}", iheader);
 
     /*let (w, h) = i.size;
     let header = BITMAPINFOHEADER {
