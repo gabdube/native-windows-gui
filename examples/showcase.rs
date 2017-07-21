@@ -6,7 +6,9 @@
 
 use nwg::{Ui, EventArgs, dispatch_events, exit as nwg_exit};
 use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, CheckState, FileDialogAction, HTextAlign, PickerDate, ImageType};
-use nwg::events as nwge;
+use nwg::events as nwge;    
+
+static EMBED_BMP01: &'static [u8; 27702]  = include_bytes!("../img/rust-logo.bmp");
 
 nwg_template!(
     head: setup_ui<&'static str>,
@@ -34,49 +36,65 @@ nwg_template!(
         ("Action3", nwg_menuitem!(parent="TestSubmenu3"; text="SayHello")),
         ("Action4", nwg_menuitem!(parent="TestSubmenu3"; text="Disabled :("; disabled=true)),
         
+        // Tabs
+        ("TabView", nwg_tabsview!(parent="MainWindow"; position=(5, 5); size=(490, 370))),
+        ("Tab1", nwg_tab!(parent="TabView"; text="Simple controls")),
+        ("Tab2", nwg_tab!(parent="TabView"; text="Images And Trees")),
+
         // Timers
-        ("TimerButton", nwg_button!(parent="MainWindow"; text="Start timer"; position=(10,85); size=(100, 30); font=Some("Font2"))),
-        ("TimerLabel", nwg_label!(parent="MainWindow"; text="Time elapsed: 0 seconds"; position=(120, 90); size=(200, 25); font=Some("Font2"))),
+        ("TimerButton", nwg_button!(parent="Tab1"; text="Start timer"; position=(10,5); size=(100, 30); font=Some("Font2"))),
+        ("TimerLabel", nwg_label!(parent="Tab1"; text="Time elapsed: 0 seconds"; position=(120, 10); size=(200, 25); font=Some("Font2"))),
         ("Timer", nwg_timer!(interval=500)),
-        
+
+        // Combobox
+        ("SchoolSupplyComboBox ", 
+            nwg_combobox!(
+                parent="Tab1";
+                position=(325, 10); size=(145, 30);
+                placeholder=Some("Choose plz"); font=Some("Font1");
+                collection=vec!["Pencil", "Eraser", "Scissor", "Calculator", "Notebook"])),
+
         // File dialog
-        ("FileDialogButton", nwg_button!(parent="MainWindow"; text="Browse File"; position=(10,120); size=(100, 30); font=Some("Font1"))),
-        ("FilePathInput", nwg_textinput!(parent="MainWindow"; position=(120, 125); size=(360, 24); readonly=true; font=Some("Font1"))),
+        ("FileDialogButton", nwg_button!(parent="Tab1"; text="Browse File"; position=(10,40); size=(100, 30); font=Some("Font1"))),
+        ("FilePathInput", nwg_textinput!(parent="Tab1"; position=(120, 45); size=(350, 24); readonly=true; font=Some("Font1"))),
         ("FileDialog", nwg_filedialog!(parent=Some("MainWindow"); action=FileDialogAction::Open; filters=Some("Test(*.txt;*.rs)|Any(*.*)"))),
-        
+
         // List
-        ("NameList", nwg_listbox!(parent="MainWindow"; position=(10, 10); size=(100, 60); collection=vec!["A Listbox", "Jimmy", "Sam", "Coconut", "Waldo", "David", "John"])),
+        ("NameList", nwg_listbox!(
+            parent="Tab1"; 
+            position=(10, 75); size=(150, 100);
+            collection=vec!["A Listbox", "Jimmy", "Sam", "Coconut", "Waldo", "David", "John"])),
         
         // Checkbox & radios
-        ("HappyCheckBox", nwg_checkbox!(parent="MainWindow"; text="I am happy"; position=(120, 10); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
-        ("TriCheckBox", nwg_checkbox!(parent="MainWindow"; text="Three states"; position=(240, 10); size=(110, 30); tristate=true; checkstate=CheckState::Indeterminate; font=Some("Font1"))),
-        ("CatRadio", nwg_radiobutton!(parent="MainWindow"; text="I have a cat"; position=(120, 50); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
-        ("DogRadio", nwg_radiobutton!(parent="MainWindow"; text="I have a dog"; position=(240, 50); size=(110, 30); font=Some("Font1"))),
+        ("HappyCheckBox", nwg_checkbox!(parent="Tab1"; text="I am happy"; position=(170, 75); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
+        ("TriCheckBox", nwg_checkbox!(parent="Tab1"; text="Three states"; position=(290, 75); size=(110, 30); tristate=true; checkstate=CheckState::Indeterminate; font=Some("Font1"))),
+        ("CatRadio", nwg_radiobutton!(parent="Tab1"; text="I have a cat"; position=(170, 105); size=(110, 30); checkstate=CheckState::Checked; font=Some("Font1"))),
+        ("DogRadio", nwg_radiobutton!(parent="Tab1"; text="I have a dog"; position=(290, 105); size=(110, 30); font=Some("Font1"))),
         
         // Groupbox
-        ("YesNoGroup", nwg_groupbox!(parent="MainWindow"; text="Choose one"; position=(360, 40); size=(130, 80);  align=HTextAlign::Center; font=Some("Font1") )),
-        ("YesRadio", nwg_radiobutton!(parent="YesNoGroup"; text="Yes"; position=(10, 20); size=(110, 30); font=Some("Font1"))),
-        ("NoRadio", nwg_radiobutton!(parent="YesNoGroup"; text="No"; position=(10, 45); size=(110, 30); font=Some("Font1"))),
-        
-        // Combobox
-        ("SchoolSupplyComboBox ", nwg_combobox!(parent="MainWindow"; position=(360, 10); size=(130, 30); placeholder=Some("Choose plz"); font=Some("Font1"); collection=vec!["Pencil", "Eraser", "Scissor", "Calculator", "Notebook"])),
+        ("YesNoGroup", nwg_groupbox!(parent="Tab1"; text="Choose one"; position=(10, 185); size=(150, 60);  align=HTextAlign::Center; font=Some("Font1") )),
+        ("YesRadio", nwg_radiobutton!(parent="YesNoGroup"; text="Blue"; position=(10, 20); size=(50, 30); font=Some("Font1"))),
+        ("NoRadio", nwg_radiobutton!(parent="YesNoGroup"; text="Red"; position=(90, 20); size=(50, 30); font=Some("Font1"))),
         
         // Textbox
-        ("RandomStuffLabel", nwg_label!(parent="MainWindow"; text="Write some notes in here:"; position=(10, 160); size=(180, 25); font=Some("Font1"))),
-        ("RandomStuffTextBox", nwg_textbox!(parent="MainWindow"; position=(10, 185); size=(200, 60); scrollbars=(false, true))),
+        ("RandomStuffLabel", nwg_label!(parent="Tab1"; text="Write your notes here:"; position=(170, 135); size=(180, 25); font=Some("Font1"))),
+        ("RandomStuffTextBox", nwg_textbox!(parent="Tab1"; position=(170, 160); size=(290, 100); scrollbars=(false, true))),
         
         // Progress bar
-        ("InstallCatLabel", nwg_label!(parent="MainWindow"; text="Installing cat.exe ..."; position=(230, 160); size=(180, 25); font=Some("Font1") )),
-        ("CatProgress", nwg_progressbar!(parent="MainWindow"; position=(230, 190); size=(240, 25); range=(0, 100); value=85)),
+        ("InstallCatLabel", nwg_label!(parent="Tab1"; text="Installing cat.exe ..."; position=(10, 265); size=(150, 25); font=Some("Font1") )),
+        ("CatProgress", nwg_progressbar!(parent="Tab1"; position=(10, 290); size=(200, 25); range=(0, 100); value=85)),
         
         // Date picker
-        ("DatePicker", nwg_datepicker!(parent="MainWindow"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(230, 220); size=(240, 25); font=Some("Font1"))),
+        ("DateLabel", nwg_label!(parent="Tab1"; text="Select the birth date of your cat"; position=(220, 265); size=(220, 25); font=Some("Font1") )),
+        ("DatePicker", nwg_datepicker!(parent="Tab1"; value=Some(PickerDate{year:2016, month:12, day:1}); format=" dd MMMM yyyy"; position=(220, 290); size=(240, 25); font=Some("Font1"))),
         
         // ImageFrame
-        ("RustLogoFrame", nwg_image_frame!(parent="MainWindow"; image=Some("RustLogo"); position=(195, 250); size=(100,100))),
+        ("RustLogoFrame", nwg_image_frame!(parent="Tab2"; image=Some("RustLogo"); position=(190, 215); size=(100,100))),
+        ("OtherFrame", nwg_image_frame!(parent="Tab2"; image=Some("RustLogo"); position=(295, 215); size=(100,100))),
         
         // TreeView
-        ("TreeView", nwg_treeview!(parent="MainWindow"; position=(10, 250); size=(180, 120))),
+        ("TreeSelected", nwg_textinput!(parent="Tab2"; position=(190, 5); size=(280, 22); placeholder=Some("Selected Item Text"); font=Some("Font1") )),
+        ("TreeView", nwg_treeview!(parent="Tab2"; position=(5, 5); size=(180, 315))),
         ("Tree_Root", nwg_treeview_item!(parent="TreeView"; text="Department")),
         ("TreeDirector", nwg_treeview_item!(parent="Tree_Root"; text="Director & Associate")),
         ("TreeBob", nwg_treeview_item!(parent="TreeDirector"; text="Bob Stalone")),
@@ -97,16 +115,16 @@ nwg_template!(
             }
         }),
 
-        ("NestedAction", "SayHello", nwge::menu::Triggered, |_,_,_,_| {
-            nwg::simple_message("Hello", "Hello World!");
-        }),
+        ("TreeView", "ItemSelected", nwge::treeview::ItemChanged, |app,_,_,_| {
+            let (tree, text) = nwg_get!(app; [
+                ("TreeView", nwg::TreeView),
+                ("TreeSelected", nwg::TextInput)
+            ]);
 
-        ("Action3", "SayHello", nwge::menu::Triggered, |_,_,_,_| {
-            nwg::simple_message("Hello", "Hello World!");
-        }),
-
-        ("QuitItem", "Quit", nwge::menu::Triggered, |_,_,_,_| {
-            nwg_exit()
+            if let Some(item_id) = tree.get_selected_item(app) {
+                let item = nwg_get!(app; (item_id, nwg::TreeViewItem));
+                text.set_text( &item.get_text() );
+            }
         }),
 
         ("TimerButton", "Start Timer", nwge::button::Click, |app,_,_,_|{
@@ -165,15 +183,20 @@ nwg_template!(
                 },
                 _ => unreachable!()
             }
-        })
+        }),
+
+        ("NestedAction", "SayHello", nwge::menu::Triggered, |_,_,_,_| { nwg::simple_message("Hello", "Hello World!");  }),
+        ("Action3", "SayHello", nwge::menu::Triggered, |_,_,_,_| { nwg::simple_message("Hello", "Hello World!"); }),
+        ("QuitItem", "Quit", nwge::menu::Triggered, |_,_,_,_| { nwg_exit() })
 
     ];
     resources: [
-        ("Font1", nwg_font!(family="Calibri"; size=20 )),
+        ("Font1", nwg_font!(family="Calibri"; size=17 )),
         ("Font2", nwg_font!(family="Arial"; size=17; weight=FONT_WEIGHT_BLACK; decoration=FONT_DECO_ITALIC)),
         ("RustLogo", nwg_image!(source="img\\rust-logo.bmp"; image_type=ImageType::Bitmap)), // Make sure to use '\\' and not '/'
         ("RustMascot", nwg_image!(source="img\\rust-mascot.bmp"; image_type=ImageType::Bitmap; size=(100, 100))), // Make sure to use '\\' and not '/'
         ("RustLogoIcon", nwg_image!(source="img\\rust-logo.ico"; image_type=ImageType::Icon))
+        //("RustLogoMemory", nwg::MemoryImageT{source: Vec::from( &EMBED_BMP01[..] )} )
     ];
     values: []
 );
