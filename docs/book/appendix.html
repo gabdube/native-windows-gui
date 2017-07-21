@@ -4,11 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <title>Native Windows GUI guide - Custom</title>
+    <title>Native Windows GUI guide - Basics</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-    <link rel="stylesheet" type="text/css" href="style/pygments.css">
-    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
     
 </head>
@@ -36,6 +34,7 @@
 </li>
 <li><a href='getting_started.html'><b>2.</b> Getting Started</a>
 </li>
+
 <li><a href="basics.html"><b>3.</b> Basics </a>
 <ul class="section">
     <li><a href="ui.html"><b>3.1.</b> Ui objects </a></li>
@@ -74,23 +73,11 @@
 <div id='page'>
 
 
-    <h1 class="title">Custom controls</h1>
-    <p>
-        NWG has multiple way to create custom controls (aka: user controls). It ranges from very unsafe and powerful to 
-        not unsafe and less powerful<br/><br/>
-
-        There are a few reason to use custom controls: create an easy interface over a complex system, create eye candy controls (à la Electron) or 
-        create a custom calendar...<br/><br/>
-
-        <b>Note</b>: The customization API is not yet entirely stabilized
-    </p>
-
-    <p>Here are the sub chapters:</p>
+    <h1 class="title">Appendix</h1>
 
 <ul>
-<li><a href="canvas.html">Canvas</a> - The canvas is the 100% safe way to create custom controls. It's a Direct2D wrapper.</li>
-<li><a href="lowlevel.html">Custom Module</a> - Use the <code>custom</code> module. Unsafe.</li>
-<li><a href="custom_events.html">Custom events</a> - Define custom events <b>WIP</b>.</li>
+<li><a href="gnu_canvas.html">Gnu canvas</a> - Required steps in order to build the canvas on te GNU toolchain</li>
+<li><a href="embedding.html">Embedding resources</a> - How to embed resources in a nwg executable</li>
 </ul>
 <br/><br/>
 
