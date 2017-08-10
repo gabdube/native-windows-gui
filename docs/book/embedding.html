@@ -7,6 +7,8 @@
     <title>Native Windows GUI guide - Basics</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
     
 </head>
@@ -72,8 +74,89 @@
 <div id='page-wrapper'>
 <div id='page'>
 
-
     <h1 class="title">Embedding resources</h1>
+
+    This section explains how to read or write data embedded in the executable.<br>
+    Embedding resources into an executable is not a feature of NWG and it will never be. Hopefully, there is already a 
+    library that can achieve this (and it has a very nice name). <br>
+
+    <h1 id="write" class="section-header"><a href="#idd">rust-embed-resource</a></h1>
+
+    <blockquote>
+        <a href="https://github.com/nabijaczleweli/rust-embed-resource">rust-embed-resource</a> is build script library to handle compilation and inclusion
+        of Windows resources, in the most resilient fashion imaginable
+    </blockquote>
+
+    For this example, a VERSIONINFO resource file will be embedded into a NWG executable. A version info defines the data about the executable such
+    as the company name, the copyrights, the product version, etc... For more information, see the official documentation:
+    <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa381058(v=vs.85).aspx">https://msdn.microsoft.com/en-us/library/windows/desktop/aa381058(v=vs.85).aspx</a>
+    (you will need it)<br><br>
+
+    The first step is to write the version info to a file. Here's a dummy file that works:
+<div class="hlcode">
+<div class="syntax"><pre><span></span><span class="mi">1</span><span class="w"> </span><span class="n">VERSIONINFO</span><span class="w"></span>
+<span class="n">FILEVERSION</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="n">PRODUCTVERSION</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="n">FILEOS</span><span class="w"> </span><span class="mh">0x00040004</span><span class="n">L</span><span class="w"></span>
+<span class="n">FILETYPE</span><span class="w"> </span><span class="mh">0x00000001</span><span class="n">L</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w"> </span><span class="n">BLOCK</span><span class="w"> </span><span class="s">"StringFileInfo"</span><span class="w"></span>
+<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">BLOCK</span><span class="w"> </span><span class="s">"040904E4"</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">VALUE</span><span class="w"> </span><span class="s">"CompanyName"</span><span class="p">,</span><span class="w"> </span><span class="s">"Company name goes here</span><span class="se">\0</span><span class="s">00"</span><span class="w"></span>
+<span class="w">   </span><span class="n">VALUE</span><span class="w"> </span><span class="s">"FileDescription"</span><span class="p">,</span><span class="w"> </span><span class="s">"File description goes here</span><span class="se">\0</span><span class="s">00"</span><span class="w"></span>
+<span class="w">   </span><span class="n">VALUE</span><span class="w"> </span><span class="s">"FileVersion"</span><span class="p">,</span><span class="w"> </span><span class="s">"Version info goes here</span><span class="se">\0</span><span class="s">00"</span><span class="w"></span>
+<span class="w">   </span><span class="n">VALUE</span><span class="w"> </span><span class="s">"InternalName"</span><span class="p">,</span><span class="w"> </span><span class="s">"Internal name goes here</span><span class="se">\0</span><span class="s">00"</span><span class="w"></span>
+<span class="w">   </span><span class="n">VALUE</span><span class="w"> </span><span class="s">"LegalCopyright"</span><span class="p">,</span><span class="w"> </span><span class="s">"Copyright strng goes here - use \251 for copyright symbol</span><span class="se">\0</span><span class="s">00"</span><span class="w"></span>
+<span class="w">   </span><span class="n">VALUE</span><span class="w"> </span><span class="s">"OriginalFilename"</span><span class="p">,</span><span class="w"> </span><span class="s">"Filename goes here</span><span class="se">\0</span><span class="s">00"</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="n">BLOCK</span><span class="w"> </span><span class="s">"VarFileInfo"</span><span class="w"></span>
+<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">VALUE</span><span class="w"> </span><span class="s">"Translation"</span><span class="p">,</span><span class="w"> </span><span class="mi">1033</span><span class="p">,</span><span class="w"> </span><span class="mi">1252</span><span class="w"></span>
+<span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+
+
+    The second is to add <code>embed-resource</code> to the build-dependencies and a <code>build</code> target (if there isn't one already) to the project:
+<div class="syntax"><pre><span></span><span class="p">[</span><span class="n">package</span><span class="p">]</span><span class="w"></span>
+<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"embed-test"</span><span class="w"></span>
+<span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"0.1.0"</span><span class="w"></span>
+<span class="n">build</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"build.rs"</span><span class="w"></span>
+
+<span class="p">[</span><span class="n">dependencies</span><span class="p">]</span><span class="w"></span>
+<span class="n">native</span><span class="o">-</span><span class="n">windows</span><span class="o">-</span><span class="n">gui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"0.3.0"</span><span class="w"></span>
+
+<span class="p">[</span><span class="n">build</span><span class="o">-</span><span class="n">dependencies</span><span class="p">]</span><span class="w"></span>
+<span class="n">embed</span><span class="o">-</span><span class="n">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"1.1"</span><span class="w"></span>
+</pre></div>
+
+    Then add modify <code>build.rs</code> so that it compiles the resource:
+<div class="hlcode">
+<div class="syntax"><pre><span></span><span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">embed_resource</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">env</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">embed_resource</span>::<span class="n">compile</span><span class="p">(</span><span class="s">"versioninfo.rc"</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+</div>
+
+    Finally, something like this comes out:<br>
+
+    <img src="images/version_info.png">
+
+
+    <h1 id="read" class="section-header"><a href="#idd">Reading embed resources</a></h1>
+
+    Support for reading embed resources is planned to be implemented before the first stable release. It will use the resource system.
+
+    <br><br>
 
 </div>
 </div>
