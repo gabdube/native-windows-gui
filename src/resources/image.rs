@@ -189,8 +189,9 @@ impl Resource for Image {
 // Private functions
 
 unsafe fn create_dib(i: &MemoryImageT) -> Result<HBITMAP, Error> {
-    use winapi::{HDC, BITMAPINFO, BITMAPINFOHEADER, DIB_RGB_COLORS, BI_RGB, LONG, DWORD};
-    use gdi32::SetDIBits;
+    use winapi::{BITMAPINFO, BITMAPINFOHEADER, DIB_RGB_COLORS, BI_RGB, LONG, DWORD};
+    use gdi32::{CreateCompatibleBitmap, CreateCompatibleDC, SetDIBits};
+    use user32::{GetDC, ReleaseDC};
     use low::defs::BITMAPFILEHEADER;
     use std::os::raw::c_void;
 
@@ -213,24 +214,35 @@ unsafe fn create_dib(i: &MemoryImageT) -> Result<HBITMAP, Error> {
     let iheader: BITMAPINFOHEADER = ptr::read( iheader_ptr );
 
     println!("{:?}", fheader);
-    println!("{:?}", iheader);
+    println!("In BI header: {:?}", iheader);
 
-    /*let (w, h) = i.size;
+    let (w, h) = (iheader.biWidth, iheader.biHeight);
+
+    let screen_dc = GetDC(ptr::null_mut());
+    let hdc = CreateCompatibleDC(screen_dc);
+    let bitmap = CreateCompatibleBitmap(screen_dc, w, h);
+    ReleaseDC(ptr::null_mut(), screen_dc);
+
     let header = BITMAPINFOHEADER {
         biSize: mem::size_of::<BITMAPINFOHEADER>() as DWORD,
         biWidth: w as LONG, biHeight: h as LONG, 
         biPlanes: 1, biBitCount: 24, biCompression: BI_RGB,
-        biSizeImage: 0, biXPelsPerMeter: 0, biYPelsPerMeter: 0,
+        biSizeImage: (w * h * 3) as u32,
+        biXPelsPerMeter: 0, biYPelsPerMeter: 0,
         biClrUsed: 0, biClrImportant: 0
     };
+    println!("Created BI header: {:?}", header);
 
     let info = BITMAPINFO {
         bmiHeader: header,
-        bmiColors: ptr::null_mut()
+        bmiColors: [],
     };
 
-    let data_ptr = i.source.as_ptr() as *const c_void;
-    SetDIBits(hdc, bitmap, 0, 0, data_ptr, &info, DIB_RGB_COLORS) != 0*/
+    let data_ptr = i.source.as_ptr().offset(fheader.bfOffBits as isize) as *const c_void;
+    if 0 == SetDIBits(hdc, bitmap, 0, h as u32, data_ptr, &info, DIB_RGB_COLORS) {
+        let msg = "SetDIBits failed.".to_string();
+        return Err(Error::BadResource(msg));
+    }
 
-    return Err(Error::Unimplemented);
+    return Ok(bitmap);
 }
