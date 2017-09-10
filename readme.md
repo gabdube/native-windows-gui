@@ -72,6 +72,9 @@ cargo run --example templating
     Simple example on how to use the nwg template system.
 */
 
+//To hide console window
+#![windows_subsystem = "windows"]
+
 #[macro_use] extern crate native_windows_gui as nwg;
 
 use nwg::{Event, Ui, simple_message, fatal_message, dispatch_events};
