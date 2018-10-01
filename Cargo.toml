@@ -4,7 +4,7 @@ version = "0.2.0"
 authors = ["Gabriel Dube <gdube.475@gmail.com>"]
 
 description = "A thin GUI toolkit built over the Microsoft Windows WINAPI"
-documentation = "https://gabdube.github.io/native-windows-gui/docs/book/introduction.html"
+documentation = "https://gabdube.github.io/native-windows-gui/api/native_windows_gui/index.html"
 homepage = "https://gabdube.github.io/native-windows-gui/"
 repository = "https://github.com/gabdube/native-windows-gui"
 
