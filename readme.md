@@ -35,7 +35,7 @@ To use NWG in your project add it to cargo.toml:
 
 ```toml
 [dependencies]
-native-windows-gui = "0.2.0"
+native-windows-gui = "0.2.1"
 ```
 
 And then, in main.rs or lib.rs : 
