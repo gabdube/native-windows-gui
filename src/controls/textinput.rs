@@ -67,7 +67,7 @@ pub struct TextInputT<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+C
 }
 
 impl<S1: Clone+Into<String>, S2: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextInputT<S1, S2, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<TextInput>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<TextInput>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp,

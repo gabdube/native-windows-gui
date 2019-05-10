@@ -37,7 +37,7 @@ pub trait ResourceT<ID: Clone+Hash> {
     /**
         Should return the TypeId of the generated resource. For example a `FontT` struct returns the TypeId of a `Font` struct.
     */
-    fn type_id(&self) -> TypeId;
+    fn resource_type_id(&self) -> TypeId;
 
     /**
         Should instance the resource and return it as a Box<Resource>. If an error is raised, it will be returned by `ui.commit`.

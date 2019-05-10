@@ -65,7 +65,7 @@ pub struct FileDialogT<S: Clone+Into<String>, ID: Hash+Clone> {
 }
 
 impl<S1: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for FileDialogT<S1, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<FileDialog>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<FileDialog>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed]

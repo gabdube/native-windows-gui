@@ -58,7 +58,7 @@ pub struct WindowT<S: Clone+Into<String>> {
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for WindowT<S> {
-    fn type_id(&self) -> TypeId { TypeId::of::<Window>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<Window>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::Closed, Event::MouseDown, Event::MouseUp,

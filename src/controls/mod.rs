@@ -109,7 +109,7 @@ pub trait ControlT<ID: Clone+Hash> {
     /**
         Should return the TypeId of the generated control. For example a `WindowT` struct returns the TypeId of a `Window` struct.
     */
-    fn type_id(&self) -> TypeId;
+    fn resource_type_id(&self) -> TypeId;
 
     /**
         Should instance the control and return it as a Box<Control>. If an error is raised, it will be returned by `ui.commit`.

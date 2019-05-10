@@ -32,7 +32,7 @@ pub struct MyCustomWindow {
 }
 
 impl<ID: Hash+Clone> ControlT<ID> for MyCustomWindowT {
-    fn type_id(&self) -> TypeId { 
+    fn resource_type_id(&self) -> TypeId { 
         // This method must return the TypeID of the associated control
         // Used internally by NWG
         

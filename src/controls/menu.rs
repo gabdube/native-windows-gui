@@ -49,7 +49,7 @@ pub struct MenuT<S: Clone+Into<String>, ID: Hash+Clone> {
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuT<S, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<Menu>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<Menu>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed]
@@ -122,7 +122,7 @@ pub struct MenuItemT<S: Clone+Into<String>, ID: Hash+Clone> {
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for MenuItemT<S, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<MenuItem>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<MenuItem>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Triggered]
@@ -193,7 +193,7 @@ pub struct SeparatorT<ID: Hash+Clone> {
 }
 
 impl<ID: Hash+Clone> ControlT<ID> for SeparatorT<ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<Separator>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<Separator>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed]

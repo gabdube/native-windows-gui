@@ -60,7 +60,7 @@ pub struct RadioButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for RadioButtonT<S, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<RadioButton>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<RadioButton>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]

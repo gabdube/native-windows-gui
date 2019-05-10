@@ -59,7 +59,7 @@ pub struct ComboBoxT<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<Str
 }
 
 impl<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> ControlT<ID> for ComboBoxT<D, ID, S> {
-    fn type_id(&self) -> TypeId { TypeId::of::<ComboBox<D>>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<ComboBox<D>>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]

@@ -67,7 +67,7 @@ pub struct TextBoxT<S1: Clone+Into<String>, ID: Hash+Clone> {
 }
 
 impl<S1: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for TextBoxT<S1, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<TextBox>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<TextBox>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Focus, Event::Char, Event::KeyDown, Event::KeyUp, Event::MouseDown, Event::MouseUp,

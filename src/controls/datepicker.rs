@@ -79,7 +79,7 @@ pub struct DatePickerT<S: Clone+Into<String>, ID: Hash+Clone> {
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for DatePickerT<S, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<DatePicker>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<DatePicker>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw, Event::DateChanged]

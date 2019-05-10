@@ -56,7 +56,7 @@ pub struct NumericInputT<ID: Hash+Clone> {
 }
 
 impl<ID: Hash+Clone> ControlT<ID> for NumericInputT<ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<NumericInput>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<NumericInput>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Moved, Event::Resized]

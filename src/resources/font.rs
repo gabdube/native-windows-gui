@@ -45,7 +45,7 @@ pub struct FontT<S: Clone+Into<String>> {
 }
 
 impl<ID: Clone+Hash, S: Clone+Into<String>> ResourceT<ID> for FontT<S> {
-    fn type_id(&self) -> TypeId { TypeId::of::<Font>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<Font>() }
 
     #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Resource>, Error> {

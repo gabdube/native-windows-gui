@@ -57,7 +57,7 @@ pub struct GroupBoxT<S: Clone+Into<String>, ID: Hash+Clone> {
 }
 
 impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for GroupBoxT<S, ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<GroupBox>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<GroupBox>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw]

@@ -122,7 +122,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                         event_collection.insert(e, Rc::new(Vec::new()));
                     }
 
-                    self.inner_public_map.insert(inner_id, (params.id, params.value.type_id()));
+                    self.inner_public_map.insert(inner_id, (params.id, params.value.resource_type_id()));
                     self.controls.insert(inner_id, RefCell::new(control) );
                     self.control_events.insert(inner_id, event_collection);
                     self.handle_inner_map.insert(handle_hash, inner_id);
@@ -146,7 +146,7 @@ impl<ID: Hash+Clone> UiInner<ID> {
                 Ok(resource) => {
                     let handle_hash = UiInner::<ID>::hash_handle(&resource.handle());
 
-                    self.inner_public_map.insert(inner_id, (params.id, params.value.type_id()));
+                    self.inner_public_map.insert(inner_id, (params.id, params.value.resource_type_id()));
                     self.resources.insert(inner_id, RefCell::new(resource) );
                     self.handle_inner_map.insert(handle_hash, inner_id);
 

@@ -46,7 +46,7 @@ pub struct TimerT {
 }
 
 impl<ID: Hash+Clone> ControlT<ID> for TimerT {
-    fn type_id(&self) -> TypeId { TypeId::of::<Timer>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<Timer>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Tick]

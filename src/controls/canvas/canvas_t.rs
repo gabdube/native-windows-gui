@@ -53,7 +53,7 @@ pub struct CanvasT<ID: Hash+Clone> {
 }
 
 impl<ID: Hash+Clone+'static> ControlT<ID> for CanvasT<ID> {
-    fn type_id(&self) -> TypeId { TypeId::of::<Canvas<ID>>() }
+    fn resource_type_id(&self) -> TypeId { TypeId::of::<Canvas<ID>>() }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::MouseDown, Event::MouseUp,
