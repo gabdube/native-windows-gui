@@ -176,7 +176,6 @@ impl Control for RadioButton {
 #[inline(always)]
 unsafe fn set_checkstate(handle: HWND, check: &CheckState) {
     use low::defs::{BM_SETCHECK, BST_CHECKED, BST_INDETERMINATE, BST_UNCHECKED};
-    use user32::SendMessageW;
     use winapi::WPARAM;
 
     let check_state = match check {

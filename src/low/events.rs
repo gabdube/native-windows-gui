@@ -263,7 +263,7 @@ pub fn hook_window_events<ID: Hash+Clone+'static>(uiinner: &mut UiInner<ID>, han
 */
 pub fn unhook_window_events<ID: Hash+Clone+'static>(handle: HWND) { unsafe {
   use comctl32::{RemoveWindowSubclass, GetWindowSubclass};
-  use winapi::{TRUE, DWORD_PTR};
+  use winapi::{TRUE};
 
   let mut data: DWORD_PTR = 0;
   if GetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, &mut data) == TRUE {
@@ -276,7 +276,7 @@ pub fn unhook_window_events<ID: Hash+Clone+'static>(handle: HWND) { unsafe {
 */
 pub unsafe fn window_id<ID: Clone+Hash>(handle: HWND, inner_ref: *mut UiInner<ID>) -> Option<u64> {
   use comctl32::GetWindowSubclass;
-  use winapi::{TRUE, DWORD_PTR};
+  use winapi::{TRUE};
 
   let mut data: DWORD_PTR = 0;
   if GetWindowSubclass(handle, Some(process_events::<ID>), EVENTS_DISPATCH_ID, &mut data) == TRUE {

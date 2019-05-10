@@ -325,7 +325,7 @@ impl Control for FileDialog {
 
 #[inline(always)]
 unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<String, Error> {
-    use winapi::{S_OK, SIGDN_FILESYSPATH, PWSTR};
+    use winapi::{SIGDN_FILESYSPATH, PWSTR};
     use ole32::CoTaskMemFree;
     use low::other_helper::from_wide_ptr;
 
@@ -345,7 +345,7 @@ unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<String, Error> {
 unsafe fn set_default_folder<S: Clone+Into<String>>(dialog: &mut IFileDialog, folder_name: &S) -> Result<(), Error> {
     use low::defs::{SHCreateItemFromParsingName, SFGAO_FOLDER};
     use low::clsid::IID_IShellItem;
-    use winapi::{IShellItem, SFGAOF, S_FALSE};
+    use winapi::{SFGAOF, S_FALSE};
 
     let mut shellitem: *mut IShellItem = ptr::null_mut();
     let path_s = folder_name.clone().into();

@@ -69,7 +69,6 @@ impl<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> ControlT<I
         use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
         use low::defs::{CBS_DROPDOWNLIST, CBS_HASSTRINGS, CB_ADDSTRING};
         use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD};
-        use user32::SendMessageW;
 
         let flags: DWORD = WS_CHILD | CBS_HASSTRINGS | CBS_DROPDOWNLIST |
         if self.visible      { WS_VISIBLE }      else { 0 } |
