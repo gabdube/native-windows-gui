@@ -1,6 +1,6 @@
 [package]
 name = "native-windows-gui"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Gabriel Dube <gdube.475@gmail.com>"]
 
 description = "A thin GUI toolkit built over the Microsoft Windows WINAPI"
