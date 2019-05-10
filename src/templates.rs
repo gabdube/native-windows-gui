@@ -83,7 +83,8 @@ macro_rules! nwg_get_mut {
 
     Usage: 
 
-    ```rust  
+    ```rust2  
+
         nwg_template!(
             head: setup_ui<&'static str>,
             controls: [ ("TEST", Control), ("TEST2", Control) ],
