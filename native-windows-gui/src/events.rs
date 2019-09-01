@@ -13,6 +13,24 @@ pub enum Event {
     /// When a TextInput value is changed
     OnTextInput,
 
+    // When the list of a combobox is closed
+    OnComboBoxClosed,
+
+    // When the list of a combobox is about to be visible
+    OnComboBoxDropdown,
+
+    // When a combobox item is clicked twice rapidly
+    OnComboBoxDoubleClick,
+
+    // When the current selection of the combobox was changed
+    OnComboxBoxSelection,
+
+    // When the user click on a menu item
+    OnMenuItemClick,
+
+    /// When a timer delay is elapsed
+    OnTimerTick,
+
     /// When a user click on the X button of a window
     OnWindowClose,
 

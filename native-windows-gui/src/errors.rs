@@ -6,5 +6,7 @@
 pub enum SystemError {
     GetModuleHandleFailed,
     SystemClassCreationFailed,
-    WindowCreationFailed
+    WindowCreationFailed,
+    MenuCreationFailed,
+    SeparatorWithoutMenuParent
 }

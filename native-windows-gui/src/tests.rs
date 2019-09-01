@@ -5,24 +5,41 @@ use std::cell::RefCell;
 pub struct TestRun {
     button: bool,
     textedit: bool,
-    combo_box: bool
+    combo_box: bool,
+    menu: bool
 }
 
 
 #[derive(Default)]
 pub struct TestApp {
+    // App data
     runs: RefCell<TestRun>,
+
+    // Controls
     window: Window,
     test_button: Button,
     test_input: TextInput, 
-    test_combobox: ComboBox<String>,
+    test_combobox: ComboBox<&'static str>,
 
+    // Menu
+    window_menu: Menu,
+    window_submenu1: Menu,
+    window_menu_sep: MenuSeparator,
+    window_menu_item1: MenuItem,
+    window_menu_item2: MenuItem,
+    window_menu_item3: MenuItem,
+
+    // Timer
+    timer: Timer,
+    
     // Control window
     control_window: Window,
     events_show: TextInput,
     run_button_test: Button,
     run_textedit_test: Button,
     run_combobox_test: Button,
+    run_window_test: Button,
+    run_menu_test: Button,
     focus_test: Button,
 }
 
@@ -57,7 +74,7 @@ mod basic_app_ui {
             let control_window = ControlBase::build_hwnd()
               .class_name(data.control_window.class_name())
               .forced_flags(data.control_window.forced_flags())
-              .flags(((WindowFlags::MAIN_WINDOW | WindowFlags::VISIBLE).bits(), 0))
+              .flags(((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits(), 0))
               .size((280, 300))
               .position((650, 300))
               .text("Controls Panel")
@@ -96,6 +113,7 @@ mod basic_app_ui {
               .parent(&window)
               .build()?;
             data.test_combobox.handle = test_combobox.handle.clone();
+            data.test_combobox.set_collection(vec!["TEST1", "TEST2"]);
 
             let events_show = ControlBase::build_hwnd()
               .class_name(data.events_show.class_name())
@@ -141,6 +159,28 @@ mod basic_app_ui {
               .build()?;
             data.run_combobox_test.handle = run_combobox_test.handle.clone();
 
+            let run_window_test = ControlBase::build_hwnd()
+              .class_name(data.run_window_test.class_name())
+              .forced_flags(data.run_window_test.forced_flags())
+              .flags(data.run_window_test.flags())
+              .size((125, 30))
+              .position((5, 95))
+              .text("Run window tests")
+              .parent(&control_window)
+              .build()?;
+            data.run_window_test.handle = run_window_test.handle.clone();
+
+            let run_menu_test = ControlBase::build_hwnd()
+              .class_name(data.run_menu_test.class_name())
+              .forced_flags(data.run_menu_test.forced_flags())
+              .flags(data.run_menu_test.flags())
+              .size((125, 30))
+              .position((135, 95))
+              .text("Run menu tests")
+              .parent(&control_window)
+              .build()?;
+            data.run_menu_test.handle = run_menu_test.handle.clone();
+
             let focus_test = ControlBase::build_hwnd()
               .class_name(data.focus_test.class_name())
               .forced_flags(data.focus_test.forced_flags())
@@ -152,6 +192,56 @@ mod basic_app_ui {
               .build()?;
             data.focus_test.handle = focus_test.handle.clone();
 
+            // Menus & Actions
+            let window_menu = ControlBase::build_hmenu()
+                .text("Test menu")
+                .item(false)
+                .parent(&window)
+                .build()?;
+            data.window_menu.handle = window_menu.handle.clone();
+
+            let window_submenu1 = ControlBase::build_hmenu()
+                .text("Test Submenu")
+                .item(false)
+                .parent(&window_menu)
+                .build()?;
+            data.window_submenu1.handle = window_submenu1.handle.clone();
+
+            let window_menu_sep = ControlBase::build_hmenu()
+                .separator(true)
+                .parent(&window_menu)
+                .build()?;
+            data.window_menu_sep.handle = window_menu_sep.handle.clone();
+
+            let window_menu_item1 = ControlBase::build_hmenu()
+                .text("Test Item 1")
+                .item(true)
+                .parent(&window_menu)
+                .build()?;
+            data.window_menu_item1.handle = window_menu_item1.handle.clone();
+
+            let window_menu_item2 = ControlBase::build_hmenu()
+                .text("Test Item 2")
+                .item(true)
+                .parent(&window_submenu1)
+                .build()?;
+            data.window_menu_item2.handle = window_menu_item2.handle.clone();
+
+            let window_menu_item3 = ControlBase::build_hmenu()
+                .text("Test Item 3")
+                .item(true)
+                .parent(&window)
+                .build()?;
+            data.window_menu_item3.handle = window_menu_item3.handle.clone();
+
+            // Timers
+            let timer = ControlBase::build_timer()
+                .interval(1000)
+                .stopped(false)
+                .parent(&window)
+                .build()?;
+            data.timer.handle = timer.handle;
+
             // Wrap-up
             let ui = Rc::new(TestAppUi { inner: data });
 
@@ -161,32 +251,69 @@ mod basic_app_ui {
                 let evt_ui = ui.clone();
                 let handle_events = move |evt, handle: ControlHandle| {
                     match evt {
-                        E::OnButtonClick => {
+                        E::OnButtonClick => 
                             if handle == evt_ui.run_button_test.handle {
                                 super::test_button(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.run_textedit_test.handle {
                                 super::test_textedit(&evt_ui.inner, evt);
+
+                            } else if handle == evt_ui.run_combobox_test.handle {
+                                super::test_combobox(&evt_ui.inner, evt);
+
+                            } else if handle == evt_ui.run_window_test.handle {
+                                super::test_window(&evt_ui.inner, evt);
+
+                            } else if handle == evt_ui.run_menu_test.handle {
+                                super::test_menu(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.test_button.handle {
                                 super::test_events(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.focus_test.handle {
                                 super::focus(&evt_ui.inner, evt);
-                            }
-                        },
-                        E::OnButtonDoubleClick => {
+                            },
+                        E::OnButtonDoubleClick => 
                             if handle == evt_ui.test_button.handle {
                                 super::test_events(&evt_ui.inner, evt);
-                            }
-                        },
-                        E::OnTextInput => {
+                            },
+                        E::OnTextInput =>
                             if handle == evt_ui.test_input.handle {
                                 super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnComboBoxClosed =>
+                            if handle == evt_ui.test_combobox.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnComboBoxDropdown =>
+                            if handle == evt_ui.test_combobox.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnComboBoxDoubleClick =>
+                            if handle == evt_ui.test_combobox.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnComboxBoxSelection =>
+                            if handle == evt_ui.test_combobox.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnMenuItemClick =>
+                            if handle == evt_ui.window_menu_item1.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.window_menu_item2.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.window_menu_item3.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnTimerTick => {
+                            if handle == evt_ui.timer.handle {
+                                super::timer_tick(&evt_ui.inner, evt);
                             }
                         },
-                        E::OnWindowClose => {
+                        E::OnWindowClose => 
                             if handle == evt_ui.window.handle {
                                 super::close(&evt_ui.inner, evt);
-                            }
-                        },
+                            },
                         _ => {}
                     }
                 };
@@ -305,14 +432,86 @@ fn test_textedit(app: &TestApp, _e: Event) {
         app.test_input.set_size(120, 25);
         app.test_input.set_enabled(true);
         app.test_input.set_readonly(false);
-        app.runs.borrow_mut().textedit = false;
         app.test_input.set_password_char(None);
+
+        app.runs.borrow_mut().textedit = false;
+    }
+}
+
+fn test_combobox(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().combo_box {
+        {
+            let col = app.test_combobox.collection();
+            assert_eq!(&col as &[&'static str], &["TEST1", "TEST2"]);
+        }
+
+        {
+            let mut col = app.test_combobox.collection_mut();
+            col.push("TEST3");
+        }
+
+        app.test_combobox.sync();
+        app.test_combobox.push("Hello!");
+
+        app.test_combobox.set_selection(None);
+        assert_eq!(app.test_combobox.selection(), None);
+        assert_eq!(app.test_combobox.selection_string(), None);
+
+        app.test_combobox.set_selection(Some(2));
+        assert_eq!(app.test_combobox.selection(), Some(2));
+        assert_eq!(app.test_combobox.selection_string(), Some("TEST3".to_string()));
+
+        assert_eq!(app.test_combobox.set_selection_string("hel"), Some(3));
+        assert_eq!(app.test_combobox.selection(), Some(3));
+        assert_eq!(app.test_combobox.selection_string(), Some("Hello!".to_string()));
+
+        app.test_combobox.sort();
+        assert_eq!(app.test_combobox.set_selection_string("hel"), Some(0));
+
+        app.test_combobox.insert(1, "BOO!");
+        app.test_combobox.insert(std::usize::MAX, "Ahoy!!");
+        assert_eq!(app.test_combobox.set_selection_string("BOO!"), Some(1));
+        assert_eq!(app.test_combobox.set_selection_string("Ahoy!!"), Some(5));
+
+        app.test_combobox.dropdown(true);
+
+        app.runs.borrow_mut().combo_box = true;
+    } else {
+        app.test_combobox.set_collection(vec!["TEST1", "TEST2"]);
+        app.runs.borrow_mut().combo_box = false;
+    }
+}
+
+fn test_window(_app: &TestApp, _e: Event) {
+
+}
+
+fn test_menu(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().menu {
+        assert_eq!(app.window_menu_item1.enabled(), true);
+        app.window_menu_item1.set_enabled(false);
+        assert_eq!(app.window_menu_item1.enabled(), false);
+
+        assert_eq!(app.window_submenu1.enabled(), true);
+        app.window_submenu1.set_enabled(false);
+        assert_eq!(app.window_submenu1.enabled(), false);
+
+        app.runs.borrow_mut().menu = true;
+    } else {
+        app.window_menu_item1.set_enabled(true);
+        app.window_submenu1.set_enabled(true);
+        app.runs.borrow_mut().menu = false;
     }
 }
 
 fn test_events(app: &TestApp, e: Event) {
     app.events_show.set_text(&format!("{:?}", e));
 }
+
+fn timer_tick(_app: &TestApp, _e: Event) {
+    println!("TICK!");
+}
+
 
 fn close(_app: &TestApp, _e: Event) {
     stop_thread_dispatch();

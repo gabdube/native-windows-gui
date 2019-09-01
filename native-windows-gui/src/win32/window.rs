@@ -1,5 +1,9 @@
+/*!
+Native Windows GUI windowing base. Includes events dispatching and window creation.
+*/
+
 use winapi::shared::minwindef::{UINT, DWORD, HMODULE, WPARAM, LPARAM, LRESULT};
-use winapi::shared::windef::{HWND, HBRUSH};
+use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
 use super::base_helper::{get_system_error, to_utf16};
 use crate::controls::ControlHandle;
@@ -7,6 +11,25 @@ use crate::{Event, SystemError};
 use std::{ptr, mem};
 
 
+static mut TIMER_ID: u32 = 1; 
+
+
+pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> ControlHandle {
+    use winapi::um::winuser::SetTimer;
+    
+    let id = TIMER_ID;
+    TIMER_ID += 1;
+
+    if !stopped {
+        SetTimer(parent, id as UINT_PTR, interval as UINT, None);
+    }
+    
+    ControlHandle::Timer(parent, id)
+}
+
+/**
+    Set a window subclass the uses the `process_events` function of NWG.
+*/
 pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) 
     where F: Fn(Event, ControlHandle) -> () + 'static
 {
@@ -160,8 +183,8 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
     use std::ffi::OsString;
 
     use winapi::um::commctrl::DefSubclassProc;
-    use winapi::um::winuser::GetClassNameW;
-    use winapi::um::winuser::{WM_CLOSE, WM_COMMAND};
+    use winapi::um::winuser::{GetClassNameW, GetMenuItemID};
+    use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::HIWORD;
 
@@ -171,21 +194,33 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
         WM_CLOSE => {
             callback(Event::OnWindowClose, ControlHandle::Hwnd(hwnd));
         },
+        WM_MENUCOMMAND => {
+            let parent_handle: HMENU = mem::transmute(l);
+            let item_id = GetMenuItemID(parent_handle, w as i32);
+            let handle = ControlHandle::MenuItem(parent_handle, item_id);
+            callback(Event::OnMenuItemClick, handle);
+        },
         WM_COMMAND => {
             let child_handle: HWND = mem::transmute(l);
+            let message = HIWORD(w as u32) as u16;
+            let handle = ControlHandle::Hwnd(child_handle);
+            
+            // Converting the class name into rust string might not be the most efficient way to do this
+            // It might be a good idea to just compare the class_name_raw
             let mut class_name_raw: Vec<WCHAR> = Vec::with_capacity(100);  class_name_raw.set_len(100);
             let count = GetClassNameW(child_handle, class_name_raw.as_mut_ptr(), 100) as usize;
             let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
-            
-            let message = HIWORD(w as u32) as u16;
-
-            let handle = ControlHandle::Hwnd(child_handle);
 
             match &class_name as &str {
                 "Button" => callback(button_commands(message), handle),
                 "Edit" => callback(edit_commands(message), handle),
+                "ComboBox" => callback(edit_combo(message), handle),
                 _ => {}
             }
+        },
+        WM_TIMER => {
+            let handle = ControlHandle::Timer(hwnd, w as u32);
+            callback(Event::OnTimerTick, handle);
         },
         _ => {}
     }
@@ -195,21 +230,32 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
     DefSubclassProc(hwnd, msg, w, l)
 }
 
-fn button_commands(_m: u16) -> Event {
+fn button_commands(m: u16) -> Event {
     use winapi::um::winuser::{BN_CLICKED, BN_DBLCLK};
     
-    match _m {
+    match m {
         BN_CLICKED => Event::OnButtonClick,
         BN_DBLCLK => Event::OnButtonDoubleClick,
         _ => Event::Unknown
     }
 }
 
-fn edit_commands(_m: u16) -> Event {
+fn edit_commands(m: u16) -> Event {
     use winapi::um::winuser::{EN_CHANGE};
 
-    match _m {
+    match m {
         EN_CHANGE => Event::OnTextInput,
+        _ => Event::Unknown
+    }
+}
+
+fn edit_combo(m: u16) -> Event {
+    use winapi::um::winuser::{CBN_CLOSEUP, CBN_DROPDOWN, CBN_DBLCLK, CBN_SELCHANGE};
+    match m {
+        CBN_CLOSEUP => Event::OnComboBoxClosed,
+        CBN_DROPDOWN => Event::OnComboBoxDropdown,
+        CBN_DBLCLK => Event::OnComboBoxDoubleClick,
+        CBN_SELCHANGE => Event::OnComboxBoxSelection,
         _ => Event::Unknown
     }
 }

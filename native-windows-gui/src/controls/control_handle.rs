@@ -1,11 +1,20 @@
-use std::hash::{Hash, Hasher};
-use winapi::shared::windef::{HWND};
+use winapi::shared::windef::{HWND, HMENU};
 
 
 #[derive(Debug, Clone)]
 pub enum ControlHandle {
     NoHandle,
-    Hwnd(HWND)
+    Hwnd(HWND),
+
+    /// (Parent menu / Menu). 
+    /// Parent menu must be there as WINAPI does not have any function to fetch the parent
+    Menu(HMENU, HMENU),
+
+    /// (Parent menu / Unique ID). 
+    MenuItem(HMENU, u32),
+
+    /// Timer handle
+    Timer(HWND, u32)
 }
 
 impl ControlHandle {
@@ -19,11 +28,31 @@ impl ControlHandle {
 
     pub fn hwnd(&self) -> Option<HWND> {
         match self {
-            &ControlHandle::NoHandle => None,
-            &ControlHandle::Hwnd(h) => Some(h)
+            &ControlHandle::Hwnd(h) => Some(h),
+            _ => None,
         }
     }
 
+    pub fn hmenu(&self) -> Option<(HMENU, HMENU)> {
+        match self {
+            &ControlHandle::Menu(h1, h2) => Some((h1, h2)),
+            _ => None,
+        }
+    }
+
+    pub fn hmenu_item(&self) -> Option<(HMENU, u32)> {
+        match self {
+            &ControlHandle::MenuItem(h, i) => Some((h, i)),
+            _ => None,
+        }
+    }
+
+    pub fn timer(&self) -> Option<(HWND, u32)> {
+        match self {
+            &ControlHandle::Timer(h, i) => Some((h, i)),
+            _ => None,
+        }
+    }
 }
 
 
@@ -35,17 +64,6 @@ impl Default for ControlHandle {
 
 }
 
-impl Hash for ControlHandle {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        match self {
-            &ControlHandle::NoHandle => 0.hash(state),
-            &ControlHandle::Hwnd(value) => {
-                (1, (value as usize)).hash(state);
-            },
-        }
-    }
-}
-
 impl PartialEq for ControlHandle {
     fn eq(&self, other: &Self) -> bool {
         match self {
@@ -55,8 +73,23 @@ impl PartialEq for ControlHandle {
                 _ => false
             },
             // HWND
-            &ControlHandle::Hwnd(value1) => match other {
-                &ControlHandle::Hwnd(value2) => value1 == value2,
+            &ControlHandle::Hwnd(hwnd1) => match other {
+                &ControlHandle::Hwnd(hwnd2) => hwnd1 == hwnd2,
+                _ => false
+            },
+            // HMENU
+            &ControlHandle::Menu(h1, h2) => match other {
+                &ControlHandle::Menu(h3, h4) => h1 == h3 && h2 == h4,
+                _ => false
+            },
+            // HMENU / ITEM
+            &ControlHandle::MenuItem(value1, id1) => match other {
+                &ControlHandle::MenuItem(value2, id2) => value1 == value2 && id1 == id2,
+                _ => false
+            },
+            // TIMER
+            &ControlHandle::Timer(hwnd1, id1) => match other {
+                &ControlHandle::Timer(hwnd2, id2) => hwnd1 == hwnd2 && id1 == id2,
                 _ => false
             }
         }
