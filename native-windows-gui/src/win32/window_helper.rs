@@ -1,8 +1,18 @@
 use super::base_helper::{to_utf16, from_utf16};
 use winapi::shared::windef::HWND;
-use winapi::shared::minwindef::{UINT, WPARAM, LPARAM, LRESULT};
+use winapi::shared::minwindef::{DWORD, UINT, WPARAM, LPARAM, LRESULT};
+use winapi::um::winuser::WM_USER;
 use winapi::ctypes::c_int;
 use std::{ptr, mem};
+
+
+pub const NOTICE_MESSAGE: UINT = WM_USER;
+
+
+pub unsafe fn send_notice(thread_id: DWORD, hwnd: usize, id: u32) {
+    use winapi::um::winuser::PostThreadMessageW;
+    PostThreadMessageW(thread_id, NOTICE_MESSAGE, id as WPARAM, hwnd as LPARAM);
+}
 
 
 pub fn kill_timer(hwnd: HWND, id: u32) {

@@ -6,6 +6,7 @@ use winapi::shared::minwindef::{UINT, DWORD, HMODULE, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
 use super::base_helper::{get_system_error, to_utf16};
+use super::window_helper::{NOTICE_MESSAGE};
 use crate::controls::ControlHandle;
 use crate::{Event, SystemError};
 use std::{ptr, mem};
@@ -23,7 +24,6 @@ pub fn build_notice(parent: HWND) -> ControlHandle {
     };
     ControlHandle::Timer(parent, id)
 }
-
 
 pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> ControlHandle {
     use winapi::um::winuser::SetTimer;
@@ -232,6 +232,11 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
         WM_TIMER => {
             let handle = ControlHandle::Timer(hwnd, w as u32);
             callback(Event::OnTimerTick, handle);
+        },
+        NOTICE_MESSAGE => {
+            println!("TEST");
+            let handle = ControlHandle::Timer(hwnd, w as u32);
+            callback(Event::OnNotice, handle);
         },
         _ => {}
     }

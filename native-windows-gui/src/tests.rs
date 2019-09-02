@@ -249,7 +249,7 @@ mod basic_app_ui {
 
             // Timers
             let timer = ControlBase::build_timer()
-                .interval(1000)
+                .interval(10000)
                 .stopped(false)
                 .parent(&window)
                 .build()?;
@@ -284,6 +284,9 @@ mod basic_app_ui {
 
                             } else if handle == evt_ui.run_menu_test.handle {
                                 super::test_menu(&evt_ui.inner, evt);
+
+                            } else if handle == evt_ui.run_thread_test.handle {
+                                super::test_thread(&evt_ui.inner, evt);
 
                             } else if handle == evt_ui.test_button.handle {
                                 super::test_events(&evt_ui.inner, evt);
@@ -323,11 +326,14 @@ mod basic_app_ui {
                             } else if handle == evt_ui.window_menu_item3.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
-                        E::OnTimerTick => {
+                        E::OnTimerTick => 
                             if handle == evt_ui.timer.handle {
-                                super::timer_tick(&evt_ui.inner, evt);
-                            }
-                        },
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnNotice => 
+                            if handle == evt_ui.notice.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
                         E::OnWindowClose => 
                             if handle == evt_ui.window.handle {
                                 super::close(&evt_ui.inner, evt);
@@ -522,14 +528,20 @@ fn test_menu(app: &TestApp, _e: Event) {
     }
 }
 
+fn test_thread(app: &TestApp, _e: Event) {
+    use std::thread;
+    use std::time::Duration;
+
+    let notice_sender = app.notice.sender();
+    thread::spawn(move || {
+        thread::sleep(Duration::from_millis(3000));
+        notice_sender.notice();
+    });
+}
+
 fn test_events(app: &TestApp, e: Event) {
     app.events_show.set_text(&format!("{:?}", e));
 }
-
-fn timer_tick(_app: &TestApp, _e: Event) {
-    println!("TICK!");
-}
-
 
 fn close(_app: &TestApp, _e: Event) {
     stop_thread_dispatch();

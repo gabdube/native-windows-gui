@@ -31,6 +31,9 @@ pub enum Event {
     /// When a timer delay is elapsed
     OnTimerTick,
 
+    /// When a notice is... noticed
+    OnNotice,
+
     /// When a user click on the X button of a window
     OnWindowClose,
 

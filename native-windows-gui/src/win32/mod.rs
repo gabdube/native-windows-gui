@@ -11,11 +11,20 @@ pub(crate) mod message_box;
 */
 pub fn dispatch_thread_events() {
     use winapi::um::winuser::MSG;
-    use winapi::um::winuser::{GetMessageW, TranslateMessage, DispatchMessageW};
+    use winapi::um::winuser::{SendMessageW, GetMessageW, TranslateMessage, DispatchMessageW};
+    use winapi::shared::windef::HWND;
 
     unsafe {
         let mut msg: MSG = mem::uninitialized();
         while GetMessageW(&mut msg, ptr::null_mut(), 0, 0) != 0 {
+
+            // Dispatch notice message sent from other threads
+            if msg.message == window_helper::NOTICE_MESSAGE {
+                let hwnd = msg.lParam as HWND;
+                SendMessageW(hwnd, window_helper::NOTICE_MESSAGE, msg.wParam, 0);
+                continue;
+            }
+
             TranslateMessage(&msg); 
             DispatchMessageW(&msg); 
         }
