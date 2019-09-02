@@ -13,7 +13,7 @@ pub enum ControlHandle {
     /// (Parent menu / Unique ID). 
     MenuItem(HMENU, u32),
 
-    /// Timer handle
+    /// Timer / Notice handle
     Timer(HWND, u32)
 }
 

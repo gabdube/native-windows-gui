@@ -1,7 +1,7 @@
 use winapi::shared::minwindef::DWORD;
 use winapi::shared::windef::{HWND, HMENU};
 use super::ControlHandle;
-use crate::win32::window::{build_hwnd_control, build_timer};
+use crate::win32::window::{build_hwnd_control, build_timer, build_notice};
 use crate::win32::menu::build_hmenu_control;
 use crate::SystemError;
 
@@ -25,7 +25,9 @@ impl ControlBase {
         TimerBuilder::default()
     }
 
-
+    pub fn build_notice() -> NoticeBuilder {
+        NoticeBuilder::default()
+    }
 }
 
 #[derive(Default)]
@@ -182,3 +184,22 @@ impl TimerBuilder {
 
 }
 
+
+#[derive(Default)]
+pub struct NoticeBuilder {
+    parent: Option<HWND>
+}
+
+impl NoticeBuilder {
+
+    pub fn parent(mut self, parent: &ControlBase) -> NoticeBuilder {
+        self.parent = parent.handle.hwnd();
+        self
+    }
+
+    pub fn build(self) -> Result<ControlBase, SystemError> {
+        let handle = self.parent.expect("Internal error. Notice without window parent");
+        Ok(ControlBase { handle: build_notice(handle) } )
+    }
+
+}

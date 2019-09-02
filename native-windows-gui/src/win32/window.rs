@@ -12,6 +12,17 @@ use std::{ptr, mem};
 
 
 static mut TIMER_ID: u32 = 1; 
+static mut NOTICE_ID: u32 = 1; 
+
+
+pub fn build_notice(parent: HWND) -> ControlHandle {
+    let id = unsafe {
+        let tmp = NOTICE_ID;
+        NOTICE_ID += 1;
+        tmp
+    };
+    ControlHandle::Timer(parent, id)
+}
 
 
 pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> ControlHandle {

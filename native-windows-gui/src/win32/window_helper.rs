@@ -5,6 +5,24 @@ use winapi::ctypes::c_int;
 use std::{ptr, mem};
 
 
+pub fn kill_timer(hwnd: HWND, id: u32) {
+    use winapi::um::winuser::KillTimer;
+    use winapi::shared::basetsd::UINT_PTR;
+
+    unsafe {
+        KillTimer(hwnd, id as UINT_PTR);
+    }
+}
+
+pub fn start_timer(hwnd: HWND, id: u32, interval: u32) {
+    use winapi::um::winuser::SetTimer;
+    use winapi::shared::basetsd::UINT_PTR;
+
+    unsafe {
+        SetTimer(hwnd, id as UINT_PTR, interval, None);
+    }
+}
+
 pub fn get_style(handle: HWND) -> UINT {
     get_window_long(handle, ::winapi::um::winuser::GWL_STYLE) as UINT
 }

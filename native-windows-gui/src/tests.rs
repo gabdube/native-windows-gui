@@ -29,8 +29,9 @@ pub struct TestApp {
     window_menu_item2: MenuItem,
     window_menu_item3: MenuItem,
 
-    // Timer
+    // Timer / Notice
     timer: Timer,
+    notice: Notice,
     
     // Control window
     control_window: Window,
@@ -40,6 +41,7 @@ pub struct TestApp {
     run_combobox_test: Button,
     run_window_test: Button,
     run_menu_test: Button,
+    run_thread_test: Button,
     focus_test: Button,
 }
 
@@ -181,6 +183,17 @@ mod basic_app_ui {
               .build()?;
             data.run_menu_test.handle = run_menu_test.handle.clone();
 
+            let run_thread_test = ControlBase::build_hwnd()
+              .class_name(data.run_thread_test.class_name())
+              .forced_flags(data.run_thread_test.forced_flags())
+              .flags(data.run_thread_test.flags())
+              .size((125, 30))
+              .position((5, 125))
+              .text("Run thread tests")
+              .parent(&control_window)
+              .build()?;
+            data.run_thread_test.handle = run_thread_test.handle.clone();
+
             let focus_test = ControlBase::build_hwnd()
               .class_name(data.focus_test.class_name())
               .forced_flags(data.focus_test.forced_flags())
@@ -241,6 +254,11 @@ mod basic_app_ui {
                 .parent(&window)
                 .build()?;
             data.timer.handle = timer.handle;
+
+            let notice = ControlBase::build_notice()
+                .parent(&window)
+                .build()?;
+            data.notice.handle = notice.handle;
 
             // Wrap-up
             let ui = Rc::new(TestAppUi { inner: data });
