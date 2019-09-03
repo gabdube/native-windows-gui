@@ -234,7 +234,6 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
             callback(Event::OnTimerTick, handle);
         },
         NOTICE_MESSAGE => {
-            println!("TEST");
             let handle = ControlHandle::Timer(hwnd, w as u32);
             callback(Event::OnNotice, handle);
         },

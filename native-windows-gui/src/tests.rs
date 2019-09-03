@@ -11,9 +11,24 @@ pub struct TestRun {
 
 
 #[derive(Default)]
+pub struct PartialApp1 {
+    window: Window,
+    test: Button
+}
+
+#[derive(Default)]
+pub struct PartialApp2 {
+    test: Button
+}
+
+#[derive(Default)]
 pub struct TestApp {
     // App data
     runs: RefCell<TestRun>,
+
+    // Partial
+    p1: PartialApp1,
+    p2: PartialApp2,
 
     // Controls
     window: Window,
@@ -45,13 +60,81 @@ pub struct TestApp {
     focus_test: Button,
 }
 
-mod basic_app_ui {
-    use super::TestApp;
+#[allow(unused_imports)]
+mod partial_app_1_ui {
+    use super::*;
+    use crate::{PartialUi, ControlBase, SystemError, WindowFlags};
+
+    #[allow(unused_mut)]
+    impl PartialUi<PartialApp1> for PartialApp1 {
+
+        fn build_partial(data: &mut PartialApp1, parent: Option<&ControlBase>) -> Result<(), SystemError> {
+
+            let window = ControlBase::build_hwnd()
+              .class_name(data.window.class_name())
+              .forced_flags(data.window.forced_flags())
+              .flags(((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits(), 0))
+              .size((300, 300))
+              .position((1200, 300))
+              .text("Partial 1 Window")
+              .build()?;
+            data.window.handle = window.handle.clone();
+
+            let test = ControlBase::build_hwnd()
+              .class_name(data.test.class_name())
+              .forced_flags(data.test.forced_flags())
+              .flags(data.test.flags())
+              .size((290, 290))
+              .position((5, 5))
+              .text("Partial Button")
+              .parent(Some(&window).or(parent.clone()) )
+              .build()?;
+            data.test.handle = test.handle.clone();
+
+            Ok(())
+        }
+
+    }
+
+}
+
+
+#[allow(unused_imports)]
+mod partial_app_2_ui {
+    use super::*;
+    use crate::{PartialUi, ControlBase, SystemError, WindowFlags};
+
+    #[allow(unused_mut)]
+    impl PartialUi<PartialApp2> for PartialApp2 {
+
+        fn build_partial(data: &mut PartialApp2, parent: Option<&ControlBase>) -> Result<(), SystemError> {
+            
+            let test = ControlBase::build_hwnd()
+              .class_name(data.test.class_name())
+              .forced_flags(data.test.forced_flags())
+              .flags(data.test.flags())
+              .size((150, 30))
+              .position((5, 80))
+              .text("Partial Button")
+              .parent(None.or(parent.clone()))
+              .build()?;
+            data.test.handle = test.handle.clone();
+        
+            Ok(())
+        }
+
+    }
+
+}
+
+
+#[allow(unused_imports)]
+mod test_app_ui {
+    use super::*;
     use crate::{NativeUi, ControlBase, ControlHandle, SystemError, bind_event_handler, WindowFlags};
     use std::rc::Rc;
     use std::ops::Deref;
 
-    #[allow(dead_code)]
     pub struct TestAppUi {
         inner: TestApp
     }
@@ -67,7 +150,7 @@ mod basic_app_ui {
               .class_name(data.window.class_name())
               .forced_flags(data.window.forced_flags())
               .flags(data.window.flags())
-              .size((300, 120))
+              .size((300, 220))
               .position((300, 300))
               .text("Tests")
               .build()?;
@@ -80,7 +163,7 @@ mod basic_app_ui {
               .size((280, 300))
               .position((650, 300))
               .text("Controls Panel")
-              .parent(&window)
+              .parent(Some(&window))
               .build()?;
             data.control_window.handle = control_window.handle.clone();
 
@@ -91,7 +174,7 @@ mod basic_app_ui {
               .size((100, 40))
               .position((5, 5))
               .text("Test Button")
-              .parent(&window)
+              .parent(Some(&window))
               .build()?;
             data.test_button.handle = test_button.handle.clone();
 
@@ -102,7 +185,7 @@ mod basic_app_ui {
               .size((120, 25))
               .position((155, 15))
               .text("Test TextEdit")
-              .parent(&window)
+              .parent(Some(&window))
               .build()?;
             data.test_input.handle = test_input.handle.clone();
 
@@ -110,9 +193,9 @@ mod basic_app_ui {
               .class_name(data.test_combobox.class_name())
               .forced_flags(data.test_combobox.forced_flags())
               .flags(data.test_combobox.flags())
-              .size((120, 25))
+              .size((150, 25))
               .position((5, 50))
-              .parent(&window)
+              .parent(Some(&window))
               .build()?;
             data.test_combobox.handle = test_combobox.handle.clone();
             data.test_combobox.set_collection(vec!["TEST1", "TEST2"]);
@@ -124,7 +207,7 @@ mod basic_app_ui {
               .size((255, 25))
               .position((5, 5))
               .text("")
-              .parent(&control_window)
+              .parent(Some(&control_window))
               .build()?;
             data.events_show.handle = events_show.handle.clone();
 
@@ -135,7 +218,7 @@ mod basic_app_ui {
               .size((125, 30))
               .position((5, 35))
               .text("Run button tests")
-              .parent(&control_window)
+              .parent(Some(&control_window))
               .build()?;
             data.run_button_test.handle = run_button_test.handle.clone();
 
@@ -146,7 +229,7 @@ mod basic_app_ui {
               .size((125, 30))
               .position((5, 65))
               .text("Run textedit tests")
-              .parent(&control_window)
+              .parent(Some(&control_window))
               .build()?;
             data.run_textedit_test.handle = run_textedit_test.handle.clone();
 
@@ -157,7 +240,7 @@ mod basic_app_ui {
               .size((125, 30))
               .position((135, 65))
               .text("Run combo tests")
-              .parent(&control_window)
+              .parent(Some(&control_window))
               .build()?;
             data.run_combobox_test.handle = run_combobox_test.handle.clone();
 
@@ -168,7 +251,7 @@ mod basic_app_ui {
               .size((125, 30))
               .position((5, 95))
               .text("Run window tests")
-              .parent(&control_window)
+              .parent(Some(&control_window))
               .build()?;
             data.run_window_test.handle = run_window_test.handle.clone();
 
@@ -179,7 +262,7 @@ mod basic_app_ui {
               .size((125, 30))
               .position((135, 95))
               .text("Run menu tests")
-              .parent(&control_window)
+              .parent(Some(&control_window))
               .build()?;
             data.run_menu_test.handle = run_menu_test.handle.clone();
 
@@ -190,7 +273,7 @@ mod basic_app_ui {
               .size((125, 30))
               .position((5, 125))
               .text("Run thread tests")
-              .parent(&control_window)
+              .parent(Some(&control_window))
               .build()?;
             data.run_thread_test.handle = run_thread_test.handle.clone();
 
@@ -201,7 +284,7 @@ mod basic_app_ui {
               .size((125, 30))
               .position((135, 35))
               .text("Focus text")
-              .parent(&control_window)
+              .parent(Some(&control_window))
               .build()?;
             data.focus_test.handle = focus_test.handle.clone();
 
@@ -247,6 +330,10 @@ mod basic_app_ui {
                 .build()?;
             data.window_menu_item3.handle = window_menu_item3.handle.clone();
 
+            // Control for partial ui
+            PartialApp1::build_partial(&mut data.p1, Some(&window))?;
+            PartialApp2::build_partial(&mut data.p2, Some(&window))?;
+
             // Timers
             let timer = ControlBase::build_timer()
                 .interval(10000)
@@ -264,7 +351,7 @@ mod basic_app_ui {
             let ui = Rc::new(TestAppUi { inner: data });
 
             // Events
-            let window_handles = [&ui.window.handle, &ui.control_window.handle];
+            let window_handles = [&ui.window.handle, &ui.control_window.handle, &ui.p1.window.handle];
             for handle in window_handles.iter() {
                 let evt_ui = ui.clone();
                 let handle_events = move |evt, handle: ControlHandle| {
@@ -293,6 +380,10 @@ mod basic_app_ui {
 
                             } else if handle == evt_ui.focus_test.handle {
                                 super::focus(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.p1.test.handle {
+                                super::test_partial(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.p2.test.handle {
+                                super::test_partial(&evt_ui.inner, evt);
                             },
                         E::OnButtonDoubleClick => 
                             if handle == evt_ui.test_button.handle {
@@ -424,8 +515,8 @@ fn test_textedit(app: &TestApp, _e: Event) {
         assert_eq!(app.test_input.len(), 8);
 
         assert_eq!(app.test_input.position(), (155, 15));
-        app.test_input.set_position(150, 20);
-        assert_eq!(app.test_input.position(), (150, 20));
+        app.test_input.set_position(150, 5);
+        assert_eq!(app.test_input.position(), (150, 5));
 
         assert_eq!(app.test_input.size(), (120, 25));
         app.test_input.set_size(115, 30);
@@ -534,13 +625,17 @@ fn test_thread(app: &TestApp, _e: Event) {
 
     let notice_sender = app.notice.sender();
     thread::spawn(move || {
-        thread::sleep(Duration::from_millis(3000));
+        thread::sleep(Duration::from_millis(1000));
         notice_sender.notice();
     });
 }
 
 fn test_events(app: &TestApp, e: Event) {
     app.events_show.set_text(&format!("{:?}", e));
+}
+
+fn test_partial(_app: &TestApp, _e: Event) {
+    simple_message("HELLO!", "Hello from partial");
 }
 
 fn close(_app: &TestApp, _e: Event) {

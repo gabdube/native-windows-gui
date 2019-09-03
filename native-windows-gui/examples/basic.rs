@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 extern crate native_windows_gui as nwg;
 use nwg::NativeUi;
 
@@ -58,7 +60,7 @@ mod basic_app_ui {
                 .size((280, 25))
                 .position((10, 10))
                 .text("Heisenberg")
-                .parent(&window)
+                .parent(Some(&window))
                 .build()?;
             data.name_edit.handle = name_edit.handle.clone();
 
@@ -69,7 +71,7 @@ mod basic_app_ui {
                 .size((280, 60))
                 .position((10, 40))
                 .text("Say my name")
-                .parent(&window)
+                .parent(Some(&window))
                 .build()?;
             data.hello_button.handle = hello_button.handle.clone();
 

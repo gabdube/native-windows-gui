@@ -76,8 +76,11 @@ impl HwndBuilder {
         self
     }
 
-    pub fn parent(mut self, parent: &ControlBase) -> HwndBuilder {
-        self.parent = parent.handle.hwnd();
+    pub fn parent(mut self, parent: Option<&ControlBase>) -> HwndBuilder {
+        match parent {
+            Some(p) => { self.parent = p.handle.hwnd(); }
+            None => { self.parent = None; }
+        }
         self
     }
 

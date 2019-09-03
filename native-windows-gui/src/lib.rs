@@ -21,6 +21,10 @@ mod controls;
 pub use controls::*;
 
 
+pub trait PartialUi<D> {
+    fn build_partial(d: &mut D, parent: Option<&ControlBase>) -> Result<(), SystemError>;
+}
+
 pub trait NativeUi<D, UI> {
     fn build_ui(d: D) -> Result<Rc<UI>, SystemError>;
 }
