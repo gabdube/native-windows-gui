@@ -1,4 +1,5 @@
 use crate::win32::window_helper as wh;
+use crate::Font;
 use super::ControlHandle;
 
 const NOT_BOUND: &'static str = "Button is not yet bound to a winapi object";
@@ -10,6 +11,26 @@ pub struct Button {
 }
 
 impl Button {
+
+    /// Return the font of the control
+    pub fn font(&self) -> Option<Font> {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let font_handle = wh::get_window_font(handle);
+        if font_handle.is_null() {
+            None
+        } else {
+            Some(Font { handle: font_handle })
+        }
+    }
+
+    /// Set the font of the control
+    pub fn set_font(&self, font: Option<&Font>) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
+    }
 
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {

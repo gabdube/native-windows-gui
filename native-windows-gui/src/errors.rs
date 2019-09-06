@@ -8,6 +8,7 @@ pub enum SystemError {
     SystemClassCreationFailed,
     WindowCreationFailed,
     FontCreationFailed,
+    ImageCreationFailed,
     MenuCreationFailed,
     SeparatorWithoutMenuParent
 }

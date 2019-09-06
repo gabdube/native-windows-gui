@@ -1,4 +1,5 @@
 use crate::win32::window_helper as wh;
+use crate::Font;
 use super::ControlHandle;
 use std::ops::Range;
 use std::char;
@@ -12,6 +13,26 @@ pub struct TextInput {
 }
 
 impl TextInput {
+
+    /// Return the font of the control
+    pub fn font(&self) -> Option<Font> {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let font_handle = wh::get_window_font(handle);
+        if font_handle.is_null() {
+            None
+        } else {
+            Some(Font { handle: font_handle })
+        }
+    }
+
+    /// Set the font of the control
+    pub fn set_font(&self, font: Option<&Font>) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
+    }
 
     /// Return the password character displayed by the text input. If the input is not a password, return None.
     pub fn password_char(&self) -> Option<char> {

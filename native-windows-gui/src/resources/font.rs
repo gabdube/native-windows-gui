@@ -5,6 +5,7 @@ use std::ptr;
 
 
 /// A system font
+#[derive(PartialEq, Eq, Debug)]
 pub struct Font {
     pub(crate) handle: HFONT
 }

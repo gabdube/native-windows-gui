@@ -7,7 +7,8 @@ pub struct TestRun {
     textedit: bool,
     combo_box: bool,
     menu: bool,
-    label: bool
+    label: bool,
+    status: bool
 }
 
 
@@ -33,10 +34,11 @@ pub struct TestApp {
 
     // Resources
     font: Font,
+    ico1: Image,
 
     // Controls
     window: Window,
-    windows_status: StatusBar,
+    window_status: StatusBar,
     test_button: Button,
     test_input: TextInput, 
     test_combobox: ComboBox<&'static str>,
@@ -64,6 +66,7 @@ pub struct TestApp {
     run_menu_test: Button,
     run_thread_test: Button,
     run_label_test: Button,
+    run_status_test: Button,
     focus_test: Button,
 }
 
@@ -160,26 +163,31 @@ mod test_app_ui {
               .build()?;
             data.font = font;
 
+            // Image
+            let ico1 = Image::icon("./test_rc/cog.ico", None, false)?;
+            data.ico1 = ico1;
+
             // Controls
             let window = ControlBase::build_hwnd()
               .class_name(data.window.class_name())
               .forced_flags(data.window.forced_flags())
               .flags(data.window.flags())
-              .size((300, 220))
+              .size((300, 280))
               .position((300, 300))
               .text("Tests")
               .build()?;
             data.window.handle = window.handle.clone();
+            data.window.set_icon(Some(&data.ico1), true);
 
-            let windows_status = ControlBase::build_hwnd()
-              .class_name(data.windows_status.class_name())
-              .forced_flags(data.windows_status.forced_flags())
-              .flags(data.windows_status.flags())
+            let window_status = ControlBase::build_hwnd()
+              .class_name(data.window_status.class_name())
+              .forced_flags(data.window_status.forced_flags())
+              .flags(data.window_status.flags())
               .parent(Some(&window))
               .build()?;
-            data.windows_status.handle = windows_status.handle;
-            data.windows_status.set_text(0, "TEST status");
-            data.windows_status.hook_parent_resize();
+            data.window_status.handle = window_status.handle;
+            data.window_status.set_text(0, "TEST status");
+            data.window_status.hook_parent_resize();
 
             let control_window = ControlBase::build_hwnd()
               .class_name(data.control_window.class_name())
@@ -191,6 +199,7 @@ mod test_app_ui {
               .parent(Some(&window))
               .build()?;
             data.control_window.handle = control_window.handle.clone();
+            data.control_window.set_icon(Some(&data.ico1), true);
 
             let test_button = ControlBase::build_hwnd()
               .class_name(data.test_button.class_name())
@@ -235,7 +244,7 @@ mod test_app_ui {
               .parent(Some(&window))
               .build()?;
             data.test_label.handle = test_label.handle.clone();
-            data.test_label.set_font(&data.font);
+            data.test_label.set_font(Some(&data.font));
 
             let events_show = ControlBase::build_hwnd()
               .class_name(data.events_show.class_name())
@@ -324,6 +333,18 @@ mod test_app_ui {
               .parent(Some(&control_window))
               .build()?;
             data.run_label_test.handle = run_label_test.handle.clone();
+
+            let run_status_test = ControlBase::build_hwnd()
+              .class_name(data.run_status_test.class_name())
+              .forced_flags(data.run_status_test.forced_flags())
+              .flags(data.run_status_test.flags())
+              .size((125, 30))
+              .position((5, 155))
+              .text("Run status tests")
+              .parent(Some(&control_window))
+              .build()?;
+              
+            data.run_status_test.handle = run_status_test.handle.clone();
 
             let focus_test = ControlBase::build_hwnd()
               .class_name(data.focus_test.class_name())
@@ -429,10 +450,15 @@ mod test_app_ui {
                             } else if handle == evt_ui.test_button.handle {
                                 super::test_events(&evt_ui.inner, evt);
 
+                            } else if handle == evt_ui.run_status_test.handle {
+                                super::test_status(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.focus_test.handle {
                                 super::focus(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.p1.test.handle {
                                 super::test_partial(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.p2.test.handle {
                                 super::test_partial(&evt_ui.inner, evt);
                             },
@@ -696,6 +722,28 @@ fn test_label(app: &TestApp, _e: Event) {
         app.runs.borrow_mut().label = false;
     }
 }
+
+fn test_status(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().status {
+
+        app.window_status.set_text(0, "Status changed!");
+        assert_eq!(&app.window_status.text(0), "Status changed!");
+
+        app.window_status.set_font(Some(&app.font));
+        assert_eq!(app.window_status.font().as_ref(), Some(&app.font));
+
+        app.window_status.set_min_height(55);
+
+        app.runs.borrow_mut().status = true;
+    } else {
+
+        app.window_status.set_font(None);
+        app.window_status.set_min_height(25);
+
+        app.runs.borrow_mut().status = false;
+    }
+}
+
 
 fn test_events(app: &TestApp, e: Event) {
     app.events_show.set_text(&format!("{:?}", e));

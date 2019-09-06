@@ -2,6 +2,7 @@ use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_CLIPCHILDREN, WS_VISIBLE, WS_D
 WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME};
 
 use crate::win32::window_helper as wh;
+use crate::Image;
 use super::ControlHandle;
 
 const NOT_BOUND: &'static str = "Window is not yet bound to a winapi object";
@@ -29,6 +30,23 @@ pub struct Window {
 }
 
 impl Window {
+
+    /// Set the icon in the window
+    /// - icon: The new icon. If None, the icon is removed
+    /// - large: If true, set the large icon for the window, if false set the small icon for the window.
+    pub fn set_icon(&self, icon: Option<&Image>, large: bool) {
+        use winapi::um::winuser::WM_SETICON;
+        use winapi::shared::minwindef::WPARAM;
+        use std::{mem, ptr};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let image_handle = icon.map(|i| i.handle).unwrap_or(ptr::null_mut());
+        unsafe {
+            wh::send_message(handle, WM_SETICON, large as WPARAM, mem::transmute(image_handle));
+        }
+    }
 
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {

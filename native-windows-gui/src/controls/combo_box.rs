@@ -1,6 +1,7 @@
 use winapi::shared::windef::HWND;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::win32::window_helper as wh;
+use crate::Font;
 use super::ControlHandle;
 use std::cell::{Ref, RefMut, RefCell};
 use std::fmt::Display;
@@ -17,6 +18,26 @@ pub struct ComboBox<D: Display+Default> {
 }
 
 impl<D: Display+Default> ComboBox<D> {
+
+    /// Return the font of the control
+    pub fn font(&self) -> Option<Font> {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let font_handle = wh::get_window_font(handle);
+        if font_handle.is_null() {
+            None
+        } else {
+            Some(Font { handle: font_handle })
+        }
+    }
+
+    /// Set the font of the control
+    pub fn set_font(&self, font: Option<&Font>) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
+    }
 
     /// Sort the inner collection by the display value of it's items and update the view
     /// Internally this uses `Vec.sort_unstable_by`.

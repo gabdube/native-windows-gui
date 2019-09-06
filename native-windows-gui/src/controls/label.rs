@@ -14,17 +14,24 @@ pub struct Label {
 
 impl Label {
 
-    pub fn font(&self) -> Font {
+    /// Return the font of the control
+    pub fn font(&self) -> Option<Font> {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
-        return Font { handle: wh::get_window_font(handle) }
+        let font_handle = wh::get_window_font(handle);
+        if font_handle.is_null() {
+            None
+        } else {
+            Some(Font { handle: font_handle })
+        }
     }
 
-    pub fn set_font(&self, font: &Font) {
+    /// Set the font of the control
+    pub fn set_font(&self, font: Option<&Font>) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::set_window_font(handle, Some(font.handle), true); }
+        unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
     }
 
     /// Return true if the control currently has the keyboard focus
