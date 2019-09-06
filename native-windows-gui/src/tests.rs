@@ -6,7 +6,8 @@ pub struct TestRun {
     button: bool,
     textedit: bool,
     combo_box: bool,
-    menu: bool
+    menu: bool,
+    label: bool
 }
 
 
@@ -30,11 +31,15 @@ pub struct TestApp {
     p1: PartialApp1,
     p2: PartialApp2,
 
+    // Resources
+    font: Font,
+
     // Controls
     window: Window,
     test_button: Button,
     test_input: TextInput, 
     test_combobox: ComboBox<&'static str>,
+    test_label: Label,
 
     // Menu
     window_menu: Menu,
@@ -57,6 +62,7 @@ pub struct TestApp {
     run_window_test: Button,
     run_menu_test: Button,
     run_thread_test: Button,
+    run_label_test: Button,
     focus_test: Button,
 }
 
@@ -145,6 +151,14 @@ mod test_app_ui {
         fn build_ui(mut data: TestApp) -> Result<Rc<TestAppUi>, SystemError> {
             use crate::Event as E;
 
+            // Font
+            let font = Font::builder()
+              .size(20)
+              .weight(700)
+              .family(Some("Arial"))
+              .build()?;
+            data.font = font;
+
             // Controls
             let window = ControlBase::build_hwnd()
               .class_name(data.window.class_name())
@@ -199,6 +213,18 @@ mod test_app_ui {
               .build()?;
             data.test_combobox.handle = test_combobox.handle.clone();
             data.test_combobox.set_collection(vec!["TEST1", "TEST2"]);
+
+            let test_label = ControlBase::build_hwnd()
+              .class_name(data.test_label.class_name())
+              .forced_flags(data.test_label.forced_flags())
+              .flags(data.test_label.flags())
+              .text("Test label")
+              .size((150, 25))
+              .position((5, 115))
+              .parent(Some(&window))
+              .build()?;
+            data.test_label.handle = test_label.handle.clone();
+            data.test_label.set_font(&data.font);
 
             let events_show = ControlBase::build_hwnd()
               .class_name(data.events_show.class_name())
@@ -276,6 +302,17 @@ mod test_app_ui {
               .parent(Some(&control_window))
               .build()?;
             data.run_thread_test.handle = run_thread_test.handle.clone();
+
+            let run_label_test = ControlBase::build_hwnd()
+              .class_name(data.run_label_test.class_name())
+              .forced_flags(data.run_label_test.forced_flags())
+              .flags(data.run_label_test.flags())
+              .size((125, 30))
+              .position((135, 125))
+              .text("Run label tests")
+              .parent(Some(&control_window))
+              .build()?;
+            data.run_label_test.handle = run_label_test.handle.clone();
 
             let focus_test = ControlBase::build_hwnd()
               .class_name(data.focus_test.class_name())
@@ -375,6 +412,9 @@ mod test_app_ui {
                             } else if handle == evt_ui.run_thread_test.handle {
                                 super::test_thread(&evt_ui.inner, evt);
 
+                            } else if handle == evt_ui.run_label_test.handle {
+                                super::test_label(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.test_button.handle {
                                 super::test_events(&evt_ui.inner, evt);
 
@@ -407,6 +447,14 @@ mod test_app_ui {
                             },
                         E::OnComboxBoxSelection =>
                             if handle == evt_ui.test_combobox.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnLabelClick =>
+                            if handle == evt_ui.test_label.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnLabelDoubleClick =>
+                            if handle == evt_ui.test_label.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
                         E::OnMenuItemClick =>
@@ -628,6 +676,14 @@ fn test_thread(app: &TestApp, _e: Event) {
         thread::sleep(Duration::from_millis(1000));
         notice_sender.notice();
     });
+}
+
+fn test_label(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().label {
+        app.runs.borrow_mut().label = true;
+    } else {
+        app.runs.borrow_mut().label = false;
+    }
 }
 
 fn test_events(app: &TestApp, e: Event) {

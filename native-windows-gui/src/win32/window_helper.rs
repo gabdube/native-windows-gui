@@ -1,19 +1,35 @@
 use super::base_helper::{to_utf16, from_utf16};
-use winapi::shared::windef::HWND;
+use winapi::shared::windef::{HFONT, HWND};
 use winapi::shared::minwindef::{DWORD, UINT, WPARAM, LPARAM, LRESULT};
 use winapi::um::winuser::WM_USER;
 use winapi::ctypes::c_int;
 use std::{ptr, mem};
 
-
 pub const NOTICE_MESSAGE: UINT = WM_USER;
 
+
+pub fn get_window_font(handle: HWND) -> HFONT {
+    use winapi::um::winuser::{ WM_GETFONT };
+    unsafe { 
+        let h = send_message(handle, WM_GETFONT, 0, 0);
+        mem::transmute(h)
+    }
+}
+
+/// Set the font of a window
+pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: bool) {
+    use winapi::um::winuser::{WM_SETFONT};
+    use winapi::um::winuser::SendMessageW;
+
+    let font_handle = font_handle.unwrap_or(ptr::null_mut());
+
+    SendMessageW(handle, WM_SETFONT, mem::transmute(font_handle), redraw as LPARAM);
+}
 
 pub unsafe fn send_notice(thread_id: DWORD, hwnd: usize, id: u32) {
     use winapi::um::winuser::PostThreadMessageW;
     PostThreadMessageW(thread_id, NOTICE_MESSAGE, id as WPARAM, hwnd as LPARAM);
 }
-
 
 pub fn kill_timer(hwnd: HWND, id: u32) {
     use winapi::um::winuser::KillTimer;

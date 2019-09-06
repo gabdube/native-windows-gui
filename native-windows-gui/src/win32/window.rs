@@ -225,7 +225,8 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
             match &class_name as &str {
                 "Button" => callback(button_commands(message), handle),
                 "Edit" => callback(edit_commands(message), handle),
-                "ComboBox" => callback(edit_combo(message), handle),
+                "ComboBox" => callback(combo_commands(message), handle),
+                "Static" => callback(static_commands(message), handle),
                 _ => {}
             }
         },
@@ -264,7 +265,7 @@ fn edit_commands(m: u16) -> Event {
     }
 }
 
-fn edit_combo(m: u16) -> Event {
+fn combo_commands(m: u16) -> Event {
     use winapi::um::winuser::{CBN_CLOSEUP, CBN_DROPDOWN, CBN_DBLCLK, CBN_SELCHANGE};
     match m {
         CBN_CLOSEUP => Event::OnComboBoxClosed,
@@ -275,3 +276,12 @@ fn edit_combo(m: u16) -> Event {
     }
 }
 
+fn static_commands(m: u16) -> Event {
+    use winapi::um::winuser::{STN_CLICKED, STN_DBLCLK};
+
+    match m {
+        STN_CLICKED => Event::OnLabelClick,
+        STN_DBLCLK => Event::OnLabelDoubleClick,
+        _ => Event::Unknown
+    }
+}

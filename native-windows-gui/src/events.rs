@@ -10,6 +10,12 @@ pub enum Event {
     /// When a button is clicked twice rapidly
     OnButtonDoubleClick,
 
+    /// When a label is clicked
+    OnLabelClick,
+
+    /// When a label is clicked twice rapidly
+    OnLabelDoubleClick,
+
     /// When a TextInput value is changed
     OnTextInput,
 

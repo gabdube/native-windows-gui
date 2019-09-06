@@ -17,6 +17,9 @@ pub(crate) mod win32;
 pub use win32::{dispatch_thread_events, stop_thread_dispatch, enable_visual_styles, window::bind_event_handler,
  message_box::{MessageButtons, MessageIcons, MessageChoice, MessageParams, message, fatal_message, error_message, simple_message}};
 
+mod resources;
+pub use resources::*;
+
 mod controls;
 pub use controls::*;
 

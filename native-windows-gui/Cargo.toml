@@ -5,6 +5,6 @@ authors = ["gdube <gdube.475@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-winapi = { version = "0.3", features = ["winuser", "winbase", "libloaderapi", "processthreadsapi", "errhandlingapi", "winerror", "commctrl", "sysinfoapi"] }
+winapi = { version = "0.3", features = ["winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi", "errhandlingapi", "winerror", "commctrl", "sysinfoapi"] }
 bitflags = { version = "1.1.0" }
 native-windows-derive = { path = "../native-windows-derive/" }
