@@ -52,10 +52,31 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, f: F)
             let proc_data: DWORD_PTR = mem::transmute(proc);
             SetWindowSubclass(v, Some(process_events::<F>), 0, proc_data);
         },
-        htype => panic!("Cannot bind control with an handle of type {:?}. THIS IS AN INTERNAL ERROR!", htype)
+        htype => panic!("Cannot bind control with an handle of type {:?}.", htype)
     }
 
 }
+
+/**
+    Set a window subclass the uses the `process_raw_events` function of NWG.
+
+*/
+pub fn bind_raw_event_handler<F>(handle: &ControlHandle, f: F) 
+    where F: Fn(HWND, UINT, WPARAM, LPARAM) -> () + 'static
+{
+    use winapi::um::commctrl::SetWindowSubclass;
+    
+    match handle {
+        &ControlHandle::Hwnd(v) => unsafe {
+            let proc: Box<F> = Box::new(f);
+            let proc_data: DWORD_PTR = mem::transmute(proc);
+            SetWindowSubclass(v, Some(process_raw_events::<F>), 0, proc_data);
+        },
+        htype => panic!("Cannot bind control with an handle of type {:?}.", htype)
+    }
+
+}
+
 
 
 /**
@@ -244,6 +265,20 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
     mem::forget(callback);
 
     DefSubclassProc(hwnd, msg, w, l)
+}
+
+/**
+    A window subclass procedure that dispatch the windows control events to the associated application control
+*/
+#[allow(unused_variables)]
+unsafe extern "system" fn process_raw_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT 
+    where F: Fn(HWND, UINT, WPARAM, LPARAM) -> () + 'static
+{
+    let callback: Box<F> = mem::transmute(data);
+    callback(hwnd, msg, w, l);
+    mem::forget(callback);
+
+    ::winapi::um::commctrl::DefSubclassProc(hwnd, msg, w, l)
 }
 
 fn button_commands(m: u16) -> Event {

@@ -82,3 +82,20 @@ pub fn enable_visual_styles() {
         ActivateActCtx(handle, &mut activation_cookie);
     }
 }
+
+/**
+    Ensure that the dll containing the winapi controls is loaded
+*/
+pub fn init_common_controls() {
+    use winapi::um::commctrl::{InitCommonControlsEx, INITCOMMONCONTROLSEX};
+    use winapi::um::commctrl::{ICC_BAR_CLASSES, ICC_STANDARD_CLASSES};
+
+    unsafe {
+        let data = INITCOMMONCONTROLSEX {
+            dwSize: mem::size_of::<INITCOMMONCONTROLSEX>() as u32,
+            dwICC: ICC_BAR_CLASSES | ICC_STANDARD_CLASSES
+        };
+
+        InitCommonControlsEx(&data);
+    }
+}

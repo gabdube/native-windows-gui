@@ -8,6 +8,11 @@ use std::{ptr, mem};
 pub const NOTICE_MESSAGE: UINT = WM_USER;
 
 
+pub fn get_window_parent(hwnd: HWND) -> HWND {
+    use winapi::um::winuser::GetParent;
+    unsafe { GetParent(hwnd) }
+}
+
 pub fn get_window_font(handle: HWND) -> HFONT {
     use winapi::um::winuser::{ WM_GETFONT };
     unsafe { 

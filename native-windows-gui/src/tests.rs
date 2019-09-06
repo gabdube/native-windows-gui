@@ -36,6 +36,7 @@ pub struct TestApp {
 
     // Controls
     window: Window,
+    windows_status: StatusBar,
     test_button: Button,
     test_input: TextInput, 
     test_combobox: ComboBox<&'static str>,
@@ -153,7 +154,7 @@ mod test_app_ui {
 
             // Font
             let font = Font::builder()
-              .size(20)
+              .size(24)
               .weight(700)
               .family(Some("Arial"))
               .build()?;
@@ -169,6 +170,16 @@ mod test_app_ui {
               .text("Tests")
               .build()?;
             data.window.handle = window.handle.clone();
+
+            let windows_status = ControlBase::build_hwnd()
+              .class_name(data.windows_status.class_name())
+              .forced_flags(data.windows_status.forced_flags())
+              .flags(data.windows_status.flags())
+              .parent(Some(&window))
+              .build()?;
+            data.windows_status.handle = windows_status.handle;
+            data.windows_status.set_text(0, "TEST status");
+            data.windows_status.hook_parent_resize();
 
             let control_window = ControlBase::build_hwnd()
               .class_name(data.control_window.class_name())
@@ -701,6 +712,7 @@ fn close(_app: &TestApp, _e: Event) {
 #[test]
 fn test_everything() {
     enable_visual_styles();
+    init_common_controls();
     
     let app = TestApp::build_ui(Default::default()).expect("Failed to build UI");
 

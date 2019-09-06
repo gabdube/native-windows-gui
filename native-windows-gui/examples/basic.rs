@@ -120,6 +120,7 @@ mod basic_app_ui {
 
 fn main() {
     nwg::enable_visual_styles();
+    nwg::init_common_controls();
 
     let app = BasicApp::build_ui(Default::default());
 
