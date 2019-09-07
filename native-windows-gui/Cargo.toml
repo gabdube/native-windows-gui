@@ -1,10 +1,20 @@
 [package]
 name = "native-windows-gui"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["gdube <gdube.475@gmail.com>"]
 edition = "2018"
 
+build = "build.rs"
+keywords = ["gui", "ui", "windows"]
+
 [dependencies]
-winapi = { version = "0.3", features = ["winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi", "errhandlingapi", "winerror", "commctrl", "sysinfoapi"] }
+winapi = { version = "0.3", features = ["winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi", "errhandlingapi", "winerror", "commctrl", "sysinfoapi", "shobjidl", "combaseapi"] }
 bitflags = { version = "1.1.0" }
 native-windows-derive = { path = "../native-windows-derive/" }
+
+[build-dependencies]
+winapi-build = "0.1.1"
+
+[features]
+default = []
+file-dialog = []

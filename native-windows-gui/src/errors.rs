@@ -3,6 +3,7 @@
 */
 
 #[derive(Debug, Clone, Copy)]
+#[repr(usize)]
 pub enum SystemError {
     GetModuleHandleFailed,
     SystemClassCreationFailed,
@@ -10,5 +11,6 @@ pub enum SystemError {
     FontCreationFailed,
     ImageCreationFailed,
     MenuCreationFailed,
+    FileDialogCreationFailed,
     SeparatorWithoutMenuParent
 }

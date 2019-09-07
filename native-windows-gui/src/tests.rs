@@ -8,7 +8,9 @@ pub struct TestRun {
     combo_box: bool,
     menu: bool,
     label: bool,
-    status: bool
+    status: bool,
+    window: bool,
+    image: bool
 }
 
 
@@ -35,6 +37,7 @@ pub struct TestApp {
     // Resources
     font: Font,
     ico1: Image,
+    ferris: Image,
 
     // Controls
     window: Window,
@@ -43,6 +46,7 @@ pub struct TestApp {
     test_input: TextInput, 
     test_combobox: ComboBox<&'static str>,
     test_label: Label,
+    image: ImageFrame,
 
     // Menu
     window_menu: Menu,
@@ -55,6 +59,11 @@ pub struct TestApp {
     // Timer / Notice
     timer: Timer,
     notice: Notice,
+
+    // File dialog
+    #[cfg(feature = "file-dialog")]
+    open_file: FileDialog,
+    open_file_button: Button,
     
     // Control window
     control_window: Window,
@@ -164,20 +173,20 @@ mod test_app_ui {
             data.font = font;
 
             // Image
-            let ico1 = Image::icon("./test_rc/cog.ico", None, false)?;
-            data.ico1 = ico1;
+            data.ico1 = Image::icon("./test_rc/cog.ico", None, false)?;
+            data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
 
             // Controls
             let window = ControlBase::build_hwnd()
               .class_name(data.window.class_name())
               .forced_flags(data.window.forced_flags())
               .flags(data.window.flags())
-              .size((300, 280))
+              .size((350, 280))
               .position((300, 300))
               .text("Tests")
               .build()?;
             data.window.handle = window.handle.clone();
-            data.window.set_icon(Some(&data.ico1), true);
+            data.window.set_icon(Some(&data.ico1));
 
             let window_status = ControlBase::build_hwnd()
               .class_name(data.window_status.class_name())
@@ -194,12 +203,12 @@ mod test_app_ui {
               .forced_flags(data.control_window.forced_flags())
               .flags(((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits(), 0))
               .size((280, 300))
-              .position((650, 300))
+              .position((680, 300))
               .text("Controls Panel")
               .parent(Some(&window))
               .build()?;
             data.control_window.handle = control_window.handle.clone();
-            data.control_window.set_icon(Some(&data.ico1), true);
+            data.control_window.set_icon(Some(&data.ico1));
 
             let test_button = ControlBase::build_hwnd()
               .class_name(data.test_button.class_name())
@@ -245,6 +254,29 @@ mod test_app_ui {
               .build()?;
             data.test_label.handle = test_label.handle.clone();
             data.test_label.set_font(Some(&data.font));
+
+            let image = ControlBase::build_hwnd()
+              .class_name(data.image.class_name())
+              .forced_flags(data.image.forced_flags())
+              .flags(data.image.flags())
+              .size((150, 99))
+              .position((170, 65))
+              .parent(Some(&window))
+              .build()?;
+            data.image.handle = image.handle.clone();
+            data.image.set_image(Some(&data.ferris));
+
+            let open_file_button = ControlBase::build_hwnd()
+                    .class_name(data.open_file_button.class_name())
+                    .forced_flags(data.open_file_button.forced_flags())
+                    .flags(data.open_file_button.flags())
+                    .size((125, 30))
+                    .position((5, 155))
+                    .text("Choose a file")
+                    .parent(Some(&window))
+                    .build()?;
+            data.open_file_button.handle = open_file_button.handle.clone();
+            data.open_file_button.set_enabled(cfg!(feature = "file-dialog"));
 
             let events_show = ControlBase::build_hwnd()
               .class_name(data.events_show.class_name())
@@ -403,6 +435,12 @@ mod test_app_ui {
             PartialApp1::build_partial(&mut data.p1, Some(&window))?;
             PartialApp2::build_partial(&mut data.p2, Some(&window))?;
 
+            // File dialogs
+            data.open_file = FileDialog::builder()
+              .default_folder("D:\\projects")
+              .parent(Some(&window))
+              .build()?;  
+
             // Timers
             let timer = ControlBase::build_timer()
                 .interval(10000)
@@ -461,6 +499,9 @@ mod test_app_ui {
 
                             } else if handle == evt_ui.p2.test.handle {
                                 super::test_partial(&evt_ui.inner, evt);
+
+                            } else if handle == evt_ui.open_file_button.handle {
+                                super::test_file_dialog(&evt_ui.inner, evt);
                             },
                         E::OnButtonDoubleClick => 
                             if handle == evt_ui.test_button.handle {
@@ -478,10 +519,6 @@ mod test_app_ui {
                             if handle == evt_ui.test_combobox.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
-                        E::OnComboBoxDoubleClick =>
-                            if handle == evt_ui.test_combobox.handle {
-                                super::test_events(&evt_ui.inner, evt);
-                            },
                         E::OnComboxBoxSelection =>
                             if handle == evt_ui.test_combobox.handle {
                                 super::test_events(&evt_ui.inner, evt);
@@ -492,6 +529,14 @@ mod test_app_ui {
                             },
                         E::OnLabelDoubleClick =>
                             if handle == evt_ui.test_label.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnImageFrameClick => 
+                            if handle == evt_ui.image.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnImageFrameDoubleClick =>
+                            if handle == evt_ui.image.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
                         E::OnMenuItemClick =>
@@ -682,8 +727,14 @@ fn test_combobox(app: &TestApp, _e: Event) {
     }
 }
 
-fn test_window(_app: &TestApp, _e: Event) {
+fn test_window(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().window {
+        app.runs.borrow_mut().window = true;
 
+        assert_eq!(app.window.icon().as_ref(), Some(&app.ico1));
+    } else {
+        app.runs.borrow_mut().window = false;
+    }
 }
 
 fn test_menu(app: &TestApp, _e: Event) {
@@ -744,6 +795,14 @@ fn test_status(app: &TestApp, _e: Event) {
     }
 }
 
+#[cfg(feature = "file-dialog")]
+fn test_file_dialog(app: &TestApp, _e: Event) {
+    app.open_file.run();
+}
+
+#[cfg(not(feature = "file-dialog"))]
+fn test_file_dialog(_app: &TestApp, _e: Event) {
+}
 
 fn test_events(app: &TestApp, e: Event) {
     app.events_show.set_text(&format!("{:?}", e));

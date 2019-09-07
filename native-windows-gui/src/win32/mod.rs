@@ -1,3 +1,4 @@
+#[cfg(feature = "file-dialog")] use winapi::shared::guiddef::GUID;
 use std::{mem, ptr};
 
 pub(crate) mod base_helper;
@@ -99,3 +100,27 @@ pub fn init_common_controls() {
         InitCommonControlsEx(&data);
     }
 }
+
+
+
+#[allow(unused_macros)]
+macro_rules! define_guid {
+    ($n1:ident, $d1:expr, $d2:expr, $d3:expr, $d4:expr) => (
+
+        #[inline(always)]
+        #[allow(non_snake_case)]
+        pub(crate) fn $n1() ->  GUID {
+            GUID {
+                Data1: $d1,
+                Data2: $d2,
+                Data3: $d3,
+                Data4: $d4
+            }
+        }
+    
+    )
+}
+
+#[cfg(feature = "file-dialog")] define_guid!(UUIDOF_IFileDialog, 1123569974, 56190, 17308, [133, 241, 228, 7, 93, 19, 95, 200]);
+#[cfg(feature = "file-dialog")] define_guid!(UUIDOF_IFileOpenDialog, 3581702792, 54445, 18280, [190, 2, 157, 150, 149, 50, 217, 96]);
+#[cfg(feature = "file-dialog")] define_guid!(IID_IShellItem, 1132621086, 59160, 17134, [188, 85, 161, 226, 97, 195, 123, 254]);

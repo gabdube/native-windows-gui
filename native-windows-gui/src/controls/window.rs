@@ -31,12 +31,26 @@ pub struct Window {
 
 impl Window {
 
+    /// Return the icon of the window
+    pub fn icon(&self) -> Option<Image> {
+        use winapi::um::winuser::WM_GETICON;
+        use std::mem;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let handle = wh::send_message(handle, WM_GETICON, 0, 0);
+        if handle == 0 {
+            None
+        } else {
+            Some(Image{ handle: unsafe{ mem::transmute(handle) } })
+        }
+    }
+
     /// Set the icon in the window
     /// - icon: The new icon. If None, the icon is removed
-    /// - large: If true, set the large icon for the window, if false set the small icon for the window.
-    pub fn set_icon(&self, icon: Option<&Image>, large: bool) {
+    pub fn set_icon(&self, icon: Option<&Image>) {
         use winapi::um::winuser::WM_SETICON;
-        use winapi::shared::minwindef::WPARAM;
         use std::{mem, ptr};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -44,7 +58,7 @@ impl Window {
 
         let image_handle = icon.map(|i| i.handle).unwrap_or(ptr::null_mut());
         unsafe {
-            wh::send_message(handle, WM_SETICON, large as WPARAM, mem::transmute(image_handle));
+            wh::send_message(handle, WM_SETICON, 0, mem::transmute(image_handle));
         }
     }
 

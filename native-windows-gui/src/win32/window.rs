@@ -247,7 +247,7 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
                 "Button" => callback(button_commands(message), handle),
                 "Edit" => callback(edit_commands(message), handle),
                 "ComboBox" => callback(combo_commands(message), handle),
-                "Static" => callback(static_commands(message), handle),
+                "Static" => callback(static_commands(child_handle, message), handle),
                 _ => {}
             }
         },
@@ -301,22 +301,31 @@ fn edit_commands(m: u16) -> Event {
 }
 
 fn combo_commands(m: u16) -> Event {
-    use winapi::um::winuser::{CBN_CLOSEUP, CBN_DROPDOWN, CBN_DBLCLK, CBN_SELCHANGE};
+    use winapi::um::winuser::{CBN_CLOSEUP, CBN_DROPDOWN, CBN_SELCHANGE};
     match m {
         CBN_CLOSEUP => Event::OnComboBoxClosed,
         CBN_DROPDOWN => Event::OnComboBoxDropdown,
-        CBN_DBLCLK => Event::OnComboBoxDoubleClick,
         CBN_SELCHANGE => Event::OnComboxBoxSelection,
         _ => Event::Unknown
     }
 }
 
-fn static_commands(m: u16) -> Event {
-    use winapi::um::winuser::{STN_CLICKED, STN_DBLCLK};
+unsafe fn static_commands(handle: HWND, m: u16) -> Event {
+    use winapi::um::winuser::{STN_CLICKED, STN_DBLCLK, STM_GETIMAGE, IMAGE_BITMAP};
+    use winapi::um::winuser::SendMessageW;
 
-    match m {
-        STN_CLICKED => Event::OnLabelClick,
-        STN_DBLCLK => Event::OnLabelDoubleClick,
-        _ => Event::Unknown
-    }
+    let has_image = SendMessageW(handle, STM_GETIMAGE, IMAGE_BITMAP as usize, 0) != 0;
+    if has_image {
+        match m {
+            STN_CLICKED => Event::OnImageFrameClick,
+            STN_DBLCLK => Event::OnImageFrameDoubleClick,
+            _ => Event::Unknown
+        }
+    } else {
+        match m {
+            STN_CLICKED => Event::OnLabelClick,
+            STN_DBLCLK => Event::OnLabelDoubleClick,
+            _ => Event::Unknown
+        }
+    }   
 }

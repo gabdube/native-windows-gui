@@ -1,5 +1,6 @@
 /// All the events that can be dispatched by the built-in controls of native-windows-gui
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(usize)]
 pub enum Event {
     /// Undefined / not implemented event
     Unknown,
@@ -16,6 +17,12 @@ pub enum Event {
     /// When a label is clicked twice rapidly
     OnLabelDoubleClick,
 
+    /// When a ImageFrame is clicked
+    OnImageFrameClick,
+
+    /// When a ImageFrame is clicked twice rapidly
+    OnImageFrameDoubleClick,
+
     /// When a TextInput value is changed
     OnTextInput,
 
@@ -24,9 +31,6 @@ pub enum Event {
 
     // When the list of a combobox is about to be visible
     OnComboBoxDropdown,
-
-    // When a combobox item is clicked twice rapidly
-    OnComboBoxDoubleClick,
 
     // When the current selection of the combobox was changed
     OnComboxBoxSelection,

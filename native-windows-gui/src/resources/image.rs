@@ -4,8 +4,10 @@ use winapi::um::winnt::HANDLE;
 use std::ptr;
 
 
+/// An image resource. This can be an icon, a bitmap or a cursor.
+/// To display an Image onto a window, see the ImageFrame control.
 #[allow(dead_code)]
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Image {
     pub(crate) handle: HANDLE,
 }
