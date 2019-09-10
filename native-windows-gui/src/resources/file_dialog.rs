@@ -1,10 +1,11 @@
 use winapi::shared::windef::HWND;
 use winapi::um::shobjidl::IFileDialog;
 use crate::win32::resources_helper as rh;
+
 use crate::controls::ControlBase;
-use crate::{SystemError};
-use std::fmt;
-use std::ptr;
+use crate::win32::base_helper::to_utf16;
+use crate::{SystemError, UserError};
+use std::{fmt, ptr, mem};
 
 
 /**
@@ -28,14 +29,18 @@ pub enum FileDialogAction {
 pub struct FileDialog {
     parent: HWND,
     handle: *mut IFileDialog,
-    action: FileDialogAction,
-    multiselect: bool
+    action: FileDialogAction
 }
 
 impl FileDialog {
 
     pub fn builder() -> FileDialogBuilder {
         FileDialogBuilder::new()
+    }
+
+    /// Return the action type executed by this dialog
+    pub fn action(&self) -> FileDialogAction {
+        self.action
     }
 
     /// Display the dialog. Return true if the dialog was accepted or false if it was cancelled
@@ -45,13 +50,124 @@ impl FileDialog {
         unsafe { (&mut *self.handle).Show(self.parent) == S_OK }
     }
 
+     /**
+        Return the item selected in the dialog by the user. 
+        
+        Failures:  
+        • if the dialog was not called  
+        • if there was a system error while reading the selected item  
+        • if the dialog has the `multiselect` flag  
+    */
+    pub fn get_selected_item(&self) -> Result<String, UserError> { 
+        
+        /*if self.multiselect {
+            return Err(UserError::FileDialog("FileDialog have the multiselect flag".into()))
+        }*/
+
+        unsafe {
+            rh::filedialog_get_item(&mut *self.handle)
+        }
+    }
+
+    /**
+        Return the selected items in the dialog by the user.
+        Failures:  
+        • if the dialog was not called  
+        • if there was a system error while reading the selected items  
+        • if the dialog has `Save` for action  
+    */
+    pub fn get_selected_items(&self) -> Result<Vec<String>, UserError> {
+        if self.action == FileDialogAction::Save {
+            return Err(UserError::FileDialog("Save dialog cannot have more than one item selected".into()));
+        }
+
+        unsafe {
+            rh::filedialog_get_items(mem::transmute(&mut *self.handle))
+        }
+    }
+
+    /// Return `true` if the dialog accepts multiple values or `false` otherwise
+    pub fn multiselect(&self) -> bool {
+        use winapi::um::shobjidl::FOS_ALLOWMULTISELECT;
+
+        unsafe {
+            let flags = rh::file_dialog_options(&mut *self.handle).unwrap_or(0);
+            flags & FOS_ALLOWMULTISELECT == FOS_ALLOWMULTISELECT
+        }
+    }
+
+    /**
+        Set the multiselect flag of the dialog. 
+        Failures:  
+        • if there was a system error while setting the new flag value  
+        • if the dialog has `Save` for action  
+    */
+    pub fn set_multiselect(&self, multiselect: bool) -> Result<(), UserError> {
+        use winapi::um::shobjidl::FOS_ALLOWMULTISELECT;
+
+        if self.action == FileDialogAction::Save {
+            return Err(UserError::FileDialog("Cannot set multiselect flag for a save file dialog".into()));
+        }
+
+        let result = unsafe{ rh::toggle_dialog_flags(&mut *self.handle, FOS_ALLOWMULTISELECT, multiselect) };
+        match result {
+            Ok(_) => Ok(()),
+            Err(e) => Err(e)
+        }
+    }
+
+        /**
+        Set the first opened folder when the dialog is shown. This value is overriden by the user after the dialog ran.  
+        Call `clear_client_data` to fix that.
+        Failures:
+        • if the default folder do not identify a folder  
+        • if the folder do not exists  
+    */
+    pub fn set_default_folder<'a>(&self, folder: &'a str) -> Result<(), SystemError> {
+        unsafe{ 
+            let handle = &mut *self.handle;
+            rh::file_dialog_set_default_folder(handle, &folder) 
+        }
+    }
+
+    /**
+        Filter the files that the user can select (In a `Open` dialog) in the dialog or which extension to add to the saved file (in a `Save` dialog).  
+        This can only be set ONCE (the initialization counts) and won't work if the dialog is `OpenDirectory`.  
+       
+        The `filters` value must be a '|' separated string having this format: "Test(*.txt;*.rs)|Any(*.*)"  
+        Where the fist part is the "human name" and the second part is a filter for the system.
+    */
+    pub fn set_filters<'a>(&self, filters: &'a str) -> Result<(), SystemError> {
+        unsafe{ 
+            let handle = &mut *self.handle;
+            rh::file_dialog_set_filters(handle, &filters) 
+        }
+    }
+
+    /// Change the dialog title
+    pub fn set_title<'a>(&self, title: &'a str) {
+        unsafe {
+            let title = to_utf16(title);
+            let handle = &mut *self.handle;
+            handle.SetTitle(title.as_ptr());
+        }
+    }
+
+    /// Instructs the dialog to clear all persisted state information (such as the last folder visited).
+    pub fn clear_client_data(&self) { 
+        unsafe{
+            let handle =  &mut *self.handle;
+            handle.ClearClientData();
+        }
+    }
+
 }
 
 
 impl fmt::Debug for FileDialog {
 
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "FileDialog {{ action: {:?}, multiselect: {:?} }}", self.action, self.multiselect)
+        write!(f, "FileDialog {{ action: {:?} }}", self.action)
     }
 
 }
@@ -61,15 +177,14 @@ impl Default for FileDialog {
         FileDialog {
             parent: ptr::null_mut(),
             handle: ptr::null_mut(),
-            action: FileDialogAction::Open,
-            multiselect: false
+            action: FileDialogAction::Open
         }
     }
 }
 
 impl PartialEq for FileDialog {
     fn eq(&self, other: &Self) -> bool {
-        self.parent == other.parent && self.action == other.action && self.multiselect == other.multiselect
+        self.parent == other.parent && self.action == other.action
     }
 }
 
@@ -94,7 +209,7 @@ impl FileDialogBuilder {
             title: None,
             parent: None,
             action: FileDialogAction::Save,
-            multiselect: true,
+            multiselect: false,
             default_folder: None,
             filters: None
         }
@@ -120,12 +235,21 @@ impl FileDialogBuilder {
         self
     }
 
+    pub fn action(mut self, a: FileDialogAction) -> FileDialogBuilder {
+        self.action = a;
+        self
+    }
+
+    pub fn multiselect(mut self, m: bool) -> FileDialogBuilder {
+        self.multiselect = m;
+        self
+    }
+
     pub fn build(self) -> Result<FileDialog, SystemError> {
         unsafe {
             let mut dialog = FileDialog::default();
             dialog.parent = self.parent.unwrap_or(ptr::null_mut());
             dialog.action = self.action;
-            dialog.multiselect = self.multiselect;
 
             let handle = rh::create_file_dialog(
                 self.action,
@@ -135,6 +259,9 @@ impl FileDialogBuilder {
             )?;
 
             dialog.handle = handle;
+            if let Some(title) = self.title {
+                dialog.set_title(&title);
+            }
 
             Ok(dialog)
         }

@@ -14,3 +14,8 @@ pub enum SystemError {
     FileDialogCreationFailed,
     SeparatorWithoutMenuParent
 }
+
+#[derive(Debug, Clone)]
+pub enum UserError {
+    FileDialog(String)
+}

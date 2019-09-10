@@ -8,7 +8,7 @@ use std::rc::Rc;
 mod tests;
 
 mod errors;
-pub use errors::SystemError;
+pub use errors::{UserError, SystemError};
 
 mod events;
 pub use events::Event;

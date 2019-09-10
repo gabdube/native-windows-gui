@@ -164,6 +164,23 @@ mod test_app_ui {
         fn build_ui(mut data: TestApp) -> Result<Rc<TestAppUi>, SystemError> {
             use crate::Event as E;
 
+            #[cfg(feature = "file-dialog")]
+            fn setup_file_dialog(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
+                app.open_file = FileDialog::builder()
+                  .action(FileDialogAction::Open)
+                  .parent(Some(window))
+                  .multiselect(false)
+                  .title("Select a file")
+                  .build()?;
+
+                  Ok(())
+            }
+
+            #[cfg(not(feature = "file-dialog"))]
+            fn setup_file_dialog(_app: &mut TestApp, _window: &ControlBase) -> Result<(), ()> {
+                Ok(())
+            }
+
             // Font
             let font = Font::builder()
               .size(24)
@@ -436,10 +453,7 @@ mod test_app_ui {
             PartialApp2::build_partial(&mut data.p2, Some(&window))?;
 
             // File dialogs
-            data.open_file = FileDialog::builder()
-              .default_folder("D:\\projects")
-              .parent(Some(&window))
-              .build()?;  
+            setup_file_dialog(&mut data, &window)?;
 
             // Timers
             let timer = ControlBase::build_timer()
@@ -797,7 +811,24 @@ fn test_status(app: &TestApp, _e: Event) {
 
 #[cfg(feature = "file-dialog")]
 fn test_file_dialog(app: &TestApp, _e: Event) {
-    app.open_file.run();
+    if app.open_file.run() {
+        if let Ok(file_name) = app.open_file.get_selected_item() {
+            let text = format!("{:?}", file_name);
+            simple_message("Selected file", &text);
+        }
+    }
+
+    app.open_file.set_multiselect(true).expect("FAIL");
+    assert_eq!(app.open_file.multiselect(), true);
+
+    app.open_file.set_title("Test 123");
+
+    if app.open_file.run() {
+        if let Ok(file_names) = app.open_file.get_selected_items() {
+            let text = format!("{:?}", file_names);
+            simple_message("Selected files", &text);
+        }
+    }
 }
 
 #[cfg(not(feature = "file-dialog"))]

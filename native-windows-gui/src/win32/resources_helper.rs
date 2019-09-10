@@ -1,14 +1,14 @@
 use winapi::shared::windef::{HFONT};
 use winapi::ctypes::c_int;
 use winapi::um::winnt::HANDLE;
+use winapi::um::shobjidl_core::{IShellItem};
 
 use super::base_helper::{get_system_error, to_utf16};
-use crate::{SystemError};
-use std::ptr;
+use crate::{SystemError, UserError};
+use std::{ptr, mem};
 
 #[cfg(feature = "file-dialog")] use crate::resources::FileDialogAction;
-#[cfg(feature = "file-dialog")] use winapi::um::shobjidl::IFileDialog;
-
+#[cfg(feature = "file-dialog")] use winapi::um::shobjidl::{IFileDialog, IFileOpenDialog};
 
 pub unsafe fn build_font(
     size: u32,
@@ -87,6 +87,10 @@ pub unsafe fn build_image<'a>(
     }
 }
 
+//
+// File dialog low level methods
+//
+
 #[cfg(feature = "file-dialog")]
 pub unsafe fn create_file_dialog<'a, 'b>(
     action: FileDialogAction,
@@ -100,7 +104,6 @@ pub unsafe fn create_file_dialog<'a, 'b>(
     use winapi::um::combaseapi::CoCreateInstance;
     use winapi::shared::{wtypesbase::CLSCTX_INPROC_SERVER, winerror::S_OK};
     use super::{UUIDOF_IFileDialog, UUIDOF_IFileOpenDialog};
-    use std::mem;
 
     let (clsid, uuid) = match action {
         FileDialogAction::Save => (CLSID_FileSaveDialog, UUIDOF_IFileDialog()),
@@ -118,25 +121,24 @@ pub unsafe fn create_file_dialog<'a, 'b>(
 
     // Set dialog options
     if file_dialog.GetOptions(&mut flags) != S_OK {
+        println!("get options");
         file_dialog.Release(); 
         return Err(SystemError::FileDialogCreationFailed);
     }
-
-    /*
+ 
     let use_dir = if action == FileDialogAction::OpenDirectory { FOS_PICKFOLDERS } else { 0 };
     let multiselect = if multiselect { FOS_ALLOWMULTISELECT } else { 0 };
     if file_dialog.SetOptions(flags | FOS_FORCEFILESYSTEM | use_dir | multiselect) != S_OK {
         file_dialog.Release();
         return Err(SystemError::FileDialogCreationFailed);
     }
-    */
 
     
     // Set the default folder
     match &default_folder {
         &Some(ref f) => match file_dialog_set_default_folder(file_dialog, f) {
             Ok(_) => (),
-            Err(e) => { file_dialog.Release(); return Err(e); }
+            Err(e) => { println!("set default folder"); file_dialog.Release(); return Err(e); }
         },
         &None => ()
     }
@@ -145,7 +147,7 @@ pub unsafe fn create_file_dialog<'a, 'b>(
     match &filters {
         &Some(ref f) => match file_dialog_set_filters(file_dialog, f) {
             Ok(_) => (),
-            Err(e) => { file_dialog.Release(); return Err(e); }
+            Err(e) => { println!("set filters"); file_dialog.Release(); return Err(e); }
         },
         &None => ()
     }
@@ -155,13 +157,12 @@ pub unsafe fn create_file_dialog<'a, 'b>(
 
 
 #[cfg(feature = "file-dialog")]
-unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folder_name: &'a str) -> Result<(), SystemError> {
-    use winapi::um::shobjidl_core::{IShellItem, SFGAOF};
+pub unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folder_name: &'a str) -> Result<(), SystemError> {
+    use winapi::um::shobjidl_core::{SFGAOF};
     use winapi::um::objidl::IBindCtx;
     use winapi::shared::{winerror::{S_OK, S_FALSE}, guiddef::REFIID, ntdef::{HRESULT, PCWSTR}};
     use winapi::ctypes::c_void;
     use super::IID_IShellItem;
-    use std::mem;
 
     const SFGAO_FOLDER: u32 = 0x20000000;
 
@@ -205,7 +206,7 @@ unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folder_na
 
 
 #[cfg(feature = "file-dialog")]
-unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a str) -> Result<(), SystemError> {
+pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a str) -> Result<(), SystemError> {
     use winapi::shared::minwindef::UINT;
     use winapi::um::shtypes::COMDLG_FILTERSPEC;
     use winapi::shared::winerror::S_OK;
@@ -233,5 +234,99 @@ unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a str
     } else {
         println!("Failed to set the filters using {:?}", filters);
         Err(SystemError::FileDialogCreationFailed)
+    }
+}
+
+#[cfg(feature = "file-dialog")]
+pub unsafe fn filedialog_get_item(dialog: &mut IFileDialog) -> Result<String, UserError> {
+    use winapi::shared::winerror::S_OK;
+    
+    let mut _item: *mut IShellItem = ptr::null_mut();
+
+    if dialog.GetResult(&mut _item) != S_OK {
+        return Err(UserError::FileDialog("Failed to get result".to_string()));
+    }
+
+    let text = get_ishellitem_path(&mut *_item);
+    (&mut *_item).Release();
+
+    text
+}
+
+#[cfg(feature = "file-dialog")]
+pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<String>, UserError> {
+    use winapi::um::shobjidl::IShellItemArray;
+    use winapi::shared::{winerror::S_OK, minwindef::DWORD};
+    
+    let mut _item: *mut IShellItem = ptr::null_mut();
+    let mut _items: *mut IShellItemArray = ptr::null_mut();
+
+    if dialog.GetResults( mem::transmute(&mut _items) ) != S_OK {
+        return Err(UserError::FileDialog("Failed to get results".into()));
+    }
+
+    let items = &mut *_items;
+    let mut count: DWORD = 0;
+    items.GetCount(&mut count);
+    
+    let mut item_names: Vec<String> = Vec::with_capacity(count as usize);
+    for i in 0..count {
+        items.GetItemAt(i, &mut _item);
+        match get_ishellitem_path(&mut *_item) {
+            Ok(s) => item_names.push(s),
+            Err(_) => {}
+        }
+    }
+
+    items.Release();
+
+    Ok(item_names)
+}
+
+#[cfg(feature = "file-dialog")]
+unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<String, UserError> {
+    use winapi::um::shobjidl_core::SIGDN_FILESYSPATH;
+    use winapi::shared::{ntdef::PWSTR, winerror::S_OK};
+    use winapi::um::combaseapi::CoTaskMemFree;
+    use super::base_helper::from_wide_ptr;
+
+    let mut item_path: PWSTR = ptr::null_mut();
+    if item.GetDisplayName(SIGDN_FILESYSPATH, &mut item_path) != S_OK {
+        return Err(UserError::FileDialog("Failed to get file name".into()));
+    }
+
+    let text = from_wide_ptr(item_path);
+
+    CoTaskMemFree(mem::transmute(item_path));
+
+    Ok(text)
+}
+
+#[cfg(feature = "file-dialog")]
+pub unsafe fn file_dialog_options(dialog: &mut IFileDialog) -> Result<u32, UserError> {
+    use winapi::shared::winerror::S_OK;
+
+    let mut flags = 0;
+    if dialog.GetOptions(&mut flags) != S_OK {
+        return Err(UserError::FileDialog("Failed to get the file dialog options".into()));
+    }
+
+    Ok(flags)
+}
+
+#[cfg(feature = "file-dialog")]
+pub unsafe fn toggle_dialog_flags(dialog: &mut IFileDialog, flag: u32, enabled: bool) -> Result<(), UserError> {
+    use winapi::shared::winerror::S_OK;
+    
+    let mut flags = file_dialog_options(dialog)?;
+    flags = match enabled {
+        true => flags | flag,
+        false => flags & (!flag)
+    };
+
+    if dialog.SetOptions(flags) != S_OK {
+        return Err(UserError::FileDialog("Failed to set the file dialog options".into()));
+    } else {
+        Ok(())
     }
 }
