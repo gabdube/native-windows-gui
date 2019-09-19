@@ -1,12 +1,13 @@
 use winapi::shared::windef::{HFONT};
 use winapi::ctypes::c_int;
 use winapi::um::winnt::HANDLE;
-use winapi::um::shobjidl_core::{IShellItem};
 
 use super::base_helper::{get_system_error, to_utf16};
-use crate::{SystemError, UserError};
-use std::{ptr, mem};
 
+#[allow(unused_imports)] use std::{ptr, mem};
+#[allow(unused_imports)] use crate::{SystemError, UserError};
+
+#[cfg(feature = "file-dialog")] use winapi::um::shobjidl_core::{IShellItem};
 #[cfg(feature = "file-dialog")] use crate::resources::FileDialogAction;
 #[cfg(feature = "file-dialog")] use winapi::um::shobjidl::{IFileDialog, IFileOpenDialog};
 

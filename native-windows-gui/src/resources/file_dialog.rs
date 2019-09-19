@@ -44,6 +44,9 @@ impl FileDialog {
     }
 
     /// Display the dialog. Return true if the dialog was accepted or false if it was cancelled
+    /// If the dialog was accepted, `get_selected_item` or `get_selected_items` can be used to find the selected file(s)
+    ///
+    /// It's important to note that `run` blocks the current thread until the user as chosen a file (similar to `dispatch_thread_events`)
     pub fn run(&self) -> bool { 
         use winapi::shared::winerror::S_OK;
 
