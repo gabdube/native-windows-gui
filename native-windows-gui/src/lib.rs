@@ -4,8 +4,8 @@ extern crate winapi;
 
 use std::rc::Rc;
 
-#[cfg(test)]
-mod tests;
+#[cfg(test)] mod tests;
+#[cfg(test)] mod tests_layout;
 
 mod errors;
 pub use errors::{UserError, SystemError};
@@ -23,6 +23,9 @@ pub use resources::*;
 
 mod controls;
 pub use controls::*;
+
+mod layouts;
+pub use layouts::*;
 
 
 pub trait PartialUi<D> {

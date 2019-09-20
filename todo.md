@@ -2,22 +2,22 @@
 
 ## Control List
 
- [] Button
- [] ComboBox
+ [X] Button
+ [X] ComboBox
  [] DateTime
  [] ListBox
  [] ListView
  [] MonthCalendar
  [] ProgressBar
  [] RichEdit (includes LineEdit)
- [] Static
+ [X] Static
  [] SysLink
  [] Tabs
  [] ToolBar
- [] MenuBar
+ [X] MenuBar
  [] ToolTip
  [] TreeView
- [] FileDialog
+ [X] FileDialog
 
 ## Controls that must be manually reimplemented
 
@@ -27,13 +27,13 @@
 
 ## Actions
 
- [] Add built-in control to the interface
+ [X] Add built-in control to the interface
  [] Remove built-in control to the interface AT RUNTIME
  [] Add composited user control to the interface (see Composition)
 
 ## Events
 
- [] Allow users to associate one or more callback to a control event
+ [X] Allow users to associate one or more callback to a control event
  [] Allow users to add event callbacks at runtime
  [] Allow users to remove event callbacks at runtime
 
@@ -46,8 +46,8 @@
 
 ## Composition
 
- [] Allow base control to be referenced in a user struct
- [] Allow user structs with UI controls to be referenced in other user structs
+ [X] Allow base control to be referenced in a user struct
+ [X] Allow user structs with UI controls to be referenced in other user structs
 
 ## Derive
 

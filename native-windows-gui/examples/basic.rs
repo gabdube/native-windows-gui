@@ -28,12 +28,11 @@ impl BasicApp {
 // ALL of this stuff is handled by native-windows-derive
 //
 mod basic_app_ui {
-    use nwg;
-    use super::BasicApp;
+    use native_windows_gui as nwg;
+    use super::*;
     use std::rc::Rc;
     use std::ops::Deref;
 
-    #[allow(dead_code)]
     pub struct BasicAppUi {
         inner: BasicApp
     }

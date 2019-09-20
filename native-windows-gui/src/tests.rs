@@ -168,7 +168,6 @@ mod test_app_ui {
             fn setup_file_dialog(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
                 app.open_file = FileDialog::builder()
                   .action(FileDialogAction::Open)
-                  //.parent(Some(window))
                   .multiselect(false)
                   .title("Select a file")
                   .build()?;
