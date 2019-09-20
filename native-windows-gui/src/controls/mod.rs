@@ -11,6 +11,9 @@ mod menu;
 mod timer;
 mod notice;
 
+#[cfg(feature = "datetime-picker")]
+mod datetime_picker;
+
 pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase};
 pub use window::{Window, WindowFlags};
@@ -23,3 +26,6 @@ pub use image_frame::ImageFrame;
 pub use menu::{Menu, MenuItem, MenuSeparator};
 pub use timer::Timer;
 pub use notice::Notice;
+
+#[cfg(feature = "datetime-picker")]
+pub use datetime_picker::DateTimePicker;

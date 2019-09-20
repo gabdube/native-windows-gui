@@ -11,12 +11,9 @@ pub struct TestLayoutApp {
     // VBoxLayout
     vbox_window: Window,
     button4: Button,
-    button5: Button,
     button6: Button,
 
     // GridLayout
-
-    // FormLayout
 }
 
 #[allow(unused_imports)]
@@ -90,15 +87,6 @@ mod test_layout_app_ui {
               .build()?;
             data.button4.handle = button4.handle.clone();
 
-            let button5 = ControlBase::build_hwnd()
-              .class_name(data.button5.class_name())
-              .forced_flags(data.button5.forced_flags())
-              .flags(data.button5.flags())
-              .text("Button 5")
-              .parent(Some(&vbox_window))
-              .build()?;
-            data.button5.handle = button5.handle.clone();
-
             let button6 = ControlBase::build_hwnd()
               .class_name(data.button6.class_name())
               .forced_flags(data.button6.forced_flags())
@@ -141,7 +129,6 @@ mod test_layout_app_ui {
             VBoxLayout::builder()
                 .parent(&ui.vbox_window.handle)
                 .child(0, &ui.button4.handle)
-                .child(1, &ui.button5.handle)
                 .child(2, &ui.button6.handle)
                 .build();
 

@@ -10,7 +10,8 @@ pub struct TestRun {
     label: bool,
     status: bool,
     window: bool,
-    image: bool
+    image: bool,
+    datetime_picker: bool
 }
 
 
@@ -47,6 +48,7 @@ pub struct TestApp {
     test_combobox: ComboBox<&'static str>,
     test_label: Label,
     image: ImageFrame,
+    dtpick: DateTimePicker,
 
     // Menu
     window_menu: Menu,
@@ -165,7 +167,7 @@ mod test_app_ui {
             use crate::Event as E;
 
             #[cfg(feature = "file-dialog")]
-            fn setup_file_dialog(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
+            fn setup_file_dialog(app: &mut TestApp) -> Result<(), SystemError> {
                 app.open_file = FileDialog::builder()
                   .action(FileDialogAction::Open)
                   .multiselect(false)
@@ -175,8 +177,29 @@ mod test_app_ui {
                   Ok(())
             }
 
+            #[cfg(feature = "datetime-picker")]
+            fn setup_datetime_picker(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
+               let dtpick = ControlBase::build_hwnd()
+                .class_name(app.dtpick.class_name())
+                .forced_flags(app.dtpick.forced_flags())
+                .flags(app.dtpick.flags())
+                .size((125, 30))
+                .position((5, 195))
+                .parent(Some(window))
+                .build()?;
+
+                app.dtpick.handle = dtpick.handle.clone();
+
+                Ok(())
+            }
+
             #[cfg(not(feature = "file-dialog"))]
-            fn setup_file_dialog(_app: &mut TestApp, _window: &ControlBase) -> Result<(), SystemError> {
+            fn setup_file_dialog(_app: &mut TestApp) -> Result<(), SystemError> {
+                Ok(())
+            }
+
+            #[cfg(not(feature = "datetime-picker"))]
+            fn setup_datetime_picker(_app: &mut TestApp, _window: &ControlBase) -> Result<(), SystemError> {
                 Ok(())
             }
 
@@ -270,6 +293,8 @@ mod test_app_ui {
               .build()?;
             data.test_label.handle = test_label.handle.clone();
             data.test_label.set_font(Some(&data.font));
+
+            setup_datetime_picker(&mut data, &window)?;
 
             let image = ControlBase::build_hwnd()
               .class_name(data.image.class_name())
@@ -452,7 +477,7 @@ mod test_app_ui {
             PartialApp2::build_partial(&mut data.p2, Some(&window))?;
 
             // File dialogs
-            setup_file_dialog(&mut data, &window)?;
+            setup_file_dialog(&mut data)?;
 
             // Timers
             let timer = ControlBase::build_timer()

@@ -31,7 +31,7 @@ impl HBoxLayout {
     fn update_layout(&self, width: u32, height: u32) -> () {
         let m = self.margins;
         let sp = self.spacing;
-        let children_count = self.children.len() as u32;
+        let children_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
 
         let dwidth = width / children_count;
         let m_top_bottom = m[0] + m[2];
@@ -86,7 +86,7 @@ impl VBoxLayout {
     fn update_layout(&self, width: u32, height: u32) -> () {
         let m = self.margins;
         let sp = self.spacing;
-        let children_count = self.children.len() as u32;
+        let children_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
 
         let dheight = height / children_count;
         let m_top_bottom = m[0] + m[2];
