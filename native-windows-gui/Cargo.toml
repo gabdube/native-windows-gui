@@ -19,4 +19,5 @@ winapi-build = "0.1.1"
 default = []
 file-dialog = []
 datetime-picker = []
-all = ["file-dialog", "datetime-picker"]
+progress-bar = []
+all = ["file-dialog", "datetime-picker", "progress-bar"]

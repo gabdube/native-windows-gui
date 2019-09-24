@@ -14,6 +14,9 @@ mod notice;
 #[cfg(feature = "datetime-picker")]
 mod date_picker;
 
+#[cfg(feature = "datetime-picker")]
+mod progress_bar;
+
 pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase};
 pub use window::{Window, WindowFlags};
@@ -29,3 +32,6 @@ pub use notice::Notice;
 
 #[cfg(feature = "datetime-picker")]
 pub use date_picker::{DatePicker, DatePickerValue};
+
+#[cfg(feature = "progress-bar")]
+pub use progress_bar::ProgressBar;

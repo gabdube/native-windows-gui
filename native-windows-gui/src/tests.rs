@@ -11,7 +11,8 @@ pub struct TestRun {
     status: bool,
     window: bool,
     image: bool,
-    date_picker: bool
+    date_picker: bool,
+    progress_bar: bool
 }
 
 
@@ -52,6 +53,9 @@ pub struct TestApp {
     #[cfg(feature = "datetime-picker")]
     dtpick: DatePicker,
 
+    #[cfg(feature = "progress-bar")]
+    pbar: ProgressBar,
+
     // Menu
     window_menu: Menu,
     window_submenu1: Menu,
@@ -81,6 +85,7 @@ pub struct TestApp {
     run_label_test: Button,
     run_status_test: Button,
     run_datepicker_test: Button,
+    run_progressbar_test: Button,
     focus_test: Button,
 }
 
@@ -196,6 +201,22 @@ mod test_app_ui {
                 Ok(())
             }
 
+            #[cfg(feature = "progress-bar")]
+            fn setup_progress_bar(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
+                let pbar = ControlBase::build_hwnd()
+                .class_name(app.pbar.class_name())
+                .forced_flags(app.pbar.forced_flags())
+                .flags(app.pbar.flags())
+                .size((200, 30))
+                .position((5, 235))
+                .parent(Some(window))
+                .build()?;
+
+                app.pbar.handle = pbar.handle.clone();
+
+                Ok(())
+            }
+
             #[cfg(not(feature = "file-dialog"))]
             fn setup_file_dialog(_app: &mut TestApp) -> Result<(), SystemError> {
                 Ok(())
@@ -205,6 +226,12 @@ mod test_app_ui {
             fn setup_datetime_picker(_app: &mut TestApp, _window: &ControlBase) -> Result<(), SystemError> {
                 Ok(())
             }
+
+            #[cfg(not(feature = "progress-bar"))]
+            fn setup_progress_bar(_app: &mut TestApp, _window: &ControlBase) -> Result<(), SystemError> {
+                Ok(())
+            }
+
 
             // Font
             let font = Font::builder()
@@ -223,7 +250,7 @@ mod test_app_ui {
               .class_name(data.window.class_name())
               .forced_flags(data.window.forced_flags())
               .flags(data.window.flags())
-              .size((350, 280))
+              .size((350, 330))
               .position((300, 300))
               .text("Tests")
               .build()?;
@@ -298,6 +325,7 @@ mod test_app_ui {
             data.test_label.set_font(Some(&data.font));
 
             setup_datetime_picker(&mut data, &window)?;
+            setup_progress_bar(&mut data, &window)?;
 
             let image = ControlBase::build_hwnd()
               .class_name(data.image.class_name())
@@ -435,6 +463,19 @@ mod test_app_ui {
             data.run_datepicker_test.handle = run_datepicker_test.handle.clone();
             data.run_datepicker_test.set_enabled(cfg!(feature = "file-dialog"));
 
+            let run_progressbar_test = ControlBase::build_hwnd()
+              .class_name(data.run_progressbar_test.class_name())
+              .forced_flags(data.run_progressbar_test.forced_flags())
+              .flags(data.run_progressbar_test.flags())
+              .size((125, 30))
+              .position((5, 185))
+              .text("Run progbar tests")
+              .parent(Some(&control_window))
+              .build()?;
+              
+            data.run_progressbar_test.handle = run_progressbar_test.handle.clone();
+            data.run_progressbar_test.set_enabled(cfg!(feature = "progress-bar"));
+
             let focus_test = ControlBase::build_hwnd()
               .class_name(data.focus_test.class_name())
               .forced_flags(data.focus_test.forced_flags())
@@ -557,7 +598,8 @@ mod test_app_ui {
                             } else if handle == evt_ui.open_file_button.handle {
                                 super::test_file_dialog(&evt_ui.inner, evt);
                             } else {
-                                super::dispatch_date_time_tests(handle, &evt_ui.inner);
+                                super::dispatch_date_time_tests(&handle, &evt_ui.inner);
+                                super::dispatch_progress_bar_tests(&handle, &evt_ui.inner);
                             },
                         E::OnButtonDoubleClick => 
                             if handle == evt_ui.test_button.handle {
@@ -895,9 +937,9 @@ fn dispatch_dtp_event(app: &TestApp, evt: Event, handle: ControlHandle) {
 fn dispatch_dtp_event(_app: &TestApp, _evt: Event, handle: ControlHandle) {
 } 
 
-#[cfg(feature = "file-dialog")]
-fn dispatch_date_time_tests(handle: ControlHandle, app: &TestApp) {
-    if handle != app.run_datepicker_test.handle {
+#[cfg(feature = "datetime-picker")]
+fn dispatch_date_time_tests(handle: &ControlHandle, app: &TestApp) {
+    if handle != &app.run_datepicker_test.handle {
         return;
     }
 
@@ -926,8 +968,25 @@ fn dispatch_date_time_tests(handle: ControlHandle, app: &TestApp) {
     }
 }
 
-#[cfg(not(feature = "file-dialog"))]
-fn dispatch_date_time_tests(_handle: ControlHandle, _app: &TestApp) {
+#[cfg(not(feature = "datetime-picker"))]
+fn dispatch_date_time_tests(_handle: &ControlHandle, _app: &TestApp) {
+}
+
+#[cfg(feature = "progress-bar")]
+fn dispatch_progress_bar_tests(handle: &ControlHandle, app: &TestApp) {
+    if handle != &app.run_progressbar_test.handle {
+        return;
+    }
+
+    if !app.runs.borrow().progress_bar {
+        app.runs.borrow_mut().progress_bar = true;
+    } else {
+        app.runs.borrow_mut().progress_bar = false;
+    }
+}
+
+#[cfg(not(feature = "progress-bar"))]
+fn dispatch_progress_bar_tests(_handle: &ControlHandle, _app: &TestApp) {
 }
 
 fn test_events(app: &TestApp, e: Event) {

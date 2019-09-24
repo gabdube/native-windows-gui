@@ -89,13 +89,17 @@ pub fn enable_visual_styles() {
 */
 pub fn init_common_controls() {
     use winapi::um::commctrl::{InitCommonControlsEx, INITCOMMONCONTROLSEX};
-    use winapi::um::commctrl::{ICC_BAR_CLASSES, ICC_STANDARD_CLASSES, ICC_DATE_CLASSES};
+    use winapi::um::commctrl::{ICC_BAR_CLASSES, ICC_STANDARD_CLASSES, ICC_DATE_CLASSES, ICC_PROGRESS_CLASS};
 
     unsafe {
         let mut classes = ICC_BAR_CLASSES | ICC_STANDARD_CLASSES;
 
         if cfg!(feature = "datetime-picker") {
             classes |= ICC_DATE_CLASSES;
+        }
+
+        if cfg!(feature = "progress-bar") {
+            classes |= ICC_PROGRESS_CLASS;
         }
 
         let data = INITCOMMONCONTROLSEX {
