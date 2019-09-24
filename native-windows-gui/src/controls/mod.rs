@@ -28,4 +28,4 @@ pub use timer::Timer;
 pub use notice::Notice;
 
 #[cfg(feature = "datetime-picker")]
-pub use date_picker::{DatePicker, DatePickerValue, DatePickerCheckState};
+pub use date_picker::{DatePicker, DatePickerValue};

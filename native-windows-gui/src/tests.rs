@@ -897,11 +897,29 @@ fn dispatch_dtp_event(_app: &TestApp, _evt: Event, handle: ControlHandle) {
 
 #[cfg(feature = "file-dialog")]
 fn dispatch_date_time_tests(handle: ControlHandle, app: &TestApp) {
-    if handle != app.dtpick.handle {
+    if handle != app.run_datepicker_test.handle {
         return;
     }
 
     if !app.runs.borrow().date_picker {
+
+        let v = DatePickerValue { year: 2000, month: 10, day: 5 };
+        app.dtpick.set_value(Some(v));
+        assert_eq!(app.dtpick.value(), Some(v));
+        assert_eq!(app.dtpick.checked(), true);
+
+        app.dtpick.set_value(None);
+        assert_eq!(app.dtpick.value(), None);
+        assert_eq!(app.dtpick.checked(), false);
+
+        app.dtpick.set_format("dddd MMM dd', 'yyyy");
+        app.dtpick.set_size(250, 30);
+
+        let up = DatePickerValue { year: 2000, month: 1, day: 1 };
+        let down = DatePickerValue { year: 2001, month: 1, day: 1 };
+        app.dtpick.set_range(&[up, down]);
+        assert_eq!(app.dtpick.range(), [up, down]);
+
         app.runs.borrow_mut().date_picker = true;
     } else {
         app.runs.borrow_mut().date_picker = false;
