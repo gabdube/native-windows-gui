@@ -26,14 +26,23 @@ pub enum Event {
     /// When a TextInput value is changed
     OnTextInput,
 
-    // When the list of a combobox is closed
+    /// When the list of a combobox is closed
     OnComboBoxClosed,
 
-    // When the list of a combobox is about to be visible
+    /// When the list of a combobox is about to be visible
     OnComboBoxDropdown,
 
-    // When the current selection of the combobox was changed
+    /// When the current selection of the combobox was changed
     OnComboxBoxSelection,
+
+    /// When the date select dropdown is expanded
+    OnDatePickerDropdown,
+
+    /// When the date select dropdown is closed
+    OnDatePickerClosed,
+
+    /// When the value of the date select is changed
+    OnDatePickerChanged,
 
     // When the user click on a menu item
     OnMenuItemClick,

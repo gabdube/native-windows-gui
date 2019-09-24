@@ -11,7 +11,7 @@ pub struct TestRun {
     status: bool,
     window: bool,
     image: bool,
-    datetime_picker: bool
+    date_picker: bool
 }
 
 
@@ -48,7 +48,9 @@ pub struct TestApp {
     test_combobox: ComboBox<&'static str>,
     test_label: Label,
     image: ImageFrame,
-    dtpick: DateTimePicker,
+
+    #[cfg(feature = "datetime-picker")]
+    dtpick: DatePicker,
 
     // Menu
     window_menu: Menu,
@@ -78,6 +80,7 @@ pub struct TestApp {
     run_thread_test: Button,
     run_label_test: Button,
     run_status_test: Button,
+    run_datepicker_test: Button,
     focus_test: Button,
 }
 
@@ -419,6 +422,19 @@ mod test_app_ui {
               
             data.run_status_test.handle = run_status_test.handle.clone();
 
+            let run_datepicker_test = ControlBase::build_hwnd()
+              .class_name(data.run_datepicker_test.class_name())
+              .forced_flags(data.run_datepicker_test.forced_flags())
+              .flags(data.run_datepicker_test.flags())
+              .size((125, 30))
+              .position((135, 155))
+              .text("Run date tests")
+              .parent(Some(&control_window))
+              .build()?;
+              
+            data.run_datepicker_test.handle = run_datepicker_test.handle.clone();
+            data.run_datepicker_test.set_enabled(cfg!(feature = "file-dialog"));
+
             let focus_test = ControlBase::build_hwnd()
               .class_name(data.focus_test.class_name())
               .forced_flags(data.focus_test.forced_flags())
@@ -540,6 +556,8 @@ mod test_app_ui {
 
                             } else if handle == evt_ui.open_file_button.handle {
                                 super::test_file_dialog(&evt_ui.inner, evt);
+                            } else {
+                                super::dispatch_date_time_tests(handle, &evt_ui.inner);
                             },
                         E::OnButtonDoubleClick => 
                             if handle == evt_ui.test_button.handle {
@@ -577,6 +595,12 @@ mod test_app_ui {
                             if handle == evt_ui.image.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
+                        E::OnDatePickerDropdown =>
+                            super::dispatch_dtp_event(&evt_ui.inner, evt, handle),
+                        E::OnDatePickerClosed =>
+                            super::dispatch_dtp_event(&evt_ui.inner, evt, handle),
+                        E::OnDatePickerChanged =>
+                            super::dispatch_dtp_event(&evt_ui.inner, evt, handle),
                         E::OnMenuItemClick =>
                             if handle == evt_ui.window_menu_item1.handle {
                                 super::test_events(&evt_ui.inner, evt);
@@ -618,6 +642,7 @@ mod test_app_ui {
     }
 
 }
+
 
 fn focus(app: &TestApp, _e: Event) {
     app.test_input.set_focus();
@@ -857,6 +882,34 @@ fn test_file_dialog(app: &TestApp, _e: Event) {
 
 #[cfg(not(feature = "file-dialog"))]
 fn test_file_dialog(_app: &TestApp, _e: Event) {
+}
+
+#[cfg(feature = "datetime-picker")]
+fn dispatch_dtp_event(app: &TestApp, evt: Event, handle: ControlHandle) {
+    if handle == app.dtpick.handle {
+        test_events(app, evt);
+    }
+} 
+
+#[cfg(not(feature = "datetime-picker"))]
+fn dispatch_dtp_event(_app: &TestApp, _evt: Event, handle: ControlHandle) {
+} 
+
+#[cfg(feature = "file-dialog")]
+fn dispatch_date_time_tests(handle: ControlHandle, app: &TestApp) {
+    if handle != app.dtpick.handle {
+        return;
+    }
+
+    if !app.runs.borrow().date_picker {
+        app.runs.borrow_mut().date_picker = true;
+    } else {
+        app.runs.borrow_mut().date_picker = false;
+    }
+}
+
+#[cfg(not(feature = "file-dialog"))]
+fn dispatch_date_time_tests(_handle: ControlHandle, _app: &TestApp) {
 }
 
 fn test_events(app: &TestApp, e: Event) {

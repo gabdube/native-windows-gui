@@ -12,7 +12,7 @@ mod timer;
 mod notice;
 
 #[cfg(feature = "datetime-picker")]
-mod datetime_picker;
+mod date_picker;
 
 pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase};
@@ -28,4 +28,4 @@ pub use timer::Timer;
 pub use notice::Notice;
 
 #[cfg(feature = "datetime-picker")]
-pub use datetime_picker::DateTimePicker;
+pub use date_picker::{DatePicker, DatePickerValue, DatePickerCheckState};
