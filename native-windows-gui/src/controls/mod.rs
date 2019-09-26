@@ -34,4 +34,4 @@ pub use notice::Notice;
 pub use date_picker::{DatePicker, DatePickerValue};
 
 #[cfg(feature = "progress-bar")]
-pub use progress_bar::ProgressBar;
+pub use progress_bar::{ProgressBar, ProgressBarState};

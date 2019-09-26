@@ -979,6 +979,26 @@ fn dispatch_progress_bar_tests(handle: &ControlHandle, app: &TestApp) {
     }
 
     if !app.runs.borrow().progress_bar {
+        app.pbar.set_range(0..1000);
+
+        let r = app.pbar.range();
+        assert!(r.start == 0 && r.end == 1000);
+
+        app.pbar.set_pos(500);
+        assert!(app.pbar.pos() == 500);
+
+        app.pbar.set_step(100);
+        assert!(app.pbar.step() == 100);
+
+        app.pbar.set_state(ProgressBarState::Paused);
+        assert!(app.pbar.state() == ProgressBarState::Paused);
+
+        app.pbar.advance();
+        assert!(app.pbar.pos() == 600);
+
+        app.pbar.advance_delta(50);
+        assert!(app.pbar.pos() == 650);
+
         app.runs.borrow_mut().progress_bar = true;
     } else {
         app.runs.borrow_mut().progress_bar = false;
