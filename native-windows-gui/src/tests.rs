@@ -51,6 +51,8 @@ pub struct TestApp {
     test_label: Label,
     test_image: ImageFrame,
     test_checkbox: CheckBox,
+    test_radio1: RadioButton,
+    test_radio2: RadioButton,
 
     #[cfg(feature = "datetime-picker")]
     dtpick: DatePicker,
@@ -342,12 +344,34 @@ mod test_app_ui {
               .class_name(data.test_checkbox.class_name())
               .forced_flags(data.test_checkbox.forced_flags())
               .flags(data.test_checkbox.flags())
-              .size((130, 40))
+              .size((130, 25))
               .position((215, 230))
               .text("Test CheckBox")
               .parent(Some(&window))
               .build()?;
             data.test_checkbox.handle = test_checkbox.handle.clone();
+
+            let test_radio1 = ControlBase::build_hwnd()
+              .class_name(data.test_radio1.class_name())
+              .forced_flags(data.test_radio1.forced_flags())
+              .flags(data.test_radio1.flags())
+              .size((130, 25))
+              .position((215, 255))
+              .text("Test Radio 1")
+              .parent(Some(&window))
+              .build()?;
+            data.test_radio1.handle = test_radio1.handle.clone();
+
+            let test_radio2 = ControlBase::build_hwnd()
+              .class_name(data.test_radio2.class_name())
+              .forced_flags(data.test_radio2.forced_flags())
+              .flags(data.test_radio2.flags())
+              .size((130, 25))
+              .position((215, 280))
+              .text("Test Radio 2")
+              .parent(Some(&window))
+              .build()?;
+            data.test_radio2.handle = test_radio2.handle.clone();
 
             let open_file_button = ControlBase::build_hwnd()
                     .class_name(data.open_file_button.class_name())
@@ -937,6 +961,12 @@ fn test_check(app: &TestApp, _e: Event) {
 
         app.test_checkbox.set_check_state(CheckBoxState::Checked);
         assert_eq!(app.test_checkbox.check_state(), CheckBoxState::Checked);
+
+        app.test_radio2.set_check_state(RadioButtonState::Checked);
+        assert_eq!(app.test_radio2.check_state(), RadioButtonState::Checked);
+
+        app.test_radio1.set_check_state(RadioButtonState::Unchecked);
+        assert_eq!(app.test_radio1.check_state(), RadioButtonState::Unchecked);
 
         app.runs.borrow_mut().check_box = true;
     } else {

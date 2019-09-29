@@ -3,12 +3,14 @@
 ## Control List
 
  [X] Button
+ [X] CheckBox
+ [X] RadioButton
  [X] ComboBox
  [] DateTime
  [] ListBox
  [] ListView
  [] MonthCalendar
- [] ProgressBar
+ [X] ProgressBar
  [] RichEdit (includes LineEdit)
  [X] Static
  [] SysLink
