@@ -12,7 +12,8 @@ pub struct TestRun {
     window: bool,
     image: bool,
     date_picker: bool,
-    progress_bar: bool
+    progress_bar: bool,
+    check_box: bool,
 }
 
 
@@ -48,7 +49,8 @@ pub struct TestApp {
     test_input: TextInput, 
     test_combobox: ComboBox<&'static str>,
     test_label: Label,
-    image: ImageFrame,
+    test_image: ImageFrame,
+    test_checkbox: CheckBox,
 
     #[cfg(feature = "datetime-picker")]
     dtpick: DatePicker,
@@ -86,6 +88,7 @@ pub struct TestApp {
     run_status_test: Button,
     run_datepicker_test: Button,
     run_progressbar_test: Button,
+    run_check_test: Button,
     focus_test: Button,
 }
 
@@ -250,8 +253,8 @@ mod test_app_ui {
               .class_name(data.window.class_name())
               .forced_flags(data.window.forced_flags())
               .flags(data.window.flags())
-              .size((350, 330))
-              .position((300, 300))
+              .size((350, 370))
+              .position((300, 250))
               .text("Tests")
               .build()?;
             data.window.handle = window.handle.clone();
@@ -324,19 +327,27 @@ mod test_app_ui {
             data.test_label.handle = test_label.handle.clone();
             data.test_label.set_font(Some(&data.font));
 
-            setup_datetime_picker(&mut data, &window)?;
-            setup_progress_bar(&mut data, &window)?;
-
-            let image = ControlBase::build_hwnd()
-              .class_name(data.image.class_name())
-              .forced_flags(data.image.forced_flags())
-              .flags(data.image.flags())
+            let test_image = ControlBase::build_hwnd()
+              .class_name(data.test_image.class_name())
+              .forced_flags(data.test_image.forced_flags())
+              .flags(data.test_image.flags())
               .size((150, 99))
               .position((170, 65))
               .parent(Some(&window))
               .build()?;
-            data.image.handle = image.handle.clone();
-            data.image.set_image(Some(&data.ferris));
+            data.test_image.handle = test_image.handle.clone();
+            data.test_image.set_image(Some(&data.ferris));
+
+            let test_checkbox = ControlBase::build_hwnd()
+              .class_name(data.test_checkbox.class_name())
+              .forced_flags(data.test_checkbox.forced_flags())
+              .flags(data.test_checkbox.flags())
+              .size((130, 40))
+              .position((215, 230))
+              .text("Test CheckBox")
+              .parent(Some(&window))
+              .build()?;
+            data.test_checkbox.handle = test_checkbox.handle.clone();
 
             let open_file_button = ControlBase::build_hwnd()
                     .class_name(data.open_file_button.class_name())
@@ -349,6 +360,9 @@ mod test_app_ui {
                     .build()?;
             data.open_file_button.handle = open_file_button.handle.clone();
             data.open_file_button.set_enabled(cfg!(feature = "file-dialog"));
+
+            setup_datetime_picker(&mut data, &window)?;
+            setup_progress_bar(&mut data, &window)?;
 
             let events_show = ControlBase::build_hwnd()
               .class_name(data.events_show.class_name())
@@ -449,6 +463,18 @@ mod test_app_ui {
               .build()?;
               
             data.run_status_test.handle = run_status_test.handle.clone();
+
+            let run_check_test = ControlBase::build_hwnd()
+              .class_name(data.run_check_test.class_name())
+              .forced_flags(data.run_check_test.forced_flags())
+              .flags(data.run_check_test.flags())
+              .size((125, 30))
+              .position((135, 185))
+              .text("Run check tests")
+              .parent(Some(&control_window))
+              .build()?;
+              
+            data.run_check_test.handle = run_check_test.handle.clone();
 
             let run_datepicker_test = ControlBase::build_hwnd()
               .class_name(data.run_datepicker_test.class_name())
@@ -586,6 +612,9 @@ mod test_app_ui {
                             } else if handle == evt_ui.run_status_test.handle {
                                 super::test_status(&evt_ui.inner, evt);
 
+                            } else if handle == evt_ui.run_check_test.handle {
+                                super::test_check(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.focus_test.handle {
                                 super::focus(&evt_ui.inner, evt);
 
@@ -630,11 +659,11 @@ mod test_app_ui {
                                 super::test_events(&evt_ui.inner, evt);
                             },
                         E::OnImageFrameClick => 
-                            if handle == evt_ui.image.handle {
+                            if handle == evt_ui.test_image.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
                         E::OnImageFrameDoubleClick =>
-                            if handle == evt_ui.image.handle {
+                            if handle == evt_ui.test_image.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
                         E::OnDatePickerDropdown =>
@@ -897,6 +926,22 @@ fn test_status(app: &TestApp, _e: Event) {
         app.window_status.set_min_height(25);
 
         app.runs.borrow_mut().status = false;
+    }
+}
+
+fn test_check(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().check_box {
+
+        app.test_checkbox.set_tristate(true);
+        assert!(app.test_checkbox.tristate());
+
+        app.test_checkbox.set_check_state(CheckBoxState::Checked);
+        assert_eq!(app.test_checkbox.check_state(), CheckBoxState::Checked);
+
+        app.runs.borrow_mut().check_box = true;
+    } else {
+        app.test_checkbox.set_tristate(false);
+        app.runs.borrow_mut().check_box = false;
     }
 }
 
