@@ -14,6 +14,7 @@ pub struct TestRun {
     date_picker: bool,
     progress_bar: bool,
     check_box: bool,
+    list_box: bool
 }
 
 
@@ -53,6 +54,7 @@ pub struct TestApp {
     test_checkbox: CheckBox,
     test_radio1: RadioButton,
     test_radio2: RadioButton,
+    test_listbox: ListBox<&'static str>,
 
     #[cfg(feature = "datetime-picker")]
     dtpick: DatePicker,
@@ -91,6 +93,7 @@ pub struct TestApp {
     run_datepicker_test: Button,
     run_progressbar_test: Button,
     run_check_test: Button,
+    run_listbox_test: Button,
     focus_test: Button,
 }
 
@@ -109,7 +112,7 @@ mod partial_app_1_ui {
               .forced_flags(data.window.forced_flags())
               .flags(((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits(), 0))
               .size((300, 300))
-              .position((1200, 300))
+              .position((1300, 100))
               .text("Partial 1 Window")
               .build()?;
             data.window.handle = window.handle.clone();
@@ -255,8 +258,8 @@ mod test_app_ui {
               .class_name(data.window.class_name())
               .forced_flags(data.window.forced_flags())
               .flags(data.window.flags())
-              .size((350, 370))
-              .position((300, 250))
+              .size((650, 370))
+              .position((300, 100))
               .text("Tests")
               .build()?;
             data.window.handle = window.handle.clone();
@@ -277,7 +280,7 @@ mod test_app_ui {
               .forced_flags(data.control_window.forced_flags())
               .flags(((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits(), 0))
               .size((280, 300))
-              .position((680, 300))
+              .position((980, 100))
               .text("Controls Panel")
               .parent(Some(&window))
               .build()?;
@@ -372,6 +375,17 @@ mod test_app_ui {
               .parent(Some(&window))
               .build()?;
             data.test_radio2.handle = test_radio2.handle.clone();
+
+            let test_listbox = ControlBase::build_hwnd()
+              .class_name(data.test_listbox.class_name())
+              .forced_flags(data.test_listbox.forced_flags())
+              .flags(data.test_listbox.flags())
+              .size((130, 120))
+              .position((330, 10))
+              .parent(Some(&window))
+              .build()?;
+            data.test_listbox.handle = test_listbox.handle.clone();
+            data.test_listbox.set_collection(vec!["Item 1", "Item 2", "Item 3"]);
 
             let open_file_button = ControlBase::build_hwnd()
                     .class_name(data.open_file_button.class_name())
@@ -499,6 +513,18 @@ mod test_app_ui {
               .build()?;
               
             data.run_check_test.handle = run_check_test.handle.clone();
+
+            let run_listbox_test = ControlBase::build_hwnd()
+              .class_name(data.run_listbox_test.class_name())
+              .forced_flags(data.run_listbox_test.forced_flags())
+              .flags(data.run_listbox_test.flags())
+              .size((125, 30))
+              .position((5, 215))
+              .text("Run list tests")
+              .parent(Some(&control_window))
+              .build()?;
+              
+            data.run_listbox_test.handle = run_listbox_test.handle.clone();
 
             let run_datepicker_test = ControlBase::build_hwnd()
               .class_name(data.run_datepicker_test.class_name())
@@ -638,6 +664,9 @@ mod test_app_ui {
 
                             } else if handle == evt_ui.run_check_test.handle {
                                 super::test_check(&evt_ui.inner, evt);
+
+                            } else if handle == evt_ui.run_listbox_test.handle {
+                                super::test_listbox(&evt_ui.inner, evt);
 
                             } else if handle == evt_ui.focus_test.handle {
                                 super::focus(&evt_ui.inner, evt);
@@ -855,6 +884,7 @@ fn test_combobox(app: &TestApp, _e: Event) {
 
         app.test_combobox.sync();
         app.test_combobox.push("Hello!");
+        assert_eq!(app.test_combobox.len(), 4);
 
         app.test_combobox.set_selection(None);
         assert_eq!(app.test_combobox.selection(), None);
@@ -876,12 +906,47 @@ fn test_combobox(app: &TestApp, _e: Event) {
         assert_eq!(app.test_combobox.set_selection_string("BOO!"), Some(1));
         assert_eq!(app.test_combobox.set_selection_string("Ahoy!!"), Some(5));
 
+        app.test_combobox.remove(0);
+
         app.test_combobox.dropdown(true);
 
         app.runs.borrow_mut().combo_box = true;
     } else {
         app.test_combobox.set_collection(vec!["TEST1", "TEST2"]);
         app.runs.borrow_mut().combo_box = false;
+    }
+}
+
+fn test_listbox(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().list_box {
+        {
+            let col = app.test_listbox.collection();
+            assert_eq!(&col as &[&'static str], &["Item 1", "Item 2", "Item 3"]);
+        }
+
+        {
+            let mut col = app.test_listbox.collection_mut();
+            col.push("Item 4");
+        }
+
+        app.test_listbox.sync();
+        app.test_listbox.push("Hello!");
+        assert_eq!(app.test_listbox.len(), 5);
+
+        app.test_listbox.set_selection(Some(0));
+
+        app.test_listbox.set_selection(None);
+        assert_eq!(app.test_listbox.selection(), None);
+        assert_eq!(app.test_listbox.selection_string(), None);
+
+        app.test_listbox.set_selection(Some(2));
+        assert_eq!(app.test_listbox.selection(), Some(2));
+        assert_eq!(app.test_listbox.selection_string(), Some("Item 3".to_string()));
+
+        app.runs.borrow_mut().list_box = true;
+    } else {
+        app.test_listbox.set_collection(vec!["Item 1", "Item 2", "Item 3"]);
+        app.runs.borrow_mut().list_box = false;
     }
 }
 

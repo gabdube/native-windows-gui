@@ -36,7 +36,7 @@ mod test_layout_app_ui {
                 .forced_flags(data.hbox_window.forced_flags())
                 .flags(Some(((WindowFlags::WINDOW | WindowFlags::VISIBLE | WindowFlags::RESIZABLE).bits(), 0)).unwrap_or(data.hbox_window.flags()))
                 .size((400, 100))
-                .position((300, 300))
+                .position((600, 510))
                 .text("HBOX test")
                 .build()?;
             data.hbox_window.handle = hbox_window.handle.clone();
@@ -73,7 +73,7 @@ mod test_layout_app_ui {
                 .forced_flags(data.vbox_window.forced_flags())
                 .flags(Some(((WindowFlags::WINDOW | WindowFlags::VISIBLE | WindowFlags::RESIZABLE).bits(), 0)).unwrap_or(data.vbox_window.flags()))
                 .size((250, 400))
-                .position((300, 450))
+                .position((300, 510))
                 .text("VBOX test")
                 .build()?;
             data.vbox_window.handle = vbox_window.handle.clone();
