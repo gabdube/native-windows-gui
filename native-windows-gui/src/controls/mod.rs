@@ -31,7 +31,7 @@ pub use label::Label;
 pub use combo_box::ComboBox;
 pub use status_bar::StatusBar;
 pub use image_frame::ImageFrame;
-pub use list_box::ListBox;
+pub use list_box::{ListBox, ListBoxFlags};
 pub use menu::{Menu, MenuItem, MenuSeparator};
 pub use timer::Timer;
 pub use notice::Notice;

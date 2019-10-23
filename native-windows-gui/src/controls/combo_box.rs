@@ -160,8 +160,7 @@ impl<D: Display+Default> ComboBox<D> {
         self.collection.borrow_mut().push(item);
     }
 
-    /// Insert an item in the collection and the control. This does not sort the collection
-    /// even if the combobox was created with the `sorted` flag.
+    /// Insert an item in the collection and the control.
     ///
     /// SPECIAL behaviour! If index is `std::usize::MAX`, the item is added at the end of the collection.
     /// The method will still panic if `index > len` with every other values.

@@ -1,15 +1,26 @@
 use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::{WPARAM, LPARAM};
+use winapi::um::winuser::{LBS_MULTIPLESEL, LBS_NOSEL, WS_VISIBLE};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::Font;
 use super::ControlHandle;
 use std::cell::{Ref, RefMut, RefCell};
 use std::fmt::Display;
+use std::ops::Range;
 use std::mem;
 
 const NOT_BOUND: &'static str = "ListBox is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: ListBox handle is not HWND!";
+
+
+bitflags! {
+    pub struct ListBoxFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const MULTI_SELECT = LBS_MULTIPLESEL;
+        const NO_SELECT = LBS_NOSEL;
+    }
+}
 
 /**
 A list box is a control window that contains a simple list of items from which the user can choose.
@@ -40,6 +51,31 @@ impl<D: Display+Default> ListBox<D> {
         self.collection.borrow_mut().push(item);
     }
 
+    /// Insert an item in the collection and the control. 
+    ///
+    /// SPECIAL behaviour! If index is `std::usize::MAX`, the item is added at the end of the collection.
+    /// The method will still panic if `index > len` with every other values.
+    pub fn insert(&self, index: usize, item: D) {
+        use winapi::um::winuser::LB_INSERTSTRING;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let display = format!("{}", item);
+        let display_os = to_utf16(&display);
+
+        let mut col = self.collection.borrow_mut();
+        if index == std::usize::MAX {
+            col.push(item);
+        } else {
+            col.insert(index, item);
+        }
+
+        unsafe {
+            wh::send_message(handle, LB_INSERTSTRING, index, mem::transmute(display_os.as_ptr()));
+        }
+    }
+
 
     /// Remove the item at the selected index and returns it.
     /// Panic of the index is out of bounds
@@ -58,21 +94,65 @@ impl<D: Display+Default> ListBox<D> {
     /// Return the index of the currencty selected item for single value list box.
     /// Return `None` if no item is selected.
     pub fn selection(&self) -> Option<usize> {
-        use winapi::um::winuser::{LB_GETCURSEL , CB_ERR};
+        use winapi::um::winuser::{LB_GETCURSEL, LB_ERR};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let index = wh::send_message(handle, LB_GETCURSEL , 0, 0);
 
-        if index == CB_ERR { None }
+        if index == LB_ERR { None }
         else { Some(index as usize) }
+    }
+
+    /// Return the number of selected item in the list box
+    /// Returns 0 for single select list box
+    pub fn multi_selection_len(&self) -> usize {
+        use winapi::um::winuser::{LB_GETSELCOUNT, LB_ERR};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        match wh::send_message(handle, LB_GETSELCOUNT, 0, 0) {
+            LB_ERR => 0,
+            value => value as usize
+        }
+    }
+
+    /// Return a list index
+    /// Returns an empty vector for single select list box.
+    pub fn multi_selection(&self) -> Vec<usize> {
+        use winapi::um::winuser::{LB_GETSELCOUNT, LB_GETSELITEMS, LB_ERR};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let select_count = match wh::send_message(handle, LB_GETSELCOUNT, 0, 0) {
+            LB_ERR => usize::max_value(),
+            value => value as usize
+        };
+
+        if select_count == usize::max_value() || usize::max_value() == 0 {
+            return Vec::new();
+        }
+
+        let mut indices_buffer: Vec<u32> = Vec::with_capacity(select_count);
+        unsafe { indices_buffer.set_len(select_count) };
+
+        wh::send_message(
+            handle,
+            LB_GETSELITEMS,
+            select_count as WPARAM,
+            indices_buffer.as_mut_ptr() as LPARAM
+        );
+
+        indices_buffer.into_iter().map(|i| i as usize).collect()
     }
 
     /// Return the display value of the currenctly selected item for single value
     /// Return `None` if no item is selected. This reads the visual value.
     pub fn selection_string(&self) -> Option<String> {
-        use winapi::um::winuser::{LB_GETCURSEL, LB_GETTEXTLEN, LB_GETTEXT, CB_ERR};
+        use winapi::um::winuser::{LB_GETCURSEL, LB_GETTEXTLEN, LB_GETTEXT, LB_ERR};
         use winapi::shared::ntdef::WCHAR;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -80,7 +160,7 @@ impl<D: Display+Default> ListBox<D> {
 
         let index = wh::send_message(handle, LB_GETCURSEL, 0, 0);
 
-        if index == CB_ERR { None }
+        if index == LB_ERR { None }
         else {
             let index = index as usize;
             let length = wh::send_message(handle, LB_GETTEXTLEN, index, 0) as usize;
@@ -94,7 +174,7 @@ impl<D: Display+Default> ListBox<D> {
         }
     }
 
-    /// Set the currently selected item in the list box.
+    /// Set the currently selected item in the list box for single value list box.
     /// Does nothing if the index is out of bound
     /// If the value is None, remove the selected value
     pub fn set_selection(&self, index: Option<usize>) {
@@ -107,11 +187,67 @@ impl<D: Display+Default> ListBox<D> {
         wh::send_message(handle, LB_SETCURSEL, index, 0);
     }
 
+    /// Select the item as index `index` in a multi item list box
+    pub fn multi_add_selection(&self, index: usize) {
+        use winapi::um::winuser::LB_SETSEL;
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        wh::send_message(handle, LB_SETSEL, 1, index as LPARAM);
+    }
+
+    /// Unselect the item as index `index` in a multi item list box
+    pub fn multi_remove_selection(&self, index: usize) {
+        use winapi::um::winuser::LB_SETSEL;
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        wh::send_message(handle, LB_SETSEL, 0, index as LPARAM);
+    }
+
+    /// Unselect every item in the list box
+    pub fn unselect_all(&self) {
+        use winapi::um::winuser::LB_SETSEL;
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        wh::send_message(handle, LB_SETSEL, 0, -1);
+    }
+
+    /// Select every item in the list box
+    pub fn select_all(&self) {
+        use winapi::um::winuser::LB_SETSEL;
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        wh::send_message(handle, LB_SETSEL, 1, -1);
+    }
+
+    /// Select a range of items in a multi list box
+    pub fn multi_select_range(&self, range: Range<usize>) {
+        use winapi::um::winuser::LB_SELITEMRANGEEX;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let start = range.start as WPARAM;
+        let end = range.end as LPARAM;
+        wh::send_message(handle, LB_SELITEMRANGEEX, start, end);
+    }
+
+    /// Unselect a range of items in a multi list box
+    pub fn multi_unselect_range(&self, range: Range<usize>) {
+        use winapi::um::winuser::LB_SELITEMRANGEEX;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let start = range.start as LPARAM;
+        let end = range.end as WPARAM;
+        wh::send_message(handle, LB_SELITEMRANGEEX, end, start);
+    }
+
     /// Search an item that begins by the value and select the first one found.
     /// The search is not case sensitive, so this string can contain any combination of uppercase and lowercase letters.
     /// Return the index of the selected string or None if the search was not successful
     pub fn set_selection_string(&self, value: &str) -> Option<usize> {
-        use winapi::um::winuser::{LB_SELECTSTRING, CB_ERR};
+        use winapi::um::winuser::{LB_SELECTSTRING, LB_ERR};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -120,12 +256,23 @@ impl<D: Display+Default> ListBox<D> {
 
         unsafe {
             let index = wh::send_message(handle, LB_SELECTSTRING, 0, mem::transmute(os_string.as_ptr()));
-            if index == CB_ERR {
+            if index == LB_ERR {
                 None
             } else {
                 Some(index as usize)
             }
         }
+    }
+
+    /// Check if the item at `index` is selected by the user
+    /// Return `false` if the index is out of range.
+    pub fn selected(&self, index: usize) -> bool {
+        use winapi::um::winuser::LB_GETSEL;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, LB_GETSEL, index as WPARAM, 0) > 0
     }
 
     /// Update the visual of the control with the inner collection.

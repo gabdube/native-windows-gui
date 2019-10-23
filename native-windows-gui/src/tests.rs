@@ -55,6 +55,7 @@ pub struct TestApp {
     test_radio1: RadioButton,
     test_radio2: RadioButton,
     test_listbox: ListBox<&'static str>,
+    test_listbox_m: ListBox<&'static str>,
 
     #[cfg(feature = "datetime-picker")]
     dtpick: DatePicker,
@@ -379,13 +380,24 @@ mod test_app_ui {
             let test_listbox = ControlBase::build_hwnd()
               .class_name(data.test_listbox.class_name())
               .forced_flags(data.test_listbox.forced_flags())
-              .flags(data.test_listbox.flags())
-              .size((130, 120))
+              .flags(data.test_listbox_m.flags())
+              .size((130, 90))
               .position((330, 10))
               .parent(Some(&window))
               .build()?;
             data.test_listbox.handle = test_listbox.handle.clone();
             data.test_listbox.set_collection(vec!["Item 1", "Item 2", "Item 3"]);
+
+            let test_listbox_m = ControlBase::build_hwnd()
+              .class_name(data.test_listbox_m.class_name())
+              .forced_flags(data.test_listbox_m.forced_flags())
+              .flags(((ListBoxFlags::MULTI_SELECT | ListBoxFlags::VISIBLE).bits(), 0))
+              .size((130, 90))
+              .position((330, 105))
+              .parent(Some(&window))
+              .build()?;
+            data.test_listbox_m.handle = test_listbox_m.handle.clone();
+            data.test_listbox_m.set_collection(vec!["Dog", "Cat", "Racoon", "Bear"]);
 
             let open_file_button = ControlBase::build_hwnd()
                     .class_name(data.open_file_button.class_name())
@@ -934,8 +946,10 @@ fn test_listbox(app: &TestApp, _e: Event) {
         assert_eq!(app.test_listbox.len(), 5);
 
         app.test_listbox.set_selection(Some(0));
+        assert_eq!(app.test_listbox.selected(0), true);
 
         app.test_listbox.set_selection(None);
+        assert_eq!(app.test_listbox.selected(0), false);
         assert_eq!(app.test_listbox.selection(), None);
         assert_eq!(app.test_listbox.selection_string(), None);
 
@@ -943,8 +957,42 @@ fn test_listbox(app: &TestApp, _e: Event) {
         assert_eq!(app.test_listbox.selection(), Some(2));
         assert_eq!(app.test_listbox.selection_string(), Some("Item 3".to_string()));
 
+        app.test_listbox.insert(1, "BOO!");
+        app.test_listbox.insert(std::usize::MAX, "Ahoy!!");
+        assert_eq!(app.test_listbox.set_selection_string("BOO!"), Some(1));
+        assert_eq!(app.test_listbox.set_selection_string("Ahoy!!"), Some(6));
+
+        app.test_listbox.remove(0);
+
+        app.test_listbox_m.multi_add_selection(0);
+        app.test_listbox_m.multi_add_selection(2);
+        app.test_listbox_m.multi_add_selection(3);
+        assert_eq!(app.test_listbox_m.multi_selection_len(), 3);
+        assert_eq!(app.test_listbox_m.multi_selection(), vec![0, 2, 3]);
+
+        app.test_listbox_m.multi_remove_selection(0);
+        assert_eq!(app.test_listbox_m.multi_selection_len(), 2);
+        assert_eq!(app.test_listbox_m.multi_selection(), vec![2, 3]);
+
+        app.test_listbox_m.select_all();
+        assert_eq!(app.test_listbox_m.multi_selection_len(), 4);
+        assert_eq!(app.test_listbox_m.multi_selection(), vec![0, 1, 2, 3]);
+
+        app.test_listbox_m.unselect_all();
+        assert_eq!(app.test_listbox_m.multi_selection_len(), 0);
+        assert_eq!(app.test_listbox_m.multi_selection(), vec![]);
+
+        app.test_listbox_m.multi_select_range(0..2);
+        assert_eq!(app.test_listbox_m.multi_selection_len(), 3);
+        assert_eq!(app.test_listbox_m.multi_selection(), vec![0, 1, 2]);
+
+        app.test_listbox_m.multi_unselect_range(0..1);
+        assert_eq!(app.test_listbox_m.multi_selection_len(), 1);
+        assert_eq!(app.test_listbox_m.multi_selection(), vec![2]);
+
         app.runs.borrow_mut().list_box = true;
     } else {
+        app.test_listbox_m.unselect_all();
         app.test_listbox.set_collection(vec!["Item 1", "Item 2", "Item 3"]);
         app.runs.borrow_mut().list_box = false;
     }
