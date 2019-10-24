@@ -119,11 +119,9 @@ mod basic_app_ui {
 
 fn main() {
     nwg::enable_visual_styles();
-    nwg::init_common_controls();
+    nwg::init_common_controls().expect("Failed to init common controls");
 
-    let app = BasicApp::build_ui(Default::default());
-
-    app.expect("Failed to build UI");
+    let _app = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
 
     nwg::dispatch_thread_events();
 }

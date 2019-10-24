@@ -44,6 +44,12 @@ pub enum Event {
     /// When the value of the date select is changed
     OnDatePickerChanged,
 
+    /// When an item on a list box is clicked twice
+    OnListBoxDoubleClick,
+
+    /// When an item on a list box is selected
+    OnListBoxSelect,
+
     // When the user click on a menu item
     OnMenuItemClick,
 

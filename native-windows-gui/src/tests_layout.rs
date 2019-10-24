@@ -152,7 +152,7 @@ fn close(_app: &TestLayoutApp, _e: Event) {
 #[test]
 fn test_layouts() {
     enable_visual_styles();
-    init_common_controls();
+    init_common_controls().expect("Failed to build UI");
     
     let app = TestLayoutApp::build_ui(Default::default()).expect("Failed to build UI");
 

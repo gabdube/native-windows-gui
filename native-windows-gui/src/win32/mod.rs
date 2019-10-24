@@ -1,12 +1,17 @@
-#[cfg(feature = "file-dialog")] use winapi::shared::guiddef::GUID;
-use std::{mem, ptr};
-
 pub(crate) mod base_helper;
 pub(crate) mod window_helper;
 pub(crate) mod resources_helper;
 pub(crate) mod window;
 pub(crate) mod menu;
 pub(crate) mod message_box;
+
+#[cfg(feature = "tabs")]
+pub(crate) mod tabs;
+
+#[cfg(feature = "file-dialog")] use winapi::shared::guiddef::GUID;
+use std::{mem, ptr};
+use crate::errors::SystemError;
+
 
 /**
     Dispatch system events in the current thread
@@ -85,11 +90,13 @@ pub fn enable_visual_styles() {
 }
 
 /**
-    Ensure that the dll containing the winapi controls is loaded
+    Ensure that the dll containing the winapi controls is loaded.
+    Also register the custom classes used by NWG
 */
-pub fn init_common_controls() {
+pub fn init_common_controls() -> Result<(), SystemError> {
     use winapi::um::commctrl::{InitCommonControlsEx, INITCOMMONCONTROLSEX};
-    use winapi::um::commctrl::{ICC_BAR_CLASSES, ICC_STANDARD_CLASSES, ICC_DATE_CLASSES, ICC_PROGRESS_CLASS};
+    use winapi::um::commctrl::{ICC_BAR_CLASSES, ICC_STANDARD_CLASSES, ICC_DATE_CLASSES, ICC_PROGRESS_CLASS,
+     ICC_TAB_CLASSES};
 
     unsafe {
         let mut classes = ICC_BAR_CLASSES | ICC_STANDARD_CLASSES;
@@ -102,6 +109,10 @@ pub fn init_common_controls() {
             classes |= ICC_PROGRESS_CLASS;
         }
 
+        if cfg!(feature = "tabs") {
+            classes |= ICC_TAB_CLASSES;
+        }
+
         let data = INITCOMMONCONTROLSEX {
             dwSize: mem::size_of::<INITCOMMONCONTROLSEX>() as u32,
             dwICC: classes
@@ -109,8 +120,17 @@ pub fn init_common_controls() {
 
         InitCommonControlsEx(&data);
     }
+
+    tabs_init()?;
+
+    Ok(())
 }
 
+#[cfg(feature = "tabs")]
+fn tabs_init() -> Result<(), SystemError> { tabs::create_tab_classes() }
+
+#[cfg(not(feature = "tabs"))]
+fn tabs_init() -> Result<(), SystemError> { Ok(()) }
 
 
 #[allow(unused_macros)]

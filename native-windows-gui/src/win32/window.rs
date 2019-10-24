@@ -5,6 +5,7 @@ Native Windows GUI windowing base. Includes events dispatching and window creati
 use winapi::shared::minwindef::{UINT, DWORD, HMODULE, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
+use winapi::um::winuser::WNDPROC;
 use super::base_helper::{get_system_error, to_utf16};
 use super::window_helper::{NOTICE_MESSAGE};
 use crate::controls::ControlHandle;
@@ -103,7 +104,7 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
 
     let class_name = class_name.unwrap_or("NativeWindowsGuiWindow");
     if class_name == "NativeWindowsGuiWindow" {
-        build_sysclass(hmod, class_name)?;
+        build_sysclass(hmod, class_name, Some(blank_window_proc))?;
     }
 
     let class_name = to_utf16(class_name);
@@ -147,9 +148,10 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
     }
 }
 
-unsafe fn build_sysclass<'a>(
+pub unsafe fn build_sysclass<'a>(
     hmod: HMODULE,
-    class_name: &'a str
+    class_name: &'a str,
+    clsproc: WNDPROC,
 ) -> Result<(), SystemError> 
 {
     use winapi::um::winuser::{LoadCursorW, RegisterClassExW};
@@ -165,7 +167,7 @@ unsafe fn build_sysclass<'a>(
     WNDCLASSEXW {
         cbSize: mem::size_of::<WNDCLASSEXW>() as UINT,
         style: style,
-        lpfnWndProc: Some(blank_window_proc), 
+        lpfnWndProc: clsproc, 
         cbClsExtra: 0,
         cbWndExtra: 0,
         hInstance: hmod,
@@ -248,6 +250,7 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
                 "Edit" => callback(edit_commands(message), handle),
                 "ComboBox" => callback(combo_commands(message), handle),
                 "Static" => callback(static_commands(child_handle, message), handle),
+                "ListBox" => callback(listbox_commands(message), handle),
                 _ => {}
             }
         },
@@ -352,4 +355,14 @@ unsafe fn static_commands(handle: HWND, m: u16) -> Event {
             _ => Event::Unknown
         }
     }   
+}
+
+unsafe fn listbox_commands(m: u16) -> Event {
+    use winapi::um::winuser::{LBN_SELCHANGE, LBN_DBLCLK};
+
+    match m {
+        LBN_SELCHANGE => Event::OnListBoxSelect,
+        LBN_DBLCLK => Event::OnListBoxDoubleClick,
+        _ => Event::Unknown
+    }
 }

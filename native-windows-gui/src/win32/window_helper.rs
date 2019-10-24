@@ -94,7 +94,6 @@ pub unsafe fn set_window_text<'a>(handle: HWND, text: &'a str) {
     SetWindowTextW(handle, text.as_ptr());
 }
 
-
 pub unsafe fn set_window_position(handle: HWND, x: i32, y: i32) {
     use winapi::um::winuser::SetWindowPos;
     use winapi::um::winuser::{SWP_NOZORDER, SWP_NOSIZE, SWP_NOACTIVATE};

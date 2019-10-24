@@ -2,6 +2,7 @@ use crate::*;
 use std::cell::RefCell;
 
 #[derive(Default)]
+#[allow(dead_code)]
 pub struct TestRun {
     button: bool,
     textedit: bool,
@@ -14,7 +15,8 @@ pub struct TestRun {
     date_picker: bool,
     progress_bar: bool,
     check_box: bool,
-    list_box: bool
+    list_box: bool,
+    tabs: bool
 }
 
 
@@ -63,6 +65,15 @@ pub struct TestApp {
     #[cfg(feature = "progress-bar")]
     pbar: ProgressBar,
 
+    #[cfg(feature = "tabs")]
+    test_tabs: TabsContainer,
+
+    #[cfg(feature = "tabs")]
+    tab1: Tab,
+
+    #[cfg(feature = "tabs")]
+    tab2: Tab,
+
     // Menu
     window_menu: Menu,
     window_submenu1: Menu,
@@ -95,6 +106,7 @@ pub struct TestApp {
     run_progressbar_test: Button,
     run_check_test: Button,
     run_listbox_test: Button,
+    run_tabs_test: Button,
     focus_test: Button,
 }
 
@@ -226,6 +238,47 @@ mod test_app_ui {
                 Ok(())
             }
 
+            #[cfg(feature = "tabs")]
+            fn setup_tabs(app: &mut TestApp,  window: &ControlBase) -> Result<(), SystemError> {
+                let test_tabs = ControlBase::build_hwnd()
+                    .class_name(app.test_tabs.class_name())
+                    .forced_flags(app.test_tabs.forced_flags())
+                    .flags(app.test_tabs.flags())
+                    .size((170, 180))
+                    .position((470, 10))
+                    .parent(Some(window))
+                    .build()?;
+
+                app.test_tabs.handle = test_tabs.handle.clone();
+                app.test_tabs.hook_tabs();
+                
+                let tab1 = ControlBase::build_hwnd()
+                    .class_name(app.tab1.class_name())
+                    .forced_flags(app.tab1.forced_flags())
+                    .flags(app.tab1.flags())
+                    .size((50, 50))
+                    .parent(Some(&test_tabs))
+                    .text("Tab 01")
+                    .build()?;
+
+                app.tab1.handle = tab1.handle.clone();
+                app.tab1.bind_container("Tab 01");
+
+                let tab2 = ControlBase::build_hwnd()
+                    .class_name(app.tab2.class_name())
+                    .forced_flags(app.tab2.forced_flags())
+                    .flags(app.tab2.flags())
+                    .size((50, 50))
+                    .parent(Some(&test_tabs))
+                    .text("Tab 02")
+                    .build()?;
+                
+                app.tab2.handle = tab2.handle.clone();
+                app.tab2.bind_container("Tab 02");
+
+                Ok(())
+            }
+
             #[cfg(not(feature = "file-dialog"))]
             fn setup_file_dialog(_app: &mut TestApp) -> Result<(), SystemError> {
                 Ok(())
@@ -238,6 +291,11 @@ mod test_app_ui {
 
             #[cfg(not(feature = "progress-bar"))]
             fn setup_progress_bar(_app: &mut TestApp, _window: &ControlBase) -> Result<(), SystemError> {
+                Ok(())
+            }
+
+            #[cfg(not(feature = "tabs"))]
+            fn setup_tabs(_app: &mut TestApp,  _window: &ControlBase) -> Result<(), SystemError> {
                 Ok(())
             }
 
@@ -413,6 +471,7 @@ mod test_app_ui {
 
             setup_datetime_picker(&mut data, &window)?;
             setup_progress_bar(&mut data, &window)?;
+            setup_tabs(&mut data, &window)?;
 
             let events_show = ControlBase::build_hwnd()
               .class_name(data.events_show.class_name())
@@ -563,6 +622,19 @@ mod test_app_ui {
               
             data.run_progressbar_test.handle = run_progressbar_test.handle.clone();
             data.run_progressbar_test.set_enabled(cfg!(feature = "progress-bar"));
+
+            let run_tabs_test = ControlBase::build_hwnd()
+              .class_name(data.run_tabs_test.class_name())
+              .forced_flags(data.run_tabs_test.forced_flags())
+              .flags(data.run_tabs_test.flags())
+              .size((125, 30))
+              .position((135, 215))
+              .text("Run tabs tests")
+              .parent(Some(&control_window))
+              .build()?;
+              
+            data.run_tabs_test.handle = run_tabs_test.handle.clone();
+            data.run_tabs_test.set_enabled(cfg!(feature = "tabs"));
 
             let focus_test = ControlBase::build_hwnd()
               .class_name(data.focus_test.class_name())
@@ -737,6 +809,18 @@ mod test_app_ui {
                             super::dispatch_dtp_event(&evt_ui.inner, evt, handle),
                         E::OnDatePickerChanged =>
                             super::dispatch_dtp_event(&evt_ui.inner, evt, handle),
+                        E::OnListBoxSelect => 
+                            if handle == evt_ui.test_listbox.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.test_listbox_m.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnListBoxDoubleClick => 
+                            if handle == evt_ui.test_listbox.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.test_listbox_m.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
                         E::OnMenuItemClick =>
                             if handle == evt_ui.window_menu_item1.handle {
                                 super::test_events(&evt_ui.inner, evt);
@@ -931,6 +1015,8 @@ fn test_combobox(app: &TestApp, _e: Event) {
 
 fn test_listbox(app: &TestApp, _e: Event) {
     if !app.runs.borrow().list_box {
+        app.test_listbox_m.unselect_all();
+
         {
             let col = app.test_listbox.collection();
             assert_eq!(&col as &[&'static str], &["Item 1", "Item 2", "Item 3"]);
@@ -1122,7 +1208,7 @@ fn dispatch_dtp_event(app: &TestApp, evt: Event, handle: ControlHandle) {
 } 
 
 #[cfg(not(feature = "datetime-picker"))]
-fn dispatch_dtp_event(_app: &TestApp, _evt: Event, handle: ControlHandle) {
+fn dispatch_dtp_event(_app: &TestApp, _evt: Event, _handle: ControlHandle) {
 } 
 
 #[cfg(feature = "datetime-picker")]
@@ -1212,7 +1298,7 @@ fn close(_app: &TestApp, _e: Event) {
 #[test]
 fn test_everything() {
     enable_visual_styles();
-    init_common_controls();
+    init_common_controls().expect("Failed to init controls");
     
     let app = TestApp::build_ui(Default::default()).expect("Failed to build UI");
 

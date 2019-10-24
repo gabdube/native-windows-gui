@@ -20,6 +20,9 @@ mod date_picker;
 #[cfg(feature = "datetime-picker")]
 mod progress_bar;
 
+#[cfg(feature = "tabs")]
+mod tabs;
+
 pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase};
 pub use window::{Window, WindowFlags};
@@ -41,3 +44,6 @@ pub use date_picker::{DatePicker, DatePickerValue};
 
 #[cfg(feature = "progress-bar")]
 pub use progress_bar::{ProgressBar, ProgressBarState};
+
+#[cfg(feature = "progress-bar")]
+pub use tabs::{TabsContainer, Tab};

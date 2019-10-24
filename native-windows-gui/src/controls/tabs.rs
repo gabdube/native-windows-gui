@@ -1,0 +1,294 @@
+use winapi::shared::minwindef::{WPARAM, LPARAM, BOOL};
+use winapi::shared::windef::HWND;
+use winapi::um::winnt::LPWSTR;
+use crate::win32::window_helper as wh;
+use crate::win32::base_helper::{to_utf16};
+use super::ControlHandle;
+use std::mem;
+
+const NOT_BOUND: &'static str = "TabsContainer/Tab is not yet bound to a winapi object";
+const BAD_HANDLE: &'static str = "INTERNAL ERROR: TabsContainer/Tab handle is not HWND!";
+
+
+/**
+A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
+that indicates what the button does when the user selects it.
+*/
+#[derive(Default, Debug)]
+pub struct TabsContainer {
+    pub handle: ControlHandle
+}
+
+impl TabsContainer {
+
+    /// The tab widget lacks basic functionalities on it's own. This fix it. 
+    pub fn hook_tabs(&self) {
+        use crate::bind_raw_event_handler;
+        use winapi::um::winuser::{NMHDR, WM_SIZE, WM_NOTIFY};
+        use winapi::um::commctrl::{TCM_GETCURSEL, TCN_SELCHANGE};
+        use winapi::um::winuser::{SendMessageW, EnumChildWindows};
+        
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
+
+        bind_raw_event_handler(&parent_handle, move |_hwnd, msg, _w, l| { unsafe {
+            match msg {
+                WM_SIZE => { /* TODO RESIZE */ },
+                WM_NOTIFY => {
+                    let nmhdr: &NMHDR = mem::transmute(l);
+                    if nmhdr.code == TCN_SELCHANGE {
+                        let index = SendMessageW(handle, TCM_GETCURSEL, 0, 0) as i32;
+                        let data: (HWND, i32) = (handle, index);
+                        let data_ptr = &data as *const (HWND, i32);
+                        EnumChildWindows(handle, Some(toggle_children_tabs), data_ptr as LPARAM);
+                    }
+                },
+                _ => {}
+            }
+        } });
+    }
+
+    //
+    // Default methods
+    //
+
+    /// Return true if the control currently has the keyboard focus
+    pub fn focus(&self) -> bool {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::get_focus(handle) }
+    }
+
+    /// Set the keyboard focus on the button.
+    pub fn set_focus(&self) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_focus(handle); }
+    }
+
+    /// Return true if the control user can interact with the control, return false otherwise
+    pub fn enabled(&self) -> bool {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::get_window_enabled(handle) }
+    }
+
+    /// Enable or disable the control
+    pub fn set_enabled(&self, v: bool) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_enabled(handle, v) }
+    }
+
+    /// Return true if the control is visible to the user. Will return true even if the 
+    /// control is outside of the parent client view (ex: at the position (10000, 10000))
+    pub fn visible(&self) -> bool {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::get_window_visibility(handle) }
+    }
+
+    /// Show or hide the control to the user
+    pub fn set_visible(&self, v: bool) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_visibility(handle, v) }
+    }
+
+    /// Return the size of the button in the parent window
+    pub fn size(&self) -> (u32, u32) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::get_window_size(handle) }
+    }
+
+    /// Set the size of the button in the parent window
+    pub fn set_size(&self, x: u32, y: u32) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_size(handle, x, y, false) }
+    }
+
+    /// Return the position of the button in the parent window
+    pub fn position(&self) -> (i32, i32) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::get_window_position(handle) }
+    }
+
+    /// Set the position of the button in the parent window
+    pub fn set_position(&self, x: i32, y: i32) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_position(handle, x, y) }
+    }
+
+    /// Return the button label
+    pub fn text(&self) -> String { 
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::get_window_text(handle) }
+    }
+
+    /// Set the button label
+    pub fn set_text<'a>(&self, v: &'a str) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_text(handle, v) }
+    }
+
+    /// Winapi class name used during control creation
+    pub fn class_name(&self) -> Option<&'static str> {
+        use winapi::um::commctrl::WC_TABCONTROL;
+        Some(WC_TABCONTROL)
+    }
+
+    /// Winapi base flags used during window creation
+    pub fn flags(&self) -> (u32, u32) {
+        (::winapi::um::winuser::WS_VISIBLE, 0)
+    }
+
+    /// Winapi flags required by the control
+    pub fn forced_flags(&self) -> u32 {
+        //use winapi::um::commctrl::{TCS_SINGLELINE};
+        use winapi::um::winuser::{WS_CHILD};
+
+        WS_CHILD
+    }
+
+}
+
+
+/**
+    A subwindow in a TabContainer widget
+*/
+#[derive(Default, Debug)]
+pub struct Tab {
+    pub handle: ControlHandle
+}
+
+impl Tab {
+
+    /// Bind the tab to a tab view
+    pub fn bind_container<'a>(&self, text: &'a str) {
+        use winapi::um::commctrl::{TCITEMW, TCM_INSERTITEMW, TCIF_TEXT};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let tab_view_handle = wh::get_window_parent(handle);
+        let next_index = Tab::next_index(tab_view_handle);
+
+        unsafe {
+            Tab::init(handle, tab_view_handle, next_index);
+        }
+
+
+        let text = to_utf16(&text);
+        let tab_info = TCITEMW {
+            mask: TCIF_TEXT,
+            dwState: 0,
+            dwStateMask: 0,
+            pszText: text.as_ptr() as LPWSTR,
+            cchTextMax: 0,
+            iImage: -1,
+            lParam: 0
+        };
+
+        let tab_info_ptr = &tab_info as *const TCITEMW;
+        wh::send_message(tab_view_handle, TCM_INSERTITEMW, next_index as WPARAM, tab_info_ptr as LPARAM);
+    }
+
+    /// Winapi class name used during control creation
+    pub fn class_name(&self) -> Option<&'static str> {
+        Some("BUTTON")
+    }
+
+    /// Winapi base flags used during window creation
+    pub fn flags(&self) -> (u32, u32) {
+        (0, 0)
+    }
+
+    /// Winapi flags required by the control
+    pub fn forced_flags(&self) -> u32 {
+        //use winapi::um::commctrl::{TCS_SINGLELINE};
+        use winapi::um::winuser::{WS_CHILD};
+
+        WS_CHILD
+    }
+
+    /// Set and initialize a tab as active
+    unsafe fn init(current_handle: HWND, tab_view_handle: HWND, index: usize) {
+        use winapi::um::winuser::GWL_USERDATA;
+        use winapi::um::winuser::EnumChildWindows;
+
+        // Save the index of the tab in the window data
+        wh::set_window_long(current_handle, GWL_USERDATA, index);
+
+        // Resize the tabs so that they match the tab view size and hide all children tabs
+        let (w, h) = wh::get_window_size(tab_view_handle);
+        let mut data: (HWND, u32, u32) = (tab_view_handle, w, h);
+
+        // Move the tabs under the tabs header
+        if w > 11 {  data.1 -= 11;  }
+        if h > 40 {  data.2 -= 30;  }
+
+        let data_ptr = &data as *const (HWND, u32, u32);
+        EnumChildWindows(tab_view_handle, Some(resize_direct_children), mem::transmute(data_ptr));
+
+        // Move the tab under the headers
+        wh::set_window_position(current_handle, 5, 25);
+
+        // Make the current tab visible
+        if index == 1 {
+            wh::set_window_visibility(current_handle, true);
+        }
+    }
+
+    fn next_index(tab_view_handle: HWND) -> usize {
+        use winapi::um::winuser::EnumChildWindows;
+
+        let mut count = 0;
+        let count_ptr = &mut count as *mut usize;
+
+        unsafe {
+            EnumChildWindows(tab_view_handle, Some(count_children), mem::transmute(count_ptr));
+        }
+
+        count
+    }
+
+}
+
+
+unsafe extern "system" fn resize_direct_children(handle: HWND, params: LPARAM) -> BOOL {
+    let &(parent, w, h): &(HWND, u32, u32) = mem::transmute(params);
+    if wh::get_window_parent(handle) == parent {
+        wh::set_window_size(handle, w, h, false);
+    }
+
+    1
+}
+
+unsafe extern "system" fn count_children(_handle: HWND, params: LPARAM) -> BOOL {
+    let count: &mut usize = ::std::mem::transmute(params);
+    *count += 1;
+    1
+}
+
+/// Toggle the visibility of the active and inactive tab.
+unsafe extern "system" fn toggle_children_tabs(handle: HWND, params: LPARAM) -> BOOL {
+    use winapi::um::winuser::GWL_USERDATA;
+    
+    let &(parent, index): &(HWND, i32) = mem::transmute(params);
+    if wh::get_window_parent(handle) == parent {
+        let tab_index = wh::get_window_long(handle, GWL_USERDATA) as i32;
+        let visible = tab_index == index + 1;
+        wh::set_window_visibility(handle, visible);
+    }
+
+    1
+}
