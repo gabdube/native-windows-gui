@@ -1,6 +1,7 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM, BOOL};
 use winapi::shared::windef::HWND;
 use winapi::um::winnt::LPWSTR;
+use winapi::um::winuser::EnumChildWindows;
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
 use super::ControlHandle;
@@ -21,12 +22,52 @@ pub struct TabsContainer {
 
 impl TabsContainer {
 
+    /// Return the index of the currently selected tab
+    /// May return `usize::max_value()` if no tab is selected
+    pub fn selected_tab(&self) -> usize {
+        use winapi::um::commctrl::{TCM_GETCURSEL};
+        
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TCM_GETCURSEL, 0, 0) as usize
+    }
+
+    /// Set the currently selected tab by index
+    pub fn set_selected_tab(&self, index: usize) {
+        use winapi::um::commctrl::{TCM_SETCURSEL};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TCM_SETCURSEL, index as WPARAM, 0);
+
+        // Update the visible state of the tabs (this is not done automatically)
+        let data: (HWND, i32) = (handle, index as i32);
+        let data_ptr = &data as *const (HWND, i32);
+        
+        unsafe {
+            EnumChildWindows(handle, Some(toggle_children_tabs), data_ptr as LPARAM);
+        }
+    }
+
+    /// Return the number of tabs in the view
+    pub fn tab_count(&self) -> usize {
+        use winapi::um::commctrl::{TCM_GETITEMCOUNT};
+            
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TCM_GETITEMCOUNT, 0, 0) as usize
+    }
+
     /// The tab widget lacks basic functionalities on it's own. This fix it. 
     pub fn hook_tabs(&self) {
         use crate::bind_raw_event_handler;
+        use winapi::shared::minwindef::{HIWORD, LOWORD};
         use winapi::um::winuser::{NMHDR, WM_SIZE, WM_NOTIFY};
         use winapi::um::commctrl::{TCM_GETCURSEL, TCN_SELCHANGE};
-        use winapi::um::winuser::{SendMessageW, EnumChildWindows};
+        use winapi::um::winuser::{SendMessageW};
         
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -36,7 +77,6 @@ impl TabsContainer {
 
         bind_raw_event_handler(&parent_handle, move |_hwnd, msg, _w, l| { unsafe {
             match msg {
-                WM_SIZE => { /* TODO RESIZE */ },
                 WM_NOTIFY => {
                     let nmhdr: &NMHDR = mem::transmute(l);
                     if nmhdr.code == TCN_SELCHANGE {
@@ -49,6 +89,19 @@ impl TabsContainer {
                 _ => {}
             }
         } });
+
+        bind_raw_event_handler(&self.handle, move |hwnd, msg, _w, l| { unsafe {
+            match msg {
+                WM_SIZE => {
+                    let mut data = (hwnd, LOWORD(l as u32) as u32, HIWORD(l as u32) as u32);
+                    data.1 -= 11;
+                    data.2 -= 30;
+                    let data_ptr = &data as *const (HWND, u32, u32);
+                    EnumChildWindows(hwnd, Some(resize_direct_children), mem::transmute(data_ptr));
+                },
+                _ => {}
+            }
+        } } );
     }
 
     //
@@ -172,6 +225,33 @@ pub struct Tab {
 
 impl Tab {
 
+    /// Set the title of the tab
+    pub fn set_text<'a>(&self, text: &'a str) {
+        use winapi::um::commctrl::{TCM_SETITEMW, TCIF_TEXT, TCITEMW};
+        use winapi::um::winuser::GWL_USERDATA;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let tab_index = (wh::get_window_long(handle, GWL_USERDATA) - 1) as WPARAM;
+
+        let tab_view_handle = wh::get_window_parent(handle);
+
+        let text = to_utf16(text);
+        let item = TCITEMW {
+            mask: TCIF_TEXT,
+            dwState: 0,
+            dwStateMask: 0,
+            pszText: text.as_ptr() as LPWSTR,
+            cchTextMax: 0,
+            iImage: -1,
+            lParam: 0
+        };
+
+        let item_ptr = &item as *const TCITEMW;
+        wh::send_message(tab_view_handle, TCM_SETITEMW, tab_index, item_ptr as LPARAM);
+    }
+
     /// Bind the tab to a tab view
     pub fn bind_container<'a>(&self, text: &'a str) {
         use winapi::um::commctrl::{TCITEMW, TCM_INSERTITEMW, TCIF_TEXT};
@@ -185,7 +265,6 @@ impl Tab {
         unsafe {
             Tab::init(handle, tab_view_handle, next_index);
         }
-
 
         let text = to_utf16(&text);
         let tab_info = TCITEMW {
@@ -202,9 +281,13 @@ impl Tab {
         wh::send_message(tab_view_handle, TCM_INSERTITEMW, next_index as WPARAM, tab_info_ptr as LPARAM);
     }
 
+    //
+    // Other methods
+    //
+
     /// Winapi class name used during control creation
     pub fn class_name(&self) -> Option<&'static str> {
-        Some("BUTTON")
+        Some("NWG_TAB")
     }
 
     /// Winapi base flags used during window creation
@@ -223,21 +306,17 @@ impl Tab {
     /// Set and initialize a tab as active
     unsafe fn init(current_handle: HWND, tab_view_handle: HWND, index: usize) {
         use winapi::um::winuser::GWL_USERDATA;
-        use winapi::um::winuser::EnumChildWindows;
 
         // Save the index of the tab in the window data
         wh::set_window_long(current_handle, GWL_USERDATA, index);
 
         // Resize the tabs so that they match the tab view size and hide all children tabs
         let (w, h) = wh::get_window_size(tab_view_handle);
-        let mut data: (HWND, u32, u32) = (tab_view_handle, w, h);
+        let width = w - 11;
+        let height = h - 30;
 
-        // Move the tabs under the tabs header
-        if w > 11 {  data.1 -= 11;  }
-        if h > 40 {  data.2 -= 30;  }
-
-        let data_ptr = &data as *const (HWND, u32, u32);
-        EnumChildWindows(tab_view_handle, Some(resize_direct_children), mem::transmute(data_ptr));
+        // Resize the tab to match the tab view
+        wh::set_window_size(current_handle, width, height, false);
 
         // Move the tab under the headers
         wh::set_window_position(current_handle, 5, 25);
@@ -249,8 +328,6 @@ impl Tab {
     }
 
     fn next_index(tab_view_handle: HWND) -> usize {
-        use winapi::um::winuser::EnumChildWindows;
-
         let mut count = 0;
         let count_ptr = &mut count as *mut usize;
 

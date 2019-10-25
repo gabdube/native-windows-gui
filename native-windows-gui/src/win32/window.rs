@@ -265,6 +265,7 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
 
             match &class_name as &str {
                 "SysDateTimePick32" => callback(datetimepick_commands(notif.code), handle),
+                "SysTabControl32" => callback(tabs_commands(notif.code), handle),
                 _ => {}
             }
         },
@@ -333,6 +334,15 @@ fn datetimepick_commands(m: u32) -> Event {
         DTN_CLOSEUP => Event::OnDatePickerClosed,
         DTN_DROPDOWN => Event::OnDatePickerDropdown,
         DTN_DATETIMECHANGE => Event::OnDatePickerChanged,
+        _ => Event::Unknown
+    }
+}
+
+fn tabs_commands(m: u32) -> Event {
+    use winapi::um::commctrl::{TCN_SELCHANGE, TCN_SELCHANGING};
+    match m {
+        TCN_SELCHANGE => Event::TabsContainerChanged,
+        TCN_SELCHANGING => Event::TabsContainerChanging,
         _ => Event::Unknown
     }
 }

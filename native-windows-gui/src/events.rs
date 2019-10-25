@@ -50,6 +50,12 @@ pub enum Event {
     /// When an item on a list box is selected
     OnListBoxSelect,
 
+    // The select tab of a TabsContainer changed
+    TabsContainerChanged,
+
+    // The select tab of a TabsContainer is about to be changed
+    TabsContainerChanging,
+
     // When the user click on a menu item
     OnMenuItemClick,
 

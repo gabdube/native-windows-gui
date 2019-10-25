@@ -74,6 +74,9 @@ pub struct TestApp {
     #[cfg(feature = "tabs")]
     tab2: Tab,
 
+    #[cfg(feature = "tabs")]
+    tab_btn: Button,
+
     // Menu
     window_menu: Menu,
     window_submenu1: Menu,
@@ -275,6 +278,17 @@ mod test_app_ui {
                 
                 app.tab2.handle = tab2.handle.clone();
                 app.tab2.bind_container("Tab 02");
+
+                let tab_btn = ControlBase::build_hwnd()
+                    .class_name(app.tab_btn.class_name())
+                    .forced_flags(app.tab_btn.forced_flags())
+                    .flags(app.tab_btn.flags())
+                    .size((150, 40))
+                    .position((5, 5))
+                    .text("Tab Button")
+                    .parent(Some(&tab1))
+                    .build()?;
+                app.tab_btn.handle = tab_btn.handle.clone();
 
                 Ok(())
             }
@@ -766,6 +780,7 @@ mod test_app_ui {
                             } else {
                                 super::dispatch_date_time_tests(&handle, &evt_ui.inner);
                                 super::dispatch_progress_bar_tests(&handle, &evt_ui.inner);
+                                super::dispatch_tabs_tests(&handle, &evt_ui.inner);
                             },
                         E::OnButtonDoubleClick => 
                             if handle == evt_ui.test_button.handle {
@@ -819,6 +834,14 @@ mod test_app_ui {
                             if handle == evt_ui.test_listbox.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             } else if handle == evt_ui.test_listbox_m.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::TabsContainerChanged => 
+                            if handle == evt_ui.test_tabs.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::TabsContainerChanging => 
+                            if handle == evt_ui.test_tabs.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
                         E::OnMenuItemClick =>
@@ -1281,6 +1304,32 @@ fn dispatch_progress_bar_tests(handle: &ControlHandle, app: &TestApp) {
 
 #[cfg(not(feature = "progress-bar"))]
 fn dispatch_progress_bar_tests(_handle: &ControlHandle, _app: &TestApp) {
+}
+
+#[cfg(feature = "tabs")]
+fn dispatch_tabs_tests(handle: &ControlHandle, app: &TestApp) {
+    if handle != &app.run_tabs_test.handle {
+        return;
+    }
+
+    if !app.runs.borrow().tabs {
+        app.test_tabs.set_size(170, 200);
+        assert!(app.test_tabs.tab_count() == 2);
+
+        app.test_tabs.set_selected_tab(1);
+        assert!(app.test_tabs.selected_tab() == 1);
+
+        app.tab1.set_text("ABC");
+
+        app.runs.borrow_mut().tabs = true;
+    } else {
+        app.test_tabs.set_size(170, 180);
+        app.runs.borrow_mut().tabs = false;
+    }
+}
+
+#[cfg(not(feature = "tabs"))]
+fn dispatch_tabs_tests(_handle: &ControlHandle, _app: &TestApp) {
 }
 
 fn test_events(app: &TestApp, e: Event) {
