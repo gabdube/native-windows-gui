@@ -16,7 +16,8 @@ pub struct TestRun {
     progress_bar: bool,
     check_box: bool,
     list_box: bool,
-    tabs: bool
+    tabs: bool,
+    tooltip: bool
 }
 
 
@@ -58,6 +59,8 @@ pub struct TestApp {
     test_radio2: RadioButton,
     test_listbox: ListBox<&'static str>,
     test_listbox_m: ListBox<&'static str>,
+    test_tooltip: Tooltip,
+    test_tooltip_ico: Tooltip,
 
     #[cfg(feature = "datetime-picker")]
     dtpick: DatePicker,
@@ -110,6 +113,7 @@ pub struct TestApp {
     run_check_test: Button,
     run_listbox_test: Button,
     run_tabs_test: Button,
+    run_tool_test: Button,
     focus_test: Button,
 }
 
@@ -352,7 +356,7 @@ mod test_app_ui {
               .class_name(data.control_window.class_name())
               .forced_flags(data.control_window.forced_flags())
               .flags(((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits(), 0))
-              .size((280, 300))
+              .size((280, 330))
               .position((980, 100))
               .text("Controls Panel")
               .parent(Some(&window))
@@ -611,6 +615,18 @@ mod test_app_ui {
               
             data.run_listbox_test.handle = run_listbox_test.handle.clone();
 
+            let run_tool_test = ControlBase::build_hwnd()
+              .class_name(data.run_tool_test.class_name())
+              .forced_flags(data.run_tool_test.forced_flags())
+              .flags(data.run_tool_test.flags())
+              .size((125, 30))
+              .position((5, 245))
+              .text("Run tool tests")
+              .parent(Some(&control_window))
+              .build()?;
+              
+            data.run_tool_test.handle = run_tool_test.handle.clone();
+
             let run_datepicker_test = ControlBase::build_hwnd()
               .class_name(data.run_datepicker_test.class_name())
               .forced_flags(data.run_datepicker_test.forced_flags())
@@ -660,6 +676,24 @@ mod test_app_ui {
               .parent(Some(&control_window))
               .build()?;
             data.focus_test.handle = focus_test.handle.clone();
+
+            // Tooltips
+            let test_tooltip = ControlBase::build_hwnd()
+              .class_name(data.test_tooltip.class_name())
+              .forced_flags(data.test_tooltip.forced_flags())
+              .flags(data.test_tooltip.flags())
+              .build()?;
+            data.test_tooltip.handle = test_tooltip.handle.clone();
+            data.test_tooltip.register(&test_button.handle, "Test tooltip");
+            data.test_tooltip.register(&test_combobox.handle, "Test tooltip again");
+
+            let test_tooltip_ico = ControlBase::build_hwnd()
+              .class_name(data.test_tooltip_ico.class_name())
+              .forced_flags(data.test_tooltip_ico.forced_flags())
+              .flags(data.test_tooltip_ico.flags())
+              .build()?;
+            data.test_tooltip_ico.handle = test_tooltip_ico.handle.clone();
+            data.test_tooltip_ico.register(&test_label.handle, "I love pinapple");
 
             // Menus & Actions
             let window_menu = ControlBase::build_hmenu()
@@ -766,6 +800,9 @@ mod test_app_ui {
                             } else if handle == evt_ui.run_listbox_test.handle {
                                 super::test_listbox(&evt_ui.inner, evt);
 
+                            } else if handle == evt_ui.run_tool_test.handle {
+                                super::test_tooltip(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.focus_test.handle {
                                 super::focus(&evt_ui.inner, evt);
 
@@ -837,13 +874,9 @@ mod test_app_ui {
                                 super::test_events(&evt_ui.inner, evt);
                             },
                         E::TabsContainerChanged => 
-                            if handle == evt_ui.test_tabs.handle {
-                                super::test_events(&evt_ui.inner, evt);
-                            },
+                            super::dispatch_tabs_event(&evt_ui.inner, evt, handle),
                         E::TabsContainerChanging => 
-                            if handle == evt_ui.test_tabs.handle {
-                                super::test_events(&evt_ui.inner, evt);
-                            },
+                            super::dispatch_tabs_event(&evt_ui.inner, evt, handle),
                         E::OnMenuItemClick =>
                             if handle == evt_ui.window_menu_item1.handle {
                                 super::test_events(&evt_ui.inner, evt);
@@ -1107,6 +1140,26 @@ fn test_listbox(app: &TestApp, _e: Event) {
     }
 }
 
+fn test_tooltip(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().tooltip {
+        app.test_tooltip.set_enabled(true);
+
+        app.test_tooltip.set_delay_time(Some(100));
+        assert_eq!(app.test_tooltip.delay_time(), 100);
+
+        app.test_tooltip.set_default_decoration("Default Icon Title", TooltipIcon::ErrorLarge);
+        app.test_tooltip_ico.set_decoration("Custom Icon Title", &app.ico1);
+
+        app.test_tooltip.set_text(&app.test_button.handle, "New tool tip!");
+        assert_eq!(&app.test_tooltip.text(&app.test_button.handle, None), "New tool tip!");
+
+        app.runs.borrow_mut().tooltip = true;
+    } else {
+        app.test_tooltip.set_enabled(false);
+        app.runs.borrow_mut().tooltip = false;
+    }
+}
+
 fn test_window(app: &TestApp, _e: Event) {
     if !app.runs.borrow().window {
         app.runs.borrow_mut().window = true;
@@ -1232,6 +1285,17 @@ fn dispatch_dtp_event(app: &TestApp, evt: Event, handle: ControlHandle) {
 
 #[cfg(not(feature = "datetime-picker"))]
 fn dispatch_dtp_event(_app: &TestApp, _evt: Event, _handle: ControlHandle) {
+} 
+
+#[cfg(feature = "tabs")]
+fn dispatch_tabs_event(app: &TestApp, evt: Event, handle: ControlHandle) {
+    if handle == app.test_tabs.handle {
+        test_events(app, evt);
+    }
+} 
+
+#[cfg(not(feature = "tabs"))]
+fn dispatch_tabs_event(_app: &TestApp, _evt: Event, _handle: ControlHandle) {
 } 
 
 #[cfg(feature = "datetime-picker")]
