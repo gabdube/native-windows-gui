@@ -59,7 +59,7 @@ impl TrackBar {
 
     /// Retrieves the starting and ending position of the current selection range in a trackbar.
     /// Only work for trackbar with the `Range` flags
-    pub fn range_pos(&self) -> Range<usize> {
+    pub fn selection_range_pos(&self) -> Range<usize> {
         use winapi::um::commctrl::{TBM_GETSELEND, TBM_GETSELSTART};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -73,7 +73,7 @@ impl TrackBar {
 
     /// Sets the range value of the trackbar
     /// Only work for trackbar with the `Range` flags
-    pub fn set_range_pos(&self, value: Range<usize>) {
+    pub fn set_selection_range_pos(&self, value: Range<usize>) {
         use winapi::um::commctrl::{TBM_SETSELEND, TBM_SETSELSTART};
 
         if self.handle.blank() { panic!(NOT_BOUND); }

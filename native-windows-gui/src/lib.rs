@@ -14,7 +14,9 @@ mod events;
 pub use events::Event;
 
 pub(crate) mod win32;
-pub use win32::{dispatch_thread_events, stop_thread_dispatch, enable_visual_styles, init_common_controls, 
+pub use win32::{
+ dispatch_thread_events, stop_thread_dispatch, enable_visual_styles, init_common_controls, 
+ cursor::Cursor,
  window::{bind_event_handler, bind_raw_event_handler},
  message_box::{MessageButtons, MessageIcons, MessageChoice, MessageParams, message, fatal_message, error_message, simple_message}};
 

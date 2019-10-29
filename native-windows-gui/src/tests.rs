@@ -492,14 +492,12 @@ mod test_app_ui {
             let test_track_bar2 = ControlBase::build_hwnd()
               .class_name(data.test_track_bar2.class_name())
               .forced_flags(data.test_track_bar2.forced_flags())
-              .flags(((TrackBarFlags::AUTO_TICK | TrackBarFlags::VERTICAL | TrackBarFlags::VISIBLE).bits(), 0))
+              .flags(((TrackBarFlags::AUTO_TICK | TrackBarFlags::RANGE | TrackBarFlags::VERTICAL | TrackBarFlags::VISIBLE).bits(), 0))
               .size((30, 110))
               .position((350, 200))
               .parent(Some(&window))
               .build()?;
             data.test_track_bar2.handle = test_track_bar2.handle.clone();
-            data.test_track_bar2.set_range_min(0);
-            data.test_track_bar2.set_range_max(10);
 
             let open_file_button = ControlBase::build_hwnd()
                 .class_name(data.open_file_button.class_name())
@@ -1223,6 +1221,11 @@ fn test_track_bar(app: &TestApp, _e: Event) {
 
         app.test_track_bar.set_pos(300);
         assert_eq!(app.test_track_bar.pos(), 300);
+
+        app.test_track_bar2.set_range_min(0);
+        app.test_track_bar2.set_range_max(10);
+        app.test_track_bar2.set_selection_range_pos(2..8);
+        assert_eq!(app.test_track_bar2.selection_range_pos(), 2..8);
 
         app.runs.borrow_mut().track_bar = true;
     } else {
