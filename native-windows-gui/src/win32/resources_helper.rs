@@ -2,6 +2,7 @@ use winapi::shared::windef::{HFONT};
 use winapi::ctypes::c_int;
 use winapi::um::winnt::HANDLE;
 
+use crate::resources::OemImage;
 use super::base_helper::{get_system_error, to_utf16};
 
 #[allow(unused_imports)] use std::{ptr, mem};
@@ -10,6 +11,7 @@ use super::base_helper::{get_system_error, to_utf16};
 #[cfg(feature = "file-dialog")] use winapi::um::shobjidl_core::{IShellItem};
 #[cfg(feature = "file-dialog")] use crate::resources::FileDialogAction;
 #[cfg(feature = "file-dialog")] use winapi::um::shobjidl::{IFileDialog, IFileOpenDialog};
+
 
 pub unsafe fn build_font(
     size: u32,
@@ -80,6 +82,44 @@ pub unsafe fn build_image<'a>(
             handle = LoadImageW(ptr::null_mut(), hand_resource, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE|LR_SHARED);
         }
     }
+
+    if handle.is_null() {
+        Err(SystemError::ImageCreationFailed)
+    } else {
+        Ok(handle)
+    }
+}
+
+pub unsafe fn build_oem_image(
+    source: OemImage,
+    size: Option<(u32, u32)>,
+) -> Result<HANDLE, SystemError> 
+{
+    use winapi::um::winuser::{LR_DEFAULTSIZE, LR_SHARED, IMAGE_ICON, IMAGE_CURSOR, IMAGE_BITMAP};
+    use winapi::um::winuser::LoadImageW;
+    use winapi::shared::ntdef::LPCWSTR;
+
+    let (width, height) = size.unwrap_or((0,0));
+
+    let (c_res_type, res_identifier) = match source {
+        OemImage::Bitmap(b) => {
+            (IMAGE_BITMAP, (b as usize) as LPCWSTR)
+        },
+        OemImage::Cursor(c) => {
+            (IMAGE_CURSOR, (c as usize) as LPCWSTR)
+        },
+        OemImage::Icon(i) => {
+            (IMAGE_ICON, (i as usize) as LPCWSTR)
+        }
+    };
+
+    let flags = if (width, height) == (0, 0) {
+        LR_DEFAULTSIZE|LR_SHARED
+    } else {
+        LR_SHARED
+    };
+
+    let handle = LoadImageW(ptr::null_mut(), res_identifier, c_res_type, width as i32, height as i32, flags);
 
     if handle.is_null() {
         Err(SystemError::ImageCreationFailed)

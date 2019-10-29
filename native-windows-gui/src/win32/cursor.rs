@@ -37,7 +37,10 @@ impl Cursor {
     }
 
     /**
-        Set the cursor image
+        Set the cursor image.
+        If your application must set the cursor while it is in a window, make sure the class cursor
+        for the specified window's class is set to NULL. If the class cursor is not NULL,
+        the system restores the class cursor each time the mouse is moved.
 
         Arguments:
         • `cursor`: The id identifying the cursor resource
@@ -139,7 +142,5 @@ impl Cursor {
 
         unsafe { DragDetect(handle, c_point) == 1 }
     }
-
-    
 
 }

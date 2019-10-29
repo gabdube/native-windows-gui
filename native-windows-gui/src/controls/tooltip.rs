@@ -301,7 +301,7 @@ impl Tooltip {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> (u32, u32) {
-        (::winapi::um::winuser::WS_VISIBLE, 0)
+        (0, 0)
     }
 
     /// Winapi flags required by the control

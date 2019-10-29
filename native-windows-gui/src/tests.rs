@@ -19,6 +19,7 @@ pub struct TestRun {
     tabs: bool,
     tooltip: bool,
     track_bar: bool,
+    cursor: bool,
 }
 
 
@@ -46,6 +47,9 @@ pub struct TestApp {
     font: Font,
     ico1: Image,
     ferris: Image,
+    precision_ptr: Image,
+    normal_ptr: Image,
+    info_ico: Image,
 
     // Controls
     window: Window,
@@ -118,6 +122,7 @@ pub struct TestApp {
     run_tabs_test: Button,
     run_tool_test: Button,
     run_track_test: Button,
+    run_cursor_test: Button,
     focus_test: Button,
 }
 
@@ -333,6 +338,9 @@ mod test_app_ui {
             // Image
             data.ico1 = Image::icon("./test_rc/cog.ico", None, false)?;
             data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
+            data.precision_ptr = Image::oem_cursor(OemCursor::Wait, None)?;
+            data.normal_ptr = Image::oem_cursor(OemCursor::Normal, None)?;
+            data.info_ico = Image::oem_icon(OemIcon::Information, None)?;
 
             // Controls
             let window = ControlBase::build_hwnd()
@@ -360,7 +368,7 @@ mod test_app_ui {
               .class_name(data.control_window.class_name())
               .forced_flags(data.control_window.forced_flags())
               .flags(((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits(), 0))
-              .size((280, 330))
+              .size((280, 360))
               .position((980, 100))
               .text("Controls Panel")
               .parent(Some(&window))
@@ -662,6 +670,17 @@ mod test_app_ui {
               .build()?;
             data.run_track_test.handle = run_track_test.handle.clone();
 
+            let run_cursor_test = ControlBase::build_hwnd()
+              .class_name(data.run_cursor_test.class_name())
+              .forced_flags(data.run_cursor_test.forced_flags())
+              .flags(data.run_cursor_test.flags())
+              .size((125, 30))
+              .position((5, 275))
+              .text("Run cursor tests")
+              .parent(Some(&control_window))
+              .build()?;
+            data.run_cursor_test.handle = run_cursor_test.handle.clone();
+
             let run_datepicker_test = ControlBase::build_hwnd()
               .class_name(data.run_datepicker_test.class_name())
               .forced_flags(data.run_datepicker_test.forced_flags())
@@ -713,6 +732,7 @@ mod test_app_ui {
             data.focus_test.handle = focus_test.handle.clone();
 
             // Tooltips
+
             let test_tooltip = ControlBase::build_hwnd()
               .class_name(data.test_tooltip.class_name())
               .forced_flags(data.test_tooltip.forced_flags())
@@ -729,6 +749,7 @@ mod test_app_ui {
               .build()?;
             data.test_tooltip_ico.handle = test_tooltip_ico.handle.clone();
             data.test_tooltip_ico.register(&test_label.handle, "I love pinapple");
+            
 
             // Menus & Actions
             let window_menu = ControlBase::build_hmenu()
@@ -840,6 +861,9 @@ mod test_app_ui {
 
                             } else if handle == evt_ui.run_track_test.handle {
                                 super::test_track_bar(&evt_ui.inner, evt);
+
+                            } else if handle == evt_ui.run_cursor_test.handle {
+                                super::test_cursor(&evt_ui.inner, evt);
 
                             } else if handle == evt_ui.focus_test.handle {
                                 super::focus(&evt_ui.inner, evt);
@@ -1235,9 +1259,13 @@ fn test_track_bar(app: &TestApp, _e: Event) {
 
 fn test_window(app: &TestApp, _e: Event) {
     if !app.runs.borrow().window {
-        app.runs.borrow_mut().window = true;
-
+        
         assert_eq!(app.window.icon().as_ref(), Some(&app.ico1));
+
+        app.window.set_icon(Some(&app.info_ico));
+        assert_eq!(app.window.icon().as_ref(), Some(&app.info_ico));
+
+        app.runs.borrow_mut().window = true;
     } else {
         app.runs.borrow_mut().window = false;
     }
@@ -1320,6 +1348,16 @@ fn test_check(app: &TestApp, _e: Event) {
     } else {
         app.test_checkbox.set_tristate(false);
         app.runs.borrow_mut().check_box = false;
+    }
+}
+
+fn test_cursor(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().cursor {
+        Cursor::set_position(0, 0);
+        
+        app.runs.borrow_mut().cursor = true;
+    } else {
+        app.runs.borrow_mut().cursor = false;
     }
 }
 
