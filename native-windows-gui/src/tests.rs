@@ -17,7 +17,8 @@ pub struct TestRun {
     check_box: bool,
     list_box: bool,
     tabs: bool,
-    tooltip: bool
+    tooltip: bool,
+    track_bar: bool,
 }
 
 
@@ -61,6 +62,8 @@ pub struct TestApp {
     test_listbox_m: ListBox<&'static str>,
     test_tooltip: Tooltip,
     test_tooltip_ico: Tooltip,
+    test_track_bar: TrackBar,
+    test_track_bar2: TrackBar,
 
     #[cfg(feature = "datetime-picker")]
     dtpick: DatePicker,
@@ -114,6 +117,7 @@ pub struct TestApp {
     run_listbox_test: Button,
     run_tabs_test: Button,
     run_tool_test: Button,
+    run_track_test: Button,
     focus_test: Button,
 }
 
@@ -475,15 +479,37 @@ mod test_app_ui {
             data.test_listbox_m.handle = test_listbox_m.handle.clone();
             data.test_listbox_m.set_collection(vec!["Dog", "Cat", "Racoon", "Bear"]);
 
+            let test_track_bar = ControlBase::build_hwnd()
+              .class_name(data.test_track_bar.class_name())
+              .forced_flags(data.test_track_bar.forced_flags())
+              .flags(data.test_track_bar.flags())
+              .size((200, 30))
+              .position((5, 275))
+              .parent(Some(&window))
+              .build()?;
+            data.test_track_bar.handle = test_track_bar.handle.clone();
+
+            let test_track_bar2 = ControlBase::build_hwnd()
+              .class_name(data.test_track_bar2.class_name())
+              .forced_flags(data.test_track_bar2.forced_flags())
+              .flags(((TrackBarFlags::AUTO_TICK | TrackBarFlags::VERTICAL | TrackBarFlags::VISIBLE).bits(), 0))
+              .size((30, 110))
+              .position((350, 200))
+              .parent(Some(&window))
+              .build()?;
+            data.test_track_bar2.handle = test_track_bar2.handle.clone();
+            data.test_track_bar2.set_range_min(0);
+            data.test_track_bar2.set_range_max(10);
+
             let open_file_button = ControlBase::build_hwnd()
-                    .class_name(data.open_file_button.class_name())
-                    .forced_flags(data.open_file_button.forced_flags())
-                    .flags(data.open_file_button.flags())
-                    .size((125, 30))
-                    .position((5, 155))
-                    .text("Choose a file")
-                    .parent(Some(&window))
-                    .build()?;
+                .class_name(data.open_file_button.class_name())
+                .forced_flags(data.open_file_button.forced_flags())
+                .flags(data.open_file_button.flags())
+                .size((125, 30))
+                .position((5, 155))
+                .text("Choose a file")
+                .parent(Some(&window))
+                .build()?;
             data.open_file_button.handle = open_file_button.handle.clone();
             data.open_file_button.set_enabled(cfg!(feature = "file-dialog"));
 
@@ -626,6 +652,17 @@ mod test_app_ui {
               .build()?;
               
             data.run_tool_test.handle = run_tool_test.handle.clone();
+
+            let run_track_test = ControlBase::build_hwnd()
+              .class_name(data.run_tool_test.class_name())
+              .forced_flags(data.run_tool_test.forced_flags())
+              .flags(data.run_tool_test.flags())
+              .size((125, 30))
+              .position((135, 245))
+              .text("Run track tests")
+              .parent(Some(&control_window))
+              .build()?;
+            data.run_track_test.handle = run_track_test.handle.clone();
 
             let run_datepicker_test = ControlBase::build_hwnd()
               .class_name(data.run_datepicker_test.class_name())
@@ -803,6 +840,9 @@ mod test_app_ui {
                             } else if handle == evt_ui.run_tool_test.handle {
                                 super::test_tooltip(&evt_ui.inner, evt);
 
+                            } else if handle == evt_ui.run_track_test.handle {
+                                super::test_track_bar(&evt_ui.inner, evt);
+
                             } else if handle == evt_ui.focus_test.handle {
                                 super::focus(&evt_ui.inner, evt);
 
@@ -873,10 +913,22 @@ mod test_app_ui {
                             } else if handle == evt_ui.test_listbox_m.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
+                        E::OnHorizontalScroll => 
+                            if handle == evt_ui.test_track_bar.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnVerticalScroll => 
+                            if handle == evt_ui.test_track_bar2.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::TrackBarUpdated => 
+                            if handle == evt_ui.test_track_bar.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            }
                         E::TabsContainerChanged => 
                             super::dispatch_tabs_event(&evt_ui.inner, evt, handle),
                         E::TabsContainerChanging => 
-                            super::dispatch_tabs_event(&evt_ui.inner, evt, handle),
+                            super::dispatch_tabs_event(&evt_ui.inner, evt, handle),                        
                         E::OnMenuItemClick =>
                             if handle == evt_ui.window_menu_item1.handle {
                                 super::test_events(&evt_ui.inner, evt);
@@ -1157,6 +1209,24 @@ fn test_tooltip(app: &TestApp, _e: Event) {
     } else {
         app.test_tooltip.set_enabled(false);
         app.runs.borrow_mut().tooltip = false;
+    }
+}
+
+fn test_track_bar(app: &TestApp, _e: Event) {
+    if !app.runs.borrow().track_bar {
+
+        app.test_track_bar.set_range_min(100);
+        app.test_track_bar.set_range_max(500);
+
+        assert_eq!(app.test_track_bar.range_min(), 100);
+        assert_eq!(app.test_track_bar.range_max(), 500);
+
+        app.test_track_bar.set_pos(300);
+        assert_eq!(app.test_track_bar.pos(), 300);
+
+        app.runs.borrow_mut().track_bar = true;
+    } else {
+        app.runs.borrow_mut().track_bar = false;
     }
 }
 

@@ -218,7 +218,7 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
 
     use winapi::um::commctrl::DefSubclassProc;
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID, NMHDR};
-    use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY};
+    use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::HIWORD;
 
@@ -259,15 +259,24 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
             let notif = &*notif_ptr;
             let handle = ControlHandle::Hwnd(notif.hwndFrom);
 
-            let mut class_name_raw: Vec<WCHAR> = Vec::with_capacity(100);  class_name_raw.set_len(100);
+            let mut class_name_raw: [WCHAR; 100] = mem::zeroed();
             let count = GetClassNameW(notif.hwndFrom, class_name_raw.as_mut_ptr(), 100) as usize;
             let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
 
             match &class_name as &str {
                 "SysDateTimePick32" => callback(datetimepick_commands(notif.code), handle),
                 "SysTabControl32" => callback(tabs_commands(notif.code), handle),
+                "msctls_trackbar32" => callback(track_commands(notif.code), handle),
                 _ => {}
             }
+        },
+        WM_HSCROLL => {
+            let handle = ControlHandle::Hwnd(l as HWND);
+            callback(Event::OnHorizontalScroll, handle);
+        },
+        WM_VSCROLL => {
+            let handle = ControlHandle::Hwnd(l as HWND);
+            callback(Event::OnVerticalScroll, handle);
         },
         WM_TIMER => {
             let handle = ControlHandle::Timer(hwnd, w as u32);
@@ -343,6 +352,14 @@ fn tabs_commands(m: u32) -> Event {
     match m {
         TCN_SELCHANGE => Event::TabsContainerChanged,
         TCN_SELCHANGING => Event::TabsContainerChanging,
+        _ => Event::Unknown
+    }
+}
+
+fn track_commands(m: u32) -> Event {
+    use winapi::um::commctrl::{NM_RELEASEDCAPTURE};
+    match m {
+        NM_RELEASEDCAPTURE => Event::TrackBarUpdated,
         _ => Event::Unknown
     }
 }

@@ -5,6 +5,14 @@ pub enum Event {
     /// Undefined / not implemented event
     Unknown,
 
+    /// When a bar like control value is changed.
+    /// Controls affected: TrackBack
+    OnVerticalScroll,
+
+    /// When a bar like control value is changed.
+    /// Controls affected: TrackBack
+    OnHorizontalScroll,
+
     /// When a button is clicked. Similar to a MouseUp event
     OnButtonClick,
 
@@ -55,6 +63,9 @@ pub enum Event {
 
     // The select tab of a TabsContainer is about to be changed
     TabsContainerChanging,
+
+    // When the trackbar thumb is released by the user
+    TrackBarUpdated,
 
     // When the user click on a menu item
     OnMenuItemClick,
