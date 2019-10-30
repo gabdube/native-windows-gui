@@ -11,7 +11,7 @@ mod errors;
 pub use errors::{UserError, SystemError};
 
 mod events;
-pub use events::Event;
+pub use events::{Event, MousePressEvent};
 
 pub(crate) mod win32;
 pub use win32::{

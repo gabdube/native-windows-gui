@@ -9,7 +9,7 @@ use winapi::um::winuser::WNDPROC;
 use super::base_helper::{get_system_error, to_utf16};
 use super::window_helper::{NOTICE_MESSAGE};
 use crate::controls::ControlHandle;
-use crate::{Event, SystemError};
+use crate::{Event, MousePressEvent, SystemError};
 use std::{ptr, mem};
 
 
@@ -218,13 +218,34 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
 
     use winapi::um::commctrl::DefSubclassProc;
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID, NMHDR};
-    use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL};
+    use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
+      WM_RBUTTONDOWN, WM_RBUTTONUP};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::HIWORD;
 
     let callback: Box<F> = mem::transmute(data);
 
     match msg {
+        WM_NOTIFY => {
+            let notif_ptr: *const NMHDR = mem::transmute(l);
+            let notif = &*notif_ptr;
+            let handle = ControlHandle::Hwnd(notif.hwndFrom);
+
+            let mut class_name_raw: [WCHAR; 100] = mem::zeroed();
+            let count = GetClassNameW(notif.hwndFrom, class_name_raw.as_mut_ptr(), 100) as usize;
+            let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
+
+            match &class_name as &str {
+                "SysDateTimePick32" => callback(datetimepick_commands(notif.code), handle),
+                "SysTabControl32" => callback(tabs_commands(notif.code), handle),
+                "msctls_trackbar32" => callback(track_commands(notif.code), handle),
+                _ => {}
+            }
+        },
+        WM_TIMER => {
+            let handle = ControlHandle::Timer(hwnd, w as u32);
+            callback(Event::OnTimerTick, handle);
+        },
         WM_CLOSE => {
             callback(Event::OnWindowClose, ControlHandle::Hwnd(hwnd));
         },
@@ -254,22 +275,6 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
                 _ => {}
             }
         },
-        WM_NOTIFY => {
-            let notif_ptr: *const NMHDR = mem::transmute(l);
-            let notif = &*notif_ptr;
-            let handle = ControlHandle::Hwnd(notif.hwndFrom);
-
-            let mut class_name_raw: [WCHAR; 100] = mem::zeroed();
-            let count = GetClassNameW(notif.hwndFrom, class_name_raw.as_mut_ptr(), 100) as usize;
-            let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
-
-            match &class_name as &str {
-                "SysDateTimePick32" => callback(datetimepick_commands(notif.code), handle),
-                "SysTabControl32" => callback(tabs_commands(notif.code), handle),
-                "msctls_trackbar32" => callback(track_commands(notif.code), handle),
-                _ => {}
-            }
-        },
         WM_HSCROLL => {
             let handle = ControlHandle::Hwnd(l as HWND);
             callback(Event::OnHorizontalScroll, handle);
@@ -278,10 +283,10 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
             let handle = ControlHandle::Hwnd(l as HWND);
             callback(Event::OnVerticalScroll, handle);
         },
-        WM_TIMER => {
-            let handle = ControlHandle::Timer(hwnd, w as u32);
-            callback(Event::OnTimerTick, handle);
-        },
+        WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), ControlHandle::Hwnd(hwnd)), 
+        WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), ControlHandle::Hwnd(hwnd)), 
+        WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), ControlHandle::Hwnd(hwnd)), 
+        WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), ControlHandle::Hwnd(hwnd)),
         NOTICE_MESSAGE => {
             let handle = ControlHandle::Timer(hwnd, w as u32);
             callback(Event::OnNotice, handle);

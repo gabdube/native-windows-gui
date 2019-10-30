@@ -10,6 +10,9 @@ pub enum ControlHandle {
     /// Parent menu must be there as WINAPI does not have any function to fetch the parent
     Menu(HMENU, HMENU),
 
+    /// (Parent window / Menu). 
+    PopMenu(HWND, HMENU),
+
     /// (Parent menu / Unique ID). 
     MenuItem(HMENU, u32),
 
@@ -36,6 +39,13 @@ impl ControlHandle {
     pub fn hmenu(&self) -> Option<(HMENU, HMENU)> {
         match self {
             &ControlHandle::Menu(h1, h2) => Some((h1, h2)),
+            _ => None,
+        }
+    }
+
+    pub fn pop_hmenu(&self) -> Option<(HWND, HMENU)> {
+        match self {
+            &ControlHandle::PopMenu(h1, h2) => Some((h1, h2)),
             _ => None,
         }
     }
@@ -80,6 +90,11 @@ impl PartialEq for ControlHandle {
             // HMENU
             &ControlHandle::Menu(h1, h2) => match other {
                 &ControlHandle::Menu(h3, h4) => h1 == h3 && h2 == h4,
+                _ => false
+            },
+            // HMENU
+            &ControlHandle::PopMenu(_, h1) => match other {
+                &ControlHandle::Menu(_, h2) => h1 == h2,
                 _ => false
             },
             // HMENU / ITEM

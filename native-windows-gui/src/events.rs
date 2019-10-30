@@ -1,9 +1,23 @@
-/// All the events that can be dispatched by the built-in controls of native-windows-gui
+//! All the events that can be dispatched by the built-in controls of native-windows-gui
+
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum MousePressEvent {
+    MousePressLeftUp,
+    MousePressLeftDown,
+    MousePressRightUp,
+    MousePressRightDown
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(usize)]
 pub enum Event {
     /// Undefined / not implemented event
     Unknown,
+
+    /// Generic mouse press events that can be sent to most window controls
+    MousePress(MousePressEvent),
 
     /// When a bar like control value is changed.
     /// Controls affected: TrackBack

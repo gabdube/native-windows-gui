@@ -12,7 +12,7 @@ use std::{mem, ptr};
 static mut MENU_ITEMS_ID: u32 = 1; 
 
 /// Build a system menu
-pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: bool, hmenu: Option<HMENU>, hwnd: Option<HWND>) -> Result<ControlHandle, SystemError> {
+pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: bool, popup: bool, hmenu: Option<HMENU>, hwnd: Option<HWND>) -> Result<ControlHandle, SystemError> {
     use winapi::um::winuser::{CreateMenu, CreatePopupMenu, GetMenu, SetMenu, DrawMenuBar, AppendMenuW};
     use winapi::um::winuser::{MF_STRING, MF_POPUP};
 
@@ -21,6 +21,19 @@ pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: b
             return Err(SystemError::SeparatorWithoutMenuParent);
         }
         return Ok(build_hmenu_separator(hmenu.unwrap()));
+    }
+
+    if popup {
+        let menu = CreatePopupMenu();
+        if menu.is_null() {
+            return Err(SystemError::MenuCreationFailed);
+        }
+
+        if hwnd.is_none() {
+            return Err(SystemError::PopMenuWithoutParent);
+        }
+
+        return Ok(ControlHandle::PopMenu(hwnd.unwrap(), menu));
     }
 
     let mut parent_menu: HMENU = ptr::null_mut();
@@ -63,11 +76,12 @@ pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: b
 
         if item {
             menu = parent;
+            println!("Item {}", MENU_ITEMS_ID);
             AppendMenuW(parent, flags, item_id as usize, text.as_ptr());
             MENU_ITEMS_ID += 1;
         } else {
             parent_menu = parent;
-            menu = CreatePopupMenu();
+            menu = CreateMenu();
             if menu.is_null() {
                 return Err(SystemError::MenuCreationFailed);
             }

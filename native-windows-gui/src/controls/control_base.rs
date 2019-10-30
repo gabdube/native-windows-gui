@@ -106,6 +106,7 @@ pub struct HmenuBuilder {
     text: Option<String>,
     item: bool,
     separator: bool,
+    popup: bool,
     parent_menu: Option<HMENU>,
     parent_window: Option<HWND>,
 }
@@ -130,10 +131,23 @@ impl HmenuBuilder {
         self
     }
 
+    /// Set if the menu item should be a separator
+    pub fn popup(mut self, i: bool) -> HmenuBuilder {
+        self.popup = i;
+        self
+    }
+
     /// Set the parent of the menu. Can be a window or another menu.
     pub fn parent(mut self, parent: &ControlBase) -> HmenuBuilder {
         self.parent_window = parent.handle.hwnd();
-        self.parent_menu = parent.handle.hmenu().as_ref().map(|(_, m)| *m);
+
+        match &parent.handle {
+            &ControlHandle::Hwnd(hwnd) => { self.parent_window = Some(hwnd); }
+            &ControlHandle::Menu(_parent, menu) => { self.parent_menu = Some(menu); }
+            &ControlHandle::PopMenu(_hwnd, menu) => { self.parent_menu = Some(menu); },
+            _ => {}
+        }
+
         self
     }
 
@@ -142,6 +156,7 @@ impl HmenuBuilder {
             self.text,
             self.item,
             self.separator,
+            self.popup,
             self.parent_menu,
             self.parent_window
         )? };

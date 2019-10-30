@@ -95,6 +95,10 @@ pub struct TestApp {
     window_menu_item2: MenuItem,
     window_menu_item3: MenuItem,
 
+    pop_menu: Menu,
+    pop_menu_item1: MenuItem,
+    pop_menu_item2: MenuItem,
+
     // Timer / Notice
     timer: Timer,
     notice: Notice,
@@ -793,6 +797,26 @@ mod test_app_ui {
                 .build()?;
             data.window_menu_item3.handle = window_menu_item3.handle.clone();
 
+            let pop_menu = ControlBase::build_hmenu()
+                .popup(true)
+                .parent(&window)
+                .build()?;
+            data.pop_menu.handle = pop_menu.handle.clone();
+
+            let pop_menu_item1 = ControlBase::build_hmenu()
+                .text("Popup item 1")
+                .item(true)
+                .parent(&pop_menu)
+                .build()?;
+            data.pop_menu_item1.handle = pop_menu_item1.handle.clone();
+
+            let pop_menu_item2 = ControlBase::build_hmenu()
+                .text("Popup item 2")
+                .item(true)
+                .parent(&pop_menu)
+                .build()?;
+            data.pop_menu_item2.handle = pop_menu_item2.handle.clone();
+
             // Control for partial ui
             PartialApp1::build_partial(&mut data.p1, Some(&window))?;
             PartialApp2::build_partial(&mut data.p2, Some(&window))?;
@@ -822,10 +846,13 @@ mod test_app_ui {
                 let evt_ui = ui.clone();
                 let handle_events = move |evt, handle: ControlHandle| {
                     match evt {
+                        E::MousePress(MousePressEvent::MousePressRightUp) =>
+                            if handle == evt_ui.window.handle {
+                                super::pop_menu(&evt_ui.inner);
+                            },
                         E::OnButtonClick => 
                             if handle == evt_ui.run_button_test.handle {
                                 super::test_button(&evt_ui.inner, evt);
-
                             } else if handle == evt_ui.run_textedit_test.handle {
                                 super::test_textedit(&evt_ui.inner, evt);
 
@@ -1359,6 +1386,11 @@ fn test_cursor(app: &TestApp, _e: Event) {
     } else {
         app.runs.borrow_mut().cursor = false;
     }
+}
+
+fn pop_menu(app: &TestApp) {
+    let (x, y) = Cursor::position();
+    app.pop_menu.popup(x, y);
 }
 
 #[cfg(feature = "file-dialog")]
