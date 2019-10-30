@@ -125,10 +125,10 @@ impl Label {
     }
 
     /// Winapi base flags used during window creation
-    pub fn flags(&self) -> (u32, u32) {
+    pub fn flags(&self) -> u32 {
         use winapi::um::winuser::{SS_NOPREFIX, SS_LEFT, SS_WORDELLIPSIS, WS_VISIBLE};
 
-        (WS_VISIBLE | SS_NOPREFIX | SS_LEFT | SS_WORDELLIPSIS, 0)
+        WS_VISIBLE | SS_NOPREFIX | SS_LEFT | SS_WORDELLIPSIS
     }
 
     /// Winapi flags required by the control

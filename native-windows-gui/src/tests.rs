@@ -143,7 +143,7 @@ mod partial_app_1_ui {
             let window = ControlBase::build_hwnd()
               .class_name(data.window.class_name())
               .forced_flags(data.window.forced_flags())
-              .flags(((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits(), 0))
+              .flags((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits())
               .size((300, 300))
               .position((1300, 100))
               .text("Partial 1 Window")
@@ -371,7 +371,7 @@ mod test_app_ui {
             let control_window = ControlBase::build_hwnd()
               .class_name(data.control_window.class_name())
               .forced_flags(data.control_window.forced_flags())
-              .flags(((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits(), 0))
+              .flags((WindowFlags::WINDOW | WindowFlags::VISIBLE).bits())
               .size((280, 360))
               .position((980, 100))
               .text("Controls Panel")
@@ -483,7 +483,7 @@ mod test_app_ui {
             let test_listbox_m = ControlBase::build_hwnd()
               .class_name(data.test_listbox_m.class_name())
               .forced_flags(data.test_listbox_m.forced_flags())
-              .flags(((ListBoxFlags::MULTI_SELECT | ListBoxFlags::VISIBLE).bits(), 0))
+              .flags((ListBoxFlags::MULTI_SELECT | ListBoxFlags::VISIBLE).bits())
               .size((130, 90))
               .position((330, 105))
               .parent(Some(&window))
@@ -504,7 +504,7 @@ mod test_app_ui {
             let test_track_bar2 = ControlBase::build_hwnd()
               .class_name(data.test_track_bar2.class_name())
               .forced_flags(data.test_track_bar2.forced_flags())
-              .flags(((TrackBarFlags::AUTO_TICK | TrackBarFlags::RANGE | TrackBarFlags::VERTICAL | TrackBarFlags::VISIBLE).bits(), 0))
+              .flags((TrackBarFlags::AUTO_TICK | TrackBarFlags::RANGE | TrackBarFlags::VERTICAL | TrackBarFlags::VISIBLE).bits())
               .size((30, 110))
               .position((350, 200))
               .parent(Some(&window))
@@ -984,6 +984,10 @@ mod test_app_ui {
                             } else if handle == evt_ui.window_menu_item2.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             } else if handle == evt_ui.window_menu_item3.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.pop_menu_item1.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.pop_menu_item2.handle {
                                 super::test_events(&evt_ui.inner, evt);
                             },
                         E::OnTimerTick => 

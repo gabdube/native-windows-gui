@@ -64,10 +64,13 @@ impl HwndBuilder {
         self
     }
 
-    pub fn flags(mut self, flags: (u32, u32)) -> HwndBuilder {
-        let (flags, ex_flags) = flags;
+    pub fn flags(mut self, flags: u32) -> HwndBuilder {
         self.flags = Some(flags as DWORD);
-        self.ex_flags = Some(ex_flags as DWORD);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> HwndBuilder {
+        self.ex_flags = Some(flags as DWORD);
         self
     }
 

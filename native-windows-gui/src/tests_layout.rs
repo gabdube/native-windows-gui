@@ -14,6 +14,13 @@ pub struct TestLayoutApp {
     button6: Button,
 
     // GridLayout
+    grid_window: Window,
+    button7: Button,
+    button8: Button,
+    button9: Button,
+    button10: Button,
+    button11: Button,
+    button12: Button,
 }
 
 #[allow(unused_imports)]
@@ -34,7 +41,7 @@ mod test_layout_app_ui {
             let hbox_window = ControlBase::build_hwnd()
                 .class_name(data.hbox_window.class_name())
                 .forced_flags(data.hbox_window.forced_flags())
-                .flags(Some(((WindowFlags::WINDOW | WindowFlags::VISIBLE | WindowFlags::RESIZABLE).bits(), 0)).unwrap_or(data.hbox_window.flags()))
+                .flags((WindowFlags::WINDOW | WindowFlags::VISIBLE | WindowFlags::RESIZABLE).bits())
                 .size((400, 100))
                 .position((600, 510))
                 .text("HBOX test")
@@ -71,7 +78,7 @@ mod test_layout_app_ui {
             let vbox_window = ControlBase::build_hwnd()
                 .class_name(data.vbox_window.class_name())
                 .forced_flags(data.vbox_window.forced_flags())
-                .flags(Some(((WindowFlags::WINDOW | WindowFlags::VISIBLE | WindowFlags::RESIZABLE).bits(), 0)).unwrap_or(data.vbox_window.flags()))
+                .flags((WindowFlags::WINDOW | WindowFlags::VISIBLE | WindowFlags::RESIZABLE).bits())
                 .size((250, 400))
                 .position((300, 510))
                 .text("VBOX test")
@@ -96,11 +103,21 @@ mod test_layout_app_ui {
               .build()?;
             data.button6.handle = button6.handle.clone();
 
+            let grid_window =  ControlBase::build_hwnd()
+                .class_name(data.grid_window.class_name())
+                .forced_flags(data.grid_window.forced_flags())
+                .flags((WindowFlags::WINDOW | WindowFlags::VISIBLE | WindowFlags::RESIZABLE).bits())
+                .size((300, 300))
+                .position((1050, 510))
+                .text("GRID test")
+                .build()?;
+            data.grid_window.handle = grid_window.handle.clone();
+
             // Wrap-up
             let ui = Rc::new(TestLayoutAppUi { inner: data });
 
             // Events
-            let window_handles = [&ui.hbox_window.handle, &ui.vbox_window.handle];
+            let window_handles = [&ui.hbox_window.handle, &ui.vbox_window.handle, &ui.grid_window.handle];
             for handle in window_handles.iter() {
                 let evt_ui = ui.clone();
                 let handle_events = move |evt, handle: ControlHandle| {

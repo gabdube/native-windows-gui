@@ -33,6 +33,8 @@ pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: b
             return Err(SystemError::PopMenuWithoutParent);
         }
 
+        use_menu_command(menu);
+
         return Ok(ControlHandle::PopMenu(hwnd.unwrap(), menu));
     }
 
@@ -76,7 +78,6 @@ pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: b
 
         if item {
             menu = parent;
-            println!("Item {}", MENU_ITEMS_ID);
             AppendMenuW(parent, flags, item_id as usize, text.as_ptr());
             MENU_ITEMS_ID += 1;
         } else {
@@ -205,14 +206,13 @@ unsafe fn build_hmenu_separator(menu: HMENU) -> ControlHandle {
 unsafe fn use_menu_command(h: HMENU) {
     use winapi::um::winuser::{MENUINFO, MNS_NOTIFYBYPOS, MIM_STYLE, SetMenuInfo};
     use winapi::shared::minwindef::DWORD;
-    use winapi::shared::windef::HBRUSH;
 
     let mut info = MENUINFO {
         cbSize: mem::size_of::<MENUINFO>() as DWORD,
         fMask: MIM_STYLE,
         dwStyle: MNS_NOTIFYBYPOS,
         cyMax: 0,
-        hbrBack: mem::transmute(ptr::null_mut::<HBRUSH>()),
+        hbrBack: ptr::null_mut(),
         dwContextHelpID: 0,
         dwMenuData: 0
     };

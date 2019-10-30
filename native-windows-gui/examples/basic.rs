@@ -45,7 +45,7 @@ mod basic_app_ui {
             let window = nwg::ControlBase::build_hwnd()
                 .class_name(data.window.class_name())
                 .forced_flags(data.window.forced_flags())
-                .flags(Some(((nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE ).bits(), 0)).unwrap_or(data.window.flags()))
+                .flags(Some((nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE).bits()).unwrap_or(data.window.flags()))
                 .size((300, 115))
                 .position((300, 300))
                 .text("Basic example")

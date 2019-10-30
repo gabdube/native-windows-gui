@@ -96,8 +96,8 @@ impl Window {
     }
 
     // Winapi base flags used during window creation
-    pub fn flags(&self) -> (u32, u32) {
-        (WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0)
+    pub fn flags(&self) -> u32 {
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE
     }
 
     /// Winapi flags required by the control

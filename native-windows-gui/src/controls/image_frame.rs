@@ -126,10 +126,9 @@ impl ImageFrame {
     }
 
     /// Winapi base flags used during window creation
-    pub fn flags(&self) -> (u32, u32) {
+    pub fn flags(&self) -> u32 {
         use winapi::um::winuser::{SS_BITMAP, SS_CENTERIMAGE, WS_VISIBLE};
-
-        (WS_VISIBLE | SS_BITMAP | SS_CENTERIMAGE, 0)
+        WS_VISIBLE | SS_BITMAP | SS_CENTERIMAGE
     }
 
     /// Winapi flags required by the control
