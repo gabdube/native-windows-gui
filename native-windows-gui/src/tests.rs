@@ -68,6 +68,7 @@ pub struct TestApp {
     test_tooltip_ico: Tooltip,
     test_track_bar: TrackBar,
     test_track_bar2: TrackBar,
+    test_text_box: TextBox,
 
     #[cfg(feature = "datetime-picker")]
     dtpick: DatePicker,
@@ -351,8 +352,8 @@ mod test_app_ui {
               .class_name(data.window.class_name())
               .forced_flags(data.window.forced_flags())
               .flags(data.window.flags())
-              .size((650, 370))
-              .position((300, 100))
+              .size((800, 370))
+              .position((150, 100))
               .text("Tests")
               .build()?;
             data.window.handle = window.handle.clone();
@@ -510,6 +511,17 @@ mod test_app_ui {
               .parent(Some(&window))
               .build()?;
             data.test_track_bar2.handle = test_track_bar2.handle.clone();
+
+            let test_text_box = ControlBase::build_hwnd()
+              .class_name(data.test_text_box.class_name())
+              .forced_flags(data.test_text_box.forced_flags())
+              .flags((TextBoxFlags::VSCROLL | TextBoxFlags::VISIBLE | TextBoxFlags::HSCROLL).bits())
+              .size((220, 110))
+              .text("Multiline\r\nText\r\nBox")
+              .position((400, 200))
+              .parent(Some(&window))
+              .build()?;
+            data.test_text_box.handle = test_text_box.handle.clone();
 
             let open_file_button = ControlBase::build_hwnd()
                 .class_name(data.open_file_button.class_name())
@@ -1524,7 +1536,6 @@ fn dispatch_tabs_tests(handle: &ControlHandle, app: &TestApp) {
     }
 
     if !app.runs.borrow().tabs {
-        app.test_tabs.set_size(170, 200);
         assert!(app.test_tabs.tab_count() == 2);
 
         app.test_tabs.set_selected_tab(1);
@@ -1534,7 +1545,6 @@ fn dispatch_tabs_tests(handle: &ControlHandle, app: &TestApp) {
 
         app.runs.borrow_mut().tabs = true;
     } else {
-        app.test_tabs.set_size(170, 180);
         app.runs.borrow_mut().tabs = false;
     }
 }

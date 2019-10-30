@@ -1,21 +1,33 @@
+use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use crate::Font;
 use super::ControlHandle;
 use std::ops::Range;
-use std::char;
 
-const NOT_BOUND: &'static str = "TextInput is not yet bound to a winapi object";
-const BAD_HANDLE: &'static str = "INTERNAL ERROR: TextInput handle is not HWND!";
+const NOT_BOUND: &'static str = "TextBox is not yet bound to a winapi object";
+const BAD_HANDLE: &'static str = "INTERNAL ERROR: TextBox handle is not HWND!";
+
+
+bitflags! {
+    pub struct TextBoxFlags: u32 {
+        const VSCROLL = ES_AUTOVSCROLL;
+        const HSCROLL = ES_AUTOHSCROLL;
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+    }
+}
 
 
 /// An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
-/// This control only allow a single line input. For block of text, use `TextBox`.
+/// This control allow multi line input. For a single line of text, use `TextInput`.
+///
+/// Note: Use `\r\n` to input a new line not just `\n`.
 #[derive(Default, Debug)]
-pub struct TextInput {
+pub struct TextBox {
     pub handle: ControlHandle
 }
 
-impl TextInput {
+impl TextBox {
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
@@ -35,31 +47,6 @@ impl TextInput {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
-    }
-
-    /// Return the password character displayed by the text input. If the input is not a password, return None.
-    pub fn password_char(&self) -> Option<char> {
-        use winapi::um::winuser::EM_GETPASSWORDCHAR;
-
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let raw_char = wh::send_message(handle, EM_GETPASSWORDCHAR as u32, 0, 0) as u32;
-        match raw_char {
-            0 => None,
-            v => char::from_u32(v)
-        }
-    }
-
-    /// Set or Remove the password character displayed by the text input.
-    /// If the input is not a password all character are re-rendered with the new character
-    pub fn set_password_char(&self, c: Option<char>) {
-        use winapi::um::winuser::EM_SETPASSWORDCHAR;
-
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        wh::send_message(handle, EM_SETPASSWORDCHAR as u32, c.map(|c| c as usize).unwrap_or(0), 0);
     }
 
     /// Return the number of maximum character allowed in this text input
@@ -258,9 +245,9 @@ impl TextInput {
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        use winapi::um::winuser::{WS_BORDER, ES_AUTOHSCROLL, WS_CHILD};
+        use winapi::um::winuser::{WS_BORDER, WS_CHILD, ES_MULTILINE};
         
-        WS_BORDER | ES_AUTOHSCROLL | WS_CHILD
+        WS_BORDER | WS_CHILD | ES_MULTILINE
     }
 
 }
