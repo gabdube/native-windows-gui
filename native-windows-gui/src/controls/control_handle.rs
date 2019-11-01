@@ -1,7 +1,7 @@
 use winapi::shared::windef::{HWND, HMENU};
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum ControlHandle {
     NoHandle,
     Hwnd(HWND),

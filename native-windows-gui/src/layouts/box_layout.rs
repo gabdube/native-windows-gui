@@ -1,4 +1,4 @@
-use crate::controls::ControlHandle;
+use crate::controls::{ControlHandle};
 use crate::win32::window::bind_raw_event_handler;
 use crate::win32::window_helper as wh;
 use winapi::shared::windef::{HWND};
@@ -28,29 +28,30 @@ impl HBoxLayout {
     }
 
     /// Private function that update the layout and the children
-    fn update_layout(&self, width: u32, height: u32) -> () {
-        let m = self.margins;
+    fn update_layout(&self, mut width: u32, mut height: u32) -> () {
+        let [m_top, m_right, m_bottom, m_left] = self.margins;
         let sp = self.spacing;
-        let children_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
 
-        let dwidth = width / children_count;
-        let m_top_bottom = m[0] + m[2];
-        let m_left_right = m[1] + m[3];
+        let column_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
 
-        if m_top_bottom > height || m_left_right > dwidth {
-            return;
-        }
+        // Apply margins
+        width = width - m_right - m_left;
+        height = height - m_top - m_bottom;
 
-        let item_height = height - m_top_bottom;
-        let item_width = dwidth - m_left_right;
+        // Apply spacing
+        width = width - ((sp * 2) * column_count);
+        height = height - (sp * 2);
 
-        let y = m[0] as i32;
+        let item_width = width / column_count;
+        let item_height = height;
+
+        let y = (m_top + sp) as i32;
 
         for &(i, handle) in self.children.iter() {
-            let x = (m[3] + (sp*(1+i)) + (item_width * i)) as i32;
+            let x = m_left + (sp + (sp * 2 * i)) + (item_width * i);
 
             unsafe {
-                wh::set_window_position(handle, x, y);
+                wh::set_window_position(handle, x as i32, y);
                 wh::set_window_size(handle, item_width, item_height, false);
             }
         }
@@ -83,29 +84,30 @@ impl VBoxLayout {
     }
 
     /// Private function that update the layout and the children
-    fn update_layout(&self, width: u32, height: u32) -> () {
-        let m = self.margins;
+    fn update_layout(&self, mut width: u32, mut height: u32) -> () {
+        let [m_top, m_right, m_bottom, m_left] = self.margins;
         let sp = self.spacing;
-        let children_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
 
-        let dheight = height / children_count;
-        let m_top_bottom = m[0] + m[2];
-        let m_left_right = m[1] + m[3];
+        let row_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
 
-        if m_left_right > width || m_top_bottom > dheight {
-            return;
-        }
+        // Apply margins
+        width = width - m_right - m_left;
+        height = height - m_top - m_bottom;
 
-        let item_height = dheight - m_top_bottom;
-        let item_width = width - m_left_right;
+        // Apply spacing
+        width = width - (sp * 2);
+        height = height - ((sp * 2) * row_count);
 
-        let x = m[3] as i32;
+        let item_width = width;
+        let item_height = height / row_count;
+
+        let x = (m_left + sp) as i32;
 
         for &(i, handle) in self.children.iter() {
-            let y = (m[0] + (sp*(1+i)) + (item_height * i)) as i32;
+            let y = m_top + (sp + (sp * 2 * i)) + (item_height * i);
 
             unsafe {
-                wh::set_window_position(handle, x, y);
+                wh::set_window_position(handle, x, y as i32);
                 wh::set_window_size(handle, item_width, item_height, false);
             }
         }
@@ -127,10 +129,11 @@ pub struct BoxLayoutBuilder {
 impl BoxLayoutBuilder {
 
     /// Set the layout parent. The handle must be a window object otherwise the function will panic
-    pub fn parent(mut self, p: &ControlHandle) -> BoxLayoutBuilder {
+    pub fn parent<W: Into<ControlHandle>>(mut self, p: W) -> BoxLayoutBuilder {
+        let parent = p.into();
         match &mut self.layout {
-            LayoutType::Vertical(layout) => layout.base = p.hwnd().expect("Parent must be HWND"),
-            LayoutType::Horizontal(layout) => layout.base = p.hwnd().expect("Parent must be HWND"),
+            LayoutType::Vertical(layout) => layout.base = parent.hwnd().expect("Parent must be HWND"),
+            LayoutType::Horizontal(layout) => layout.base = parent.hwnd().expect("Parent must be HWND"),
         };
         self
     }

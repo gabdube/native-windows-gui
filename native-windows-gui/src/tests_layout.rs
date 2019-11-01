@@ -19,8 +19,6 @@ pub struct TestLayoutApp {
     button8: Button,
     button9: Button,
     button10: Button,
-    button11: Button,
-    button12: Button,
 }
 
 #[allow(unused_imports)]
@@ -103,7 +101,7 @@ mod test_layout_app_ui {
               .build()?;
             data.button6.handle = button6.handle.clone();
 
-            let grid_window =  ControlBase::build_hwnd()
+            let grid_window = ControlBase::build_hwnd()
                 .class_name(data.grid_window.class_name())
                 .forced_flags(data.grid_window.forced_flags())
                 .flags((WindowFlags::WINDOW | WindowFlags::VISIBLE | WindowFlags::RESIZABLE).bits())
@@ -112,6 +110,42 @@ mod test_layout_app_ui {
                 .text("GRID test")
                 .build()?;
             data.grid_window.handle = grid_window.handle.clone();
+
+            let button7 = ControlBase::build_hwnd()
+              .class_name(data.button7.class_name())
+              .forced_flags(data.button7.forced_flags())
+              .flags(data.button7.flags())
+              .text("Button 7")
+              .parent(Some(&grid_window))
+              .build()?;
+            data.button7.handle = button7.handle.clone();
+
+            let button8 = ControlBase::build_hwnd()
+              .class_name(data.button8.class_name())
+              .forced_flags(data.button8.forced_flags())
+              .flags(data.button8.flags())
+              .text("Button 8")
+              .parent(Some(&grid_window))
+              .build()?;
+            data.button8.handle = button8.handle.clone();
+
+            let button9 = ControlBase::build_hwnd()
+              .class_name(data.button9.class_name())
+              .forced_flags(data.button9.forced_flags())
+              .flags(data.button9.flags())
+              .text("Button 9")
+              .parent(Some(&grid_window))
+              .build()?;
+            data.button9.handle = button9.handle.clone();
+
+            let button10 = ControlBase::build_hwnd()
+              .class_name(data.button10.class_name())
+              .forced_flags(data.button10.forced_flags())
+              .flags(data.button10.flags())
+              .text("Button 10")
+              .parent(Some(&grid_window))
+              .build()?;
+            data.button10.handle = button10.handle.clone();
 
             // Wrap-up
             let ui = Rc::new(TestLayoutAppUi { inner: data });
@@ -127,6 +161,8 @@ mod test_layout_app_ui {
                                 super::close(&evt_ui.inner, evt);
                             } else if handle == evt_ui.vbox_window.handle {
                                 super::close(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.grid_window.handle {
+                                super::close(&evt_ui.inner, evt);
                             }
                         _ => {}
                     }
@@ -137,16 +173,24 @@ mod test_layout_app_ui {
 
             // Layouts
             HBoxLayout::builder()
-                .parent(&ui.hbox_window.handle)
+                .parent(&ui.hbox_window)
                 .child(0, &ui.button1.handle)
                 .child(1, &ui.button2.handle)
                 .child(2, &ui.button3.handle)
                 .build();
 
             VBoxLayout::builder()
-                .parent(&ui.vbox_window.handle)
+                .parent(&ui.vbox_window)
                 .child(0, &ui.button4.handle)
                 .child(2, &ui.button6.handle)
+                .build();
+
+            GridLayout::builder()
+                .parent(&ui.grid_window)
+                .child(0, 0, &ui.button7.handle)
+                .child(0, 1, &ui.button8.handle)
+                .child(1, 0, &ui.button9.handle)
+                .child(1, 1, &ui.button10.handle)
                 .build();
 
             return Ok(ui);

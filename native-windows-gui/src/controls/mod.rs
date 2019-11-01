@@ -26,6 +26,8 @@ mod progress_bar;
 #[cfg(feature = "tabs")]
 mod tabs;
 
+mod handle_from_control;
+
 pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase};
 pub use window::{Window, WindowFlags};
@@ -53,3 +55,5 @@ pub use progress_bar::{ProgressBar, ProgressBarState};
 
 #[cfg(feature = "progress-bar")]
 pub use tabs::{TabsContainer, Tab};
+
+pub use handle_from_control::*;
