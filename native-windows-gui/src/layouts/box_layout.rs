@@ -34,6 +34,14 @@ impl HBoxLayout {
 
         let column_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
 
+        if width < (m_right + m_left) + ((sp * 2) * column_count) {
+            return;
+        }
+
+        if height < m_top + m_bottom + (sp * 2) {
+            return;
+        }
+
         // Apply margins
         width = width - m_right - m_left;
         height = height - m_top - m_bottom;
@@ -89,6 +97,14 @@ impl VBoxLayout {
         let sp = self.spacing;
 
         let row_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
+
+        if width < m_right + m_left + (sp * 2) {
+            return;
+        }
+
+        if height < m_top + m_bottom + ((sp * 2) * row_count) {
+            return;
+        }
 
         // Apply margins
         width = width - m_right - m_left;

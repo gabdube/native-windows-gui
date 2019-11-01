@@ -5,7 +5,9 @@ use winapi::um::winuser::WM_USER;
 use winapi::ctypes::c_int;
 use std::{ptr, mem};
 
+
 pub const NOTICE_MESSAGE: UINT = WM_USER;
+pub const NWG_INIT: UINT = WM_USER + 1;
 
 
 pub fn get_window_parent(hwnd: HWND) -> HWND {

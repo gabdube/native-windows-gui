@@ -19,6 +19,15 @@ pub enum Event {
     /// Generic mouse press events that can be sent to most window controls
     MousePress(MousePressEvent),
 
+    /// When a top level window control is created.
+    OnInit,
+    
+    /// When a control is resized by the user. This typically applied to top level window.
+    OnResize,
+
+    /// When a control is moved by the user. This typically applied to top level window.
+    OnMove,
+
     /// When a bar like control value is changed.
     /// Controls affected: TrackBack
     OnVerticalScroll,

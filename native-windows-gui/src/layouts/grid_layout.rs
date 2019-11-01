@@ -34,6 +34,14 @@ impl GridLayout {
         let column_count = children.iter().map(|([x, _y], _)| *x).max().unwrap_or(0) + 1;
         let row_count = children.iter().map(|([_x, y], _)| *y).max().unwrap_or(0) + 1;
 
+        if width < (m_right + m_left) + ((sp * 2) * column_count) {
+            return;
+        }
+
+        if height < m_top + m_bottom + ((sp * 2) * row_count) {
+            return;
+        }
+
         // Apply margins
         width = width - m_right - m_left;
         height = height - m_top - m_bottom;

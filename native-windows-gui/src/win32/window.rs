@@ -5,9 +5,9 @@ Native Windows GUI windowing base. Includes events dispatching and window creati
 use winapi::shared::minwindef::{UINT, DWORD, HMODULE, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
-use winapi::um::winuser::WNDPROC;
+use winapi::um::winuser::{WNDPROC};
 use super::base_helper::{get_system_error, to_utf16};
-use super::window_helper::{NOTICE_MESSAGE};
+use super::window_helper::{NOTICE_MESSAGE, NWG_INIT};
 use crate::controls::ControlHandle;
 use crate::{Event, MousePressEvent, SystemError};
 use std::{ptr, mem};
@@ -192,10 +192,13 @@ pub unsafe fn build_sysclass<'a>(
 */
 unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use winapi::um::winuser::WM_CREATE;
-    use winapi::um::winuser::DefWindowProcW;
+    use winapi::um::winuser::{DefWindowProcW, PostMessageW};
 
     let handled = match msg {
-        WM_CREATE => true,
+        WM_CREATE => {
+            PostMessageW(hwnd, NWG_INIT, 0, 0);
+            true
+        },
         _ => false
     };
 
@@ -219,11 +222,12 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
     use winapi::um::commctrl::DefSubclassProc;
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID, NMHDR};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
-      WM_RBUTTONDOWN, WM_RBUTTONUP};
+      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::HIWORD;
 
     let callback: Box<F> = mem::transmute(data);
+    let base_handle = ControlHandle::Hwnd(hwnd);
 
     match msg {
         WM_NOTIFY => {
@@ -241,13 +245,6 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
                 "msctls_trackbar32" => callback(track_commands(notif.code), handle),
                 _ => {}
             }
-        },
-        WM_TIMER => {
-            let handle = ControlHandle::Timer(hwnd, w as u32);
-            callback(Event::OnTimerTick, handle);
-        },
-        WM_CLOSE => {
-            callback(Event::OnWindowClose, ControlHandle::Hwnd(hwnd));
         },
         WM_MENUCOMMAND => {
             let parent_handle: HMENU = mem::transmute(l);
@@ -275,22 +272,18 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
                 _ => {}
             }
         },
-        WM_HSCROLL => {
-            let handle = ControlHandle::Hwnd(l as HWND);
-            callback(Event::OnHorizontalScroll, handle);
-        },
-        WM_VSCROLL => {
-            let handle = ControlHandle::Hwnd(l as HWND);
-            callback(Event::OnVerticalScroll, handle);
-        },
-        WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), ControlHandle::Hwnd(hwnd)), 
-        WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), ControlHandle::Hwnd(hwnd)), 
-        WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), ControlHandle::Hwnd(hwnd)), 
-        WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), ControlHandle::Hwnd(hwnd)),
-        NOTICE_MESSAGE => {
-            let handle = ControlHandle::Timer(hwnd, w as u32);
-            callback(Event::OnNotice, handle);
-        },
+        WM_TIMER => callback(Event::OnTimerTick, ControlHandle::Timer(hwnd, w as u32)),
+        WM_SIZE => callback(Event::OnResize, base_handle),
+        WM_MOVE => callback(Event::OnMove, base_handle),
+        WM_CLOSE => callback(Event::OnWindowClose, base_handle),
+        WM_HSCROLL => callback(Event::OnHorizontalScroll, ControlHandle::Hwnd(l as HWND)),
+        WM_VSCROLL => callback(Event::OnVerticalScroll, ControlHandle::Hwnd(l as HWND)),
+        WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), base_handle), 
+        WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), base_handle), 
+        WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), base_handle), 
+        WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), base_handle),
+        NOTICE_MESSAGE => callback(Event::OnNotice, ControlHandle::Timer(hwnd, w as u32)),
+        NWG_INIT => callback(Event::OnInit, base_handle),
         _ => {}
     }
 

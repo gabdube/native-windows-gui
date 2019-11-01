@@ -862,6 +862,18 @@ mod test_app_ui {
                             if handle == evt_ui.window.handle {
                                 super::pop_menu(&evt_ui.inner);
                             },
+                        E::OnInit => 
+                            if handle == evt_ui.window.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnResize => 
+                            if handle == evt_ui.window.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
+                        E::OnMove => 
+                            if handle == evt_ui.window.handle {
+                                super::test_events(&evt_ui.inner, evt);
+                            },
                         E::OnButtonClick => 
                             if handle == evt_ui.run_button_test.handle {
                                 super::test_button(&evt_ui.inner, evt);
