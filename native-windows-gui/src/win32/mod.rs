@@ -97,7 +97,7 @@ pub fn enable_visual_styles() {
 pub fn init_common_controls() -> Result<(), SystemError> {
     use winapi::um::commctrl::{InitCommonControlsEx, INITCOMMONCONTROLSEX};
     use winapi::um::commctrl::{ICC_BAR_CLASSES, ICC_STANDARD_CLASSES, ICC_DATE_CLASSES, ICC_PROGRESS_CLASS,
-     ICC_TAB_CLASSES};
+     ICC_TAB_CLASSES, ICC_TREEVIEW_CLASSES};
 
     unsafe {
         let mut classes = ICC_BAR_CLASSES | ICC_STANDARD_CLASSES;
@@ -112,6 +112,10 @@ pub fn init_common_controls() -> Result<(), SystemError> {
 
         if cfg!(feature = "tabs") {
             classes |= ICC_TAB_CLASSES;
+        }
+
+        if cfg!(feature = "tree-view") {
+            classes |= ICC_TREEVIEW_CLASSES;
         }
 
         let data = INITCOMMONCONTROLSEX {

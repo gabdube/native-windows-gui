@@ -26,6 +26,9 @@ mod progress_bar;
 #[cfg(feature = "tabs")]
 mod tabs;
 
+#[cfg(feature = "tree-view")]
+mod treeview;
+
 mod handle_from_control;
 
 pub use control_handle::ControlHandle;
@@ -55,5 +58,8 @@ pub use progress_bar::{ProgressBar, ProgressBarState};
 
 #[cfg(feature = "progress-bar")]
 pub use tabs::{TabsContainer, Tab};
+
+#[cfg(feature = "tree-view")]
+pub use treeview::{TreeView};
 
 pub use handle_from_control::*;

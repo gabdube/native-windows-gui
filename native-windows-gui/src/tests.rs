@@ -20,6 +20,7 @@ pub struct TestRun {
     tooltip: bool,
     track_bar: bool,
     cursor: bool,
+    tree: bool
 }
 
 
@@ -76,6 +77,9 @@ pub struct TestApp {
     #[cfg(feature = "progress-bar")]
     pbar: ProgressBar,
 
+    #[cfg(feature = "tree-view")]
+    test_tree: TreeView,
+
     #[cfg(feature = "tabs")]
     test_tabs: TabsContainer,
 
@@ -128,6 +132,7 @@ pub struct TestApp {
     run_tool_test: Button,
     run_track_test: Button,
     run_cursor_test: Button,
+    run_tree_test: Button,
     focus_test: Button,
 }
 
@@ -260,7 +265,7 @@ mod test_app_ui {
             }
 
             #[cfg(feature = "tabs")]
-            fn setup_tabs(app: &mut TestApp,  window: &ControlBase) -> Result<(), SystemError> {
+            fn setup_tabs(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
                 let test_tabs = ControlBase::build_hwnd()
                     .class_name(app.test_tabs.class_name())
                     .forced_flags(app.test_tabs.forced_flags())
@@ -311,6 +316,22 @@ mod test_app_ui {
                 Ok(())
             }
 
+            #[cfg(feature = "tree-view")]
+            fn setup_tree(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
+                let test_tree = ControlBase::build_hwnd()
+                    .class_name(app.test_tree.class_name())
+                    .forced_flags(app.test_tree.forced_flags())
+                    .flags(app.test_tree.flags())
+                    .size((130, 180))
+                    .position((650, 10))
+                    .parent(Some(window))
+                    .build()?;
+
+                app.test_tree.handle = test_tree.handle.clone();
+
+                Ok(())
+            }
+
             #[cfg(not(feature = "file-dialog"))]
             fn setup_file_dialog(_app: &mut TestApp) -> Result<(), SystemError> {
                 Ok(())
@@ -328,6 +349,11 @@ mod test_app_ui {
 
             #[cfg(not(feature = "tabs"))]
             fn setup_tabs(_app: &mut TestApp,  _window: &ControlBase) -> Result<(), SystemError> {
+                Ok(())
+            }
+
+            #[cfg(not(feature = "tree-view"))]
+            fn setup_tree(_app: &mut TestApp,  _window: &ControlBase) -> Result<(), SystemError> {
                 Ok(())
             }
 
@@ -537,6 +563,7 @@ mod test_app_ui {
 
             setup_datetime_picker(&mut data, &window)?;
             setup_progress_bar(&mut data, &window)?;
+            setup_tree(&mut data, &window)?;
             setup_tabs(&mut data, &window)?;
 
             let events_show = ControlBase::build_hwnd()
@@ -736,6 +763,19 @@ mod test_app_ui {
             data.run_tabs_test.handle = run_tabs_test.handle.clone();
             data.run_tabs_test.set_enabled(cfg!(feature = "tabs"));
 
+            let run_tabs_test = ControlBase::build_hwnd()
+              .class_name(data.run_tabs_test.class_name())
+              .forced_flags(data.run_tabs_test.forced_flags())
+              .flags(data.run_tabs_test.flags())
+              .size((125, 30))
+              .position((135, 275))
+              .text("Run tree tests")
+              .parent(Some(&control_window))
+              .build()?;
+              
+            data.run_tabs_test.handle = run_tabs_test.handle.clone();
+            data.run_tabs_test.set_enabled(cfg!(feature = "tree-view"));
+
             let focus_test = ControlBase::build_hwnd()
               .class_name(data.focus_test.class_name())
               .forced_flags(data.focus_test.forced_flags())
@@ -931,6 +971,7 @@ mod test_app_ui {
                                 super::dispatch_date_time_tests(&handle, &evt_ui.inner);
                                 super::dispatch_progress_bar_tests(&handle, &evt_ui.inner);
                                 super::dispatch_tabs_tests(&handle, &evt_ui.inner);
+                                super::dispatch_tree_tests(&handle, &evt_ui.inner);
                             },
                         E::OnButtonDoubleClick => 
                             if handle == evt_ui.test_button.handle {
@@ -1564,6 +1605,24 @@ fn dispatch_tabs_tests(handle: &ControlHandle, app: &TestApp) {
 #[cfg(not(feature = "tabs"))]
 fn dispatch_tabs_tests(_handle: &ControlHandle, _app: &TestApp) {
 }
+
+#[cfg(feature = "tree-view")]
+fn dispatch_tree_tests(handle: &ControlHandle, app: &TestApp) {
+    if handle != &app.run_tree_test.handle {
+        return;
+    }
+
+    if !app.runs.borrow().tree {
+        app.runs.borrow_mut().tree = true;
+    } else {
+        app.runs.borrow_mut().tree = false;
+    }
+}
+
+#[cfg(not(feature = "tree-view"))]
+fn dispatch_tree_tests(_handle: &ControlHandle, _app: &TestApp) {
+}
+
 
 fn test_events(app: &TestApp, e: Event) {
     app.events_show.set_text(&format!("{:?}", e));
