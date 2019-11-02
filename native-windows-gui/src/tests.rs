@@ -329,6 +329,13 @@ mod test_app_ui {
 
                 app.test_tree.handle = test_tree.handle.clone();
 
+                let root = app.test_tree.insert_item("Root item", None, TreeInsert::Root);
+                let i1 = app.test_tree.insert_item("Item 1", Some(root), TreeInsert::Last);
+                app.test_tree.insert_item("DOG", Some(i1), TreeInsert::Last);
+                app.test_tree.insert_item("CAT", Some(i1), TreeInsert::Last);
+                app.test_tree.insert_item("Item 2", Some(root), TreeInsert::Last);
+                app.test_tree.insert_item("Item 3", Some(root), TreeInsert::Last);
+
                 Ok(())
             }
 

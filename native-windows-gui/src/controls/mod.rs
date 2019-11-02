@@ -60,6 +60,6 @@ pub use progress_bar::{ProgressBar, ProgressBarState};
 pub use tabs::{TabsContainer, Tab};
 
 #[cfg(feature = "tree-view")]
-pub use treeview::{TreeView};
+pub use treeview::{TreeView, TreeItem, TreeInsert};
 
 pub use handle_from_control::*;

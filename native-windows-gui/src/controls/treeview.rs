@@ -1,9 +1,44 @@
+use winapi::shared::minwindef::LPARAM;
+use winapi::um::commctrl::HTREEITEM;
 use crate::win32::window_helper as wh;
+use crate::win32::base_helper::{to_utf16};
 use crate::Font;
 use super::ControlHandle;
+use std::{mem, ptr};
 
 const NOT_BOUND: &'static str = "TreeView is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: TreeView handle is not HWND!";
+
+
+/// Select the position of a new item that is about to be inserted in a TreeView
+#[derive(Copy, Clone, Debug)]
+pub enum TreeInsert {
+    /// Inserts the item at the beginning of the list. 
+    First,
+
+    /// Inserts the item at the end of the list. 
+    Last,
+
+    /// Add the item as a root item 
+    Root,
+
+    /// Inserts the item into the list in alphabetical order
+    Sort,
+
+    /// Insert the item after the choosen item
+    After(HTREEITEM)
+}
+
+/// A reference to an item in a TreeView
+#[derive(Copy, Clone)]
+pub struct TreeItem {
+    pub handle: HTREEITEM
+}
+
+impl TreeItem {
+
+}
+
 
 /**
 A tree-view control is a window that displays a hierarchical list of items
@@ -15,6 +50,51 @@ pub struct TreeView {
 
 
 impl TreeView {
+
+
+    /// Insert a new item into the TreeView and return a reference to new newly added item
+    pub fn insert_item<'a>(&self, new: &'a str, parent: Option<TreeItem>, position: TreeInsert) -> TreeItem {
+        use winapi::um::commctrl::{TVM_INSERTITEMW, TVINSERTSTRUCTW, TVI_FIRST, TVI_LAST, TVI_ROOT, TVI_SORT, TVIF_TEXT};
+        use winapi::um::commctrl::TVINSERTSTRUCTW_u;
+        use winapi::um::winnt::LPWSTR;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let insert = match position {
+            TreeInsert::First => TVI_FIRST,
+            TreeInsert::Last => TVI_LAST,
+            TreeInsert::Root => TVI_ROOT,
+            TreeInsert::Sort => TVI_SORT,
+            TreeInsert::After(i) => i
+        };
+
+        let text = to_utf16(new);
+
+        let item = {
+            let mut item: TVINSERTSTRUCTW_u = unsafe { mem::zeroed() };
+            let i = unsafe { item.item_mut() };
+            i.mask = TVIF_TEXT;
+            i.pszText = text.as_ptr() as LPWSTR;
+            item
+        };
+
+        let new_item = TVINSERTSTRUCTW {
+            hParent: parent.map(|p| p.handle ).unwrap_or(ptr::null_mut()),
+            hInsertAfter: insert,
+            u: item
+        };
+
+        let ptr = &new_item as *const TVINSERTSTRUCTW;
+        let handle = wh::send_message(handle, TVM_INSERTITEMW, 0, ptr as LPARAM) as HTREEITEM;
+
+        TreeItem { handle }
+    }
+
+
+    //
+    // Common methods
+    //
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
@@ -129,3 +209,11 @@ impl TreeView {
     }
 }
 
+
+impl PartialEq for TreeItem {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}
+
+impl Eq for TreeItem {}
