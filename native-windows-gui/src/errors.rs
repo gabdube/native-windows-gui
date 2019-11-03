@@ -13,7 +13,8 @@ pub enum SystemError {
     MenuCreationFailed,
     FileDialogCreationFailed,
     SeparatorWithoutMenuParent,
-    PopMenuWithoutParent
+    PopMenuWithoutParent,
+    ControlWithoutParent, 
 }
 
 #[derive(Debug, Clone)]

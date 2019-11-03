@@ -342,7 +342,7 @@ mod test_app_ui {
             }
 
             #[cfg(feature = "fancy-window")]
-            fn setup_tree(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
+            fn setup_fancy_window(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
                 Ok(())
             }
 
@@ -887,6 +887,8 @@ mod test_app_ui {
                 .parent(&pop_menu)
                 .build()?;
             data.pop_menu_item2.handle = pop_menu_item2.handle.clone();
+
+            //
 
             // Control for partial ui
             PartialApp1::build_partial(&mut data.p1, Some(&window))?;

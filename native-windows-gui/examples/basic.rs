@@ -42,43 +42,32 @@ mod basic_app_ui {
             use nwg::Event as E;
             
             // Controls
-            let window = nwg::ControlBase::build_hwnd()
-                .class_name(data.window.class_name())
-                .forced_flags(data.window.forced_flags())
-                .flags(Some((nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE).bits()).unwrap_or(data.window.flags()))
+            nwg::Window::builder()
+                .flags(nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE)
                 .size((300, 115))
                 .position((300, 300))
-                .text("Basic example")
-                .build()?;
-            data.window.handle = window.handle.clone();
+                .title("Basic example")
+                .build(&mut data.window)?;
 
-            let name_edit =  nwg::ControlBase::build_hwnd()
-                .class_name(data.name_edit.class_name())
-                .forced_flags(data.name_edit.forced_flags())
-                .flags(data.name_edit.flags())
+            nwg::TextInput::builder()
                 .size((280, 25))
                 .position((10, 10))
                 .text("Heisenberg")
-                .parent(Some(&window))
-                .build()?;
-            data.name_edit.handle = name_edit.handle.clone();
+                .parent(&data.window)
+                .build(&mut data.name_edit)?;
 
-            let hello_button = nwg::ControlBase::build_hwnd()
-                .class_name(data.hello_button.class_name())
-                .forced_flags(data.hello_button.forced_flags())
-                .flags(data.hello_button.flags())
+            nwg::Button::builder()
                 .size((280, 60))
                 .position((10, 40))
                 .text("Say my name")
-                .parent(Some(&window))
-                .build()?;
-            data.hello_button.handle = hello_button.handle.clone();
+                .parent(&data.window)
+                .build(&mut data.hello_button)?;
 
             // Wrap-up
             let ui = Rc::new(BasicAppUi { inner: data });
 
             // Events
-            let window_handles = [&window.handle];
+            let window_handles = [&ui.window.handle];
             for handle in window_handles.iter() {
                 let evt_ui = ui.clone();
                 let handle_events = move |evt, handle| {

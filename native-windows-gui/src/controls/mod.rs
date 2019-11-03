@@ -40,7 +40,7 @@ pub use window::{Window, WindowFlags};
 pub use button::Button;
 pub use check_box::{CheckBox, CheckBoxState};
 pub use radio_button::{RadioButton, RadioButtonState};
-pub use text_input::TextInput;
+pub use text_input::{TextInput, TextInputFlags};
 pub use text_box::{TextBox, TextBoxFlags};
 pub use label::Label;
 pub use combo_box::ComboBox;

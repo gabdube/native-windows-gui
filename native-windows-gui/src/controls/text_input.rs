@@ -1,12 +1,24 @@
+/*!
+ 	An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
+*/
+use winapi::shared::minwindef::{UINT, WPARAM, LPARAM};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
-use crate::Font;
-use super::ControlHandle;
+use crate::{Font, SystemError};
+use super::{ControlBase, ControlHandle};
 use std::ops::Range;
 use std::char;
 
 const NOT_BOUND: &'static str = "TextInput is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: TextInput handle is not HWND!";
 
+
+bitflags! {
+    pub struct TextInputFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+    }
+}
 
 /// An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
 /// This control only allow a single line input. For block of text, use `TextBox`.
@@ -16,6 +28,19 @@ pub struct TextInput {
 }
 
 impl TextInput {
+
+    pub fn builder<'a>() -> TextInputBuilder<'a> {
+        TextInputBuilder {
+            text: "",
+            size: (100, 25),
+            position: (0, 0),
+            flags: None,
+            limit: 0,
+            password: None,
+            readonly: false,
+            parent: None
+        }
+    }
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
@@ -73,6 +98,7 @@ impl TextInput {
     }
 
     /// Set the number of maximum character allowed in this text input
+    /// If `limit` is 0, the text length is set to 0x7FFFFFFE characters 
     pub fn set_limit(&self, limit: usize) {
         use winapi::um::winuser::EM_SETLIMITTEXT;
 
@@ -113,12 +139,18 @@ impl TextInput {
 
     /// Return the selected range of characters by the user in the text input
     pub fn selection(&self) -> Range<u32> {
+        use winapi::um::winuser::EM_GETSEL;
+
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
-        let (w, l) = unsafe { get_selection(handle) };
+        let mut start = 0u32;
+        let mut end = 0u32;
+        let ptr1 = &mut start as *mut u32;
+        let ptr2 = &mut end as *mut u32;
+        wh::send_message(handle, EM_GETSEL as UINT, ptr1 as WPARAM, ptr2 as LPARAM);
 
-        Range { start: w as u32, end: l as u32 }
+        start..end
     }
 
     /// Return the selected range of characters by the user in the text input
@@ -154,7 +186,6 @@ impl TextInput {
     /// A user can still copy text from a readonly TextEdit (unlike disabled)
     pub fn set_readonly(&self, r: bool) {
         use winapi::um::winuser::EM_SETREADONLY;
-        use winapi::shared::minwindef::WPARAM;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -265,15 +296,90 @@ impl TextInput {
 
 }
 
-use winapi::shared::windef::HWND;
+pub struct TextInputBuilder<'a> {
+    text: &'a str,
+    size: (i32, i32),
+    position: (i32, i32),
+    flags: Option<TextInputFlags>,
+    limit: usize,
+    password: Option<char>,
+    readonly: bool,
+    parent: Option<ControlHandle>
+}
 
-unsafe fn get_selection(hwnd: HWND) -> (u32, u32) {
-    use winapi::um::winuser::EM_GETSEL;
-    use winapi::um::winuser::SendMessageW;
-    use std::mem;
+impl<'a> TextInputBuilder<'a> {
 
-    let (mut out1, mut out2) = (0u32, 0u32);
-    SendMessageW(hwnd, EM_GETSEL as u32, mem::transmute(&mut out1), mem::transmute(&mut out2));
+    pub fn flags(mut self, flags: TextInputFlags) -> TextInputBuilder<'a> {
+        self.flags = Some(flags);
+        self
+    }
 
-    (out1, out2) 
+    pub fn text(mut self, text: &'a str) -> TextInputBuilder<'a> {
+        self.text = text;
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> TextInputBuilder<'a> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> TextInputBuilder<'a> {
+        self.position = pos;
+        self
+    }
+
+    pub fn limit(mut self, limit: usize) -> TextInputBuilder<'a> {
+        self.limit = limit;
+        self
+    }
+
+    pub fn password(mut self, psw: Option<char>) -> TextInputBuilder<'a> {
+        self.password = psw;
+        self
+    }
+
+    pub fn readonly(mut self, read: bool) -> TextInputBuilder<'a> {
+        self.readonly = read;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TextInputBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut TextInput) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .text(self.text)
+            .parent(Some(parent))
+            .build()?;
+
+        if self.limit > 0 {
+            out.set_limit(self.limit);
+        }
+
+        if self.password.is_some() {
+            out.set_password_char(self.password)
+        }
+
+        if self.readonly {
+            out.set_readonly(self.readonly);
+        }
+
+        Ok(())
+    }
+
 }

@@ -1,9 +1,23 @@
+/*!
+A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
+that indicates what the button does when the user selects it.
+*/
+
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
-use crate::Font;
-use super::ControlHandle;
+use crate::{SystemError, Font};
+use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "Button is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Button handle is not HWND!";
+
+
+bitflags! {
+    pub struct ButtonFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+    }
+}
 
 /**
 A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
@@ -15,6 +29,16 @@ pub struct Button {
 }
 
 impl Button {
+
+    pub fn builder<'a>() -> ButtonBuilder<'a> {
+        ButtonBuilder {
+            text: "Button",
+            size: (100, 25),
+            position: (0, 0),
+            flags: None,
+            parent: None
+        }
+    }
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
@@ -136,6 +160,64 @@ impl Button {
         use winapi::um::winuser::{BS_NOTIFY, WS_CHILD};
 
         BS_NOTIFY | WS_CHILD
+    }
+
+}
+
+pub struct ButtonBuilder<'a> {
+    text: &'a str,
+    size: (i32, i32),
+    position: (i32, i32),
+    flags: Option<ButtonFlags>,
+    parent: Option<ControlHandle>
+}
+
+impl<'a> ButtonBuilder<'a> {
+
+    pub fn flags(mut self, flags: ButtonFlags) -> ButtonBuilder<'a> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn text(mut self, text: &'a str) -> ButtonBuilder<'a> {
+        self.text = text;
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> ButtonBuilder<'a> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> ButtonBuilder<'a> {
+        self.position = pos;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ButtonBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut Button) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .text(self.text)
+            .parent(Some(parent))
+            .build()?;
+
+        Ok(())
     }
 
 }

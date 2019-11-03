@@ -79,15 +79,15 @@ impl HwndBuilder {
         self
     }
 
-    pub fn parent(mut self, parent: Option<&ControlBase>) -> HwndBuilder {
+    pub fn parent(mut self, parent: Option<ControlHandle>) -> HwndBuilder {
         match parent {
-            Some(p) => { self.parent = p.handle.hwnd(); }
+            Some(p) => { self.parent = p.hwnd(); }
             None => { self.parent = None; }
         }
         self
     }
 
-    pub fn build(self) -> Result<ControlBase, SystemError> {
+    pub fn build(self) -> Result<ControlHandle, SystemError> {
         let handle = unsafe { build_hwnd_control(
             self.class_name.as_ref().map(|v| v as &str),
             self.text.as_ref().map(|v| v as &str),
@@ -99,7 +99,7 @@ impl HwndBuilder {
             self.parent
         )? };
 
-        Ok(ControlBase { handle })
+        Ok(handle)
     }
 }
 
