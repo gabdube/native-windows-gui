@@ -156,8 +156,8 @@ impl BoxLayoutBuilder {
 
     /// Add a children to the layout at the position `p`. If an item is already at the selected position, the old child will be replaced.
     /// The handle must be a window object otherwise the function will panic
-    pub fn child(mut self, p: u32, c: &ControlHandle) -> BoxLayoutBuilder {
-        let h = c.hwnd().expect("Child must be HWND");
+    pub fn child<W: Into<ControlHandle>>(mut self, p: u32, c: W) -> BoxLayoutBuilder {
+        let h = c.into().hwnd().expect("Child must be HWND");
 
         let children = match &mut self.layout {
             LayoutType::Vertical(layout) => &mut layout.children,

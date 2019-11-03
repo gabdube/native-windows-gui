@@ -5,7 +5,6 @@ extern crate winapi;
 use std::rc::Rc;
 
 #[cfg(test)] mod tests;
-#[cfg(test)] mod tests_layout;
 
 mod errors;
 pub use errors::{UserError, SystemError};
@@ -31,7 +30,7 @@ pub use layouts::*;
 
 
 pub trait PartialUi<D> {
-    fn build_partial(d: &mut D, parent: Option<&ControlBase>) -> Result<(), SystemError>;
+    fn build_partial<W: Into<ControlHandle>>(d: &mut D, parent: Option<W>) -> Result<(), SystemError>;
 }
 
 pub trait NativeUi<D, UI> {

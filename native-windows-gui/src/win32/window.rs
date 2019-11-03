@@ -191,12 +191,16 @@ pub unsafe fn build_sysclass<'a>(
     A blank system procedure used when creating new window class. Actual system event handling is done in the subclass produre `process_events`.
 */
 unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::um::winuser::WM_CREATE;
-    use winapi::um::winuser::{DefWindowProcW, PostMessageW};
+    use winapi::um::winuser::{WM_CREATE, WM_CLOSE, SW_HIDE};
+    use winapi::um::winuser::{DefWindowProcW, PostMessageW, ShowWindow};
 
     let handled = match msg {
         WM_CREATE => {
             PostMessageW(hwnd, NWG_INIT, 0, 0);
+            true
+        },
+        WM_CLOSE => {
+            ShowWindow(hwnd, SW_HIDE);
             true
         },
         _ => false
@@ -275,7 +279,6 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
         WM_TIMER => callback(Event::OnTimerTick, ControlHandle::Timer(hwnd, w as u32)),
         WM_SIZE => callback(Event::OnResize, base_handle),
         WM_MOVE => callback(Event::OnMove, base_handle),
-        WM_CLOSE => callback(Event::OnWindowClose, base_handle),
         WM_HSCROLL => callback(Event::OnHorizontalScroll, ControlHandle::Hwnd(l as HWND)),
         WM_VSCROLL => callback(Event::OnVerticalScroll, ControlHandle::Hwnd(l as HWND)),
         WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), base_handle), 
@@ -284,6 +287,9 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
         WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), base_handle),
         NOTICE_MESSAGE => callback(Event::OnNotice, ControlHandle::Timer(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, base_handle),
+        WM_CLOSE => {
+            callback(Event::OnWindowClose, base_handle);
+        },
         _ => {}
     }
 
