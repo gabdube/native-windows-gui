@@ -29,6 +29,9 @@ mod tabs;
 #[cfg(feature = "tree-view")]
 mod treeview;
 
+#[cfg(feature = "fancy-window")]
+mod fancy_window;
+
 mod handle_from_control;
 
 pub use control_handle::ControlHandle;
@@ -61,5 +64,8 @@ pub use tabs::{TabsContainer, Tab};
 
 #[cfg(feature = "tree-view")]
 pub use treeview::{TreeView, TreeItem, TreeInsert};
+
+#[cfg(feature = "fancy-window")]
+pub use fancy_window::{FancyWindow};
 
 pub use handle_from_control::*;

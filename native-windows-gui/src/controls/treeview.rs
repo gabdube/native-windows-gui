@@ -1,4 +1,4 @@
-use winapi::shared::minwindef::LPARAM;
+use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::commctrl::HTREEITEM;
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
@@ -27,6 +27,17 @@ pub enum TreeInsert {
 
     /// Insert the item after the choosen item
     After(HTREEITEM)
+}
+
+/// Possible state of a tree item regarding the "expanded/collapsed" state
+#[derive(Copy, Clone, Debug)]
+#[repr(u8)]
+pub enum ExpandState {
+    Collapse,
+    CollapseReset,
+    Expand,
+    ExpandPartial,
+    Toggle
 }
 
 /// A reference to an item in a TreeView
@@ -89,6 +100,79 @@ impl TreeView {
         let handle = wh::send_message(handle, TVM_INSERTITEMW, 0, ptr as LPARAM) as HTREEITEM;
 
         TreeItem { handle }
+    }
+
+    /// Remove an item and its children from the tree view
+    pub fn remove_item(&self, item: TreeItem) {
+        use winapi::um::commctrl::{TVM_DELETEITEM};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TVM_DELETEITEM, 0, item.handle as LPARAM);
+    }
+
+    /// Selects the specified tree-view item and scrolls the item into view.
+    pub fn select_item(&self, item: TreeItem) {
+        //x
+    }
+
+    /// Expands or collapses the list of child items associated with the specified parent item, if any. 
+    pub fn set_expand_state(&self, item: TreeItem, state: ExpandState) {
+        use winapi::um::commctrl::{TVM_EXPAND, TVE_COLLAPSE, TVE_COLLAPSERESET, TVE_EXPAND, TVE_EXPANDPARTIAL, TVE_TOGGLE};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let state = match state {
+            ExpandState::Collapse => TVE_COLLAPSE,
+            ExpandState::CollapseReset => TVE_COLLAPSE | TVE_COLLAPSERESET,
+            ExpandState::Expand => TVE_EXPAND,
+            ExpandState::ExpandPartial => TVE_EXPANDPARTIAL,
+            ExpandState::Toggle => TVE_TOGGLE,
+        };
+
+        wh::send_message(handle, TVM_EXPAND, state as WPARAM, item.handle as LPARAM);
+    }
+
+    /// Ensures that a tree-view item is visible, expanding the parent item or scrolling the tree-view control, if necessary.
+    pub fn ensure_visible(&self, item: TreeItem) {
+        use winapi::um::commctrl::{TVM_ENSUREVISIBLE};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TVM_ENSUREVISIBLE, 0, item.handle as LPARAM);
+    }
+
+    /// Remove every item from the treeview by removing the root item
+    pub fn clear(&self) {
+        use winapi::um::commctrl::{TVM_DELETEITEM, TVI_ROOT};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TVM_DELETEITEM, 0, TVI_ROOT  as LPARAM);
+    }
+
+    /// Return the total number of item in the tree view
+    pub fn len(&self) -> usize {
+        use winapi::um::commctrl::{TVM_GETCOUNT};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TVM_GETCOUNT, 0, 0) as usize
+    }
+
+    /// Return the number of item in the tree view visible by the user
+    pub fn visible_len(&self) -> usize {
+        use winapi::um::commctrl::{TVM_GETVISIBLECOUNT};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TVM_GETVISIBLECOUNT, 0, 0) as usize
     }
 
 

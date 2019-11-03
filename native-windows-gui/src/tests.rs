@@ -134,6 +134,8 @@ pub struct TestApp {
     run_cursor_test: Button,
     run_tree_test: Button,
     focus_test: Button,
+
+    fancy_window: FancyWindow
 }
 
 #[allow(unused_imports)]
@@ -339,6 +341,11 @@ mod test_app_ui {
                 Ok(())
             }
 
+            #[cfg(feature = "fancy-window")]
+            fn setup_tree(app: &mut TestApp, window: &ControlBase) -> Result<(), SystemError> {
+                Ok(())
+            }
+
             #[cfg(not(feature = "file-dialog"))]
             fn setup_file_dialog(_app: &mut TestApp) -> Result<(), SystemError> {
                 Ok(())
@@ -361,6 +368,11 @@ mod test_app_ui {
 
             #[cfg(not(feature = "tree-view"))]
             fn setup_tree(_app: &mut TestApp,  _window: &ControlBase) -> Result<(), SystemError> {
+                Ok(())
+            }
+
+            #[cfg(not(feature = "fancy-window"))]
+            fn setup_fancy_window(_app: &mut TestApp,  _window: &ControlBase) -> Result<(), SystemError> {
                 Ok(())
             }
 

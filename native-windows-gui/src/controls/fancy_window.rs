@@ -1,39 +1,58 @@
 /*!
-    A basic top level window.
-*/
+    A fancy window is a top level Window control that support transparency.
+    In WinApi, it's called a "Layered Window"
 
-use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_CLIPCHILDREN, WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION,
-WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME};
+    By default, a fancy window has the popup style and do not come with the default Windows decoration.
+
+    Using a layered window can significantly improve performance and visual effects for a window
+    that has a complex shape, animates its shape, or wishes to use alpha blending effects.
+    The system automatically composes and repaints layered windows and the windows of underlying
+    applications. As a result, layered windows are rendered smoothly, without the flickering typical
+    of complex window regions. In addition, layered windows can be partially translucent, that is, alpha-blended.
+*/
 
 use crate::win32::window_helper as wh;
 use crate::Image;
 use super::ControlHandle;
 
-const NOT_BOUND: &'static str = "Window is not yet bound to a winapi object";
-const BAD_HANDLE: &'static str = "INTERNAL ERROR: Window handle is not HWND!";
 
+const NOT_BOUND: &'static str = "FancyWindow is not yet bound to a winapi object";
+const BAD_HANDLE: &'static str = "INTERNAL ERROR: FancyWindow handle is not HWND!";
 
-bitflags! {
-    pub struct WindowFlags: u32 {
-        const MAIN_WINDOW = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX;
-        const WINDOW = WS_CAPTION | WS_SYSMENU;
-        const MINIMIZE_BOX = WS_MINIMIZEBOX;
-        const MAXIMIZE_BOX = WS_MAXIMIZEBOX;
-        const SYS_MENU = WS_SYSMENU;
-        const VISIBLE = WS_VISIBLE;
-        const DISABLED = WS_DISABLED;
-        const MAXIMIZED = WS_MAXIMIZE;
-        const MINIMIZED = WS_MINIMIZE;
-        const RESIZABLE = WS_THICKFRAME | WS_MAXIMIZEBOX;
-    }
-}
-
+/**
+A fancy window is a top level Window control that support transparency.
+In WinApi, it's called a "Layered Window". See the top level module documentation for more information
+*/
 #[derive(Default, Debug)]
-pub struct Window {
+pub struct FancyWindow {
     pub handle: ControlHandle
 }
 
-impl Window {
+
+impl FancyWindow {
+
+    pub fn init_layered(&self) {
+        use winapi::um::winuser::{WS_EX_LAYERED, GWL_EXSTYLE, LWA_COLORKEY};
+        use winapi::um::winuser::SetLayeredWindowAttributes;
+        use winapi::um::wingdi::RGB;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let mut style = wh::get_window_long(handle, GWL_EXSTYLE) as usize;
+        style |= WS_EX_LAYERED as usize;
+
+        wh::set_window_long(handle, GWL_EXSTYLE, style);
+
+        unsafe {
+            let color = RGB(0,0,0);
+            SetLayeredWindowAttributes(handle, color, 255, LWA_COLORKEY);
+        }
+    }
+
+    //
+    // Basic functions
+    //
 
     /// Return the icon of the window
     pub fn icon(&self) -> Option<Image> {
@@ -101,11 +120,15 @@ impl Window {
 
     // Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_OVERLAPPEDWINDOW | WS_VISIBLE
+        use winapi::um::winuser::{WS_VISIBLE, WS_POPUP};
+
+        WS_VISIBLE | WS_POPUP
     }
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
+        use winapi::um::winuser::WS_CLIPCHILDREN;
+
         WS_CLIPCHILDREN
     }
 }
