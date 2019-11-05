@@ -212,9 +212,10 @@ impl BoxLayoutBuilder {
                         let height = HIWORD(size) as u32;
                         VBoxLayout::update_layout(&layout, width, height);
                     }
+                    None
                 };
 
-                bind_raw_event_handler(&base_handle, cb);
+                bind_raw_event_handler(&base_handle, 0, cb);
             },
 
             LayoutType::Horizontal(layout) => {
@@ -231,9 +232,10 @@ impl BoxLayoutBuilder {
                         let height = HIWORD(size) as u32;
                         HBoxLayout::update_layout(&layout, width, height);
                     }
+                    None
                 };
 
-                bind_raw_event_handler(&base_handle, cb);
+                bind_raw_event_handler(&base_handle, 0, cb);
             }
         };
     }

@@ -48,3 +48,16 @@ impl From<&TrackBar> for ControlHandle {
     fn from(control: &TrackBar) -> Self { control.handle }
 }
 
+
+#[cfg(feature = "tabs")]
+use super::{TabsContainer, Tab};
+
+#[cfg(feature = "tabs")]
+impl From<&TabsContainer> for ControlHandle {
+    fn from(control: &TabsContainer) -> Self { control.handle }
+}
+
+#[cfg(feature = "tabs")]
+impl From<&Tab> for ControlHandle {
+    fn from(control: &Tab) -> Self { control.handle }
+}

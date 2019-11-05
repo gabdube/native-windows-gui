@@ -43,7 +43,8 @@ impl Window {
             title: "New Window",
             size: (500, 500),
             position: (300, 300),
-            flags: None
+            flags: None,
+            icon: None
         }
     }
 
@@ -132,7 +133,7 @@ impl Window {
     pub fn set_size(&self, x: u32, y: u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::set_window_size(handle, x, y, false) }
+        unsafe { wh::set_window_size(handle, x, y, true) }
     }
 
     /// Return the position of the button in the parent window
@@ -184,7 +185,8 @@ pub struct WindowBuilder<'a> {
     title: &'a str,
     size: (i32, i32),
     position: (i32, i32),
-    flags: Option<WindowFlags>
+    flags: Option<WindowFlags>,
+    icon: Option<&'a Image>,
 }
 
 impl<'a> WindowBuilder<'a> {
@@ -209,6 +211,11 @@ impl<'a> WindowBuilder<'a> {
         self
     }
 
+    pub fn icon(mut self, ico: Option<&'a Image>) -> WindowBuilder<'a> {
+        self.icon = ico;
+        self
+    }
+
     pub fn build(self, out: &mut Window) -> Result<(), SystemError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
         out.handle = ControlBase::build_hwnd()
@@ -219,6 +226,10 @@ impl<'a> WindowBuilder<'a> {
             .position(self.position)
             .text(self.title)
             .build()?;
+
+        if self.icon.is_some() {
+            out.set_icon(self.icon);
+        }
 
         Ok(())
     }

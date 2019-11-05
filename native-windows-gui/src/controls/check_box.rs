@@ -1,12 +1,21 @@
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_AUTOCHECKBOX, BS_AUTO3STATE};
 use crate::win32::window_helper as wh;
-use crate::Font;
-use super::ControlHandle;
+use crate::{Font, SystemError};
+use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "CheckBox is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: CheckBox handle is not HWND!";
 
-/// Represents the check status of a checkbox
 
+bitflags! {
+    pub struct CheckBoxFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+        const TRISTATE = BS_AUTO3STATE;
+    }
+}
+
+/// Represents the check status of a checkbox
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum CheckBoxState {
     Checked,
@@ -29,10 +38,20 @@ pub struct CheckBox {
 
 impl CheckBox {
 
+    pub fn builder<'a>() -> CheckBoxBuilder<'a> {
+        CheckBoxBuilder {
+            text: "A checkbox",
+            size: (100, 25),
+            position: (0, 0),
+            background_color: None,
+            flags: None,
+            font: None,
+            parent: None
+        }
+    }
+
     /// Return `true` if the checkbox can have a third state or `false` otherwise
     pub fn tristate(&self) -> bool {
-        use winapi::um::winuser::{BS_AUTO3STATE};
-
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
@@ -43,7 +62,7 @@ impl CheckBox {
 
     /// Sets or unsets the checkbox as tristate
     pub fn set_tristate(&self, tri: bool) {
-        use winapi::um::winuser::{BM_SETSTYLE, BS_AUTO3STATE, BS_AUTOCHECKBOX};
+        use winapi::um::winuser::{BM_SETSTYLE};
         use winapi::shared::minwindef::WPARAM;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -152,42 +171,42 @@ impl CheckBox {
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
-    /// Return the size of the button in the parent window
+    /// Return the size of the check box in the parent window
     pub fn size(&self) -> (u32, u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
-    /// Set the size of the button in the parent window
+    /// Set the size of the check box in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
-    /// Return the position of the button in the parent window
+    /// Return the position of the check box in the parent window
     pub fn position(&self) -> (i32, i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
-    /// Set the position of the button in the parent window
+    /// Set the position of the check box in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 
-    /// Return the button label
+    /// Return the check box label
     pub fn text(&self) -> String { 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_text(handle) }
     }
 
-    /// Set the button label
+    /// Set the check box label
     pub fn set_text<'a>(&self, v: &'a str) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -201,14 +220,123 @@ impl CheckBox {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        ::winapi::um::winuser::WS_VISIBLE
+        WS_VISIBLE
     }
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        use winapi::um::winuser::{BS_NOTIFY, WS_CHILD, BS_AUTOCHECKBOX};
+        use winapi::um::winuser::{BS_NOTIFY, WS_CHILD};
 
-        BS_NOTIFY | WS_CHILD | BS_AUTOCHECKBOX
+        BS_NOTIFY | WS_CHILD 
+    }
+
+    /// Change the checkbox background color.
+    fn hook_background_color(&self, c: [u8; 3]) {
+        use crate::bind_raw_event_handler;
+        use winapi::um::winuser::{WM_CTLCOLORSTATIC};
+        use winapi::shared::{basetsd::UINT_PTR, windef::{HWND}, minwindef::LRESULT};
+        use winapi::um::wingdi::{CreateSolidBrush, RGB};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
+        let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
+        
+        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+            match msg {
+                WM_CTLCOLORSTATIC => {
+                    let child = l as HWND;
+                    if child == handle {
+                        return Some(brush as LRESULT);
+                    }
+                },
+                _ => {}
+            }
+
+            None
+        });
+    }
+
+}
+
+pub struct CheckBoxBuilder<'a> {
+    text: &'a str,
+    size: (i32, i32),
+    position: (i32, i32),
+    background_color: Option<[u8; 3]>,
+    flags: Option<CheckBoxFlags>,
+    font: Option<&'a Font>,
+    parent: Option<ControlHandle>
+}
+
+impl<'a> CheckBoxBuilder<'a> {
+
+    pub fn flags(mut self, flags: CheckBoxFlags) -> CheckBoxBuilder<'a> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn text(mut self, text: &'a str) -> CheckBoxBuilder<'a> {
+        self.text = text;
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> CheckBoxBuilder<'a> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> CheckBoxBuilder<'a> {
+        self.position = pos;
+        self
+    }
+
+    pub fn background_color(mut self, color: Option<[u8;3]>) -> CheckBoxBuilder<'a> {
+        self.background_color = color;
+        self
+    }
+
+    pub fn font(mut self, font: Option<&'a Font>) -> CheckBoxBuilder<'a> {
+        self.font = font;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> CheckBoxBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut CheckBox) -> Result<(), SystemError> {
+        let mut flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        if flags & BS_AUTO3STATE == 0 {
+            flags |= BS_AUTOCHECKBOX;
+        }
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .text(self.text)
+            .parent(Some(parent))
+            .build()?;
+
+        if self.font.is_some() {
+            out.set_font(self.font);
+        }
+
+        if self.background_color.is_some() {
+            out.hook_background_color(self.background_color.unwrap());
+        }
+
+        Ok(())
     }
 
 }

@@ -1,15 +1,24 @@
 use winapi::shared::windef::HWND;
-use winapi::shared::minwindef::WPARAM;
+use winapi::shared::minwindef::{LPARAM, WPARAM};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::win32::window_helper as wh;
-use crate::Font;
-use super::ControlHandle;
+use crate::{Font, SystemError};
+use super::{ControlHandle, ControlBase};
 use std::cell::{Ref, RefMut, RefCell};
 use std::fmt::Display;
 use std::mem;
 
 const NOT_BOUND: &'static str = "Combobox is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Combobox handle is not HWND!";
+
+
+bitflags! {
+    pub struct ComboBoxFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+    }
+}
 
 
 #[derive(Default, Debug)]
@@ -19,6 +28,18 @@ pub struct ComboBox<D: Display+Default> {
 }
 
 impl<D: Display+Default> ComboBox<D> {
+
+    pub fn builder<'a>() -> ComboBoxBuilder<'a, D> {
+        ComboBoxBuilder {
+            size: (100, 25),
+            position: (0, 0),
+            flags: None,
+            font: None,
+            collection: None,
+            selected_index: None,
+            parent: None
+        }
+    }
 
     /// Remove the item at the selected index and returns it.
     /// Panic of the index is out of bounds
@@ -54,10 +75,7 @@ impl<D: Display+Default> ComboBox<D> {
         for item in col.iter() {
             let display = format!("{}", item);
             let display_os = to_utf16(&display);
-            
-            unsafe {
-                wh::send_message(handle, CB_ADDSTRING, 0, mem::transmute(display_os.as_ptr()));
-            }
+            wh::send_message(handle, CB_ADDSTRING, 0, display_os.as_ptr() as LPARAM);
         }
     }
 
@@ -102,7 +120,7 @@ impl<D: Display+Default> ComboBox<D> {
             let mut buffer: Vec<WCHAR> = Vec::with_capacity(length);
             unsafe { 
                 buffer.set_len(length); 
-                wh::send_message(handle, CB_GETLBTEXT, index, mem::transmute(buffer.as_ptr()));
+                wh::send_message(handle, CB_GETLBTEXT, index, buffer.as_ptr() as LPARAM);
             }
 
             Some(from_utf16(&buffer))
@@ -133,13 +151,11 @@ impl<D: Display+Default> ComboBox<D> {
         
         let os_string = to_utf16(value);
 
-        unsafe {
-            let index = wh::send_message(handle, CB_SELECTSTRING, 0, mem::transmute(os_string.as_ptr()));
-            if index == CB_ERR {
-                None
-            } else {
-                Some(index as usize)
-            }
+        let index = wh::send_message(handle, CB_SELECTSTRING, 0, os_string.as_ptr() as LPARAM);
+        if index == CB_ERR {
+            None
+        } else {
+            Some(index as usize)
         }
     }
 
@@ -153,9 +169,7 @@ impl<D: Display+Default> ComboBox<D> {
         let display = format!("{}", item);
         let display_os = to_utf16(&display);
 
-        unsafe {
-            wh::send_message(handle, CB_ADDSTRING, 0, mem::transmute(display_os.as_ptr()));
-        }
+        wh::send_message(handle, CB_ADDSTRING, 0, display_os.as_ptr() as LPARAM);
 
         self.collection.borrow_mut().push(item);
     }
@@ -180,9 +194,7 @@ impl<D: Display+Default> ComboBox<D> {
             col.insert(index, item);
         }
 
-        unsafe {
-            wh::send_message(handle, CB_INSERTSTRING, index, mem::transmute(display_os.as_ptr()));
-        }
+        wh::send_message(handle, CB_INSERTSTRING, index, display_os.as_ptr() as LPARAM);
     }
 
     /// Update the visual of the control with the inner collection.
@@ -199,9 +211,7 @@ impl<D: Display+Default> ComboBox<D> {
             let display = format!("{}", item);
             let display_os = to_utf16(&display);
             
-            unsafe {
-                wh::send_message(handle, CB_ADDSTRING, 0, mem::transmute(display_os.as_ptr()));
-            }
+            wh::send_message(handle, CB_ADDSTRING, 0, display_os.as_ptr() as LPARAM);
         }
     }
 
@@ -217,10 +227,7 @@ impl<D: Display+Default> ComboBox<D> {
         for item in col.iter() {
             let display = format!("{}", item);
             let display_os = to_utf16(&display);
-            
-            unsafe {
-                wh::send_message(handle, CB_ADDSTRING, 0, mem::transmute(display_os.as_ptr()));
-            }
+            wh::send_message(handle, CB_ADDSTRING, 0, display_os.as_ptr() as LPARAM);
         }
 
         let mut col_ref = self.collection.borrow_mut();
@@ -371,6 +378,88 @@ impl<D: Display+Default> ComboBox<D> {
     fn clear_inner(&self, handle: HWND) {
         use winapi::um::winuser::CB_RESETCONTENT;
         wh::send_message(handle, CB_RESETCONTENT, 0, 0);
+    }
+
+}
+
+
+pub struct ComboBoxBuilder<'a, D: Display+Default> {
+    size: (i32, i32),
+    position: (i32, i32),
+    flags: Option<ComboBoxFlags>,
+    font: Option<&'a Font>,
+    collection: Option<Vec<D>>,
+    selected_index: Option<usize>,
+    parent: Option<ControlHandle>
+}
+
+impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
+
+    pub fn flags(mut self, flags: ComboBoxFlags) -> ComboBoxBuilder<'a, D> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> ComboBoxBuilder<'a, D> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> ComboBoxBuilder<'a, D> {
+        self.position = pos;
+        self
+    }
+
+    pub fn font(mut self, font: Option<&'a Font>) -> ComboBoxBuilder<'a, D> {
+        self.font = font;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ComboBoxBuilder<'a, D> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn collection(mut self, collection: Vec<D>) -> ComboBoxBuilder<'a, D> {
+        self.collection = Some(collection);
+        self
+    }
+
+    pub fn selected_index(mut self, index: Option<usize>) -> ComboBoxBuilder<'a, D> {
+        self.selected_index = index;
+        self
+    }
+
+    pub fn build(self, out: &mut ComboBox<D>) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .parent(Some(parent))
+            .build()?;
+
+        if self.font.is_some() {
+            out.set_font(self.font);
+        }
+
+        if self.collection.is_some() {
+            out.set_collection(self.collection.unwrap());
+        }
+
+        if self.selected_index.is_some() {
+            out.set_selection(self.selected_index);
+        }
+
+        Ok(())
     }
 
 }

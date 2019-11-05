@@ -10,6 +10,8 @@ pub struct GridLayout {
     base: HWND,
     children: Vec<([u32;2], HWND)>,
     margins: [u32; 4],
+    column_count: Option<u32>,
+    row_count: Option<u32>, 
     spacing: u32
 }
 
@@ -20,6 +22,8 @@ impl GridLayout {
             base: ptr::null_mut(),
             children: Vec::new(),
             margins: [5, 5, 5, 5],
+            column_count: None,
+            row_count: None,
             spacing: 5,
         };
 
@@ -31,8 +35,16 @@ impl GridLayout {
         let sp = self.spacing;
 
         let children = &self.children;
-        let column_count = children.iter().map(|([x, _y], _)| *x).max().unwrap_or(0) + 1;
-        let row_count = children.iter().map(|([_x, y], _)| *y).max().unwrap_or(0) + 1;
+
+        let column_count = match self.column_count {
+            Some(c) => c,
+            None => children.iter().map(|([x, _y], _)| *x).max().unwrap_or(0) + 1
+        };
+
+        let row_count = match self.row_count {
+            Some(c) => c,
+            None => children.iter().map(|([_x, y], _)| *y).max().unwrap_or(0) + 1
+        };
 
         if width < (m_right + m_left) + ((sp * 2) * column_count) {
             return;
@@ -81,8 +93,8 @@ impl GridLayoutBuilder {
 
     /// Add a children to the layout at the position `p`. If an item is already at the selected position, the old child will be replaced.
     /// The handle must be a window object otherwise the function will panic
-    pub fn child(mut self, p1: u32, p2: u32, c: &ControlHandle) -> GridLayoutBuilder {
-        let h = c.hwnd().expect("Child must be HWND");
+    pub fn child<W: Into<ControlHandle>>(mut self, p1: u32, p2: u32, c: W) -> GridLayoutBuilder {
+        let h = c.into().hwnd().expect("Child must be HWND");
         let pos = [p1, p2];
         let children = &mut self.layout.children;
 
@@ -107,6 +119,18 @@ impl GridLayoutBuilder {
         self
     }
 
+    /// Set the number of column in the layout
+    pub fn max_column(mut self, count: Option<u32>) -> GridLayoutBuilder {
+        self.layout.column_count = count;
+        self
+    }
+
+    /// Set the number of row in the layout
+    pub fn max_row(mut self, count: Option<u32>) -> GridLayoutBuilder {
+        self.layout.row_count = count;
+        self
+    }
+
     /// Build the layout object and bind the callback.
     /// Children must only contains window object otherwise this method will panic.
     pub fn build(self) {
@@ -127,9 +151,10 @@ impl GridLayoutBuilder {
                 let height = HIWORD(size) as u32;
                 GridLayout::update_layout(&layout, width, height);
             }
+            None
         };
 
-        bind_raw_event_handler(&base_handle, cb);
+        bind_raw_event_handler(&base_handle, 0, cb);
     }
 
 }

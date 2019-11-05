@@ -10,8 +10,7 @@ pub struct TestControlPanel {
     controls_test_button: Button,
     layouts_test_button: Button,
 
-    controls_test: ControlsTest,
-    controls_test_panel: ControlsTestPanel,
+    controls_tests: ControlsTest,
 }
 
 mod test_control_panel_ui {
@@ -47,22 +46,21 @@ mod test_control_panel_ui {
                 .build(&mut data.layouts_test_button)?;
 
             // Partials
-            ControlsTest::build_partial(&mut data.controls_test, Some(&data.window))?;
-            ControlsTestPanel::build_partial(&mut data.controls_test_panel, Some(&data.window))?;
+            ControlsTest::build_partial(&mut data.controls_tests, Some(&data.window))?;
 
             // Wrap-up
             let ui = Rc::new(TestControlPanelUi { inner: data });
 
             // Events
-            let window_handles = [
-                &ui.window.handle,
-                &ui.controls_test.window.handle,
-                &ui.controls_test_panel.window.handle
-            ];
+            let mut window_handles = vec![&ui.window.handle];
+            window_handles.append(&mut ui.controls_tests.handles());
 
             for handle in window_handles.iter() {
                 let evt_ui = ui.clone();
                 let handle_events = move |evt, handle| {
+
+                    evt_ui.controls_tests.process_event(evt, handle);
+
                     match evt {
                         E::OnButtonClick =>
                             if handle == evt_ui.controls_test_button.handle {
@@ -101,9 +99,9 @@ mod test_control_panel_ui {
 }
 
 fn show_control_test(app: &TestControlPanel, _e: Event) {
-    app.controls_test.window.set_visible(true);
-    app.controls_test_panel.window.set_visible(true);
-    app.controls_test.window.set_focus();
+    app.controls_tests.window.set_visible(true);
+    app.controls_tests.panel.set_visible(true);
+    app.controls_tests.window.set_focus();
 }
 
 fn close(_app: &TestControlPanel, _e: Event) {

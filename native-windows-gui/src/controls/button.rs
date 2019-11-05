@@ -36,6 +36,7 @@ impl Button {
             size: (100, 25),
             position: (0, 0),
             flags: None,
+            font: None,
             parent: None
         }
     }
@@ -169,6 +170,7 @@ pub struct ButtonBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<ButtonFlags>,
+    font: Option<&'a Font>,
     parent: Option<ControlHandle>
 }
 
@@ -194,6 +196,11 @@ impl<'a> ButtonBuilder<'a> {
         self
     }
 
+    pub fn font(mut self, font: Option<&'a Font>) -> ButtonBuilder<'a> {
+        self.font = font;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ButtonBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -216,6 +223,10 @@ impl<'a> ButtonBuilder<'a> {
             .text(self.text)
             .parent(Some(parent))
             .build()?;
+
+        if self.font.is_some() {
+            out.set_font(self.font);
+        }
 
         Ok(())
     }

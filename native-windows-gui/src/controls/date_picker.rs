@@ -1,11 +1,19 @@
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::to_utf16;
-use crate::Font;
-use super::ControlHandle;
+use crate::{Font, SystemError};
+use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "DatePicker is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: DatePicker handle is not HWND!";
 
+
+bitflags! {
+    pub struct DatePickerFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+    }
+}
 
 /**
     A date struct that can be passed to a date time picker control.
@@ -24,6 +32,19 @@ pub struct DatePicker {
 }
 
 impl DatePicker {
+
+    pub fn builder<'a>() -> DatePickerBuilder<'a> {
+        DatePickerBuilder {
+            size: (100, 25),
+            position: (0, 0),
+            flags: None,
+            font: None,
+            parent: None,
+            date: None,
+            format: None,
+            range: None
+        }
+    }
 
     /**
         Sets the date format of the control
@@ -251,47 +272,34 @@ impl DatePicker {
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
-    /// Return the size of the button in the parent window
+    /// Return the size of the date picker in the parent window
     pub fn size(&self) -> (u32, u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
-    /// Set the size of the button in the parent window
+    /// Set the size of the date picker in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
-    /// Return the position of the button in the parent window
+    /// Return the position of the date picker in the parent window
     pub fn position(&self) -> (i32, i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
-    /// Set the position of the button in the parent window
+    /// Set the position of the date picker in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 
-    /// Return the button label
-    pub fn text(&self) -> String { 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::get_window_text(handle) }
-    }
-
-    /// Set the button label
-    pub fn set_text<'a>(&self, v: &'a str) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::set_window_text(handle, v) }
-    }
 
     /// Winapi class name used during control creation
     pub fn class_name(&self) -> Option<&'static str> {
@@ -312,6 +320,98 @@ impl DatePicker {
     }
 
 }
+
+pub struct DatePickerBuilder<'a> {
+    size: (i32, i32),
+    position: (i32, i32),
+    flags: Option<DatePickerFlags>,
+    font: Option<&'a Font>,
+    parent: Option<ControlHandle>,
+    date: Option<DatePickerValue>,
+    format: Option<&'a str>,
+    range: Option<[DatePickerValue; 2]>
+}
+
+impl<'a> DatePickerBuilder<'a> {
+
+    pub fn flags(mut self, flags: DatePickerFlags) -> DatePickerBuilder<'a> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> DatePickerBuilder<'a> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> DatePickerBuilder<'a> {
+        self.position = pos;
+        self
+    }
+
+    pub fn font(mut self, font: Option<&'a Font>) -> DatePickerBuilder<'a> {
+        self.font = font;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> DatePickerBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn date(mut self, date: Option<DatePickerValue>) -> DatePickerBuilder<'a> {
+        self.date = date;
+        self
+    }
+
+    pub fn format(mut self, format: Option<&'a str>) -> DatePickerBuilder<'a> {
+        self.format = format;
+        self
+    }
+
+    pub fn range(mut self, range: Option<[DatePickerValue; 2]>) -> DatePickerBuilder<'a> {
+        self.range = range;
+        self
+    }
+
+    pub fn build(self, out: &mut DatePicker) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .parent(Some(parent))
+            .build()?;
+
+        if self.font.is_some() {
+            out.set_font(self.font);
+        }
+
+        if self.date.is_some() {
+            out.set_value(self.date)
+        }
+
+        if self.range.is_some() {
+            out.set_range(&self.range.unwrap());
+        }
+
+        if self.format.is_some() {
+            out.set_format(self.format.unwrap());
+        }
+
+        Ok(())
+    }
+
+}
+
 
 
 use winapi::um::commctrl::DATETIMEPICKERINFO;

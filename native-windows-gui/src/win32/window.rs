@@ -62,8 +62,8 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, f: F)
     Set a window subclass the uses the `process_raw_events` function of NWG.
 
 */
-pub fn bind_raw_event_handler<F>(handle: &ControlHandle, f: F) 
-    where F: Fn(HWND, UINT, WPARAM, LPARAM) -> () + 'static
+pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) 
+    where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
 {
     use winapi::um::commctrl::SetWindowSubclass;
     
@@ -71,7 +71,7 @@ pub fn bind_raw_event_handler<F>(handle: &ControlHandle, f: F)
         &ControlHandle::Hwnd(v) => unsafe {
             let proc: Box<F> = Box::new(f);
             let proc_data: DWORD_PTR = mem::transmute(proc);
-            SetWindowSubclass(v, Some(process_raw_events::<F>), 0, proc_data);
+            SetWindowSubclass(v, Some(process_raw_events::<F>), id, proc_data);
         },
         htype => panic!("Cannot bind control with an handle of type {:?}.", htype)
     }
@@ -303,13 +303,16 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
 */
 #[allow(unused_variables)]
 unsafe extern "system" fn process_raw_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT 
-    where F: Fn(HWND, UINT, WPARAM, LPARAM) -> () + 'static
+    where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
 {
     let callback: Box<F> = mem::transmute(data);
-    callback(hwnd, msg, w, l);
+    let result = callback(hwnd, msg, w, l);
     mem::forget(callback);
 
-    ::winapi::um::commctrl::DefSubclassProc(hwnd, msg, w, l)
+    match result {
+        Some(r) => r,
+        None => ::winapi::um::commctrl::DefSubclassProc(hwnd, msg, w, l)
+    }
 }
 
 fn button_commands(m: u16) -> Event {

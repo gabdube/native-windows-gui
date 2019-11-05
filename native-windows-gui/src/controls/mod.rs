@@ -38,7 +38,7 @@ pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase};
 pub use window::{Window, WindowFlags};
 pub use button::Button;
-pub use check_box::{CheckBox, CheckBoxState};
+pub use check_box::{CheckBox, CheckBoxState, CheckBoxFlags};
 pub use radio_button::{RadioButton, RadioButtonState};
 pub use text_input::{TextInput, TextInputFlags};
 pub use text_box::{TextBox, TextBoxFlags};

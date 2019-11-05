@@ -87,10 +87,12 @@ impl StatusBar {
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
-        bind_raw_event_handler(&parent_handle, move |_hwnd, msg, _w, _l| {
+        bind_raw_event_handler(&parent_handle, 0, move |_hwnd, msg, _w, _l| {
             if msg == WM_SIZE {
                 wh::send_message(handle, WM_SIZE, 0, 0);
             }
+
+            None
         });
     }
 

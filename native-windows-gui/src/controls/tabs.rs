@@ -1,15 +1,23 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM, BOOL};
 use winapi::shared::windef::HWND;
 use winapi::um::winnt::LPWSTR;
-use winapi::um::winuser::EnumChildWindows;
+use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
-use super::ControlHandle;
+use crate::{SystemError};
+use super::{ControlBase, ControlHandle};
 use std::mem;
 
 const NOT_BOUND: &'static str = "TabsContainer/Tab is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: TabsContainer/Tab handle is not HWND!";
 
+
+bitflags! {
+    pub struct TabsContainerFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+    }
+}
 
 /**
 A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
@@ -17,10 +25,19 @@ that indicates what the button does when the user selects it.
 */
 #[derive(Default, Debug)]
 pub struct TabsContainer {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
 }
 
 impl TabsContainer {
+
+    pub fn builder() -> TabsContainerBuilder {
+        TabsContainerBuilder {
+            size: (300, 300),
+            position: (0, 0),
+            parent: None,
+            flags: None,
+        }
+    }
 
     /// Return the index of the currently selected tab
     /// May return `usize::max_value()` if no tab is selected
@@ -59,49 +76,6 @@ impl TabsContainer {
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         wh::send_message(handle, TCM_GETITEMCOUNT, 0, 0) as usize
-    }
-
-    /// The tab widget lacks basic functionalities on it's own. This fix it. 
-    pub fn hook_tabs(&self) {
-        use crate::bind_raw_event_handler;
-        use winapi::shared::minwindef::{HIWORD, LOWORD};
-        use winapi::um::winuser::{NMHDR, WM_SIZE, WM_NOTIFY};
-        use winapi::um::commctrl::{TCM_GETCURSEL, TCN_SELCHANGE};
-        use winapi::um::winuser::{SendMessageW};
-        
-
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
-
-        bind_raw_event_handler(&parent_handle, move |_hwnd, msg, _w, l| { unsafe {
-            match msg {
-                WM_NOTIFY => {
-                    let nmhdr: &NMHDR = mem::transmute(l);
-                    if nmhdr.code == TCN_SELCHANGE {
-                        let index = SendMessageW(handle, TCM_GETCURSEL, 0, 0) as i32;
-                        let data: (HWND, i32) = (handle, index);
-                        let data_ptr = &data as *const (HWND, i32);
-                        EnumChildWindows(handle, Some(toggle_children_tabs), data_ptr as LPARAM);
-                    }
-                },
-                _ => {}
-            }
-        } });
-
-        bind_raw_event_handler(&self.handle, move |hwnd, msg, _w, l| { unsafe {
-            match msg {
-                WM_SIZE => {
-                    let mut data = (hwnd, LOWORD(l as u32) as u32, HIWORD(l as u32) as u32);
-                    data.1 -= 11;
-                    data.2 -= 30;
-                    let data_ptr = &data as *const (HWND, u32, u32);
-                    EnumChildWindows(hwnd, Some(resize_direct_children), mem::transmute(data_ptr));
-                },
-                _ => {}
-            }
-        } } );
     }
 
     //
@@ -212,6 +186,104 @@ impl TabsContainer {
         WS_CHILD
     }
 
+    //
+    // Private
+    //
+
+    /// The tab widget lacks basic functionalities on it's own. This fix it. 
+    fn hook_tabs(&self) {
+        use crate::bind_raw_event_handler;
+        use winapi::shared::minwindef::{HIWORD, LOWORD};
+        use winapi::um::winuser::{NMHDR, WM_SIZE, WM_NOTIFY};
+        use winapi::um::commctrl::{TCM_GETCURSEL, TCN_SELCHANGE};
+        use winapi::um::winuser::{SendMessageW};
+        
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
+
+        bind_raw_event_handler(&parent_handle, 0, move |_hwnd, msg, _w, l| { unsafe {
+            match msg {
+                WM_NOTIFY => {
+                    let nmhdr: &NMHDR = mem::transmute(l);
+                    if nmhdr.code == TCN_SELCHANGE {
+                        let index = SendMessageW(handle, TCM_GETCURSEL, 0, 0) as i32;
+                        let data: (HWND, i32) = (handle, index);
+                        let data_ptr = &data as *const (HWND, i32);
+                        EnumChildWindows(handle, Some(toggle_children_tabs), data_ptr as LPARAM);
+                    }
+                },
+                _ => {}
+            }
+
+            None
+        } });
+
+        bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, _w, l| { unsafe {
+            match msg {
+                WM_SIZE => {
+                    let mut data = (hwnd, LOWORD(l as u32) as u32, HIWORD(l as u32) as u32);
+                    data.1 -= 11;
+                    data.2 -= 30;
+                    let data_ptr = &data as *const (HWND, u32, u32);
+                    EnumChildWindows(hwnd, Some(resize_direct_children), mem::transmute(data_ptr));
+                },
+                _ => {}
+            }
+
+            None
+        } } );
+    }
+}
+
+
+pub struct TabsContainerBuilder {
+    size: (i32, i32),
+    position: (i32, i32),
+    parent: Option<ControlHandle>,
+    flags: Option<TabsContainerFlags>,
+}
+
+impl TabsContainerBuilder {
+
+    pub fn size(mut self, size: (i32, i32)) -> TabsContainerBuilder {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> TabsContainerBuilder {
+        self.position = pos;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TabsContainerBuilder {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut TabsContainer) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .parent(Some(parent))
+            .build()?;
+
+        out.hook_tabs();
+
+        Ok(())
+    }
 }
 
 
@@ -224,6 +296,13 @@ pub struct Tab {
 }
 
 impl Tab {
+
+    pub fn builder<'a>() -> TabBuilder<'a> {
+        TabBuilder {
+            text: "Tab",
+            parent: None
+        }
+    }
 
     /// Set the title of the tab
     pub fn set_text<'a>(&self, text: &'a str) {
@@ -250,35 +329,6 @@ impl Tab {
 
         let item_ptr = &item as *const TCITEMW;
         wh::send_message(tab_view_handle, TCM_SETITEMW, tab_index, item_ptr as LPARAM);
-    }
-
-    /// Bind the tab to a tab view
-    pub fn bind_container<'a>(&self, text: &'a str) {
-        use winapi::um::commctrl::{TCITEMW, TCM_INSERTITEMW, TCIF_TEXT};
-
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let tab_view_handle = wh::get_window_parent(handle);
-        let next_index = Tab::next_index(tab_view_handle);
-
-        unsafe {
-            Tab::init(handle, tab_view_handle, next_index);
-        }
-
-        let text = to_utf16(&text);
-        let tab_info = TCITEMW {
-            mask: TCIF_TEXT,
-            dwState: 0,
-            dwStateMask: 0,
-            pszText: text.as_ptr() as LPWSTR,
-            cchTextMax: 0,
-            iImage: -1,
-            lParam: 0
-        };
-
-        let tab_info_ptr = &tab_info as *const TCITEMW;
-        wh::send_message(tab_view_handle, TCM_INSERTITEMW, next_index as WPARAM, tab_info_ptr as LPARAM);
     }
 
     //
@@ -338,6 +388,72 @@ impl Tab {
         count
     }
 
+    /// Bind the tab to a tab view
+    fn bind_container<'a>(&self, text: &'a str) {
+        use winapi::um::commctrl::{TCITEMW, TCM_INSERTITEMW, TCIF_TEXT};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let tab_view_handle = wh::get_window_parent(handle);
+        let next_index = Tab::next_index(tab_view_handle);
+
+        unsafe {
+            Tab::init(handle, tab_view_handle, next_index);
+        }
+
+        let text = to_utf16(&text);
+        let tab_info = TCITEMW {
+            mask: TCIF_TEXT,
+            dwState: 0,
+            dwStateMask: 0,
+            pszText: text.as_ptr() as LPWSTR,
+            cchTextMax: 0,
+            iImage: -1,
+            lParam: 0
+        };
+
+        let tab_info_ptr = &tab_info as *const TCITEMW;
+        wh::send_message(tab_view_handle, TCM_INSERTITEMW, next_index as WPARAM, tab_info_ptr as LPARAM);
+    }
+
+}
+
+pub struct TabBuilder<'a> {
+    text: &'a str,
+    parent: Option<ControlHandle>
+}
+
+impl<'a> TabBuilder<'a> {
+
+    pub fn text(mut self, text: &'a str) -> TabBuilder<'a> {
+        self.text = text;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TabBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut Tab) -> Result<(), SystemError> {
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(out.flags())
+            .text(self.text)
+            .parent(Some(parent))
+            .build()?;
+
+        out.bind_container(self.text);
+
+        Ok(())
+    }
 }
 
 
