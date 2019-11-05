@@ -1,10 +1,22 @@
+/*!
+An image frame is a control that display an image resource. It also accept mouse clicks.
+*/
+
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
-use super::ControlHandle;
-use crate::Image;
+use super::{ControlBase, ControlHandle};
+use crate::{Image, SystemError};
 
 const NOT_BOUND: &'static str = "ImageFrame is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: ImageFrame handle is not HWND!";
 
+
+bitflags! {
+    pub struct ImageFrameFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+    }
+}
 
 /// Display a bitmap image in the application
 #[derive(Default, Debug)]
@@ -13,6 +25,16 @@ pub struct ImageFrame {
 }
 
 impl ImageFrame {
+
+    pub fn builder<'a>() -> ImageFrameBuilder<'a> {
+        ImageFrameBuilder {
+            size: (100, 100),
+            position: (0, 0),
+            flags: None,
+            image: None,
+            parent: None
+        }
+    }
 
     /// Get the image of the image frame
     pub fn image(&self) -> Option<Image> {
@@ -78,46 +100,32 @@ impl ImageFrame {
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
-    /// Return the size of the label in the parent window
+    /// Return the size of the image frame in the parent window
     pub fn size(&self) -> (u32, u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
-    /// Set the size of the label in the parent window
+    /// Set the size of the image frame in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
-    /// Return the position of the label in the parent window
+    /// Return the position of the image frame in the parent window
     pub fn position(&self) -> (i32, i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
-    /// Set the position of the label in the parent window
+    /// Set the position of the image frame in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
-    }
-
-    /// Return the label text
-    pub fn text(&self) -> String { 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::get_window_text(handle) }
-    }
-
-    /// Set the label text
-    pub fn set_text<'a>(&self, v: &'a str) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::set_window_text(handle, v) }
     }
 
     /// Winapi class name used during control creation
@@ -127,7 +135,7 @@ impl ImageFrame {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        use winapi::um::winuser::{SS_BITMAP, SS_CENTERIMAGE, WS_VISIBLE};
+        use winapi::um::winuser::{SS_BITMAP, SS_CENTERIMAGE};
         WS_VISIBLE | SS_BITMAP | SS_CENTERIMAGE
     }
 
@@ -136,6 +144,67 @@ impl ImageFrame {
         use winapi::um::winuser::{SS_NOTIFY, WS_CHILD};
 
         WS_CHILD | SS_NOTIFY
+    }
+
+}
+
+pub struct ImageFrameBuilder<'a> {
+    size: (i32, i32),
+    position: (i32, i32),
+    flags: Option<ImageFrameFlags>,
+    image: Option<&'a Image>,
+    parent: Option<ControlHandle>
+}
+
+impl<'a> ImageFrameBuilder<'a> {
+
+    pub fn flags(mut self, flags: ImageFrameFlags) -> ImageFrameBuilder<'a> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> ImageFrameBuilder<'a> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> ImageFrameBuilder<'a> {
+        self.position = pos;
+        self
+    }
+
+    pub fn image(mut self, image: Option<&'a Image>) -> ImageFrameBuilder<'a> {
+        self.image = image;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ImageFrameBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut ImageFrame) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .parent(Some(parent))
+            .build()?;
+
+        if self.image.is_some() {
+            out.set_image(self.image);
+        }
+
+        Ok(())
     }
 
 }

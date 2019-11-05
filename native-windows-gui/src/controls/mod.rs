@@ -45,7 +45,7 @@ pub use text_box::{TextBox, TextBoxFlags};
 pub use label::Label;
 pub use combo_box::ComboBox;
 pub use status_bar::StatusBar;
-pub use image_frame::ImageFrame;
+pub use image_frame::{ImageFrame, ImageFrameFlags};
 pub use list_box::{ListBox, ListBoxFlags};
 pub use tooltip::{Tooltip, TooltipIcon};
 pub use track_bar::{TrackBar, TrackBarFlags};

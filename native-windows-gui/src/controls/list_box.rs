@@ -3,8 +3,8 @@ use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{LBS_MULTIPLESEL, LBS_NOSEL, WS_VISIBLE};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
-use crate::Font;
-use super::ControlHandle;
+use crate::{Font, SystemError};
+use super::{ControlBase, ControlHandle};
 use std::cell::{Ref, RefMut, RefCell};
 use std::fmt::Display;
 use std::ops::Range;
@@ -33,6 +33,18 @@ pub struct ListBox<D: Display+Default> {
 
 impl<D: Display+Default> ListBox<D> {
 
+    pub fn builder<'a>() -> ListBoxBuilder<'a, D> {
+        ListBoxBuilder {
+            size: (100, 300),
+            position: (0, 0),
+            flags: None,
+            font: None,
+            collection: None,
+            selected_index: None,
+            multi_selection: Vec::new(),
+            parent: None
+        }
+    }
 
     /// Add a new item to the listbox. Sort the collection if the listbox is sorted.
     pub fn push(&self, item: D) {
@@ -465,6 +477,98 @@ impl<D: Display+Default> ListBox<D> {
     fn clear_inner(&self, handle: HWND) {
         use winapi::um::winuser::LB_RESETCONTENT;
         wh::send_message(handle, LB_RESETCONTENT, 0, 0);
+    }
+
+}
+
+pub struct ListBoxBuilder<'a, D: Display+Default> {
+    size: (i32, i32),
+    position: (i32, i32),
+    flags: Option<ListBoxFlags>,
+    font: Option<&'a Font>,
+    collection: Option<Vec<D>>,
+    selected_index: Option<usize>,
+    multi_selection: Vec<usize>,
+    parent: Option<ControlHandle>
+}
+
+impl<'a, D: Display+Default> ListBoxBuilder<'a, D> {
+
+    pub fn flags(mut self, flags: ListBoxFlags) -> ListBoxBuilder<'a, D> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> ListBoxBuilder<'a, D> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> ListBoxBuilder<'a, D> {
+        self.position = pos;
+        self
+    }
+
+    pub fn font(mut self, font: Option<&'a Font>) -> ListBoxBuilder<'a, D> {
+        self.font = font;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ListBoxBuilder<'a, D> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn collection(mut self, collection: Vec<D>) -> ListBoxBuilder<'a, D> {
+        self.collection = Some(collection);
+        self
+    }
+
+    pub fn selected_index(mut self, index: Option<usize>) -> ListBoxBuilder<'a, D> {
+        self.selected_index = index;
+        self
+    }
+
+    pub fn multi_selection(mut self, select: Vec<usize>) -> ListBoxBuilder<'a, D> {
+        self.multi_selection = select;
+        self
+    }
+
+    pub fn build(self, out: &mut ListBox<D>) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .parent(Some(parent))
+            .build()?;
+
+        if self.font.is_some() {
+            out.set_font(self.font);
+        }
+
+        if let Some(col) = self.collection {
+            out.set_collection(col);
+        }
+
+        if flags & LBS_MULTIPLESEL == LBS_MULTIPLESEL {
+            for i in self.multi_selection {
+                out.multi_add_selection(i);
+            }
+        } else {
+            out.set_selection(self.selected_index);
+        }
+
+
+        Ok(())
     }
 
 }

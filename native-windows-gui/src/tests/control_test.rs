@@ -9,6 +9,8 @@ pub struct TestRun {
     check: bool,
     combo: bool,
     date: bool,
+    font: bool,
+    list: bool
 }
 
 
@@ -17,9 +19,12 @@ pub struct ControlsTest {
     // data
     pub runs: RefCell<TestRun>,
 
+    pub window_icon: Image,
+    pub ferris: Image,
+    pub arial_font: Font,
+
     // Control window
     pub window: Window,
-    pub window_icon: Image,
     pub controls_holder: TabsContainer,
     pub basics_control_tab: Tab,
     pub test_button: Button,
@@ -27,6 +32,9 @@ pub struct ControlsTest {
     pub test_checkbox2: CheckBox,
     pub test_combo: ComboBox<&'static str>,
     pub test_date: DatePicker,
+    pub test_img_frame: ImageFrame,
+    pub test_label: Label,
+    pub test_list_box: ListBox<&'static str>,
 
     // Control panel
     pub panel: Window,
@@ -34,7 +42,9 @@ pub struct ControlsTest {
     pub run_button_test: Button,
     pub run_check_box_test: Button,
     pub run_combo_test: Button,
-    pub run_date_test: Button
+    pub run_date_test: Button,
+    pub run_font_test: Button,
+    pub run_list_test: Button,
 }
 
 mod partial_controls_test_ui {
@@ -49,6 +59,12 @@ mod partial_controls_test_ui {
             // Resources
             //
             data.window_icon = Image::icon("./test_rc/cog.ico", None, false)?;
+            data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
+
+            Font::builder()
+                .size(20)
+                .family("Arial")
+                .build(&mut data.arial_font)?;
 
             //
             //  Controls holder
@@ -56,7 +72,7 @@ mod partial_controls_test_ui {
 
             Window::builder()
                 .flags(WindowFlags::MAIN_WINDOW)
-                .size((500, 370))
+                .size((500, 400))
                 .position((100, 100))
                 .title("Controls")
                 .icon(Some(&data.window_icon))
@@ -88,7 +104,7 @@ mod partial_controls_test_ui {
 
             CheckBox::builder()
                 .flags(CheckBoxFlags::VISIBLE | CheckBoxFlags::TRISTATE)
-                .text("Tree state")
+                .text("Three state")
                 .position((10, 80))
                 .size((130, 30))
                 .background_color(Some([255, 255, 255]))
@@ -108,6 +124,38 @@ mod partial_controls_test_ui {
                 .size((130, 30))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_date)?;
+
+            Label::builder()
+                .text("A label")
+                .position((10, 200))
+                .size((130, 30))
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_label)?;
+
+            ListBox::builder()
+                .position((10, 240))
+                .size((130, 100))
+                .parent(&data.basics_control_tab)
+                .collection(vec!["Red", "White", "Green", "Yellow"])
+                .selected_index(Some(1))
+                .build(&mut data.test_list_box)?;
+
+            ListBox::builder()
+                .flags(ListBoxFlags::VISIBLE | ListBoxFlags::MULTI_SELECT)
+                .position((150, 10))
+                .size((130, 100))
+                .parent(&data.basics_control_tab)
+                .collection(vec!["Cat", "Dog", "Parrot", "Horse", "Ogre"])
+                .multi_selection(vec![0, 2, 3])
+                .build(&mut data.test_list_box)?;
+
+            ImageFrame::builder()
+                .position((150, 110))
+                .size((150, 99))
+                .parent(&data.basics_control_tab)
+                .image(Some(&data.ferris))
+                .build(&mut data.test_img_frame)?;
+        
 
             //
             // Run tests
@@ -145,6 +193,14 @@ mod partial_controls_test_ui {
                 .text("Run date test")
                 .parent(&data.panel)
                 .build(&mut data.run_date_test)?;
+            Button::builder()
+                .text("Run font test")
+                .parent(&data.panel)
+                .build(&mut data.run_font_test)?;
+            Button::builder()
+                .text("Run list test")
+                .parent(&data.panel)
+                .build(&mut data.run_list_test)?;
 
             // Layout
             VBoxLayout::builder()
@@ -154,11 +210,14 @@ mod partial_controls_test_ui {
 
             GridLayout::builder()
                 .parent(&data.panel)
+                .spacing(1)
                 .child(0, 0, &data.run_window_test)
                 .child(1, 0, &data.run_button_test)
                 .child(0, 1, &data.run_check_box_test)
                 .child(1, 1, &data.run_combo_test)
                 .child(0, 2, &data.run_date_test)
+                .child(1, 2, &data.run_font_test)
+                .child(0, 3, &data.run_list_test)
                 .max_row(Some(8))
                 .build();
             
@@ -178,6 +237,12 @@ mod partial_controls_test_ui {
                         run_check_box_tests(self, evt);
                     } else if handle == self.run_combo_test.handle {
                         run_combo_tests(self, evt);
+                    } else if handle == self.run_date_test.handle {
+                        run_date_tests(self, evt);
+                    } else if handle == self.run_font_test.handle {
+                        run_font_tests(self, evt);
+                    } else if handle == self.run_list_test.handle {
+                        run_list_tests(self, evt);
                     },
                 _ => {}
             }
@@ -328,5 +393,64 @@ fn run_combo_tests(app: &ControlsTest, _evt: Event) {
     } else {
         app.test_combo.set_collection(vec!["Chocolate", "Strawberry", "Blueberry"]);
         app.runs.borrow_mut().combo = false;
+    }
+}
+
+fn run_date_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().date {
+        
+        let v = DatePickerValue { year: 2000, month: 10, day: 5 };
+        app.test_date.set_value(Some(v));
+        assert_eq!(app.test_date.value(), Some(v));
+        assert_eq!(app.test_date.checked(), true);
+
+        app.test_date.set_value(None);
+        assert_eq!(app.test_date.value(), None);
+        assert_eq!(app.test_date.checked(), false);
+
+        app.test_date.set_format(Some("'YEAR: 'yyyy"));
+
+        let up = DatePickerValue { year: 2000, month: 1, day: 1 };
+        let down = DatePickerValue { year: 2001, month: 1, day: 1 };
+        app.test_date.set_range(&[up, down]);
+        assert_eq!(app.test_date.range(), [up, down]);
+
+        app.runs.borrow_mut().date = true;
+    } else {
+        app.test_date.set_format(None);
+
+        let up = DatePickerValue { year: 1950, month: 1, day: 1 };
+        let down = DatePickerValue { year: 2020, month: 12, day: 30 };
+        app.test_date.set_range(&[up, down]);
+        app.runs.borrow_mut().date = false;
+    }
+}
+
+fn run_font_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().font {
+        app.test_label.set_font(Some(&app.arial_font));
+        app.test_button.set_font(Some(&app.arial_font));
+        app.test_checkbox1.set_font(Some(&app.arial_font));
+        app.test_combo.set_font(Some(&app.arial_font));
+        app.test_date.set_font(Some(&app.arial_font));
+
+        assert_eq!(app.test_label.font().as_ref(), Some(&app.arial_font));
+
+        app.runs.borrow_mut().font = true;
+    } else {
+        app.test_label.set_font(None);
+        app.test_button.set_font(None);
+        app.test_checkbox1.set_font(None);
+        app.test_combo.set_font(None);
+        app.test_date.set_font(None);
+        app.runs.borrow_mut().font = false;
+    }
+}
+
+fn run_list_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().list {
+        app.runs.borrow_mut().list = true;
+    } else {
+        app.runs.borrow_mut().list = false;
     }
 }

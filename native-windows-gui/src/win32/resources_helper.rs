@@ -17,7 +17,7 @@ pub unsafe fn build_font(
     size: u32,
     weight: u32,
     style: [bool; 3],
-    family_name: Option<String>,
+    family_name: Option<&str>,
 ) -> Result<HFONT, SystemError> 
 {  
     use winapi::um::wingdi::{DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH};

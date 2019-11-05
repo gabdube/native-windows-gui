@@ -72,17 +72,25 @@ impl DatePicker {
         
         Furthermore, any string enclosed in `'` can be used in the format to display text.  
         For example, to display the current date with the format `'Today is: Tuesday Mar 23, 1996`, the format string is `'Today is: 'dddd MMM dd', 'yyyy`. 
+    
+        If `format` is set to `None`, use the default system format.
     */
-    pub fn set_format<'a>(&self, format: &'a str) {
+    pub fn set_format<'a>(&self, format: Option<&'a str>) {
         use winapi::um::commctrl::DTM_SETFORMATW;
         use winapi::shared::minwindef::LPARAM;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
-        let format = to_utf16(format);
+        let (_format, format_ptr) = if format.is_some() {
+            let f = to_utf16(format.unwrap());
+            let fptr = f.as_ptr() as LPARAM;
+            (f, fptr)
+        } else {
+            (Vec::new(), 0)
+        };
 
-        wh::send_message(handle, DTM_SETFORMATW, 0, format.as_ptr() as LPARAM);
+        wh::send_message(handle, DTM_SETFORMATW, 0, format_ptr);
     }
 
     /**
@@ -404,7 +412,7 @@ impl<'a> DatePickerBuilder<'a> {
         }
 
         if self.format.is_some() {
-            out.set_format(self.format.unwrap());
+            out.set_format(self.format);
         }
 
         Ok(())
