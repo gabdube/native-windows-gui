@@ -142,8 +142,6 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
         println!("{:?}", get_system_error());
         Err(SystemError::WindowCreationFailed)
     } else {
-        
-
         Ok(ControlHandle::Hwnd(handle))
     }
 }

@@ -49,7 +49,7 @@ pub use image_frame::{ImageFrame, ImageFrameFlags};
 pub use list_box::{ListBox, ListBoxFlags};
 pub use tooltip::{Tooltip, TooltipIcon};
 pub use track_bar::{TrackBar, TrackBarFlags};
-pub use menu::{Menu, MenuItem, MenuSeparator};
+pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder};
 pub use timer::Timer;
 pub use notice::Notice;
 

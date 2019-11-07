@@ -141,20 +141,18 @@ impl HmenuBuilder {
     }
 
     /// Set the parent of the menu. Can be a window or another menu.
-    pub fn parent(mut self, parent: &ControlBase) -> HmenuBuilder {
-        self.parent_window = parent.handle.hwnd();
-
-        match &parent.handle {
-            &ControlHandle::Hwnd(hwnd) => { self.parent_window = Some(hwnd); }
-            &ControlHandle::Menu(_parent, menu) => { self.parent_menu = Some(menu); }
-            &ControlHandle::PopMenu(_hwnd, menu) => { self.parent_menu = Some(menu); },
+    pub fn parent(mut self, parent: ControlHandle) -> HmenuBuilder {
+        match parent {
+            ControlHandle::Hwnd(hwnd) => { self.parent_window = Some(hwnd); }
+            ControlHandle::Menu(_parent, menu) => { self.parent_menu = Some(menu); }
+            ControlHandle::PopMenu(_hwnd, menu) => { self.parent_menu = Some(menu); },
             _ => {}
         }
 
         self
     }
 
-    pub fn build(self) -> Result<ControlBase, SystemError> {
+    pub fn build(self) -> Result<ControlHandle, SystemError> {
         let handle = unsafe { build_hmenu_control(
             self.text,
             self.item,
@@ -164,7 +162,7 @@ impl HmenuBuilder {
             self.parent_window
         )? };
 
-        Ok(ControlBase { handle })
+        Ok(handle)
     }
 
 }

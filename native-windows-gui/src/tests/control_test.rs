@@ -10,41 +10,56 @@ pub struct TestRun {
     combo: bool,
     date: bool,
     font: bool,
-    list: bool
+    list: bool,
+    menu: bool,
 }
 
 
 #[derive(Default)]
 pub struct ControlsTest {
     // data
-    pub runs: RefCell<TestRun>,
+    runs: RefCell<TestRun>,
 
-    pub window_icon: Image,
-    pub ferris: Image,
-    pub arial_font: Font,
+    window_icon: Image,
+    ferris: Image,
+    arial_font: Font,
 
     // Control window
     pub window: Window,
-    pub controls_holder: TabsContainer,
-    pub basics_control_tab: Tab,
-    pub test_button: Button,
-    pub test_checkbox1: CheckBox,
-    pub test_checkbox2: CheckBox,
-    pub test_combo: ComboBox<&'static str>,
-    pub test_date: DatePicker,
-    pub test_img_frame: ImageFrame,
-    pub test_label: Label,
-    pub test_list_box: ListBox<&'static str>,
+    controls_holder: TabsContainer,
+    basics_control_tab: Tab,
+    test_button: Button,
+    test_checkbox1: CheckBox,
+    test_checkbox2: CheckBox,
+    test_combo: ComboBox<&'static str>,
+    test_date: DatePicker,
+    test_img_frame: ImageFrame,
+    test_label: Label,
+    test_list_box1: ListBox<&'static str>,
+    test_list_box2: ListBox<&'static str>,
+
+    // Menu
+    window_menu: Menu,
+    window_submenu1: Menu,
+    window_menu_sep: MenuSeparator,
+    window_menu_item1: MenuItem,
+    window_menu_item2: MenuItem,
+    window_menu_item3: MenuItem,
+
+    pop_menu: Menu,
+    pop_menu_item1: MenuItem,
+    pop_menu_item2: MenuItem,
 
     // Control panel
     pub panel: Window,
-    pub run_window_test: Button,
-    pub run_button_test: Button,
-    pub run_check_box_test: Button,
-    pub run_combo_test: Button,
-    pub run_date_test: Button,
-    pub run_font_test: Button,
-    pub run_list_test: Button,
+    run_window_test: Button,
+    run_button_test: Button,
+    run_check_box_test: Button,
+    run_combo_test: Button,
+    run_date_test: Button,
+    run_font_test: Button,
+    run_list_test: Button,
+    run_menu_test: Button,
 }
 
 mod partial_controls_test_ui {
@@ -72,7 +87,7 @@ mod partial_controls_test_ui {
 
             Window::builder()
                 .flags(WindowFlags::MAIN_WINDOW)
-                .size((500, 400))
+                .size((500, 420))
                 .position((100, 100))
                 .title("Controls")
                 .icon(Some(&data.window_icon))
@@ -138,7 +153,7 @@ mod partial_controls_test_ui {
                 .parent(&data.basics_control_tab)
                 .collection(vec!["Red", "White", "Green", "Yellow"])
                 .selected_index(Some(1))
-                .build(&mut data.test_list_box)?;
+                .build(&mut data.test_list_box1)?;
 
             ListBox::builder()
                 .flags(ListBoxFlags::VISIBLE | ListBoxFlags::MULTI_SELECT)
@@ -147,7 +162,7 @@ mod partial_controls_test_ui {
                 .parent(&data.basics_control_tab)
                 .collection(vec!["Cat", "Dog", "Parrot", "Horse", "Ogre"])
                 .multi_selection(vec![0, 2, 3])
-                .build(&mut data.test_list_box)?;
+                .build(&mut data.test_list_box2)?;
 
             ImageFrame::builder()
                 .position((150, 110))
@@ -155,7 +170,53 @@ mod partial_controls_test_ui {
                 .parent(&data.basics_control_tab)
                 .image(Some(&data.ferris))
                 .build(&mut data.test_img_frame)?;
-        
+
+
+            // Menu
+            Menu::builder()
+                .text("Test menu")
+                .parent(&data.window)
+                .build(&mut data.window_menu)?;
+
+            Menu::builder()
+                .text("Test Submenu")
+                .parent(&data.window_menu)
+                .build(&mut data.window_submenu1)?;
+            
+            MenuSeparator::builder()
+                .parent(&data.window_menu)
+                .build(&mut data.window_menu_sep)?;
+
+            MenuItem::builder()
+                .text("Test item 1")
+                .parent(&data.window_menu)
+                .build(&mut data.window_menu_item1)?;
+
+            MenuItem::builder()
+                .text("Test item 2")
+                .parent(&data.window_submenu1)
+                .build(&mut data.window_menu_item2)?;
+
+            MenuItem::builder()
+                .text("Test item 3")
+                .parent(&data.window)
+                .build(&mut data.window_menu_item3)?;
+
+            Menu::builder()
+                .popup(true)
+                .parent(&data.window)
+                .build(&mut data.pop_menu)?;
+
+            MenuItem::builder()
+                .text("Popup item 1")
+                .parent(&data.pop_menu)
+                .build(&mut data.pop_menu_item1)?;
+
+            MenuItem::builder()
+                .text("Popup item 2")
+                .parent(&data.pop_menu)
+                .build(&mut data.pop_menu_item2)?;
+
 
             //
             // Run tests
@@ -193,14 +254,21 @@ mod partial_controls_test_ui {
                 .text("Run date test")
                 .parent(&data.panel)
                 .build(&mut data.run_date_test)?;
+
             Button::builder()
                 .text("Run font test")
                 .parent(&data.panel)
                 .build(&mut data.run_font_test)?;
+
             Button::builder()
                 .text("Run list test")
                 .parent(&data.panel)
                 .build(&mut data.run_list_test)?;
+
+            Button::builder()
+                .text("Run menu test")
+                .parent(&data.panel)
+                .build(&mut data.run_menu_test)?;
 
             // Layout
             VBoxLayout::builder()
@@ -211,6 +279,7 @@ mod partial_controls_test_ui {
             GridLayout::builder()
                 .parent(&data.panel)
                 .spacing(1)
+                .max_row(Some(8))
                 .child(0, 0, &data.run_window_test)
                 .child(1, 0, &data.run_button_test)
                 .child(0, 1, &data.run_check_box_test)
@@ -218,7 +287,7 @@ mod partial_controls_test_ui {
                 .child(0, 2, &data.run_date_test)
                 .child(1, 2, &data.run_font_test)
                 .child(0, 3, &data.run_list_test)
-                .max_row(Some(8))
+                .child(1, 3, &data.run_menu_test)
                 .build();
             
             Ok(())
@@ -228,10 +297,16 @@ mod partial_controls_test_ui {
             use crate::Event as E;
 
             match evt {
+                E::MousePress(MousePressEvent::MousePressRightUp) =>
+                    if handle == self.window.handle {
+                        show_pop_menu(self, evt);
+                    } else if handle == self.basics_control_tab.handle {
+                        show_pop_menu(self, evt);
+                    },
                 E::OnButtonClick =>
                     if handle == self.run_window_test.handle {
                         run_window_tests(self, evt);
-                    } else if handle == self.run_button_test.handle {
+                    }  else if handle == self.run_button_test.handle {
                         run_button_tests(self, evt);
                     } else if handle == self.run_check_box_test.handle {
                         run_check_box_tests(self, evt);
@@ -243,6 +318,8 @@ mod partial_controls_test_ui {
                         run_font_tests(self, evt);
                     } else if handle == self.run_list_test.handle {
                         run_list_tests(self, evt);
+                    } else if handle == self.run_menu_test.handle {
+                        run_menu_tests(self, evt);
                     },
                 _ => {}
             }
@@ -250,10 +327,15 @@ mod partial_controls_test_ui {
 
 
         fn handles(&self) -> Vec<&ControlHandle> {
-            vec![&self.window.handle, &self.panel.handle]
+            vec![&self.window.handle, &self.panel.handle, &self.basics_control_tab.handle]
         }
 
     }
+}
+
+fn show_pop_menu(app: &ControlsTest, _evt: Event) {
+    let (x, y) = Cursor::position();
+    app.pop_menu.popup(x, y);
 }
 
 fn run_window_tests(app: &ControlsTest, _evt: Event) {
@@ -431,8 +513,13 @@ fn run_font_tests(app: &ControlsTest, _evt: Event) {
         app.test_label.set_font(Some(&app.arial_font));
         app.test_button.set_font(Some(&app.arial_font));
         app.test_checkbox1.set_font(Some(&app.arial_font));
+        app.test_checkbox2.set_font(Some(&app.arial_font));
         app.test_combo.set_font(Some(&app.arial_font));
         app.test_date.set_font(Some(&app.arial_font));
+        app.test_date.set_font(Some(&app.arial_font));
+        app.test_list_box1.set_font(Some(&app.arial_font));
+        app.test_list_box2.set_font(Some(&app.arial_font));
+        app.controls_holder.set_font(Some(&app.arial_font));
 
         assert_eq!(app.test_label.font().as_ref(), Some(&app.arial_font));
 
@@ -441,16 +528,113 @@ fn run_font_tests(app: &ControlsTest, _evt: Event) {
         app.test_label.set_font(None);
         app.test_button.set_font(None);
         app.test_checkbox1.set_font(None);
+        app.test_checkbox2.set_font(None);
         app.test_combo.set_font(None);
         app.test_date.set_font(None);
+        app.test_list_box1.set_font(None);
+        app.test_list_box2.set_font(None);
+        app.controls_holder.set_font(None);
+
+        app.test_list_box1.set_size(130, 100);
+        app.test_list_box2.set_size(130, 100);
+
         app.runs.borrow_mut().font = false;
     }
 }
 
 fn run_list_tests(app: &ControlsTest, _evt: Event) {
     if !app.runs.borrow().list {
+        app.test_list_box2.unselect_all();
+
+        {
+            let col = app.test_list_box1.collection();
+            assert_eq!(&col as &[&'static str], &["Red", "White", "Green", "Yellow"]);
+        }
+
+        {
+            let mut col = app.test_list_box1.collection_mut();
+            col.push("Blue");
+        }
+
+        app.test_list_box1.sync();
+        app.test_list_box1.push("Hello!");
+        assert_eq!(app.test_list_box1.len(), 6);
+
+        app.test_list_box1.set_selection(Some(0));
+        assert_eq!(app.test_list_box1.selected(0), true);
+        
+        
+        app.test_list_box1.set_selection(None);
+        assert_eq!(app.test_list_box1.selected(0), false);
+        assert_eq!(app.test_list_box1.selection(), None);
+        assert_eq!(app.test_list_box1.selection_string(), None);
+
+        app.test_list_box1.set_selection(Some(2));
+        assert_eq!(app.test_list_box1.selection(), Some(2));
+        assert_eq!(app.test_list_box1.selection_string(), Some("Green".to_string()));
+
+        app.test_list_box1.insert(1, "BOO!");
+        app.test_list_box1.insert(std::usize::MAX, "Ahoy!!");
+        assert_eq!(app.test_list_box1.set_selection_string("BOO!"), Some(1));
+        assert_eq!(app.test_list_box1.set_selection_string("Ahoy!!"), Some(7));
+
+        app.test_list_box1.remove(0);
+
+        
+        app.test_list_box2.multi_add_selection(0);
+        app.test_list_box2.multi_add_selection(2);
+        app.test_list_box2.multi_add_selection(3);
+        assert_eq!(app.test_list_box2.multi_selection_len(), 3);
+        assert_eq!(app.test_list_box2.multi_selection(), vec![0, 2, 3]);
+
+        
+        app.test_list_box2.multi_remove_selection(0);
+        assert_eq!(app.test_list_box2.multi_selection_len(), 2);
+        assert_eq!(app.test_list_box2.multi_selection(), vec![2, 3]);
+
+        app.test_list_box2.select_all();
+        assert_eq!(app.test_list_box2.multi_selection_len(), 5);
+        assert_eq!(app.test_list_box2.multi_selection(), vec![0, 1, 2, 3, 4]);
+
+        app.test_list_box2.unselect_all();
+        assert_eq!(app.test_list_box2.multi_selection_len(), 0);
+        assert_eq!(app.test_list_box2.multi_selection(), vec![]);
+
+        app.test_list_box2.multi_select_range(0..2);
+        assert_eq!(app.test_list_box2.multi_selection_len(), 3);
+        assert_eq!(app.test_list_box2.multi_selection(), vec![0, 1, 2]);
+
+        app.test_list_box2.multi_unselect_range(0..1);
+        assert_eq!(app.test_list_box2.multi_selection_len(), 1);
+        assert_eq!(app.test_list_box2.multi_selection(), vec![2]);
+
         app.runs.borrow_mut().list = true;
     } else {
+        app.test_list_box2.unselect_all();
+        app.test_list_box1.set_collection(vec!["Red", "White", "Green", "Yellow"]);
+
         app.runs.borrow_mut().list = false;
+    }
+}
+
+fn run_menu_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().menu {
+        app.window_menu_item1.set_enabled(false);
+        assert_eq!(app.window_menu_item1.enabled(), false);
+
+        app.window_submenu1.set_enabled(false);
+        assert_eq!(app.window_submenu1.enabled(), false);
+
+        app.pop_menu_item1.set_enabled(false);
+        assert_eq!(app.pop_menu_item1.enabled(), false);
+
+        app.pop_menu.set_enabled(false);
+
+        app.runs.borrow_mut().menu = true;
+    } else {
+        app.pop_menu_item1.set_enabled(true);
+        app.window_submenu1.set_enabled(true);
+        app.window_menu_item1.set_enabled(true);
+        app.runs.borrow_mut().menu = false;
     }
 }

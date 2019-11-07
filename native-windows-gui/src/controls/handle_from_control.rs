@@ -1,5 +1,5 @@
 use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, ComboBox,
-StatusBar, ImageFrame, ListBox, TrackBar};
+StatusBar, ImageFrame, ListBox, TrackBar, Menu, MenuItem, MenuSeparator};
 use std::convert::From;
 use std::fmt::Display;
 
@@ -46,6 +46,18 @@ impl<D: Display+Default> From<&ListBox<D>> for ControlHandle {
 
 impl From<&TrackBar> for ControlHandle {
     fn from(control: &TrackBar) -> Self { control.handle }
+}
+
+impl From<&Menu> for ControlHandle {
+    fn from(control: &Menu) -> Self { control.handle }
+}
+
+impl From<&MenuItem> for ControlHandle {
+    fn from(control: &MenuItem) -> Self { control.handle }
+}
+
+impl From<&MenuSeparator> for ControlHandle {
+    fn from(control: &MenuSeparator) -> Self { control.handle }
 }
 
 

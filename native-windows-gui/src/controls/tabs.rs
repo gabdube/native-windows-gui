@@ -4,7 +4,7 @@ use winapi::um::winnt::LPWSTR;
 use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
-use crate::{SystemError};
+use crate::{SystemError, Font};
 use super::{ControlBase, ControlHandle};
 use std::mem;
 
@@ -30,11 +30,12 @@ pub struct TabsContainer {
 
 impl TabsContainer {
 
-    pub fn builder() -> TabsContainerBuilder {
+    pub fn builder<'a>() -> TabsContainerBuilder<'a> {
         TabsContainerBuilder {
             size: (300, 300),
             position: (0, 0),
             parent: None,
+            font: None,
             flags: None,
         }
     }
@@ -125,46 +126,52 @@ impl TabsContainer {
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
-    /// Return the size of the button in the parent window
+    /// Return the size of the tabs container in the parent window
     pub fn size(&self) -> (u32, u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
-    /// Set the size of the button in the parent window
+    /// Set the size of the tabs container in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
-    /// Return the position of the button in the parent window
+    /// Return the position of the tabs container in the parent window
     pub fn position(&self) -> (i32, i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
-    /// Set the position of the button in the parent window
+    /// Set the position of the tabs container in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 
-    /// Return the button label
-    pub fn text(&self) -> String { 
+    /// Return the font of the control
+    pub fn font(&self) -> Option<Font> {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::get_window_text(handle) }
+
+        let font_handle = wh::get_window_font(handle);
+        if font_handle.is_null() {
+            None
+        } else {
+            Some(Font { handle: font_handle })
+        }
     }
 
-    /// Set the button label
-    pub fn set_text<'a>(&self, v: &'a str) {
+    /// Set the font of the control
+    pub fn set_font(&self, font: Option<&Font>) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::set_window_text(handle, v) }
+        unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
     }
 
     /// Winapi class name used during control creation
@@ -239,26 +246,27 @@ impl TabsContainer {
 }
 
 
-pub struct TabsContainerBuilder {
+pub struct TabsContainerBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     parent: Option<ControlHandle>,
+    font: Option<&'a Font>,
     flags: Option<TabsContainerFlags>,
 }
 
-impl TabsContainerBuilder {
+impl<'a> TabsContainerBuilder<'a> {
 
-    pub fn size(mut self, size: (i32, i32)) -> TabsContainerBuilder {
+    pub fn size(mut self, size: (i32, i32)) -> TabsContainerBuilder<'a> {
         self.size = size;
         self
     }
 
-    pub fn position(mut self, pos: (i32, i32)) -> TabsContainerBuilder {
+    pub fn position(mut self, pos: (i32, i32)) -> TabsContainerBuilder<'a> {
         self.position = pos;
         self
     }
 
-    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TabsContainerBuilder {
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TabsContainerBuilder<'a> {
         self.parent = Some(p.into());
         self
     }
@@ -281,6 +289,10 @@ impl TabsContainerBuilder {
             .build()?;
 
         out.hook_tabs();
+
+        if self.font.is_some() {
+            out.set_font(self.font);
+        }
 
         Ok(())
     }
@@ -330,6 +342,7 @@ impl Tab {
         let item_ptr = &item as *const TCITEMW;
         wh::send_message(tab_view_handle, TCM_SETITEMW, tab_index, item_ptr as LPARAM);
     }
+    
 
     //
     // Other methods
