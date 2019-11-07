@@ -61,11 +61,22 @@ This is the main project git. It is separated in multiple sections
  * Support fow low level system message capture. 
  * Cross compiling and testing from Linux to Windows with Wine and mingw.
 
+## Performance
+
+This was measured on a `Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz, 3401 Mhz, 4 Core(s), 8 Logical Processor(s)`
+
+
+In release mode, the `basic` example weight **163kb** on disk and take **900kb** in memory. Launch time is instantaneous.
+
+The interactive test suit (with over 50 controls) weight **671 kb** on disk and take **1100kb** in memory. Launch time is still instantaneous.
+
+Initial build time takes around 22 seconds for a basic applications. This is mainly due to `winapi-rs` taking its sweet time. Subsequent compile time takes around 0.7 seconds.
+
 ## Development
 
-The development of this library is considered "done". By that, I mean that 
+The development of this library is considered "done". By that, I mean that
 there won't by any change to the API. Issues can be raised if a bug is found or
-if some area in the documentation are unclear. If I overlooked a very important feature, 
+if some area in the documentation are unclear. If I overlooked a very important feature,
 it might also be added. 
 
 ## Code example
