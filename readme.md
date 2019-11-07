@@ -40,6 +40,11 @@ This is the main project git. It is separated in multiple sections
  * Menus and menu bar 
  * Image and font resource
  * Tooltip and system tray notification
+ * Partial templates support
+   * Split large application into chunks
+ * Dynamic controls support
+   * Add/Remove controls at runtime
+   * Bind or unbind new events at runtime
  * Multithreaded application support
    * Communicate to the GUI thread from another thread
    * Run multiple window on different threads
