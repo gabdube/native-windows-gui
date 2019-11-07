@@ -1,3 +1,4 @@
+use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use crate::Font;
@@ -100,12 +101,16 @@ impl TextBox {
 
     /// Return the selected range of characters by the user in the text input
     pub fn selection(&self) -> Range<u32> {
+        use winapi::um::winuser::EM_GETSEL;
+
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
-        let (w, l) = unsafe { get_selection(handle) };
+        let (mut out1, mut out2) = (0u32, 0u32);
+        let (ptr1, ptr2) = (&mut out1 as *mut u32, &mut out2 as *mut u32);
+        wh::send_message(handle, EM_GETSEL as u32, ptr1 as WPARAM, ptr2 as LPARAM);
 
-        Range { start: w as u32, end: l as u32 }
+        Range { start: out1 as u32, end: out2 as u32 }
     }
 
     /// Return the selected range of characters by the user in the text input
@@ -141,7 +146,6 @@ impl TextBox {
     /// A user can still copy text from a readonly TextEdit (unlike disabled)
     pub fn set_readonly(&self, r: bool) {
         use winapi::um::winuser::EM_SETREADONLY;
-        use winapi::shared::minwindef::WPARAM;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -250,17 +254,4 @@ impl TextBox {
         WS_BORDER | WS_CHILD | ES_MULTILINE
     }
 
-}
-
-use winapi::shared::windef::HWND;
-
-unsafe fn get_selection(hwnd: HWND) -> (u32, u32) {
-    use winapi::um::winuser::EM_GETSEL;
-    use winapi::um::winuser::SendMessageW;
-    use std::mem;
-
-    let (mut out1, mut out2) = (0u32, 0u32);
-    SendMessageW(hwnd, EM_GETSEL as u32, mem::transmute(&mut out1), mem::transmute(&mut out2));
-
-    (out1, out2) 
 }

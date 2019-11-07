@@ -44,6 +44,7 @@ impl CheckBox {
             size: (100, 25),
             position: (0, 0),
             background_color: None,
+            check_state: CheckBoxState::Unchecked,
             flags: None,
             font: None,
             parent: None
@@ -265,6 +266,7 @@ pub struct CheckBoxBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     background_color: Option<[u8; 3]>,
+    check_state: CheckBoxState,
     flags: Option<CheckBoxFlags>,
     font: Option<&'a Font>,
     parent: Option<ControlHandle>
@@ -289,6 +291,11 @@ impl<'a> CheckBoxBuilder<'a> {
 
     pub fn position(mut self, pos: (i32, i32)) -> CheckBoxBuilder<'a> {
         self.position = pos;
+        self
+    }
+
+    pub fn check_state(mut self, check: CheckBoxState) -> CheckBoxBuilder<'a> {
+        self.check_state = check;
         self
     }
 
@@ -335,6 +342,8 @@ impl<'a> CheckBoxBuilder<'a> {
         if self.background_color.is_some() {
             out.hook_background_color(self.background_color.unwrap());
         }
+
+        out.set_check_state(self.check_state);
 
         Ok(())
     }

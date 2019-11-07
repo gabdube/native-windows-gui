@@ -1,9 +1,18 @@
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_GROUP};
 use crate::win32::window_helper as wh;
-use crate::Font;
-use super::ControlHandle;
+use crate::{Font, SystemError};
+use super::{ControlBase, ControlHandle};
 
-const NOT_BOUND: &'static str = "CheckBox is not yet bound to a winapi object";
-const BAD_HANDLE: &'static str = "INTERNAL ERROR: CheckBox handle is not HWND!";
+const NOT_BOUND: &'static str = "RadioButton is not yet bound to a winapi object";
+const BAD_HANDLE: &'static str = "INTERNAL ERROR: RadioButton handle is not HWND!";
+
+bitflags! {
+    pub struct RadioButtonFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+        const GROUP = WS_GROUP;
+    }
+}
 
 /// Represents the check status of a radio button
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -24,6 +33,19 @@ pub struct RadioButton {
 }
 
 impl RadioButton {
+
+    pub fn builder<'a>() -> RadioButtonBuilder<'a> {
+        RadioButtonBuilder {
+            text: "A radio button",
+            size: (100, 25),
+            position: (0, 0),
+            background_color: None,
+            check_state: RadioButtonState::Unchecked,
+            flags: None,
+            font: None,
+            parent: None
+        }
+    }
 
 
     /// Return the check state of the check box
@@ -119,42 +141,42 @@ impl RadioButton {
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
-    /// Return the size of the button in the parent window
+    /// Return the size of the radio button in the parent window
     pub fn size(&self) -> (u32, u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
-    /// Set the size of the button in the parent window
+    /// Set the size of the radio button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
-    /// Return the position of the button in the parent window
+    /// Return the position of the radio button in the parent window
     pub fn position(&self) -> (i32, i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
-    /// Set the position of the button in the parent window
+    /// Set the position of the radio button in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 
-    /// Return the button label
+    /// Return the radio button label
     pub fn text(&self) -> String { 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_text(handle) }
     }
 
-    /// Set the button label
+    /// Set the radio button label
     pub fn set_text<'a>(&self, v: &'a str) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -168,7 +190,7 @@ impl RadioButton {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        ::winapi::um::winuser::WS_VISIBLE
+        WS_VISIBLE
     }
 
     /// Winapi flags required by the control
@@ -176,6 +198,120 @@ impl RadioButton {
         use winapi::um::winuser::{BS_NOTIFY, WS_CHILD, BS_AUTORADIOBUTTON};
 
         BS_NOTIFY | WS_CHILD | BS_AUTORADIOBUTTON
+    }
+
+    /// Change the radio button background color.
+    fn hook_background_color(&self, c: [u8; 3]) {
+        use crate::bind_raw_event_handler;
+        use winapi::um::winuser::{WM_CTLCOLORSTATIC};
+        use winapi::shared::{basetsd::UINT_PTR, windef::{HWND}, minwindef::LRESULT};
+        use winapi::um::wingdi::{CreateSolidBrush, RGB};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
+        let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
+        
+        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+            match msg {
+                WM_CTLCOLORSTATIC => {
+                    let child = l as HWND;
+                    if child == handle {
+                        return Some(brush as LRESULT);
+                    }
+                },
+                _ => {}
+            }
+
+            None
+        });
+    }
+
+}
+
+pub struct RadioButtonBuilder<'a> {
+    text: &'a str,
+    size: (i32, i32),
+    position: (i32, i32),
+    background_color: Option<[u8; 3]>,
+    check_state: RadioButtonState,
+    flags: Option<RadioButtonFlags>,
+    font: Option<&'a Font>,
+    parent: Option<ControlHandle>
+}
+
+impl<'a> RadioButtonBuilder<'a> {
+
+    pub fn flags(mut self, flags: RadioButtonFlags) -> RadioButtonBuilder<'a> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn text(mut self, text: &'a str) -> RadioButtonBuilder<'a> {
+        self.text = text;
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> RadioButtonBuilder<'a> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> RadioButtonBuilder<'a> {
+        self.position = pos;
+        self
+    }
+
+    pub fn check_state(mut self, check: RadioButtonState) -> RadioButtonBuilder<'a> {
+        self.check_state = check;
+        self
+    }
+
+    pub fn background_color(mut self, color: Option<[u8;3]>) -> RadioButtonBuilder<'a> {
+        self.background_color = color;
+        self
+    }
+
+    pub fn font(mut self, font: Option<&'a Font>) -> RadioButtonBuilder<'a> {
+        self.font = font;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> RadioButtonBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut RadioButton) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .text(self.text)
+            .parent(Some(parent))
+            .build()?;
+
+        if self.font.is_some() {
+            out.set_font(self.font);
+        }
+
+        if self.background_color.is_some() {
+            out.hook_background_color(self.background_color.unwrap());
+        }
+
+        out.set_check_state(self.check_state);
+
+        Ok(())
     }
 
 }

@@ -12,6 +12,8 @@ pub struct TestRun {
     font: bool,
     list: bool,
     menu: bool,
+    radio: bool,
+    text: bool
 }
 
 
@@ -37,6 +39,11 @@ pub struct ControlsTest {
     test_label: Label,
     test_list_box1: ListBox<&'static str>,
     test_list_box2: ListBox<&'static str>,
+    test_radio1: RadioButton,
+    test_radio2: RadioButton,
+    test_radio3: RadioButton,
+    test_radio4: RadioButton,
+    test_text_input: TextInput,
 
     // Menu
     window_menu: Menu,
@@ -60,6 +67,9 @@ pub struct ControlsTest {
     run_font_test: Button,
     run_list_test: Button,
     run_menu_test: Button,
+    run_radio_test: Button,
+    run_text_test: Button,
+
 }
 
 mod partial_controls_test_ui {
@@ -171,8 +181,50 @@ mod partial_controls_test_ui {
                 .image(Some(&data.ferris))
                 .build(&mut data.test_img_frame)?;
 
+            RadioButton::builder()
+                .flags(RadioButtonFlags::GROUP | RadioButtonFlags::VISIBLE)
+                .text("Cats")
+                .position((150, 220))
+                .size((150, 25))
+                .background_color(Some([255, 255, 255]))
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_radio1)?;
 
+            RadioButton::builder()
+                .text("Dogs")
+                .position((150, 245))
+                .size((150, 25))
+                .background_color(Some([255, 255, 255]))
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_radio2)?;
+
+            RadioButton::builder()
+                .flags(RadioButtonFlags::GROUP | RadioButtonFlags::VISIBLE)
+                .text("Energy drink")
+                .position((150, 280))
+                .size((150, 25))
+                .background_color(Some([255, 255, 255]))
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_radio3)?;
+
+            RadioButton::builder()
+                .text("Chocolate")
+                .position((150, 305))
+                .size((150, 25))
+                .background_color(Some([255, 255, 255]))
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_radio4)?;
+
+            TextInput::builder()
+                .text("Hello World!")
+                .position((290, 10))
+                .size((150, 25))
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_text_input)?;
+
+            //
             // Menu
+            //
             Menu::builder()
                 .text("Test menu")
                 .parent(&data.window)
@@ -270,7 +322,19 @@ mod partial_controls_test_ui {
                 .parent(&data.panel)
                 .build(&mut data.run_menu_test)?;
 
+            Button::builder()
+                .text("Run radio test")
+                .parent(&data.panel)
+                .build(&mut data.run_radio_test)?;
+
+            Button::builder()
+                .text("Run text test")
+                .parent(&data.panel)
+                .build(&mut data.run_text_test)?;
+
+            //
             // Layout
+            //
             VBoxLayout::builder()
                 .parent(&data.window)
                 .child(0, &data.controls_holder)
@@ -288,6 +352,8 @@ mod partial_controls_test_ui {
                 .child(1, 2, &data.run_font_test)
                 .child(0, 3, &data.run_list_test)
                 .child(1, 3, &data.run_menu_test)
+                .child(0, 4, &data.run_radio_test)
+                .child(1, 4, &data.run_text_test)
                 .build();
             
             Ok(())
@@ -306,7 +372,7 @@ mod partial_controls_test_ui {
                 E::OnButtonClick =>
                     if handle == self.run_window_test.handle {
                         run_window_tests(self, evt);
-                    }  else if handle == self.run_button_test.handle {
+                    } else if handle == self.run_button_test.handle {
                         run_button_tests(self, evt);
                     } else if handle == self.run_check_box_test.handle {
                         run_check_box_tests(self, evt);
@@ -320,11 +386,14 @@ mod partial_controls_test_ui {
                         run_list_tests(self, evt);
                     } else if handle == self.run_menu_test.handle {
                         run_menu_tests(self, evt);
+                    } else if handle == self.run_radio_test.handle {
+                        run_radio_tests(self, evt);
+                    } else if handle == self.run_text_test.handle {
+                        run_text_tests(self, evt);
                     },
                 _ => {}
             }
         }
-
 
         fn handles(&self) -> Vec<&ControlHandle> {
             vec![&self.window.handle, &self.panel.handle, &self.basics_control_tab.handle]
@@ -636,5 +705,30 @@ fn run_menu_tests(app: &ControlsTest, _evt: Event) {
         app.window_submenu1.set_enabled(true);
         app.window_menu_item1.set_enabled(true);
         app.runs.borrow_mut().menu = false;
+    }
+}
+
+fn run_radio_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().radio {
+        app.test_radio1.set_check_state(RadioButtonState::Checked);
+        assert_eq!(app.test_radio1.check_state(), RadioButtonState::Checked);
+
+        app.test_radio2.set_check_state(RadioButtonState::Checked);
+        assert_eq!(app.test_radio2.check_state(), RadioButtonState::Checked);
+
+        app.test_radio2.set_check_state(RadioButtonState::Unchecked);
+        assert_eq!(app.test_radio2.check_state(), RadioButtonState::Unchecked);
+
+        app.runs.borrow_mut().radio = true;
+    } else {
+        app.runs.borrow_mut().radio = false;
+    }
+}
+
+fn run_text_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().text {
+        app.runs.borrow_mut().text = true;
+    } else {
+        app.runs.borrow_mut().text = false;
     }
 }
