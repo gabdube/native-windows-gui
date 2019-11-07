@@ -29,7 +29,7 @@ This is the main project git. It is separated in multiple sections
   - A hefty documentation that goes over everything you need to know about NWG
 - linda-cat-cafe
   - The final result of the "cat cafe" tutorial in the docs
-- showcase
+- [showcase](https://github.com/gabdube/nwg-private/tree/master/showcase)
   - Images of the examples. If you've made a NWG application and want
   to share it here. Send me a message or open a PR. It's free real estate.
 
