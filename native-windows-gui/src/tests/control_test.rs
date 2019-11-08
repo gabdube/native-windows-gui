@@ -44,6 +44,7 @@ pub struct ControlsTest {
     test_radio3: RadioButton,
     test_radio4: RadioButton,
     test_text_input: TextInput,
+    test_text_box: TextBox,
 
     // Menu
     window_menu: Menu,
@@ -176,7 +177,7 @@ mod partial_controls_test_ui {
 
             ImageFrame::builder()
                 .position((150, 110))
-                .size((150, 99))
+                .size((130, 99))
                 .parent(&data.basics_control_tab)
                 .image(Some(&data.ferris))
                 .build(&mut data.test_img_frame)?;
@@ -185,7 +186,7 @@ mod partial_controls_test_ui {
                 .flags(RadioButtonFlags::GROUP | RadioButtonFlags::VISIBLE)
                 .text("Cats")
                 .position((150, 220))
-                .size((150, 25))
+                .size((130, 25))
                 .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_radio1)?;
@@ -193,7 +194,7 @@ mod partial_controls_test_ui {
             RadioButton::builder()
                 .text("Dogs")
                 .position((150, 245))
-                .size((150, 25))
+                .size((130, 25))
                 .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_radio2)?;
@@ -221,6 +222,13 @@ mod partial_controls_test_ui {
                 .size((150, 25))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_text_input)?;
+
+            TextBox::builder()
+                .text("Multi\r\nLine\r\nText")
+                .position((290, 40))
+                .size((150, 100))
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_text_box)?;
 
             //
             // Menu
@@ -426,9 +434,10 @@ fn run_window_tests(app: &ControlsTest, _evt: Event) {
 
         app.window.set_position(100, 100);
         assert_eq!(app.window.position(), (100, 100));
-        
-        app.window.set_size(500, 370);
-        assert_eq!(app.window.size(), (500, 370));
+
+        app.window.set_size(500, 420);
+        // The actual size return here might be less because it does not take account of the menubar
+        // assert_eq!(app.window.size(), (500, 400));
 
         app.runs.borrow_mut().window = true;
     } else {
@@ -727,8 +736,48 @@ fn run_radio_tests(app: &ControlsTest, _evt: Event) {
 
 fn run_text_tests(app: &ControlsTest, _evt: Event) {
     if !app.runs.borrow().text {
+        app.test_text_input.set_text("New Text");
+        assert_eq!(&app.test_text_input.text(), "New Text");
+
+        app.test_text_input.set_limit(32);
+        assert_eq!(app.test_text_input.limit(), 32);
+
+        assert_eq!(app.test_text_input.password_char(), None);
+        app.test_text_input.set_password_char(Some('X'));
+        assert_eq!(app.test_text_input.password_char(), Some('X'));
+
+        app.test_text_input.set_modified(true);
+        assert_eq!(app.test_text_input.modified(), true);
+
+        app.test_text_input.set_selection(0..4);
+        assert_eq!(app.test_text_input.selection(), 0..4);
+
+        assert_eq!(app.test_text_input.len(), 8);
+
+        assert_eq!(app.test_text_input.visible(), true);
+        app.test_text_input.set_visible(false);
+        assert_eq!(app.test_text_input.visible(), false);
+        app.test_text_input.set_visible(true);
+
+        app.test_text_input.set_focus();
+        assert_eq!(app.test_text_input.focus(), true);
+        app.window.set_focus();
+        assert_eq!(app.test_text_input.focus(), false);
+
+        assert_eq!(app.test_text_input.readonly(), false);
+        app.test_text_input.set_readonly(true);
+        assert_eq!(app.test_text_input.readonly(), true);
+
+        assert_eq!(app.test_text_input.enabled(), true);
+        app.test_text_input.set_enabled(false);
+        assert_eq!(app.test_text_input.enabled(), false);
+
         app.runs.borrow_mut().text = true;
     } else {
+        app.test_text_input.set_text("Hello World");
+        app.test_text_input.set_enabled(true);
+        app.test_text_input.set_readonly(false);
+        app.test_text_input.set_password_char(None);
         app.runs.borrow_mut().text = false;
     }
 }

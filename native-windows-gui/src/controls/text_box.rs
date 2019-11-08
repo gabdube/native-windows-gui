@@ -1,8 +1,8 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
-use crate::Font;
-use super::ControlHandle;
+use crate::{Font, SystemError};
+use super::{ControlBase, ControlHandle};
 use std::ops::Range;
 
 const NOT_BOUND: &'static str = "TextBox is not yet bound to a winapi object";
@@ -29,6 +29,19 @@ pub struct TextBox {
 }
 
 impl TextBox {
+
+    pub fn builder<'a>() -> TextBoxBuilder<'a> {
+        TextBoxBuilder {
+            text: "",
+            size: (100, 25),
+            position: (0, 0),
+            flags: None,
+            limit: 0,
+            readonly: false,
+            font: None,
+            parent: None
+        }
+    }
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
@@ -252,6 +265,95 @@ impl TextBox {
         use winapi::um::winuser::{WS_BORDER, WS_CHILD, ES_MULTILINE};
         
         WS_BORDER | WS_CHILD | ES_MULTILINE
+    }
+
+}
+
+
+pub struct TextBoxBuilder<'a> {
+    text: &'a str,
+    size: (i32, i32),
+    position: (i32, i32),
+    flags: Option<TextBoxFlags>,
+    limit: usize,
+    readonly: bool,
+    font: Option<&'a Font>,
+    parent: Option<ControlHandle>
+}
+
+impl<'a> TextBoxBuilder<'a> {
+
+    pub fn flags(mut self, flags: TextBoxFlags) -> TextBoxBuilder<'a> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn text(mut self, text: &'a str) -> TextBoxBuilder<'a> {
+        self.text = text;
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> TextBoxBuilder<'a> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> TextBoxBuilder<'a> {
+        self.position = pos;
+        self
+    }
+
+    pub fn limit(mut self, limit: usize) -> TextBoxBuilder<'a> {
+        self.limit = limit;
+        self
+    }
+
+    pub fn readonly(mut self, read: bool) -> TextBoxBuilder<'a> {
+        self.readonly = read;
+        self
+    }
+
+    pub fn font(mut self, font: Option<&'a Font>) -> TextBoxBuilder<'a> {
+        self.font = font;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TextBoxBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut TextBox) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .text(self.text)
+            .parent(Some(parent))
+            .build()?;
+
+        if self.limit > 0 {
+            out.set_limit(self.limit);
+        }
+
+        if self.readonly {
+            out.set_readonly(self.readonly);
+        }
+
+        if self.font.is_some() {
+            out.set_font(self.font);
+        }
+
+        Ok(())
     }
 
 }

@@ -38,6 +38,7 @@ impl TextInput {
             limit: 0,
             password: None,
             readonly: false,
+            font: None,
             parent: None
         }
     }
@@ -304,6 +305,7 @@ pub struct TextInputBuilder<'a> {
     limit: usize,
     password: Option<char>,
     readonly: bool,
+    font: Option<&'a Font>,
     parent: Option<ControlHandle>
 }
 
@@ -344,6 +346,11 @@ impl<'a> TextInputBuilder<'a> {
         self
     }
 
+    pub fn font(mut self, font: Option<&'a Font>) -> TextInputBuilder<'a> {
+        self.font = font;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TextInputBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -377,6 +384,10 @@ impl<'a> TextInputBuilder<'a> {
 
         if self.readonly {
             out.set_readonly(self.readonly);
+        }
+
+        if self.font.is_some() {
+            out.set_font(self.font);
         }
 
         Ok(())
