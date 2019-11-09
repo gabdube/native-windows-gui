@@ -54,13 +54,13 @@ pub use timer::Timer;
 pub use notice::Notice;
 
 #[cfg(feature = "datetime-picker")]
-pub use date_picker::{DatePicker, DatePickerValue};
+pub use date_picker::{DatePicker, DatePickerValue, DatePickerFlags};
 
 #[cfg(feature = "progress-bar")]
-pub use progress_bar::{ProgressBar, ProgressBarState};
+pub use progress_bar::{ProgressBar, ProgressBarState, ProgressBarFlags};
 
 #[cfg(feature = "progress-bar")]
-pub use tabs::{TabsContainer, Tab};
+pub use tabs::{TabsContainer, Tab, TabsContainerFlags};
 
 #[cfg(feature = "tree-view")]
 pub use treeview::{TreeView, TreeItem, TreeInsert};

@@ -13,7 +13,9 @@ pub struct TestRun {
     list: bool,
     menu: bool,
     radio: bool,
-    text: bool
+    text: bool,
+    progress: bool,
+    track: bool
 }
 
 
@@ -28,8 +30,10 @@ pub struct ControlsTest {
 
     // Control window
     pub window: Window,
+    status: StatusBar,
     controls_holder: TabsContainer,
     basics_control_tab: Tab,
+    dialog_tab: Tab,
     test_button: Button,
     test_checkbox1: CheckBox,
     test_checkbox2: CheckBox,
@@ -45,6 +49,9 @@ pub struct ControlsTest {
     test_radio4: RadioButton,
     test_text_input: TextInput,
     test_text_box: TextBox,
+    test_progress: ProgressBar,
+    test_track1: TrackBar,
+    test_track2: TrackBar,
 
     // Menu
     window_menu: Menu,
@@ -70,7 +77,8 @@ pub struct ControlsTest {
     run_menu_test: Button,
     run_radio_test: Button,
     run_text_test: Button,
-
+    run_progress_test: Button,
+    run_track_test: Button
 }
 
 mod partial_controls_test_ui {
@@ -98,11 +106,16 @@ mod partial_controls_test_ui {
 
             Window::builder()
                 .flags(WindowFlags::MAIN_WINDOW)
-                .size((500, 420))
+                .size((480, 430))
                 .position((100, 100))
                 .title("Controls")
                 .icon(Some(&data.window_icon))
                 .build(&mut data.window)?;
+
+            StatusBar::builder()
+                .text("Ready for tests ;)")
+                .parent(&data.window)
+                .build(&mut data.status)?;
 
             TabsContainer::builder()
                 .parent(&data.window)
@@ -112,6 +125,11 @@ mod partial_controls_test_ui {
                 .text("Basic")
                 .parent(&data.controls_holder)
                 .build(&mut data.basics_control_tab)?;
+
+            Tab::builder()
+                .text("Dialog")
+                .parent(&data.controls_holder)
+                .build(&mut data.dialog_tab)?;
 
             Button::builder()
                 .text("A simple button")
@@ -203,7 +221,7 @@ mod partial_controls_test_ui {
                 .flags(RadioButtonFlags::GROUP | RadioButtonFlags::VISIBLE)
                 .text("Energy drink")
                 .position((150, 280))
-                .size((150, 25))
+                .size((130, 25))
                 .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_radio3)?;
@@ -211,7 +229,7 @@ mod partial_controls_test_ui {
             RadioButton::builder()
                 .text("Chocolate")
                 .position((150, 305))
-                .size((150, 25))
+                .size((130, 25))
                 .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_radio4)?;
@@ -229,6 +247,27 @@ mod partial_controls_test_ui {
                 .size((150, 100))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_text_box)?;
+
+            ProgressBar::builder()
+                .position((290, 150))
+                .size((150, 30))
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_progress)?;
+
+            TrackBar::builder()
+                .position((290, 190))
+                .size((150, 20))
+                .parent(&data.basics_control_tab)
+                .background_color(Some([255, 255, 255]))
+                .build(&mut data.test_track1)?;
+
+            TrackBar::builder()
+                .flags(TrackBarFlags::VISIBLE | TrackBarFlags::RANGE | TrackBarFlags::VERTICAL | TrackBarFlags::AUTO_TICK)
+                .position((290, 220))
+                .size((20, 110))
+                .background_color(Some([255, 255, 255]))
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_track2)?;
 
             //
             // Menu
@@ -340,10 +379,21 @@ mod partial_controls_test_ui {
                 .parent(&data.panel)
                 .build(&mut data.run_text_test)?;
 
+            Button::builder()
+                .text("Run progress test")
+                .parent(&data.panel)
+                .build(&mut data.run_progress_test)?;
+
+            Button::builder()
+                .text("Run track test")
+                .parent(&data.panel)
+                .build(&mut data.run_track_test)?;
+
             //
             // Layout
             //
             VBoxLayout::builder()
+                .margin([5, 5, 25, 5])
                 .parent(&data.window)
                 .child(0, &data.controls_holder)
                 .build();
@@ -362,6 +412,8 @@ mod partial_controls_test_ui {
                 .child(1, 3, &data.run_menu_test)
                 .child(0, 4, &data.run_radio_test)
                 .child(1, 4, &data.run_text_test)
+                .child(0, 5, &data.run_progress_test)
+                .child(1, 5, &data.run_track_test)
                 .build();
             
             Ok(())
@@ -398,6 +450,10 @@ mod partial_controls_test_ui {
                         run_radio_tests(self, evt);
                     } else if handle == self.run_text_test.handle {
                         run_text_tests(self, evt);
+                    } else if handle == self.run_progress_test.handle {
+                        run_progress_tests(self, evt);
+                    } else if handle == self.run_track_test.handle {
+                        run_track_tests(self, evt);
                     },
                 _ => {}
             }
@@ -779,5 +835,59 @@ fn run_text_tests(app: &ControlsTest, _evt: Event) {
         app.test_text_input.set_readonly(false);
         app.test_text_input.set_password_char(None);
         app.runs.borrow_mut().text = false;
+    }
+}
+
+fn run_progress_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().progress {
+        app.test_progress.set_range(0..1000);
+
+        let r = app.test_progress.range();
+        assert!(r.start == 0 && r.end == 1000);
+
+        app.test_progress.set_pos(500);
+        assert!(app.test_progress.pos() == 500);
+
+        app.test_progress.set_step(100);
+        assert!(app.test_progress.step() == 100);
+
+        app.test_progress.set_state(ProgressBarState::Paused);
+        assert!(app.test_progress.state() == ProgressBarState::Paused);
+
+        app.test_progress.advance();
+        assert!(app.test_progress.pos() == 600);
+
+        app.test_progress.advance_delta(50);
+        assert!(app.test_progress.pos() == 650);
+
+        app.runs.borrow_mut().progress = true;
+    } else {
+        app.test_progress.set_pos(0);
+        app.test_progress.set_state(ProgressBarState::Normal);
+        app.runs.borrow_mut().progress = false;
+    }
+}
+
+fn run_track_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().track {
+        
+        app.test_track1.set_range_min(0);
+        app.test_track1.set_range_max(10);
+
+        assert_eq!(app.test_track1.range_min(), 0);
+        assert_eq!(app.test_track1.range_max(), 10);
+
+        app.test_track1.set_pos(3);
+        assert_eq!(app.test_track1.pos(), 3);
+
+        
+        app.test_track2.set_range_min(0);
+        app.test_track2.set_range_max(5);
+        app.test_track2.set_selection_range_pos(0..3);
+        assert_eq!(app.test_track2.selection_range_pos(), 0..3);
+
+        app.runs.borrow_mut().track = true;
+    } else {
+        app.runs.borrow_mut().track = false;
     }
 }

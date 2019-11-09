@@ -1,9 +1,24 @@
+/*!
+A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
+that indicates what the button does when the user selects it.
+*/
+
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
-use super::ControlHandle;
+use crate::SystemError;
+use super::{ControlHandle, ControlBase};
 use std::ops::Range;
 
 const NOT_BOUND: &'static str = "Progress bar is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Progress bar handle is not HWND!";
+
+
+bitflags! {
+    pub struct ProgressBarFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u8)]
@@ -19,6 +34,19 @@ pub struct ProgressBar {
 }
 
 impl ProgressBar {
+
+    pub fn builder() -> ProgressBarBuilder {
+        ProgressBarBuilder {
+            size: (100, 40),
+            position: (0, 0),
+            flags: None,
+            state: ProgressBarState::Normal,
+            step: 1,
+            pos: 0,
+            range: 0..100,
+            parent: None
+        }
+    }
 
     /// Return the current state of the progress bar
     pub fn state(&self) -> ProgressBarState {
@@ -226,6 +254,87 @@ impl ProgressBar {
         use winapi::um::winuser::{WS_CHILD};
 
         WS_CHILD
+    }
+
+}
+
+
+pub struct ProgressBarBuilder {
+    size: (i32, i32),
+    position: (i32, i32),
+    flags: Option<ProgressBarFlags>,
+    state: ProgressBarState,
+    step: u32,
+    pos: u32,
+    range: Range<u32>,
+    parent: Option<ControlHandle>
+}
+
+impl ProgressBarBuilder {
+
+    pub fn flags(mut self, flags: ProgressBarFlags) -> ProgressBarBuilder {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> ProgressBarBuilder {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> ProgressBarBuilder {
+        self.position = pos;
+        self
+    }
+
+    pub fn state(mut self, state: ProgressBarState) -> ProgressBarBuilder {
+        self.state = state;
+        self
+    }
+
+    pub fn step(mut self, step: u32) -> ProgressBarBuilder {
+        self.step = step;
+        self
+    }
+
+    pub fn pos(mut self, pos: u32) -> ProgressBarBuilder {
+        self.pos = pos;
+        self
+    }
+
+    pub fn range(mut self, range: Range<u32>) -> ProgressBarBuilder {
+        self.range = range;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ProgressBarBuilder {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut ProgressBar) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .parent(Some(parent))
+            .build()?;
+
+        out.set_state(self.state);
+        out.set_step(self.step);
+        out.set_pos(self.pos);
+        out.set_range(self.range);
+
+        Ok(())
     }
 
 }

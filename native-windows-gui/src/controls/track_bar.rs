@@ -2,7 +2,8 @@ use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::WS_VISIBLE;
 use winapi::um::commctrl::{TBS_AUTOTICKS, TBS_VERT, TBS_HORZ, TBS_TOP, TBS_BOTTOM, TBS_LEFT, TBS_RIGHT, TBS_NOTICKS, TBS_ENABLESELRANGE};
 use crate::win32::window_helper as wh;
-use super::ControlHandle;
+use crate::SystemError;
+use super::{ControlBase, ControlHandle};
 use std::ops::Range;
 
 const NOT_BOUND: &'static str = "TrackBar is not yet bound to a winapi object";
@@ -35,6 +36,19 @@ pub struct TrackBar {
 }
 
 impl TrackBar {
+
+    pub fn builder() -> TrackbarBuilder {
+        TrackbarBuilder {
+            size: (100, 20),
+            position: (0, 0),
+            range: None,
+            selected_range: None,
+            pos: None,
+            flags: None,
+            parent: None,
+            background_color: None
+        }
+    }
 
     /// Retrieves the current logical position of the slider in a trackbar.
     /// The logical positions are the integer values in the trackbar's range of minimum to maximum slider positions. 
@@ -213,7 +227,7 @@ impl TrackBar {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        ::winapi::um::winuser::WS_VISIBLE
+        WS_VISIBLE | TBS_AUTOTICKS
     }
 
     /// Winapi flags required by the control
@@ -221,6 +235,115 @@ impl TrackBar {
         use winapi::um::winuser::{WS_CHILD};
 
         WS_CHILD
+    }
+
+    /// Change the label background color to transparent.
+    fn hook_background_color(&self, c: [u8; 3]) {
+        use crate::bind_raw_event_handler;
+        use winapi::um::winuser::{WM_CTLCOLORSTATIC};
+        use winapi::shared::{basetsd::UINT_PTR, windef::{HWND}, minwindef::LRESULT};
+        use winapi::um::wingdi::{CreateSolidBrush, RGB};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
+        let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
+        
+        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+            match msg {
+                WM_CTLCOLORSTATIC => {
+                    let child = l as HWND;
+                    if child == handle {
+                        return Some(brush as LRESULT);
+                    }
+                },
+                _ => {}
+            }
+
+            None
+        });
+    }
+
+}
+
+
+pub struct TrackbarBuilder {
+    size: (i32, i32),
+    position: (i32, i32),
+    range: Option<Range<usize>>,
+    selected_range: Option<Range<usize>>,
+    pos: Option<usize>,
+    flags: Option<TrackBarFlags>,
+    parent: Option<ControlHandle>,
+    background_color: Option<[u8; 3]>,
+}
+
+impl TrackbarBuilder {
+
+    pub fn flags(mut self, flags: TrackBarFlags) -> TrackbarBuilder {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> TrackbarBuilder {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> TrackbarBuilder {
+        self.position = pos;
+        self
+    }
+
+    pub fn range(mut self, range: Option<Range<usize>>) -> TrackbarBuilder {
+        self.range = range;
+        self
+    }
+
+    pub fn selected_range(mut self, range: Option<Range<usize>>) -> TrackbarBuilder {
+        self.selected_range = range;
+        self
+    }
+
+    pub fn pos(mut self, pos: Option<usize>) -> TrackbarBuilder {
+        self.pos = pos;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TrackbarBuilder {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn background_color(mut self, color: Option<[u8;3]>) -> TrackbarBuilder {
+        self.background_color = color;
+        self
+    }
+
+    pub fn build(self, out: &mut TrackBar) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .parent(Some(parent))
+            .build()?;
+
+
+        if self.background_color.is_some() {
+            out.hook_background_color(self.background_color.unwrap());
+        }
+    
+        Ok(())
     }
 
 }

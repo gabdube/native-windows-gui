@@ -1,6 +1,7 @@
+use winapi::shared::minwindef::{WPARAM, LPARAM};
 use crate::win32::window_helper as wh;
-use crate::Font;
-use super::ControlHandle;
+use crate::{Font, SystemError};
+use super::{ControlHandle, ControlBase};
 
 const NOT_BOUND: &'static str = "StatusBar is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: StatusBar handle is not HWND!";
@@ -13,11 +14,18 @@ pub struct StatusBar {
 
 impl StatusBar {
 
+    pub fn builder<'a>() -> StatusBarBuilder<'a> {
+        StatusBarBuilder {
+            text: "",
+            font: None,
+            parent: None
+        }
+    }
+
     /// Set the minimum height of the statusbar (in pixels)
     pub fn set_min_height(&self, height: u32) {
         use winapi::um::commctrl::SB_SETMINHEIGHT;
         use winapi::um::winuser::WM_SIZE;
-        use winapi::shared::minwindef::WPARAM;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -48,16 +56,34 @@ impl StatusBar {
 
     /// Return the text in one of the region of the status bar
     pub fn text<'a>(&self, index: u8) -> String {
+        use winapi::um::commctrl::{SB_GETTEXTLENGTHW, SB_GETTEXTW};
+        use winapi::shared::minwindef::{LOWORD};
+        use crate::win32::base_helper::from_utf16;
+
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        get_status_text(handle, index)
+        
+        let result = wh::send_message(handle, SB_GETTEXTLENGTHW, index as WPARAM, 0);
+        let text_length = LOWORD(result as u32) as usize;
+
+        let mut buffer: Vec<u16> = Vec::with_capacity(text_length);
+        unsafe { buffer.set_len(text_length); }
+        
+        wh::send_message(handle, SB_GETTEXTW, index as WPARAM, buffer.as_mut_ptr() as LPARAM);
+
+        from_utf16(&buffer)
     }
 
     /// Set the text in one of the region of the status bar
     pub fn set_text<'a>(&self, index: u8, text: &'a str) {
+        use winapi::um::commctrl::{SB_SETTEXTW};
+        use crate::win32::base_helper::to_utf16;
+
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        set_status_text(handle, index, text);
+        
+        let text = to_utf16(text);
+        wh::send_message(handle, SB_SETTEXTW, index as WPARAM, text.as_ptr() as LPARAM);
     }
 
     /// Winapi class name used during control creation
@@ -98,34 +124,46 @@ impl StatusBar {
 
 }
 
-use std::mem;
-use winapi::shared::windef::HWND;
-
-fn set_status_text<'a>(handle: HWND, index: u8, text: &'a str) {
-    use winapi::um::commctrl::{SB_SETTEXTW};
-    use winapi::shared::minwindef::WPARAM;
-    use crate::win32::base_helper::to_utf16;
-
-    let text = to_utf16(text);
-    unsafe {
-        wh::send_message(handle, SB_SETTEXTW, index as WPARAM, mem::transmute(text.as_ptr()));
-    }
+pub struct StatusBarBuilder<'a> {
+    text: &'a str,
+    font: Option<&'a Font>,
+    parent: Option<ControlHandle>
 }
 
-fn get_status_text(handle: HWND, index: u8) -> String {
-    use winapi::um::commctrl::{SB_GETTEXTLENGTHW, SB_GETTEXTW};
-    use winapi::shared::minwindef::{LOWORD, WPARAM};
-    use crate::win32::base_helper::from_utf16;
+impl<'a> StatusBarBuilder<'a> {
 
-    unsafe {
-        let result = wh::send_message(handle, SB_GETTEXTLENGTHW, index as WPARAM, 0);
-        let text_length = LOWORD(result as u32) as usize;
-
-        let mut buffer: Vec<u16> = Vec::with_capacity(text_length);
-        buffer.set_len(text_length);
-        
-        wh::send_message(handle, SB_GETTEXTW, index as WPARAM, mem::transmute(buffer.as_mut_ptr()));
-
-        from_utf16(&buffer)
+    pub fn text(mut self, text: &'a str) -> StatusBarBuilder<'a> {
+        self.text = text;
+        self
     }
+
+    pub fn font(mut self, font: Option<&'a Font>) -> StatusBarBuilder<'a> {
+        self.font = font;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> StatusBarBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut StatusBar) -> Result<(), SystemError> {
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(out.flags())
+            .parent(Some(parent))
+            .build()?;
+
+        out.set_text(0, self.text);
+        out.hook_parent_resize();
+
+        Ok(())
+    }
+
 }
