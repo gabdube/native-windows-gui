@@ -961,5 +961,7 @@ fn run_tooltip_tests(app: &ControlsTest, _evt: Event) {
 fn set_tooltip_dynamic<'a>(app: &ControlsTest, handle: &ControlHandle, data: &mut ToolTipTextData<'a>) {
     if &app.window == handle {
         data.set_text(&format!("Control text: \"{}\"", app.window.text()));
+    } else if &app.test_text_input == handle {
+        data.set_text(&format!("Control text: \"{}\"", app.test_text_input.text()));
     }
 }
