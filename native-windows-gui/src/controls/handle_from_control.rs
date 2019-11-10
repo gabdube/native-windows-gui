@@ -4,7 +4,6 @@ use std::convert::From;
 use std::fmt::Display;
 
 macro_rules! handles {
-    // `()` indicates that the macro takes no argument.
     ($control:ty) => {
         impl From<&$control> for ControlHandle {
             fn from(control: &$control) -> Self { control.handle }
@@ -13,6 +12,12 @@ macro_rules! handles {
         impl PartialEq<ControlHandle> for $control {
             fn eq(&self, other: &ControlHandle) -> bool {
                 self.handle == *other
+            }
+        }
+
+        impl PartialEq<$control> for ControlHandle {
+            fn eq(&self, other: &$control) -> bool {
+                *self == other.handle
             }
         }
     };
@@ -44,6 +49,12 @@ impl<D: Display+Default> PartialEq<ControlHandle> for ComboBox<D> {
     }
 }
 
+impl<D: Display+Default> PartialEq<ComboBox<D>> for ControlHandle {
+    fn eq(&self, other: &ComboBox<D>) -> bool {
+        *self == other.handle
+    }
+}
+
 impl<D: Display+Default> From<&ListBox<D>> for ControlHandle {
     fn from(control: &ListBox<D>) -> Self { control.handle }
 }
@@ -54,6 +65,11 @@ impl<D: Display+Default> PartialEq<ControlHandle> for ListBox<D> {
     }
 }
 
+impl<D: Display+Default> PartialEq<ListBox<D>> for ControlHandle {
+    fn eq(&self, other: &ListBox<D>) -> bool {
+        *self == other.handle
+    }
+}
 
 
 #[cfg(feature = "tabs")]

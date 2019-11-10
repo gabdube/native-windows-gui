@@ -257,7 +257,7 @@ impl TextBox {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {;
-        ::winapi::um::winuser::WS_VISIBLE
+        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL
     }
 
     /// Winapi flags required by the control

@@ -4,6 +4,7 @@ that indicates what the button does when the user selects it.
 */
 
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::commctrl::{PBS_VERTICAL};
 use crate::win32::window_helper as wh;
 use crate::SystemError;
 use super::{ControlHandle, ControlBase};
@@ -17,6 +18,7 @@ bitflags! {
     pub struct ProgressBarFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const VERTICAL = PBS_VERTICAL;
     }
 }
 

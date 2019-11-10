@@ -17,6 +17,7 @@ pub struct TestRun {
     progress: bool,
     track: bool,
     tooltip: bool,
+    status: bool,
 }
 
 
@@ -50,7 +51,8 @@ pub struct ControlsTest {
     test_radio4: RadioButton,
     test_text_input: TextInput,
     test_text_box: TextBox,
-    test_progress: ProgressBar,
+    test_progress1: ProgressBar,
+    test_progress2: ProgressBar,
     test_track1: TrackBar,
     test_track2: TrackBar,
 
@@ -86,6 +88,7 @@ pub struct ControlsTest {
     run_progress_test: Button,
     run_track_test: Button,
     run_tooltip_test: Button,
+    run_status_test: Button,
 }
 
 mod partial_controls_test_ui {
@@ -259,7 +262,16 @@ mod partial_controls_test_ui {
                 .position((290, 150))
                 .size((150, 30))
                 .parent(&data.basics_control_tab)
-                .build(&mut data.test_progress)?;
+                .build(&mut data.test_progress1)?;
+
+            ProgressBar::builder()
+                .flags(ProgressBarFlags::VISIBLE | ProgressBarFlags::VERTICAL)
+                .position((320, 220))
+                .size((20, 110))
+                .range(0..100)
+                .pos(50)
+                .parent(&data.basics_control_tab)
+                .build(&mut data.test_progress2)?;
 
             TrackBar::builder()
                 .position((290, 190))
@@ -271,7 +283,7 @@ mod partial_controls_test_ui {
             TrackBar::builder()
                 .flags(TrackBarFlags::VISIBLE | TrackBarFlags::RANGE | TrackBarFlags::VERTICAL | TrackBarFlags::AUTO_TICK)
                 .position((290, 220))
-                .size((20, 110))
+                .size((30, 110))
                 .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_track2)?;
@@ -423,6 +435,11 @@ mod partial_controls_test_ui {
                 .parent(&data.panel)
                 .build(&mut data.run_tooltip_test)?;
 
+            Button::builder()
+                .text("Run status test")
+                .parent(&data.panel)
+                .build(&mut data.run_status_test)?;
+
             //
             // Layout
             //
@@ -449,6 +466,7 @@ mod partial_controls_test_ui {
                 .child(0, 5, &data.run_progress_test)
                 .child(1, 5, &data.run_track_test)
                 .child(0, 6, &data.run_tooltip_test)
+                .child(1, 6, &data.run_status_test)
                 .build();
             
             Ok(())
@@ -459,41 +477,43 @@ mod partial_controls_test_ui {
 
             match evt {
                 E::MousePress(MousePressEvent::MousePressRightUp) =>
-                    if handle == self.window.handle {
+                    if &handle == &self.window {
                         show_pop_menu(self, evt);
-                    } else if handle == self.basics_control_tab.handle {
+                    } else if &handle == &self.basics_control_tab {
                         show_pop_menu(self, evt);
                     },
                 E::OnButtonClick =>
-                    if handle == self.run_window_test.handle {
+                    if &handle == &self.run_window_test {
                         run_window_tests(self, evt);
-                    } else if handle == self.run_button_test.handle {
+                    } else if &handle == &self.run_button_test {
                         run_button_tests(self, evt);
-                    } else if handle == self.run_check_box_test.handle {
+                    } else if &handle == &self.run_check_box_test {
                         run_check_box_tests(self, evt);
-                    } else if handle == self.run_combo_test.handle {
+                    } else if &handle == &self.run_combo_test {
                         run_combo_tests(self, evt);
-                    } else if handle == self.run_date_test.handle {
+                    } else if &handle == &self.run_date_test {
                         run_date_tests(self, evt);
-                    } else if handle == self.run_font_test.handle {
+                    } else if &handle == &self.run_font_test {
                         run_font_tests(self, evt);
-                    } else if handle == self.run_list_test.handle {
+                    } else if &handle == &self.run_list_test {
                         run_list_tests(self, evt);
-                    } else if handle == self.run_menu_test.handle {
+                    } else if &handle == &self.run_menu_test {
                         run_menu_tests(self, evt);
-                    } else if handle == self.run_radio_test.handle {
+                    } else if &handle == &self.run_radio_test {
                         run_radio_tests(self, evt);
-                    } else if handle == self.run_text_test.handle {
+                    } else if &handle == &self.run_text_test {
                         run_text_tests(self, evt);
-                    } else if handle == self.run_progress_test.handle {
+                    } else if &handle == &self.run_progress_test {
                         run_progress_tests(self, evt);
-                    } else if handle == self.run_track_test.handle {
+                    } else if &handle == &self.run_track_test {
                         run_track_tests(self, evt);
-                    } else if handle == self.run_tooltip_test.handle {
+                    } else if &handle == &self.run_tooltip_test {
                         run_tooltip_tests(self, evt);
+                    } else if &handle == &self.run_status_test {
+                        run_status_tests(self, evt);
                     },
                 E::OnTooltipText => 
-                    if handle == self.window.handle {
+                    if &handle == &self.window {
                         set_tooltip_dynamic(self, &self.window.handle, _evt_data.on_tooltip_text());
                     }
                 _ => {}
@@ -695,6 +715,8 @@ fn run_font_tests(app: &ControlsTest, _evt: Event) {
         app.test_list_box1.set_font(Some(&app.arial_font));
         app.test_list_box2.set_font(Some(&app.arial_font));
         app.controls_holder.set_font(Some(&app.arial_font));
+        app.test_text_input.set_font(Some(&app.arial_font));
+        app.test_text_box.set_font(Some(&app.arial_font));
 
         assert_eq!(app.test_label.font().as_ref(), Some(&app.arial_font));
 
@@ -881,30 +903,30 @@ fn run_text_tests(app: &ControlsTest, _evt: Event) {
 
 fn run_progress_tests(app: &ControlsTest, _evt: Event) {
     if !app.runs.borrow().progress {
-        app.test_progress.set_range(0..1000);
+        app.test_progress1.set_range(0..1000);
 
-        let r = app.test_progress.range();
+        let r = app.test_progress1.range();
         assert!(r.start == 0 && r.end == 1000);
 
-        app.test_progress.set_pos(500);
-        assert!(app.test_progress.pos() == 500);
+        app.test_progress1.set_pos(500);
+        assert!(app.test_progress1.pos() == 500);
 
-        app.test_progress.set_step(100);
-        assert!(app.test_progress.step() == 100);
+        app.test_progress1.set_step(100);
+        assert!(app.test_progress1.step() == 100);
 
-        app.test_progress.set_state(ProgressBarState::Paused);
-        assert!(app.test_progress.state() == ProgressBarState::Paused);
+        app.test_progress1.set_state(ProgressBarState::Paused);
+        assert!(app.test_progress1.state() == ProgressBarState::Paused);
 
-        app.test_progress.advance();
-        assert!(app.test_progress.pos() == 600);
+        app.test_progress1.advance();
+        assert!(app.test_progress1.pos() == 600);
 
-        app.test_progress.advance_delta(50);
-        assert!(app.test_progress.pos() == 650);
+        app.test_progress1.advance_delta(50);
+        assert!(app.test_progress1.pos() == 650);
 
         app.runs.borrow_mut().progress = true;
     } else {
-        app.test_progress.set_pos(0);
-        app.test_progress.set_state(ProgressBarState::Normal);
+        app.test_progress1.set_pos(0);
+        app.test_progress1.set_state(ProgressBarState::Normal);
         app.runs.borrow_mut().progress = false;
     }
 }
@@ -955,6 +977,27 @@ fn run_tooltip_tests(app: &ControlsTest, _evt: Event) {
         app.test_ttp1.register(&app.test_button, "A button");
         app.test_ttp2.set_enabled(true);
         app.runs.borrow_mut().tooltip = false;
+    }
+}
+
+fn run_status_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().status {
+
+        app.status.set_text(0, "Status changed!");
+        assert_eq!(&app.status.text(0), "Status changed!");
+
+        app.status.set_font(Some(&app.arial_font));
+        assert_eq!(app.status.font().as_ref(), Some(&app.arial_font));
+
+        app.status.set_min_height(55);
+
+        app.runs.borrow_mut().status = true;
+    } else {
+
+        app.status.set_font(None);
+        app.status.set_min_height(25);
+
+        app.runs.borrow_mut().status = false;
     }
 }
 

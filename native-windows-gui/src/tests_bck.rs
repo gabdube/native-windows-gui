@@ -20,7 +20,8 @@ pub struct TestRun {
     tooltip: bool,
     track_bar: bool,
     cursor: bool,
-    tree: bool
+    tree: bool,
+    status: bool
 }
 
 

@@ -45,6 +45,7 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
 
 /**
     Set a window subclass the uses the `process_events` function of NWG.
+    The window subclass is applied to the window and all it's children (recursively).
 */
 pub fn bind_event_handler<'a, F>(handle: &ControlHandle, f: F) 
     where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
@@ -64,7 +65,7 @@ pub fn bind_event_handler<'a, F>(handle: &ControlHandle, f: F)
 
 /**
     Set a window subclass the uses the `process_raw_events` function of NWG.
-
+    The subclass is only applied to the control itself and NOT the children.
 */
 pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) 
     where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
