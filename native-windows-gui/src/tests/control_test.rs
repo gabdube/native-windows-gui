@@ -296,7 +296,7 @@ mod partial_controls_test_ui {
                 .register(&data.test_date, "A test date picker")
                 .register(&data.test_combo, "A test combobox")
                 .register_callback(&data.window)
-                .register_callback(&data.test_text_box)
+                .register_callback(&data.test_text_input)
                 .build(&mut data.test_ttp1)?;
 
             Tooltip::builder()
@@ -515,13 +515,15 @@ mod partial_controls_test_ui {
                 E::OnTooltipText => 
                     if &handle == &self.window {
                         set_tooltip_dynamic(self, &self.window.handle, _evt_data.on_tooltip_text());
-                    }
+                    } else if &handle == &self.test_text_input {
+                        set_tooltip_dynamic(self, &self.test_text_input.handle, _evt_data.on_tooltip_text());
+                    },
                 _ => {}
             }
         }
 
         fn handles(&self) -> Vec<&ControlHandle> {
-            vec![&self.window.handle, &self.panel.handle, &self.basics_control_tab.handle]
+            vec![&self.window.handle, &self.panel.handle]
         }
 
     }
