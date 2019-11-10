@@ -112,3 +112,7 @@ impl PartialEq for ControlHandle {
 }
 
 impl Eq for ControlHandle {}
+
+impl From<&ControlHandle> for ControlHandle {
+    fn from(control: &ControlHandle) -> Self { *control }
+}

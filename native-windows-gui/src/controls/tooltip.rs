@@ -2,8 +2,8 @@ use winapi::shared::minwindef::{UINT, LPARAM, WPARAM};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 //use crate::Font;
-use crate::Image;
-use super::ControlHandle;
+use crate::{Image, SystemError};
+use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
 
 const NOT_BOUND: &'static str = "Tooltip is not yet bound to a winapi object";
@@ -36,6 +36,16 @@ pub struct Tooltip {
 }
 
 impl Tooltip {
+
+    pub fn builder<'a>() -> TooltipBuilder<'a> {
+        TooltipBuilder {
+            title: None,
+            ico: None,
+            default_ico: None,
+            register: Vec::new(),
+            register_cb: Vec::new()
+        }
+    }
 
     /*
     Work with Comclt32.dll version 6.0. Should be implemented eventually
@@ -234,13 +244,15 @@ impl Tooltip {
 
     /// Register the tooltip under a control.
     /// `owner` must be a window control.
-    pub fn register<'a>(&self, owner: &ControlHandle, text: &'a str) {
+    pub fn register<'a, W: Into<ControlHandle>>(&self, owner: W, text: &'a str) {
         use winapi::um::commctrl::{TTM_ADDTOOLW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS};
         use winapi::um::winnt::LPSTR;
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let owner = owner.into();
 
         let mut text = to_utf16(text);
         let owner_handle = {
@@ -264,13 +276,48 @@ impl Tooltip {
         wh::send_message(handle, TTM_ADDTOOLW, 0, tool_ptr as LPARAM);
     }
 
+    /// Register the tooltip under a control.
+    /// `owner` must be a window control.
+    /// When the user trigger the tooltip, the application receives a `OnTooltipText` event
+    pub fn register_callback<W: Into<ControlHandle>>(&self, owner: W) {
+        use winapi::um::commctrl::{TTM_ADDTOOLW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS, LPSTR_TEXTCALLBACKW};
+        use winapi::um::winnt::LPSTR;
+        use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let owner = owner.into();
+        let owner_handle = {
+            if owner.blank() { panic!(NOT_BOUND); }
+            owner.hwnd().expect(BAD_HANDLE)
+        };
+
+        let tool = TTTOOLINFOW {
+            cbSize: mem::size_of::<TTTOOLINFOW>() as UINT,
+            uFlags: TTF_IDISHWND | TTF_SUBCLASS,
+            hwnd: owner_handle,
+            uId: owner_handle as UINT_PTR,
+            rect: RECT { left: 0, top: 0, right: 0, bottom: 0 },
+            hinst: ptr::null_mut(),
+            lpszText: LPSTR_TEXTCALLBACKW as LPSTR,
+            lParam: 0,
+            lpReserved: ptr::null_mut()
+        };
+
+        let tool_ptr = &tool as *const TTTOOLINFOW;
+        wh::send_message(handle, TTM_ADDTOOLW, 0, tool_ptr as LPARAM);
+    }
+
     /// Remove the tooltip from a control
-    pub fn unregister(&self, owner: &ControlHandle) {
+    pub fn unregister<W: Into<ControlHandle>>(&self, owner: W) {
         use winapi::um::commctrl::{TTM_DELTOOLW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS};
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let owner = owner.into();
 
         let owner_handle = {
             if owner.blank() { panic!(NOT_BOUND); }
@@ -310,6 +357,67 @@ impl Tooltip {
         use winapi::um::commctrl::{TTS_ALWAYSTIP, TTS_NOPREFIX};
 
         WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX
+    }
+
+}
+
+pub struct TooltipBuilder<'a> {
+    title: Option<&'a str>,
+    ico: Option<&'a Image>,
+    default_ico: Option<TooltipIcon>,
+    register: Vec<(ControlHandle, &'a str)>,
+    register_cb: Vec<ControlHandle>,
+}
+
+impl<'a> TooltipBuilder<'a> {
+
+    pub fn register<W: Into<ControlHandle>>(mut self, widget: W, text: &'a str) -> TooltipBuilder<'a> {
+        self.register.push((widget.into(), text));
+        self
+    }
+
+    pub fn register_callback<W: Into<ControlHandle>>(mut self, widget: W) -> TooltipBuilder<'a> {
+        self.register_cb.push(widget.into());
+        self
+    }
+
+    pub fn decoration(mut self, title: Option<&'a str>, ico: Option<&'a Image>) -> TooltipBuilder<'a> {
+        self.title = title;
+        self.ico = ico;
+        self
+    }
+
+    pub fn default_decoration(mut self, title: Option<&'a str>, ico: Option<TooltipIcon>) -> TooltipBuilder<'a> {
+        self.title = title;
+        self.default_ico = ico;
+        self
+    }
+
+    pub fn build(self, tooltip: &mut Tooltip) -> Result<(), SystemError> {
+        tooltip.handle = ControlBase::build_hwnd()
+            .class_name(tooltip.class_name())
+            .forced_flags(tooltip.forced_flags())
+            .flags(tooltip.flags())
+            .build()?;
+
+        if self.title.is_some() || self.ico.is_some() || self.default_ico.is_some() {
+            let title = self.title.unwrap_or("");
+            match (self.ico, self.default_ico) {
+                (Some(ico), None) | (Some(ico), _) => tooltip.set_decoration(title, ico),
+                (None, Some(ico)) => tooltip.set_default_decoration(title, ico),
+                (None, None) => tooltip.set_default_decoration(title, TooltipIcon::None),
+            }
+        }
+        
+        for (handle, text) in self.register {
+            tooltip.register(&handle, text);
+        }
+
+        for handle in self.register_cb {
+            tooltip.register_callback(&handle);
+        }
+
+        Ok(())
     }
 
 }

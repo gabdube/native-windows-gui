@@ -15,7 +15,8 @@ pub struct TestRun {
     radio: bool,
     text: bool,
     progress: bool,
-    track: bool
+    track: bool,
+    tooltip: bool,
 }
 
 
@@ -53,6 +54,11 @@ pub struct ControlsTest {
     test_track1: TrackBar,
     test_track2: TrackBar,
 
+    // Tooltip
+    test_ttp1: Tooltip,
+    test_ttp2: Tooltip,
+    test_ttp3: Tooltip,
+
     // Menu
     window_menu: Menu,
     window_submenu1: Menu,
@@ -78,7 +84,8 @@ pub struct ControlsTest {
     run_radio_test: Button,
     run_text_test: Button,
     run_progress_test: Button,
-    run_track_test: Button
+    run_track_test: Button,
+    run_tooltip_test: Button,
 }
 
 mod partial_controls_test_ui {
@@ -270,6 +277,28 @@ mod partial_controls_test_ui {
                 .build(&mut data.test_track2)?;
 
             //
+            // Tooltip
+            //
+            Tooltip::builder()
+                .register(&data.test_button, "A test button")
+                .register(&data.test_date, "A test date picker")
+                .register(&data.test_combo, "A test combobox")
+                .register_callback(&data.window)
+                .register_callback(&data.test_text_box)
+                .build(&mut data.test_ttp1)?;
+
+            Tooltip::builder()
+                .decoration(Some("Tooltip title (fancy)"), Some(&data.window_icon))
+                .register(&data.test_img_frame, "Hello rust!")
+                .build(&mut data.test_ttp2)?;
+
+            Tooltip::builder()
+                .default_decoration(Some("More info"), Some(TooltipIcon::InfoLarge))
+                .register(&data.test_list_box1, "Simple list")
+                .register(&data.test_list_box2, "Multi select list")
+                .build(&mut data.test_ttp3)?;
+
+            //
             // Menu
             //
             Menu::builder()
@@ -388,6 +417,11 @@ mod partial_controls_test_ui {
                 .text("Run track test")
                 .parent(&data.panel)
                 .build(&mut data.run_track_test)?;
+            
+            Button::builder()
+                .text("Run tooltip test")
+                .parent(&data.panel)
+                .build(&mut data.run_tooltip_test)?;
 
             //
             // Layout
@@ -414,12 +448,13 @@ mod partial_controls_test_ui {
                 .child(1, 4, &data.run_text_test)
                 .child(0, 5, &data.run_progress_test)
                 .child(1, 5, &data.run_track_test)
+                .child(0, 6, &data.run_tooltip_test)
                 .build();
             
             Ok(())
         }
 
-        fn process_event(&self, evt: Event, handle: ControlHandle) {
+        fn process_event<'a>(&self, evt: Event, mut _evt_data: EventData<'a>, handle: ControlHandle) {
             use crate::Event as E;
 
             match evt {
@@ -454,7 +489,13 @@ mod partial_controls_test_ui {
                         run_progress_tests(self, evt);
                     } else if handle == self.run_track_test.handle {
                         run_track_tests(self, evt);
+                    } else if handle == self.run_tooltip_test.handle {
+                        run_tooltip_tests(self, evt);
                     },
+                E::OnTooltipText => 
+                    if handle == self.window.handle {
+                        set_tooltip_dynamic(self, &self.window.handle, _evt_data.on_tooltip_text());
+                    }
                 _ => {}
             }
         }
@@ -879,7 +920,6 @@ fn run_track_tests(app: &ControlsTest, _evt: Event) {
 
         app.test_track1.set_pos(3);
         assert_eq!(app.test_track1.pos(), 3);
-
         
         app.test_track2.set_range_min(0);
         app.test_track2.set_range_max(5);
@@ -889,5 +929,37 @@ fn run_track_tests(app: &ControlsTest, _evt: Event) {
         app.runs.borrow_mut().track = true;
     } else {
         app.runs.borrow_mut().track = false;
+    }
+}
+
+fn run_tooltip_tests(app: &ControlsTest, _evt: Event) {
+    if !app.runs.borrow().tooltip {
+
+        app.test_ttp2.set_enabled(false);
+
+        app.test_ttp1.set_delay_time(Some(100));
+        assert_eq!(app.test_ttp1.delay_time(), 100);
+
+        app.test_ttp1.register(&app.test_checkbox1, "A simple checkbox");
+        app.test_ttp1.register(&app.test_checkbox2, "A checkbox with 3 states!");
+
+        app.test_ttp3.set_default_decoration("Changed!", TooltipIcon::None);
+
+        app.test_ttp1.set_text(&app.test_button.handle, "New tool tip!");
+        assert_eq!(&app.test_ttp1.text(&app.test_button.handle, None), "New tool tip!");
+
+        app.test_ttp1.unregister(&app.test_button);
+
+        app.runs.borrow_mut().tooltip = true;
+    } else {
+        app.test_ttp1.register(&app.test_button, "A button");
+        app.test_ttp2.set_enabled(true);
+        app.runs.borrow_mut().tooltip = false;
+    }
+}
+
+fn set_tooltip_dynamic<'a>(app: &ControlsTest, handle: &ControlHandle, data: &mut ToolTipTextData<'a>) {
+    if &app.window == handle {
+        data.set_text(&format!("Control text: \"{}\"", app.window.text()));
     }
 }

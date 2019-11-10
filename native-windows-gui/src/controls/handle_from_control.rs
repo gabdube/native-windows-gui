@@ -1,11 +1,17 @@
 use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, ComboBox,
-StatusBar, ImageFrame, ListBox, TrackBar, Menu, MenuItem, MenuSeparator};
+StatusBar, ImageFrame, ListBox, TrackBar, Menu, MenuItem, MenuSeparator, TextBox};
 use std::convert::From;
 use std::fmt::Display;
 
 
 impl From<&Window> for ControlHandle {
     fn from(control: &Window) -> Self { control.handle }
+}
+
+impl PartialEq<ControlHandle> for Window {
+    fn eq(&self, other: &ControlHandle) -> bool {
+        self.handle == *other
+    }
 }
 
 impl From<&Button> for ControlHandle {
@@ -48,6 +54,10 @@ impl From<&TrackBar> for ControlHandle {
     fn from(control: &TrackBar) -> Self { control.handle }
 }
 
+impl From<&TextBox> for ControlHandle {
+    fn from(control: &TextBox) -> Self { control.handle }
+}
+
 impl From<&Menu> for ControlHandle {
     fn from(control: &Menu) -> Self { control.handle }
 }
@@ -72,4 +82,20 @@ impl From<&TabsContainer> for ControlHandle {
 #[cfg(feature = "tabs")]
 impl From<&Tab> for ControlHandle {
     fn from(control: &Tab) -> Self { control.handle }
+}
+
+#[cfg(feature = "datetime-picker")]
+use super::{DatePicker};
+
+#[cfg(feature = "datetime-picker")]
+impl From<&DatePicker> for ControlHandle {
+    fn from(control: &DatePicker) -> Self { control.handle }
+}
+
+#[cfg(feature = "progress-bar")]
+use super::{ProgressBar};
+
+#[cfg(feature = "progress-bar")]
+impl From<&ProgressBar> for ControlHandle {
+    fn from(control: &ProgressBar) -> Self { control.handle }
 }

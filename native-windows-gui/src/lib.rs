@@ -10,7 +10,7 @@ mod errors;
 pub use errors::{UserError, SystemError};
 
 mod events;
-pub use events::{Event, MousePressEvent};
+pub use events::*;
 
 pub(crate) mod win32;
 pub use win32::{
@@ -31,7 +31,7 @@ pub use layouts::*;
 
 pub trait PartialUi<D> {
     fn build_partial<W: Into<ControlHandle>>(d: &mut D, parent: Option<W>) -> Result<(), SystemError>;
-    fn process_event(&self, _evt: Event, _handle: ControlHandle) {}
+    fn process_event(&self, _evt: Event, _evt_data: EventData, _handle: ControlHandle) {}
     fn handles<'a>(&'a self) -> Vec<&'a ControlHandle> { vec![] }
 }
 

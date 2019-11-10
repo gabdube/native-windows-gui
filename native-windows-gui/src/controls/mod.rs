@@ -20,7 +20,7 @@ mod notice;
 #[cfg(feature = "datetime-picker")]
 mod date_picker;
 
-#[cfg(feature = "datetime-picker")]
+#[cfg(feature = "progress-bar")]
 mod progress_bar;
 
 #[cfg(feature = "tabs")]
@@ -59,7 +59,7 @@ pub use date_picker::{DatePicker, DatePickerValue, DatePickerFlags};
 #[cfg(feature = "progress-bar")]
 pub use progress_bar::{ProgressBar, ProgressBarState, ProgressBarFlags};
 
-#[cfg(feature = "progress-bar")]
+#[cfg(feature = "tabs")]
 pub use tabs::{TabsContainer, Tab, TabsContainerFlags};
 
 #[cfg(feature = "tree-view")]

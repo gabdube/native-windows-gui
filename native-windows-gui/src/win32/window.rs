@@ -1,20 +1,24 @@
 /*!
 Native Windows GUI windowing base. Includes events dispatching and window creation.
-*/
 
+Warning. Not for the faint of heart.
+*/
 use winapi::shared::minwindef::{UINT, DWORD, HMODULE, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
-use winapi::um::winuser::{WNDPROC};
+use winapi::um::winuser::{WNDPROC, NMHDR};
+use winapi::um::commctrl::{NMTTDISPINFOW};
 use super::base_helper::{get_system_error, to_utf16};
 use super::window_helper::{NOTICE_MESSAGE, NWG_INIT};
 use crate::controls::ControlHandle;
-use crate::{Event, MousePressEvent, SystemError};
+use crate::{Event, EventData, MousePressEvent, SystemError};
 use std::{ptr, mem};
 
 
 static mut TIMER_ID: u32 = 1; 
 static mut NOTICE_ID: u32 = 1; 
+
+const NO_DATA: EventData = EventData::NoData;
 
 
 pub fn build_notice(parent: HWND) -> ControlHandle {
@@ -42,8 +46,8 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
 /**
     Set a window subclass the uses the `process_events` function of NWG.
 */
-pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) 
-    where F: Fn(Event, ControlHandle) -> () + 'static
+pub fn bind_event_handler<'a, F>(handle: &ControlHandle, f: F) 
+    where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
 {
     use winapi::um::commctrl::SetWindowSubclass;
     
@@ -51,7 +55,7 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, f: F)
         &ControlHandle::Hwnd(v) => unsafe {
             let proc: Box<F> = Box::new(f);
             let proc_data: DWORD_PTR = mem::transmute(proc);
-            SetWindowSubclass(v, Some(process_events::<F>), 0, proc_data);
+            SetWindowSubclass(v, Some(process_events::<'a, F>), 0, proc_data);
         },
         htype => panic!("Cannot bind control with an handle of type {:?}.", htype)
     }
@@ -215,14 +219,14 @@ unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l:
     A window subclass procedure that dispatch the windows control events to the associated application control
 */
 #[allow(unused_variables)]
-unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT 
-    where F: Fn(Event, ControlHandle) -> () + 'static
+unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT 
+    where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
 {
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;
 
-    use winapi::um::commctrl::DefSubclassProc;
-    use winapi::um::winuser::{GetClassNameW, GetMenuItemID, NMHDR};
+    use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
+    use winapi::um::winuser::{GetClassNameW, GetMenuItemID};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
       WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE};
     use winapi::um::winnt::WCHAR;
@@ -233,26 +237,21 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
 
     match msg {
         WM_NOTIFY => {
-            let notif_ptr: *const NMHDR = mem::transmute(l);
-            let notif = &*notif_ptr;
-            let handle = ControlHandle::Hwnd(notif.hwndFrom);
-
-            let mut class_name_raw: [WCHAR; 100] = mem::zeroed();
-            let count = GetClassNameW(notif.hwndFrom, class_name_raw.as_mut_ptr(), 100) as usize;
-            let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
-
-            match &class_name as &str {
-                "SysDateTimePick32" => callback(datetimepick_commands(notif.code), handle),
-                "SysTabControl32" => callback(tabs_commands(notif.code), handle),
-                "msctls_trackbar32" => callback(track_commands(notif.code), handle),
-                _ => {}
+            let code = {
+                let notif_ptr: *mut NMHDR = mem::transmute(l);
+                (&*notif_ptr).code
+            };
+        
+            match code {
+                TTN_GETDISPINFOW => handle_tooltip_callback(mem::transmute::<_, *mut NMTTDISPINFOW>(l), &callback),
+                _ => handle_default_notify_callback(mem::transmute::<_, *const NMHDR>(l), &callback)
             }
         },
         WM_MENUCOMMAND => {
             let parent_handle: HMENU = mem::transmute(l);
             let item_id = GetMenuItemID(parent_handle, w as i32);
             let handle = ControlHandle::MenuItem(parent_handle, item_id);
-            callback(Event::OnMenuItemClick, handle);
+            callback(Event::OnMenuItemClick, NO_DATA, handle);
         },
         WM_COMMAND => {
             let child_handle: HWND = mem::transmute(l);
@@ -266,27 +265,27 @@ unsafe extern "system" fn process_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l:
             let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
 
             match &class_name as &str {
-                "Button" => callback(button_commands(message), handle),
-                "Edit" => callback(edit_commands(message), handle),
-                "ComboBox" => callback(combo_commands(message), handle),
-                "Static" => callback(static_commands(child_handle, message), handle),
-                "ListBox" => callback(listbox_commands(message), handle),
+                "Button" => callback(button_commands(message), NO_DATA, handle),
+                "Edit" => callback(edit_commands(message), NO_DATA, handle),
+                "ComboBox" => callback(combo_commands(message), NO_DATA, handle),
+                "Static" => callback(static_commands(child_handle, message), NO_DATA, handle),
+                "ListBox" => callback(listbox_commands(message), NO_DATA, handle),
                 _ => {}
             }
         },
-        WM_TIMER => callback(Event::OnTimerTick, ControlHandle::Timer(hwnd, w as u32)),
-        WM_SIZE => callback(Event::OnResize, base_handle),
-        WM_MOVE => callback(Event::OnMove, base_handle),
-        WM_HSCROLL => callback(Event::OnHorizontalScroll, ControlHandle::Hwnd(l as HWND)),
-        WM_VSCROLL => callback(Event::OnVerticalScroll, ControlHandle::Hwnd(l as HWND)),
-        WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), base_handle), 
-        WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), base_handle), 
-        WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), base_handle), 
-        WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), base_handle),
-        NOTICE_MESSAGE => callback(Event::OnNotice, ControlHandle::Timer(hwnd, w as u32)),
-        NWG_INIT => callback(Event::OnInit, base_handle),
+        WM_TIMER => callback(Event::OnTimerTick, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),
+        WM_SIZE => callback(Event::OnResize, NO_DATA, base_handle),
+        WM_MOVE => callback(Event::OnMove, NO_DATA, base_handle),
+        WM_HSCROLL => callback(Event::OnHorizontalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
+        WM_VSCROLL => callback(Event::OnVerticalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
+        WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  base_handle), 
+        WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
+        WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
+        WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
+        NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),
+        NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {
-            callback(Event::OnWindowClose, base_handle);
+            callback(Event::OnWindowClose, NO_DATA, base_handle);
         },
         _ => {}
     }
@@ -396,5 +395,39 @@ unsafe fn listbox_commands(m: u16) -> Event {
         LBN_SELCHANGE => Event::OnListBoxSelect,
         LBN_DBLCLK => Event::OnListBoxDoubleClick,
         _ => Event::Unknown
+    }
+}
+
+unsafe fn handle_tooltip_callback<'a, F>(notif: *mut NMTTDISPINFOW, callback: &Box<F>) 
+  where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
+{
+    use crate::events::ToolTipTextData;
+
+    let notif = &mut *notif;
+    let handle = ControlHandle::Hwnd(notif.hdr.idFrom as HWND);
+    let data = EventData::OnTooltipText(ToolTipTextData { data: notif });
+    callback(Event::OnTooltipText, data, handle);
+}
+
+unsafe fn handle_default_notify_callback<'a, F>(notif: *const NMHDR, callback: &Box<F>) 
+  where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
+{
+    use std::os::windows::ffi::OsStringExt;
+    use std::ffi::OsString;
+    use winapi::um::winnt::WCHAR;
+    use winapi::um::winuser::{GetClassNameW};
+
+    let notif = &*notif;
+    let handle = ControlHandle::Hwnd(notif.hwndFrom);
+
+    let mut class_name_raw: [WCHAR; 100] = mem::zeroed();
+    let count = GetClassNameW(notif.hwndFrom, class_name_raw.as_mut_ptr(), 100) as usize;
+    let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
+
+    match &class_name as &str {
+        "SysDateTimePick32" => callback(datetimepick_commands(notif.code), NO_DATA, handle),
+        "SysTabControl32" => callback(tabs_commands(notif.code), NO_DATA, handle),
+        "msctls_trackbar32" => callback(track_commands(notif.code), NO_DATA, handle),
+        _ => {}
     }
 }

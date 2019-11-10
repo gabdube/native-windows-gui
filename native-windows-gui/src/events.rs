@@ -10,6 +10,8 @@ pub enum MousePressEvent {
     MousePressRightDown
 }
 
+/// Events are identifier that are sent by controls on user interaction
+/// Some events also have data that can be further processed by the event loop. See `EventData`
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(usize)]
 pub enum Event {
@@ -81,17 +83,21 @@ pub enum Event {
     /// When an item on a list box is selected
     OnListBoxSelect,
 
-    // The select tab of a TabsContainer changed
+    /// The select tab of a TabsContainer changed
     TabsContainerChanged,
 
-    // The select tab of a TabsContainer is about to be changed
+    /// The select tab of a TabsContainer is about to be changed
     TabsContainerChanging,
 
-    // When the trackbar thumb is released by the user
+    /// When the trackbar thumb is released by the user
     TrackBarUpdated,
 
-    // When the user click on a menu item
+    /// When the user click on a menu item
     OnMenuItemClick,
+
+    /// When the user hovers over a callback tooltip
+    /// The callback will also receive a `EventData::OnTooltipText`
+    OnTooltipText,
 
     /// When a timer delay is elapsed
     OnTimerTick,
@@ -108,3 +114,87 @@ pub enum Event {
     /// When most control lose keyboard focus
     OnFocusLost
 }
+
+
+/// Events data sent by the controls. 
+#[derive(Debug)]
+pub enum EventData<'a> {
+    /// The event has no data
+    NoData,
+
+    /// Sets the text of a tooltip.
+    /// The method `on_tooltip_text` should be used to access the inner data
+    OnTooltipText(ToolTipTextData<'a>)
+}
+
+impl<'a> EventData<'a> {
+
+    pub fn on_tooltip_text(&mut self) -> &mut ToolTipTextData<'a> {
+        match self {
+            EventData::OnTooltipText(d) => d,
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
+}
+
+//
+// Events data structures
+//
+
+use winapi::um::commctrl::NMTTDISPINFOW;
+use std::fmt;
+
+/// A wrapper structure that set the tooltip text on a `OnTooltipText` callback
+pub struct ToolTipTextData<'a> {
+    pub(crate) data: &'a mut NMTTDISPINFOW
+}
+
+impl<'a> ToolTipTextData<'a> {
+
+    /// Tells the application to save the text value of the callback
+    /// The `OnTooltipText` will not be called a second time for the associated control
+    pub fn keep(&mut self, keep: bool) {
+        use ::winapi::um::commctrl::TTF_DI_SETITEM;
+        match keep {
+            true => { self.data.uFlags |= TTF_DI_SETITEM; },
+            false => { self.data.uFlags &= !TTF_DI_SETITEM; }
+        }
+    }
+
+    /// Sets the text of the callback. This function will copy the text.
+    /// WINAPI do not easily allow tooltip with more than 79 characters (80 with NULL)
+    /// With a text > 79 characters, this method will do nothing.
+    pub fn set_text<'b>(&mut self, text: &'b str) {
+        use crate::win32::base_helper::to_utf16;
+        use std::ptr;
+        
+        let text_len = text.len();
+        if text_len > 79 {
+            return;
+        }
+
+        self.clear();
+        unsafe {
+            let local_text = to_utf16(text);
+            ptr::copy_nonoverlapping(local_text.as_ptr(), self.data.szText.as_mut_ptr(), text_len);
+        }
+    }
+
+    fn clear(&mut self) {
+        use winapi::um::winnt::WCHAR;
+        use std::{ptr, mem};
+        
+        unsafe {
+            ptr::write(&mut self.data.szText as *mut [WCHAR; 80], mem::zeroed());
+        }
+    }
+
+}
+
+impl<'a> fmt::Debug for ToolTipTextData<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ToolTipTextData")
+    }
+}
+

@@ -70,7 +70,7 @@ mod basic_app_ui {
             let window_handles = [&ui.window.handle];
             for handle in window_handles.iter() {
                 let evt_ui = ui.clone();
-                let handle_events = move |evt, handle| {
+                let handle_events = move |evt, _evt_data, handle| {
                     match evt {
                         E::OnButtonClick => {
                             if handle == evt_ui.hello_button.handle {

@@ -57,9 +57,9 @@ mod test_control_panel_ui {
 
             for handle in window_handles.iter() {
                 let evt_ui = ui.clone();
-                let handle_events = move |evt, handle| {
+                let handle_events = move |evt, _evt_data, handle| {
 
-                    evt_ui.controls_tests.process_event(evt, handle);
+                    evt_ui.controls_tests.process_event(evt, _evt_data, handle);
 
                     match evt {
                         E::OnButtonClick =>
