@@ -106,7 +106,6 @@ pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F)
 
 }
 
-
 /**
     High level function that handle the creation of custom window control or built in window control
 */

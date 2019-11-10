@@ -56,6 +56,11 @@ pub struct ControlsTest {
     test_track1: TrackBar,
     test_track2: TrackBar,
 
+    test_open_file_button: Button,
+    test_open_directory_button: Button,
+    test_save_file_button: Button,
+    file_dialog_result: TextInput,
+
     // Tooltip
     test_ttp1: Tooltip,
     test_ttp2: Tooltip,
@@ -288,6 +293,25 @@ mod partial_controls_test_ui {
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_track2)?;
 
+            Button::builder()
+                .text("Open file")
+                .parent(&data.dialog_tab)
+                .build(&mut data.test_open_file_button)?;
+
+            Button::builder()
+                .text("Open directory")
+                .parent(&data.dialog_tab)
+                .build(&mut data.test_open_directory_button)?;
+
+            Button::builder()
+                .text("Save file")
+                .parent(&data.dialog_tab)
+                .build(&mut data.test_save_file_button)?;
+
+            TextInput::builder()
+                .parent(&data.dialog_tab)
+                .build(&mut data.file_dialog_result)?;
+
             //
             // Tooltip
             //
@@ -469,6 +493,15 @@ mod partial_controls_test_ui {
                 .child(1, 6, &data.run_status_test)
                 .build();
             
+            GridLayout::builder()
+                .parent(&data.dialog_tab)
+                .max_row(Some(8))
+                .child(0, 0, &data.test_open_file_button)
+                .child(1, 0, &data.test_open_directory_button)
+                .child(2, 0, &data.test_save_file_button)
+                .child_item(GridLayoutItem::new(&data.file_dialog_result, 0, 1, 1, 3))
+                .build();
+
             Ok(())
         }
 
