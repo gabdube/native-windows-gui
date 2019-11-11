@@ -59,7 +59,7 @@ pub struct ControlsTest {
     test_open_file_button: Button,
     test_open_directory_button: Button,
     test_save_file_button: Button,
-    file_dialog_result: TextInput,
+    file_dialog_result: TextBox,
 
     // Tooltip
     test_ttp1: Tooltip,
@@ -271,8 +271,8 @@ mod partial_controls_test_ui {
 
             ProgressBar::builder()
                 .flags(ProgressBarFlags::VISIBLE | ProgressBarFlags::VERTICAL)
-                .position((320, 220))
-                .size((20, 110))
+                .position((340, 220))
+                .size((30, 110))
                 .range(0..100)
                 .pos(50)
                 .parent(&data.basics_control_tab)
@@ -288,7 +288,7 @@ mod partial_controls_test_ui {
             TrackBar::builder()
                 .flags(TrackBarFlags::VISIBLE | TrackBarFlags::RANGE | TrackBarFlags::VERTICAL | TrackBarFlags::AUTO_TICK)
                 .position((290, 220))
-                .size((30, 110))
+                .size((40, 110))
                 .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_track2)?;
@@ -308,7 +308,7 @@ mod partial_controls_test_ui {
                 .parent(&data.dialog_tab)
                 .build(&mut data.test_save_file_button)?;
 
-            TextInput::builder()
+            TextBox::builder()
                 .parent(&data.dialog_tab)
                 .build(&mut data.file_dialog_result)?;
 
@@ -495,11 +495,11 @@ mod partial_controls_test_ui {
             
             GridLayout::builder()
                 .parent(&data.dialog_tab)
-                .max_row(Some(8))
+                .min_size([400, 90])
                 .child(0, 0, &data.test_open_file_button)
                 .child(1, 0, &data.test_open_directory_button)
                 .child(2, 0, &data.test_save_file_button)
-                .child_item(GridLayoutItem::new(&data.file_dialog_result, 0, 1, 1, 3))
+                .child_item(GridLayoutItem::new(&data.file_dialog_result, 0, 1, 3, 1))
                 .build();
 
             Ok(())

@@ -1,7 +1,7 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM, BOOL};
 use winapi::shared::windef::HWND;
 use winapi::um::winnt::LPWSTR;
-use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_COMPOSITED};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
 use crate::{SystemError, Font};
@@ -232,8 +232,10 @@ impl TabsContainer {
             match msg {
                 WM_SIZE => {
                     let mut data = (hwnd, LOWORD(l as u32) as u32, HIWORD(l as u32) as u32);
-                    data.1 -= 11;
-                    data.2 -= 30;
+                    
+                    if data.1 > 11 { data.1 -= 11; }
+                    if data.2 > 30 { data.2 -= 30; }
+                    
                     let data_ptr = &data as *const (HWND, u32, u32);
                     EnumChildWindows(hwnd, Some(resize_direct_children), mem::transmute(data_ptr));
                 },
@@ -283,6 +285,7 @@ impl<'a> TabsContainerBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(WS_EX_COMPOSITED)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

@@ -6,6 +6,7 @@ use std::ptr;
 
 
 /// A control item in a GridLayout
+#[derive(Debug)]
 pub struct GridLayoutItem {
     /// The handle to the control in the item
     control: HWND,
@@ -43,11 +44,28 @@ impl GridLayoutItem {
 
 /// A layout that lays out widgets in a grid
 pub struct GridLayout {
+    /// The control that holds the layout
     base: HWND,
+
+    /// The children of the control that fit in the layout
     children: Vec<GridLayoutItem>,
+
+    /// The top, right, bottom, left space around the layout
     margins: [u32; 4],
+
+    /// The minimum size of the layout. Used if `base` is smaller than `min_size`.
+    min_size: [u32; 2],
+
+    /// The maximum size of the layout. Used if `base` is bigger than `min_size`.
+    max_size: [u32; 2],
+
+    /// The number of column. If None, compute the value from children.
     column_count: Option<u32>,
+
+    /// The number of row. If None, compute the value from children.
     row_count: Option<u32>, 
+
+    /// The spacing between controls
     spacing: u32
 }
 
@@ -58,6 +76,8 @@ impl GridLayout {
             base: ptr::null_mut(),
             children: Vec::new(),
             margins: [5, 5, 5, 5],
+            min_size: [0, 0],
+            max_size: [u32::max_value(), u32::max_value()],
             column_count: None,
             row_count: None,
             spacing: 5,
@@ -71,6 +91,14 @@ impl GridLayout {
         let sp = self.spacing;
 
         let children = &self.children;
+
+        let [min_w, min_h] = self.min_size;
+        if width < min_w { width = min_w; }
+        if height < min_h { height = min_h; }
+
+        let [max_w, max_h] = self.max_size;
+        if width > max_w { width = max_w; }
+        if height > max_h { height = max_h; }
 
         let column_count = match self.column_count {
             Some(c) => c,
@@ -86,7 +114,7 @@ impl GridLayout {
             return;
         }
 
-        if height < m_top + m_bottom + ((sp * 2) * row_count) {
+        if height < (m_top + m_bottom) + ((sp * 2) * row_count) {
             return;
         }
 
@@ -106,8 +134,8 @@ impl GridLayout {
             let x = m_left + (sp + (sp2 * item.col)) + (item_width * item.col);
             let y = m_top + (sp + (sp2 * item.row)) + (item_height * item.row);
 
-            let local_width = (item_width * item.row_span) + (sp2 * (item.row_span - 1));
-            let local_height = (item_height * item.col_span) + (sp2 * (item.col_span - 1));
+            let local_width = (item_width * item.col_span) + (sp2 * (item.col_span - 1));
+            let local_height = (item_height * item.row_span) + (sp2 * (item.row_span - 1));
 
             unsafe {
                 wh::set_window_position(item.control, x as i32, y as i32);
@@ -163,6 +191,18 @@ impl GridLayoutBuilder {
     /// Set the size of the space between the children in the layout. Default value is 5.
     pub fn spacing(mut self, sp: u32) -> GridLayoutBuilder {
         self.layout.spacing = sp;
+        self
+    }
+
+    /// Sets the minimum size of the layout
+    pub fn min_size(mut self, sz: [u32; 2]) -> GridLayoutBuilder {
+        self.layout.min_size = sz;
+        self
+    }
+
+    /// Sets the maximum size of the layout
+    pub fn max_size(mut self, sz: [u32; 2]) -> GridLayoutBuilder {
+        self.layout.max_size = sz;
         self
     }
 
