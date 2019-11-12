@@ -29,6 +29,8 @@ pub struct ControlsTest {
     window_icon: Image,
     ferris: Image,
     arial_font: Font,
+    open_file_dialog: FileDialog,
+    save_file_dialog: FileDialog,
 
     // Control window
     pub window: Window,
@@ -109,6 +111,18 @@ mod partial_controls_test_ui {
             //
             data.window_icon = Image::icon("./test_rc/cog.ico", None, false)?;
             data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
+
+            FileDialog::builder()
+                .action(FileDialogAction::Open)
+                .multiselect(false)
+                .title("Open a file")
+                .build(&mut data.open_file_dialog)?;
+
+            FileDialog::builder()
+                .action(FileDialogAction::Save)
+                .multiselect(false)
+                .title("Save a file")
+                .build(&mut data.save_file_dialog)?;
 
             Font::builder()
                 .size(20)
@@ -496,6 +510,7 @@ mod partial_controls_test_ui {
             GridLayout::builder()
                 .parent(&data.dialog_tab)
                 .min_size([400, 90])
+                .max_size([u32::max_value(), 150])
                 .child(0, 0, &data.test_open_file_button)
                 .child(1, 0, &data.test_open_directory_button)
                 .child(2, 0, &data.test_save_file_button)

@@ -248,26 +248,24 @@ impl FileDialogBuilder {
         self
     }
 
-    pub fn build(self) -> Result<FileDialog, SystemError> {
+    pub fn build(self, out: &mut FileDialog) -> Result<(), SystemError> {
         unsafe {
-            let mut dialog = FileDialog::default();
-            dialog.parent = self.parent.unwrap_or(ptr::null_mut());
-            dialog.action = self.action;
-
-            let handle = rh::create_file_dialog(
+            out.handle = rh::create_file_dialog(
                 self.action,
                 self.multiselect,
                 self.default_folder,
                 self.filters
             )?;
-
-            dialog.handle = handle;
-            if let Some(title) = self.title {
-                dialog.set_title(&title);
-            }
-
-            Ok(dialog)
         }
+
+        out.parent = self.parent.unwrap_or(ptr::null_mut());
+        out.action = self.action;
+        
+        if let Some(title) = self.title {
+            out.set_title(&title);
+        }
+
+        Ok(())
     }
 
 }

@@ -358,7 +358,7 @@ impl Tab {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        0
+        winapi::um::winuser::WS_CLIPCHILDREN
     }
 
     /// Winapi flags required by the control
