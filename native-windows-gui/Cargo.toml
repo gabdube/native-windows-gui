@@ -16,7 +16,7 @@ native-windows-derive = { path = "../native-windows-derive/" }
 winapi-build = "0.1.1"
 
 [features]
-default = ["all", "interactive"]
+tests-linux = ["datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "interactive"]
 interactive = []
 file-dialog = []
 datetime-picker = []

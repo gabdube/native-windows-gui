@@ -92,3 +92,9 @@ use super::{ProgressBar};
 
 #[cfg(feature = "progress-bar")]
 handles!(ProgressBar);
+
+#[cfg(feature = "tree-view")]
+use super::{TreeView};
+
+#[cfg(feature = "tree-view")]
+handles!(TreeView);

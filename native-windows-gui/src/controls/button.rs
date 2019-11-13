@@ -35,6 +35,7 @@ impl Button {
             text: "Button",
             size: (100, 25),
             position: (0, 0),
+            enabled: true,
             flags: None,
             font: None,
             parent: None
@@ -169,6 +170,7 @@ pub struct ButtonBuilder<'a> {
     text: &'a str,
     size: (i32, i32),
     position: (i32, i32),
+    enabled: bool,
     flags: Option<ButtonFlags>,
     font: Option<&'a Font>,
     parent: Option<ControlHandle>
@@ -193,6 +195,11 @@ impl<'a> ButtonBuilder<'a> {
 
     pub fn position(mut self, pos: (i32, i32)) -> ButtonBuilder<'a> {
         self.position = pos;
+        self
+    }
+
+    pub fn enabled(mut self, e: bool) -> ButtonBuilder<'a> {
+        self.enabled = e;
         self
     }
 
@@ -227,6 +234,8 @@ impl<'a> ButtonBuilder<'a> {
         if self.font.is_some() {
             out.set_font(self.font);
         }
+
+        out.set_enabled(self.enabled);
 
         Ok(())
     }

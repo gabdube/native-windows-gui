@@ -1,14 +1,26 @@
+/*!
+A tree-view control is a window that displays a hierarchical list of items
+*/
+
 use winapi::shared::minwindef::{WPARAM, LPARAM};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use winapi::um::commctrl::HTREEITEM;
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
-use crate::Font;
-use super::ControlHandle;
+use crate::{Font, SystemError};
+use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
 
 const NOT_BOUND: &'static str = "TreeView is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: TreeView handle is not HWND!";
 
+
+bitflags! {
+    pub struct TreeViewFlags: u32 {
+        const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+    }
+}
 
 /// Select the position of a new item that is about to be inserted in a TreeView
 #[derive(Copy, Clone, Debug)]
@@ -41,7 +53,6 @@ pub enum ExpandState {
 }
 
 /// A reference to an item in a TreeView
-#[derive(Copy, Clone)]
 pub struct TreeItem {
     pub handle: HTREEITEM
 }
@@ -62,6 +73,16 @@ pub struct TreeView {
 
 impl TreeView {
 
+    pub fn builder<'a>() -> TreeViewBuilder<'a> {
+        TreeViewBuilder {
+            size: (100, 200),
+            position: (0, 0),
+            enabled: true,
+            flags: None,
+            font: None,
+            parent: None
+        }
+    }
 
     /// Insert a new item into the TreeView and return a reference to new newly added item
     pub fn insert_item<'a>(&self, new: &'a str, parent: Option<TreeItem>, position: TreeInsert) -> TreeItem {
@@ -103,13 +124,16 @@ impl TreeView {
     }
 
     /// Remove an item and its children from the tree view
-    pub fn remove_item(&self, item: TreeItem) {
+    /// After being removed, the item is reverted back to a unused state
+    pub fn remove_item(&self, item: &mut TreeItem) {
         use winapi::um::commctrl::{TVM_DELETEITEM};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         wh::send_message(handle, TVM_DELETEITEM, 0, item.handle as LPARAM);
+
+        item.handle = ptr::null_mut();
     }
 
     /// Selects the specified tree-view item and scrolls the item into view.
@@ -280,7 +304,6 @@ impl TreeView {
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
         use winapi::um::commctrl::{TVS_HASBUTTONS, TVS_LINESATROOT, TVS_HASLINES};
-        use winapi::um::winuser::WS_VISIBLE;
 
         WS_VISIBLE | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES
     }
@@ -291,6 +314,76 @@ impl TreeView {
 
         WS_CHILD | WS_BORDER
     }
+}
+
+pub struct TreeViewBuilder<'a> {
+    size: (i32, i32),
+    position: (i32, i32),
+    enabled: bool,
+    flags: Option<TreeViewFlags>,
+    font: Option<&'a Font>,
+    parent: Option<ControlHandle>
+}
+
+
+impl<'a> TreeViewBuilder<'a> {
+
+    pub fn flags(mut self, flags: TreeViewFlags) -> TreeViewBuilder<'a> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> TreeViewBuilder<'a> {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, pos: (i32, i32)) -> TreeViewBuilder<'a> {
+        self.position = pos;
+        self
+    }
+
+    pub fn enabled(mut self, e: bool) -> TreeViewBuilder<'a> {
+        self.enabled = e;
+        self
+    }
+
+    pub fn font(mut self, font: Option<&'a Font>) -> TreeViewBuilder<'a> {
+        self.font = font;
+        self
+    }
+
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TreeViewBuilder<'a> {
+        self.parent = Some(p.into());
+        self
+    }
+
+    pub fn build(self, out: &mut TreeView) -> Result<(), SystemError> {
+        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        let parent = match self.parent {
+            Some(p) => Ok(p),
+            None => Err(SystemError::ControlWithoutParent)
+        }?;
+
+        out.handle = ControlBase::build_hwnd()
+            .class_name(out.class_name())
+            .forced_flags(out.forced_flags())
+            .flags(flags)
+            .size(self.size)
+            .position(self.position)
+            .parent(Some(parent))
+            .build()?;
+
+        if self.font.is_some() {
+            out.set_font(self.font);
+        }
+
+        out.set_enabled(self.enabled);
+
+        Ok(())
+    }
+
 }
 
 

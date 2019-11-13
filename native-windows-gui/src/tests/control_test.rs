@@ -29,7 +29,11 @@ pub struct ControlsTest {
     window_icon: Image,
     ferris: Image,
     arial_font: Font,
+    
+    #[cfg(feature = "file-dialog")]
     open_file_dialog: FileDialog,
+
+    #[cfg(feature = "file-dialog")]
     save_file_dialog: FileDialog,
 
     // Control window
@@ -38,6 +42,7 @@ pub struct ControlsTest {
     controls_holder: TabsContainer,
     basics_control_tab: Tab,
     dialog_tab: Tab,
+    tree_tab: Tab,
     test_button: Button,
     test_checkbox1: CheckBox,
     test_checkbox2: CheckBox,
@@ -62,6 +67,10 @@ pub struct ControlsTest {
     test_open_directory_button: Button,
     test_save_file_button: Button,
     file_dialog_result: TextBox,
+
+    test_tree: TreeView,
+    test_tree_add: Button,
+    test_tree_remove: Button,
 
     // Tooltip
     test_ttp1: Tooltip,
@@ -112,17 +121,26 @@ mod partial_controls_test_ui {
             data.window_icon = Image::icon("./test_rc/cog.ico", None, false)?;
             data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
 
-            FileDialog::builder()
-                .action(FileDialogAction::Open)
-                .multiselect(true)
-                .title("Open a file")
-                .build(&mut data.open_file_dialog)?;
+            #[cfg(feature = "file-dialog")]
+            fn init_dialog(data: &mut ControlsTest) {
+                FileDialog::builder()
+                    .action(FileDialogAction::Open)
+                    .multiselect(true)
+                    .title("Open a file")
+                    .build(&mut data.open_file_dialog)?;
 
-            FileDialog::builder()
-                .action(FileDialogAction::Save)
-                .multiselect(false)
-                .title("Save a file")
-                .build(&mut data.save_file_dialog)?;
+                FileDialog::builder()
+                    .action(FileDialogAction::Save)
+                    .multiselect(false)
+                    .title("Save a file")
+                    .build(&mut data.save_file_dialog)?;
+            }
+
+            #[cfg(not(feature = "file-dialog"))]
+            fn init_dialog(_data: &mut ControlsTest) { }
+
+            init_dialog(data);
+
 
             Font::builder()
                 .size(20)
@@ -159,6 +177,10 @@ mod partial_controls_test_ui {
                 .text("Dialog")
                 .parent(&data.controls_holder)
                 .build(&mut data.dialog_tab)?;
+            Tab::builder()
+                .text("Tree view")
+                .parent(&data.controls_holder)
+                .build(&mut data.tree_tab)?;
 
             Button::builder()
                 .text("A simple button")
@@ -310,21 +332,39 @@ mod partial_controls_test_ui {
             Button::builder()
                 .text("Open file")
                 .parent(&data.dialog_tab)
+                .enabled(cfg!(feature="file-dialog"))
                 .build(&mut data.test_open_file_button)?;
 
             Button::builder()
                 .text("Open directory")
                 .parent(&data.dialog_tab)
+                .enabled(cfg!(feature="file-dialog"))
                 .build(&mut data.test_open_directory_button)?;
 
             Button::builder()
                 .text("Save file")
                 .parent(&data.dialog_tab)
+                .enabled(cfg!(feature="file-dialog"))
                 .build(&mut data.test_save_file_button)?;
 
             TextBox::builder()
                 .parent(&data.dialog_tab)
                 .build(&mut data.file_dialog_result)?;
+
+            TreeView::builder()
+                .parent(&data.tree_tab)
+                .build(&mut data.test_tree)?;
+
+            Button::builder()
+                .text("Add file")
+                .parent(&data.tree_tab)
+                .build(&mut data.test_tree_add)?;
+
+            Button::builder()
+                .text("Remove item")
+                .parent(&data.tree_tab)
+                .build(&mut data.test_tree_remove)?;
+
 
             //
             // Tooltip
@@ -516,6 +556,13 @@ mod partial_controls_test_ui {
                 .child(2, 0, &data.test_save_file_button)
                 .child_item(GridLayoutItem::new(&data.file_dialog_result, 0, 1, 3, 1))
                 .build();
+            
+            GridLayout::builder()
+                .parent(&data.tree_tab)
+                .child_item(GridLayoutItem::new(&data.test_tree, 0, 0, 1, 7))
+                .child(1, 0, &data.test_tree_add)
+                .child(1, 1, &data.test_tree_remove)
+                .build();
 
             Ok(())
         }
@@ -565,6 +612,10 @@ mod partial_controls_test_ui {
                         open_directory(self, evt);
                     } else if &handle == &self.test_save_file_button {
                         save_file(self, evt);
+                    } else if &handle == &self.test_tree_add {
+                        tree_tests(self, &self.test_tree_add.handle);
+                    } else if &handle == &self.test_tree_remove {
+                        tree_tests(self, &self.test_tree_remove.handle);
                     },
                 E::OnTooltipText => 
                     if &handle == &self.window {
@@ -1065,6 +1116,14 @@ fn set_tooltip_dynamic<'a>(app: &ControlsTest, handle: &ControlHandle, data: &mu
     }
 }
 
+fn tree_tests(app: &ControlsTest, handle: &ControlHandle) {
+    let add = &app.test_tree_add == handle;
+    let remove = &app.test_tree_remove == handle;
+
+    println!("{:?} {:?}", add, remove);
+}
+
+#[cfg(feature = "file-dialog")]
 fn open_file(app: &ControlsTest, _evt: Event) {
     if app.open_file_dialog.run() {
         app.file_dialog_result.clear();
@@ -1076,10 +1135,17 @@ fn open_file(app: &ControlsTest, _evt: Event) {
     }
 }
 
-fn open_directory(app: &ControlsTest, _evt: Event) {
+#[cfg(not(feature = "file-dialog"))]
+fn open_file(_app: &ControlsTest, _evt: Event) {}
 
-}
+#[cfg(feature = "file-dialog")]
+fn open_directory(app: &ControlsTest, _evt: Event) {}
 
-fn save_file(app: &ControlsTest, _evt: Event) {
+#[cfg(not(feature = "file-dialog"))]
+fn open_directory(_app: &ControlsTest, _evt: Event) {}
 
-}
+#[cfg(feature = "file-dialog")]
+fn save_file(app: &ControlsTest, _evt: Event) {}
+
+#[cfg(not(feature = "file-dialog"))]
+fn save_file(_app: &ControlsTest, _evt: Event) {}
