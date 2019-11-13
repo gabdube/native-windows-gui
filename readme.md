@@ -8,7 +8,7 @@ the quirks and rough edges of the API by providing a simple, safe and rust-like 
 Due to its simple nature NWG is sure to keep your compile time low, your resources
 usage at a minimum and your mind somewhat "sane".
 
-This is the 3rd version and final of NWG. It is considered "mature" or, as I would say
+This is the 3rd and final version of NWG. It is considered "mature" or, as I would say
 "the backlog is empty, and it will most likely stay that way". This version implements pretty much
 everything required to develop applications on Windows. Don't bother using the older versions as they
 have "irreconcilable design decisions" and cannot support some key features.
