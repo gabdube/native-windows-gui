@@ -67,9 +67,9 @@ This was measured on a `Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz, 3401 Mhz, 4 Cor
 
 In release mode, the `basic` example weight **163kb** on disk and take **900kb** in memory. Launch time is instantaneous.
 
-The interactive test suit (with over 50 controls) weight **671 kb** on disk and take **1100kb** in memory. Launch time is still instantaneous.
+The interactive test suite (with over 50 controls) weight **671 kb** on disk and take **1100kb** in memory. Launch time is still instantaneous.
 
-Initial build time takes around **22 seconds** for a basic applications. This is mainly due to `winapi-rs` taking its sweet time. Subsequent compile time takes around **0.7 seconds**.
+Initial build time takes around **22 seconds** for a basic application. This is mainly due to `winapi-rs` taking its sweet time. Subsequent compile time takes around **0.7 seconds**.
 
 ## Development
 
