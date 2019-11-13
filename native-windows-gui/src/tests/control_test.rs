@@ -114,7 +114,7 @@ mod partial_controls_test_ui {
 
             FileDialog::builder()
                 .action(FileDialogAction::Open)
-                .multiselect(false)
+                .multiselect(true)
                 .title("Open a file")
                 .build(&mut data.open_file_dialog)?;
 
@@ -559,6 +559,12 @@ mod partial_controls_test_ui {
                         run_tooltip_tests(self, evt);
                     } else if &handle == &self.run_status_test {
                         run_status_tests(self, evt);
+                    } else if &handle == &self.test_open_file_button {
+                        open_file(self, evt);
+                    } else if &handle == &self.test_open_directory_button {
+                        open_directory(self, evt);
+                    } else if &handle == &self.test_save_file_button {
+                        save_file(self, evt);
                     },
                 E::OnTooltipText => 
                     if &handle == &self.window {
@@ -1057,4 +1063,23 @@ fn set_tooltip_dynamic<'a>(app: &ControlsTest, handle: &ControlHandle, data: &mu
     } else if &app.test_text_input == handle {
         data.set_text(&format!("Control text: \"{}\"", app.test_text_input.text()));
     }
+}
+
+fn open_file(app: &ControlsTest, _evt: Event) {
+    if app.open_file_dialog.run() {
+        app.file_dialog_result.clear();
+        if let Ok(file_names) = app.open_file_dialog.get_selected_items() {
+            for name in file_names {
+                //app.file_dialog_result.append_text(format!("{:?}\r\n", name))
+            }
+        }
+    }
+}
+
+fn open_directory(app: &ControlsTest, _evt: Event) {
+
+}
+
+fn save_file(app: &ControlsTest, _evt: Event) {
+
 }

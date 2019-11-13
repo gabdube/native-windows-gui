@@ -165,6 +165,11 @@ impl TextBox {
         wh::send_message(handle, EM_SETREADONLY as u32, r as WPARAM, 0);
     }
 
+    /// Remove all text from the textbox
+    pub fn clear(&self) {
+        self.set_text("");
+    }
+
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
         if self.handle.blank() { panic!(NOT_BOUND); }
