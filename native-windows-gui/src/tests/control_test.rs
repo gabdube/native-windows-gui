@@ -39,6 +39,9 @@ pub struct ControlsTest {
     #[cfg(feature = "file-dialog")]
     save_file_dialog: FileDialog,
 
+    #[cfg(feature = "color-dialog")]
+    color_dialog: ColorDialog,
+
     // Control window
     pub window: Window,
     status: StatusBar,
@@ -70,6 +73,8 @@ pub struct ControlsTest {
     test_open_directory_button: Button,
     test_save_file_button: Button,
     file_dialog_result: TextBox,
+    test_select_color_button: Button,
+    test_color_output: TextInput,
 
     test_tree: TreeView,
     test_tree_input: TextInput,
@@ -126,6 +131,7 @@ mod partial_controls_test_ui {
             data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
 
             #[cfg(feature = "file-dialog")]
+            #[cfg(feature = "color-dialog")]
             fn init_dialog(data: &mut ControlsTest) -> Result<(), SystemError> {
                 FileDialog::builder()
                     .action(FileDialogAction::Open)
@@ -144,10 +150,14 @@ mod partial_controls_test_ui {
                     .filters("Text(*.txt)|Any(*.*)")
                     .build(&mut data.save_file_dialog)?;
 
+                ColorDialog::builder()
+                    .build(&mut data.color_dialog)?;
+
                 Ok(())
             }
 
             #[cfg(not(feature = "file-dialog"))]
+            #[cfg(feature = "color-dialog")]
             fn init_dialog(_data: &mut ControlsTest) -> Result<(), SystemError> { Ok(()) }
 
             init_dialog(data)?;
@@ -362,6 +372,16 @@ mod partial_controls_test_ui {
                 .parent(&data.dialog_tab)
                 .build(&mut data.file_dialog_result)?;
 
+            Button::builder()
+                .text("Select a color")
+                .parent(&data.dialog_tab)
+                .enabled(cfg!(feature="color-dialog"))
+                .build(&mut data.test_select_color_button)?;
+
+            TextInput::builder()
+                .parent(&data.dialog_tab)
+                .build(&mut data.test_color_output)?;
+
             TreeView::builder()
                 .parent(&data.tree_tab)
                 .build(&mut data.test_tree)?;
@@ -571,6 +591,8 @@ mod partial_controls_test_ui {
                 .child(1, 0, &data.test_open_directory_button)
                 .child(2, 0, &data.test_save_file_button)
                 .child_item(GridLayoutItem::new(&data.file_dialog_result, 0, 1, 3, 1))
+                .child(0, 2, &data.test_select_color_button)
+                .child_item(GridLayoutItem::new(&data.test_color_output, 1, 2, 2, 1))
                 .build();
             
             GridLayout::builder()
@@ -634,6 +656,8 @@ mod partial_controls_test_ui {
                         tree_tests(self, &self.test_tree_add.handle);
                     } else if &handle == &self.test_tree_remove {
                         tree_tests(self, &self.test_tree_remove.handle);
+                    } else if &handle == &self.test_select_color_button {
+                        color_select(self);
                     },
                 E::OnTooltipText => 
                     if &handle == &self.window {
@@ -1203,3 +1227,13 @@ fn save_file(app: &ControlsTest, _evt: Event) {
 
 #[cfg(not(feature = "file-dialog"))]
 fn save_file(_app: &ControlsTest, _evt: Event) {}
+
+#[cfg(feature = "color-dialog")]
+fn color_select(app: &ControlsTest) {
+    if app.color_dialog.show(Some(&app.window)) {
+        app.test_color_output.set_text(&format!("{:?}", app.color_dialog.color()))
+    }
+}
+
+#[cfg(not(feature = "color-dialog"))]
+fn color_select(_app: &ControlsTest) {}
