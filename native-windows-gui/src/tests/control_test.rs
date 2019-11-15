@@ -72,6 +72,7 @@ pub struct ControlsTest {
     file_dialog_result: TextBox,
 
     test_tree: TreeView,
+    test_tree_input: TextInput,
     test_tree_add: Button,
     test_tree_remove: Button,
 
@@ -365,8 +366,13 @@ mod partial_controls_test_ui {
                 .parent(&data.tree_tab)
                 .build(&mut data.test_tree)?;
 
+            TextInput::builder()
+                .text("New Item")
+                .parent(&data.tree_tab)
+                .build(&mut data.test_tree_input)?;
+
             Button::builder()
-                .text("Add file")
+                .text("Add item")
                 .parent(&data.tree_tab)
                 .build(&mut data.test_tree_add)?;
 
@@ -569,9 +575,11 @@ mod partial_controls_test_ui {
             
             GridLayout::builder()
                 .parent(&data.tree_tab)
+                .min_size([400, 220])
                 .child_item(GridLayoutItem::new(&data.test_tree, 0, 0, 1, 7))
-                .child(1, 0, &data.test_tree_add)
-                .child(1, 1, &data.test_tree_remove)
+                .child(1, 0, &data.test_tree_input)
+                .child(1, 1, &data.test_tree_add)
+                .child(1, 2, &data.test_tree_remove)
                 .build();
 
             Ok(())
@@ -1130,7 +1138,25 @@ fn tree_tests(app: &ControlsTest, handle: &ControlHandle) {
     let add = &app.test_tree_add == handle;
     let remove = &app.test_tree_remove == handle;
 
-    println!("{:?} {:?}", add, remove);
+    if add {
+        let text = app.test_tree_input.text();
+        match app.test_tree.root() {
+            Some(root) => match app.test_tree.selected_item() {
+                None =>    { app.test_tree.insert_item(&text, Some(root), TreeInsert::Last); },
+                Some(i) => { app.test_tree.insert_item(&text, Some(i), TreeInsert::Last); },
+            },
+            None => { app.test_tree.insert_item(&text, None, TreeInsert::Root); },
+        }
+    }
+
+    if remove {
+        match app.test_tree.selected_item() {
+            Some(item) => { app.test_tree.remove_item(&item);},
+            None => {}
+        }
+    }
+
+    app.test_tree.set_focus();
 }
 
 #[cfg(feature = "file-dialog")]

@@ -57,11 +57,6 @@ pub struct TreeItem {
     pub handle: HTREEITEM
 }
 
-impl TreeItem {
-
-}
-
-
 /**
 A tree-view control is a window that displays a hierarchical list of items
 */
@@ -81,6 +76,38 @@ impl TreeView {
             flags: None,
             font: None,
             parent: None
+        }
+    }
+
+    /// Return the root item of the tree view if one is present.
+    /// If there is no root in the tree, returns `None`.
+    pub fn root(&self) -> Option<TreeItem> {
+        use winapi::um::commctrl::{TVM_GETNEXTITEM, TVGN_ROOT};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_ROOT, 0) as HTREEITEM;
+        if handle.is_null() {
+            None
+        } else {
+            Some(TreeItem { handle })
+        }
+    }
+
+    /// Return the currently selected item.
+    /// If there is no selected item, returns `None`.
+    pub fn selected_item(&self) -> Option<TreeItem> {
+        use winapi::um::commctrl::{TVM_GETNEXTITEM, TVGN_CARET};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_CARET, 0) as HTREEITEM;
+        if handle.is_null() {
+            None
+        } else {
+            Some(TreeItem { handle })
         }
     }
 
@@ -124,16 +151,13 @@ impl TreeView {
     }
 
     /// Remove an item and its children from the tree view
-    /// After being removed, the item is reverted back to a unused state
-    pub fn remove_item(&self, item: &mut TreeItem) {
+    pub fn remove_item(&self, item: &TreeItem) {
         use winapi::um::commctrl::{TVM_DELETEITEM};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         wh::send_message(handle, TVM_DELETEITEM, 0, item.handle as LPARAM);
-
-        item.handle = ptr::null_mut();
     }
 
     /// Selects the specified tree-view item and scrolls the item into view.
