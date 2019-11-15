@@ -34,6 +34,9 @@ pub struct ControlsTest {
     open_file_dialog: FileDialog,
 
     #[cfg(feature = "file-dialog")]
+    open_directory_dialog: FileDialog,
+
+    #[cfg(feature = "file-dialog")]
     save_file_dialog: FileDialog,
 
     // Control window
@@ -122,7 +125,7 @@ mod partial_controls_test_ui {
             data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
 
             #[cfg(feature = "file-dialog")]
-            fn init_dialog(data: &mut ControlsTest) {
+            fn init_dialog(data: &mut ControlsTest) -> Result<(), SystemError> {
                 FileDialog::builder()
                     .action(FileDialogAction::Open)
                     .multiselect(true)
@@ -130,16 +133,23 @@ mod partial_controls_test_ui {
                     .build(&mut data.open_file_dialog)?;
 
                 FileDialog::builder()
+                    .action(FileDialogAction::OpenDirectory)
+                    .title("Open a directory")
+                    .build(&mut data.open_directory_dialog)?;
+
+                FileDialog::builder()
                     .action(FileDialogAction::Save)
-                    .multiselect(false)
                     .title("Save a file")
+                    .filters("Text(*.txt)|Any(*.*)")
                     .build(&mut data.save_file_dialog)?;
+
+                Ok(())
             }
 
             #[cfg(not(feature = "file-dialog"))]
-            fn init_dialog(_data: &mut ControlsTest) { }
+            fn init_dialog(_data: &mut ControlsTest) -> Result<(), SystemError> { Ok(()) }
 
-            init_dialog(data);
+            init_dialog(data)?;
 
 
             Font::builder()
@@ -1128,9 +1138,13 @@ fn open_file(app: &ControlsTest, _evt: Event) {
     if app.open_file_dialog.run() {
         app.file_dialog_result.clear();
         if let Ok(file_names) = app.open_file_dialog.get_selected_items() {
+            let mut names = String::new();
             for name in file_names {
-                //app.file_dialog_result.append_text(format!("{:?}\r\n", name))
+                names.push_str(&name);
+                names.push_str("\r\n")
             }
+
+            app.file_dialog_result.set_text(&names);
         }
     }
 }
@@ -1139,13 +1153,27 @@ fn open_file(app: &ControlsTest, _evt: Event) {
 fn open_file(_app: &ControlsTest, _evt: Event) {}
 
 #[cfg(feature = "file-dialog")]
-fn open_directory(app: &ControlsTest, _evt: Event) {}
+fn open_directory(app: &ControlsTest, _evt: Event) {
+    if app.open_directory_dialog.run() {
+        app.file_dialog_result.clear();
+        if let Ok(directory) = app.open_directory_dialog.get_selected_item() {
+            app.file_dialog_result.set_text(&directory);
+        }
+    }
+}
 
 #[cfg(not(feature = "file-dialog"))]
 fn open_directory(_app: &ControlsTest, _evt: Event) {}
 
 #[cfg(feature = "file-dialog")]
-fn save_file(app: &ControlsTest, _evt: Event) {}
+fn save_file(app: &ControlsTest, _evt: Event) {
+    if app.save_file_dialog.run() {
+        app.file_dialog_result.clear();
+        if let Ok(file) = app.save_file_dialog.get_selected_item() {
+            app.file_dialog_result.set_text(&file);
+        }
+    }
+}
 
 #[cfg(not(feature = "file-dialog"))]
 fn save_file(_app: &ControlsTest, _evt: Event) {}

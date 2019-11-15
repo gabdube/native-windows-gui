@@ -53,7 +53,7 @@ impl FileDialog {
         unsafe { (&mut *self.handle).Show(self.parent) == S_OK }
     }
 
-     /**
+    /**
         Return the item selected in the dialog by the user. 
         
         Failures:  
@@ -63,9 +63,9 @@ impl FileDialog {
     */
     pub fn get_selected_item(&self) -> Result<String, UserError> { 
         
-        /*if self.multiselect {
+        if self.multiselect() {
             return Err(UserError::FileDialog("FileDialog have the multiselect flag".into()))
-        }*/
+        }
 
         unsafe {
             rh::filedialog_get_item(&mut *self.handle)
@@ -119,7 +119,7 @@ impl FileDialog {
         }
     }
 
-        /**
+    /**
         Set the first opened folder when the dialog is shown. This value is overriden by the user after the dialog ran.  
         Call `clear_client_data` to fix that.
         Failures:
