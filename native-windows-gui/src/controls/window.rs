@@ -44,7 +44,8 @@ impl Window {
             size: (500, 500),
             position: (300, 300),
             flags: None,
-            icon: None
+            icon: None,
+            parent: None
         }
     }
 
@@ -187,6 +188,7 @@ pub struct WindowBuilder<'a> {
     position: (i32, i32),
     flags: Option<WindowFlags>,
     icon: Option<&'a Image>,
+    parent: Option<ControlHandle>
 }
 
 impl<'a> WindowBuilder<'a> {
@@ -216,8 +218,14 @@ impl<'a> WindowBuilder<'a> {
         self
     }
 
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: Option<C>) -> WindowBuilder<'a> {
+        self.parent = p.map(|p2| p2.into());
+        self
+    }
+
     pub fn build(self, out: &mut Window) -> Result<(), SystemError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
@@ -225,6 +233,7 @@ impl<'a> WindowBuilder<'a> {
             .size(self.size)
             .position(self.position)
             .text(self.title)
+            .parent(self.parent)
             .build()?;
 
         if self.icon.is_some() {

@@ -8,6 +8,9 @@ mod file_dialog;
 #[cfg(feature = "color-dialog")]
 mod color_dialog;
 
+#[cfg(feature = "font-dialog")]
+mod font_dialog;
+
 pub use font::{Font, FontBuilder};
 pub use system_images::*;
 pub use image::{Image};
@@ -17,3 +20,6 @@ pub use file_dialog::{FileDialog, FileDialogAction};
 
 #[cfg(feature = "color-dialog")]
 pub use color_dialog::{ColorDialog, ColorDialogBuilder};
+
+#[cfg(feature = "font-dialog")]
+pub use font_dialog::{FontDialog, FontDialogBuilder};

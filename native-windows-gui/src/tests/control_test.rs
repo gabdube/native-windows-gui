@@ -42,6 +42,9 @@ pub struct ControlsTest {
     #[cfg(feature = "color-dialog")]
     color_dialog: ColorDialog,
 
+    #[cfg(feature = "font-dialog")]
+    font_dialog: FontDialog,
+
     // Control window
     pub window: Window,
     status: StatusBar,
@@ -75,6 +78,8 @@ pub struct ControlsTest {
     file_dialog_result: TextBox,
     test_select_color_button: Button,
     test_color_output: TextInput,
+    test_select_font_button: Button,
+    test_font_output: TextInput,
 
     test_tree: TreeView,
     test_tree_input: TextInput,
@@ -152,6 +157,9 @@ mod partial_controls_test_ui {
 
                 ColorDialog::builder()
                     .build(&mut data.color_dialog)?;
+
+                FontDialog::builder()
+                    .build(&mut data.font_dialog)?;
 
                 Ok(())
             }
@@ -382,6 +390,16 @@ mod partial_controls_test_ui {
                 .parent(&data.dialog_tab)
                 .build(&mut data.test_color_output)?;
 
+            Button::builder()
+                .text("Select a font")
+                .parent(&data.dialog_tab)
+                .enabled(cfg!(feature="font-dialog"))
+                .build(&mut data.test_select_font_button)?;
+
+            TextInput::builder()
+                .parent(&data.dialog_tab)
+                .build(&mut data.test_font_output)?;
+
             TreeView::builder()
                 .parent(&data.tree_tab)
                 .build(&mut data.test_tree)?;
@@ -482,6 +500,7 @@ mod partial_controls_test_ui {
                 .position((650, 100))
                 .title("Action panel")
                 .icon(Some(&data.window_icon))
+                .parent(Some(&data.window))
                 .build(&mut data.panel)?;
             
             Button::builder()
@@ -585,14 +604,16 @@ mod partial_controls_test_ui {
             
             GridLayout::builder()
                 .parent(&data.dialog_tab)
-                .min_size([400, 90])
-                .max_size([u32::max_value(), 150])
+                .min_size([400, 150])
+                .max_size([u32::max_value(), 200])
                 .child(0, 0, &data.test_open_file_button)
                 .child(1, 0, &data.test_open_directory_button)
                 .child(2, 0, &data.test_save_file_button)
                 .child_item(GridLayoutItem::new(&data.file_dialog_result, 0, 1, 3, 1))
                 .child(0, 2, &data.test_select_color_button)
                 .child_item(GridLayoutItem::new(&data.test_color_output, 1, 2, 2, 1))
+                .child(0, 3, &data.test_select_font_button)
+                .child_item(GridLayoutItem::new(&data.test_font_output, 1, 3, 2, 1))
                 .build();
             
             GridLayout::builder()
@@ -658,6 +679,8 @@ mod partial_controls_test_ui {
                         tree_tests(self, &self.test_tree_remove.handle);
                     } else if &handle == &self.test_select_color_button {
                         color_select(self);
+                    } else if &handle == &self.test_select_font_button {
+                        font_select(self);
                     },
                 E::OnTooltipText => 
                     if &handle == &self.window {
@@ -866,6 +889,7 @@ fn run_font_tests(app: &ControlsTest, _evt: Event) {
         app.controls_holder.set_font(Some(&app.arial_font));
         app.test_text_input.set_font(Some(&app.arial_font));
         app.test_text_box.set_font(Some(&app.arial_font));
+        app.test_tree.set_font(Some(&app.arial_font));
 
         assert_eq!(app.test_label.font().as_ref(), Some(&app.arial_font));
 
@@ -880,6 +904,7 @@ fn run_font_tests(app: &ControlsTest, _evt: Event) {
         app.test_list_box1.set_font(None);
         app.test_list_box2.set_font(None);
         app.controls_holder.set_font(None);
+        app.test_tree.set_font(None);
 
         app.test_list_box1.set_size(130, 100);
         app.test_list_box2.set_size(130, 100);
@@ -1237,3 +1262,13 @@ fn color_select(app: &ControlsTest) {
 
 #[cfg(not(feature = "color-dialog"))]
 fn color_select(_app: &ControlsTest) {}
+
+#[cfg(feature = "font-dialog")]
+fn font_select(app: &ControlsTest) {
+    if app.font_dialog.show(Some(&app.window)) {
+        app.test_font_output.set_text(&format!("{:?}", app.font_dialog.font()))
+    }
+}
+
+#[cfg(not(feature = "font-dialog"))]
+fn font_select(_app: &ControlsTest) {}
