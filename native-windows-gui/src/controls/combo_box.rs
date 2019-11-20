@@ -364,7 +364,7 @@ impl<D: Display+Default> ComboBox<D> {
     }
 
     /// Winapi base flags used during window creation
-    pub fn flags(&self) -> u32 {;
+    pub fn flags(&self) -> u32 {
         ::winapi::um::winuser::WS_VISIBLE
     }
 

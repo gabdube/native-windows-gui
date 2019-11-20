@@ -261,7 +261,7 @@ impl TextBox {
     }
 
     /// Winapi base flags used during window creation
-    pub fn flags(&self) -> u32 {;
+    pub fn flags(&self) -> u32 {
         WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL
     }
 

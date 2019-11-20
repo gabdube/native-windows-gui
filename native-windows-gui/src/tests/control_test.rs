@@ -137,6 +137,7 @@ mod partial_controls_test_ui {
 
             #[cfg(feature = "file-dialog")]
             #[cfg(feature = "color-dialog")]
+            #[cfg(feature = "font-dialog")]
             fn init_dialog(data: &mut ControlsTest) -> Result<(), SystemError> {
                 FileDialog::builder()
                     .action(FileDialogAction::Open)

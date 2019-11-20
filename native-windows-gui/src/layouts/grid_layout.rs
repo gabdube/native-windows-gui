@@ -28,7 +28,7 @@ impl GridLayoutItem {
 
     /// Initialize a new grid layout item
     pub fn new<W: Into<ControlHandle>>(c: W, col: u32, row: u32, col_span: u32, row_span: u32) -> GridLayoutItem {
-        let control = c.into().hwnd().expect("Child must be HWND");;
+        let control = c.into().hwnd().expect("Child must be HWND");
 
         GridLayoutItem {
             control,
