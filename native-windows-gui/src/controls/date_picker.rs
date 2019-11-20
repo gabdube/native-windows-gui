@@ -136,7 +136,7 @@ impl DatePicker {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
-        let mut syst: SYSTEMTIME = unsafe{ mem::uninitialized() };
+        let mut syst: SYSTEMTIME = unsafe{ mem::zeroed() };
 
         let r = unsafe{ wh::send_message(handle, DTM_GETSYSTEMTIME, 0, mem::transmute(&mut syst)) };
         match r {
@@ -430,7 +430,7 @@ unsafe fn get_dtp_info(handle: HWND) -> DATETIMEPICKERINFO {
     use winapi::shared::minwindef::DWORD;
     use std::mem;
 
-    let mut dtp_info: DATETIMEPICKERINFO = mem::uninitialized();
+    let mut dtp_info: DATETIMEPICKERINFO = mem::zeroed();
     dtp_info.cbSize = mem::size_of::<DATETIMEPICKERINFO>() as DWORD;
     wh::send_message(handle, DTM_GETDATETIMEPICKERINFO, 0, mem::transmute(&mut dtp_info));
 

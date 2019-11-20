@@ -23,7 +23,7 @@ pub fn dispatch_thread_events() {
     use winapi::shared::windef::HWND;
 
     unsafe {
-        let mut msg: MSG = mem::uninitialized();
+        let mut msg: MSG = mem::zeroed();
         while GetMessageW(&mut msg, ptr::null_mut(), 0, 0) != 0 {
 
             // Dispatch notice message sent from other threads

@@ -107,7 +107,7 @@ pub unsafe fn get_window_position(handle: HWND) -> (i32, i32) {
     use winapi::um::winuser::{GetWindowRect, ScreenToClient, GetParent};
     use winapi::shared::windef::{RECT, POINT};
     
-    let mut r: RECT = mem::uninitialized();
+    let mut r: RECT = mem::zeroed();
     GetWindowRect(handle, &mut r);
 
     let parent = GetParent(handle);
@@ -145,7 +145,7 @@ pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {
     use winapi::um::winuser::GetClientRect;
     use winapi::shared::windef::RECT;
     
-    let mut r: RECT = mem::uninitialized();
+    let mut r: RECT = mem::zeroed();
     GetClientRect(handle, &mut r);
 
     (r.right as u32, r.bottom as u32)

@@ -11,7 +11,7 @@ mod color_dialog;
 #[cfg(feature = "font-dialog")]
 mod font_dialog;
 
-pub use font::{Font, FontBuilder};
+pub use font::{Font, FontInfo, FontBuilder};
 pub use system_images::*;
 pub use image::{Image};
 

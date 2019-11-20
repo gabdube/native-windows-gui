@@ -4,7 +4,13 @@ extern crate winapi;
 
 use std::rc::Rc;
 
-#[cfg(test)] mod tests;
+#[cfg(feature="all")]
+#[cfg(test)]
+mod tests;
+
+#[cfg(feature="tests-linux")]
+#[cfg(test)]
+mod tests;
 
 mod errors;
 pub use errors::{UserError, SystemError};
