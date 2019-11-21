@@ -59,12 +59,9 @@ pub struct ControlGen<'a> {
 impl<'a> ToTokens for ControlGen<'a> {
 
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
-        let mut control_params = self.params.borrow_mut();
+        let control_params = self.params.borrow();
         let member = self.member;
         let ty = &self.ty;
-    
-        let flags_name = format!("{}Flags", ty);
-        expand_flags(&mut control_params, &flags_name);
     
         let ids: Vec<&syn::Ident> = control_params.params.iter().map(|p| &p.ident).collect();
         let values: Vec<&syn::Expr> = control_params.params.iter().map(|p| &p.e).collect();
@@ -109,8 +106,11 @@ pub fn organize_controls<'a>(fields: &mut Vec<ControlGen<'a>>) {
     let mut last_top_level: Option<&ControlGen<'a>> = None;
 
     for control in fields.iter() {
+        let flags_name = format!("{}Flags", control.ty);
+
         if TOP_LEVEL.iter().any(|top| &control.ty == top) {
             last_top_level = Some(control);
+            expand_flags(control, &flags_name);
             continue;
         }
 
@@ -122,6 +122,8 @@ pub fn organize_controls<'a>(fields: &mut Vec<ControlGen<'a>>) {
         if try_expand_parent {
             expand_parent(control);
         }
+
+        expand_flags(control, &flags_name);
     }
 
 }
@@ -162,13 +164,14 @@ fn parse_parameters(m: &pm2::Ident, s: &pm2::TokenStream) -> ControlParameters {
 }
 
 /// Expand the control flags from the compressed format. Ex: "WINDOW|VISIBLE"
-fn expand_flags(p: &mut ControlParameters, base: &str) {
+fn expand_flags<'a>(control: &ControlGen<'a>, base: &str) {
+    let mut p = control.params.borrow_mut();
     let mut flags = p.params.iter_mut().find(|f| &f.ident == "flags");
     if let Some(flags_param) = flags.as_mut() {
         let flags_value = match &flags_param.e {
             syn::Expr::Lit(expr_lit) => match &expr_lit.lit {
                 syn::Lit::Str(value) => value,
-                other => panic!("Compressed flags must str, got {:?}", other)
+                other => panic!("Compressed flags must str, got {:?} for control {}", other, control.member)
             },
             _ => { return; }
         };
@@ -189,7 +192,10 @@ fn expand_flags(p: &mut ControlParameters, base: &str) {
             }
         }
 
-        flags_param.e = syn::parse_str(&final_flags).expect("Failed to parse flags");
+        flags_param.e = match syn::parse_str(&final_flags) {
+            Ok(e) => e,
+            Err(e) => panic!("Failed to parse flags value for control {}: {}", control.member, e)
+        };
     }
 }
 
