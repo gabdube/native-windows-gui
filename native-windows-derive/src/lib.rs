@@ -61,7 +61,6 @@ fn parse_named_fields(d: &syn::DataStruct) -> Option<&Punctuated<syn::Field, Com
     }
 } 
 
-
 fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
     let struct_name = &n.n_struct;
     let ui_struct_name = &n.n_struct_ui;
@@ -77,6 +76,8 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
 
     quote! {
         fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, nwg::SystemError> {
+
+            #(#fields)*
 
             let ui = Rc::new(#ui_struct_name { inner: data });
 

@@ -9,7 +9,12 @@ use nwg::NativeUi;
 
 #[derive(Default, NwgUi)]
 pub struct BasicApp {
-    #[nwg_control]
+    #[nwg_control(
+        size: (300, 115),
+        position: (300, 300),
+        title: "Basic example",
+        flags: "WINDOW|VISIBLE"
+    )]
     window: nwg::Window,
 
     name_edit: nwg::TextInput,
@@ -36,5 +41,5 @@ fn main() {
 
     let _app = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
 
-    //nwg::dispatch_thread_events();
+    nwg::dispatch_thread_events();
 }
