@@ -1,0 +1,40 @@
+#![windows_subsystem = "windows"]
+
+extern crate native_windows_gui as nwg;
+extern crate native_windows_derive as nwd;
+
+use nwd::NwgUi;
+use nwg::NativeUi;
+
+
+#[derive(Default, NwgUi)]
+pub struct BasicApp {
+    #[nwg_control]
+    window: nwg::Window,
+
+    name_edit: nwg::TextInput,
+
+    hello_button: nwg::Button
+}
+
+impl BasicApp {
+
+    fn say_hello(&self, _event: nwg::Event) {
+        nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
+    }
+    
+    fn say_goodbye(&self, _event: nwg::Event) {
+        nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
+        nwg::stop_thread_dispatch();
+    }
+
+}
+
+fn main() {
+    nwg::enable_visual_styles();
+    nwg::init_common_controls().expect("Failed to init common controls");
+
+    let _app = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
+
+    //nwg::dispatch_thread_events();
+}
