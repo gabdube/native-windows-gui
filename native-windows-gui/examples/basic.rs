@@ -1,5 +1,3 @@
-#![windows_subsystem = "windows"]
-
 extern crate native_windows_gui as nwg;
 use nwg::NativeUi;
 

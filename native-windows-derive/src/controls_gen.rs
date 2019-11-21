@@ -1,9 +1,23 @@
 use proc_macro2 as pm2;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
+use quote::{ToTokens};
+use std::cell::RefCell;
 
 
-#[derive(Debug)]
+static CONTROL_LIST: &'static [&'static str] = &[
+    "Window", "Button", "CheckBox", "ComboBox", "DatePicker", "FancyWindow",
+    "ImageFrame", "Label", "ListBox", "Menu", "MenuItem", "MenuSeparator",
+    "Notice", "ProgressBar", "RadioButton", "StatusBar", "TabsContainer", "Tab",
+    "TextBox", "TextInput", "Timer", "Tooltip", "Trackbar", "TreeView"
+];
+
+static TOP_LEVEL: &'static [&'static str] = &[
+    "Window", "FancyWindow", "TabsContainer", "Tab"
+];
+
+
+#[allow(unused)]
 struct ControlParam {
     ident: syn::Ident,
     sep: Token![:],
@@ -21,7 +35,6 @@ impl Parse for ControlParam {
 }
 
 
-#[derive(Debug)]
 struct ControlParameters {
     params: Punctuated<ControlParam, Token![,]>
 }
@@ -37,27 +50,80 @@ impl Parse for ControlParameters {
 }
 
 
+pub struct ControlGen<'a> {
+    ty: syn::Ident,
+    member: &'a syn::Ident,
+    params: RefCell<ControlParameters>,  
+}
+
+impl<'a> ToTokens for ControlGen<'a> {
+
+    fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+        let mut control_params = self.params.borrow_mut();
+        let member = self.member;
+        let ty = &self.ty;
+    
+        let flags_name = format!("{}Flags", ty);
+        expand_flags(&mut control_params, &flags_name);
+    
+        let ids: Vec<&syn::Ident> = control_params.params.iter().map(|p| &p.ident).collect();
+        let values: Vec<&syn::Expr> = control_params.params.iter().map(|p| &p.e).collect();
+    
+        let control_tk = quote! {
+            nwg::#ty::builder()
+                #(.#ids(#values))*
+                .build(&mut data.#member)?;
+        };
+
+        control_tk.to_tokens(tokens);
+    }
+
+}
+
+
 /// Generate the code that inits the control in the `build_ui` function or the `build_partial` function
 /// Note that ordering is done in `organize_controls`
-pub fn generate_control(field: &syn::Field) -> Option<pm2::TokenStream> {
+pub fn generate_control<'a>(field: &'a syn::Field) -> Option<ControlGen<'a>> {
     let attrs = &field.attrs;
     if attrs.len() == 0 { return None; }
 
-    let member_name = &field.ident.as_ref().expect("Cannot find member name when generating control");
+    let member = field.ident.as_ref().expect("Cannot find member name when generating control");
 
     let attr = match find_control_attr(&attrs) {
         Some(a) => a,
         None => { return None; }
     };
 
-    let control_type = extract_control_type(&field.ty);
+    let ty = extract_control_type(&field.ty);
+    if !CONTROL_LIST.iter().any(|name| &ty == name) {
+        panic!("Unkown nwg type #{}. If you use renamed control try `control(ty=Button)`.", ty);
+    }
     
-    let control_tks = match &control_type as &str {
-        "Window" => generate_window(&member_name, attr),
-        other => panic!("Unkown nwg type #{}. If using user control try `control(ty=Button)`.", other)
-    };
+    let params = parse_parameters(member, &attr.tokens);
 
-    Some(control_tks)
+    Some( ControlGen {  ty, member, params: RefCell::new(params)  } )
+}
+
+/// Guess the controls parent and reorder the controls creation order to make sure everything works
+pub fn organize_controls<'a>(fields: &mut Vec<ControlGen<'a>>) {
+    let mut last_top_level: Option<&ControlGen<'a>> = None;
+
+    for control in fields.iter_mut() {
+        if TOP_LEVEL.iter().any(|top| &control.ty == top) {
+            last_top_level = Some(control);
+            continue;
+        }
+
+        let try_expand_parent = match last_top_level.clone() {
+            Some(top) => auto_parent(control, top),
+            None => true
+        };
+
+        if try_expand_parent {
+            expand_parent(control);
+        }
+    }
+
 }
 
 fn find_control_attr(attrs: &[syn::Attribute]) -> Option<&syn::Attribute> {
@@ -74,7 +140,7 @@ fn find_control_attr(attrs: &[syn::Attribute]) -> Option<&syn::Attribute> {
     index.map(|i| &attrs[i])
 }
 
-fn extract_control_type(ty: &syn::Type) -> String {
+fn extract_control_type(ty: &syn::Type) -> syn::Ident {
     let control_type: String;
 
     match ty {
@@ -85,7 +151,7 @@ fn extract_control_type(ty: &syn::Type) -> String {
         _ => panic!("Ui control fields must be in a path format `nwg::Button` or simple format `Button`.")
     }
 
-    control_type
+    syn::Ident::new(&control_type, pm2::Span::call_site())
 }
 
 fn parse_parameters(m: &pm2::Ident, s: &pm2::TokenStream) -> ControlParameters {
@@ -95,49 +161,80 @@ fn parse_parameters(m: &pm2::Ident, s: &pm2::TokenStream) -> ControlParameters {
     }
 }
 
-fn expand_flags(p: &mut ControlParameters, base: &'static str) {
+/// Expand the control flags from the compressed format. Ex: "WINDOW|VISIBLE"
+fn expand_flags(p: &mut ControlParameters, base: &str) {
     let mut flags = p.params.iter_mut().find(|f| &f.ident == "flags");
     if let Some(flags_param) = flags.as_mut() {
         let flags_value = match &flags_param.e {
             syn::Expr::Lit(expr_lit) => match &expr_lit.lit {
-                syn::Lit::Str(value) => Some(value),
+                syn::Lit::Str(value) => value,
                 other => panic!("Compressed flags must str, got {:?}", other)
             },
-            _ => None
+            _ => { return; }
         };
 
-        if let Some(fv) = flags_value {
-            let flags = fv.value();
-            let splitted: Vec<&str> = flags.split('|').collect();
+        let flags = flags_value.value();
+        let splitted: Vec<&str> = flags.split('|').collect();
 
-            let flags_count = splitted.len() - 1;
-            let mut final_flags: String = String::with_capacity(100);
-            for (i, value) in splitted.into_iter().enumerate() {
-                final_flags.push_str("nwg::");
-                final_flags.push_str(base);
-                final_flags.push_str("::");
-                final_flags.push_str(value);
+        let flags_count = splitted.len() - 1;
+        let mut final_flags: String = String::with_capacity(100);
+        for (i, value) in splitted.into_iter().enumerate() {
+            final_flags.push_str("nwg::");
+            final_flags.push_str(base);
+            final_flags.push_str("::");
+            final_flags.push_str(value);
 
-                if i != flags_count {
-                    final_flags.push('|');
-                }
+            if i != flags_count {
+                final_flags.push('|');
             }
-
-            flags_param.e = syn::parse_str(&final_flags).expect("Failed to parse flags");
         }
+
+        flags_param.e = syn::parse_str(&final_flags).expect("Failed to parse flags");
     }
 }
 
-fn generate_window(member: &pm2::Ident, attr: &syn::Attribute) -> pm2::TokenStream {
-    let mut control_params = parse_parameters(member, &attr.tokens);
-    expand_flags(&mut control_params, "WindowFlags");
+/// Expand user defined parent field. Ex: "parent: window" becomes "parent: &data.window"
+fn expand_parent<'a>(control: &mut ControlGen<'a>) {
+    let mut p = control.params.borrow_mut();
+    let mut parent = p.params.iter_mut().find(|f| &f.ident == "parent");
 
-    let ids: Vec<&syn::Ident> = control_params.params.iter().map(|p| &p.ident).collect();
-    let values: Vec<&syn::Expr> = control_params.params.iter().map(|p| &p.e).collect();
+    if let Some(parent_params) = parent.as_mut() {
+        let parent_name_path = match &parent_params.e {
+            syn::Expr::Path(exp_path) => &exp_path.path.segments,
+            _ => { return; }
+        };
 
-    quote! {
-        nwg::Window::builder()
-            #(.#ids(#values))*
-            .build(&mut data.#member)?;
+        let parent_name = match parent_name_path.first().map(|seg| &seg.ident) {
+            Some(name) => name,
+            None => panic!("Failed to parse parent value for control {}", control.member)
+        };
+
+        let final_parent = format!("& data.{}", parent_name);
+        parent_params.e = match syn::parse_str(&final_parent) {
+            Ok(e) => e,
+            Err(e) => panic!("Failed to parse parent value for control {}: {}", control.member, e)
+        };
     }
+}
+
+
+/// Add the control parent to the control parameters.
+/// Returns `true` if a parent field already exists
+/// Returns `false` if the parent field was added
+fn auto_parent<'a>(control: &mut ControlGen<'a>, parent: &ControlGen<'a>) -> bool {
+    let mut p = control.params.borrow_mut();
+    if p.params.iter().any(|p| &p.ident == "parent") {
+        return true;  // User already defined a parent
+    }
+
+    let parent_expr = format!("&data.{}", parent.member);
+    let parent_param = ControlParam {
+        ident: syn::Ident::new("parent", pm2::Span::call_site()),
+        sep: syn::token::Colon(pm2::Span::call_site()),
+        e: syn::parse_str(&parent_expr).unwrap(),
+    };
+
+    p.params.push(parent_param);
+
+    false
 }

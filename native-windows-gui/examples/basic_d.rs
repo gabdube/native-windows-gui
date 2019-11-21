@@ -1,5 +1,3 @@
-#![windows_subsystem = "windows"]
-
 extern crate native_windows_gui as nwg;
 extern crate native_windows_derive as nwd;
 
@@ -17,8 +15,10 @@ pub struct BasicApp {
     )]
     window: nwg::Window,
 
+    #[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10), parent: window)]
     name_edit: nwg::TextInput,
 
+    #[nwg_control(text: "Say my name", size: (280, 60), position: (10, 40))]
     hello_button: nwg::Button
 }
 

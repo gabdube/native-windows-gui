@@ -11,6 +11,7 @@ use syn::token::Comma;
 extern crate quote;
 
 mod controls_gen;
+use controls_gen::ControlGen;
 
 
 struct BaseNames {
@@ -67,12 +68,14 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
 
     let named_fields = parse_named_fields(s).expect("Ui structure must have named fields");
 
-    let mut fields: Vec<pm2::TokenStream> = Vec::with_capacity(named_fields.len());
+    let mut fields: Vec<ControlGen> = Vec::with_capacity(named_fields.len());
     for f in named_fields.iter() {
-        if let Some(control) =  controls_gen::generate_control(f) {
+        if let Some(control) = controls_gen::generate_control(f) {
             fields.push(control);
         }
     }
+
+    controls_gen::organize_controls(&mut fields);
 
     quote! {
         fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, nwg::SystemError> {
@@ -104,6 +107,7 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
             use super::*;
             use std::ops::Deref;
             use std::rc::Rc;
+            use std::fmt;
 
             pub struct #ui_struct_name {
                 inner: #struct_name
@@ -118,6 +122,12 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
         
                 fn deref(&self) -> &#struct_name {
                     &self.inner
+                }
+            }
+
+            impl fmt::Debug for #ui_struct_name {
+                fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                    write!(f, "[#ui_struct_name Ui]")
                 }
             }
         }
