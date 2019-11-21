@@ -108,7 +108,7 @@ pub fn generate_control<'a>(field: &'a syn::Field) -> Option<ControlGen<'a>> {
 pub fn organize_controls<'a>(fields: &mut Vec<ControlGen<'a>>) {
     let mut last_top_level: Option<&ControlGen<'a>> = None;
 
-    for control in fields.iter_mut() {
+    for control in fields.iter() {
         if TOP_LEVEL.iter().any(|top| &control.ty == top) {
             last_top_level = Some(control);
             continue;
@@ -194,7 +194,7 @@ fn expand_flags(p: &mut ControlParameters, base: &str) {
 }
 
 /// Expand user defined parent field. Ex: "parent: window" becomes "parent: &data.window"
-fn expand_parent<'a>(control: &mut ControlGen<'a>) {
+fn expand_parent<'a>(control: &ControlGen<'a>) {
     let mut p = control.params.borrow_mut();
     let mut parent = p.params.iter_mut().find(|f| &f.ident == "parent");
 
@@ -221,7 +221,7 @@ fn expand_parent<'a>(control: &mut ControlGen<'a>) {
 /// Add the control parent to the control parameters.
 /// Returns `true` if a parent field already exists
 /// Returns `false` if the parent field was added
-fn auto_parent<'a>(control: &mut ControlGen<'a>, parent: &ControlGen<'a>) -> bool {
+fn auto_parent<'a>(control: &ControlGen<'a>, parent: &ControlGen<'a>) -> bool {
     let mut p = control.params.borrow_mut();
     if p.params.iter().any(|p| &p.ident == "parent") {
         return true;  // User already defined a parent

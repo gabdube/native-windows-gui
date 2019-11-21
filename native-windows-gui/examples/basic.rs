@@ -105,8 +105,7 @@ mod basic_app_ui {
 
 
 fn main() {
-    nwg::enable_visual_styles();
-    nwg::init_common_controls().expect("Failed to init common controls");
+    nwg::init().expect("Failed to init Native Windows GUI");
 
     let _app = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
 

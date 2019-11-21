@@ -44,3 +44,11 @@ pub trait PartialUi<D> {
 pub trait NativeUi<D, UI> {
     fn build_ui(d: D) -> Result<Rc<UI>, SystemError>;
 }
+
+
+/// Initialize some application wide GUI settings.
+/// This includes default styling and common controls resources.
+pub fn init() -> std::result::Result<(), errors::SystemError> {
+    enable_visual_styles();
+    init_common_controls()
+}

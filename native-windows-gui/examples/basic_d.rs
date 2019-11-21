@@ -15,7 +15,7 @@ pub struct BasicApp {
     )]
     window: nwg::Window,
 
-    #[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10), parent: window)]
+    #[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10))]
     name_edit: nwg::TextInput,
 
     #[nwg_control(text: "Say my name", size: (280, 60), position: (10, 40))]
@@ -36,8 +36,7 @@ impl BasicApp {
 }
 
 fn main() {
-    nwg::enable_visual_styles();
-    nwg::init_common_controls().expect("Failed to init common controls");
+    nwg::init().expect("Failed to init Native Windows GUI");
 
     let _app = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
 
