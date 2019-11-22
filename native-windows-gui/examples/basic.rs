@@ -11,11 +11,11 @@ pub struct BasicApp {
 
 impl BasicApp {
 
-    fn say_hello(&self, _event: nwg::Event) {
+    fn say_hello(&self) {
         nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
     }
     
-    fn say_goodbye(&self, _event: nwg::Event) {
+    fn say_goodbye(&self) {
         nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
         nwg::stop_thread_dispatch();
     }
@@ -72,12 +72,12 @@ mod basic_app_ui {
                     match evt {
                         E::OnButtonClick => {
                             if handle == evt_ui.hello_button.handle {
-                                BasicApp::say_hello(&evt_ui.inner, evt);
+                                BasicApp::say_hello(&evt_ui.inner);
                             }
                         },
                         E::OnWindowClose => {
                             if handle == evt_ui.window.handle {
-                                BasicApp::say_goodbye(&evt_ui.inner, evt);
+                                BasicApp::say_goodbye(&evt_ui.inner);
                             }
                         },
                         _ => {}

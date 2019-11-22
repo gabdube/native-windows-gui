@@ -13,6 +13,9 @@ extern crate quote;
 mod controls_gen;
 use controls_gen::ControlGen;
 
+mod controls_events;
+use controls_events::ControlEvents;
+
 
 struct BaseNames {
     n_module: syn::Ident,
@@ -69,6 +72,7 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
     let named_fields = parse_named_fields(s).expect("Ui structure must have named fields");
 
     let mut fields: Vec<ControlGen> = Vec::with_capacity(named_fields.len());
+    let mut events = ControlEvents::with_capacity(named_fields.len());
     for f in named_fields.iter() {
         if let Some(control) = controls_gen::generate_control(f) {
             fields.push(control);
@@ -84,12 +88,14 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
 
             let ui = Rc::new(#ui_struct_name { inner: data });
 
+            #events
+            
             Ok(ui)
         }
     }
 }
 
-#[proc_macro_derive(NwgUi, attributes(nwg_control))]
+#[proc_macro_derive(NwgUi, attributes(nwg_control, nwg_events))]
 pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     let base = parse_macro_input!(input as DeriveInput);
 
