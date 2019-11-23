@@ -98,3 +98,9 @@ use super::{TreeView};
 
 #[cfg(feature = "tree-view")]
 handles!(TreeView);
+
+#[cfg(feature = "canvas")]
+use super::{CanvasWindow};
+
+#[cfg(feature = "canvas")]
+handles!(CanvasWindow);

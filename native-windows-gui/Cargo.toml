@@ -8,7 +8,11 @@ build = "build.rs"
 keywords = ["gui", "ui", "windows"]
 
 [dependencies]
-winapi = { version = "0.3", features = ["winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi", "errhandlingapi", "winerror", "commctrl", "sysinfoapi", "shobjidl", "combaseapi", "commdlg"] }
+winapi = { version = "0.3", features = [
+  "winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi", 
+  "errhandlingapi", "winerror", "commctrl", "sysinfoapi", "shobjidl", "combaseapi",
+  "commdlg", "d2d1"] }
+
 bitflags = { version = "1.1.0" }
 
 [dev-dependencies]
@@ -28,4 +32,5 @@ progress-bar = []
 tabs = []
 tree-view = []
 fancy-window = []
-all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window"]
+canvas = []
+all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "canvas"]

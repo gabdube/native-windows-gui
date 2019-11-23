@@ -162,7 +162,25 @@ impl TreeView {
 
     /// Selects the specified tree-view item and scrolls the item into view.
     pub fn select_item(&self, item: TreeItem) {
-        //x
+        use winapi::um::commctrl::{TVITEMW, TVM_SETITEMW, TVIS_SELECTED, TVIF_STATE};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
+
+        let mut item = TVITEMW {
+            mask: TVIF_STATE,
+            hItem: item.handle,
+            state: TVIS_SELECTED,
+            stateMask: TVIS_SELECTED,
+            pszText: ptr::null_mut(),
+            cchTextMax: 0,
+            iImage: 0,
+            iSelectedImage: 0,
+            cChildren: 0,
+            lParam: 0
+        };
+
+        wh::send_message(handle, TVM_SETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
     }
 
     /// Expands or collapses the list of child items associated with the specified parent item, if any. 

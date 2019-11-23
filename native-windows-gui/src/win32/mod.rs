@@ -9,6 +9,9 @@ pub(crate) mod cursor;
 #[cfg(feature = "tabs")]
 pub(crate) mod tabs;
 
+#[cfg(feature = "canvas")]
+pub(crate) mod canvas;
+
 #[cfg(feature = "file-dialog")] use winapi::shared::guiddef::GUID;
 use std::{mem, ptr};
 use crate::errors::SystemError;
@@ -127,6 +130,7 @@ pub fn init_common_controls() -> Result<(), SystemError> {
     }
 
     tabs_init()?;
+    canvas_init()?;
 
     Ok(())
 }
@@ -136,6 +140,12 @@ fn tabs_init() -> Result<(), SystemError> { tabs::create_tab_classes() }
 
 #[cfg(not(feature = "tabs"))]
 fn tabs_init() -> Result<(), SystemError> { Ok(()) }
+
+#[cfg(feature = "canvas")]
+fn canvas_init() -> Result<(), SystemError> { canvas::create_canvas_classes() }
+
+#[cfg(not(feature = "canvas"))]
+fn canvas_init() -> Result<(), SystemError> { Ok(()) }
 
 
 #[allow(unused_macros)]

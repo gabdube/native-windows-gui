@@ -5,8 +5,8 @@ Welcome to Native Windows GUI (aka NWG). The BEST (and only) rust library to dev
 NWG is a very light wrapper over WINAPI. It allows you, the developer, to handle
 the quirks and rough edges of the API by providing a simple, safe and rust-like interface.
 
-Due to its simple nature NWG is sure to keep your compile time low, your resources
-usage at a minimum and your mind somewhat "sane".
+Native Windows GUI keeps things simple. This means small compile time, minimal resources usage
+and less time searching the documentation and more time for you to develop your application.
 
 This is the 3rd and final version of NWG. It is considered "mature" or, as I would say
 "the backlog is empty, and it will most likely stay that way". This version implements pretty much

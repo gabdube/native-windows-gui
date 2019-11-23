@@ -11,10 +11,12 @@ pub enum SystemError {
     FontCreationFailed,
     ImageCreationFailed,
     MenuCreationFailed,
+    CanvasRendererCreationFailed,
+    CanvasRenderTargetCreationFailed,
     FileDialogCreationFailed,
     SeparatorWithoutMenuParent,
     PopMenuWithoutParent,
-    ControlWithoutParent, 
+    ControlWithoutParent,
 }
 
 #[derive(Debug, Clone)]

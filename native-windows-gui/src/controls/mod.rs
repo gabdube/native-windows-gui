@@ -32,6 +32,9 @@ mod treeview;
 #[cfg(feature = "fancy-window")]
 mod fancy_window;
 
+#[cfg(feature = "canvas")]
+mod canvas;
+
 mod handle_from_control;
 
 pub use control_handle::ControlHandle;
@@ -67,5 +70,8 @@ pub use treeview::{TreeView, TreeItem, TreeInsert};
 
 #[cfg(feature = "fancy-window")]
 pub use fancy_window::{FancyWindow};
+
+#[cfg(feature = "canvas")]
+pub use canvas::{CanvasWindow, CanvasWindowFlags};
 
 pub use handle_from_control::*;

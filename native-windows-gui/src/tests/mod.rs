@@ -3,14 +3,18 @@ use crate::*;
 mod control_test;
 use control_test::*;
 
+mod canvas_test;
+use canvas_test::*;
+
 
 #[derive(Default)]
 pub struct TestControlPanel {
     window: Window,
     controls_test_button: Button,
-    layouts_test_button: Button,
+    canvas_test_button: Button,
 
     controls_tests: ControlsTest,
+    canvas_tests: CanvasTest,
 }
 
 mod test_control_panel_ui {
@@ -41,12 +45,14 @@ mod test_control_panel_ui {
                 .build(&mut data.controls_test_button)?;
 
             Button::builder()
-                .text("Layout tests")
+                .text("Canvas tests")
+                .enabled(cfg!(feature = "canvas"))
                 .parent(&data.window)
-                .build(&mut data.layouts_test_button)?;
+                .build(&mut data.canvas_test_button)?;
 
             // Partials
             ControlsTest::build_partial(&mut data.controls_tests, Some(&data.window))?;
+            CanvasTest::build_partial(&mut data.canvas_tests, Some(&data.window))?;
 
             // Wrap-up
             let ui = Rc::new(TestControlPanelUi { inner: data });
@@ -65,6 +71,8 @@ mod test_control_panel_ui {
                         E::OnButtonClick =>
                             if handle == evt_ui.controls_test_button.handle {
                                 show_control_test(&evt_ui.inner, evt);
+                            } else if handle == evt_ui.canvas_test_button.handle {
+                                show_canvas_test(&evt_ui.inner, evt);
                             },
                         E::OnWindowClose => 
                             if handle == evt_ui.window.handle {
@@ -81,7 +89,7 @@ mod test_control_panel_ui {
             VBoxLayout::builder()
                 .parent(&ui.window)
                 .child(0, &ui.controls_test_button)
-                .child(1, &ui.layouts_test_button)
+                .child(1, &ui.canvas_test_button)
                 .build();
 
             Ok(ui)
@@ -102,6 +110,11 @@ fn show_control_test(app: &TestControlPanel, _e: Event) {
     app.controls_tests.window.set_visible(true);
     app.controls_tests.panel.set_visible(true);
     app.controls_tests.window.set_focus();
+}
+
+fn show_canvas_test(app: &TestControlPanel, _e: Event) {
+    app.canvas_tests.window.set_visible(true);
+    app.canvas_tests.window.set_focus();
 }
 
 fn close(_app: &TestControlPanel, _e: Event) {
