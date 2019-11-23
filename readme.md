@@ -17,6 +17,23 @@ If you've managed to read though this introduction, you should know that my twit
 is [#gdube_dev](https://twitter.com/gdube_dev) and you can support this project with *GitHub Sponsors*.
 Any support is greatly appreciated.
 
+## Installation
+
+To use NWG in your project add it to cargo.toml:
+
+```toml
+[dependencies]
+native-windows-gui = "1.0.0"
+native-windows-derive = "1.0.0" # Optional. Only if the derive macro is used.
+```
+
+And then, in main.rs or lib.rs :
+
+```rust
+extern crate native_windows_gui as nwg;
+extern crate native_windows_derive as nwd;  // Optional. Only if the derive macro is used.
+```
+
 ## Project structure
 
 This is the main project git. It is separated in multiple sections
@@ -35,31 +52,31 @@ This is the main project git. It is separated in multiple sections
 
 ## Supported features
 
-* The WHOLE winapi control library [(reference)](https://docs.microsoft.com/en-us/windows/win32/controls/individual-control-info)
-  * Some very niche controls are not supported: flat scroll bar, ip control, rebar, and pager.
- * Menus and menu bar 
- * Image and font resource
- * Tooltip and system tray notification
- * Partial templates support
-   * Split large application into chunks
- * Dynamic controls support
-   * Add/Remove controls at runtime
-   * Bind or unbind new events at runtime
- * Multithreaded application support
-   * Communicate to the GUI thread from another thread
-   * Run multiple window on different threads
- * Simple layout configurations
-    * HBoxLayout
-    * VBoxLayout
-    * GridLayout
- * A canvas powered by *Direct2D* to draw custom controls
- * Extended image formats with the Windows Imaging Component (WIC).
- * The most common dialog boxes
-   * File dialog (save, open, open folder)
-   * Font dialog
-   * Color dialog
- * Support fow low level system message capture. 
- * Cross compiling and testing from Linux to Windows with Wine and mingw.
+- The WHOLE winapi control library [(reference)](https://docs.microsoft.com/en-us/windows/win32/controls/individual-control-info)
+  - Some very niche controls are not supported: flat scroll bar, ip control, rebar, and pager.
+- Menus and menu bar 
+- Image and font resource
+- Tooltip and system tray notification
+- Partial templates support
+  - Split large application into chunks
+- Dynamic controls support
+  - Add/Remove controls at runtime
+  - Bind or unbind new events at runtime
+- Multithreaded application support
+  - Communicate to the GUI thread from another thread
+  - Run multiple window on different threads
+- Simple layout configurations
+  - HBoxLayout
+  - VBoxLayout
+  - GridLayout
+- A canvas powered by *Direct2D* to draw custom controls
+- Extended image formats with the Windows Imaging Component (WIC).
+- The most common dialog boxes
+  - File dialog (save, open, open folder)
+  - Font dialog
+  - Color dialog
+- Support fow low level system message capture. 
+- Cross compiling and testing from Linux to Windows with Wine and mingw.
 
 ## Performance
 
@@ -69,7 +86,7 @@ In release mode, the `basic` example weight **163kb** on disk and take **900kb**
 
 The interactive test suite (with over 50 controls) weight **671 kb** on disk and take **1100kb** in memory. Launch time is still instantaneous.
 
-Initial build time takes around **22 seconds** for a basic application. This is mainly due to `winapi-rs` taking its sweet time. Subsequent compile time takes around **0.7 seconds**.
+Initial build time takes around **22 seconds** for a basic application. This is mainly due to `winapi-rs` initial compile time. Subsequent compile time takes around **0.7 seconds**.
 
 ## Development
 
@@ -109,7 +126,7 @@ impl BasicApp {
     fn say_hello(&self) {
         nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
     }
-    
+
     fn say_goodbye(&self) {
         nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
         nwg::stop_thread_dispatch();
@@ -171,7 +188,7 @@ mod basic_app_ui {
     impl nwg::NativeUi<BasicApp, BasicAppUi> for BasicApp {
         fn build_ui(mut data: BasicApp) -> Result<Rc<BasicAppUi>, nwg::SystemError> {
             use nwg::Event as E;
-            
+
             // Controls
             nwg::Window::builder()
                 .flags(nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE)
@@ -219,7 +236,7 @@ mod basic_app_ui {
 
                 nwg::bind_event_handler(handle, handle_events);
             }
-            
+
             return Ok(ui);
         }
     }
@@ -238,8 +255,7 @@ mod basic_app_ui {
 
 
 fn main() {
-    nwg::enable_visual_styles();
-    nwg::init_common_controls().expect("Failed to init common controls");
+    nwg::init().expect("Failed to init Native Windows GUI");
 
     let _app = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
 

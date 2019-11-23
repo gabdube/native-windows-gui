@@ -1,3 +1,8 @@
+/*!
+    A very simple application that show your name in a message box.
+    See `basic_d` for the derive version
+*/
+
 extern crate native_windows_gui as nwg;
 use nwg::NativeUi;
 
