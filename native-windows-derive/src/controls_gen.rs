@@ -1,6 +1,6 @@
 use proc_macro2 as pm2;
-use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
+use syn::parse::{Parse, ParseStream};
 use quote::{ToTokens};
 use std::cell::RefCell;
 
@@ -96,7 +96,10 @@ pub fn generate_control<'a>(field: &'a syn::Field) -> Option<ControlGen<'a>> {
         panic!("Unkown nwg type #{}. If you use renamed control try `control(ty=Button)`.", ty);
     }
     
-    let params = parse_parameters(member, &attr.tokens);
+    let params: ControlParameters = match syn::parse2(attr.tokens.clone()) {
+        Ok(a) => a,
+        Err(e) => panic!("Failed to parse field #{}: {}", member, e)
+    };
 
     Some( ControlGen {  ty, member, params: RefCell::new(params)  } )
 }
@@ -154,13 +157,6 @@ fn extract_control_type(ty: &syn::Type) -> syn::Ident {
     }
 
     syn::Ident::new(&control_type, pm2::Span::call_site())
-}
-
-fn parse_parameters(m: &pm2::Ident, s: &pm2::TokenStream) -> ControlParameters {
-    match syn::parse2(s.clone()) {
-        Ok(a) => a,
-        Err(e) => panic!("Failed to parse field #{}: {}", m, e)
-    }
 }
 
 /// Expand the control flags from the compressed format. Ex: "WINDOW|VISIBLE"
@@ -222,7 +218,6 @@ fn expand_parent<'a>(control: &ControlGen<'a>) {
         };
     }
 }
-
 
 /// Add the control parent to the control parameters.
 /// Returns `true` if a parent field already exists
