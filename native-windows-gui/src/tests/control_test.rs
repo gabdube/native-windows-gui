@@ -629,7 +629,7 @@ mod partial_controls_test_ui {
             Ok(())
         }
 
-        fn process_event<'a>(&self, evt: Event, mut _evt_data: EventData<'a>, handle: ControlHandle) {
+        fn process_event<'a>(&self, evt: Event, _evt_data: &EventData, handle: ControlHandle) {
             use crate::Event as E;
 
             match evt {
@@ -1176,7 +1176,7 @@ fn run_status_tests(app: &ControlsTest, _evt: Event) {
     }
 }
 
-fn set_tooltip_dynamic<'a>(app: &ControlsTest, handle: &ControlHandle, data: &mut ToolTipTextData<'a>) {
+fn set_tooltip_dynamic<'a>(app: &ControlsTest, handle: &ControlHandle, data: &ToolTipTextData) {
     if &app.window == handle {
         data.set_text(&format!("Control text: \"{}\"", app.window.text()));
     } else if &app.test_text_input == handle {

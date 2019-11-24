@@ -72,6 +72,6 @@ pub use treeview::{TreeView, TreeItem, TreeInsert};
 pub use fancy_window::{FancyWindow};
 
 #[cfg(feature = "canvas")]
-pub use canvas::{CanvasWindow, CanvasWindowFlags};
+pub use canvas::*;
 
 pub use handle_from_control::*;

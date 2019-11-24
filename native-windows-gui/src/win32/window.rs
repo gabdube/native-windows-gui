@@ -48,8 +48,8 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
     Set a window subclass the uses the `process_events` function of NWG.
     The window subclass is applied to the window and all it's children (recursively).
 */
-pub fn bind_event_handler<'a, F>(handle: &ControlHandle, f: F) 
-    where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
+pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) 
+    where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
     use winapi::um::commctrl::SetWindowSubclass;
     use winapi::um::winuser::EnumChildWindows;
@@ -57,15 +57,15 @@ pub fn bind_event_handler<'a, F>(handle: &ControlHandle, f: F)
     /**
         Function that iters over a top level window and bind the events dispatch callback
     */
-    unsafe extern "system" fn iter_children_window<'a, F>(h: HWND, p: LPARAM) -> i32 
-        where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
+    unsafe extern "system" fn iter_children_window<F>(h: HWND, p: LPARAM) -> i32 
+        where F: Fn(Event, EventData, ControlHandle) -> () + 'static
     {
         let cb: Rc<F> = Rc::from_raw(p as *const F);
 
         let callback = cb.clone();
         let callback_ptr: *const F = Rc::into_raw(callback);
         let callback_value = callback_ptr as UINT_PTR;
-        SetWindowSubclass(h, Some(process_events::<'a, F>), 0, callback_value);
+        SetWindowSubclass(h, Some(process_events::<F>), 0, callback_value);
 
         mem::forget(cb);
 
@@ -81,8 +81,8 @@ pub fn bind_event_handler<'a, F>(handle: &ControlHandle, f: F)
 
     let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
     unsafe {
-        EnumChildWindows(hwnd, Some(iter_children_window::<'a, F>), callback_value);
-        SetWindowSubclass(hwnd, Some(process_events::<'a, F>), 0, callback_value as UINT_PTR);
+        EnumChildWindows(hwnd, Some(iter_children_window::<F>), callback_value);
+        SetWindowSubclass(hwnd, Some(process_events::<F>), 0, callback_value as UINT_PTR);
     }
 }
 
@@ -242,7 +242,7 @@ unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l:
 */
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT 
-    where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
+    where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;
@@ -422,7 +422,7 @@ unsafe fn listbox_commands(m: u16) -> Event {
 }
 
 unsafe fn handle_tooltip_callback<'a, F>(notif: *mut NMTTDISPINFOW, callback: &Rc<F>) 
-  where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
+  where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
     use crate::events::ToolTipTextData;
 
@@ -433,7 +433,7 @@ unsafe fn handle_tooltip_callback<'a, F>(notif: *mut NMTTDISPINFOW, callback: &R
 }
 
 unsafe fn handle_default_notify_callback<'a, F>(notif: *const NMHDR, callback: &Rc<F>) 
-  where F: Fn(Event, EventData<'a>, ControlHandle) -> () + 'static
+  where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;

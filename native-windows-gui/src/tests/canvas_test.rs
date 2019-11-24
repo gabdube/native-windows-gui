@@ -1,8 +1,20 @@
 use crate::*;
+use std::cell::RefCell;
+
+#[derive(Default)]
+struct CanvasResources {
+    background_brush: SolidBrush
+}
+
 
 #[derive(Default)]
 pub struct CanvasTest {
+    resources: RefCell<CanvasResources>,
     pub window: CanvasWindow,
+}
+
+fn init_resources(canvas: &CanvasTest) {
+    println!("TEST");
 }
 
 mod partial_canvas_test_ui {
@@ -22,7 +34,16 @@ mod partial_canvas_test_ui {
             Ok(())
         }
 
-        fn process_event<'a>(&self, _evt: Event, mut _evt_data: EventData<'a>, _handle: ControlHandle) {
+        fn process_event<'a>(&self, evt: Event, mut _evt_data: &EventData, handle: ControlHandle) {
+            use crate::Event as E;
+
+            match evt {
+                E::OnInit => 
+                    if &handle == &self.window {
+                        init_resources(self);
+                    },
+                _ => {}
+            }
         }
 
         fn handles(&self) -> Vec<&ControlHandle> {

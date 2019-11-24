@@ -60,12 +60,14 @@ mod test_control_panel_ui {
             // Events
             let mut window_handles = vec![&ui.window.handle];
             window_handles.append(&mut ui.controls_tests.handles());
+            window_handles.append(&mut ui.canvas_tests.handles());
 
             for handle in window_handles.iter() {
                 let evt_ui = ui.clone();
                 let handle_events = move |evt, _evt_data, handle| {
 
-                    evt_ui.controls_tests.process_event(evt, _evt_data, handle);
+                    evt_ui.controls_tests.process_event(evt, &_evt_data, handle);
+                    evt_ui.canvas_tests.process_event(evt, &_evt_data, handle);
 
                     match evt {
                         E::OnButtonClick =>

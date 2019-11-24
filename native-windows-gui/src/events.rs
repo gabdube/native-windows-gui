@@ -118,18 +118,18 @@ pub enum Event {
 
 /// Events data sent by the controls. 
 #[derive(Debug)]
-pub enum EventData<'a> {
+pub enum EventData {
     /// The event has no data
     NoData,
 
     /// Sets the text of a tooltip.
     /// The method `on_tooltip_text` should be used to access the inner data
-    OnTooltipText(ToolTipTextData<'a>)
+    OnTooltipText(ToolTipTextData)
 }
 
-impl<'a> EventData<'a> {
+impl EventData {
 
-    pub fn on_tooltip_text(&mut self) -> &mut ToolTipTextData<'a> {
+    pub fn on_tooltip_text(&self) -> &ToolTipTextData {
         match self {
             EventData::OnTooltipText(d) => d,
             d => panic!("Wrong data type: {:?}", d)
@@ -146,26 +146,28 @@ use winapi::um::commctrl::NMTTDISPINFOW;
 use std::fmt;
 
 /// A wrapper structure that set the tooltip text on a `OnTooltipText` callback
-pub struct ToolTipTextData<'a> {
-    pub(crate) data: &'a mut NMTTDISPINFOW
+pub struct ToolTipTextData {
+    pub(crate) data: *mut NMTTDISPINFOW
 }
 
-impl<'a> ToolTipTextData<'a> {
+impl ToolTipTextData {
 
     /// Tells the application to save the text value of the callback
     /// The `OnTooltipText` will not be called a second time for the associated control
-    pub fn keep(&mut self, keep: bool) {
+    pub fn keep(&self, keep: bool) {
         use ::winapi::um::commctrl::TTF_DI_SETITEM;
+        
+        let data = unsafe { &mut *self.data };
         match keep {
-            true => { self.data.uFlags |= TTF_DI_SETITEM; },
-            false => { self.data.uFlags &= !TTF_DI_SETITEM; }
+            true => { data.uFlags |= TTF_DI_SETITEM; },
+            false => { data.uFlags &= !TTF_DI_SETITEM; }
         }
     }
 
     /// Sets the text of the callback. This function will copy the text.
     /// WINAPI do not easily allow tooltip with more than 79 characters (80 with NULL)
     /// With a text > 79 characters, this method will do nothing.
-    pub fn set_text<'b>(&mut self, text: &'b str) {
+    pub fn set_text<'b>(&self, text: &'b str) {
         use crate::win32::base_helper::to_utf16;
         use std::ptr;
         
@@ -176,23 +178,25 @@ impl<'a> ToolTipTextData<'a> {
 
         self.clear();
         unsafe {
+            let data = &mut *self.data;
             let local_text = to_utf16(text);
-            ptr::copy_nonoverlapping(local_text.as_ptr(), self.data.szText.as_mut_ptr(), text_len);
+            ptr::copy_nonoverlapping(local_text.as_ptr(), data.szText.as_mut_ptr(), text_len);
         }
     }
 
-    fn clear(&mut self) {
+    fn clear(&self) {
         use winapi::um::winnt::WCHAR;
         use std::{ptr, mem};
         
         unsafe {
-            ptr::write(&mut self.data.szText as *mut [WCHAR; 80], mem::zeroed());
+            let data = &mut *self.data;
+            ptr::write(&mut data.szText as *mut [WCHAR; 80], mem::zeroed());
         }
     }
 
 }
 
-impl<'a> fmt::Debug for ToolTipTextData<'a> {
+impl fmt::Debug for ToolTipTextData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "ToolTipTextData")
     }

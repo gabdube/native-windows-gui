@@ -12,6 +12,7 @@ use crate::win32::window_helper as wh;
 use crate::win32::canvas;
 use crate::{SystemError, Image};
 use super::super::{ControlBase, ControlHandle};
+use std::ops::Deref;
 
 const NOT_BOUND: &'static str = "CanvasWindow is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: CanvasWindow handle is not HWND!";
@@ -255,4 +256,13 @@ impl<'a> CanvasWindowBuilder<'a> {
         Ok(())
     }
 
+}
+
+
+impl Deref for CanvasWindow {
+    type Target = canvas::CanvasRenderer;
+
+    fn deref(&self) -> &Self::Target {
+        &self.renderer
+    }
 }

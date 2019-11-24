@@ -5,6 +5,7 @@ use winapi::um::d2d1::{ID2D1Factory, ID2D1HwndRenderTarget};
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND};
 use super::window::build_sysclass;
+use super::window_helper::{NWG_INIT};
 use crate::{SystemError};
 use std::ptr;
 
@@ -14,8 +15,8 @@ pub const CANVAS_CLASS_ID: &'static str = "NWG_CANVAS";
 /// Inner working of the D2D1 renderer
 #[derive(Debug)]
 pub struct CanvasRenderer {
-    renderer: *mut ID2D1Factory,
-    render_target: *mut ID2D1HwndRenderTarget,
+    pub(crate) renderer: *mut ID2D1Factory,
+    pub(crate) render_target: *mut ID2D1HwndRenderTarget,
 }
 
 impl Default for CanvasRenderer {
@@ -116,18 +117,21 @@ pub fn create_canvas_classes() -> Result<(), SystemError>  {
     if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
 
     unsafe { 
-        build_sysclass(hmod, CANVAS_CLASS_ID, Some(tab_proc))?;
+        build_sysclass(hmod, CANVAS_CLASS_ID, Some(canvas_proc))?;
     }
 
     Ok(())
 }
 
-unsafe extern "system" fn tab_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
+unsafe extern "system" fn canvas_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use winapi::um::winuser::{WM_CREATE};
-    use winapi::um::winuser::{DefWindowProcW};
+    use winapi::um::winuser::{DefWindowProcW, PostMessageW};
 
     let handled = match msg {
-        WM_CREATE => true,
+        WM_CREATE => {
+            PostMessageW(hwnd, NWG_INIT, 0, 2);
+            true
+        },
         _ => false
     };
 
