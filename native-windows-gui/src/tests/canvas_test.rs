@@ -14,7 +14,14 @@ pub struct CanvasTest {
 }
 
 fn init_resources(canvas: &CanvasTest) {
-    println!("TEST");
+    let mut res = canvas.resources.borrow_mut();
+    let can = &canvas.window;
+
+    res.background_brush = SolidBrush::from_color(
+        can,
+        Color {r: 0.3, g: 0.3, b: 0.3, a: 1.0},
+    );
+
 }
 
 mod partial_canvas_test_ui {
