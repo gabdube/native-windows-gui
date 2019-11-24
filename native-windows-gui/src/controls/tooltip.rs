@@ -341,9 +341,8 @@ impl Tooltip {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        use winapi::um::commctrl::TOOLTIPS_CLASS;
-        Some(TOOLTIPS_CLASS)
+    pub fn class_name(&self) -> &'static str {
+        winapi::um::commctrl::TOOLTIPS_CLASS
     }
 
     /// Winapi base flags used during window creation

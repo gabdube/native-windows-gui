@@ -220,9 +220,8 @@ impl TrackBar {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        use winapi::um::commctrl::TRACKBAR_CLASS;
-        Some(TRACKBAR_CLASS)
+    pub fn class_name(&self) -> &'static str {
+        winapi::um::commctrl::TRACKBAR_CLASS
     }
 
     /// Winapi base flags used during window creation

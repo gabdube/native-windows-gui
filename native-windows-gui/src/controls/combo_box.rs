@@ -359,8 +359,8 @@ impl<D: Display+Default> ComboBox<D> {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        Some("COMBOBOX")
+    pub fn class_name(&self) -> &'static str {
+        "COMBOBOX"
     }
 
     /// Winapi base flags used during window creation

@@ -138,8 +138,8 @@ impl Label {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        Some("STATIC")
+    pub fn class_name(&self) -> &'static str {
+        "STATIC"
     }
 
     /// Winapi base flags used during window creation

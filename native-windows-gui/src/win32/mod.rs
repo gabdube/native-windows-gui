@@ -129,6 +129,7 @@ pub fn init_common_controls() -> Result<(), SystemError> {
         InitCommonControlsEx(&data);
     }
 
+    window::init_window_class()?;
     tabs_init()?;
     canvas_init()?;
 

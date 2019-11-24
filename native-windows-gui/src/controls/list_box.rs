@@ -457,8 +457,8 @@ impl<D: Display+Default> ListBox<D> {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        Some("ListBox")
+    pub fn class_name(&self) -> &'static str {
+        "ListBox"
     }
 
     /// Winapi base flags used during window creation

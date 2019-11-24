@@ -256,8 +256,8 @@ impl TextBox {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        Some("EDIT")
+    pub fn class_name(&self) -> &'static str {
+        "EDIT"
     }
 
     /// Winapi base flags used during window creation

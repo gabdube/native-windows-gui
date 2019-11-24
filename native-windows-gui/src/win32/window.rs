@@ -110,7 +110,7 @@ pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F)
     High level function that handle the creation of custom window control or built in window control
 */
 pub(crate) unsafe fn build_hwnd_control<'a>(
-    class_name: Option<&'a str>,
+    class_name: &'a str,
     window_title: Option<&'a str>,
     size: Option<(i32, i32)>,
     pos: Option<(i32, i32)>,
@@ -127,11 +127,6 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
 
     let hmod = GetModuleHandleW(ptr::null_mut());
     if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
-
-    let class_name = class_name.unwrap_or("NativeWindowsGuiWindow");
-    if class_name == "NativeWindowsGuiWindow" {
-        build_sysclass(hmod, class_name, Some(blank_window_proc))?;
-    }
 
     let class_name = to_utf16(class_name);
     let window_title = to_utf16(window_title.unwrap_or("New Window"));
@@ -210,6 +205,21 @@ pub(crate) unsafe fn build_sysclass<'a>(
         Ok(())
     }
 }
+
+/// Create the window class for the base nwg window
+pub(crate) fn init_window_class() -> Result<(), SystemError> {
+    use winapi::um::libloaderapi::GetModuleHandleW;
+    
+    unsafe {
+        let hmod = GetModuleHandleW(ptr::null_mut());
+        if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
+
+        build_sysclass(hmod, "NativeWindowsGuiWindow", Some(blank_window_proc))?;
+    }
+    
+    Ok(())
+}
+
 
 /**
     A blank system procedure used when creating new window class. Actual system event handling is done in the subclass produre `process_events`.

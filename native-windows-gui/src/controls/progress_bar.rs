@@ -242,8 +242,8 @@ impl ProgressBar {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        Some("msctls_progress32")
+    pub fn class_name(&self) -> &'static str {
+        "msctls_progress32"
     }
 
     /// Winapi base flags used during window creation

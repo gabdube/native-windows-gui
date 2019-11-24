@@ -184,8 +184,8 @@ impl RadioButton {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        Some("BUTTON")
+    pub fn class_name(&self) -> &'static str {
+        "BUTTON"
     }
 
     /// Winapi base flags used during window creation

@@ -166,8 +166,8 @@ impl Window {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        None
+    pub fn class_name(&self) -> &'static str {
+        "NativeWindowsGuiWindow"
     }
 
     // Winapi base flags used during window creation

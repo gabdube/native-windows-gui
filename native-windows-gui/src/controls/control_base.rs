@@ -32,7 +32,7 @@ impl ControlBase {
 
 #[derive(Default)]
 pub struct HwndBuilder {
-    class_name: Option<String>,
+    class_name: String,
     text: Option<String>,
     size: Option<(i32, i32)>,
     pos: Option<(i32, i32)>,
@@ -44,8 +44,8 @@ pub struct HwndBuilder {
 
 impl HwndBuilder {
 
-    pub fn class_name<'a>(mut self, name: Option<&'a str>) -> HwndBuilder {
-        self.class_name = name.map(|v| v.to_string());
+    pub fn class_name<'a>(mut self, name: &'a str) -> HwndBuilder {
+        self.class_name = name.to_string();
         self
     }
 
@@ -89,7 +89,7 @@ impl HwndBuilder {
 
     pub fn build(self) -> Result<ControlHandle, SystemError> {
         let handle = unsafe { build_hwnd_control(
-            self.class_name.as_ref().map(|v| v as &str),
+            &self.class_name,
             self.text.as_ref().map(|v| v as &str),
             self.size,
             self.pos,

@@ -175,9 +175,8 @@ impl TabsContainer {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        use winapi::um::commctrl::WC_TABCONTROL;
-        Some(WC_TABCONTROL)
+    pub fn class_name(&self) -> &'static str {
+        winapi::um::commctrl::WC_TABCONTROL
     }
 
     /// Winapi base flags used during window creation
@@ -352,8 +351,8 @@ impl Tab {
     //
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        Some("NWG_TAB")
+    pub fn class_name(&self) -> &'static str {
+        "NWG_TAB"
     }
 
     /// Winapi base flags used during window creation

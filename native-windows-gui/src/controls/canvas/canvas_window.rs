@@ -175,8 +175,8 @@ impl CanvasWindow {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        Some("NWG_CANVAS")
+    pub fn class_name(&self) -> &'static str {
+       "NWG_CANVAS"
     }
 
     // Winapi base flags used during window creation

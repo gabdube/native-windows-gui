@@ -338,9 +338,8 @@ impl TreeView {
     }
 
     /// Winapi class name used during control creation
-    pub fn class_name(&self) -> Option<&'static str> {
-        use winapi::um::commctrl::WC_TREEVIEW;
-        Some(WC_TREEVIEW)
+    pub fn class_name(&self) -> &'static str {
+        winapi::um::commctrl::WC_TREEVIEW
     }
 
     /// Winapi base flags used during window creation
