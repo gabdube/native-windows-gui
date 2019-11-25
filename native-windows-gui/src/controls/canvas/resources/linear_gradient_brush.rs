@@ -3,10 +3,12 @@
 
     As with most COM objects, this brush is ref counted internally by Direct2D.
     Cloning will increase the ref count and dropping the brush resource will decrease it.
+
+    Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/direct2d/direct2d-brushes-overview
 */
 use winapi::um::d2d1::{ID2D1LinearGradientBrush};
 use crate::win32::canvas;
-use super::{GradientStopCollection, LinearBrushProperties, BrushProperties, Matrix3x2F};
+use super::{GradientStopCollection, LinearBrushProperties, BrushProperties, Matrix3x2F, Point2F};
 use std::ops::Deref;
 use std::{mem, ptr, fmt};
 
@@ -86,6 +88,38 @@ impl LinearGradientBrush {
         unsafe { (&*self.handle).SetTransform(&mat); }
     }
 
+    /// Retrieves the ending coordinates of the linear gradient.
+    pub fn end_point(&self) -> Point2F {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+        unsafe { (&*self.handle).GetEndPoint() }
+    }
+
+    /// Sets the ending coordinates of the linear gradient in the brush's coordinate space.
+    pub fn set_end_point(&self, point: &Point2F) {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+        unsafe { (&*self.handle).SetEndPoint( Point2F { x: point.x, y: point.y } ); }
+    }
+    
+    /// Retrieves the starting coordinates of the linear gradient.
+    pub fn start_point(&self) -> Point2F {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+        unsafe { (&*self.handle).GetStartPoint() }
+    }
+
+    /// Sets the ending coordinates of the linear gradient in the brush's coordinate space.
+    pub fn set_start_point(&self, point: &Point2F) {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+        unsafe { (&*self.handle).SetStartPoint( Point2F { x: point.x, y: point.y } ); }
+    }
+
+    /// Retrieves the ID2D1GradientStopCollection associated with this linear gradient brush.
+    pub fn gradient_stop_collection(&self) -> GradientStopCollection {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+
+        let mut collection = GradientStopCollection::default();
+        unsafe { (&*self.handle).GetGradientStopCollection(&mut collection.handle); }
+        collection
+    }
 }
 
 impl Default for LinearGradientBrush {
@@ -102,8 +136,12 @@ impl fmt::Debug for LinearGradientBrush {
             return write!(f, "LinearGradientBrush {{ Unbound }}");
         }
 
+        let sp = self.start_point();
+        let ep = self.end_point();
+
         write!(f, 
-            "LinearGradientBrush {{ }}",
+            "LinearGradientBrush {{ start_point: {:?}, end_point: {:?} }}",
+            (sp.x, sp.y), (ep.x, ep.y)
         )
     }
 }

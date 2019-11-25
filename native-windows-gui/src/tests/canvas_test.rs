@@ -7,7 +7,8 @@ struct CanvasResources {
     plain_stroke: StrokeStyle,
     background_brush: SolidBrush,
     header_border_brush: SolidBrush,
-    header_gradient: GradientStopCollection
+    header_gradient: GradientStopCollection,
+    header_inner_brush: LinearGradientBrush,
 }
 
 
@@ -22,7 +23,8 @@ fn init_resources(canvas: &CanvasTest) {
     let can = &canvas.window;
 
     const BASE_GRAY: Color = Color::rgb([0.25, 0.25, 0.25]);
-    const DARK_GRAY: Color = Color::rgb([0.10, 0.10, 0.10]);
+    const DARK_GRAY: Color = Color::rgb([0.15, 0.15, 0.15]);
+    const DARK_GRAY2: Color = Color::rgb([0.20, 0.20, 0.20]);
 
     res.plain_stroke = StrokeStyle::from_style(can, DashStyle::Solid);
     res.background_brush = SolidBrush::from_color(can, BASE_GRAY);
@@ -31,17 +33,14 @@ fn init_resources(canvas: &CanvasTest) {
     res.header_gradient = GradientStopCollection::from_stops(
         can,
         &[
-            GradientStop {position: 0.0, color: BASE_GRAY},
-            GradientStop {position: 0.7, color: DARK_GRAY},
-            GradientStop {position: 1.0, color: BASE_GRAY}
+            GradientStop {position: 0.5, color: DARK_GRAY},
+            GradientStop {position: 0.75, color: DARK_GRAY2},
+            GradientStop {position: 0.85, color: DARK_GRAY}
         ]
     );
 
-    /*res.header_inner_brush = LinearGradiantBrush::from_linear_gradient(
-        can,
-        LinearBrushProperties { startPoint: Point2F {x:150.0, y:30.0}, endPoint: Point2F {x:150.0, y:0.0} },
-        &[  ]
-    );*/
+    let linear_props = LinearBrushProperties { startPoint: Point2F {x:150.0, y:30.0}, endPoint: Point2F {x:150.0, y:0.0} };
+    res.header_inner_brush = LinearGradientBrush::from_linear_gradient(can, &linear_props, &res.header_gradient);
 }
 
 fn paint(canvas: &CanvasTest) {
@@ -57,6 +56,7 @@ fn paint(canvas: &CanvasTest) {
 
     let header = Rect { left: 0.0, top: 0.0, right: w as f32, bottom: 30.0 };
     draw.draw_rectangle(&header, &res.header_border_brush, 1.0, &res.plain_stroke);
+    draw.fill_rectangle(&header, &res.header_inner_brush);
 
     if let Err(e) = draw.end_draw() {
         println!("{:?}", e);

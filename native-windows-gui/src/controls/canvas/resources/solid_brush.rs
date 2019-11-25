@@ -3,6 +3,8 @@
 
     As with most COM objects, a solid brush is ref counted internally by Direct2D.
     Cloning will increase the ref count and dropping the brush resource will decrease it.
+
+    Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/direct2d/direct2d-brushes-overview
 */
 use winapi::um::d2d1::{ID2D1SolidColorBrush};
 use winapi::shared::d3d9types::D3DCOLORVALUE;

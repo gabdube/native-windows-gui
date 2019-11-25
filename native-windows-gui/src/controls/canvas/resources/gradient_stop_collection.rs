@@ -1,7 +1,10 @@
 /*!
     Represents an collection of GradientStop objects for linear and radial gradient brushes.
 
-    Winapi documetation: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/nf-d2d1-id2d1rendertarget-creategradientstopcollection(constd2d1_gradient_stop_uint32_d2d1_gamma_d2d1_extend_mode_id2d1gradientstopcollection)
+    As with most COM objects, this brush is ref counted internally by Direct2D.
+    Cloning will increase the ref count and dropping the brush resource will decrease it.
+
+    Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/nf-d2d1-id2d1rendertarget-creategradientstopcollection(constd2d1_gradient_stop_uint32_d2d1_gamma_d2d1_extend_mode_id2d1gradientstopcollection)
 */
 
 use winapi::um::d2d1::{ID2D1GradientStopCollection};
