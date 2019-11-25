@@ -23,7 +23,7 @@ fn init_resources(canvas: &CanvasTest) {
     res.plain_stroke = StrokeStyle::from_style(can, DashStyle::Solid);
     res.background_brush = SolidBrush::from_color(can, Color {r: 0.25, g: 0.25, b: 0.25, a: 1.0});
     res.header_border_brush = SolidBrush::from_color(can, Color {r: 0.10, g: 0.10, b: 0.10, a: 1.0});
-    //res.header_inner_brush = GradiantBrush::from_color(can, Color {r: 0.10, g: 0.10, b: 0.10, a: 1.0});
+    //res.header_inner_brush = LinearGradiantBrush::from_color(can, Color {r: 0.10, g: 0.10, b: 0.10, a: 1.0});
 }
 
 fn paint(canvas: &CanvasTest) {
