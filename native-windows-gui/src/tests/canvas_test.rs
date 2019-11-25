@@ -7,6 +7,7 @@ struct CanvasResources {
     plain_stroke: StrokeStyle,
     background_brush: SolidBrush,
     header_border_brush: SolidBrush,
+    header_gradient: GradientStopCollection
 }
 
 
@@ -20,10 +21,29 @@ fn init_resources(canvas: &CanvasTest) {
     let mut res = canvas.resources.borrow_mut();
     let can = &canvas.window;
 
+    const BASE_GRAY: Color = Color {r: 0.25, g: 0.25, b: 0.25, a: 1.0};
+    const DARK_GRAY: Color = Color {r: 0.10, g: 0.10, b: 0.10, a: 1.0};
+
     res.plain_stroke = StrokeStyle::from_style(can, DashStyle::Solid);
-    res.background_brush = SolidBrush::from_color(can, Color {r: 0.25, g: 0.25, b: 0.25, a: 1.0});
-    res.header_border_brush = SolidBrush::from_color(can, Color {r: 0.10, g: 0.10, b: 0.10, a: 1.0});
-    //res.header_inner_brush = LinearGradiantBrush::from_color(can, Color {r: 0.10, g: 0.10, b: 0.10, a: 1.0});
+    res.background_brush = SolidBrush::from_color(can, BASE_GRAY);
+    res.header_border_brush = SolidBrush::from_color(can, DARK_GRAY);
+
+    res.header_gradient = GradientStopCollection::from_stops(
+        can,
+        &[
+            GradientStop {position: 0.0, color: BASE_GRAY},
+            GradientStop {position: 0.7, color: DARK_GRAY},
+            GradientStop {position: 1.0, color: BASE_GRAY}
+        ]
+    );
+
+    println!("{:?}", res.header_gradient);
+
+    /*res.header_inner_brush = LinearGradiantBrush::from_linear_gradient(
+        can,
+        LinearBrushProperties { startPoint: Point2F {x:150.0, y:30.0}, endPoint: Point2F {x:150.0, y:0.0} },
+        &[  ]
+    );*/
 }
 
 fn paint(canvas: &CanvasTest) {

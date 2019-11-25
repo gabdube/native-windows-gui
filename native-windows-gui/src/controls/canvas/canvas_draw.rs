@@ -70,6 +70,7 @@ impl<'a> CanvasDraw<'a> {
     pub fn clear(&self, color: Color) {
         unsafe {
             let target = &*self.base.render_target;
+            let color = color.into();
             target.Clear(&color);
         }
     }
