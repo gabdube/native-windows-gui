@@ -178,18 +178,24 @@ impl StrokeStyle {
 
     /// Gets a value that specifies how the ends of each dash are drawn.
     pub fn dash_cap(&self) -> CapStyle {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+
         let cap = unsafe { (&*self.handle).GetDashCap() };
         CapStyle::from_d2d(cap)
     }   
 
     /// Retrieves the type of shape used at the end of a stroke.
     pub fn end_cap(&self) -> CapStyle {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+
         let cap = unsafe { (&*self.handle).GetEndCap() };
         CapStyle::from_d2d(cap)
     }
 
     /// Retrieves the type of shape used at the beginning of a stroke.
     pub fn start_cap(&self) -> CapStyle {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+
         let cap = unsafe { (&*self.handle).GetStartCap() };
         CapStyle::from_d2d(cap)
     }
@@ -197,6 +203,8 @@ impl StrokeStyle {
     /// Gets a value that describes the stroke's dash pattern.
     pub fn line_join(&self) -> LineJoin {
         use winapi::um::d2d1::{D2D1_LINE_JOIN_MITER, D2D1_LINE_JOIN_BEVEL, D2D1_LINE_JOIN_ROUND, D2D1_LINE_JOIN_MITER_OR_BEVEL};
+
+        if self.is_null() { panic!("Resources is not bound to a render target") }
 
         let style = unsafe { (&*self.handle).GetDashStyle() };
         match style {
@@ -213,6 +221,8 @@ impl StrokeStyle {
         use winapi::um::d2d1::{D2D1_DASH_STYLE_SOLID, D2D1_DASH_STYLE_DASH, D2D1_DASH_STYLE_DASH_DOT,
             D2D1_DASH_STYLE_DASH_DOT_DOT, D2D1_DASH_STYLE_CUSTOM, D2D1_DASH_STYLE_DOT};
 
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+
         let style = unsafe { (&*self.handle).GetLineJoin() };
         match style {
             D2D1_DASH_STYLE_SOLID => DashStyle::Solid,
@@ -227,6 +237,8 @@ impl StrokeStyle {
 
     /// Copies the dash pattern to the specified array.
     pub fn dashes(&self) -> Vec<f32> {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+
         unsafe {
             let handle = &*self.handle;
             let dash_count = handle.GetDashesCount() as usize;
@@ -241,11 +253,13 @@ impl StrokeStyle {
 
     /// Retrieves a value that specifies how far in the dash sequence the stroke will start.
     pub fn dash_offset(&self) -> f32 {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
         unsafe { (&*self.handle).GetDashOffset() }
     }
 
     /// Retrieves the limit on the ratio of the miter length to half the stroke's thickness.
     pub fn miter_limit(&self) -> f32 {
+        if self.is_null() { panic!("Resources is not bound to a render target") }
         unsafe { (&*self.handle).GetMiterLimit() }
     }
 

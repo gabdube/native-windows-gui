@@ -21,8 +21,8 @@ fn init_resources(canvas: &CanvasTest) {
     let mut res = canvas.resources.borrow_mut();
     let can = &canvas.window;
 
-    const BASE_GRAY: Color = Color {r: 0.25, g: 0.25, b: 0.25, a: 1.0};
-    const DARK_GRAY: Color = Color {r: 0.10, g: 0.10, b: 0.10, a: 1.0};
+    const BASE_GRAY: Color = Color::rgb([0.25, 0.25, 0.25]);
+    const DARK_GRAY: Color = Color::rgb([0.10, 0.10, 0.10]);
 
     res.plain_stroke = StrokeStyle::from_style(can, DashStyle::Solid);
     res.background_brush = SolidBrush::from_color(can, BASE_GRAY);
@@ -36,8 +36,6 @@ fn init_resources(canvas: &CanvasTest) {
             GradientStop {position: 1.0, color: BASE_GRAY}
         ]
     );
-
-    println!("{:?}", res.header_gradient);
 
     /*res.header_inner_brush = LinearGradiantBrush::from_linear_gradient(
         can,

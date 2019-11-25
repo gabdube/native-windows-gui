@@ -12,6 +12,20 @@ pub struct Color {
     pub a: f32
 }
 
+impl Color {
+
+    /// Create a color from a [r, g, b, a] float array
+    pub const fn rgba(v: [f32; 4]) -> Color {
+        Color { r: v[0], g: v[1], b: v[2], a: v[3] }
+    }
+
+    /// Create a color from a [r, g, b] float array. Alpha is set to `1.0`.
+    pub const fn rgb(v: [f32; 3]) -> Color {
+        Color { r: v[0], g: v[1], b: v[2], a: 1.0 }
+    }
+
+}
+
 impl From<D3DCOLORVALUE> for Color {
     fn from(c: D3DCOLORVALUE) -> Color {
         Color {

@@ -6,7 +6,7 @@
 
 use winapi::um::d2d1::{ID2D1GradientStopCollection};
 use crate::win32::canvas;
-use super::{GradientStop, Gamma, ExtendMode};
+use super::{Color, GradientStop, Gamma, ExtendMode};
 use std::ops::Deref;
 use std::{ptr, fmt};
 
@@ -65,6 +65,53 @@ impl GradientStopCollection {
     /// Check if the collection is initialized
     pub fn is_null(&self) -> bool { self.handle.is_null() }
 
+    /// Indicates the behavior of the gradient outside the normalized gradient range.
+    pub fn extend_mode(&self) -> ExtendMode {
+        use winapi::um::d2d1::{D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_MIRROR};
+
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+
+        let extend = unsafe { (&*self.handle).GetExtendMode() };
+        match extend {
+            D2D1_EXTEND_MODE_WRAP => ExtendMode::Wrap,
+            D2D1_EXTEND_MODE_MIRROR => ExtendMode::Mirror,
+            _ => ExtendMode::Clamp,
+        }
+    }
+
+    /// Indicates the gamma space in which the gradient stops are interpolated.
+    pub fn gamma(&self) -> Gamma {
+        use winapi::um::d2d1::{D2D1_GAMMA_1_0};
+
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+
+        let gamma = unsafe { (&*self.handle).GetColorInterpolationGamma() };
+        match gamma {
+            D2D1_GAMMA_1_0 => Gamma::_1_0,
+            _ => Gamma::_2_2,
+        }
+    }
+
+    /// Copies the gradient stops from the collection into a `Vec<GradientStop>`
+    pub fn stops(&self) -> Vec<GradientStop> {
+        use winapi::um::d2d1::{D2D1_GRADIENT_STOP};
+
+        if self.is_null() { panic!("Resources is not bound to a render target") }
+
+        unsafe {
+            let handle = &*self.handle;
+            let stop_count = handle.GetGradientStopCount() as usize;
+            let mut stops: Vec<D2D1_GRADIENT_STOP> = Vec::with_capacity(stop_count);
+            stops.set_len(stop_count);
+
+            handle.GetGradientStops(stops.as_mut_ptr(), stop_count as u32);
+
+            stops.into_iter()
+                .map(|s| GradientStop { position: s.position, color: Color::from(s.color) } )
+                .collect()
+        }
+    }
+
 }
 
 
@@ -82,8 +129,13 @@ impl fmt::Debug for GradientStopCollection {
             return write!(f, "GradientStopCollection {{ Unbound }}");
         }
 
+        let em = self.extend_mode();
+        let g = self.gamma();
+        let stops = self.stops();
+
         write!(f, 
-            "GradientStopCollection {{ }}",
+            "GradientStopCollection {{ extend_mode: {:?}, gamma: {:?}, stops: {:?} }}",
+            em, g, stops
         )
     }
 }
