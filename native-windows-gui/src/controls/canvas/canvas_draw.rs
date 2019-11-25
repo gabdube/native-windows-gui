@@ -4,7 +4,7 @@
 */
 use winapi::shared::winerror::S_OK;
 use crate::win32::canvas;
-use super::{CanvasError, Rect, Color, Matrix3x2F, BaseBrush};
+use super::{CanvasError, Rect, Color, Matrix3x2F, BaseBrush, StrokeStyle};
 use std::convert::TryInto;
 
 
@@ -27,6 +27,8 @@ impl<'a> CanvasDraw<'a> {
 
     /// Finish drawing
     pub fn end_draw(self) -> Result<(), CanvasError> {
+        use winapi::shared::winerror::D2DERR_RECREATE_TARGET;
+
         let mut tag1 = 0;
         let mut tag2 = 0;
 
@@ -34,6 +36,7 @@ impl<'a> CanvasDraw<'a> {
             let target = &*self.base.render_target;
             match target.EndDraw(&mut tag1, &mut tag2) {
                 S_OK => Ok(()),
+                D2DERR_RECREATE_TARGET => Err(CanvasError::RecreateTarget),
                 e => Err(CanvasError::Other(e))
             }
         }
@@ -68,6 +71,19 @@ impl<'a> CanvasDraw<'a> {
         unsafe {
             let target = &*self.base.render_target;
             target.Clear(&color);
+        }
+    }
+
+    /// Draws the outline of a rectangle that has the specified dimensions and stroke style.
+    pub fn draw_rectangle<B: TryInto<BaseBrush>>(&self, rect: &Rect, brush: B, stroke_width: f32, stroke_style: &StrokeStyle) {
+        let base = match brush.try_into() {
+            Ok(b) => b,
+            Err(_) => panic!("Brush is invalid")
+        };
+
+        unsafe {
+            let target = &*self.base.render_target;
+            target.DrawRectangle(rect, base.0, stroke_width, stroke_style.handle);
         }
     }
 

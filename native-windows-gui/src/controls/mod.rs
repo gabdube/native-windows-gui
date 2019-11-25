@@ -29,9 +29,6 @@ mod tabs;
 #[cfg(feature = "tree-view")]
 mod treeview;
 
-#[cfg(feature = "fancy-window")]
-mod fancy_window;
-
 #[cfg(feature = "canvas")]
 mod canvas;
 
@@ -67,9 +64,6 @@ pub use tabs::{TabsContainer, Tab, TabsContainerFlags};
 
 #[cfg(feature = "tree-view")]
 pub use treeview::{TreeView, TreeItem, TreeInsert};
-
-#[cfg(feature = "fancy-window")]
-pub use fancy_window::{FancyWindow};
 
 #[cfg(feature = "canvas")]
 pub use canvas::*;

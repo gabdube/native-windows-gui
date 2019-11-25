@@ -1,12 +1,12 @@
 /*!
     A brush that paints an area with a solid color.
 
-    As with most COM objects, a solid brush if ref counted internally by Direct2D.
+    As with most COM objects, a solid brush is ref counted internally by Direct2D.
     Cloning will increase the ref count and dropping the brush resource will decrease it.
 */
 use winapi::um::d2d1::{ID2D1SolidColorBrush};
-use super::{Color, BrushProperties, Matrix3x2F};
 use crate::win32::canvas;
+use super::{Color, BrushProperties, Matrix3x2F};
 use std::ops::Deref;
 use std::{mem, ptr, fmt};
 

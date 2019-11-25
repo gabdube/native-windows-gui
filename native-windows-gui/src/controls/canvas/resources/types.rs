@@ -18,9 +18,9 @@ pub type Matrix3x2F = D2D_MATRIX_3X2_F;
 /// Represents a rectangle
 pub type Rect = D2D1_RECT_F;
 
-
 /// Errors that can be returned when drawing to a canvas
 #[derive(Copy, Clone, Debug)]
 pub enum CanvasError {
+    RecreateTarget,
     Other(HRESULT)
 }

@@ -4,7 +4,9 @@ use std::cell::RefCell;
 
 #[derive(Default)]
 struct CanvasResources {
-    background_brush: SolidBrush
+    plain_stroke: StrokeStyle,
+    background_brush: SolidBrush,
+    header_border_brush: SolidBrush,
 }
 
 
@@ -18,10 +20,10 @@ fn init_resources(canvas: &CanvasTest) {
     let mut res = canvas.resources.borrow_mut();
     let can = &canvas.window;
 
-    res.background_brush = SolidBrush::from_color(
-        can,
-        Color {r: 0.25, g: 0.25, b: 0.25, a: 1.0},
-    );
+    res.plain_stroke = StrokeStyle::from_style(can, DashStyle::Solid);
+    res.background_brush = SolidBrush::from_color(can, Color {r: 0.25, g: 0.25, b: 0.25, a: 1.0});
+    res.header_border_brush = SolidBrush::from_color(can, Color {r: 0.10, g: 0.10, b: 0.10, a: 1.0});
+    //res.header_inner_brush = GradiantBrush::from_color(can, Color {r: 0.10, g: 0.10, b: 0.10, a: 1.0});
 }
 
 fn paint(canvas: &CanvasTest) {
@@ -31,8 +33,12 @@ fn paint(canvas: &CanvasTest) {
     let draw = can.begin_draw();
 
     let (w, h) = draw.size();
+    
     let background = Rect { left: 0.0, top: 0.0, right: w as f32, bottom: h as f32 };
     draw.fill_rectangle(&background, &res.background_brush);
+
+    let header = Rect { left: 0.0, top: 0.0, right: w as f32, bottom: 30.0 };
+    draw.draw_rectangle(&header, &res.header_border_brush, 1.0, &res.plain_stroke);
 
     if let Err(e) = draw.end_draw() {
         println!("{:?}", e);
