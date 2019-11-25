@@ -117,14 +117,19 @@ pub fn create_canvas_classes() -> Result<(), SystemError>  {
     if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
 
     unsafe { 
-        build_sysclass(hmod, CANVAS_CLASS_ID, Some(canvas_proc))?;
+        build_sysclass(
+            hmod,
+            CANVAS_CLASS_ID,
+            Some(canvas_proc),
+            Some(ptr::null_mut())
+        )?;
     }
 
     Ok(())
 }
 
 unsafe extern "system" fn canvas_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::um::winuser::{WM_CREATE};
+    use winapi::um::winuser::{WM_CREATE, WM_PAINT};
     use winapi::um::winuser::{DefWindowProcW, PostMessageW};
 
     let handled = match msg {
@@ -132,6 +137,7 @@ unsafe extern "system" fn canvas_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARA
             PostMessageW(hwnd, NWG_INIT, 0, 2);
             true
         },
+        WM_PAINT => true,
         _ => false
     };
 

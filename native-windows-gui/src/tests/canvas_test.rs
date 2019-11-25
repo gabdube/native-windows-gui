@@ -1,6 +1,7 @@
 use crate::*;
 use std::cell::RefCell;
 
+
 #[derive(Default)]
 struct CanvasResources {
     background_brush: SolidBrush
@@ -19,9 +20,23 @@ fn init_resources(canvas: &CanvasTest) {
 
     res.background_brush = SolidBrush::from_color(
         can,
-        Color {r: 0.3, g: 0.3, b: 0.3, a: 1.0},
+        Color {r: 0.25, g: 0.25, b: 0.25, a: 1.0},
     );
+}
 
+fn paint(canvas: &CanvasTest) {
+    let res = canvas.resources.borrow();
+    let can = &canvas.window;
+
+    let draw = can.begin_draw();
+
+    let (w, h) = draw.size();
+    let background = Rect { left: 0.0, top: 0.0, right: w as f32, bottom: h as f32 };
+    draw.fill_rectangle(&background, &res.background_brush);
+
+    if let Err(e) = draw.end_draw() {
+        println!("{:?}", e);
+    }
 }
 
 mod partial_canvas_test_ui {
@@ -48,6 +63,10 @@ mod partial_canvas_test_ui {
                 E::OnInit => 
                     if &handle == &self.window {
                         init_resources(self);
+                    },
+                E::OnPaint => 
+                    if &handle == &self.window {
+                        paint(self);
                     },
                 _ => {}
             }

@@ -23,6 +23,9 @@ pub enum Event {
 
     /// When a top level window control is created.
     OnInit,
+
+    /// When a control needs to be redrawn
+    OnPaint,
     
     /// When a control is resized by the user. This typically applied to top level window.
     OnResize,

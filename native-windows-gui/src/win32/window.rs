@@ -171,6 +171,7 @@ pub(crate) unsafe fn build_sysclass<'a>(
     hmod: HMODULE,
     class_name: &'a str,
     clsproc: WNDPROC,
+    background: Option<HBRUSH>,
 ) -> Result<(), SystemError> 
 {
     use winapi::um::winuser::{LoadCursorW, RegisterClassExW};
@@ -179,7 +180,7 @@ pub(crate) unsafe fn build_sysclass<'a>(
     use winapi::shared::winerror::ERROR_CLASS_ALREADY_EXISTS;
 
     let class_name = to_utf16(class_name);
-    let background: HBRUSH = mem::transmute(COLOR_WINDOW as usize);
+    let background: HBRUSH = background.unwrap_or(mem::transmute(COLOR_WINDOW as usize));
     let style: UINT = CS_HREDRAW | CS_VREDRAW;
 
     let class =
@@ -214,7 +215,7 @@ pub(crate) fn init_window_class() -> Result<(), SystemError> {
         let hmod = GetModuleHandleW(ptr::null_mut());
         if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
 
-        build_sysclass(hmod, "NativeWindowsGuiWindow", Some(blank_window_proc))?;
+        build_sysclass(hmod, "NativeWindowsGuiWindow", Some(blank_window_proc), None)?;
     }
     
     Ok(())
@@ -260,7 +261,7 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
     use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
-      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE};
+      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::HIWORD;
 
@@ -315,6 +316,7 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
         WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
         WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
         WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
+        WM_PAINT => callback(Event::OnPaint, NO_DATA, base_handle),
         NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {

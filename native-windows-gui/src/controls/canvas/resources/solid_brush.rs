@@ -5,7 +5,6 @@
     Cloning will increase the ref count and dropping the brush resource will decrease it.
 */
 use winapi::um::d2d1::{ID2D1SolidColorBrush};
-
 use super::{Color, BrushProperties, Matrix3x2F};
 use crate::win32::canvas;
 use std::ops::Deref;
@@ -15,7 +14,7 @@ use std::{mem, ptr, fmt};
 /// A brush that can be used to paint areas with a solid color
 /// See module level documentation
 pub struct SolidBrush {
-    handle: *mut ID2D1SolidColorBrush
+    pub(crate) handle: *mut ID2D1SolidColorBrush
 }
 
 impl SolidBrush {

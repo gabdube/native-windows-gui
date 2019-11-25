@@ -98,9 +98,11 @@ pub fn enable_visual_styles() {
     Also register the custom classes used by NWG
 */
 pub fn init_common_controls() -> Result<(), SystemError> {
+    use winapi::um::objbase::CoInitialize;
     use winapi::um::commctrl::{InitCommonControlsEx, INITCOMMONCONTROLSEX};
     use winapi::um::commctrl::{ICC_BAR_CLASSES, ICC_STANDARD_CLASSES, ICC_DATE_CLASSES, ICC_PROGRESS_CLASS,
      ICC_TAB_CLASSES, ICC_TREEVIEW_CLASSES};
+    use winapi::shared::winerror::S_OK;
 
     unsafe {
         let mut classes = ICC_BAR_CLASSES | ICC_STANDARD_CLASSES;
@@ -133,7 +135,10 @@ pub fn init_common_controls() -> Result<(), SystemError> {
     tabs_init()?;
     canvas_init()?;
 
-    Ok(())
+    match unsafe { CoInitialize(ptr::null_mut()) } {
+        S_OK => Ok(()),
+        _ => Err(SystemError::CoInitializeFailed)
+    }
 }
 
 #[cfg(feature = "tabs")]

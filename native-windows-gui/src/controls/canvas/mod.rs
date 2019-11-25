@@ -6,7 +6,9 @@ high performance and high-quality rendering for 2-D geometry, bitmaps, and text.
 to interoperate well with GDI, GDI+, and Direct3D.
 */
 mod resources;
+mod canvas_draw;
 mod canvas_window;
 
 pub use resources::*;
+pub use canvas_draw::CanvasDraw;
 pub use canvas_window::{CanvasWindow, CanvasWindowFlags};

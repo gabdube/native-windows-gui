@@ -11,6 +11,7 @@ use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_
 use crate::win32::window_helper as wh;
 use crate::win32::canvas;
 use crate::{SystemError, Image};
+use super::CanvasDraw;
 use super::super::{ControlBase, ControlHandle};
 use std::ops::Deref;
 
@@ -56,6 +57,11 @@ impl CanvasWindow {
             icon: None,
             parent: None
         }
+    }
+
+    /// Begin drawing on the canvas. Return a `CanvasDraw` object that contains the draw methods.
+    pub fn begin_draw<'a>(&'a self) -> CanvasDraw<'a> {
+        CanvasDraw::new(&self.renderer)
     }
 
     /// Return the icon of the window

@@ -18,7 +18,7 @@ pub fn create_tab_classes() -> Result<(), SystemError>  {
     if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
 
     unsafe { 
-        build_sysclass(hmod, TAB_CLASS_ID, Some(tab_proc))?;
+        build_sysclass(hmod, TAB_CLASS_ID, Some(tab_proc), None)?;
     }
 
     Ok(())

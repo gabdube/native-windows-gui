@@ -6,6 +6,7 @@
 #[repr(usize)]
 pub enum SystemError {
     GetModuleHandleFailed,
+    CoInitializeFailed,
     SystemClassCreationFailed,
     WindowCreationFailed,
     FontCreationFailed,
