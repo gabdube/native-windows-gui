@@ -16,6 +16,9 @@ use controls_gen::ControlGen;
 mod controls_events;
 use controls_events::ControlEvents;
 
+mod controls_layouts;
+use controls_layouts::ControlLayouts;
+
 
 struct BaseNames {
     n_module: syn::Ident,
@@ -73,11 +76,14 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
 
     let mut fields: Vec<ControlGen> = Vec::with_capacity(named_fields.len());
     let mut events = ControlEvents::with_capacity(named_fields.len());
+    let mut layouts = ControlLayouts::new();
     for f in named_fields.iter() {
         if let Some(control) = controls_gen::generate_control(f) {
             fields.push(control);
             events.generate_events(f);
         }
+
+        layouts.add_layout(f);
     }
 
     controls_gen::organize_controls(&mut fields);
@@ -90,13 +96,15 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
             let ui = Rc::new(#ui_struct_name { inner: data });
 
             #events
+
+            #layouts
             
             Ok(ui)
         }
     }
 }
 
-#[proc_macro_derive(NwgUi, attributes(nwg_control, nwg_events))]
+#[proc_macro_derive(NwgUi, attributes(nwg_control, nwg_events, nwg_layout, nwg_layout_item))]
 pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     let base = parse_macro_input!(input as DeriveInput);
 

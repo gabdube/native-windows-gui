@@ -7,3 +7,6 @@
 # Interactive tests
 ![tests windows](windows-tests-base.png)
 ![tests linux](linux-tests-base.png)
+
+# Calculator
+![calc windows](windows-calc.png)

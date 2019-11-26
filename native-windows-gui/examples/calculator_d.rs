@@ -1,6 +1,7 @@
 /*!
     A calculator that use the grid layout of NWG. Macro version.
 */
+#![allow(dead_code)]
 
 extern crate native_windows_gui as nwg;
 extern crate native_windows_derive as nwd;
@@ -26,7 +27,8 @@ pub struct Calculator {
     #[nwg_events( OnWindowClose: [Calculator::exit] )]
     window: nwg::Window,
 
-    //layout: GridLayout,
+    #[nwg_layout(parent: window, spacing: 2, min_size: [150, 140])]
+    layout: nwg::GridLayout,
 
     #[nwg_control(text: "", align: nwg::HTextAlign::Right, readonly: true)]
     input: nwg::TextInput,
