@@ -18,6 +18,9 @@ pub use errors::{UserError, SystemError};
 mod events;
 pub use events::*;
 
+mod common_types;
+pub use common_types::*;
+
 pub(crate) mod win32;
 pub use win32::{
  dispatch_thread_events, stop_thread_dispatch, enable_visual_styles, init_common_controls, 

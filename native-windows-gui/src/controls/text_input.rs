@@ -2,9 +2,9 @@
  	An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
 */
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM};
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, ES_AUTOHSCROLL};
 use crate::win32::window_helper as wh;
-use crate::{Font, SystemError};
+use crate::{Font, SystemError, HTextAlign};
 use super::{ControlBase, ControlHandle};
 use std::ops::Range;
 use std::char;
@@ -17,11 +17,14 @@ bitflags! {
     pub struct TextInputFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const NUMBER = ES_NUMBER;
+        const AUTO_SCROLL = ES_AUTOHSCROLL;
     }
 }
 
 /// An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
 /// This control only allow a single line input. For block of text, use `TextBox`.
+/// Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/controls/about-edit-controls#text-and-input-styles
 #[derive(Default, Debug)]
 pub struct TextInput {
     pub handle: ControlHandle
@@ -37,6 +40,7 @@ impl TextInput {
             flags: None,
             limit: 0,
             password: None,
+            align: HTextAlign::Left,
             readonly: false,
             font: None,
             parent: None
@@ -290,7 +294,7 @@ impl TextInput {
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        use winapi::um::winuser::{WS_BORDER, ES_AUTOHSCROLL, WS_CHILD};
+        use winapi::um::winuser::{WS_BORDER, WS_CHILD};
         
         WS_BORDER | ES_AUTOHSCROLL | WS_CHILD
     }
@@ -304,6 +308,7 @@ pub struct TextInputBuilder<'a> {
     flags: Option<TextInputFlags>,
     limit: usize,
     password: Option<char>,
+    align: HTextAlign,
     readonly: bool,
     font: Option<&'a Font>,
     parent: Option<ControlHandle>
@@ -341,6 +346,11 @@ impl<'a> TextInputBuilder<'a> {
         self
     }
 
+    pub fn align(mut self, align: HTextAlign) -> TextInputBuilder<'a> {
+        self.align = align;
+        self
+    }
+
     pub fn readonly(mut self, read: bool) -> TextInputBuilder<'a> {
         self.readonly = read;
         self
@@ -357,7 +367,16 @@ impl<'a> TextInputBuilder<'a> {
     }
 
     pub fn build(self, out: &mut TextInput) -> Result<(), SystemError> {
-        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        let mut flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        match self.align {
+            HTextAlign::Left => flags |= ES_LEFT,
+            HTextAlign::Center => flags |= ES_CENTER,
+            HTextAlign::Right => {
+                flags |= ES_RIGHT;
+                flags &= !ES_AUTOHSCROLL;
+            },
+        }
 
         let parent = match self.parent {
             Some(p) => Ok(p),
