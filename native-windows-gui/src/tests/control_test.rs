@@ -45,6 +45,11 @@ pub struct ControlsTest {
     #[cfg(feature = "font-dialog")]
     font_dialog: FontDialog,
 
+    // Layouts
+    dialog_tab_layout: GridLayout,
+    tree_tab_layout: GridLayout,
+    panel_layout: GridLayout,
+
     // Control window
     pub window: Window,
     status: StatusBar,
@@ -601,7 +606,7 @@ mod partial_controls_test_ui {
                 .child(1, 5, &data.run_track_test)
                 .child(0, 6, &data.run_tooltip_test)
                 .child(1, 6, &data.run_status_test)
-                .build();
+                .build(&data.panel_layout);
             
             GridLayout::builder()
                 .parent(&data.dialog_tab)
@@ -615,7 +620,7 @@ mod partial_controls_test_ui {
                 .child_item(GridLayoutItem::new(&data.test_color_output, 1, 2, 2, 1))
                 .child(0, 3, &data.test_select_font_button)
                 .child_item(GridLayoutItem::new(&data.test_font_output, 1, 3, 2, 1))
-                .build();
+                .build(&data.dialog_tab_layout);
             
             GridLayout::builder()
                 .parent(&data.tree_tab)
@@ -624,7 +629,7 @@ mod partial_controls_test_ui {
                 .child(1, 0, &data.test_tree_input)
                 .child(1, 1, &data.test_tree_add)
                 .child(1, 2, &data.test_tree_remove)
-                .build();
+                .build(&data.tree_tab_layout);
 
             Ok(())
         }

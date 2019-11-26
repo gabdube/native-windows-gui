@@ -20,7 +20,7 @@ enum Token {
 pub struct Calculator {
     window: nwg::Window,
 
-    //layout: GridLayout,
+    layout: nwg::GridLayout,
 
     input: nwg::TextInput,
 
@@ -235,7 +235,7 @@ mod calculator_ui {
                 .child_item(nwg::GridLayoutItem::new(&ui.btn_clear, 3, 3, 2, 1))
                 .child_item(nwg::GridLayoutItem::new(&ui.btn_process, 3, 4, 2, 1))
                 .child_item(nwg::GridLayoutItem::new(&ui.btn0, 0, 4, 3, 1))
-                .build();
+                .build(&ui.layout);
             
             return Ok(ui);
         }

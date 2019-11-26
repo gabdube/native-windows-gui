@@ -2,6 +2,8 @@ use crate::controls::{ControlHandle};
 use crate::win32::window::bind_raw_event_handler;
 use crate::win32::window_helper as wh;
 use winapi::shared::windef::{HWND};
+use std::rc::Rc;
+use std::cell::RefCell;
 use std::ptr;
 
 
@@ -43,7 +45,8 @@ impl GridLayoutItem {
 
 
 /// A layout that lays out widgets in a grid
-pub struct GridLayout {
+/// This is the inner data shared between the callback and the application
+pub struct GridLayoutInner {
     /// The control that holds the layout
     base: HWND,
 
@@ -69,10 +72,16 @@ pub struct GridLayout {
     spacing: u32
 }
 
+/// A layout that lays out widgets in a grid
+#[derive(Clone)]
+pub struct GridLayout {
+    inner: Rc<RefCell<GridLayoutInner>>
+}
+
 impl GridLayout {
 
     pub fn builder() -> GridLayoutBuilder {
-        let layout = GridLayout {
+        let layout = GridLayoutInner {
             base: ptr::null_mut(),
             children: Vec::new(),
             margins: [5, 5, 5, 5],
@@ -87,25 +96,30 @@ impl GridLayout {
     }
 
     fn update_layout(&self, mut width: u32, mut height: u32) -> () {
-        let [m_top, m_right, m_bottom, m_left] = self.margins;
-        let sp = self.spacing;
+        let inner = self.inner.borrow();
+        if inner.base.is_null() || inner.children.len() == 0 {
+            return;
+        }
 
-        let children = &self.children;
+        let [m_top, m_right, m_bottom, m_left] = inner.margins;
+        let sp = inner.spacing;
 
-        let [min_w, min_h] = self.min_size;
+        let children = &inner.children;
+
+        let [min_w, min_h] = inner.min_size;
         if width < min_w { width = min_w; }
         if height < min_h { height = min_h; }
 
-        let [max_w, max_h] = self.max_size;
+        let [max_w, max_h] = inner.max_size;
         if width > max_w { width = max_w; }
         if height > max_h { height = max_h; }
 
-        let column_count = match self.column_count {
+        let column_count = match inner.column_count {
             Some(c) => c,
             None => children.iter().map(|item| item.col + item.col_span).max().unwrap_or(1)
         };
 
-        let row_count = match self.row_count {
+        let row_count = match inner.row_count {
             Some(c) => c,
             None => children.iter().map(|item| item.row + item.row_span).max().unwrap_or(1)
         };
@@ -130,7 +144,7 @@ impl GridLayout {
         let item_height = height / row_count;
         let sp2 = sp * 2;
 
-        for item in self.children.iter() {
+        for item in inner.children.iter() {
             let x = m_left + (sp + (sp2 * item.col)) + (item_width * item.col);
             let y = m_top + (sp + (sp2 * item.row)) + (item_height * item.row);
 
@@ -145,10 +159,31 @@ impl GridLayout {
     }
 }
 
+impl Default for GridLayout {
+
+    fn default() -> GridLayout {
+        let inner = GridLayoutInner {
+            base: ptr::null_mut(),
+            children: Vec::new(),
+            margins: [5, 5, 5, 5],
+            min_size: [0, 0],
+            max_size: [u32::max_value(), u32::max_value()],
+            column_count: None,
+            row_count: None,
+            spacing: 5,
+        };
+
+        GridLayout {
+            inner: Rc::new(RefCell::new(inner))
+        }
+    }
+
+}
+
 
 /// Builder for a `GridLayout` struct
 pub struct GridLayoutBuilder {
-    layout: GridLayout
+    layout: GridLayoutInner
 }
 
 impl GridLayoutBuilder {
@@ -220,23 +255,30 @@ impl GridLayoutBuilder {
 
     /// Build the layout object and bind the callback.
     /// Children must only contains window object otherwise this method will panic.
-    pub fn build(self) {
+    pub fn build(self, layout: &GridLayout) {
         use winapi::um::winuser::WM_SIZE;
         use winapi::shared::minwindef::{HIWORD, LOWORD};
-        let layout = self.layout;
+        
+        let (w, h) = unsafe { wh::get_window_size(self.layout.base) };
+        let base_handle = ControlHandle::Hwnd(self.layout.base);
 
-        unsafe {
-            let (w, h) = wh::get_window_size(layout.base);
-            layout.update_layout(w, h);
+        // Saves the new layout. TODO: should free the old one too (if any)
+        {
+            let mut layout_inner = layout.inner.borrow_mut();
+            *layout_inner = self.layout;        
         }
 
-        let base_handle = ControlHandle::Hwnd(layout.base);
+        // Initial layout update
+        layout.update_layout(w, h);
+       
+        // Bind the event handler
+        let event_layout = layout.clone();
         let cb = move |_h, msg, _w, l| {
             if msg == WM_SIZE {
                 let size = l as u32;
                 let width = LOWORD(size) as u32;
                 let height = HIWORD(size) as u32;
-                GridLayout::update_layout(&layout, width, height);
+                GridLayout::update_layout(&event_layout, width, height);
             }
             None
         };

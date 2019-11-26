@@ -7,15 +7,19 @@ mod radio_button;
 mod text_input;
 mod text_box;
 mod label;
-mod combo_box;
 mod status_bar;
 mod image_frame;
-mod list_box;
 mod tooltip;
 mod track_bar;
 mod menu;
 mod timer;
 mod notice;
+
+#[cfg(feature = "combobox")]
+mod combo_box;
+
+#[cfg(feature = "listbox")]
+mod list_box;
 
 #[cfg(feature = "datetime-picker")]
 mod date_picker;
@@ -37,21 +41,25 @@ mod handle_from_control;
 pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase};
 pub use window::{Window, WindowFlags};
-pub use button::Button;
+pub use button::{Button, ButtonFlags};
 pub use check_box::{CheckBox, CheckBoxState, CheckBoxFlags};
 pub use radio_button::{RadioButton, RadioButtonState, RadioButtonFlags};
 pub use text_input::{TextInput, TextInputFlags};
 pub use text_box::{TextBox, TextBoxFlags};
-pub use label::Label;
-pub use combo_box::ComboBox;
+pub use label::{Label, LabelFlags};
 pub use status_bar::StatusBar;
 pub use image_frame::{ImageFrame, ImageFrameFlags};
-pub use list_box::{ListBox, ListBoxFlags};
 pub use tooltip::{Tooltip, TooltipIcon};
 pub use track_bar::{TrackBar, TrackBarFlags};
 pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder};
 pub use timer::Timer;
 pub use notice::Notice;
+
+#[cfg(feature = "combobox")]
+pub use combo_box::{ComboBox, ComboBoxFlags};
+
+#[cfg(feature = "listbox")]
+pub use list_box::{ListBox, ListBoxFlags};
 
 #[cfg(feature = "datetime-picker")]
 pub use date_picker::{DatePicker, DatePickerValue, DatePickerFlags};

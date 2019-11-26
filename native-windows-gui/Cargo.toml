@@ -22,7 +22,6 @@ native-windows-derive = { path = "../native-windows-derive/" }
 winapi-build = "0.1.1"
 
 [features]
-tests-linux = ["datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "interactive"]
 interactive = []
 file-dialog = []
 color-dialog = []
@@ -33,4 +32,7 @@ tabs = []
 tree-view = []
 fancy-window = []
 canvas = []
-all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "canvas"]
+listbox = []
+combobox = []
+tests-linux = ["datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "interactive", "listbox", "combobox"]
+all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "canvas", "listbox", "combobox"]

@@ -1,6 +1,8 @@
-use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, ComboBox,
-StatusBar, ImageFrame, ListBox, TrackBar, Menu, MenuItem, MenuSeparator, TextBox};
+use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, StatusBar, ImageFrame,
+    TrackBar, Menu, MenuItem, MenuSeparator, TextBox};
 use std::convert::From;
+
+#[allow(unused)]
 use std::fmt::Display;
 
 macro_rules! handles {
@@ -39,32 +41,44 @@ handles!(MenuItem);
 handles!(MenuSeparator);
 
 
+#[cfg(feature = "combobox")]
+use super::ComboBox;
+
+#[cfg(feature = "combobox")]
 impl<D: Display+Default> From<&ComboBox<D>> for ControlHandle {
     fn from(control: &ComboBox<D>) -> Self { control.handle }
 }
 
+#[cfg(feature = "combobox")]
 impl<D: Display+Default> PartialEq<ControlHandle> for ComboBox<D> {
     fn eq(&self, other: &ControlHandle) -> bool {
         self.handle == *other
     }
 }
 
+#[cfg(feature = "combobox")]
 impl<D: Display+Default> PartialEq<ComboBox<D>> for ControlHandle {
     fn eq(&self, other: &ComboBox<D>) -> bool {
         *self == other.handle
     }
 }
 
+#[cfg(feature = "combobox")]
+use super::ListBox;
+
+#[cfg(feature = "listbox")]
 impl<D: Display+Default> From<&ListBox<D>> for ControlHandle {
     fn from(control: &ListBox<D>) -> Self { control.handle }
 }
 
+#[cfg(feature = "listbox")]
 impl<D: Display+Default> PartialEq<ControlHandle> for ListBox<D> {
     fn eq(&self, other: &ControlHandle) -> bool {
         self.handle == *other
     }
 }
 
+#[cfg(feature = "listbox")]
 impl<D: Display+Default> PartialEq<ListBox<D>> for ControlHandle {
     fn eq(&self, other: &ListBox<D>) -> bool {
         *self == other.handle
