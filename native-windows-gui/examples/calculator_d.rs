@@ -92,10 +92,12 @@ pub struct Calculator {
 
     #[nwg_control(text: "=")] 
     #[nwg_layout_item(layout: grid, col: 3, row: 4, col_span: 2)]
+    #[nwg_events( OnButtonClick: [Calculator::compute] )]
     btn_process: nwg::Button,
 
     #[nwg_control(text: "Clear")]
     #[nwg_layout_item(layout: grid, col: 3, row: 3, col_span: 2)]
+    #[nwg_events( OnButtonClick: [Calculator::clear] )]
     btn_clear: nwg::Button,
 }
 

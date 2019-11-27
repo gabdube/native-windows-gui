@@ -164,7 +164,16 @@ impl<'a> ToTokens for EventCallbackCol<'a> {
                 quote!{ if &_handle == &evt_ui.#member { #path(&evt_ui.inner) } }
             }
             _ => {
-                quote!{ {} }
+                let first_member = &cb[0].member;
+                let first_path = &cb[0].path;
+
+                let members: Vec<&syn::Ident> = cb[1..].iter().map(|c| &c.member).collect();
+                let paths: Vec<&syn::Path> = cb[1..].iter().map(|c| &c.path).collect();
+
+                quote!{
+                    if &_handle == &evt_ui.#first_member { #first_path(&evt_ui.inner) }
+                    #(else if &_handle == &evt_ui.#members { #paths(&evt_ui.inner) })*
+                }
             }
         };
 
