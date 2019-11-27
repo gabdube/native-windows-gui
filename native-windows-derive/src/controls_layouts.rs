@@ -2,7 +2,6 @@ use syn;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use quote::{ToTokens};
-use std::collections::HashMap;
 
 
 #[derive(Debug)]
@@ -29,11 +28,23 @@ impl Parse for LayoutAttribute {
     }
 }
 
+impl ToTokens for LayoutAttribute {
+
+    fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+        let id = &self.attr_id;
+        let val = &self.value;
+        let layouts_tk = quote! { #id(#val) };
+        layouts_tk.to_tokens(tokens);
+    }
+    
+}
+
 
 #[derive(Debug, Default)]
 struct LayoutAttributes {
     params: Punctuated<LayoutAttribute, Token![,]>
 }
+
 
 impl Parse for LayoutAttributes {
     fn parse(input: ParseStream) -> syn::Result<Self> {
@@ -48,22 +59,40 @@ impl Parse for LayoutAttributes {
 
 #[derive(Debug, Default)]
 struct LayoutParams {
+    member: Option<syn::Ident>,
     ty: Option<syn::Ident>,
     children: Vec<LayoutChildren>,
     attributes: LayoutAttributes
 }
 
+impl ToTokens for LayoutParams {
+
+    fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+        let ty = &self.ty;
+        let member = &self.member;
+        let attr: Vec<&LayoutAttribute> = self.attributes.params.iter().collect();
+
+        let layouts_tk = quote! { 
+            nwg::#ty::builder()
+                #(.#attr)*
+                .build(&ui.#member);
+        };
+        layouts_tk.to_tokens(tokens);
+    }
+    
+}
+
 
 /// Holds layouts data in a UI
 pub struct ControlLayouts {
-    layouts: HashMap<syn::Ident, LayoutParams>
+    layouts: Vec<LayoutParams>
 }
 
 impl ControlLayouts {
 
     pub fn new() -> ControlLayouts {
         ControlLayouts {
-            layouts: HashMap::with_capacity(3)
+            layouts: Vec::with_capacity(3)
         }
     }
 
@@ -77,12 +106,21 @@ impl ControlLayouts {
             None => { return; }
         };
 
-        let layout = self.layouts
-          .entry(member.clone())
-          .or_insert(Default::default());
+        let mut layout_params = LayoutParams {
+            member: Some(member.clone()),
+            ty: Some(extract_layout_type(&field.ty)),
+            children: Vec::with_capacity(5),
+            attributes: Default::default(),
+        };
+        parse_layout_params(&member, &attr, &mut layout_params.attributes);
+        self.layouts.push(layout_params);
+        
+    }
 
-        layout.ty = Some(extract_layout_type(&field.ty));
-        parse_layout_params(&member, &attr, &mut layout.attributes);
+    pub fn organize_layouts(&mut self) {
+        for layout in self.layouts.iter_mut() {
+            expand_parent(layout);
+        }
     }
 
 }
@@ -91,7 +129,8 @@ impl ControlLayouts {
 impl ToTokens for ControlLayouts {
 
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
-        let layouts_tk = quote! {};
+        let layouts = &self.layouts;
+        let layouts_tk = quote! { #(#layouts);* };
         layouts_tk.to_tokens(tokens);
     }
     
@@ -133,4 +172,28 @@ fn extract_layout_type(ty: &syn::Type) -> syn::Ident {
     }
 
     syn::Ident::new(&control_type, pm2::Span::call_site())
+}
+
+fn expand_parent(layout: &mut LayoutParams) {
+    let member_name = layout.member.as_ref().unwrap();
+    let parent_attr = layout.attributes.params.iter_mut().find(|p| &p.attr_id == "parent");
+
+    match parent_attr {
+        Some(parent) => {
+            let parent_name = match &parent.value {
+                syn::Expr::Path(p) => {
+                    let path_len = p.path.segments.len();
+                    p.path.segments[path_len-1].ident.to_string()
+                },
+                _ => panic!("Bad parent value for layout {}", member_name)
+            };
+
+            let final_parent = format!("&ui.{}", parent_name);
+            parent.value = match syn::parse_str(&final_parent) {
+                Ok(e) => e,
+                Err(e) => panic!("Failed to parse parent value for layout {}: {}", member_name, e)
+            };
+        },
+        None => panic!("Layout {} does not have a parent!", member_name)
+    }
 }
