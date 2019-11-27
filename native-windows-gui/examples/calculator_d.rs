@@ -28,57 +28,74 @@ pub struct Calculator {
     window: nwg::Window,
 
     #[nwg_layout(parent: window, spacing: 2, min_size: [150, 140])]
-    layout: nwg::GridLayout,
+    grid: nwg::GridLayout,
 
     #[nwg_control(text: "", align: nwg::HTextAlign::Right, readonly: true)]
+    #[nwg_layout_item(layout: grid, col: 0, row: 0, col_span: 5)]
     input: nwg::TextInput,
 
     #[nwg_control(text: "0")] 
+    #[nwg_layout_item(layout: grid, col: 0, row: 4, col_span: 3)]
     btn0: nwg::Button,
 
     #[nwg_control(text: "1")] 
+    #[nwg_layout_item(layout: grid, col: 0, row: 1)]
     btn1: nwg::Button,
 
     #[nwg_control(text: "2")] 
+    #[nwg_layout_item(layout: grid, col: 1, row: 1)]
     btn2: nwg::Button,
 
     #[nwg_control(text: "3")] 
+    #[nwg_layout_item(layout: grid, col: 2, row: 1)]
     btn3: nwg::Button,
 
     #[nwg_control(text: "4")] 
+    #[nwg_layout_item(layout: grid, col: 0, row: 2)]
     btn4: nwg::Button,
 
     #[nwg_control(text: "5")] 
+    #[nwg_layout_item(layout: grid, col: 1, row: 2)]
     btn5: nwg::Button,
 
     #[nwg_control(text: "6")] 
+    #[nwg_layout_item(layout: grid, col: 2, row: 2)]
     btn6: nwg::Button,
 
     #[nwg_control(text: "7")] 
+    #[nwg_layout_item(layout: grid, col: 0, row: 3)]
     btn7: nwg::Button,
 
     #[nwg_control(text: "8")] 
+    #[nwg_layout_item(layout: grid, col: 1, row: 3)]
     btn8: nwg::Button,
 
     #[nwg_control(text: "9")] 
+    #[nwg_layout_item(layout: grid, col: 2, row: 3)]
     btn9: nwg::Button,
 
     #[nwg_control(text: "+")] 
+    #[nwg_layout_item(layout: grid, col: 3, row: 1)]
     btn_plus: nwg::Button,
 
     #[nwg_control(text: "-")] 
+    #[nwg_layout_item(layout: grid, col: 4, row: 1)]
     btn_minus: nwg::Button,
 
     #[nwg_control(text: "*")] 
+    #[nwg_layout_item(layout: grid, col: 3, row: 2)]
     btn_mult: nwg::Button,
 
     #[nwg_control(text: "/")] 
+    #[nwg_layout_item(layout: grid, col: 4, row: 2)]
     btn_divide: nwg::Button,
 
     #[nwg_control(text: "=")] 
+    #[nwg_layout_item(layout: grid, col: 3, row: 4, col_span: 2)]
     btn_process: nwg::Button,
 
     #[nwg_control(text: "Clear")]
+    #[nwg_layout_item(layout: grid, col: 3, row: 3, col_span: 2)]
     btn_clear: nwg::Button,
 }
 

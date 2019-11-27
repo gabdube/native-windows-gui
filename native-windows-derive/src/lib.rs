@@ -81,6 +81,7 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
         if let Some(control) = controls_gen::generate_control(f) {
             fields.push(control);
             events.generate_events(f);
+            layouts.add_item(f);
         }
 
         layouts.add_layout(f);
