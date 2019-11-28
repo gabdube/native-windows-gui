@@ -4,6 +4,8 @@ use std::cell::RefCell;
 
 #[derive(Default)]
 struct CanvasResources {
+    fonts: WriteFactory,
+
     plain_stroke: StrokeStyle,
     background_brush: SolidBrush,
 
@@ -34,6 +36,8 @@ fn init_resources(canvas: &CanvasTest) {
     const BASE_GRAY: Color = Color::rgb([0.25, 0.25, 0.25]);
     const DARK_GRAY: Color = Color::rgb([0.12, 0.12, 0.12]);
     const DARK_GRAY2: Color = Color::rgb([0.18, 0.18, 0.18]);
+
+    res.fonts = WriteFactory::new().expect("Failed to create write factory");
 
     res.plain_stroke = StrokeStyle::from_style(header, DashStyle::Solid);
     res.header_border_brush = SolidBrush::from_color(header, DARK_GRAY);
