@@ -8,7 +8,9 @@ to interoperate well with GDI, GDI+, and Direct3D.
 mod resources;
 mod canvas_draw;
 mod canvas_window;
+mod canvas;
 
 pub use resources::*;
 pub use canvas_draw::CanvasDraw;
-pub use canvas_window::{CanvasWindow, CanvasWindowFlags};
+pub use canvas_window::{CanvasWindow, CanvasWindowBuilder, CanvasWindowFlags};
+pub use canvas::{Canvas, CanvasBuilder, CanvasFlags};

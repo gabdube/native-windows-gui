@@ -5,6 +5,25 @@
     Cloning will increase the ref count and dropping the brush resource will decrease it.
 
     Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/nf-d2d1-id2d1rendertarget-creategradientstopcollection(constd2d1_gradient_stop_uint32_d2d1_gamma_d2d1_extend_mode_id2d1gradientstopcollection)
+
+    ##Example
+    ```
+    use native_windows_gui as nwg;
+    
+    fn init(canvas: &nwg::Canvas) {
+        const COL1: nwg::Color = nwg::Color::rgb([0.25, 0.25, 0.25]);
+        const COL2: nwg::Color = nwg::Color::rgb([0.15, 0.15, 0.15]);
+
+        let header_gradient = nwg::GradientStopCollection::from_stops(
+            canvas,
+            &[
+                nwg::GradientStop {position: 0.5, color: COL1},
+                nwg::GradientStop {position: 0.75, color: COL2},
+                nwg::GradientStop {position: 0.85, color: COL1}
+            ]
+        );
+    }
+    ```
 */
 
 use winapi::um::d2d1::{ID2D1GradientStopCollection};

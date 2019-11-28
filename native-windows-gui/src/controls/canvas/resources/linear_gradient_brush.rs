@@ -5,6 +5,16 @@
     Cloning will increase the ref count and dropping the brush resource will decrease it.
 
     Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/direct2d/direct2d-brushes-overview
+
+    ## Example
+    ```
+    use native_windows_gui as nwg;
+
+    fn init(canvas: &nwg::Canvas, header_gradient: &nwg::GradientStopCollection) {
+        let linear_props = nwg::LinearBrushProperties { startPoint: nwg::Point2F {x:150.0, y:30.0}, endPoint: nwg::Point2F {x:150.0, y:0.0} };
+        let header_inner_brush = nwg::LinearGradientBrush::from_linear_gradient(canvas, &linear_props, header_gradient);
+    }
+    ```
 */
 use winapi::um::d2d1::{ID2D1LinearGradientBrush};
 use crate::win32::canvas;

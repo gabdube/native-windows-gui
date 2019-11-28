@@ -26,17 +26,18 @@ pub fn create_tab_classes() -> Result<(), SystemError>  {
 
 
 unsafe extern "system" fn tab_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::um::winuser::{WM_CREATE, WM_PAINT};
+    use winapi::um::winuser::{WM_CREATE, WM_PAINT, WM_ERASEBKGND};
     use winapi::um::winuser::{DefWindowProcW};
 
     let handled = match msg {
-        WM_PAINT => true,
-        WM_CREATE => true,
-        _ => false
+        WM_PAINT => Some(0),
+        WM_ERASEBKGND => Some(1),
+        WM_CREATE => Some(0),
+        _ => None
     };
 
-    if handled {
-        0
+    if let Some(result) = handled {
+        result
     } else {
         DefWindowProcW(hwnd, msg, w, l)
     }
