@@ -11,10 +11,17 @@ struct CanvasResources {
     header_background_brush: SolidBrush,
 }
 
+#[derive(Default)]
+struct OtherStuff {
+    dragging: bool,
+    anchor: (i32, i32)
+}
+
 
 #[derive(Default)]
 pub struct CanvasTest {
     resources: RefCell<CanvasResources>,
+    other_stuff: RefCell<OtherStuff>,
     pub window: CanvasWindow,
     pub header: Canvas,
 }
@@ -67,6 +74,31 @@ fn paint_header(canvas: &CanvasTest) {
     }
 }
 
+fn drag_header(canvas: &CanvasTest) {
+    let header = &canvas.header.handle;
+    if Cursor::dragging(header, None) {
+        Cursor::set_capture(header);
+
+        let mut stuff = canvas.other_stuff.borrow_mut();
+        stuff.anchor = Cursor::local_position(header, None);
+        stuff.dragging = true;
+    }
+}
+
+fn drag(canvas: &CanvasTest) {
+    let stuff = canvas.other_stuff.borrow();
+    if stuff.dragging {
+        let (x1, y1) = Cursor::position();
+        let (ax, ay) = stuff.anchor;
+        canvas.window.set_position(x1 - ax, y1 - ay);
+    }
+}
+
+fn release_header(canvas: &CanvasTest) {
+    Cursor::release();
+    canvas.other_stuff.borrow_mut().dragging = false;
+}
+
 
 mod partial_canvas_test_ui {
     use super::*;
@@ -102,6 +134,15 @@ mod partial_canvas_test_ui {
                 E::OnPaint => {
                     if &handle == &self.window { paint_window(self); }
                     else if &handle == &self.header { paint_header(self); }
+                },
+                E::MousePress(MousePressEvent::MousePressLeftDown) => {
+                    if &handle == &self.header { drag_header(self); }
+                },
+                E::MousePress(MousePressEvent::MousePressLeftUp) => {
+                    if &handle == &self.header { release_header(self); }
+                },
+                E::MouseMove => {
+                    if &handle == &self.header { drag(self); }
                 },
                 _ => {}
             }

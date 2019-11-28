@@ -23,6 +23,28 @@ impl Cursor {
     }
 
     /**
+        Return or map the cursor position relatively to a control.
+        If point is `None`, `Cursor::position` is used.
+    */
+    pub fn local_position(control: &ControlHandle, point: Option<(i32, i32)>) -> (i32, i32) {
+        use winapi::shared::ntdef::LONG;
+        use winapi::shared::windef::POINT;
+        use winapi::um::winuser::ScreenToClient;
+
+        const MSG: &'static str = "local_position can only be used for window control";
+
+        if control.blank() { panic!(MSG); }
+        let handle = control.hwnd().expect(MSG);
+
+        let (x, y) = point.unwrap_or(Cursor::position());
+        let mut p = POINT{x: x as LONG, y: y as LONG};
+
+        unsafe { ScreenToClient(handle, &mut p); }
+
+        (p.x as i32, p.y as i32)
+    }
+
+    /**
         Set the cursor position in the screen.
 
         Arguments:
@@ -73,8 +95,6 @@ impl Cursor {
         Capture the mouse for a window-like control. Make sure to call `Cursor::release` to
         remove the capture. A control that has captured the mouse will receive mouse events
         even if the mouse is not hovering it.
-
-        If the mouse is captured only to provide a "drag` gesture, use the `Cursor::drag` method instead.
 
         Will panic if the control handle passed to the method is not a window or if the control is not yet initialized.
 

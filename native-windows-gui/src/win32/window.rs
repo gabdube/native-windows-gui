@@ -261,7 +261,7 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
     use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
-      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT};
+      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::HIWORD;
 
@@ -312,6 +312,7 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
         WM_MOVE => callback(Event::OnMove, NO_DATA, base_handle),
         WM_HSCROLL => callback(Event::OnHorizontalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
         WM_VSCROLL => callback(Event::OnVerticalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
+        WM_MOUSEMOVE => callback(Event::MouseMove, NO_DATA,  base_handle), 
         WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  base_handle), 
         WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
         WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 

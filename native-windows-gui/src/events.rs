@@ -21,16 +21,19 @@ pub enum Event {
     /// Generic mouse press events that can be sent to most window controls
     MousePress(MousePressEvent),
 
+    /// Generic mouse move event that can be sent to most window controls
+    MouseMove,
+
     /// When a top level window control is created.
     OnInit,
 
     /// When a control needs to be redrawn
     OnPaint,
     
-    /// When a control is resized by the user. This typically applied to top level window.
+    /// When a control is resized by the user. This typically applied to top level windows.
     OnResize,
 
-    /// When a control is moved by the user. This typically applied to top level window.
+    /// When a control is moved by the user. This typically applied to top level windows.
     OnMove,
 
     /// When a bar like control value is changed.
