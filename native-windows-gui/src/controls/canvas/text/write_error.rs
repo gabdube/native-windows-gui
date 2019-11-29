@@ -6,5 +6,6 @@ use winapi::shared::ntdef::HRESULT;
 
 #[derive(Copy, Clone, Debug)]
 pub enum WriteError {
+    MissingParameter(&'static str),
     Unknown(HRESULT)
 }

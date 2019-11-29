@@ -5,6 +5,7 @@ use std::cell::RefCell;
 #[derive(Default)]
 struct CanvasResources {
     fonts: WriteFactory,
+    arial: WriteTextFormat,
 
     plain_stroke: StrokeStyle,
     background_brush: SolidBrush,
@@ -38,6 +39,11 @@ fn init_resources(canvas: &CanvasTest) {
     const DARK_GRAY2: Color = Color::rgb([0.18, 0.18, 0.18]);
 
     res.fonts = WriteFactory::new().expect("Failed to create write factory");
+    res.arial = WriteTextFormat::builder(&res.fonts)
+        .family("Arial")
+        .size(19.0)
+        .build()
+        .expect("Failed to build text format");
 
     res.plain_stroke = StrokeStyle::from_style(header, DashStyle::Solid);
     res.header_border_brush = SolidBrush::from_color(header, DARK_GRAY);

@@ -12,7 +12,7 @@ use std::{ptr, fmt};
 
 
 pub struct WriteFactory {
-    handle: *mut IDWriteFactory
+    pub(crate) handle: *mut IDWriteFactory
 }
 
 impl WriteFactory {
