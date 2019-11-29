@@ -18,8 +18,8 @@ Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/api/dwrite/
 
 use winapi::um::dwrite::IDWriteTextFormat;
 use winapi::shared::winerror::S_OK;
-use super::{WriteError, WriteFactory};
-use crate::win32::base_helper::to_utf16;
+use super::{WriteError, WriteFactory, FontStyle};
+use crate::win32::base_helper::{to_utf16, from_utf16};
 use std::{ptr, fmt};
 
 
@@ -32,6 +32,14 @@ impl WriteTextFormat {
 
     pub fn builder<'a>(fact: &'a WriteFactory) -> WriteTextFormatBuilder<'a> {
         use winapi::um::dwrite::{DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL};
+        use winapi::um::winnls::GetUserDefaultLocaleName;
+        use winapi::um::winnt::LOCALE_NAME_MAX_LENGTH;
+        
+        let locale = unsafe {
+            let mut buffer: [u16; LOCALE_NAME_MAX_LENGTH] = [0; LOCALE_NAME_MAX_LENGTH];
+            let count = GetUserDefaultLocaleName(buffer.as_mut_ptr(), LOCALE_NAME_MAX_LENGTH as i32);
+            from_utf16(&buffer[0..(count as usize)])
+        };
 
         WriteTextFormatBuilder {
             fact,
@@ -40,12 +48,81 @@ impl WriteTextFormat {
             font_style: DWRITE_FONT_STYLE_NORMAL,
             font_stretch: DWRITE_FONT_STRETCH_NORMAL,
             size: 20.0,
-            locale: Some("en-us"),
+            locale: Some(locale),
         }
     }
 
     /// Check if the write text format is initialized
     pub fn is_null(&self) -> bool { self.handle.is_null() }
+
+    /// Gets a copy of the font family name.
+    pub fn font_family_name(&self) -> String {
+        if self.is_null() { panic!("WriteTextFormat is not bound to a write factory") }
+
+        unsafe { 
+            let name_len = (&*self.handle).GetFontFamilyNameLength() as usize;
+            let mut name_buffer = Vec::with_capacity(name_len);
+            name_buffer.set_len(name_len);
+
+            (&*self.handle).GetFontFamilyName(name_buffer.as_mut_ptr(), name_len as u32);
+
+            from_utf16(&name_buffer)
+        }
+    }
+
+    /// Gets a copy of the locale name.
+    pub fn locale_name(&self) -> String {
+        if self.is_null() { panic!("WriteTextFormat is not bound to a write factory") }
+
+        unsafe { 
+            let name_len = (&*self.handle).GetLocaleNameLength() as usize;
+            let mut name_buffer = Vec::with_capacity(name_len);
+            name_buffer.set_len(name_len);
+
+            (&*self.handle).GetLocaleName(name_buffer.as_mut_ptr(), name_len as u32);
+
+            from_utf16(&name_buffer)
+        }
+    }
+
+    /// Gets the font size in DIP unites.
+    pub fn font_size(&self) -> f32 {
+        if self.is_null() { panic!("WriteTextFormat is not bound to a write factory") }
+        unsafe { (&*self.handle).GetFontSize() }
+    }
+
+    /// Gets the font stretch of the text.
+    pub fn font_stretch(&self) -> u32 {
+        if self.is_null() { panic!("WriteTextFormat is not bound to a write factory") }
+        unsafe { (&*self.handle).GetFontStretch() }
+    }
+
+    /// Gets the font style of the text.
+    pub fn font_style(&self) -> FontStyle {
+        use winapi::um::dwrite::{DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STYLE_ITALIC};
+
+        if self.is_null() { panic!("WriteTextFormat is not bound to a write factory") }
+        let raw_style = unsafe { (&*self.handle).GetFontStyle() };
+        match raw_style {
+            DWRITE_FONT_STYLE_NORMAL => FontStyle::Normal,
+            DWRITE_FONT_STYLE_OBLIQUE => FontStyle::Oblique,
+            DWRITE_FONT_STYLE_ITALIC => FontStyle::Italic,
+            _ => FontStyle::Normal,
+        }
+    }
+
+    /// Gets the font weight of the text.
+    pub fn font_weight(&self) -> u32 {
+        if self.is_null() { panic!("WriteTextFormat is not bound to a write factory") }
+        unsafe { (&*self.handle).GetFontWeight() }
+    }   
+
+    /// Gets the incremental tab stop position.
+    pub fn incremental_tab_stop(&self) -> f32 {
+        if self.is_null() { panic!("WriteTextFormat is not bound to a write factory") }
+        unsafe { (&*self.handle).GetIncrementalTabStop() }
+    }
+
 
 }
 
@@ -54,7 +131,7 @@ impl WriteTextFormat {
 pub struct WriteTextFormatBuilder<'a> {
     fact: &'a WriteFactory,
     family: Option<&'a str>,
-    locale: Option<&'a str>,
+    locale: Option<String>,
     font_weight: u32,
     font_style: u32,
     font_stretch: u32,
@@ -70,8 +147,8 @@ impl<'a> WriteTextFormatBuilder<'a> {
     }
 
     /// The locale name. Ex: "en-us". Default to "en-us"
-    pub fn locale(mut self, loc: Option<&'a str>) -> WriteTextFormatBuilder<'a> {
-        self.locale = loc;
+    pub fn locale<S: Into<String>>(mut self, loc: Option<S>) -> WriteTextFormatBuilder<'a> {
+        self.locale = loc.map(|s| s.into());
         self
     }
 
@@ -110,7 +187,7 @@ impl<'a> WriteTextFormatBuilder<'a> {
         };
 
         let locale = match self.locale {
-            Some(l) => to_utf16(l),
+            Some(l) => to_utf16(&l),
             None => { return Err(WriteError::MissingParameter("locale")) }
         };
 

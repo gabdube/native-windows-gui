@@ -28,7 +28,8 @@ impl Label {
             position: (0, 0),
             flags: None,
             font: None,
-            parent: None
+            parent: None,
+            background_color: None
         }
     }
 
@@ -157,27 +158,25 @@ impl Label {
     }
 
     /// Change the label background color to transparent.
-    fn hook_background_color(&self) {
+    /// Change the checkbox background color.
+    fn hook_background_color(&self, c: [u8; 3]) {
         use crate::bind_raw_event_handler;
         use winapi::um::winuser::{WM_CTLCOLORSTATIC};
-        use winapi::shared::{basetsd::UINT_PTR, windef::{HDC, HWND}, minwindef::LRESULT};
-        use winapi::um::wingdi::{SetBkMode, GetStockObject, TRANSPARENT, NULL_BRUSH};
+        use winapi::shared::{basetsd::UINT_PTR, windef::{HWND}, minwindef::LRESULT};
+        use winapi::um::wingdi::{CreateSolidBrush, RGB};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
-        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, w, l| {
+        let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
+        
+        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
             match msg {
                 WM_CTLCOLORSTATIC => {
                     let child = l as HWND;
-                    let hdc = w as HDC;
-
                     if child == handle {
-                        unsafe {
-                            SetBkMode(hdc, TRANSPARENT as i32);
-                            return Some(GetStockObject(NULL_BRUSH as i32) as LRESULT);
-                        }
+                        return Some(brush as LRESULT);
                     }
                 },
                 _ => {}
@@ -186,7 +185,6 @@ impl Label {
             None
         });
     }
-
 }
 
 
@@ -194,6 +192,7 @@ pub struct LabelBuilder<'a> {
     text: &'a str,
     size: (i32, i32),
     position: (i32, i32),
+    background_color: Option<[u8; 3]>,
     flags: Option<LabelFlags>,
     font: Option<&'a Font>,
     parent: Option<ControlHandle>
@@ -226,6 +225,11 @@ impl<'a> LabelBuilder<'a> {
         self
     }
 
+    pub fn background_color(mut self, color: Option<[u8;3]>) -> LabelBuilder<'a> {
+        self.background_color = color;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> LabelBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -253,7 +257,9 @@ impl<'a> LabelBuilder<'a> {
             out.set_font(self.font);
         }
 
-        out.hook_background_color();
+        if self.background_color.is_some() {
+            out.hook_background_color(self.background_color.unwrap());
+        }
 
         Ok(())
     }

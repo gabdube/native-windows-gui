@@ -259,6 +259,7 @@ mod partial_controls_test_ui {
                 .text("A label")
                 .position((10, 200))
                 .size((130, 30))
+                .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_label)?;
 

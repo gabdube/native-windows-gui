@@ -1,3 +1,7 @@
+/*!
+    Wrapper types over some Direct2D enums and types
+*/
+
 use winapi::um::d2d1::{D2D1_BRUSH_PROPERTIES, D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES, D2D1_RECT_F, D2D1_POINT_2F,
     D2D1_GAMMA_2_2, D2D1_GAMMA_1_0, D2D1_EXTEND_MODE_CLAMP, D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_MIRROR};
 use winapi::um::d2dbasetypes::D2D_MATRIX_3X2_F;
