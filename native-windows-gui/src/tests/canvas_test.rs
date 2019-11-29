@@ -12,6 +12,7 @@ struct CanvasResources {
 
     header_border_brush: SolidBrush,
     header_background_brush: SolidBrush,
+    header_title_brush: SolidBrush,
 }
 
 #[derive(Default)]
@@ -37,17 +38,19 @@ fn init_resources(canvas: &CanvasTest) {
     const BASE_GRAY: Color = Color::rgb([0.25, 0.25, 0.25]);
     const DARK_GRAY: Color = Color::rgb([0.12, 0.12, 0.12]);
     const DARK_GRAY2: Color = Color::rgb([0.18, 0.18, 0.18]);
+    const WHITEISH: Color = Color::rgb([0.8, 0.8, 0.8]);
 
     res.fonts = WriteFactory::new().expect("Failed to create write factory");
     res.arial = WriteTextFormat::builder(&res.fonts)
         .family("Arial")
-        .size(19.0)
+        .size(16.0)
         .build()
         .expect("Failed to build text format");
 
     res.plain_stroke = StrokeStyle::from_style(header, DashStyle::Solid);
     res.header_border_brush = SolidBrush::from_color(header, DARK_GRAY);
     res.header_background_brush = SolidBrush::from_color(header, DARK_GRAY2);
+    res.header_title_brush = SolidBrush::from_color(header, WHITEISH);
 
     res.background_brush = SolidBrush::from_color(window, BASE_GRAY);
 }
@@ -78,6 +81,7 @@ fn paint_header(canvas: &CanvasTest) {
     let header = Rect { left: 0.0, top: 0.0, right: w as f32, bottom: h as f32 };
     draw.fill_rectangle(&header, &res.header_background_brush);
     draw.draw_rectangle(&header, &res.header_border_brush, 3.0, &res.plain_stroke);
+    draw.draw_simple_text("Canvas Test", &res.arial, (5.0, 5.0), (w, h), &res.header_title_brush);
 
     if let Err(e) = draw.end_draw() {
         println!("{:?}", e);

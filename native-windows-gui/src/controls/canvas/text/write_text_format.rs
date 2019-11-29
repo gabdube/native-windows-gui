@@ -25,7 +25,7 @@ use std::{ptr, fmt};
 
 /// See module level documentation
 pub struct WriteTextFormat {
-    handle: *mut IDWriteTextFormat
+    pub(crate) handle: *mut IDWriteTextFormat
 }
 
 impl WriteTextFormat {

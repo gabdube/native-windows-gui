@@ -6,7 +6,7 @@
     A CanvasWindow has the same flags as a regular Window.
 */
 
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_POPUP};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION, WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_POPUP, WS_CLIPCHILDREN};
 
 use crate::win32::window_helper as wh;
 use crate::win32::canvas;
@@ -192,7 +192,7 @@ impl CanvasWindow {
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        0
+        WS_CLIPCHILDREN
     }
 }
 

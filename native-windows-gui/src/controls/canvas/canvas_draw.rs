@@ -3,7 +3,7 @@
     Instance of `CanvasDraw` are done using `canvas.begin_draw()`.
 */
 use winapi::shared::winerror::S_OK;
-use crate::win32::canvas;
+use crate::win32::{canvas, base_helper};
 use super::{CanvasError, Rect, Color, Matrix3x2F, BaseBrush, StrokeStyle, DrawTextOptions, MeasuringMode, WriteTextFormat};
 use std::convert::TryInto;
 
@@ -112,8 +112,30 @@ impl<'a> CanvasDraw<'a> {
     ///  - brush: The brush used to paint the text.
     ///  - options: A value that indicates whether the text should be snapped to pixel boundaries and whether the text should be clipped to the layout rectangle. 
     ///  - measure: A value that indicates how glyph metrics are used to measure text when it is formatted.
-    pub fn draw_text<'b, B: TryInto<BaseBrush>>(&self, _text: &'b str, _fmt: WriteTextFormat, _area: &Rect, _brush: B, _options: DrawTextOptions, _measure: MeasuringMode) {
+    pub fn draw_text<'b, B: TryInto<BaseBrush>>(&self, text: &'b str, fmt: &WriteTextFormat, area: &Rect, brush: B, options: DrawTextOptions, measure: MeasuringMode) {
+        use winapi::um::d2d1::D2D1_DRAW_TEXT_OPTIONS;
+        use winapi::um::dcommon::DWRITE_MEASURING_MODE;
+        
+        unsafe {
+            let target = &*self.base.render_target;
+            let text = base_helper::to_utf16(text);
+            let text_length = text.len();
 
+            let base = match brush.try_into() {
+                Ok(b) => b,
+                Err(_) => panic!("Brush is invalid")
+            };
+
+            target.DrawText(
+                text.as_ptr(),
+                text_length as u32,
+                fmt.handle,
+                area,
+                base.0,
+                options.bits() as D2D1_DRAW_TEXT_OPTIONS,
+                measure as DWRITE_MEASURING_MODE   
+            );
+        }
     }
 
     /// Draws the specified text onto the canvas
@@ -124,12 +146,12 @@ impl<'a> CanvasDraw<'a> {
     ///  - fmt: An object that describes formatting details of the text to draw, such as the font, the font size, and flow direction.
     ///  - pos: The position of the text
     ///  - brush: The brush used to paint the text.
-    pub fn draw_simple_text<'b, B: TryInto<BaseBrush>>(&self, text: &'a str, fmt: WriteTextFormat, pos: (f32, f32), brush: B) {
+    pub fn draw_simple_text<'b, B: TryInto<BaseBrush>>(&self, text: &'a str, fmt: &WriteTextFormat, pos: (f32, f32), size: (f32, f32), brush: B) {
         let area = Rect {
             left: pos.0,
             top: pos.1,
-            right: 1.0,
-            bottom: 1.0,
+            right: size.0,
+            bottom: size.1,
         };
         
         self.draw_text(

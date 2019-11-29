@@ -187,9 +187,9 @@ impl TabsContainer {
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
         //use winapi::um::commctrl::{TCS_SINGLELINE};
-        use winapi::um::winuser::{WS_CHILD};
+        use winapi::um::winuser::{WS_CHILD, WS_CLIPCHILDREN};
 
-        WS_CHILD
+        WS_CHILD | WS_CLIPCHILDREN
     }
 
     //
@@ -357,15 +357,15 @@ impl Tab {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        winapi::um::winuser::WS_CLIPCHILDREN
+        0
     }
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
         //use winapi::um::commctrl::{TCS_SINGLELINE};
-        use winapi::um::winuser::{WS_CHILD};
+        use winapi::um::winuser::{WS_CHILD, WS_CLIPCHILDREN, WS_EX_TRANSPARENT};
 
-        WS_CHILD
+        WS_CHILD | WS_CLIPCHILDREN | WS_EX_TRANSPARENT
     }
 
     /// Set and initialize a tab as active
