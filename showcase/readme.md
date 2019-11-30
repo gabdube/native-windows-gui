@@ -12,6 +12,11 @@
 # Calculator
 ![calc windows](windows-calc.png)
 
+# Dialogs
+![file dialog](file_dialog.png)
+![color dialog](color_dialog.png)
+![font dialog](font_dialog.png)
+
 # Tray notification
 ![tray notification](tray_notification.PNG)
 
