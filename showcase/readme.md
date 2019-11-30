@@ -11,3 +11,7 @@
 
 # Calculator
 ![calc windows](windows-calc.png)
+
+# Tray notification
+![tray notification](tray_notification.PNG)
+

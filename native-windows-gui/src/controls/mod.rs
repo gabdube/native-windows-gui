@@ -77,7 +77,7 @@ pub use tabs::{TabsContainer, Tab, TabsContainerFlags};
 pub use treeview::{TreeView, TreeItem, TreeInsert};
 
 #[cfg(feature = "tray-notification")]
-pub use tray_notification::*;
+pub use tray_notification::{TrayNotificationFlags, TrayNotification};
 
 #[cfg(feature = "canvas")]
 pub use canvas::*;

@@ -263,3 +263,9 @@ fn main() {
     nwg::dispatch_thread_events();
 }
 ```
+
+## Attributions
+
+For the icons used in the test suit (and only there):
+
+**love.ico** is made by [Smashicons](https://smashicons.com/) from [www.flaticon.com](https://www.flaticon.com/)

@@ -27,6 +27,7 @@ pub struct ControlsTest {
     runs: RefCell<TestRun>,
 
     window_icon: Image,
+    love_icon: Image,
     ferris: Image,
     arial_font: Font,
     
@@ -52,7 +53,11 @@ pub struct ControlsTest {
 
     // Control window
     pub window: Window,
+
+    tray_icon: TrayNotification,
+    tray_icon_2: TrayNotification,
     status: StatusBar,
+
     controls_holder: TabsContainer,
     basics_control_tab: Tab,
     dialog_tab: Tab,
@@ -138,6 +143,7 @@ mod partial_controls_test_ui {
             // Resources
             //
             data.window_icon = Image::icon("./test_rc/cog.ico", None, false)?;
+            data.love_icon = Image::icon("./test_rc/love.ico", None, false)?;
             data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
 
             #[cfg(feature = "file-dialog")]
@@ -194,6 +200,22 @@ mod partial_controls_test_ui {
                 .icon(Some(&data.window_icon))
                 .build(&mut data.window)?;
 
+            TrayNotification::builder()
+                .parent(&data.window)
+                .icon(Some(&data.window_icon))
+                .tip(Some("Native Windows GUI tests"))
+                .build(&mut data.tray_icon)?;
+
+            TrayNotification::builder()
+                .parent(&data.window)
+                .flags(TrayNotificationFlags::SILENT | TrayNotificationFlags::USER_ICON | TrayNotificationFlags::LARGE_ICON)
+                .icon(Some(&data.love_icon))
+                .balloon_icon(Some(&data.love_icon))
+                .info(Some("Tray notification by NWG"))
+                .info_title(Some("Native Windows GUI tests"))
+                .tip(Some("Hello!"))
+                .build(&mut data.tray_icon_2)?;
+
             StatusBar::builder()
                 .text("Ready for tests ;)")
                 .parent(&data.window)
@@ -212,6 +234,7 @@ mod partial_controls_test_ui {
                 .text("Dialog")
                 .parent(&data.controls_holder)
                 .build(&mut data.dialog_tab)?;
+
             Tab::builder()
                 .text("Tree view")
                 .parent(&data.controls_holder)
