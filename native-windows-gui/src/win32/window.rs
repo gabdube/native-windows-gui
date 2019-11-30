@@ -18,17 +18,29 @@ use std::rc::Rc;
 
 static mut TIMER_ID: u32 = 1; 
 static mut NOTICE_ID: u32 = 1; 
+static mut TRAY_ID: u32 = 1; 
 
 const NO_DATA: EventData = EventData::NoData;
 
-
+/// Note. While there might be a race condition here, it does not matter because
+/// All controls are thread local and the true id is (HANDLE + NOTICE_ID)
+/// The same apply to tray notification and timers
 pub fn build_notice(parent: HWND) -> ControlHandle {
     let id = unsafe {
         let tmp = NOTICE_ID;
         NOTICE_ID += 1;
         tmp
     };
-    ControlHandle::Timer(parent, id)
+    ControlHandle::Other(parent, id)
+}
+
+pub fn build_tray_notif(parent: HWND) -> ControlHandle {
+    let id = unsafe {
+        let tmp = TRAY_ID;
+        TRAY_ID += 1;
+        tmp
+    };
+    ControlHandle::Other(parent, id)
 }
 
 pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> ControlHandle {
@@ -41,7 +53,7 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
         SetTimer(parent, id as UINT_PTR, interval as UINT, None);
     }
     
-    ControlHandle::Timer(parent, id)
+    ControlHandle::Other(parent, id)
 }
 
 /**
@@ -307,7 +319,7 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
                 _ => {}
             }
         },
-        WM_TIMER => callback(Event::OnTimerTick, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),
+        WM_TIMER => callback(Event::OnTimerTick, NO_DATA, ControlHandle::Other(hwnd, w as u32)),
         WM_SIZE => callback(Event::OnResize, NO_DATA, base_handle),
         WM_MOVE => callback(Event::OnMove, NO_DATA, base_handle),
         WM_HSCROLL => callback(Event::OnHorizontalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
@@ -318,7 +330,7 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
         WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
         WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
         WM_PAINT => callback(Event::OnPaint, NO_DATA, base_handle),
-        NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),
+        NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Other(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {
             callback(Event::OnWindowClose, NO_DATA, base_handle);

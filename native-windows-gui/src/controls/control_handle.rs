@@ -16,8 +16,8 @@ pub enum ControlHandle {
     /// (Parent menu / Unique ID). 
     MenuItem(HMENU, u32),
 
-    /// Timer / Notice handle
-    Timer(HWND, u32)
+    /// Timer / Notice handle / Tray notification handle
+    Other(HWND, u32)
 }
 
 impl ControlHandle {
@@ -57,9 +57,9 @@ impl ControlHandle {
         }
     }
 
-    pub fn timer(&self) -> Option<(HWND, u32)> {
+    pub fn other(&self) -> Option<(HWND, u32)> {
         match self {
-            &ControlHandle::Timer(h, i) => Some((h, i)),
+            &ControlHandle::Other(h, i) => Some((h, i)),
             _ => None,
         }
     }
@@ -102,9 +102,9 @@ impl PartialEq for ControlHandle {
                 &ControlHandle::MenuItem(value2, id2) => value1 == value2 && id1 == id2,
                 _ => false
             },
-            // TIMER / Notice
-            &ControlHandle::Timer(hwnd1, id1) => match other {
-                &ControlHandle::Timer(hwnd2, id2) => hwnd1 == hwnd2 && id1 == id2,
+            // TIMER / Notice / Tray notification
+            &ControlHandle::Other(hwnd1, id1) => match other {
+                &ControlHandle::Other(hwnd2, id2) => hwnd1 == hwnd2 && id1 == id2,
                 _ => false
             }
         }

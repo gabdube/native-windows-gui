@@ -33,6 +33,9 @@ mod tabs;
 #[cfg(feature = "tree-view")]
 mod treeview;
 
+#[cfg(feature = "tray-notification")]
+mod tray_notification;
+
 #[cfg(feature = "canvas")]
 mod canvas;
 
@@ -72,6 +75,9 @@ pub use tabs::{TabsContainer, Tab, TabsContainerFlags};
 
 #[cfg(feature = "tree-view")]
 pub use treeview::{TreeView, TreeItem, TreeInsert};
+
+#[cfg(feature = "tray-notification")]
+pub use tray_notification::*;
 
 #[cfg(feature = "canvas")]
 pub use canvas::*;

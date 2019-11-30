@@ -11,7 +11,7 @@ keywords = ["gui", "ui", "windows"]
 winapi = { version = "0.3", features = [
   "winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi", 
   "errhandlingapi", "winerror", "commctrl", "sysinfoapi", "shobjidl", "combaseapi",
-  "commdlg", "d2d1", "objbase", "dwrite", "winnls"] }
+  "commdlg", "d2d1", "objbase", "dwrite", "winnls", "shellapi"] }
 
 bitflags = { version = "1.1.0" }
 
@@ -34,5 +34,7 @@ fancy-window = []
 canvas = []
 listbox = []
 combobox = []
+tray-notification = []
 tests-linux = ["datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "interactive", "listbox", "combobox"]
-all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "canvas", "listbox", "combobox"]
+all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar",
+       "tabs", "tree-view", "fancy-window", "canvas", "listbox", "combobox", "tray-notification"]

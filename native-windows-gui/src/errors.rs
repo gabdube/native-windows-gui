@@ -18,6 +18,7 @@ pub enum SystemError {
     SeparatorWithoutMenuParent,
     PopMenuWithoutParent,
     ControlWithoutParent,
+    WrongParentType
 }
 
 #[derive(Debug, Clone)]

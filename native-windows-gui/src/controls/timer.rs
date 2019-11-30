@@ -17,7 +17,7 @@ impl Timer {
     /// Stop the timer. Does nothing if the timer is not running.
     pub fn stop(&self) {
         if self.handle.blank() { panic!(NOT_BOUND); }
-        let (hwnd, id) = self.handle.timer().expect(BAD_HANDLE);
+        let (hwnd, id) = self.handle.other().expect(BAD_HANDLE);
 
         wh::kill_timer(hwnd, id);
     }
@@ -25,7 +25,7 @@ impl Timer {
     /// Start the timer at `interval`. Restart the timer if it is already running.
     pub fn start(&self, interval: u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
-        let (hwnd, id) = self.handle.timer().expect(BAD_HANDLE);
+        let (hwnd, id) = self.handle.other().expect(BAD_HANDLE);
 
         wh::start_timer(hwnd, id, interval);
     }

@@ -1,10 +1,19 @@
 /*!
     A global object that wraps the system cursor
+
+    ```
+    use native_windows_gui as nwg;
+
+    pub fn handle_cursor(cursor: &nwg::Image) {
+        let (x, y) = nwg::Cursor::position();
+        nwg::Cursor::set(cursor);
+    }
+    ```
 */
 use crate::Image;
 use crate::controls::ControlHandle;
 
-
+/// A global object used to manage the system cursor. See module level documentation
 pub struct Cursor;
 
 impl Cursor {

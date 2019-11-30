@@ -1,9 +1,12 @@
 use winapi::shared::minwindef::DWORD;
 use winapi::shared::windef::{HWND, HMENU};
 use super::ControlHandle;
-use crate::win32::window::{build_hwnd_control, build_timer, build_notice};
+use crate::win32::window::{build_hwnd_control, build_timer, build_notice, build_tray_notif};
 use crate::win32::menu::build_hmenu_control;
 use crate::SystemError;
+
+const NOTICE: u32 = 1;
+const TRAY: u32 = 2;
 
 
 #[derive(Debug, Clone)]
@@ -25,8 +28,18 @@ impl ControlBase {
         TimerBuilder::default()
     }
 
-    pub fn build_notice() -> NoticeBuilder {
-        NoticeBuilder::default()
+    pub fn build_notice() -> OtherBuilder {
+        OtherBuilder {
+            parent: None,
+            ty: NOTICE
+        }
+    }
+
+    pub fn build_tray_notification() -> OtherBuilder {
+        OtherBuilder {
+            parent: None,
+            ty: TRAY
+        }
     }
 }
 
@@ -205,20 +218,27 @@ impl TimerBuilder {
 
 
 #[derive(Default)]
-pub struct NoticeBuilder {
-    parent: Option<HWND>
+pub struct OtherBuilder {
+    parent: Option<HWND>,
+    ty: u32
 }
 
-impl NoticeBuilder {
+impl OtherBuilder {
 
-    pub fn parent(mut self, parent: &ControlBase) -> NoticeBuilder {
-        self.parent = parent.handle.hwnd();
+    pub fn parent(mut self, parent: HWND) -> OtherBuilder {
+        self.parent = Some(parent);
         self
     }
 
-    pub fn build(self) -> Result<ControlBase, SystemError> {
+    pub fn build(self) -> Result<ControlHandle, SystemError> {
         let handle = self.parent.expect("Internal error. Notice without window parent");
-        Ok(ControlBase { handle: build_notice(handle) } )
+        let base = match self.ty {
+            NOTICE => build_notice(handle),
+            TRAY => build_tray_notif(handle),
+            _ => unreachable!()
+        };
+
+        Ok(base)
     }
 
 }
