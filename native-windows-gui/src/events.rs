@@ -22,7 +22,10 @@ pub enum Event {
     MousePress(MousePressEvent),
 
     /// Generic mouse move event that can be sent to most window controls
-    MouseMove,
+    OnMouseMove,
+
+    /// Generic window event when the user right click a window
+    OnContextMenu,
 
     /// When a top level window control is created.
     OnInit,
@@ -30,10 +33,10 @@ pub enum Event {
     /// When a control needs to be redrawn
     OnPaint,
     
-    /// When a control is resized by the user. This typically applied to top level windows.
+    /// When a control is resized by the user. This is typically applied to top level windows.
     OnResize,
 
-    /// When a control is moved by the user. This typically applied to top level windows.
+    /// When a control is moved by the user. This is typically applied to top level windows.
     OnMove,
 
     /// When a bar like control value is changed.
@@ -44,7 +47,7 @@ pub enum Event {
     /// Controls affected: TrackBack
     OnHorizontalScroll,
 
-    /// When a button is clicked. Similar to a MouseUp event
+    /// When a button is clicked. Similar to a MouseUp event, but only for button control
     OnButtonClick,
 
     /// When a button is clicked twice rapidly
@@ -104,6 +107,18 @@ pub enum Event {
     /// When the user hovers over a callback tooltip
     /// The callback will also receive a `EventData::OnTooltipText`
     OnTooltipText,
+
+    /// When a TrayNotification info popup (not the tooltip) is shown 
+    OnTrayNotificationShow,
+
+    /// When a TrayNotification info popup (not the tooltip) is hidden 
+    OnTrayNotificationHide,
+
+    /// When a TrayNotification is closed due to a timeout
+    OnTrayNotificationTimeout,
+
+    /// When a TrayNotification is closed due to a user click
+    OnTrayNotificationUserClose,
 
     /// When a timer delay is elapsed
     OnTimerTick,

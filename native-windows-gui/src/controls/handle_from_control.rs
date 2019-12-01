@@ -121,3 +121,9 @@ handles!(CanvasWindow);
 
 #[cfg(feature = "canvas")]
 handles!(Canvas);
+
+#[cfg(feature = "tray-notification")]
+use super::{TrayNotification};
+
+#[cfg(feature = "tray-notification")]
+handles!(TrayNotification);

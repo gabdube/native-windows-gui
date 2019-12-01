@@ -129,6 +129,7 @@ pub struct ControlsTest {
     run_track_test: Button,
     run_tooltip_test: Button,
     run_status_test: Button,
+    run_tray_test: Button,
 }
 
 mod partial_controls_test_ui {
@@ -205,16 +206,6 @@ mod partial_controls_test_ui {
                 .icon(Some(&data.window_icon))
                 .tip(Some("Native Windows GUI tests"))
                 .build(&mut data.tray_icon)?;
-
-            TrayNotification::builder()
-                .parent(&data.window)
-                .flags(TrayNotificationFlags::SILENT | TrayNotificationFlags::USER_ICON | TrayNotificationFlags::LARGE_ICON)
-                .icon(Some(&data.love_icon))
-                .balloon_icon(Some(&data.love_icon))
-                .info(Some("Tray notification by NWG"))
-                .info_title(Some("Native Windows GUI tests"))
-                .tip(Some("Hello!"))
-                .build(&mut data.tray_icon_2)?;
 
             StatusBar::builder()
                 .text("Ready for tests ;)")
@@ -532,6 +523,16 @@ mod partial_controls_test_ui {
                 .icon(Some(&data.window_icon))
                 .parent(Some(&data.window))
                 .build(&mut data.panel)?;
+
+            TrayNotification::builder()
+                .parent(&data.panel)
+                .flags(TrayNotificationFlags::SILENT | TrayNotificationFlags::USER_ICON | TrayNotificationFlags::LARGE_ICON)
+                .icon(Some(&data.love_icon))
+                .balloon_icon(Some(&data.love_icon))
+                .info(Some("Tray notification by NWG"))
+                .info_title(Some("Native Windows GUI tests"))
+                .tip(Some("Hello!"))
+                .build(&mut data.tray_icon_2)?;
             
             Button::builder()
                 .text("Run window test")
@@ -602,6 +603,10 @@ mod partial_controls_test_ui {
                 .text("Run status test")
                 .parent(&data.panel)
                 .build(&mut data.run_status_test)?;
+            Button::builder()
+                .text("Run tray test")
+                .parent(&data.panel)
+                .build(&mut data.run_tray_test)?;
 
             //
             // Layout
@@ -630,6 +635,7 @@ mod partial_controls_test_ui {
                 .child(1, 5, &data.run_track_test)
                 .child(0, 6, &data.run_tooltip_test)
                 .child(1, 6, &data.run_status_test)
+                .child(0, 7, &data.run_tray_test)
                 .build(&data.panel_layout);
             
             GridLayout::builder()
@@ -662,12 +668,6 @@ mod partial_controls_test_ui {
             use crate::Event as E;
 
             match evt {
-                E::MousePress(MousePressEvent::MousePressRightUp) =>
-                    if &handle == &self.window {
-                        show_pop_menu(self, evt);
-                    } else if &handle == &self.basics_control_tab {
-                        show_pop_menu(self, evt);
-                    },
                 E::OnButtonClick =>
                     if &handle == &self.run_window_test {
                         run_window_tests(self, evt);
@@ -711,6 +711,16 @@ mod partial_controls_test_ui {
                         color_select(self);
                     } else if &handle == &self.test_select_font_button {
                         font_select(self);
+                    } else if &handle == &self.run_tray_test {
+                        run_tray_tests(self);
+                    },
+                E::OnContextMenu => 
+                    if &handle == &self.window {
+                        show_pop_menu(self, evt);
+                    } else if &handle == &self.basics_control_tab {
+                        show_pop_menu(self, evt);
+                    } else if &handle == &self.tray_icon_2 {
+                        show_pop_menu(self, evt);
                     },
                 E::OnTooltipText => 
                     if &handle == &self.window {
@@ -1203,6 +1213,19 @@ fn run_status_tests(app: &ControlsTest, _evt: Event) {
 
         app.runs.borrow_mut().status = false;
     }
+}
+
+fn run_tray_tests(app: &ControlsTest) {
+    app.tray_icon.set_visibility(false);
+    app.tray_icon_2.set_icon(&app.window_icon);
+    app.tray_icon_2.set_tip("Changed the toolip and the icon!");
+
+    let icon = Some(&app.love_icon);
+    let flags = Some(TrayNotificationFlags::USER_ICON | TrayNotificationFlags::SILENT | TrayNotificationFlags::LARGE_ICON);
+
+    app.tray_icon_2.popup("OH NO!", Some("Just a title"), flags, icon);
+    app.tray_icon_2.popup("I'm spamming the system tray popup!", Some("Just a title"), flags, icon);
+    app.tray_icon_2.popup("You can't stop me!!!!!", Some("Just a title (really)"), flags, Some(&app.window_icon));
 }
 
 fn set_tooltip_dynamic<'a>(app: &ControlsTest, handle: &ControlHandle, data: &ToolTipTextData) {

@@ -1,15 +1,28 @@
 /*!
     A control that handle system tray notification.
     A TrayNotification wraps a single icon in the Windows system tray.
-    An application can have many TrayNotification.
+    
+    An application can have many TrayNotification, but each window (aka parent) can only have a single traynotification.
+    It is possible to create system tray only application with the `MessageOnlyWindow` control.
+
+    A system tray will receive events if `callback` is set to true in the builder (the default behaviour).
+    The control will generate mouse events such as `OnMouseMove` when the user interact with the tray icon or the message popup.
+    A system tray will also receive a `OnContextMenu` when the user right click the icon. It is highly recommended handle this message and display a popup menu
+
+    You can't fetch active information (such as visibility) because Windows don't want you to.
 
     Winapi docs: https://docs.microsoft.com/en-us/windows/win32/shell/notification-area
 */
 use winapi::um::shellapi::{NIIF_NONE, NIIF_INFO, NIIF_WARNING, NIIF_ERROR, NIIF_USER, NIIF_NOSOUND, NIIF_LARGE_ICON, NIIF_RESPECT_QUIET_TIME};
+use winapi::um::shellapi::{Shell_NotifyIconW, NOTIFYICONDATAW};
 use super::{ControlBase, ControlHandle};
 use crate::win32::base_helper::to_utf16;
+use crate::win32::window_helper as wh;
 use crate::{Image, SystemError};
 use std::{mem, ptr};
+
+const NOT_BOUND: &'static str = "TrayNotification is not yet bound to a winapi object";
+const BAD_HANDLE: &'static str = "INTERNAL ERROR: TrayNotification handle is not HWND!";
 
 
 bitflags! {
@@ -29,7 +42,7 @@ bitflags! {
 /// TrayNotification manager. See module level documentation
 #[derive(Default)]
 pub struct TrayNotification {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
 }
 
 impl TrayNotification {
@@ -42,7 +55,146 @@ impl TrayNotification {
             tip: None,
             info: None,
             info_title: None,
-            flags: TrayNotificationFlags::NO_ICON
+            flags: TrayNotificationFlags::NO_ICON,
+            realtime: false,
+            callback: true,
+            visible: true,
+        }
+    }
+
+    /// Set the visibility of the icon in the system tray
+    pub fn set_visibility(&self, v: bool) {
+        use winapi::um::shellapi::{NIF_STATE, NIM_MODIFY, NIS_HIDDEN};  
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        self.handle.tray().expect(BAD_HANDLE);
+
+        unsafe {
+            let mut data = self.notify_default();
+            data.uFlags |= NIF_STATE;
+            data.dwState = if v { 0 } else { NIS_HIDDEN };
+            data.dwStateMask = NIS_HIDDEN;
+            Shell_NotifyIconW(NIM_MODIFY, &mut data);
+        }
+    }
+
+    /// Set the tooltip for the tray notification.
+    /// Note: tip will be truncated to 127 characters
+    pub fn set_tip<'a>(&self, tip: &'a str) {
+        use winapi::um::shellapi::{NIM_MODIFY, NIF_TIP, NIF_SHOWTIP};  
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        self.handle.tray().expect(BAD_HANDLE);
+
+        unsafe {
+            let mut data = self.notify_default();
+            
+            data.uFlags = NIF_TIP | NIF_SHOWTIP;
+            
+            let tip_v = to_utf16(tip);
+            let length = if tip_v.len() >= 128 { 127 } else { tip_v.len() };
+            for i in 0..length {
+                data.szTip[i] = tip_v[i];
+            }
+
+            Shell_NotifyIconW(NIM_MODIFY, &mut data);
+        }
+    }
+
+    /// Set the focus to the tray icon
+    pub fn set_focus(&self) {
+        use winapi::um::shellapi::{NIM_SETFOCUS};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        self.handle.tray().expect(BAD_HANDLE);
+
+        unsafe {
+            let mut data = self.notify_default();
+            Shell_NotifyIconW(NIM_SETFOCUS, &mut data);
+        }
+    }
+
+    /// Update the icon in the system tray
+    pub fn set_icon(&self, icon: &Image ) {
+        use winapi::um::shellapi::{NIF_ICON, NIM_MODIFY};
+        use winapi::shared::windef::HICON;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        self.handle.tray().expect(BAD_HANDLE);
+
+        unsafe {
+            let mut data = self.notify_default();
+            
+            data.uFlags = NIF_ICON;
+            data.hIcon = icon.handle as HICON;
+            Shell_NotifyIconW(NIM_MODIFY, &mut data);
+        }
+    }
+
+    /// Shows a popup message on top of the system tray
+    /// Parameters:
+    ///   - text: The text in the popup
+    ///   - title: The title of the popup
+    ///   - flags: Flags that specify how the popup is shown. Default is NO_ICON | QUIET.
+    ///   - icon: Icon to display in the popup. Only used if `USER_ICON` is set in flags.
+    ///
+    /// Note 1: text will be truncated to 255 characters
+    /// Note 2: title will be truncated to 63 characters
+    pub fn popup<'a>(&self, text: &'a str, title: Option<&'a str>, flags: Option<TrayNotificationFlags>, icon: Option<&'a Image>) {
+        use winapi::um::shellapi::{NIF_INFO, NIM_MODIFY};
+        use winapi::shared::windef::HICON;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        self.handle.tray().expect(BAD_HANDLE);
+
+        let default_flags = TrayNotificationFlags::NO_ICON | TrayNotificationFlags::SILENT;
+
+        unsafe {
+            let mut data = self.notify_default();
+            data.uFlags = NIF_INFO;
+            data.dwInfoFlags = flags.unwrap_or(default_flags).bits();
+            data.hBalloonIcon = icon.map(|i| i.handle as HICON).unwrap_or(ptr::null_mut());
+            
+            let info_v = to_utf16(text);
+            let length = if info_v.len() >= 256 { 255 } else { info_v.len() };
+            for i in 0..length {
+                data.szInfo[i] = info_v[i];
+            }
+        
+            let info_title_v = match title {
+                Some(t) => to_utf16(t),
+                None => vec![]
+            };
+
+            let length = if info_title_v.len() >= 256 { 255 } else { info_title_v.len() };
+            for i in 0..length {
+                data.szInfoTitle[i] = info_title_v[i];
+            }
+
+            Shell_NotifyIconW(NIM_MODIFY, &mut data);
+        }
+    }
+
+    fn notify_default(&self) -> NOTIFYICONDATAW {
+        unsafe {
+            let parent = self.handle.tray().unwrap();
+            NOTIFYICONDATAW {
+                cbSize: mem::size_of::<NOTIFYICONDATAW>() as u32,
+                hWnd: parent,
+                uID: 0,
+                uFlags: 0,
+                uCallbackMessage: 0,
+                hIcon: ptr::null_mut(),
+                szTip: mem::zeroed(),
+                dwState: 0,
+                dwStateMask: 0,
+                szInfo: mem::zeroed(),
+                u: mem::zeroed(),
+                szInfoTitle: mem::zeroed(),
+                dwInfoFlags: 0,
+                guidItem: mem::zeroed(),
+                hBalloonIcon: ptr::null_mut()
+            }
         }
     }
 
@@ -59,6 +211,10 @@ pub struct TrayNotificationBuilder<'a> {
     info_title: Option<&'a str>,
     flags: TrayNotificationFlags,
     balloon_icon: Option<&'a Image>,
+
+    realtime: bool,
+    callback: bool,
+    visible: bool,
 }
 
 impl<'a> TrayNotificationBuilder<'a> {
@@ -70,6 +226,21 @@ impl<'a> TrayNotificationBuilder<'a> {
 
     pub fn icon(mut self, ico: Option<&'a Image>) -> TrayNotificationBuilder<'a> {
         self.icon = ico;
+        self
+    }
+
+    pub fn realtime(mut self, r: bool) -> TrayNotificationBuilder<'a> {
+        self.realtime = r;
+        self
+    }
+
+    pub fn callback(mut self, cb: bool) -> TrayNotificationBuilder<'a> {
+        self.callback = cb;
+        self
+    }
+
+    pub fn visible(mut self, v: bool) -> TrayNotificationBuilder<'a> {
+        self.visible = v;
         self
     }
 
@@ -105,25 +276,29 @@ impl<'a> TrayNotificationBuilder<'a> {
     }
 
     pub fn build(self, out: &mut TrayNotification) -> Result<(), SystemError> {
-        use winapi::um::shellapi::Shell_NotifyIconW;
-        use winapi::um::shellapi::{NIM_ADD, NIF_ICON, NIF_TIP, NIF_SHOWTIP, NIF_INFO, NOTIFYICONDATAW, NOTIFYICONDATAW_u, NOTIFYICON_VERSION_4};
+        use winapi::um::shellapi::{NIM_ADD, NIF_ICON, NIF_TIP, NIF_SHOWTIP, NIF_INFO, NOTIFYICONDATAW_u, NOTIFYICON_VERSION_4,
+         NIF_REALTIME, NIF_MESSAGE, NIS_HIDDEN, NIF_STATE};
         use winapi::shared::windef::HICON;
         use winapi::um::winnt::WCHAR;
 
         // Flags
-
+        let version = NOTIFYICON_VERSION_4;
         let mut flags = NIF_ICON;
         let mut info_flags = 0;
-        let mut version = 0;
+        let mut state = 0;
+        
         if self.info.is_some() {
             flags |= NIF_INFO;
             info_flags |= self.flags.bits();
-            version = NOTIFYICON_VERSION_4;
         } 
         
         if self.tip.is_some() {
             flags |= NIF_TIP | NIF_SHOWTIP;
         }
+
+        if self.realtime { flags |= NIF_REALTIME; }
+        if self.callback { flags |= NIF_MESSAGE; }
+        if !self.visible { state |= NIS_HIDDEN; flags |= NIF_STATE; }
 
         // Resource handles
 
@@ -149,8 +324,6 @@ impl<'a> TrayNotificationBuilder<'a> {
         let handle = ControlBase::build_tray_notification()
             .parent(parent)
             .build()?;
-
-        let (_, id) = handle.other().unwrap();
         
         // Tips or infos
         let mut tip: [WCHAR; 128] = [0; 128];
@@ -180,20 +353,21 @@ impl<'a> TrayNotificationBuilder<'a> {
             }
         }
 
+        // Creation
         unsafe {
             let mut u: NOTIFYICONDATAW_u = mem::zeroed();
             *u.uVersion_mut() = version;
 
-            let mut data = winapi::um::shellapi::NOTIFYICONDATAW {
+            let mut data = NOTIFYICONDATAW {
                 cbSize: mem::size_of::<NOTIFYICONDATAW>() as u32,
                 hWnd: parent,
-                uID: id,
+                uID: 0,
                 uFlags: flags,
-                uCallbackMessage: 0,
+                uCallbackMessage: wh::NWG_TRAY,
                 hIcon: icon,
                 szTip: tip,
-                dwState: 0,
-                dwStateMask: 0,
+                dwState: state,
+                dwStateMask: state,
                 szInfo: info,
                 u,
                 szInfoTitle: title,
@@ -205,6 +379,8 @@ impl<'a> TrayNotificationBuilder<'a> {
             Shell_NotifyIconW(NIM_ADD, &mut data);
         }
 
+
+        // Finish
         out.handle = handle;
 
         Ok(())

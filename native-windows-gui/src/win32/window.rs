@@ -9,7 +9,7 @@ use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
 use winapi::um::winuser::{WNDPROC, NMHDR};
 use winapi::um::commctrl::{NMTTDISPINFOW};
 use super::base_helper::{get_system_error, to_utf16};
-use super::window_helper::{NOTICE_MESSAGE, NWG_INIT};
+use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY};
 use crate::controls::ControlHandle;
 use crate::{Event, EventData, MousePressEvent, SystemError};
 use std::{ptr, mem};
@@ -18,29 +18,20 @@ use std::rc::Rc;
 
 static mut TIMER_ID: u32 = 1; 
 static mut NOTICE_ID: u32 = 1; 
-static mut TRAY_ID: u32 = 1; 
 
 const NO_DATA: EventData = EventData::NoData;
 
+
 /// Note. While there might be a race condition here, it does not matter because
 /// All controls are thread local and the true id is (HANDLE + NOTICE_ID)
-/// The same apply to tray notification and timers
+/// The same apply to timers
 pub fn build_notice(parent: HWND) -> ControlHandle {
     let id = unsafe {
         let tmp = NOTICE_ID;
         NOTICE_ID += 1;
         tmp
     };
-    ControlHandle::Other(parent, id)
-}
-
-pub fn build_tray_notif(parent: HWND) -> ControlHandle {
-    let id = unsafe {
-        let tmp = TRAY_ID;
-        TRAY_ID += 1;
-        tmp
-    };
-    ControlHandle::Other(parent, id)
+    ControlHandle::Notice(parent, id)
 }
 
 pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> ControlHandle {
@@ -53,7 +44,7 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
         SetTimer(parent, id as UINT_PTR, interval as UINT, None);
     }
     
-    ControlHandle::Other(parent, id)
+    ControlHandle::Timer(parent, id)
 }
 
 /**
@@ -235,7 +226,7 @@ pub(crate) fn init_window_class() -> Result<(), SystemError> {
 
 
 /**
-    A blank system procedure used when creating new window class. Actual system event handling is done in the subclass produre `process_events`.
+    A blank system procedure used when creating new window class. Actual system event handling is done in the subclass procedure `process_events`.
 */
 unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use winapi::um::winuser::{WM_CREATE, WM_CLOSE, SW_HIDE};
@@ -273,9 +264,10 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
     use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
-      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE};
+      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU};
+    use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
-    use winapi::shared::minwindef::HIWORD;
+    use winapi::shared::minwindef::{HIWORD, LOWORD};
 
     let callback_ptr = data as *const F;
     let callback = Rc::from_raw(callback_ptr);
@@ -319,18 +311,43 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
                 _ => {}
             }
         },
-        WM_TIMER => callback(Event::OnTimerTick, NO_DATA, ControlHandle::Other(hwnd, w as u32)),
+        WM_CONTEXTMENU => {
+            let target_handle = w as HWND;
+            let handle = ControlHandle::Hwnd(target_handle);
+            callback(Event::OnContextMenu, NO_DATA, handle);
+        },
+        NWG_TRAY => {
+            let msg = LOWORD(l as u32) as u32;
+            let handle = ControlHandle::SystemTray(hwnd);
+
+            match msg {
+                NIN_BALLOONSHOW => callback(Event::OnTrayNotificationShow, NO_DATA, handle),
+                NIN_BALLOONHIDE => callback(Event::OnTrayNotificationHide, NO_DATA, handle),
+                NIN_BALLOONTIMEOUT => callback(Event::OnTrayNotificationTimeout, NO_DATA, handle),
+                NIN_BALLOONUSERCLICK => callback(Event::OnTrayNotificationUserClose, NO_DATA, handle),
+                WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  handle), 
+                WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, handle), 
+                WM_RBUTTONUP => {
+                    callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, handle);
+                    callback(Event::OnContextMenu, NO_DATA, handle);
+                }, 
+                WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, handle),
+                WM_MOUSEMOVE => callback(Event::OnMouseMove, NO_DATA, handle),
+                _ => {}
+            }
+        },
+        WM_TIMER => callback(Event::OnTimerTick, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),
         WM_SIZE => callback(Event::OnResize, NO_DATA, base_handle),
         WM_MOVE => callback(Event::OnMove, NO_DATA, base_handle),
         WM_HSCROLL => callback(Event::OnHorizontalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
         WM_VSCROLL => callback(Event::OnVerticalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
-        WM_MOUSEMOVE => callback(Event::MouseMove, NO_DATA,  base_handle), 
+        WM_MOUSEMOVE => callback(Event::OnMouseMove, NO_DATA, base_handle), 
         WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  base_handle), 
         WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
         WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
         WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
         WM_PAINT => callback(Event::OnPaint, NO_DATA, base_handle),
-        NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Other(hwnd, w as u32)),
+        NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Notice(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {
             callback(Event::OnWindowClose, NO_DATA, base_handle);

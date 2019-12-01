@@ -2,9 +2,8 @@ use winapi::shared::windef::HWND;
 use winapi::um::shobjidl::IFileDialog;
 use crate::win32::resources_helper as rh;
 
-use crate::controls::ControlBase;
 use crate::win32::base_helper::to_utf16;
-use crate::{SystemError, UserError};
+use crate::{ControlHandle, SystemError, UserError};
 use std::{fmt, ptr, mem};
 
 
@@ -27,7 +26,7 @@ pub enum FileDialogAction {
     A file dialog control
 */
 pub struct FileDialog {
-    parent: HWND,
+    parent: Option<HWND>,
     handle: *mut IFileDialog,
     action: FileDialogAction
 }
@@ -50,7 +49,8 @@ impl FileDialog {
     pub fn run(&self) -> bool { 
         use winapi::shared::winerror::S_OK;
 
-        unsafe { (&mut *self.handle).Show(self.parent) == S_OK }
+        let parent = self.parent.clone().unwrap_or(ptr::null_mut());
+        unsafe { (&mut *self.handle).Show(parent) == S_OK }
     }
 
     /**
@@ -178,7 +178,7 @@ impl fmt::Debug for FileDialog {
 impl Default for FileDialog {
     fn default() -> FileDialog {
         FileDialog {
-            parent: ptr::null_mut(),
+            parent: None,
             handle: ptr::null_mut(),
             action: FileDialogAction::Open
         }
@@ -198,7 +198,7 @@ impl Eq for FileDialog {}
 */
 pub struct FileDialogBuilder {
     pub title: Option<String>,
-    pub parent: Option<HWND>,
+    pub parent: Option<ControlHandle>,
     pub action: FileDialogAction,
     pub multiselect: bool,
     pub default_folder: Option<String>,
@@ -218,8 +218,8 @@ impl FileDialogBuilder {
         }
     }
 
-    pub fn parent(mut self, p: Option<&ControlBase>) -> FileDialogBuilder {
-        self.parent = p.map(|p| p.handle.hwnd()).unwrap_or(None);
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: Option<C>) -> FileDialogBuilder {
+        self.parent = p.map(|p2| p2.into());
         self
     }
 
@@ -258,7 +258,7 @@ impl FileDialogBuilder {
             )?;
         }
 
-        out.parent = self.parent.unwrap_or(ptr::null_mut());
+        out.parent = self.parent.map(|p| p.hwnd().unwrap());
         out.action = self.action;
         
         if let Some(title) = self.title {

@@ -23,7 +23,7 @@ impl Notice {
         use winapi::um::processthreadsapi::GetCurrentThreadId;
 
         if self.handle.blank() { panic!("Notice is not yet bound to a winapi object"); }
-        let (hwnd, id) = self.handle.other().expect("INTERNAL ERROR: Notice handle has the wrong type!");
+        let (hwnd, id) = self.handle.notice().expect("INTERNAL ERROR: Notice handle has the wrong type!");
 
         NoticeSender { 
             hwnd: hwnd as usize,

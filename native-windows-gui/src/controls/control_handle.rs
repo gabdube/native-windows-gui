@@ -16,8 +16,14 @@ pub enum ControlHandle {
     /// (Parent menu / Unique ID). 
     MenuItem(HMENU, u32),
 
-    /// Timer / Notice handle / Tray notification handle
-    Other(HWND, u32)
+    /// Notice control
+    Notice(HWND, u32),
+
+    /// Timer control
+    Timer(HWND, u32),
+
+    /// System tray control
+    SystemTray(HWND)
 }
 
 impl ControlHandle {
@@ -57,12 +63,27 @@ impl ControlHandle {
         }
     }
 
-    pub fn other(&self) -> Option<(HWND, u32)> {
+    pub fn timer(&self) -> Option<(HWND, u32)> {
         match self {
-            &ControlHandle::Other(h, i) => Some((h, i)),
+            &ControlHandle::Timer(h, i) => Some((h, i)),
             _ => None,
         }
     }
+
+    pub fn notice(&self) -> Option<(HWND, u32)> {
+        match self {
+            &ControlHandle::Notice(h, i) => Some((h, i)),
+            _ => None,
+        }
+    }
+
+    pub fn tray(&self) -> Option<HWND> {
+        match self {
+            &ControlHandle::SystemTray(h) => Some(h),
+            _ => None,
+        }
+    }
+
 }
 
 
@@ -102,9 +123,19 @@ impl PartialEq for ControlHandle {
                 &ControlHandle::MenuItem(value2, id2) => value1 == value2 && id1 == id2,
                 _ => false
             },
-            // TIMER / Notice / Tray notification
-            &ControlHandle::Other(hwnd1, id1) => match other {
-                &ControlHandle::Other(hwnd2, id2) => hwnd1 == hwnd2 && id1 == id2,
+            // TIMER 
+            &ControlHandle::Timer(hwnd1, id1) => match other {
+                &ControlHandle::Timer(hwnd2, id2) => hwnd1 == hwnd2 && id1 == id2,
+                _ => false
+            },
+            // Notice
+            &ControlHandle::Notice(hwnd1, id1) => match other {
+                &ControlHandle::Notice(hwnd2, id2) => hwnd1 == hwnd2 && id1 == id2,
+                _ => false
+            },
+            // System tray
+            &ControlHandle::SystemTray(hwnd1) => match other {
+                &ControlHandle::SystemTray(hwnd2) => hwnd1 == hwnd2,
                 _ => false
             }
         }

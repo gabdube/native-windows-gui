@@ -1,7 +1,7 @@
 use winapi::shared::minwindef::DWORD;
 use winapi::shared::windef::{HWND, HMENU};
 use super::ControlHandle;
-use crate::win32::window::{build_hwnd_control, build_timer, build_notice, build_tray_notif};
+use crate::win32::window::{build_hwnd_control, build_timer, build_notice};
 use crate::win32::menu::build_hmenu_control;
 use crate::SystemError;
 
@@ -10,9 +10,7 @@ const TRAY: u32 = 2;
 
 
 #[derive(Debug, Clone)]
-pub struct ControlBase {
-    pub handle: ControlHandle
-}
+pub struct ControlBase;
 
 impl ControlBase {
 
@@ -200,18 +198,21 @@ impl TimerBuilder {
         self
     }
 
-    pub fn parent(mut self, parent: &ControlBase) -> TimerBuilder {
-        self.parent = parent.handle.hwnd();
+    pub fn parent(mut self, parent: Option<ControlHandle>) -> TimerBuilder {
+        match parent {
+            Some(p) => { self.parent = p.hwnd(); }
+            None => panic!("Timer parent must be HWND")
+        }
         self
     }
 
-    pub fn build(self) -> Result<ControlBase, SystemError> {
+    pub fn build(self) -> Result<ControlHandle, SystemError> {
         let handle = unsafe { build_timer(
             self.parent.expect("Internal error. Timer without window parent"),
             self.interval,
             self.stopped
         ) };
-        Ok(ControlBase { handle })
+        Ok(handle)
     }
 
 }
@@ -234,7 +235,7 @@ impl OtherBuilder {
         let handle = self.parent.expect("Internal error. Notice without window parent");
         let base = match self.ty {
             NOTICE => build_notice(handle),
-            TRAY => build_tray_notif(handle),
+            TRAY => ControlHandle::SystemTray(handle),
             _ => unreachable!()
         };
 

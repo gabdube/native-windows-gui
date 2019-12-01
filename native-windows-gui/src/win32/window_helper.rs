@@ -8,6 +8,7 @@ use std::{ptr, mem};
 
 pub const NOTICE_MESSAGE: UINT = WM_USER;
 pub const NWG_INIT: UINT = WM_USER + 1;
+pub const NWG_TRAY: UINT = WM_USER + 2;
 
 
 pub fn get_window_parent(hwnd: HWND) -> HWND {

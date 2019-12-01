@@ -155,7 +155,7 @@ mod partial_canvas_test_ui {
                 E::MousePress(MousePressEvent::MousePressLeftUp) => {
                     if &handle == &self.header { release_header(self); }
                 },
-                E::MouseMove => {
+                E::OnMouseMove => {
                     if &handle == &self.header { drag(self); }
                 },
                 _ => {}
