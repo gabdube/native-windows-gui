@@ -9,11 +9,12 @@ static CONTROL_LIST: &'static [&'static str] = &[
     "Window", "Button", "CheckBox", "ComboBox", "DatePicker", "FancyWindow",
     "ImageFrame", "Label", "ListBox", "Menu", "MenuItem", "MenuSeparator",
     "Notice", "ProgressBar", "RadioButton", "StatusBar", "TabsContainer", "Tab",
-    "TextBox", "TextInput", "Timer", "Tooltip", "Trackbar", "TreeView"
+    "TextBox", "TextInput", "Timer", "Tooltip", "Trackbar", "TreeView", "Canvas",
+    "CanvasWindow", "TrayNotification", "MessageWindow"
 ];
 
 static TOP_LEVEL: &'static [&'static str] = &[
-    "Window", "FancyWindow", "TabsContainer", "Tab"
+    "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow"
 ];
 
 

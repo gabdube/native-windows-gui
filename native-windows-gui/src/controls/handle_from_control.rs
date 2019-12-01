@@ -127,3 +127,9 @@ use super::{TrayNotification};
 
 #[cfg(feature = "tray-notification")]
 handles!(TrayNotification);
+
+#[cfg(feature = "message-window")]
+use super::{MessageWindow};
+
+#[cfg(feature = "message-window")]
+handles!(MessageWindow);

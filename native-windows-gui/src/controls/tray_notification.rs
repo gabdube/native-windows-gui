@@ -9,7 +9,18 @@
     The control will generate mouse events such as `OnMouseMove` when the user interact with the tray icon or the message popup.
     A system tray will also receive a `OnContextMenu` when the user right click the icon. It is highly recommended handle this message and display a popup menu
 
-    You can't fetch active information (such as visibility) because Windows don't want you to.
+    You can't get information (such as visibility) because Windows don't want you to.
+
+    ## Example
+
+    ```
+    use native_windows_gui as nwg;
+
+    fn notice_user(tray: &nwg::TrayNotification, image: &nwg::Image) {
+        let flags = nwg::TrayNotificationFlags::USER_ICON | nwg::TrayNotificationFlags::LARGE_ICON;
+        tray.show("Hello World", Some("Welcome to my application"), Some(flags), Some(image));
+    }
+    ```
 
     Winapi docs: https://docs.microsoft.com/en-us/windows/win32/shell/notification-area
 */
@@ -132,6 +143,7 @@ impl TrayNotification {
     }
 
     /// Shows a popup message on top of the system tray
+    ///
     /// Parameters:
     ///   - text: The text in the popup
     ///   - title: The title of the popup
@@ -140,7 +152,7 @@ impl TrayNotification {
     ///
     /// Note 1: text will be truncated to 255 characters
     /// Note 2: title will be truncated to 63 characters
-    pub fn popup<'a>(&self, text: &'a str, title: Option<&'a str>, flags: Option<TrayNotificationFlags>, icon: Option<&'a Image>) {
+    pub fn show<'a>(&self, text: &'a str, title: Option<&'a str>, flags: Option<TrayNotificationFlags>, icon: Option<&'a Image>) {
         use winapi::um::shellapi::{NIF_INFO, NIM_MODIFY};
         use winapi::shared::windef::HICON;
 

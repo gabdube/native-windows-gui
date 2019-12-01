@@ -224,6 +224,41 @@ pub(crate) fn init_window_class() -> Result<(), SystemError> {
     Ok(())
 }
 
+/// Create a message only window. Used with the `MessageWindow` control
+pub(crate) fn create_message_window() -> Result<ControlHandle, SystemError> {
+    use winapi::um::winuser::HWND_MESSAGE;
+    use winapi::um::winuser::CreateWindowExW;
+    use winapi::um::libloaderapi::GetModuleHandleW;
+
+
+    let class_name = to_utf16("NativeWindowsGuiWindow");
+    let window_title = vec![0];
+
+    unsafe {
+        let hmod = GetModuleHandleW(ptr::null_mut());
+        if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
+        
+        let handle = CreateWindowExW (
+            0,
+            class_name.as_ptr(),
+            window_title.as_ptr(),
+            0,
+            0, 0,
+            0, 0,
+            HWND_MESSAGE,
+            ptr::null_mut(),
+            hmod,
+            ptr::null_mut()
+        );
+
+        if handle.is_null() {
+            Err(SystemError::WindowCreationFailed)
+        } else {
+            Ok(ControlHandle::Hwnd(handle))
+        }
+    }
+}
+
 
 /**
     A blank system procedure used when creating new window class. Actual system event handling is done in the subclass procedure `process_events`.

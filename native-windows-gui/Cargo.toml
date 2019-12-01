@@ -35,6 +35,7 @@ canvas = []
 listbox = []
 combobox = []
 tray-notification = []
+message-window = []
 tests-linux = ["datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "interactive", "listbox", "combobox"]
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar",
-       "tabs", "tree-view", "fancy-window", "canvas", "listbox", "combobox", "tray-notification"]
+       "tabs", "tree-view", "fancy-window", "canvas", "listbox", "combobox", "tray-notification", "message-window"]

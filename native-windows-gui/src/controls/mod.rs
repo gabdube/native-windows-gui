@@ -36,6 +36,9 @@ mod treeview;
 #[cfg(feature = "tray-notification")]
 mod tray_notification;
 
+#[cfg(feature = "message-window")]
+mod message_window;
+
 #[cfg(feature = "canvas")]
 mod canvas;
 
@@ -74,10 +77,13 @@ pub use progress_bar::{ProgressBar, ProgressBarState, ProgressBarFlags};
 pub use tabs::{TabsContainer, Tab, TabsContainerFlags};
 
 #[cfg(feature = "tree-view")]
-pub use treeview::{TreeView, TreeItem, TreeInsert};
+pub use treeview::{TreeView, TreeViewBuilder, TreeItem, TreeInsert};
 
 #[cfg(feature = "tray-notification")]
-pub use tray_notification::{TrayNotificationFlags, TrayNotification};
+pub use tray_notification::{TrayNotificationFlags, TrayNotification, TrayNotificationBuilder};
+
+#[cfg(feature = "message-window")]
+pub use message_window::{MessageWindow, MessageWindowBuilder};
 
 #[cfg(feature = "canvas")]
 pub use canvas::*;

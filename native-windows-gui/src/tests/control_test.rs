@@ -1223,9 +1223,9 @@ fn run_tray_tests(app: &ControlsTest) {
     let icon = Some(&app.love_icon);
     let flags = Some(TrayNotificationFlags::USER_ICON | TrayNotificationFlags::SILENT | TrayNotificationFlags::LARGE_ICON);
 
-    app.tray_icon_2.popup("OH NO!", Some("Just a title"), flags, icon);
-    app.tray_icon_2.popup("I'm spamming the system tray popup!", Some("Just a title"), flags, icon);
-    app.tray_icon_2.popup("You can't stop me!!!!!", Some("Just a title (really)"), flags, Some(&app.window_icon));
+    app.tray_icon_2.show("OH NO!", Some("Just a title"), flags, icon);
+    app.tray_icon_2.show("I'm spamming the system tray popup!", Some("Just a title"), flags, icon);
+    app.tray_icon_2.show("You can't stop me!!!!!", Some("Just a title (really)"), flags, Some(&app.window_icon));
 }
 
 fn set_tooltip_dynamic<'a>(app: &ControlsTest, handle: &ControlHandle, data: &ToolTipTextData) {
