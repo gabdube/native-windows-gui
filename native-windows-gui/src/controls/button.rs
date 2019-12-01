@@ -42,7 +42,7 @@ impl Button {
         }
     }
 
-    /// Return the font of the control
+    /// Returns the font of the control
     pub fn font(&self) -> Option<Font> {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -55,28 +55,28 @@ impl Button {
         }
     }
 
-    /// Set the font of the control
+    /// Sets the font of the control
     pub fn set_font(&self, font: Option<&Font>) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
     }
 
-    /// Return true if the control currently has the keyboard focus
+    /// Returns true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_focus(handle) }
     }
 
-    /// Set the keyboard focus on the button.
+    /// Sets the keyboard focus on the button.
     pub fn set_focus(&self) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_focus(handle); }
     }
 
-    /// Return true if the control user can interact with the control, return false otherwise
+    /// Returns true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -90,7 +90,7 @@ impl Button {
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
-    /// Return true if the control is visible to the user. Will return true even if the 
+    /// Returns true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -105,42 +105,42 @@ impl Button {
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
-    /// Return the size of the button in the parent window
+    /// Returns the size of the button in the parent window
     pub fn size(&self) -> (u32, u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
-    /// Set the size of the button in the parent window
+    /// Sets the size of the button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
-    /// Return the position of the button in the parent window
+    /// Returns the position of the button in the parent window
     pub fn position(&self) -> (i32, i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
-    /// Set the position of the button in the parent window
+    /// Sets the position of the button in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 
-    /// Return the button label
+    /// Returns the button label
     pub fn text(&self) -> String { 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_text(handle) }
     }
 
-    /// Set the button label
+    /// Sets the button label
     pub fn set_text<'a>(&self, v: &'a str) {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);

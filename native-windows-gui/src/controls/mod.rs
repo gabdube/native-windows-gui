@@ -47,7 +47,7 @@ mod handle_from_control;
 pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase};
 pub use window::{Window, WindowFlags};
-pub use button::{Button, ButtonFlags};
+pub use button::{Button, ButtonFlags, ButtonBuilder};
 pub use check_box::{CheckBox, CheckBoxState, CheckBoxFlags};
 pub use radio_button::{RadioButton, RadioButtonState, RadioButtonFlags};
 pub use text_input::{TextInput, TextInputFlags};
@@ -58,7 +58,7 @@ pub use image_frame::{ImageFrame, ImageFrameFlags};
 pub use tooltip::{Tooltip, TooltipIcon};
 pub use track_bar::{TrackBar, TrackBarFlags};
 pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder};
-pub use timer::Timer;
+pub use timer::{Timer, TimerBuilder};
 pub use notice::Notice;
 
 #[cfg(feature = "combobox")]

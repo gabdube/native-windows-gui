@@ -1,5 +1,5 @@
 use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, StatusBar, ImageFrame,
-    TrackBar, Menu, MenuItem, MenuSeparator, TextBox};
+    TrackBar, Menu, MenuItem, MenuSeparator, TextBox, Timer};
 use std::convert::From;
 
 #[allow(unused)]
@@ -35,6 +35,7 @@ handles!(TextBox);
 handles!(TextInput);
 handles!(StatusBar);
 handles!(TrackBar);
+handles!(Timer);
 
 handles!(Menu);
 handles!(MenuItem);

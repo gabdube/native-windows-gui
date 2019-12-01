@@ -76,8 +76,9 @@ This is the main project git. It is separated in multiple sections
   - File dialog (save, open, open folder)
   - Font dialog
   - Color dialog
-- Support fow low level system message capture. 
+- Support for low level system message capture. 
 - Cross compiling and testing from Linux to Windows with Wine and mingw.
+  - Not all features are supported
 
 ## Performance
 
