@@ -59,7 +59,7 @@ pub use tooltip::{Tooltip, TooltipIcon};
 pub use track_bar::{TrackBar, TrackBarFlags};
 pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder};
 pub use timer::{Timer, TimerBuilder};
-pub use notice::Notice;
+pub use notice::{Notice, NoticeSender, NoticeBuilder};
 
 #[cfg(feature = "combobox")]
 pub use combo_box::{ComboBox, ComboBoxFlags};

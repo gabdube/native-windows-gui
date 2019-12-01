@@ -1,5 +1,8 @@
 use crate::*;
 use std::cell::RefCell;
+use std::thread;
+use std::time::Duration;
+
 
 #[derive(Default)]
 pub struct ThreadResources {
@@ -16,10 +19,11 @@ pub struct ThreadTest {
     counter: TextInput,
     timer_start_btn: Button,
     timer_stop_btn: Button,
-    no_thread_count_btn: Button,
-    thread_count_btn: Button,
+    sleep_btn: Button,
+    thread_sleep_btn: Button,
 
     timer: Timer,
+    notice: Notice
 }
 
 fn timer_tick(app: &ThreadTest) {
@@ -34,6 +38,24 @@ fn start_timer(app: &ThreadTest) {
 
 fn stop_timer(app: &ThreadTest) {
     app.timer.stop();
+}
+
+fn sleep() {
+    thread::sleep(Duration::new(5, 0));
+}
+
+fn thread_sleep(app: &ThreadTest) {
+    app.counter.set_text("Sleeping for 5 sec! (off the GUI thread)");
+
+    let sender = app.notice.sender();
+    thread::spawn(move || {
+        thread::sleep(Duration::new(5, 0));
+        sender.notice();
+    });
+}
+
+fn notice_me(app: &ThreadTest) {
+    app.counter.set_text("Done sleeping of the main thread!");
 }
 
 
@@ -73,27 +95,31 @@ mod partial_canvas_test_ui {
                 .build(&mut data.timer_stop_btn)?;
 
             Button::builder()
-                .text("Count to 1 billion")
+                .text("Sleep")
                 .parent(&data.window)
-                .build(&mut data.no_thread_count_btn)?;
+                .build(&mut data.sleep_btn)?;
             
             Button::builder()
-                .text("Count to 1 billion (off thread)")
+                .text("Sleep (off thread)")
                 .parent(&data.window)
-                .build(&mut data.thread_count_btn)?;
+                .build(&mut data.thread_sleep_btn)?;
 
             Timer::builder()
                 .parent(&data.window)
                 .interval(25)
                 .build(&mut data.timer)?;
 
+            Notice::builder()
+                .parent(&data.window)
+                .build(&mut data.notice)?;
+
             VBoxLayout::builder()
                 .parent(&data.window)
                 .child(0, &data.counter)
                 .child(1, &data.timer_start_btn)
                 .child(2, &data.timer_stop_btn)
-                .child(3, &data.no_thread_count_btn)
-                .child(4, &data.thread_count_btn)
+                .child(3, &data.sleep_btn)
+                .child(4, &data.thread_sleep_btn)
                 .build();
 
             Ok(())
@@ -108,10 +134,18 @@ mod partial_canvas_test_ui {
                         start_timer(self);
                     } else if &handle == &self.timer_stop_btn {
                         stop_timer(self);
+                    } else if &handle == &self.sleep_btn {
+                        sleep();
+                    } else if &handle == &self.thread_sleep_btn {
+                        thread_sleep(self);
                     },
                 E::OnTimerTick => 
                     if &handle == &self.timer {
                         timer_tick(self)
+                    },
+                E::OnNotice => 
+                    if &handle == &self.notice {
+                        notice_me(self)
                     },
                 _ => {}
             }

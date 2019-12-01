@@ -145,7 +145,7 @@ fn close(_app: &TestControlPanel) {
 }
 
 #[test]
-fn test_everything() {
+fn everything() {
     enable_visual_styles();
     init_common_controls().expect("Failed to init controls");
     
