@@ -35,13 +35,14 @@ impl Cursor {
         Return or map the cursor position relatively to a control.
         If point is `None`, `Cursor::position` is used.
     */
-    pub fn local_position(control: &ControlHandle, point: Option<(i32, i32)>) -> (i32, i32) {
+    pub fn local_position<C: Into<ControlHandle>>(control: C, point: Option<(i32, i32)>) -> (i32, i32) {
         use winapi::shared::ntdef::LONG;
         use winapi::shared::windef::POINT;
         use winapi::um::winuser::ScreenToClient;
 
         const MSG: &'static str = "local_position can only be used for window control";
 
+        let control = control.into();
         if control.blank() { panic!(MSG); }
         let handle = control.hwnd().expect(MSG);
 

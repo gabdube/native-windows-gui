@@ -11,7 +11,8 @@ and less time searching the documentation and more time for you to develop your 
 This is the 3rd and final version of NWG. It is considered "mature" or, as I would say
 "the backlog is empty, and it will most likely stay that way". This version implements pretty much
 everything required to develop applications on Windows. Don't bother using the older versions as they
-have "irreconcilable design decisions" and cannot support some key features.
+have "irreconcilable design decisions" and cannot support some key features. Future development will be done
+in other libraries.
 
 If you've managed to read though this introduction, you should know that my twitter handle
 is [#gdube_dev](https://twitter.com/gdube_dev) and you can support this project with *GitHub Sponsors*.
@@ -267,6 +268,6 @@ fn main() {
 
 ## Attributions
 
-For the icons used in the test suit (and only there):
+For the icons used in the test suite (and only there):
 
 **love.ico** is made by [Smashicons](https://smashicons.com/) from [www.flaticon.com](https://www.flaticon.com/)

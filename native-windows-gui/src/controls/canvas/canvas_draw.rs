@@ -4,7 +4,7 @@
 */
 use winapi::shared::winerror::S_OK;
 use crate::win32::{canvas, base_helper};
-use super::{CanvasError, Rect, Color, Matrix3x2F, BaseBrush, StrokeStyle, DrawTextOptions, MeasuringMode, WriteTextFormat};
+use super::{CanvasError, Rect, Ellipse, Color, Matrix3x2F, BaseBrush, StrokeStyle, DrawTextOptions, MeasuringMode, WriteTextFormat};
 use std::convert::TryInto;
 
 
@@ -27,7 +27,7 @@ impl<'a> CanvasDraw<'a> {
 
     /// Finish drawing
     pub fn end_draw(self) -> Result<(), CanvasError> {
-        use winapi::shared::winerror::D2DERR_RECREATE_TARGET;
+        use winapi::shared::winerror::{D2DERR_RECREATE_TARGET, D2DERR_WRONG_FACTORY};
 
         let mut tag1 = 0;
         let mut tag2 = 0;
@@ -37,6 +37,7 @@ impl<'a> CanvasDraw<'a> {
             match target.EndDraw(&mut tag1, &mut tag2) {
                 S_OK => Ok(()),
                 D2DERR_RECREATE_TARGET => Err(CanvasError::RecreateTarget),
+                D2DERR_WRONG_FACTORY => Err(CanvasError::WrongFactory),
                 e => Err(CanvasError::Other(e))
             }
         }
@@ -88,6 +89,19 @@ impl<'a> CanvasDraw<'a> {
         }
     }
 
+    /// Draws the outline of a ellipse that has the specified dimensions and stroke style.
+    pub fn draw_ellipse<B: TryInto<BaseBrush>>(&self, ell: &Ellipse, brush: B, stroke_width: f32, stroke_style: &StrokeStyle) {
+        let base = match brush.try_into() {
+            Ok(b) => b,
+            Err(_) => panic!("Brush is invalid")
+        };
+
+        unsafe {
+            let target = &*self.base.render_target;
+            target.DrawEllipse(ell, base.0, stroke_width, stroke_style.handle);
+        }
+    }
+
     /// Uses a brush to fill the interior of a rectangle.
     /// Panics if the brush is not bound to the renderer
     pub fn fill_rectangle<B: TryInto<BaseBrush>>(&self, rect: &Rect, brush: B) {
@@ -99,6 +113,20 @@ impl<'a> CanvasDraw<'a> {
         unsafe {
             let target = &*self.base.render_target;
             target.FillRectangle(rect, base.0);
+        }
+    }
+
+    /// Uses a brush to fill the interior of a ellipse.
+    /// Panics if the brush is not bound to the renderer
+    pub fn fill_ellipse<B: TryInto<BaseBrush>>(&self, ell: &Ellipse, brush: B) {
+        let base = match brush.try_into() {
+            Ok(b) => b,
+            Err(_) => panic!("Brush is invalid")
+        };
+
+        unsafe {
+            let target = &*self.base.render_target;
+            target.FillEllipse(ell, base.0);
         }
     }
 

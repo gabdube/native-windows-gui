@@ -1,5 +1,5 @@
 use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, StatusBar, ImageFrame,
-    TrackBar, Menu, MenuItem, MenuSeparator, TextBox, Timer, Notice};
+    TrackBar, Menu, MenuItem, MenuSeparator, TextBox};
 use std::convert::From;
 
 #[allow(unused)]
@@ -35,9 +35,6 @@ handles!(TextBox);
 handles!(TextInput);
 handles!(StatusBar);
 handles!(TrackBar);
-handles!(Timer);
-handles!(Notice);
-
 handles!(Menu);
 handles!(MenuItem);
 handles!(MenuSeparator);
@@ -135,3 +132,15 @@ use super::{MessageWindow};
 
 #[cfg(feature = "message-window")]
 handles!(MessageWindow);
+
+#[cfg(feature = "timer")]
+use super::{Timer};
+
+#[cfg(feature = "timer")]
+handles!(Timer);
+
+#[cfg(feature = "notice")]
+use super::{Notice};
+
+#[cfg(feature = "notice")]
+handles!(Notice);

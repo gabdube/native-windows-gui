@@ -12,7 +12,11 @@ mod image_frame;
 mod tooltip;
 mod track_bar;
 mod menu;
+
+#[cfg(feature = "timer")]
 mod timer;
+
+#[cfg(feature = "notice")]
 mod notice;
 
 #[cfg(feature = "combobox")]
@@ -58,7 +62,12 @@ pub use image_frame::{ImageFrame, ImageFrameFlags};
 pub use tooltip::{Tooltip, TooltipIcon};
 pub use track_bar::{TrackBar, TrackBarFlags};
 pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder};
+
+
+#[cfg(feature = "timer")]
 pub use timer::{Timer, TimerBuilder};
+
+#[cfg(feature = "notice")]
 pub use notice::{Notice, NoticeSender, NoticeBuilder};
 
 #[cfg(feature = "combobox")]

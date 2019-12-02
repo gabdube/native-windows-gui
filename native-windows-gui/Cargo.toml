@@ -36,6 +36,8 @@ listbox = []
 combobox = []
 tray-notification = []
 message-window = []
+timer = []
+notice = []
 tests-linux = ["datetime-picker", "progress-bar", "tabs", "tree-view", "fancy-window", "interactive", "listbox", "combobox"]
-all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar",
+all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice",
        "tabs", "tree-view", "fancy-window", "canvas", "listbox", "combobox", "tray-notification", "message-window"]

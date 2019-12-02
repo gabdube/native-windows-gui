@@ -3,7 +3,7 @@
 */
 
 use winapi::um::d2d1::{D2D1_BRUSH_PROPERTIES, D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES, D2D1_RECT_F, D2D1_POINT_2F,
-    D2D1_GAMMA_2_2, D2D1_GAMMA_1_0, D2D1_EXTEND_MODE_CLAMP, D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_MIRROR};
+    D2D1_GAMMA_2_2, D2D1_GAMMA_1_0, D2D1_EXTEND_MODE_CLAMP, D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_MIRROR, D2D1_ELLIPSE};
 use winapi::um::d2dbasetypes::D2D_MATRIX_3X2_F;
 use winapi::shared::ntdef::HRESULT;
 use super::Color;
@@ -20,6 +20,9 @@ pub type Matrix3x2F = D2D_MATRIX_3X2_F;
 
 /// Represents a rectangle
 pub type Rect = D2D1_RECT_F;
+
+/// Represents a ellispe
+pub type Ellipse = D2D1_ELLIPSE;
 
 // A two dimensional point
 pub type Point2F = D2D1_POINT_2F;
@@ -54,7 +57,13 @@ pub struct GradientStop {
 /// Errors that can be returned when drawing to a canvas
 #[derive(Copy, Clone, Debug)]
 pub enum CanvasError {
+    /// A presentation error has occurred that may be recoverable. The caller needs to re-create the render target then attempt to render the frame again.
     RecreateTarget,
+
+    /// Objects used together were not all created from the same factory instance.
+    WrongFactory,
+
+    /// Other errors. See https://docs.microsoft.com/en-us/windows/win32/direct2d/direct2d-error-codes
     Other(HRESULT)
 }
 

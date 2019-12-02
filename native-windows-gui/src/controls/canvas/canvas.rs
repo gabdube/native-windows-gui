@@ -3,7 +3,7 @@
     See CanvasWindow for the window variant of the control
 */
 
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_CHILD};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_CHILD, WS_CLIPCHILDREN};
 
 use crate::win32::window_helper as wh;
 use crate::win32::canvas;
@@ -133,7 +133,7 @@ impl Canvas {
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        WS_CHILD
+        WS_CHILD | WS_CLIPCHILDREN
     }
 }
 
