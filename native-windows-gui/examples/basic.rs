@@ -71,6 +71,7 @@ mod basic_app_ui {
 
             // Events
             let window_handles = [&ui.window.handle];
+
             for handle in window_handles.iter() {
                 let evt_ui = ui.clone();
                 let handle_events = move |evt, _evt_data, handle| {
@@ -112,7 +113,7 @@ mod basic_app_ui {
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
 
-    let _app = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
-
+    let _ui = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
+    
     nwg::dispatch_thread_events();
 }

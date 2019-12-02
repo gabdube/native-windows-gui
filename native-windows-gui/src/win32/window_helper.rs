@@ -34,6 +34,8 @@ pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: 
     SendMessageW(handle, WM_SETFONT, mem::transmute(font_handle), redraw as LPARAM);
 }
 
+
+#[cfg(feature = "timer")]
 pub fn kill_timer(hwnd: HWND, id: u32) {
     use winapi::um::winuser::KillTimer;
     use winapi::shared::basetsd::UINT_PTR;
@@ -43,6 +45,7 @@ pub fn kill_timer(hwnd: HWND, id: u32) {
     }
 }
 
+#[cfg(feature = "timer")]
 pub fn start_timer(hwnd: HWND, id: u32, interval: u32) {
     use winapi::um::winuser::SetTimer;
     use winapi::shared::basetsd::UINT_PTR;

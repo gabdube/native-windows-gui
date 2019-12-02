@@ -7,7 +7,7 @@ use winapi::shared::minwindef::{UINT, DWORD, HMODULE, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
 use winapi::um::winuser::{WNDPROC, NMHDR};
-use winapi::um::commctrl::{NMTTDISPINFOW};
+use winapi::um::commctrl::{NMTTDISPINFOW, SUBCLASSPROC};
 use super::base_helper::{get_system_error, to_utf16};
 use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY};
 use crate::controls::ControlHandle;
@@ -20,6 +20,12 @@ static mut TIMER_ID: u32 = 1;
 static mut NOTICE_ID: u32 = 1; 
 
 const NO_DATA: EventData = EventData::NoData;
+
+
+pub struct EventHandler {
+    handles: Vec<HWND>,
+    id: SUBCLASSPROC
+}
 
 
 /// Note. While there might be a race condition here, it does not matter because
@@ -50,17 +56,19 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
 /**
     Set a window subclass the uses the `process_events` function of NWG.
     The window subclass is applied to the window and all it's children (recursively).
+
+    Returns a `EventHandler` that can be passed to `unbind_event_handler` to remove the callbacks.
 */
-pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) 
+pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
-    use winapi::um::commctrl::SetWindowSubclass;
+    use winapi::um::commctrl::{SetWindowSubclass};
     use winapi::um::winuser::EnumChildWindows;
 
     /**
         Function that iters over a top level window and bind the events dispatch callback
     */
-    unsafe extern "system" fn iter_children_window<F>(h: HWND, p: LPARAM) -> i32 
+    unsafe extern "system" fn set_children_subclass<F>(h: HWND, p: LPARAM) -> i32 
         where F: Fn(Event, EventData, ControlHandle) -> () + 'static
     {
         let cb: Rc<F> = Rc::from_raw(p as *const F);
@@ -75,6 +83,12 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, f: F)
         1
     }
 
+    unsafe extern "system" fn handler_children(h: HWND, p: LPARAM) -> i32 {
+        let handles_ptr: *mut Vec<HWND> = p as *mut Vec<HWND>;
+        let handles = &mut *handles_ptr;
+        handles.push(h);
+        1
+    }
 
     // The callback function must be passed to each children of the control
     // To do so, we must RC the callback
@@ -83,9 +97,38 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, f: F)
     let callback_value = callback_ptr as LPARAM;
 
     let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
+    
+    let callback_fn: SUBCLASSPROC = Some(process_events::<F>);
+    let mut handler: EventHandler = EventHandler { handles: vec![hwnd], id: callback_fn };
+
     unsafe {
-        EnumChildWindows(hwnd, Some(iter_children_window::<F>), callback_value);
-        SetWindowSubclass(hwnd, Some(process_events::<F>), 0, callback_value as UINT_PTR);
+        EnumChildWindows(hwnd, Some(handler_children), (&mut handler.handles as *mut Vec<HWND>) as LPARAM);
+        EnumChildWindows(hwnd, Some(set_children_subclass::<F>), callback_value);
+        SetWindowSubclass(hwnd, callback_fn, 0, callback_value as UINT_PTR);
+    }
+
+    handler
+}
+
+/**
+    Free all associated callbacks with the event handler.
+*/
+pub fn unbind_event_handler<F>(handler: &EventHandler)
+    where F: Fn(Event, EventData, ControlHandle) -> () + 'static
+{
+    use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
+
+    let id = handler.id;
+    for &handle in handler.handles.iter() {
+        unsafe { 
+            let mut callback_value: UINT_PTR = 0;
+            GetWindowSubclass(handle, id, 0, &mut callback_value);
+
+            let callback: Rc<F> = Rc::from_raw(callback_value as *const F);
+            mem::drop(callback);
+
+            RemoveWindowSubclass(handle, id, 0);
+        };
     }
 }
 
@@ -224,6 +267,7 @@ pub(crate) fn init_window_class() -> Result<(), SystemError> {
     Ok(())
 }
 
+#[cfg(feature = "message-window")]
 /// Create a message only window. Used with the `MessageWindow` control
 pub(crate) fn create_message_window() -> Result<ControlHandle, SystemError> {
     use winapi::um::winuser::HWND_MESSAGE;
