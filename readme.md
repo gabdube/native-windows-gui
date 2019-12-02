@@ -35,6 +35,21 @@ extern crate native_windows_gui as nwg;
 extern crate native_windows_derive as nwd;  // Optional. Only if the derive macro is used.
 ```
 
+## Trying it out
+
+See it for yourself. NWG has plenty of example and a fully interactive test suite. The only thing you need is to:
+
+```bash
+git clone git@github.com:gabdube/native-windows-gui.git
+cd native-windows-gui/native-windows-gui
+
+cargo test everything --features "all interactive"  # For the test suite
+cargo run --example basic
+cargo run --example calculator
+cargo run --example message_bank
+# etc
+```
+
 ## Project structure
 
 This is the main project git. It is separated in multiple sections

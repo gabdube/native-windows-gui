@@ -14,6 +14,7 @@ use crate::controls::ControlHandle;
 use crate::{Event, EventData, MousePressEvent, SystemError};
 use std::{ptr, mem};
 use std::rc::Rc;
+use std::marker::PhantomData;
 
 
 static mut TIMER_ID: u32 = 1; 
@@ -22,9 +23,10 @@ static mut NOTICE_ID: u32 = 1;
 const NO_DATA: EventData = EventData::NoData;
 
 
-pub struct EventHandler {
+pub struct EventHandler<F> {
     handles: Vec<HWND>,
-    id: SUBCLASSPROC
+    id: SUBCLASSPROC,
+    p: PhantomData<F>
 }
 
 
@@ -59,7 +61,7 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
 
     Returns a `EventHandler` that can be passed to `unbind_event_handler` to remove the callbacks.
 */
-pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
+pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler<F>
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
     use winapi::um::commctrl::{SetWindowSubclass};
@@ -99,7 +101,7 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
     let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
     
     let callback_fn: SUBCLASSPROC = Some(process_events::<F>);
-    let mut handler: EventHandler = EventHandler { handles: vec![hwnd], id: callback_fn };
+    let mut handler = EventHandler { handles: vec![hwnd], id: callback_fn, p: PhantomData };
 
     unsafe {
         EnumChildWindows(hwnd, Some(handler_children), (&mut handler.handles as *mut Vec<HWND>) as LPARAM);
@@ -113,7 +115,7 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
 /**
     Free all associated callbacks with the event handler.
 */
-pub fn unbind_event_handler<F>(handler: &EventHandler)
+pub fn unbind_event_handler<F>(handler: &EventHandler<F>)
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
     use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
@@ -135,6 +137,9 @@ pub fn unbind_event_handler<F>(handler: &EventHandler)
 /**
     Set a window subclass the uses the `process_raw_events` function of NWG.
     The subclass is only applied to the control itself and NOT the children.
+
+    When assigning multiple callback to the same control, a different `id` must be specified for each call
+    or otherwise, the old callback will be replaced by the new one. See `Label::hook_background_color` for example.
 */
 pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) 
     where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
