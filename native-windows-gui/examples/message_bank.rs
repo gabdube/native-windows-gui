@@ -12,8 +12,8 @@ pub struct MessageBank {
     window: nwg::Window,
     layout: nwg::GridLayout,
     add_message_btn: nwg::Button,
-    message_title: nwg::TextBox,
-    message_content: nwg::TextBox,
+    message_title: nwg::TextInput,
+    message_content: nwg::TextInput,
 }
 
 impl MessageBank {
@@ -48,7 +48,7 @@ mod message_bank_ui {
             
             // Controls
             nwg::Window::builder()
-                .flags(nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE)
+                .flags(nwg::WindowFlags::MAIN_WINDOW | nwg::WindowFlags::VISIBLE)
                 .size((400, 300))
                 .position((800, 300))
                 .title("My message bank")
@@ -59,12 +59,12 @@ mod message_bank_ui {
                 .parent(&data.window)
                 .build(&mut data.add_message_btn)?;
 
-            nwg::TextBox::builder()
+            nwg::TextInput::builder()
                 .text("Message Title")
                 .parent(&data.window)
                 .build(&mut data.message_title)?;
 
-            nwg::TextBox::builder()
+            nwg::TextInput::builder()
                 .text("Message Content")
                 .parent(&data.window)
                 .build(&mut data.message_content)?;

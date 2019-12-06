@@ -299,6 +299,88 @@ impl TextInput {
         WS_BORDER | ES_AUTOHSCROLL | WS_CHILD
     }
 
+    /// Center the text vertically. Can't believe that must be manually hacked in.
+    fn hook_non_client_size(&self) {
+        use crate::bind_raw_event_handler;
+        use winapi::shared::windef::{HGDIOBJ, RECT, HBRUSH};
+        use winapi::um::winuser::{WM_NCCALCSIZE, WM_NCPAINT, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW, WVR_REDRAW};
+        use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect};
+        use winapi::um::wingdi::SelectObject;
+        use std::{mem};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        unsafe {
+
+        bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, _w, l| {
+            match msg {
+                WM_NCCALCSIZE  => {
+                    // Calculate client area height needed for a font
+                    let font_handle = wh::get_window_font(hwnd);
+                    let mut r: RECT = mem::zeroed();
+                    let dc = GetDC(hwnd);
+                    
+                    let old = SelectObject(dc, font_handle as HGDIOBJ);
+                    let calc: [u16;2] = [75, 121];
+                    DrawTextW(dc, calc.as_ptr(), 2, &mut r, DT_CALCRECT | DT_LEFT);
+
+                    let client_height = r.bottom;
+
+                    SelectObject(dc, old);
+                    ReleaseDC(hwnd, dc);
+
+                    // Calculate NC area to center text.
+                    let mut client: RECT = mem::zeroed();
+                    let mut window: RECT = mem::zeroed();
+                    GetClientRect(hwnd, &mut client);
+                    GetWindowRect(hwnd, &mut window);
+
+                    let window_height = window.bottom - window.top;
+                    let center = ((window_height - client_height) / 2) - 4;
+                    
+                    // Save the info
+                    let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
+                    let info = &mut *info_ptr;
+                    println!("BBBBB");
+
+                    info.rgrc[0].top += center;
+                    info.rgrc[0].bottom -= center;
+                },
+                WM_NCPAINT  => {
+                    let mut window: RECT = mem::zeroed();
+                    let mut client: RECT = mem::zeroed();
+                    GetWindowRect(hwnd, &mut window);
+                    GetClientRect(hwnd, &mut client);
+                    
+                    let top = RECT {
+                        left: 0,
+                        top: -20,
+                        right: window.right,
+                        bottom: 0
+                    };
+
+                    let bottom = RECT {
+                        left: 0,
+                        top: client.bottom,
+                        right: window.right,
+                        bottom: client.bottom + 5
+                    };
+
+                    let dc = GetDC(hwnd);
+                    FillRect(dc, &top, COLOR_WINDOW as HBRUSH);
+                    FillRect(dc, &bottom, COLOR_WINDOW as HBRUSH);
+                    ReleaseDC(hwnd, dc);
+                },
+                _ => {}
+            }
+
+            None
+        });
+
+        }
+    }
+
 }
 
 pub struct TextInputBuilder<'a> {
@@ -378,6 +460,9 @@ impl<'a> TextInputBuilder<'a> {
             },
         }
 
+        // Control must be hidden before the hook_non_client_size path
+        // flags = flags & !WS_VISIBLE;
+
         let parent = match self.parent {
             Some(p) => Ok(p),
             None => Err(SystemError::ControlWithoutParent)
@@ -393,6 +478,8 @@ impl<'a> TextInputBuilder<'a> {
             .parent(Some(parent))
             .build()?;
 
+        out.hook_non_client_size();
+
         if self.limit > 0 {
             out.set_limit(self.limit);
         }
@@ -407,6 +494,13 @@ impl<'a> TextInputBuilder<'a> {
 
         if self.font.is_some() {
             out.set_font(self.font);
+        }
+
+        unsafe {
+            use std::ptr;
+            use winapi::um::winuser::SetWindowPos;
+            use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
+            SetWindowPos(out.handle.hwnd().unwrap(), ptr::null_mut(), 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
         }
 
         Ok(())
