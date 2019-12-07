@@ -302,20 +302,23 @@ impl TextInput {
     /// Center the text vertically. Can't believe that must be manually hacked in.
     fn hook_non_client_size(&self) {
         use crate::bind_raw_event_handler;
-        use winapi::shared::windef::{HGDIOBJ, RECT, HBRUSH};
-        use winapi::um::winuser::{WM_NCCALCSIZE, WM_NCPAINT, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW, WVR_REDRAW};
-        use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect};
+        use winapi::shared::windef::{HGDIOBJ, RECT, HBRUSH, POINT};
+        use winapi::um::winuser::{WM_NCCALCSIZE, WM_NCPAINT, WM_SIZE, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW,};
+        use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
+        use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect, ScreenToClient, SetWindowPos};
         use winapi::um::wingdi::SelectObject;
-        use std::{mem};
+        use std::{mem, ptr};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        self.handle.hwnd().expect(BAD_HANDLE);
 
         unsafe {
 
-        bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, _w, l| {
+        bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, w, l| {
             match msg {
                 WM_NCCALCSIZE  => {
+                    if w == 0 { return None }
+
                     // Calculate client area height needed for a font
                     let font_handle = wh::get_window_font(hwnd);
                     let mut r: RECT = mem::zeroed();
@@ -342,7 +345,6 @@ impl TextInput {
                     // Save the info
                     let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
                     let info = &mut *info_ptr;
-                    println!("BBBBB");
 
                     info.rgrc[0].top += center;
                     info.rgrc[0].bottom -= center;
@@ -352,25 +354,34 @@ impl TextInput {
                     let mut client: RECT = mem::zeroed();
                     GetWindowRect(hwnd, &mut window);
                     GetClientRect(hwnd, &mut client);
-                    
+
+                    let mut pt1 = POINT {x: window.left, y: window.top};
+                    ScreenToClient(hwnd, &mut pt1);
+
+                    let mut pt2 = POINT {x: window.right, y: window.bottom};
+                    ScreenToClient(hwnd, &mut pt2);
+
                     let top = RECT {
                         left: 0,
-                        top: -20,
+                        top: pt1.y,
                         right: window.right,
-                        bottom: 0
+                        bottom: client.top
                     };
 
                     let bottom = RECT {
                         left: 0,
                         top: client.bottom,
                         right: window.right,
-                        bottom: client.bottom + 5
+                        bottom: pt2.y
                     };
 
                     let dc = GetDC(hwnd);
                     FillRect(dc, &top, COLOR_WINDOW as HBRUSH);
                     FillRect(dc, &bottom, COLOR_WINDOW as HBRUSH);
                     ReleaseDC(hwnd, dc);
+                },
+                WM_SIZE => {
+                    SetWindowPos(hwnd, ptr::null_mut(), 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
                 },
                 _ => {}
             }
@@ -496,12 +507,12 @@ impl<'a> TextInputBuilder<'a> {
             out.set_font(self.font);
         }
 
-        unsafe {
+        /*unsafe {
             use std::ptr;
             use winapi::um::winuser::SetWindowPos;
             use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
             SetWindowPos(out.handle.hwnd().unwrap(), ptr::null_mut(), 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
-        }
+        }*/
 
         Ok(())
     }
