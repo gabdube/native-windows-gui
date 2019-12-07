@@ -46,6 +46,12 @@ mod message_window;
 #[cfg(feature = "canvas")]
 mod canvas;
 
+#[cfg(feature = "list-view")]
+mod list_view;
+
+#[cfg(feature = "image-button")]
+mod image_button;
+
 mod handle_from_control;
 
 pub use control_handle::ControlHandle;
@@ -71,19 +77,19 @@ pub use timer::{Timer, TimerBuilder};
 pub use notice::{Notice, NoticeSender, NoticeBuilder};
 
 #[cfg(feature = "combobox")]
-pub use combo_box::{ComboBox, ComboBoxFlags};
+pub use combo_box::{ComboBox, ComboBoxFlags, ComboBoxBuilder};
 
 #[cfg(feature = "listbox")]
-pub use list_box::{ListBox, ListBoxFlags};
+pub use list_box::{ListBox, ListBoxFlags, ListBoxBuilder};
 
 #[cfg(feature = "datetime-picker")]
-pub use date_picker::{DatePicker, DatePickerValue, DatePickerFlags};
+pub use date_picker::{DatePicker, DatePickerValue, DatePickerFlags, DatePickerBuilder};
 
 #[cfg(feature = "progress-bar")]
-pub use progress_bar::{ProgressBar, ProgressBarState, ProgressBarFlags};
+pub use progress_bar::{ProgressBar, ProgressBarState, ProgressBarFlags, ProgressBarBuilder};
 
 #[cfg(feature = "tabs")]
-pub use tabs::{TabsContainer, Tab, TabsContainerFlags};
+pub use tabs::{TabsContainer, Tab, TabsContainerFlags, TabsContainerBuilder, TabBuilder};
 
 #[cfg(feature = "tree-view")]
 pub use treeview::{TreeView, TreeViewBuilder, TreeItem, TreeInsert};
@@ -96,5 +102,11 @@ pub use message_window::{MessageWindow, MessageWindowBuilder};
 
 #[cfg(feature = "canvas")]
 pub use canvas::*;
+
+#[cfg(feature = "list-view")]
+pub use list_view::{ListView, ListViewBuilder, ListViewFlags};
+
+#[cfg(feature = "image-button")]
+pub use image_button::{ImageButton, ImageButtonBuilder, ImageButtonFlags};
 
 pub use handle_from_control::*;

@@ -62,6 +62,7 @@ pub struct ControlsTest {
     basics_control_tab: Tab,
     dialog_tab: Tab,
     tree_tab: Tab,
+    list_view_tab: Tab,
     test_button: Button,
     test_checkbox1: CheckBox,
     test_checkbox2: CheckBox,
@@ -230,6 +231,10 @@ mod partial_controls_test_ui {
                 .text("Tree view")
                 .parent(&data.controls_holder)
                 .build(&mut data.tree_tab)?;
+            Tab::builder()
+                .text("List view")
+                .parent(&data.controls_holder)
+                .build(&mut data.list_view_tab)?;
 
             Button::builder()
                 .text("A simple button")

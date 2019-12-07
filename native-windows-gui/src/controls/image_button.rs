@@ -1,6 +1,8 @@
 /*!
 A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
 that indicates what the button does when the user selects it.
+
+ImageButton use the same event as `Button`.
 */
 
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
@@ -8,59 +10,38 @@ use crate::win32::window_helper as wh;
 use crate::{SystemError, Font};
 use super::{ControlBase, ControlHandle};
 
-const NOT_BOUND: &'static str = "Button is not yet bound to a winapi object";
-const BAD_HANDLE: &'static str = "INTERNAL ERROR: Button handle is not HWND!";
+const NOT_BOUND: &'static str = "ImageButton is not yet bound to a winapi object";
+const BAD_HANDLE: &'static str = "INTERNAL ERROR: ImageButton handle is not HWND!";
 
 
 bitflags! {
-    pub struct ButtonFlags: u32 {
+    pub struct ImageButtonFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
     }
 }
 
 /**
-A push button is a rectangle containing an application-defined text label.
-Use `ImageButton` if you need to have a button that contains an icon or a bitmap.
+A push button is a rectangle containing an application-defined icon or bitmap.
+Use `Button` if you need to have a button that contains a label.
 */
 #[derive(Default, Debug)]
-pub struct Button {
+pub struct ImageButton {
     pub handle: ControlHandle
 }
 
-impl Button {
+impl ImageButton {
 
-    pub fn builder<'a>() -> ButtonBuilder<'a> {
-        ButtonBuilder {
-            text: "Button",
+    pub fn builder<'a>() -> ImageButtonBuilder<'a> {
+        ImageButtonBuilder {
             size: (100, 25),
             position: (0, 0),
             enabled: true,
             flags: None,
-            font: None,
             parent: None
         }
     }
 
-    /// Returns the font of the control
-    pub fn font(&self) -> Option<Font> {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let font_handle = wh::get_window_font(handle);
-        if font_handle.is_null() {
-            None
-        } else {
-            Some(Font { handle: font_handle })
-        }
-    }
-
-    /// Sets the font of the control
-    pub fn set_font(&self, font: Option<&Font>) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
-    }
 
     /// Returns true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
@@ -133,20 +114,6 @@ impl Button {
         unsafe { wh::set_window_position(handle, x, y) }
     }
 
-    /// Returns the button label
-    pub fn text(&self) -> String { 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::get_window_text(handle) }
-    }
-
-    /// Sets the button label
-    pub fn set_text<'a>(&self, v: &'a str) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        unsafe { wh::set_window_text(handle, v) }
-    }
-
     /// Winapi class name used during control creation
     pub fn class_name(&self) -> &'static str {
         "BUTTON"
@@ -166,54 +133,42 @@ impl Button {
 
 }
 
-pub struct ButtonBuilder<'a> {
-    text: &'a str,
+pub struct ImageButtonBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     enabled: bool,
-    flags: Option<ButtonFlags>,
-    font: Option<&'a Font>,
+    flags: Option<ImageButtonFlags>,
     parent: Option<ControlHandle>
 }
 
-impl<'a> ButtonBuilder<'a> {
+impl<'a> ImageButtonBuilder<'a> {
 
-    pub fn flags(mut self, flags: ButtonFlags) -> ButtonBuilder<'a> {
+    pub fn flags(mut self, flags: ImageButtonFlags) -> ImageButtonBuilder<'a> {
         self.flags = Some(flags);
         self
     }
 
-    pub fn text(mut self, text: &'a str) -> ButtonBuilder<'a> {
-        self.text = text;
-        self
-    }
-
-    pub fn size(mut self, size: (i32, i32)) -> ButtonBuilder<'a> {
+    pub fn size(mut self, size: (i32, i32)) -> ImageButtonBuilder<'a> {
         self.size = size;
         self
     }
 
-    pub fn position(mut self, pos: (i32, i32)) -> ButtonBuilder<'a> {
+    pub fn position(mut self, pos: (i32, i32)) -> ImageButtonBuilder<'a> {
         self.position = pos;
         self
     }
 
-    pub fn enabled(mut self, e: bool) -> ButtonBuilder<'a> {
+    pub fn enabled(mut self, e: bool) -> ImageButtonBuilder<'a> {
         self.enabled = e;
         self
     }
 
-    pub fn font(mut self, font: Option<&'a Font>) -> ButtonBuilder<'a> {
-        self.font = font;
-        self
-    }
-
-    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ButtonBuilder<'a> {
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ImageButtonBuilder<'a> {
         self.parent = Some(p.into());
         self
     }
 
-    pub fn build(self, out: &mut Button) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut ImageButton) -> Result<(), SystemError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let parent = match self.parent {
