@@ -52,7 +52,7 @@ impl Window {
     /// Return the icon of the window
     pub fn icon(&self) -> Option<Image> {
         use winapi::um::winuser::WM_GETICON;
-        use std::mem;
+        use winapi::um::winnt::HANDLE;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -61,7 +61,7 @@ impl Window {
         if handle == 0 {
             None
         } else {
-            Some(Image{ handle: unsafe{ mem::transmute(handle) } })
+            Some(Image{ handle: handle as HANDLE })
         }
     }
 

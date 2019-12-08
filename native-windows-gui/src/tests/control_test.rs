@@ -29,6 +29,7 @@ pub struct ControlsTest {
     window_icon: Image,
     love_icon: Image,
     ferris: Image,
+    popcorn: Image,
     arial_font: Font,
     
     #[cfg(feature = "file-dialog")]
@@ -60,6 +61,7 @@ pub struct ControlsTest {
 
     controls_holder: TabsContainer,
     basics_control_tab: Tab,
+    basics_control_tab2: Tab,
     dialog_tab: Tab,
     tree_tab: Tab,
     list_view_tab: Tab,
@@ -82,6 +84,8 @@ pub struct ControlsTest {
     test_progress2: ProgressBar,
     test_track1: TrackBar,
     test_track2: TrackBar,
+
+    test_image_button: ImageButton,
 
     test_open_file_button: Button,
     test_open_directory_button: Button,
@@ -147,6 +151,7 @@ mod partial_controls_test_ui {
             data.window_icon = Image::icon("./test_rc/cog.ico", None, false)?;
             data.love_icon = Image::icon("./test_rc/love.ico", None, false)?;
             data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
+            data.popcorn = Image::bitmap("./test_rc/popcorn.bmp", Some((80, 80)), false)?;
 
             #[cfg(feature = "file-dialog")]
             #[cfg(feature = "color-dialog")]
@@ -221,6 +226,11 @@ mod partial_controls_test_ui {
                 .text("Basic")
                 .parent(&data.controls_holder)
                 .build(&mut data.basics_control_tab)?;
+
+            Tab::builder()
+                .text("Basic 2")
+                .parent(&data.controls_holder)
+                .build(&mut data.basics_control_tab2)?;
 
             Tab::builder()
                 .text("Dialog")
@@ -383,6 +393,13 @@ mod partial_controls_test_ui {
                 .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_track2)?;
+
+            ImageButton::builder()
+                .position((10, 10))
+                .size((90, 90))
+                .image(Some(&data.popcorn))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_image_button)?;
 
             Button::builder()
                 .text("Open file")

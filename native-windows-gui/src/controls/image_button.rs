@@ -5,9 +5,9 @@ that indicates what the button does when the user selects it.
 ImageButton use the same event as `Button`.
 */
 
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_FLAT};
 use crate::win32::window_helper as wh;
-use crate::{SystemError, Font};
+use crate::{SystemError, Image};
 use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "ImageButton is not yet bound to a winapi object";
@@ -18,6 +18,7 @@ bitflags! {
     pub struct ImageButtonFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const FLAT = BS_FLAT;
     }
 }
 
@@ -38,10 +39,37 @@ impl ImageButton {
             position: (0, 0),
             enabled: true,
             flags: None,
-            parent: None
+            parent: None,
+            image: None
         }
     }
 
+    pub fn image(&self) -> Option<Image> {
+        use winapi::um::winuser::{BM_GETIMAGE, IMAGE_BITMAP};
+        use winapi::shared::minwindef::{WPARAM};
+        use winapi::um::winnt::HANDLE;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let image = wh::send_message(handle, BM_GETIMAGE, IMAGE_BITMAP as WPARAM, 0);
+        if image == 0 {
+            None
+        } else {
+            Some(Image{ handle: handle as HANDLE } )
+        }
+    }
+    
+    pub fn set_image<'a>(&self, image: Option<&'a Image>) {
+        use winapi::um::winuser::{BM_SETIMAGE, IMAGE_BITMAP};
+        use winapi::shared::minwindef::{WPARAM, LPARAM};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
+        wh::send_message(handle, BM_SETIMAGE, IMAGE_BITMAP as WPARAM, image_handle);
+    }
 
     /// Returns true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
@@ -126,9 +154,9 @@ impl ImageButton {
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        use winapi::um::winuser::{BS_NOTIFY, WS_CHILD};
+        use winapi::um::winuser::{BS_NOTIFY, WS_CHILD, BS_BITMAP};
 
-        BS_NOTIFY | WS_CHILD
+        BS_NOTIFY | WS_CHILD | BS_BITMAP
     }
 
 }
@@ -137,6 +165,7 @@ pub struct ImageButtonBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     enabled: bool,
+    image: Option<&'a Image>,
     flags: Option<ImageButtonFlags>,
     parent: Option<ControlHandle>
 }
@@ -168,6 +197,11 @@ impl<'a> ImageButtonBuilder<'a> {
         self
     }
 
+    pub fn image(mut self, i: Option<&'a Image>) -> ImageButtonBuilder<'a> {
+        self.image = i;
+        self
+    }
+
     pub fn build(self, out: &mut ImageButton) -> Result<(), SystemError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
@@ -182,12 +216,11 @@ impl<'a> ImageButtonBuilder<'a> {
             .flags(flags)
             .size(self.size)
             .position(self.position)
-            .text(self.text)
             .parent(Some(parent))
             .build()?;
 
-        if self.font.is_some() {
-            out.set_font(self.font);
+        if self.image.is_some() {
+            out.set_image(self.image);
         }
 
         out.set_enabled(self.enabled);

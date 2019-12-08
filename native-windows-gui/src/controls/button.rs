@@ -3,7 +3,7 @@ A push button is a rectangle containing an application-defined text label, an ic
 that indicates what the button does when the user selects it.
 */
 
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_PUSHLIKE, BS_FLAT};
 use crate::win32::window_helper as wh;
 use crate::{SystemError, Font};
 use super::{ControlBase, ControlHandle};
@@ -16,6 +16,8 @@ bitflags! {
     pub struct ButtonFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const FLAT = BS_FLAT;
+        const CHECK = BS_PUSHLIKE;
     }
 }
 
