@@ -285,5 +285,5 @@ fn main() {
 
 For the icons used in the test suite (and only there):
 
-**love.ico** is made by [Smashicons](https://smashicons.com/) from [www.flaticon.com](https://www.flaticon.com/)
-**popcorn.bmp** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
+- **love.ico** is made by [Smashicons](https://smashicons.com/) from [www.flaticon.com](https://www.flaticon.com/)
+- **popcorn.bmp** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)

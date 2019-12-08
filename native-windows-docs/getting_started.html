@@ -31,7 +31,7 @@
     
 <div id='toc' class='mobile-hidden'>
 <ul class='chapter'>
-<li><a href='introduction.html'><b>1.</b> Introduction</a>
+<li><a href='index.html'><b>1.</b> Introduction</a>
 </li>
 <li><a href='getting_started.html'><b>2.</b> Getting Started</a>
 </li>
@@ -78,10 +78,106 @@
     is clicked, a messagebox that says "Hello {your name}!" is created. This first example use <b>native-windows-derive</b>,
     scroll further down to see the plain API version.
 
+<div class="highlight"><pre><span></span><span class="sd">/*!</span>
+<span class="sd">    A very simple application that show your name in a message box.</span>
+<span class="sd">    See `basic` for the version without the derive macro</span>
+<span class="sd">*/</span><span class="w"></span>
+
+
+<span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">native_windows_gui</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">nwg</span><span class="p">;</span><span class="w"></span>
+<span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">native_windows_derive</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">nwd</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">use</span><span class="w"> </span><span class="n">nwd</span>::<span class="n">NwgUi</span><span class="p">;</span><span class="w"></span>
+<span class="k">use</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NativeUi</span><span class="p">;</span><span class="w"></span>
+
+
+<span class="cp">#[derive(Default, NwgUi)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">BasicApp</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control(size: (300, 115), position: (300, 300), title: </span><span class="s">&quot;Basic example&quot;</span><span class="cp">, flags: </span><span class="s">&quot;WINDOW|VISIBLE&quot;</span><span class="cp">)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_events( OnWindowClose: [BasicApp::say_goodbye]</span><span class="w"> </span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">window</span>: <span class="nc">nwg</span>::<span class="n">Window</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(text: </span><span class="s">&quot;Heisenberg&quot;</span><span class="cp">, size: (280, 25), position: (10, 10))]</span><span class="w"></span>
+<span class="w">    </span><span class="n">name_edit</span>: <span class="nc">nwg</span>::<span class="n">TextInput</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(text: </span><span class="s">&quot;Say my name&quot;</span><span class="cp">, size: (280, 60), position: (10, 40))]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_events( OnButtonClick: [BasicApp::say_hello]</span><span class="w"> </span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">hello_button</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">BasicApp</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">fn</span> <span class="nf">say_hello</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">nwg</span>::<span class="n">simple_message</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Hello {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">name_edit</span><span class="p">.</span><span class="n">text</span><span class="p">()));</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">nwg</span>::<span class="n">simple_message</span><span class="p">(</span><span class="s">&quot;Goodbye&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Goodbye {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">name_edit</span><span class="p">.</span><span class="n">text</span><span class="p">()));</span><span class="w"></span>
+<span class="w">        </span><span class="n">nwg</span>::<span class="n">stop_thread_dispatch</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">nwg</span>::<span class="n">init</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to init Native Windows GUI&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicApp</span>::<span class="n">build_ui</span><span class="p">(</span><span class="nb">Default</span>::<span class="n">default</span><span class="p">()).</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to build UI&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">nwg</span>::<span class="n">dispatch_thread_events</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+    <h1 id="main-structure" class="section-header"><a href="#installing-nwg">The example in details</a></h1>
+
+    <h3>Basic project structure</h3>
+
+    <b>Native-windows-gui</b> uses structures to represent a UI interface. Controls are represent as members. It's that simple.<br><br>
+    
+    Each control is a thin wrapper over a window handle (HWND). For more complex controls (such as listboxes), the control may contains extra data.
+    Controls implements the <code>Default</code> trait. Controls returned by default functions are considered <b>uninitialized</b>. Calling their function
+    will make the program panic.<br><br>
+
+    Ui actions (displaying a message box in this case) should be implemented as structure methods. That is in no way a hard rule though.
+    Any type of functions can be used. It just wraps nicely with the way the derive macro handles the events. 
+
+    <h3>Native windows derive</h3>
+
+    By deriving <code>NwgUi</code>, <b>Native-windows-derive</b> can automatically generate the Ui code. The derive macro has no way to actually know
+    how to actually create the controls, so further information must be provided over the fields.<br><br>
+
+    <code>nwg_control</code> specifies the control parameters. The actual syntax is <code>ident: expr</code>. The parameters names maps directly to
+    the control builder field (yes NWG uses builders to create controls, more on that later). Check a specific control documentation to see which
+    parameters are available.<br><br>
+
+    <code>nwg_events</code> specifies the events that the control responds to. It take an array of <code>EVENT_NAME: [callbacks]</code>. Note that
+    this is only the default way to dispatch events. <b>nwg_events</b> can be further customized to match all your callback needs. Again, check
+    a specific control documentation to see which events can be raised.<br><br>
+
+    The derive macro has other functions that are out of scope for this introduction, see the native-windows-derive section for more information.
+
+    <h3>Initialization</h3>
+
+    Native windows GUI needs to initialize a few things before being usage. This includes styles and loading some control classes.
+    This is done by calling <code>nwg::init()</code>. This function should not fail, but if it does, it's because the host system is really broken.
+    In such case, the only thing left to do is to panic. Note that some helper functions (such as <code>nwg::simple_message</code>) can still be called.<br><br>
+
+    The next thing to do is to initialize your application. As mentionned in the previous step, this means instantiating your struct.
+    <b>native-windows-derive</b> implements the <code>NativeUi</code> trait for you. All that is needed to do is to pass your default application state
+    to the <code>build_ui</code> function. Because this example is very simple, we just pass <code>Default::default</code> to the initializer<br><br>
+
+    Finally, the only thing left is to start listening for events on the thread. This is done by calling <code> nwg::dispatch_thread_events()</code>.
+    This function will block the thread until <code>nwg::stop_thread_dispatch()</code> is called.<br><br>
+
+    Now lets looks a the inner workings of NWG in the next section...
+        
+
     <h1 id="hello-world" class="section-header"><a href="#hello-world2">Hello World! (no macro)</a></h1>
     Here is the same example without the macro.
 
-<div class="highlight"><pre><span></span><span class="cp">#![windows_subsystem = </span><span class="s">&quot;windows&quot;</span><span class="cp">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="sd">/*!</span>
+<span class="sd">    A very simple application that show your name in a message box.</span>
+<span class="sd">    See `basic_d` for the derive version</span>
+<span class="sd">*/</span><span class="w"></span>
 
 <span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">native_windows_gui</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">nwg</span><span class="p">;</span><span class="w"></span>
 <span class="k">use</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NativeUi</span><span class="p">;</span><span class="w"></span>
@@ -96,11 +192,11 @@
 
 <span class="k">impl</span><span class="w"> </span><span class="n">BasicApp</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">fn</span> <span class="nf">say_hello</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_event</span>: <span class="nc">nwg</span>::<span class="n">Event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">say_hello</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="n">nwg</span>::<span class="n">simple_message</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Hello {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">name_edit</span><span class="p">.</span><span class="n">text</span><span class="p">()));</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="w">    </span>
-<span class="w">    </span><span class="k">fn</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_event</span>: <span class="nc">nwg</span>::<span class="n">Event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="n">nwg</span>::<span class="n">simple_message</span><span class="p">(</span><span class="s">&quot;Goodbye&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">format</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Goodbye {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">name_edit</span><span class="p">.</span><span class="n">text</span><span class="p">()));</span><span class="w"></span>
 <span class="w">        </span><span class="n">nwg</span>::<span class="n">stop_thread_dispatch</span><span class="p">();</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
@@ -151,18 +247,19 @@
 
 <span class="w">            </span><span class="c1">// Events</span>
 <span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">window_handles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="n">ui</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">handle</span><span class="p">];</span><span class="w"></span>
+
 <span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">window_handles</span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">evt_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w"></span>
 <span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">handle_events</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">_evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                    </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                        </span><span class="n">E</span>::<span class="n">OnButtonClick</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">hello_button</span><span class="p">.</span><span class="n">handle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                                </span><span class="n">BasicApp</span>::<span class="n">say_hello</span><span class="p">(</span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">inner</span><span class="p">,</span><span class="w"> </span><span class="n">evt</span><span class="p">);</span><span class="w"></span>
+<span class="w">                                </span><span class="n">BasicApp</span>::<span class="n">say_hello</span><span class="p">(</span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">inner</span><span class="p">);</span><span class="w"></span>
 <span class="w">                            </span><span class="p">}</span><span class="w"></span>
 <span class="w">                        </span><span class="p">},</span><span class="w"></span>
 <span class="w">                        </span><span class="n">E</span>::<span class="n">OnWindowClose</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">handle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                                </span><span class="n">BasicApp</span>::<span class="n">say_goodbye</span><span class="p">(</span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">inner</span><span class="p">,</span><span class="w"> </span><span class="n">evt</span><span class="p">);</span><span class="w"></span>
+<span class="w">                                </span><span class="n">BasicApp</span>::<span class="n">say_goodbye</span><span class="p">(</span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">inner</span><span class="p">);</span><span class="w"></span>
 <span class="w">                            </span><span class="p">}</span><span class="w"></span>
 <span class="w">                        </span><span class="p">},</span><span class="w"></span>
 <span class="w">                        </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
@@ -190,14 +287,14 @@
 
 
 <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">nwg</span>::<span class="n">enable_visual_styles</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="n">nwg</span>::<span class="n">init_common_controls</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to init common controls&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">nwg</span>::<span class="n">init</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to init Native Windows GUI&quot;</span><span class="p">);</span><span class="w"></span>
 
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicApp</span>::<span class="n">build_ui</span><span class="p">(</span><span class="nb">Default</span>::<span class="n">default</span><span class="p">()).</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to build UI&quot;</span><span class="p">);</span><span class="w"></span>
-
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicApp</span>::<span class="n">build_ui</span><span class="p">(</span><span class="nb">Default</span>::<span class="n">default</span><span class="p">()).</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to build UI&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span>
 <span class="w">    </span><span class="n">nwg</span>::<span class="n">dispatch_thread_events</span><span class="p">();</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+        
 
 <br>
 <br>
