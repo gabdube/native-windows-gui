@@ -92,7 +92,7 @@ pub fn init_common_controls() -> Result<(), SystemError> {
     use winapi::um::objbase::CoInitialize;
     use winapi::um::commctrl::{InitCommonControlsEx, INITCOMMONCONTROLSEX};
     use winapi::um::commctrl::{ICC_BAR_CLASSES, ICC_STANDARD_CLASSES, ICC_DATE_CLASSES, ICC_PROGRESS_CLASS,
-     ICC_TAB_CLASSES, ICC_TREEVIEW_CLASSES};
+     ICC_TAB_CLASSES, ICC_TREEVIEW_CLASSES, ICC_LISTVIEW_CLASSES};
     use winapi::shared::winerror::S_OK;
 
     unsafe {
@@ -112,6 +112,10 @@ pub fn init_common_controls() -> Result<(), SystemError> {
 
         if cfg!(feature = "tree-view") {
             classes |= ICC_TREEVIEW_CLASSES;
+        }
+
+        if cfg!(feature = "list-view") {
+            classes |= ICC_LISTVIEW_CLASSES;
         }
 
         let data = INITCOMMONCONTROLSEX {

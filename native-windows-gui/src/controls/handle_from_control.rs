@@ -144,3 +144,10 @@ use super::{Notice};
 
 #[cfg(feature = "notice")]
 handles!(Notice);
+
+#[cfg(feature = "list-view")]
+use super::{ListView};
+
+#[cfg(feature = "list-view")]
+handles!(ListView);
+

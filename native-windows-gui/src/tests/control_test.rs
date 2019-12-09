@@ -50,6 +50,7 @@ pub struct ControlsTest {
     // Layouts
     dialog_tab_layout: GridLayout,
     tree_tab_layout: GridLayout,
+    list_view_tab_layout: GridLayout,
     panel_layout: GridLayout,
 
     // Control window
@@ -100,6 +101,8 @@ pub struct ControlsTest {
     test_tree_input: TextInput,
     test_tree_add: Button,
     test_tree_remove: Button,
+
+    test_list_view: ListView,
 
     // Tooltip
     test_ttp1: Tooltip,
@@ -470,6 +473,10 @@ mod partial_controls_test_ui {
                 .parent(&data.tree_tab)
                 .build(&mut data.test_tree_remove)?;
 
+            ListView::builder()
+                .parent(&data.list_view_tab)
+                .build(&mut data.test_list_view)?;
+
 
             //
             // Tooltip
@@ -690,6 +697,12 @@ mod partial_controls_test_ui {
                 .child(1, 1, &data.test_tree_add)
                 .child(1, 2, &data.test_tree_remove)
                 .build(&data.tree_tab_layout);
+
+            GridLayout::builder()
+                .parent(&data.list_view_tab)
+                .min_size([400, 220])
+                .child_item(GridLayoutItem::new(&data.test_list_view, 0, 0, 1, 7))
+                .build(&data.list_view_tab_layout);
 
             Ok(())
         }

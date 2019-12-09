@@ -6,3 +6,6 @@ input[id^="spoiler"] + label + .spoiler { margin: 5px 0; opacity: 0; height: 0; 
 input[id^="spoiler"]:checked + label + .spoiler { opacity: 1; height: auto; }
 
 code { background-color: #E5E5E5; border-radius: 2px; padding: 0 3px; }
+
+.highlight { overflow-x: scroll; }
+.highlight > pre { width: max-content; }
