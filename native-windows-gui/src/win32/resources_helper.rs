@@ -130,9 +130,8 @@ pub unsafe fn build_oem_image(
 
 
 pub unsafe fn make_bitmap_transparent(handle: HANDLE, size: (i32, i32), key: [u8; 3]) -> Result<HANDLE, SystemError> {
-    use winapi::um::wingdi::{RGB, TransparentBlt, CreateCompatibleDC, CreateCompatibleBitmap, DeleteDC, DeleteObject, SelectObject, SRCCOPY};
-    use winapi::um::winuser::{GetDC, ReleaseDC};
-    use winapi::shared::windef::{HDC, HGDIOBJ};
+    use winapi::um::wingdi::{RGB, TransparentBlt, CreateCompatibleDC, CreateCompatibleBitmap, DeleteDC, DeleteObject, SelectObject};
+    use winapi::shared::windef::{HGDIOBJ};
 
     let (w, h) = size;
     let color_key = RGB(key[0], key[1], key[2]);
