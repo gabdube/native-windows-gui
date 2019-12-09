@@ -38,10 +38,53 @@
 
 <li><a href="basics.html"><b>3.</b> Basics </a>
 <ul class="section">
-    <li><a href="ui.html"><b>3.1.</b> Ui objects </a></li>
-    <li><a href="controls_resources.html"><b>3.2.</b> Controls and resources </a></li>
-    <li><a href="events.html"><b>3.3.</b> Events </a></li>
-    <li><a href="other_functions.html"><b>3.4.</b> Other functions </a></li>
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helper functions </a></li>
+</ul>
+</li>
+
+<li><a href="controls_lib.html"><b>4.</b> Controls encyclopedia </a>
+<ul class="section">
+    <li><a href="basic_controls.html"><b>4.1.</b> TODO </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>5.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>5.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>5.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>5.3.</b> Dialogs </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>6.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>6.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>6.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>6.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>6.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>7.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_controls.html"><b>7.1.</b> Controls </a></li>
+    <li><a href="nwd_events.html"><b>7.2.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>7.3.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>7.4.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>8.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>8.1.</b> Raw event handling </a></li>
+    </ul>
+</li>
+
+<li><a href="canvas.html"><b>9.</b> The canvas </a>
+<ul class="section">
+    <li><a href="canvas_base.html"><b>9.1.</b> Basics </a></li>
 </ul>
 </li>
 
@@ -350,24 +393,24 @@ This is exactly what <code>bind_event_handler</code> do (with lots, lots of safe
 Every time an event is raised by the parent or it's children, the callback will be called. Behind the scene, NWG will carefully parse the raw winapi parameters
 and return three simple values: an event <code>Event</code>, it's data (if any) <code>EventData</code>, and the sender window handle <code>ControlHandle</code>.<br><br>
 
-You can see that there are no way to fetch our application data from these parameters. That's why the application (now behind a RC) <b>is cloned and passed to the callback</b>.<br><br>
+You can see that there are no way to fetch our application data from these parameters. That's why the application (now behind a RC) <b>is cloned and passed to the closure</b>.<br><br>
 
 Inside the callback, the developer needs to do three things:
 <ul>
     <li>Match the event value. <code>match evt</code></li>
     <li>Check which control sent the event. <code>handle == evt_ui.hello_button.handle</code></li>
     <li>Call the required functions</li> <code>BasicApp::say_hello(&evt_ui.inner);</code>
-</ul> 
+</ul> <br>
 
-And that is all for events handling. Hopefully, <b>native-windows-derive</b> handles all of this for us!.<br><br>
+And that is all for events handling. Thankfully, <b>native-windows-derive</b> handles all of this for us!<br><br>
 
-Note that <code>bind_event_handler</code> applies to the parent and <b>all it's children</b>. This means you only need to wrap <b>TOP LEVEL window</b>.
+Note that <code>bind_event_handler</code> applies to the parent and <b>all it's children</b>. This means you only need to bind handlers on <b>TOP LEVEL window</b>.
 
 <h3>End note</h3>
 
 Right now, you learned about 50% of NWG. That's enough to build small applications, but there's two intermediate topics that you will want to learn: 
 <b>layouts, and resources handling (fonts, image)</b>. For larger applications you will want to look at more advanced topics such as
-<b>UI partials, dynamic control creation, dynamic event binding and unbinding</b>.<br><br>
+<b>UI partials, dynamic control creation, dynamic event binding, unbinding, and multithreading</b>.<br><br>
 
 Good luck with your UI projects. Hopefully, NWG will be a good fit.
 
