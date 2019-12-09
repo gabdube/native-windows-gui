@@ -157,8 +157,8 @@
 
     <h3>Initialization</h3>
 
-    Native windows GUI needs to initialize a few things before being usage. This includes styles and loading some control classes.
-    This is done by calling <code>nwg::init()</code>. This function should not fail, but if it does, it's because the host system is really broken.
+    Native windows GUI needs to initialize a few things before being usable. This includes styles and loading some control classes.
+    The initialization done by calling <code>nwg::init()</code>. This function should not fail, but if it does, it's because the host system is really broken.
     In such case, the only thing left to do is to panic. Note that some helper functions (such as <code>nwg::simple_message</code>) can still be called.<br><br>
 
     The next thing to do is to initialize your application. As mentionned in the previous step, this means instantiating your struct.

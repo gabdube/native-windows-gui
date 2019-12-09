@@ -28,8 +28,8 @@ pub struct ControlsTest {
 
     window_icon: Image,
     love_icon: Image,
-    ferris: Image,
-    popcorn: Image,
+    ferris: Bitmap,
+    popcorn: Bitmap,
     arial_font: Font,
     
     #[cfg(feature = "file-dialog")]
@@ -150,8 +150,15 @@ mod partial_controls_test_ui {
             //
             data.window_icon = Image::icon("./test_rc/cog.ico", None, false)?;
             data.love_icon = Image::icon("./test_rc/love.ico", None, false)?;
-            data.ferris = Image::bitmap("./test_rc/ferris.bmp", None, false)?;
-            data.popcorn = Image::bitmap("./test_rc/popcorn.bmp", Some((80, 80)), false)?;
+
+            Bitmap::builder()
+                .source_file(Some("./test_rc/ferris.bmp"))
+                .build(&mut data.ferris)?;
+
+            Bitmap::builder()
+                .source_file(Some("./test_rc/popcorn.bmp"))
+                .size(Some((80, 80)))
+                .build(&mut data.popcorn)?;
 
             #[cfg(feature = "file-dialog")]
             #[cfg(feature = "color-dialog")]
@@ -314,6 +321,7 @@ mod partial_controls_test_ui {
                 .size((130, 99))
                 .parent(&data.basics_control_tab)
                 .image(Some(&data.ferris))
+                .background_color(Some([255,255,255]))
                 .build(&mut data.test_img_frame)?;
 
             RadioButton::builder()

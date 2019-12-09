@@ -5,6 +5,7 @@
 #[derive(Debug, Clone, Copy)]
 #[repr(usize)]
 pub enum SystemError {
+    Todo,
     GetModuleHandleFailed,
     CoInitializeFailed,
     SystemClassCreationFailed,

@@ -1,11 +1,11 @@
 /*!
-An image frame is a control that display an image resource. It also accept mouse clicks.
+An image frame is a control that display an `Bitmap` image resource. It also accept mouse clicks.
 */
 
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use super::{ControlBase, ControlHandle};
-use crate::{Image, SystemError};
+use crate::{Bitmap, SystemError};
 
 const NOT_BOUND: &'static str = "ImageFrame is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: ImageFrame handle is not HWND!";
@@ -32,31 +32,33 @@ impl ImageFrame {
             position: (0, 0),
             flags: None,
             image: None,
-            parent: None
+            parent: None,
+            background_color: None
         }
     }
 
     /// Get the image of the image frame
-    pub fn image(&self) -> Option<Image> {
+    pub fn image(&self) -> Option<Bitmap> {
         use winapi::um::winuser::{STM_GETIMAGE, IMAGE_BITMAP};
-        use std::mem;
+        use winapi::um::winnt::HANDLE;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let image = wh::send_message(handle, STM_GETIMAGE, IMAGE_BITMAP as usize, 0);
         if image != 0 {
-            Some(Image{ handle: unsafe { mem::transmute(image) } })
+            Some(Bitmap { handle: image as HANDLE, owned: false } )
         } else {
             None
         }
     }
 
     /// Set the image of the image frame.
-    pub fn set_image(&self, image: Option<&Image>) {
+    pub fn set_image(&self, image: Option<&Bitmap>) {
         use winapi::um::winuser::{STM_SETIMAGE, IMAGE_BITMAP};
         use winapi::um::wingdi::DeleteObject;
-        use std::{mem, ptr};
+        use winapi::um::winnt::HANDLE;
+        use std::{ptr};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -66,7 +68,7 @@ impl ImageFrame {
 
         if old_image != 0 {
             unsafe {
-                DeleteObject(mem::transmute(old_image));
+                DeleteObject(old_image as HANDLE);
             }
         }
     }
@@ -146,14 +148,44 @@ impl ImageFrame {
         WS_CHILD | SS_NOTIFY
     }
 
+    /// Change the label background color to transparent.
+    /// Change the checkbox background color.
+    fn hook_background_color(&self, c: [u8; 3]) {
+        use crate::bind_raw_event_handler;
+        use winapi::um::winuser::{WM_CTLCOLORSTATIC};
+        use winapi::shared::{basetsd::UINT_PTR, windef::{HWND}, minwindef::LRESULT};
+        use winapi::um::wingdi::{CreateSolidBrush, RGB};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
+        let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
+        
+        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+            match msg {
+                WM_CTLCOLORSTATIC => {
+                    let child = l as HWND;
+                    if child == handle {
+                        return Some(brush as LRESULT);
+                    }
+                },
+                _ => {}
+            }
+
+            None
+        });
+    }
+
 }
 
 pub struct ImageFrameBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<ImageFrameFlags>,
-    image: Option<&'a Image>,
-    parent: Option<ControlHandle>
+    image: Option<&'a Bitmap>,
+    parent: Option<ControlHandle>,
+    background_color: Option<[u8; 3]>,
 }
 
 impl<'a> ImageFrameBuilder<'a> {
@@ -173,13 +205,18 @@ impl<'a> ImageFrameBuilder<'a> {
         self
     }
 
-    pub fn image(mut self, image: Option<&'a Image>) -> ImageFrameBuilder<'a> {
+    pub fn image(mut self, image: Option<&'a Bitmap>) -> ImageFrameBuilder<'a> {
         self.image = image;
         self
     }
 
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ImageFrameBuilder<'a> {
         self.parent = Some(p.into());
+        self
+    }
+
+    pub fn background_color(mut self, color: Option<[u8;3]>) -> ImageFrameBuilder<'a> {
+        self.background_color = color;
         self
     }
 
@@ -194,6 +231,7 @@ impl<'a> ImageFrameBuilder<'a> {
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
+            .ex_flags(::winapi::um::winuser::WS_EX_TRANSPARENT)
             .flags(flags)
             .size(self.size)
             .position(self.position)
@@ -202,6 +240,10 @@ impl<'a> ImageFrameBuilder<'a> {
 
         if self.image.is_some() {
             out.set_image(self.image);
+        }
+
+        if self.background_color.is_some() {
+            out.hook_background_color(self.background_color.unwrap());
         }
 
         Ok(())

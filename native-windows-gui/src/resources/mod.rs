@@ -1,6 +1,7 @@
 mod font;
 mod system_images;
 mod image;
+mod bitmap;
 
 #[cfg(feature = "file-dialog")]
 mod file_dialog;
@@ -14,6 +15,7 @@ mod font_dialog;
 pub use font::{Font, FontInfo, FontBuilder};
 pub use system_images::*;
 pub use image::{Image};
+pub use bitmap::{Bitmap};
 
 #[cfg(feature = "file-dialog")]
 pub use file_dialog::{FileDialog, FileDialogAction};

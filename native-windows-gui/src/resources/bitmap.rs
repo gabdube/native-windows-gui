@@ -1,0 +1,103 @@
+/*!
+    A wrapper over a bitmap file (*.bmp)
+*/
+use winapi::um::winnt::HANDLE;
+use winapi::um::winuser::IMAGE_BITMAP;
+use crate::win32::resources_helper as rh;
+use crate::SystemError;
+use std::ptr;
+
+
+/// A wrapper over a bitmap file (*.bmp)
+/// See module documentation
+#[allow(unused)]
+pub struct Bitmap {
+    pub handle: HANDLE,
+    pub(crate) owned: bool
+}
+
+impl Bitmap {
+
+    pub fn builder<'a>() -> BitmapBuilder<'a> {
+        BitmapBuilder {
+            source_text: None,
+            source_bin: None,
+            transparency_key: None,
+            size: None,
+            strict: false
+        }
+    }
+
+}
+
+pub struct BitmapBuilder<'a> {
+    source_text: Option<&'a str>,
+    source_bin: Option<&'a [u8]>,
+    transparency_key: Option<[u8; 3]>,
+    size: Option<(u32, u32)>,
+    strict: bool,
+}
+
+impl<'a> BitmapBuilder<'a> {
+
+    pub fn source_file(mut self, t: Option<&'a str>) -> BitmapBuilder<'a> {
+        self.source_text = t;
+        self
+    }
+
+    pub fn source_bin(mut self, t: Option<&'a [u8]>) -> BitmapBuilder<'a> {
+        self.source_bin = t;
+        self
+    }
+
+    pub fn size(mut self, s: Option<(u32, u32)>) -> BitmapBuilder<'a> {
+        self.size = s;
+        self
+    }
+
+    pub fn strict(mut self, s: bool) -> BitmapBuilder<'a> {
+        self.strict = s;
+        self
+    }
+
+    pub fn transparency_key(mut self, k: Option<[u8; 3]>) -> BitmapBuilder<'a> {
+        self.transparency_key = k;
+        self
+    }
+
+    pub fn build(self, b: &mut Bitmap) -> Result<(), SystemError> {
+        let mut handle = None;
+        
+        if let Some(src) = self.source_text {
+            handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_BITMAP).ok() };
+        }
+
+        let mut handle = handle.unwrap();
+
+        if let Some(key) = self.transparency_key {
+            let size = match self.size {
+                Some((x, y)) => (x as i32, y as i32),
+                None => (0, 0)
+            };
+
+            handle = unsafe { rh::make_bitmap_transparent(handle, size, key)? };
+        }
+        
+        *b = Bitmap { handle, owned: true };
+    
+        Ok(())
+    }
+
+}
+
+
+impl Default for Bitmap {
+
+    fn default() -> Bitmap {
+        Bitmap {
+            handle: ptr::null_mut(),
+            owned: false
+        }
+    }
+
+}

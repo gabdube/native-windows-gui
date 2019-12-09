@@ -7,7 +7,7 @@ ImageButton use the same event as `Button`.
 
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_FLAT};
 use crate::win32::window_helper as wh;
-use crate::{SystemError, Image};
+use crate::{SystemError, Bitmap};
 use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "ImageButton is not yet bound to a winapi object";
@@ -44,7 +44,7 @@ impl ImageButton {
         }
     }
 
-    pub fn image(&self) -> Option<Image> {
+    pub fn image(&self) -> Option<Bitmap> {
         use winapi::um::winuser::{BM_GETIMAGE, IMAGE_BITMAP};
         use winapi::shared::minwindef::{WPARAM};
         use winapi::um::winnt::HANDLE;
@@ -56,11 +56,11 @@ impl ImageButton {
         if image == 0 {
             None
         } else {
-            Some(Image{ handle: handle as HANDLE } )
+            Some(Bitmap { handle: handle as HANDLE, owned: false } )
         }
     }
     
-    pub fn set_image<'a>(&self, image: Option<&'a Image>) {
+    pub fn set_image<'a>(&self, image: Option<&'a Bitmap>) {
         use winapi::um::winuser::{BM_SETIMAGE, IMAGE_BITMAP};
         use winapi::shared::minwindef::{WPARAM, LPARAM};
 
@@ -165,7 +165,7 @@ pub struct ImageButtonBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     enabled: bool,
-    image: Option<&'a Image>,
+    image: Option<&'a Bitmap>,
     flags: Option<ImageButtonFlags>,
     parent: Option<ControlHandle>
 }
@@ -197,7 +197,7 @@ impl<'a> ImageButtonBuilder<'a> {
         self
     }
 
-    pub fn image(mut self, i: Option<&'a Image>) -> ImageButtonBuilder<'a> {
+    pub fn image(mut self, i: Option<&'a Bitmap>) -> ImageButtonBuilder<'a> {
         self.image = i;
         self
     }
@@ -215,6 +215,7 @@ impl<'a> ImageButtonBuilder<'a> {
             .forced_flags(out.forced_flags())
             .flags(flags)
             .size(self.size)
+            .text("")
             .position(self.position)
             .parent(Some(parent))
             .build()?;

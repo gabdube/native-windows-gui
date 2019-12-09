@@ -70,8 +70,9 @@ This is the main project git. It is separated in multiple sections
 
 - The WHOLE winapi control library [(reference)](https://docs.microsoft.com/en-us/windows/win32/controls/individual-control-info)
   - Some very niche controls are not supported: flat scroll bar, ip control, rebar, and pager.
-- Menus and menu bar 
+- Menus and menu bar
 - Image and font resource
+  - Extended image formats with the Windows Imaging Component (WIC).
 - Tooltip and system tray notification
 - Partial templates support
   - Split large application into chunks
@@ -87,7 +88,6 @@ This is the main project git. It is separated in multiple sections
   - GridLayout
 - A canvas powered by *Direct2D* to draw custom controls
   - A single line cannot express how much work was put into this
-- Extended image formats with the Windows Imaging Component (WIC).
 - The most common dialog boxes
   - File dialog (save, open, open folder)
   - Font dialog

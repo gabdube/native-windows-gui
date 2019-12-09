@@ -128,6 +128,42 @@ pub unsafe fn build_oem_image(
     }
 }
 
+
+pub unsafe fn make_bitmap_transparent(handle: HANDLE, size: (i32, i32), key: [u8; 3]) -> Result<HANDLE, SystemError> {
+    use winapi::um::wingdi::{RGB, TransparentBlt, CreateCompatibleDC, CreateCompatibleBitmap, DeleteDC, DeleteObject, SelectObject, SRCCOPY};
+    use winapi::um::winuser::{GetDC, ReleaseDC};
+    use winapi::shared::windef::{HDC, HGDIOBJ};
+
+    let (w, h) = size;
+    let color_key = RGB(key[0], key[1], key[2]);
+
+    let src_hdc = CreateCompatibleDC(ptr::null_mut());
+    SelectObject(src_hdc, handle as HGDIOBJ);
+
+    let dst_hdc = CreateCompatibleDC(ptr::null_mut());
+    let dst_hbitmap = CreateCompatibleBitmap(src_hdc, w, h);
+    SelectObject(dst_hdc, dst_hbitmap as HGDIOBJ);
+
+    let ok = TransparentBlt (
+        dst_hdc,
+        0, 0,
+        w, h,
+        src_hdc,
+        0, 0,
+        w, h,
+        color_key
+    );
+
+    DeleteDC(src_hdc);
+    DeleteDC(dst_hdc);
+    DeleteObject(handle as HANDLE);
+
+    match ok == 1 {
+        true => Ok(dst_hbitmap as HANDLE),
+        false => Err(SystemError::Todo)
+    }
+}
+
 //
 // File dialog low level methods
 //

@@ -363,9 +363,9 @@ impl Tab {
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
         //use winapi::um::commctrl::{TCS_SINGLELINE};
-        use winapi::um::winuser::{WS_CHILD, WS_CLIPCHILDREN, WS_EX_TRANSPARENT};
+        use winapi::um::winuser::{WS_CHILD, WS_CLIPCHILDREN};
 
-        WS_CHILD | WS_CLIPCHILDREN | WS_EX_TRANSPARENT
+        WS_CHILD | WS_CLIPCHILDREN
     }
 
     /// Set and initialize a tab as active
