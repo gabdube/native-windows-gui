@@ -711,6 +711,10 @@ mod partial_controls_test_ui {
             use crate::Event as E;
 
             match evt {
+                E::OnInit => 
+                    if &handle == &self.window {
+                        init_tree(self, );
+                    },
                 E::OnButtonClick =>
                     if &handle == &self.run_window_test {
                         run_window_tests(self, evt);
@@ -780,6 +784,14 @@ mod partial_controls_test_ui {
         }
 
     }
+}
+
+fn init_tree(app: &ControlsTest) {
+    let tree = &app.test_tree;
+    let item = tree.insert_item("Hello", None, TreeInsert::Root);
+    let view = tree.insert_item("A tree View", Some(&item), TreeInsert::First);
+    tree.insert_item("AHHHHHHH", Some(&view), TreeInsert::First);
+    tree.insert_item("Items", Some(&item), TreeInsert::First);
 }
 
 fn show_pop_menu(app: &ControlsTest, _evt: Event) {
@@ -1287,8 +1299,8 @@ fn tree_tests(app: &ControlsTest, handle: &ControlHandle) {
         let text = app.test_tree_input.text();
         match app.test_tree.root() {
             Some(root) => match app.test_tree.selected_item() {
-                None =>    { app.test_tree.insert_item(&text, Some(root), TreeInsert::Last); },
-                Some(i) => { app.test_tree.insert_item(&text, Some(i), TreeInsert::Last); },
+                None =>    { app.test_tree.insert_item(&text, Some(&root), TreeInsert::Last); },
+                Some(i) => { app.test_tree.insert_item(&text, Some(&i), TreeInsert::Last); },
             },
             None => { app.test_tree.insert_item(&text, None, TreeInsert::Root); },
         }

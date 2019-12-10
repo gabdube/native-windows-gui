@@ -112,7 +112,7 @@ impl TreeView {
     }
 
     /// Insert a new item into the TreeView and return a reference to new newly added item
-    pub fn insert_item<'a>(&self, new: &'a str, parent: Option<TreeItem>, position: TreeInsert) -> TreeItem {
+    pub fn insert_item<'a>(&self, new: &'a str, parent: Option<&TreeItem>, position: TreeInsert) -> TreeItem {
         use winapi::um::commctrl::{TVM_INSERTITEMW, TVINSERTSTRUCTW, TVI_FIRST, TVI_LAST, TVI_ROOT, TVI_SORT, TVIF_TEXT};
         use winapi::um::commctrl::TVINSERTSTRUCTW_u;
         use winapi::um::winnt::LPWSTR;
