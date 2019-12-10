@@ -94,7 +94,8 @@ This is the main project git. It is separated in multiple sections
   - Color dialog
 - Support for low level system message capture. 
 - Cross compiling and testing from Linux to Windows with Wine and mingw.
-  - Not all features are supported
+  - Not all features are supported (but over 90% are, thanks WINE!)
+  - See `https://zork.net/~st/jottings/rust-windows-and-debian.html` for the steps to follow
 
 ## Performance
 

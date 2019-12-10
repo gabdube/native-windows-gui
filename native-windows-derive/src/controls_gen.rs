@@ -5,14 +5,6 @@ use quote::{ToTokens};
 use std::cell::RefCell;
 
 
-static CONTROL_LIST: &'static [&'static str] = &[
-    "Window", "Button", "CheckBox", "ComboBox", "DatePicker", "FancyWindow",
-    "ImageFrame", "Label", "ListBox", "Menu", "MenuItem", "MenuSeparator",
-    "Notice", "ProgressBar", "RadioButton", "StatusBar", "TabsContainer", "Tab",
-    "TextBox", "TextInput", "Timer", "Tooltip", "Trackbar", "TreeView", "Canvas",
-    "CanvasWindow", "TrayNotification", "MessageWindow"
-];
-
 static TOP_LEVEL: &'static [&'static str] = &[
     "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow"
 ];
@@ -93,9 +85,6 @@ pub fn generate_control<'a>(field: &'a syn::Field) -> Option<ControlGen<'a>> {
     };
 
     let ty = extract_control_type(&field.ty);
-    if !CONTROL_LIST.iter().any(|name| &ty == name) {
-        panic!("Unkown nwg type #{}. If you use renamed control try `control(ty=Button)`.", ty);
-    }
     
     let params: ControlParameters = match syn::parse2(attr.tokens.clone()) {
         Ok(a) => a,
