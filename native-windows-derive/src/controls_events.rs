@@ -9,13 +9,24 @@ use std::collections::HashMap;
 
 /// A callback function definition
 struct CallbackFunction {
-    path: syn::Path
+    path: syn::Path,
+    args: Option<Punctuated<syn::Ident, Token![,]>>
 }
 
 impl Parse for CallbackFunction {
     fn parse(input: ParseStream) -> syn::Result<Self> {
+        use syn::group::parse_parens;
+
+        let path = input.parse()?;
+        let mut args = None;
+
+        if let Ok(parens) = parse_parens(input) {
+            args = Some(parens.content.parse_terminated(syn::Ident::parse)?);
+        }
+
         Ok(CallbackFunction {
-            path: input.parse()?,
+            path,
+            args
         })
     }
 }
@@ -62,6 +73,7 @@ impl Parse for CallbackDefinitions {
 struct EventCallback {
     member: syn::Ident,
     path: syn::Path,
+    args: Punctuated<syn::Expr, Token![,]>
 }
 
 /// Wrapper over a basic event dispatcher
@@ -106,7 +118,8 @@ impl ControlEvents {
             for cb_fn in callback_def.callbacks.iter() {
                 let callback = EventCallback {
                     member: member.clone(),
-                    path: cb_fn.path.clone()
+                    path: cb_fn.path.clone(),
+                    args: map_callback_args(&member, &cb_fn.args)
                 };
 
                 evt_callbacks.push(callback);
@@ -161,18 +174,21 @@ impl<'a> ToTokens for EventCallbackCol<'a> {
             1 => {
                 let member = &cb[0].member;
                 let path = &cb[0].path;
-                quote!{ if &_handle == &evt_ui.#member { #path(&evt_ui.inner) } }
+                let args = &cb[0].args;
+                quote!{ if &_handle == &evt_ui.#member { #path(#args) } }
             }
             _ => {
                 let first_member = &cb[0].member;
                 let first_path = &cb[0].path;
+                let first_args = &cb[0].args;
 
                 let members: Vec<&syn::Ident> = cb[1..].iter().map(|c| &c.member).collect();
                 let paths: Vec<&syn::Path> = cb[1..].iter().map(|c| &c.path).collect();
+                let args: Vec<&Punctuated<syn::Expr, Token![,]>> = cb[1..].iter().map(|c| &c.args).collect();
 
                 quote!{
-                    if &_handle == &evt_ui.#first_member { #first_path(&evt_ui.inner) }
-                    #(else if &_handle == &evt_ui.#members { #paths(&evt_ui.inner) })*
+                    if &_handle == &evt_ui.#first_member { #first_path(#first_args) }
+                    #(else if &_handle == &evt_ui.#members { #paths(#args) })*
                 }
             }
         };
@@ -209,4 +225,33 @@ fn top_level_window(field: &syn::Field) -> bool {
         },
         _ => false
     }
+}
+
+fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, Token![,]>>) -> Punctuated<syn::Expr, Token![,]> {
+    let mut p = Punctuated::new();
+    let default: syn::Expr = syn::parse_str("&evt_ui.inner").unwrap();
+    
+    if args.is_none() {
+        p.push(default);
+        return p;
+    }
+
+    let values = ["SELF", "CTRL", "HANDLE", "EVT", "EVT_DATA"];
+    for a in args.as_ref().unwrap().iter() {
+        let pos = values.iter().position(|v| &a == &v );
+        match pos {
+            Some(0) => { p.push(default.clone()); },
+            Some(1) => { 
+                let param = format!("&evt_ui.{}", member);
+                p.push(syn::parse_str(&param).unwrap());
+            },
+            Some(2) => { p.push(syn::parse_str("&_handle").unwrap()); },
+            Some(3) => { p.push(syn::parse_str("&_evt").unwrap()); },
+            Some(4) => { p.push(syn::parse_str("&_evt_data").unwrap()); },
+            Some(_) => { unreachable!(); }
+            None => panic!("Unknown callback argument: {}. Should be one of those values: {:?}", a, values)
+        }
+    }
+    
+    p
 }
