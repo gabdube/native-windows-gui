@@ -6,6 +6,7 @@ use std::ptr;
 
 
 /// A layout that lines up control horizontally
+/// NWG layouts use interior mutability to manage their controls.
 #[derive(Debug)]
 pub struct HBoxLayout {
     base: HWND,

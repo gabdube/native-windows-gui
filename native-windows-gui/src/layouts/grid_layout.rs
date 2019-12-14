@@ -73,6 +73,7 @@ pub struct GridLayoutInner {
 }
 
 /// A layout that lays out widgets in a grid
+/// NWG layouts use interior mutability to manage their controls.
 #[derive(Clone)]
 pub struct GridLayout {
     inner: Rc<RefCell<GridLayoutInner>>
@@ -93,6 +94,46 @@ impl GridLayout {
         };
 
         GridLayoutBuilder { layout }
+    }
+
+    /// Add a children control to the grid layout. 
+    /// This is a simplified interface over `add_child_item`
+    ///
+    /// Panic:
+    ///   - The layout must have been successfully built otherwise this function will panic.
+    ///   - The control must be window-like and be initialized
+    pub fn add_child<W: Into<ControlHandle>>(&self, col: u32, row: u32, c: W) {
+        let h = c.into().hwnd().expect("Child must be HWND");
+        let item = GridLayoutItem {
+            control: h,
+            col,
+            row,
+            col_span: 1,
+            row_span: 1,
+        };
+
+        self.add_child_item(item);
+    }
+    
+    /// Add a children control to the grid layout. 
+    ///
+    /// Panic:
+    ///   - The layout must have been successfully built otherwise this function will panic.
+    ///   - The control must be window-like and be initialized
+    pub fn add_child_item(&self, i: GridLayoutItem) {
+        let base = {
+            let mut inner = self.inner.borrow_mut();
+            if inner.base.is_null() {
+                panic!("Grid layout is not bound to a parent control.")
+            }
+
+            inner.children.push(i);
+            inner.base
+        };
+        
+
+        let (w, h) = unsafe { wh::get_window_size(base) };
+        self.update_layout(w as u32, h as u32);
     }
 
     fn update_layout(&self, mut width: u32, mut height: u32) -> () {

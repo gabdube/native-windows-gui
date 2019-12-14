@@ -1,19 +1,23 @@
 /*!
-    A very simple application that show your name in a message box.
-    See `basic_d` for the derive version
+    An application that saves messages into buttons. 
+    Demonstrate the dynamic functions of NWG.
 */
 
 extern crate native_windows_gui as nwg;
 use nwg::NativeUi;
+use std::cell::RefCell;
 
 
 #[derive(Default)]
 pub struct MessageBank {
     window: nwg::Window,
     layout: nwg::GridLayout,
+
     add_message_btn: nwg::Button,
     message_title: nwg::TextInput,
     message_content: nwg::TextInput,
+
+    buttons: RefCell<Vec<nwg::Button>>
 }
 
 impl MessageBank {
@@ -21,6 +25,19 @@ impl MessageBank {
     fn add_message(&self) {
         let title = self.message_title.text();
         let content = self.message_content.text();
+
+        let mut new_button = Default::default();
+        nwg::Button::builder()
+            .text(&title)
+            .parent(&self.window)
+            .build(&mut new_button)
+            .expect("Failed to build button");
+
+        let mut buttons = self.buttons.borrow_mut();
+        let blen = buttons.len() as u32;
+        let (x, y) = (blen % 6, blen / 6);
+        self.layout.add_child(x, y+1, &new_button);
+        buttons.push(new_button);
     }
 
     fn exit(&self) {
@@ -60,12 +77,12 @@ mod message_bank_ui {
                 .build(&mut data.add_message_btn)?;
 
             nwg::TextInput::builder()
-                .text("Message Title")
+                .text("Title")
                 .parent(&data.window)
                 .build(&mut data.message_title)?;
 
             nwg::TextInput::builder()
-                .text("Message Content")
+                .text("Hello World!")
                 .parent(&data.window)
                 .build(&mut data.message_content)?;
 
