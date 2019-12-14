@@ -29,7 +29,7 @@ use winapi::um::shellapi::{Shell_NotifyIconW, NOTIFYICONDATAW};
 use super::{ControlBase, ControlHandle};
 use crate::win32::base_helper::to_utf16;
 use crate::win32::window_helper as wh;
-use crate::{Image, SystemError};
+use crate::{Icon, SystemError};
 use std::{mem, ptr};
 
 const NOT_BOUND: &'static str = "TrayNotification is not yet bound to a winapi object";
@@ -126,7 +126,7 @@ impl TrayNotification {
     }
 
     /// Update the icon in the system tray
-    pub fn set_icon(&self, icon: &Image ) {
+    pub fn set_icon(&self, icon: &Icon) {
         use winapi::um::shellapi::{NIF_ICON, NIM_MODIFY};
         use winapi::shared::windef::HICON;
 
@@ -152,7 +152,7 @@ impl TrayNotification {
     ///
     /// Note 1: text will be truncated to 255 characters
     /// Note 2: title will be truncated to 63 characters
-    pub fn show<'a>(&self, text: &'a str, title: Option<&'a str>, flags: Option<TrayNotificationFlags>, icon: Option<&'a Image>) {
+    pub fn show<'a>(&self, text: &'a str, title: Option<&'a str>, flags: Option<TrayNotificationFlags>, icon: Option<&'a Icon>) {
         use winapi::um::shellapi::{NIF_INFO, NIM_MODIFY};
         use winapi::shared::windef::HICON;
 
@@ -215,14 +215,14 @@ impl TrayNotification {
 
 pub struct TrayNotificationBuilder<'a> {
     parent: Option<ControlHandle>,
-    icon: Option<&'a Image>,
+    icon: Option<&'a Icon>,
 
     tip: Option<&'a str>,
 
     info: Option<&'a str>,
     info_title: Option<&'a str>,
     flags: TrayNotificationFlags,
-    balloon_icon: Option<&'a Image>,
+    balloon_icon: Option<&'a Icon>,
 
     realtime: bool,
     callback: bool,
@@ -236,7 +236,7 @@ impl<'a> TrayNotificationBuilder<'a> {
         self
     }
 
-    pub fn icon(mut self, ico: Option<&'a Image>) -> TrayNotificationBuilder<'a> {
+    pub fn icon(mut self, ico: Option<&'a Icon>) -> TrayNotificationBuilder<'a> {
         self.icon = ico;
         self
     }
@@ -257,7 +257,7 @@ impl<'a> TrayNotificationBuilder<'a> {
     }
 
     /// Note: balloon_icon is only used if `info` is set AND flags uses `USER_ICON`
-    pub fn balloon_icon(mut self, ico: Option<&'a Image>) -> TrayNotificationBuilder<'a> {
+    pub fn balloon_icon(mut self, ico: Option<&'a Icon>) -> TrayNotificationBuilder<'a> {
         self.balloon_icon = ico;
         self
     }

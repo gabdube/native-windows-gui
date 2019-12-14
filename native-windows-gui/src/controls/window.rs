@@ -6,7 +6,7 @@ use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_CLIPCHILDREN, WS_VISIBLE, WS_D
 WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME};
 
 use crate::win32::window_helper as wh;
-use crate::{SystemError, Image};
+use crate::{SystemError, Icon};
 use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "Window is not yet bound to a winapi object";
@@ -50,7 +50,7 @@ impl Window {
     }
 
     /// Return the icon of the window
-    pub fn icon(&self) -> Option<Image> {
+    pub fn icon(&self) -> Option<Icon> {
         use winapi::um::winuser::WM_GETICON;
         use winapi::um::winnt::HANDLE;
 
@@ -61,13 +61,13 @@ impl Window {
         if handle == 0 {
             None
         } else {
-            Some(Image{ handle: handle as HANDLE })
+            Some(Icon { handle: handle as HANDLE, owned: false })
         }
     }
 
     /// Set the icon in the window
     /// - icon: The new icon. If None, the icon is removed
-    pub fn set_icon(&self, icon: Option<&Image>) {
+    pub fn set_icon(&self, icon: Option<&Icon>) {
         use winapi::um::winuser::WM_SETICON;
         use std::{mem, ptr};
 
@@ -187,7 +187,7 @@ pub struct WindowBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<WindowFlags>,
-    icon: Option<&'a Image>,
+    icon: Option<&'a Icon>,
     parent: Option<ControlHandle>
 }
 
@@ -213,7 +213,7 @@ impl<'a> WindowBuilder<'a> {
         self
     }
 
-    pub fn icon(mut self, ico: Option<&'a Image>) -> WindowBuilder<'a> {
+    pub fn icon(mut self, ico: Option<&'a Icon>) -> WindowBuilder<'a> {
         self.icon = ico;
         self
     }

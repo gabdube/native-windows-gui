@@ -15,17 +15,6 @@ pub struct Image {
 
 impl Image {
 
-    /// Create a new image from an icon (*.ico)
-    /// Will return a `SystemError` if the image could not be loaded
-    ///
-    ///  - source: Path to the icon
-    ///  - size: Size of the image. If None, use the original image size
-    ///  - strict: If set to `true`, the image creation will fail if the source cannot be read.  
-    ///            If not, the resource creation will not fails and the Windows `Error` default icon will be loaded instead.
-    pub fn icon<'a>(source: &'a str, size: Option<(u32, u32)>, strict: bool) -> Result<Image, SystemError> {
-        unsafe { rh::build_image(source, size, strict, ::winapi::um::winuser::IMAGE_ICON).map(|i| Image { handle: i } ) }
-    }
-
     /// Create a new image from a cursor (*.cur)
     /// Will return a `SystemError` if the image could not be loaded
     ///

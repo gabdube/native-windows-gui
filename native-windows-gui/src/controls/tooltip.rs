@@ -2,7 +2,7 @@ use winapi::shared::minwindef::{UINT, LPARAM, WPARAM};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 //use crate::Font;
-use crate::{Image, SystemError};
+use crate::{Icon, SystemError};
 use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
 
@@ -151,7 +151,7 @@ impl Tooltip {
     }
 
     /// Set the icon and the title of a tooltip. This method use custom icon defined by user resources
-    pub fn set_decoration<'a>(&self, title: &'a str, ico: &Image) {
+    pub fn set_decoration<'a>(&self, title: &'a str, ico: &Icon) {
         use winapi::um::commctrl::{TTM_SETTITLEW};
         
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -362,7 +362,7 @@ impl Tooltip {
 
 pub struct TooltipBuilder<'a> {
     title: Option<&'a str>,
-    ico: Option<&'a Image>,
+    ico: Option<&'a Icon>,
     default_ico: Option<TooltipIcon>,
     register: Vec<(ControlHandle, &'a str)>,
     register_cb: Vec<ControlHandle>,
@@ -380,7 +380,7 @@ impl<'a> TooltipBuilder<'a> {
         self
     }
 
-    pub fn decoration(mut self, title: Option<&'a str>, ico: Option<&'a Image>) -> TooltipBuilder<'a> {
+    pub fn decoration(mut self, title: Option<&'a str>, ico: Option<&'a Icon>) -> TooltipBuilder<'a> {
         self.title = title;
         self.ico = ico;
         self

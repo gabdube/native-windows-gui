@@ -26,8 +26,8 @@ pub struct ControlsTest {
     // data
     runs: RefCell<TestRun>,
 
-    window_icon: Image,
-    love_icon: Image,
+    window_icon: Icon,
+    love_icon: Icon,
     ferris: Bitmap,
     popcorn: Bitmap,
     arial_font: Font,
@@ -151,8 +151,13 @@ mod partial_controls_test_ui {
             //
             // Resources
             //
-            data.window_icon = Image::icon("./test_rc/cog.ico", None, false)?;
-            data.love_icon = Image::icon("./test_rc/love.ico", None, false)?;
+            Icon::builder()
+                .source_file(Some("./test_rc/cog.ico"))
+                .build(&mut data.window_icon)?;
+
+            Icon::builder()
+                .source_file(Some("./test_rc/love.ico"))
+                .build(&mut data.love_icon)?;
 
             Bitmap::builder()
                 .source_file(Some("./test_rc/ferris.bmp"))

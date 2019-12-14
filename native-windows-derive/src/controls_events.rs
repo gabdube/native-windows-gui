@@ -79,15 +79,23 @@ struct EventCallback {
 /// Wrapper over a basic event dispatcher
 pub struct ControlEvents {
     handles: Vec<syn::Ident>,
-    callbacks: HashMap<syn::Ident, Vec<EventCallback>>
+    callbacks: HashMap<syn::Ident, Vec<EventCallback>>,
+    callback_args_cache: HashMap<usize, syn::Expr>,
 }
 
 impl ControlEvents {
 
     pub fn with_capacity(cap: usize) -> ControlEvents {
+        let mut cache = HashMap::with_capacity(4);
+        cache.insert(0, syn::parse_str("&evt_ui.inner").unwrap());
+        cache.insert(2, syn::parse_str("&_handle").unwrap());
+        cache.insert(3, syn::parse_str("&_evt").unwrap());
+        cache.insert(4, syn::parse_str("&_evt_data").unwrap());
+
         ControlEvents {
             handles: Vec::with_capacity(1),
-            callbacks: HashMap::with_capacity(cap)
+            callbacks: HashMap::with_capacity(cap),
+            callback_args_cache: cache
         }
     }
 
@@ -119,7 +127,7 @@ impl ControlEvents {
                 let callback = EventCallback {
                     member: member.clone(),
                     path: cb_fn.path.clone(),
-                    args: map_callback_args(&member, &cb_fn.args)
+                    args: map_callback_args(&member, &cb_fn.args, &self.callback_args_cache)
                 };
 
                 evt_callbacks.push(callback);
@@ -227,12 +235,10 @@ fn top_level_window(field: &syn::Field) -> bool {
     }
 }
 
-fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, Token![,]>>) -> Punctuated<syn::Expr, Token![,]> {
+fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, Token![,]>>, cache: &HashMap<usize, syn::Expr>) -> Punctuated<syn::Expr, Token![,]> {
     let mut p = Punctuated::new();
-    let default: syn::Expr = syn::parse_str("&evt_ui.inner").unwrap();
-    
     if args.is_none() {
-        p.push(default);
+        p.push(cache[&0].clone());
         return p;
     }
 
@@ -240,14 +246,14 @@ fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, T
     for a in args.as_ref().unwrap().iter() {
         let pos = values.iter().position(|v| &a == &v );
         match pos {
-            Some(0) => { p.push(default.clone()); },
+            Some(0) => { p.push(cache[&0].clone()); },
             Some(1) => { 
                 let param = format!("&evt_ui.{}", member);
                 p.push(syn::parse_str(&param).unwrap());
             },
-            Some(2) => { p.push(syn::parse_str("&_handle").unwrap()); },
-            Some(3) => { p.push(syn::parse_str("&_evt").unwrap()); },
-            Some(4) => { p.push(syn::parse_str("&_evt_data").unwrap()); },
+            Some(2) => { p.push(cache[&2].clone()); },
+            Some(3) => { p.push(cache[&3].clone()); },
+            Some(4) => { p.push(cache[&4].clone()); },
             Some(_) => { unreachable!(); }
             None => panic!("Unknown callback argument: {}. Should be one of those values: {:?}", a, values)
         }
