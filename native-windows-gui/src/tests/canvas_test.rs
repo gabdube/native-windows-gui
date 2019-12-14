@@ -118,11 +118,11 @@ fn paint_close(canvas: &CanvasTest) {
 
 fn drag_header(canvas: &CanvasTest) {
     let header = &canvas.header.handle;
-    if Cursor::dragging(header, None) {
-        Cursor::set_capture(header);
+    if GlobalCursor::dragging(header, None) {
+        GlobalCursor::set_capture(header);
 
         let mut stuff = canvas.other_stuff.borrow_mut();
-        stuff.anchor = Cursor::local_position(header, None);
+        stuff.anchor = GlobalCursor::local_position(header, None);
         stuff.dragging = true;
     }
 }
@@ -130,7 +130,7 @@ fn drag_header(canvas: &CanvasTest) {
 fn drag(canvas: &CanvasTest) {
     let stuff = canvas.other_stuff.borrow();
     if stuff.dragging {
-        let (x1, y1) = Cursor::position();
+        let (x1, y1) = GlobalCursor::position();
         let (ax, ay) = stuff.anchor;
         canvas.window.set_position(x1 - ax, y1 - ay);
     }
@@ -153,7 +153,7 @@ fn drag(canvas: &CanvasTest) {
 }
 
 fn release_header(canvas: &CanvasTest) {
-    Cursor::release();
+    GlobalCursor::release();
     canvas.other_stuff.borrow_mut().dragging = false;
 }
 

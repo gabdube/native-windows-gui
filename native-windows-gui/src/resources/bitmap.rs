@@ -66,10 +66,12 @@ impl<'a> BitmapBuilder<'a> {
     }
 
     pub fn build(self, b: &mut Bitmap) -> Result<(), SystemError> {
-        let mut handle = None;
+        let handle;
         
         if let Some(src) = self.source_text {
             handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_BITMAP).ok() };
+        } else {
+            panic!("No source provided for Cursor. TODO ERROR");
         }
 
         let mut handle = handle.unwrap();
@@ -98,6 +100,14 @@ impl Default for Bitmap {
             handle: ptr::null_mut(),
             owned: false
         }
+    }
+
+}
+
+impl PartialEq for Bitmap {
+
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
     }
 
 }

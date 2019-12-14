@@ -59,10 +59,12 @@ impl<'a> IconBuilder<'a> {
     }
 
     pub fn build(self, b: &mut Icon) -> Result<(), SystemError> {
-        let mut handle = None;
+        let handle;
         
         if let Some(src) = self.source_text {
             handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_ICON).ok() };
+        } else {
+            panic!("No source provided for Cursor. TODO ERROR");
         }
 
         *b = Icon { handle: handle.unwrap(), owned: true };
@@ -83,3 +85,12 @@ impl Default for Icon {
     }
 
 }
+
+impl PartialEq for Icon {
+
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+
+}
+

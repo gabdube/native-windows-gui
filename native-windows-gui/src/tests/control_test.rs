@@ -31,6 +31,7 @@ pub struct ControlsTest {
     ferris: Bitmap,
     popcorn: Bitmap,
     arial_font: Font,
+    wait_cursor: Cursor,
     
     #[cfg(feature = "file-dialog")]
     open_file_dialog: FileDialog,
@@ -167,6 +168,10 @@ mod partial_controls_test_ui {
                 .source_file(Some("./test_rc/popcorn.bmp"))
                 .size(Some((80, 80)))
                 .build(&mut data.popcorn)?;
+
+            Cursor::builder()
+                .source_system(Some(OemCursor::Wait))
+                .build(&mut data.wait_cursor)?;
 
             #[cfg(feature = "file-dialog")]
             #[cfg(feature = "color-dialog")]
@@ -720,6 +725,10 @@ mod partial_controls_test_ui {
                     if &handle == &self.window {
                         init_tree(self, );
                     },
+                E::OnMouseMove => 
+                    if &handle == &self.test_img_frame {
+                        set_cursor(self);
+                    },
                 E::OnButtonClick =>
                     if &handle == &self.run_window_test {
                         run_window_tests(self, evt);
@@ -799,8 +808,12 @@ fn init_tree(app: &ControlsTest) {
     tree.insert_item("Items", Some(&item), TreeInsert::First);
 }
 
+fn set_cursor(app: &ControlsTest) {
+    GlobalCursor::set(&app.wait_cursor)
+}
+
 fn show_pop_menu(app: &ControlsTest, _evt: Event) {
-    let (x, y) = Cursor::position();
+    let (x, y) = GlobalCursor::position();
     app.pop_menu.popup(x, y);
 }
 

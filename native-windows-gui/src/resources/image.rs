@@ -2,7 +2,6 @@ use crate::win32::resources_helper as rh;
 use crate::{SystemError};
 use super::system_images::{OemImage, OemIcon, OemBitmap, OemCursor};
 use winapi::um::winnt::HANDLE;
-use std::ptr;
 
 
 /// An image resource. This can be an icon, a bitmap or a cursor.
@@ -14,17 +13,6 @@ pub struct Image {
 }
 
 impl Image {
-
-    /// Create a new image from a cursor (*.cur)
-    /// Will return a `SystemError` if the image could not be loaded
-    ///
-    ///  - source: Path to the icon
-    ///  - size: Size of the image. If None, use the original image size
-    ///  - strict: If set to `true`, the image creation will fail if the source cannot be read.  
-    ///            If not, the resource creation will not fails and the Windows `Error` default icon will be loaded instead.
-    pub fn cursor<'a>(source: &'a str, size: Option<(u32, u32)>, strict: bool) -> Result<Image, SystemError> {
-        unsafe { rh::build_image(source, size, strict, ::winapi::um::winuser::IMAGE_CURSOR).map(|i| Image { handle: i } ) }
-    }
 
     /// Create a new image from a system icon defined under `OemIcon`
     /// Will return a `SystemError` if the image could not be loaded
@@ -51,14 +39,6 @@ impl Image {
     ///  - size: Size of the image. If None, use the original image size
     pub fn oem_cursor(source: OemCursor, size: Option<(u32, u32)>) -> Result<Image, SystemError> {
         unsafe { rh::build_oem_image(OemImage::Cursor(source), size).map(|i| Image { handle: i } ) }
-    }
-
-}
-
-impl Default for Image {
-
-    fn default() -> Image {
-        Image { handle: ptr::null_mut() }
     }
 
 }

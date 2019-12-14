@@ -67,7 +67,7 @@ pub unsafe fn build_image<'a>(
     image_type: u32
 ) -> Result<HANDLE, SystemError>
 {
-    use winapi::um::winuser::{LR_LOADFROMFILE, LR_DEFAULTSIZE, LR_SHARED, IMAGE_ICON, IDC_HAND};
+    use winapi::um::winuser::{LR_LOADFROMFILE, LR_DEFAULTSIZE, LR_SHARED, IMAGE_ICON, IDC_ARROW, IDI_ERROR, IMAGE_CURSOR, IMAGE_BITMAP};
     use winapi::um::winuser::LoadImageW;
 
     let filepath = to_utf16(source);
@@ -78,8 +78,22 @@ pub unsafe fn build_image<'a>(
         let (code, _) = get_system_error();
         if code == 2 && !strict {
             // If the file was not found (err code: 2) and the loading is not strict, replace the image by the system error icon
-            let hand_resource = (IDC_HAND as usize) as *const u16;
-            handle = LoadImageW(ptr::null_mut(), hand_resource, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE|LR_SHARED);
+            handle = match image_type {
+                IMAGE_ICON => {
+                    let dr = (IDI_ERROR as usize) as *const u16;
+                    LoadImageW(ptr::null_mut(), dr, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE|LR_SHARED)
+                },
+                IMAGE_CURSOR => {
+                    let dr = (IDC_ARROW as usize) as *const u16;
+                    LoadImageW(ptr::null_mut(), dr, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE|LR_SHARED)
+                },
+                IMAGE_BITMAP => {
+                    let dr = (32754 as usize) as *const u16;
+                    LoadImageW(ptr::null_mut(), dr, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE|LR_SHARED)
+                },
+                _ => { unreachable!() }
+            };
+            
         }
     }
 

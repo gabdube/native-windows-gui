@@ -5,18 +5,18 @@
     use native_windows_gui as nwg;
 
     pub fn handle_cursor(cursor: &nwg::Image) {
-        let (x, y) = nwg::Cursor::position();
-        nwg::Cursor::set(cursor);
+        let (x, y) = nwg::GlobalCursor::position();
+        nwg::GlobalCursor::set(cursor);
     }
     ```
 */
-use crate::Image;
+use crate::Cursor;
 use crate::controls::ControlHandle;
 
 /// A global object used to manage the system cursor. See module level documentation
-pub struct Cursor;
+pub struct GlobalCursor;
 
-impl Cursor {
+impl GlobalCursor {
 
     /**
         Return the cursor position in the screen.
@@ -46,7 +46,7 @@ impl Cursor {
         if control.blank() { panic!(MSG); }
         let handle = control.hwnd().expect(MSG);
 
-        let (x, y) = point.unwrap_or(Cursor::position());
+        let (x, y) = point.unwrap_or(GlobalCursor::position());
         let mut p = POINT{x: x as LONG, y: y as LONG};
 
         unsafe { ScreenToClient(handle, &mut p); }
@@ -77,7 +77,7 @@ impl Cursor {
         Arguments:
         • `cursor`: The id identifying the cursor resource
     */
-    pub fn set(cursor: &Image) {
+    pub fn set(cursor: &Cursor) {
         use winapi::shared::windef::HCURSOR;
         use winapi::um::winuser::SetCursor;
 
@@ -89,7 +89,7 @@ impl Cursor {
 
         Returns `None` if there is no cursor.
     */
-    pub fn get() -> Option<Image> {
+    pub fn get() -> Option<Cursor> {
         use winapi::um::winuser::GetCursor;
         use winapi::um::winnt::HANDLE;
 
@@ -97,7 +97,7 @@ impl Cursor {
 
         match cursor.is_null() {
             true => None,
-            false => Some( Image { handle: cursor as HANDLE } )
+            false => Some( Cursor { handle: cursor as HANDLE, owned: false } )
         }
     }
 
@@ -167,7 +167,7 @@ impl Cursor {
         if control.blank() { panic!(MSG); }
         let handle = control.hwnd().expect(MSG);
 
-        let (x, y) = point.unwrap_or(Cursor::position());
+        let (x, y) = point.unwrap_or(GlobalCursor::position());
         let c_point = POINT{x: x as LONG, y: y as LONG};
 
         unsafe { DragDetect(handle, c_point) == 1 }
