@@ -1,6 +1,5 @@
 mod font;
 mod system_images;
-mod image;
 mod icon;
 mod cursor;
 mod bitmap;
@@ -16,7 +15,6 @@ mod font_dialog;
 
 pub use font::{Font, FontInfo, FontBuilder};
 pub use system_images::*;
-pub use image::{Image};
 pub use icon::{Icon, IconBuilder};
 pub use cursor::{Cursor, CursorBuilder};
 pub use bitmap::{Bitmap, BitmapBuilder};

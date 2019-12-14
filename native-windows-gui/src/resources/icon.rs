@@ -4,7 +4,7 @@
 use winapi::um::winnt::HANDLE;
 use winapi::um::winuser::IMAGE_ICON;
 use crate::win32::resources_helper as rh;
-use crate::SystemError;
+use crate::{OemImage, OemIcon, SystemError};
 use std::ptr;
 
 
@@ -22,6 +22,7 @@ impl Icon {
         IconBuilder {
             source_text: None,
             source_bin: None,
+            source_system: None,
             size: None,
             strict: false
         }
@@ -32,6 +33,7 @@ impl Icon {
 pub struct IconBuilder<'a> {
     source_text: Option<&'a str>,
     source_bin: Option<&'a [u8]>,
+    source_system: Option<OemIcon>,
     size: Option<(u32, u32)>,
     strict: bool,
 }
@@ -45,6 +47,11 @@ impl<'a> IconBuilder<'a> {
 
     pub fn source_bin(mut self, t: Option<&'a [u8]>) -> IconBuilder<'a> {
         self.source_bin = t;
+        self
+    }
+
+    pub fn source_system(mut self, t: Option<OemIcon>) -> IconBuilder<'a> {
+        self.source_system = t;
         self
     }
 
@@ -62,12 +69,14 @@ impl<'a> IconBuilder<'a> {
         let handle;
         
         if let Some(src) = self.source_text {
-            handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_ICON).ok() };
+            handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_ICON) };
+        } else if let Some(src) = self.source_system {
+            handle = unsafe { rh::build_oem_image(OemImage::Icon(src), self.size) };
         } else {
-            panic!("No source provided for Cursor. TODO ERROR");
+            panic!("No source provided for Icon. TODO ERROR");
         }
 
-        *b = Icon { handle: handle.unwrap(), owned: true };
+        *b = Icon { handle: handle?, owned: true };
     
         Ok(())
     }

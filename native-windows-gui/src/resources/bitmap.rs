@@ -4,7 +4,7 @@
 use winapi::um::winnt::HANDLE;
 use winapi::um::winuser::IMAGE_BITMAP;
 use crate::win32::resources_helper as rh;
-use crate::SystemError;
+use crate::{OemBitmap, OemImage, SystemError};
 use std::ptr;
 
 
@@ -22,6 +22,7 @@ impl Bitmap {
         BitmapBuilder {
             source_text: None,
             source_bin: None,
+            source_system: None,
             transparency_key: None,
             size: None,
             strict: false
@@ -33,6 +34,7 @@ impl Bitmap {
 pub struct BitmapBuilder<'a> {
     source_text: Option<&'a str>,
     source_bin: Option<&'a [u8]>,
+    source_system: Option<OemBitmap>,
     transparency_key: Option<[u8; 3]>,
     size: Option<(u32, u32)>,
     strict: bool,
@@ -47,6 +49,11 @@ impl<'a> BitmapBuilder<'a> {
 
     pub fn source_bin(mut self, t: Option<&'a [u8]>) -> BitmapBuilder<'a> {
         self.source_bin = t;
+        self
+    }
+
+    pub fn source_system(mut self, t: Option<OemBitmap>) -> BitmapBuilder<'a> {
+        self.source_system = t;
         self
     }
 
@@ -66,15 +73,15 @@ impl<'a> BitmapBuilder<'a> {
     }
 
     pub fn build(self, b: &mut Bitmap) -> Result<(), SystemError> {
-        let handle;
+        let mut handle;
         
         if let Some(src) = self.source_text {
-            handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_BITMAP).ok() };
+            handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_BITMAP) };
+        } else if let Some(src) = self.source_system {
+            handle = unsafe { rh::build_oem_image(OemImage::Bitmap(src), self.size) };
         } else {
-            panic!("No source provided for Cursor. TODO ERROR");
+            panic!("No source provided for Bitmap. TODO ERROR");
         }
-
-        let mut handle = handle.unwrap();
 
         if let Some(key) = self.transparency_key {
             let size = match self.size {
@@ -82,10 +89,10 @@ impl<'a> BitmapBuilder<'a> {
                 None => (0, 0)
             };
 
-            handle = unsafe { rh::make_bitmap_transparent(handle, size, key)? };
+            handle = unsafe { rh::make_bitmap_transparent(handle?, size, key) };
         }
         
-        *b = Bitmap { handle, owned: true };
+        *b = Bitmap { handle: handle?, owned: true };
     
         Ok(())
     }
