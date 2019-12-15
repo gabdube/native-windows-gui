@@ -186,6 +186,20 @@ pub unsafe fn set_window_enabled(handle: HWND, enabled: bool) {
     UpdateWindow(handle);
 }
 
+pub unsafe fn get_window_class_name(handle: HWND) -> String {
+    use std::ffi::OsString;
+    use std::os::windows::ffi::OsStringExt;
+    use winapi::shared::ntdef::WCHAR;
+    use winapi::um::winuser::GetClassNameW;
+
+    let mut class_name_raw: Vec<WCHAR> = Vec::with_capacity(100); 
+    class_name_raw.set_len(100);
+
+    let count = GetClassNameW(handle, class_name_raw.as_mut_ptr(), 100) as usize;
+    
+    OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string())
+}
+
 #[cfg(target_arch = "x86")] use winapi::shared::ntdef::LONG;
 #[cfg(target_arch = "x86_64")] use winapi::shared::basetsd::LONG_PTR;
 

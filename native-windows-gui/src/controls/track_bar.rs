@@ -2,7 +2,7 @@ use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::WS_VISIBLE;
 use winapi::um::commctrl::{TBS_AUTOTICKS, TBS_VERT, TBS_HORZ, TBS_TOP, TBS_BOTTOM, TBS_LEFT, TBS_RIGHT, TBS_NOTICKS, TBS_ENABLESELRANGE};
 use crate::win32::window_helper as wh;
-use crate::SystemError;
+use crate::NwgError;
 use super::{ControlBase, ControlHandle};
 use std::ops::Range;
 
@@ -320,12 +320,12 @@ impl TrackbarBuilder {
         self
     }
 
-    pub fn build(self, out: &mut TrackBar) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut TrackBar) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("TrackBar"))
         }?;
 
         out.handle = ControlBase::build_hwnd()

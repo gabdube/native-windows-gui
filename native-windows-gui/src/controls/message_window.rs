@@ -10,11 +10,11 @@
     nwg::MessageWindow::builder().build(&mut window);
     ```
 
-    When making a system tray only application (with TrayNotification), this is the recommended top level window type.
+    When making a system-tray application (with TrayNotification), this is the recommended top level window type.
 */
 use super::ControlHandle;
 use crate::win32::window::create_message_window;
-use crate::SystemError;
+use crate::NwgError;
 
 /**
     A message only top level window. At least one top level window is required to make a NWG application.
@@ -39,7 +39,7 @@ pub struct MessageWindowBuilder {
 
 impl MessageWindowBuilder {
 
-    pub fn build(self, out: &mut MessageWindow) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut MessageWindow) -> Result<(), NwgError> {
         out.handle = create_message_window()?;
         Ok(())
     }

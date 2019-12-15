@@ -6,7 +6,7 @@ use winapi::shared::minwindef::{UINT, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND};
 use super::window::build_sysclass;
 use super::window_helper::{NWG_INIT};
-use crate::{SystemError};
+use crate::{NwgError};
 use std::ptr;
 
 pub const CANVAS_CLASS_ID: &'static str = "NWG_CANVAS";
@@ -31,7 +31,7 @@ impl Default for CanvasRenderer {
 }
 
 
-pub unsafe fn build_render_target(hwnd: HWND, factory: &mut ID2D1Factory) -> Result<*mut ID2D1HwndRenderTarget, SystemError> {
+pub unsafe fn build_render_target(hwnd: HWND, factory: &mut ID2D1Factory) -> Result<*mut ID2D1HwndRenderTarget, NwgError> {
     use winapi::um::d2d1::{D2D1_RENDER_TARGET_PROPERTIES, D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1_RENDER_TARGET_USAGE_NONE,
         D2D1_FEATURE_LEVEL_DEFAULT, D2D1_HWND_RENDER_TARGET_PROPERTIES, D2D1_PRESENT_OPTIONS_NONE};
 
@@ -71,14 +71,14 @@ pub unsafe fn build_render_target(hwnd: HWND, factory: &mut ID2D1Factory) -> Res
     let mut render_target: *mut ID2D1HwndRenderTarget = ptr::null_mut();
     if factory.CreateHwndRenderTarget(&render_props, &hwnd_render_props, &mut render_target) != S_OK {
         factory.Release();
-        Err(SystemError::CanvasRenderTargetCreationFailed)
+        Err(NwgError::control_create("Failed to create the direct2D render target"))
     } else {
         Ok(render_target)
     }
 }
 
 
-pub(crate) unsafe fn build_renderer(handle: HWND) -> Result<CanvasRenderer, SystemError> {
+pub(crate) unsafe fn build_renderer(handle: HWND) -> Result<CanvasRenderer, NwgError> {
     use winapi::um::d2d1::{D2D1CreateFactory};
     use winapi::um::d2d1::{D2D1_FACTORY_TYPE_SINGLE_THREADED};
     use winapi::shared::winerror::S_OK;
@@ -94,7 +94,7 @@ pub(crate) unsafe fn build_renderer(handle: HWND) -> Result<CanvasRenderer, Syst
     );
 
     if result != S_OK {
-        return Err(SystemError::CanvasRendererCreationFailed);
+        return Err(NwgError::control_create("Failed to create the direct2D factory"));
     }
 
     // Build the render target
@@ -110,11 +110,11 @@ pub(crate) unsafe fn build_renderer(handle: HWND) -> Result<CanvasRenderer, Syst
 
 
 /// Create the NWG tab classes
-pub fn create_canvas_classes() -> Result<(), SystemError>  {
+pub fn create_canvas_classes() -> Result<(), NwgError>  {
     use winapi::um::libloaderapi::GetModuleHandleW;
 
     let hmod = unsafe { GetModuleHandleW(ptr::null_mut()) };
-    if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
+    if hmod.is_null() { return Err(NwgError::initialization("GetModuleHandleW failed")); }
 
     unsafe { 
         build_sysclass(

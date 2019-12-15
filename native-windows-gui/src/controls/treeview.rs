@@ -7,7 +7,7 @@ use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use winapi::um::commctrl::HTREEITEM;
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
-use crate::{Font, SystemError};
+use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
 
@@ -399,12 +399,12 @@ impl<'a> TreeViewBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut TreeView) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut TreeView) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("TreeView"))
         }?;
 
         out.handle = ControlBase::build_hwnd()

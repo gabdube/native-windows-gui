@@ -12,7 +12,7 @@ use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_
 
 use crate::win32::window_helper as wh;
 use crate::win32::canvas;
-use crate::{SystemError, Icon};
+use crate::{NwgError, Icon};
 use super::CanvasDraw;
 use super::super::{ControlBase, ControlHandle};
 use std::ops::Deref;
@@ -239,7 +239,7 @@ impl<'a> CanvasWindowBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut CanvasWindow) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut CanvasWindow) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
         
         out.handle = ControlBase::build_hwnd()

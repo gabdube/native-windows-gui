@@ -4,7 +4,7 @@
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, ES_AUTOHSCROLL};
 use crate::win32::window_helper as wh;
-use crate::{Font, SystemError, HTextAlign};
+use crate::{Font, NwgError, HTextAlign};
 use super::{ControlBase, ControlHandle};
 use std::ops::Range;
 use std::char;
@@ -459,7 +459,7 @@ impl<'a> TextInputBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut TextInput) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut TextInput) -> Result<(), NwgError> {
         let mut flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         match self.align {
@@ -476,7 +476,7 @@ impl<'a> TextInputBuilder<'a> {
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("TextInput"))
         }?;
 
         out.handle = ControlBase::build_hwnd()
@@ -506,13 +506,6 @@ impl<'a> TextInputBuilder<'a> {
         if self.font.is_some() {
             out.set_font(self.font);
         }
-
-        /*unsafe {
-            use std::ptr;
-            use winapi::um::winuser::SetWindowPos;
-            use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
-            SetWindowPos(out.handle.hwnd().unwrap(), ptr::null_mut(), 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
-        }*/
 
         Ok(())
     }

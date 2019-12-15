@@ -3,7 +3,7 @@ use winapi::shared::minwindef::{LPARAM, WPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::win32::window_helper as wh;
-use crate::{Font, SystemError};
+use crate::{Font, NwgError};
 use super::{ControlHandle, ControlBase};
 use std::cell::{Ref, RefMut, RefCell};
 use std::fmt::Display;
@@ -430,12 +430,12 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
         self
     }
 
-    pub fn build(self, out: &mut ComboBox<D>) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut ComboBox<D>) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("ComboBox"))
         }?;
 
         out.handle = ControlBase::build_hwnd()

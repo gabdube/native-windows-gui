@@ -1,7 +1,7 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
-use crate::{Font, SystemError};
+use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::ops::Range;
 
@@ -328,12 +328,12 @@ impl<'a> TextBoxBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut TextBox) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut TextBox) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("TextBox"))
         }?;
 
         out.handle = ControlBase::build_hwnd()

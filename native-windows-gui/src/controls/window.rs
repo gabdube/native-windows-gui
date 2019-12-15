@@ -6,7 +6,7 @@ use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_CLIPCHILDREN, WS_VISIBLE, WS_D
 WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME};
 
 use crate::win32::window_helper as wh;
-use crate::{SystemError, Icon};
+use crate::{NwgError, Icon};
 use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "Window is not yet bound to a winapi object";
@@ -223,7 +223,7 @@ impl<'a> WindowBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut Window) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut Window) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         out.handle = ControlBase::build_hwnd()

@@ -2,7 +2,7 @@ use winapi::shared::minwindef::{UINT, LPARAM, WPARAM};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 //use crate::Font;
-use crate::{Icon, SystemError};
+use crate::{Icon, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
 
@@ -392,7 +392,7 @@ impl<'a> TooltipBuilder<'a> {
         self
     }
 
-    pub fn build(self, tooltip: &mut Tooltip) -> Result<(), SystemError> {
+    pub fn build(self, tooltip: &mut Tooltip) -> Result<(), NwgError> {
         tooltip.handle = ControlBase::build_hwnd()
             .class_name(tooltip.class_name())
             .forced_flags(tooltip.forced_flags())

@@ -3,7 +3,7 @@ use winapi::shared::windef::{HWND, HMENU};
 use super::ControlHandle;
 use crate::win32::window::{build_hwnd_control, build_timer, build_notice};
 use crate::win32::menu::build_hmenu_control;
-use crate::SystemError;
+use crate::{SystemError, NwgError};
 
 const NOTICE: u32 = 1;
 const TRAY: u32 = 2;
@@ -98,7 +98,7 @@ impl HwndBuilder {
         self
     }
 
-    pub fn build(self) -> Result<ControlHandle, SystemError> {
+    pub fn build(self) -> Result<ControlHandle, NwgError> {
         let handle = unsafe { build_hwnd_control(
             &self.class_name,
             self.text.as_ref().map(|v| v as &str),

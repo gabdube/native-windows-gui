@@ -13,7 +13,7 @@ mod tests;
 mod tests;
 
 mod errors;
-pub use errors::{UserError, SystemError};
+pub use errors::{UserError, SystemError, NwgError};
 
 mod events;
 pub use events::*;
@@ -51,7 +51,7 @@ pub trait NativeUi<D, UI> {
 
 /// Initialize some application wide GUI settings.
 /// This includes default styling and common controls resources.
-pub fn init() -> std::result::Result<(), errors::SystemError> {
+pub fn init() -> std::result::Result<(), errors::NwgError> {
     enable_visual_styles();
     init_common_controls()
 }

@@ -5,7 +5,7 @@ An image frame is a control that display an `Bitmap` image resource. It also acc
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use super::{ControlBase, ControlHandle};
-use crate::{Bitmap, SystemError};
+use crate::{Bitmap, NwgError};
 
 const NOT_BOUND: &'static str = "ImageFrame is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: ImageFrame handle is not HWND!";
@@ -220,12 +220,12 @@ impl<'a> ImageFrameBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut ImageFrame) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut ImageFrame) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("ImageFrame"))
         }?;
 
         out.handle = ControlBase::build_hwnd()

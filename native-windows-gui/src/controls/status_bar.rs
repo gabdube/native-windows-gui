@@ -1,6 +1,6 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use crate::win32::window_helper as wh;
-use crate::{Font, SystemError};
+use crate::{Font, NwgError};
 use super::{ControlHandle, ControlBase};
 
 const NOT_BOUND: &'static str = "StatusBar is not yet bound to a winapi object";
@@ -147,10 +147,10 @@ impl<'a> StatusBarBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut StatusBar) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut StatusBar) -> Result<(), NwgError> {
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("StatusBar"))
         }?;
 
         out.handle = ControlBase::build_hwnd()

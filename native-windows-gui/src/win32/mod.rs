@@ -14,7 +14,7 @@ pub(crate) mod canvas;
 
 #[cfg(feature = "file-dialog")] use winapi::shared::guiddef::GUID;
 use std::{mem, ptr};
-use crate::errors::SystemError;
+use crate::errors::NwgError;
 
 
 /**
@@ -88,12 +88,12 @@ pub fn enable_visual_styles() {
     Ensure that the dll containing the winapi controls is loaded.
     Also register the custom classes used by NWG
 */
-pub fn init_common_controls() -> Result<(), SystemError> {
+pub fn init_common_controls() -> Result<(), NwgError> {
     use winapi::um::objbase::CoInitialize;
     use winapi::um::commctrl::{InitCommonControlsEx, INITCOMMONCONTROLSEX};
     use winapi::um::commctrl::{ICC_BAR_CLASSES, ICC_STANDARD_CLASSES, ICC_DATE_CLASSES, ICC_PROGRESS_CLASS,
      ICC_TAB_CLASSES, ICC_TREEVIEW_CLASSES, ICC_LISTVIEW_CLASSES};
-    use winapi::shared::winerror::S_OK;
+    use winapi::shared::winerror::{S_OK, S_FALSE};
 
     unsafe {
         let mut classes = ICC_BAR_CLASSES | ICC_STANDARD_CLASSES;
@@ -131,22 +131,22 @@ pub fn init_common_controls() -> Result<(), SystemError> {
     canvas_init()?;
 
     match unsafe { CoInitialize(ptr::null_mut()) } {
-        S_OK => Ok(()),
-        _ => Err(SystemError::CoInitializeFailed)
+        S_OK | S_FALSE => Ok(()),
+        _ => Err(NwgError::initialization("CoInitialize failed"))
     }
 }
 
 #[cfg(feature = "tabs")]
-fn tabs_init() -> Result<(), SystemError> { tabs::create_tab_classes() }
+fn tabs_init() -> Result<(), NwgError> { tabs::create_tab_classes() }
 
 #[cfg(not(feature = "tabs"))]
-fn tabs_init() -> Result<(), SystemError> { Ok(()) }
+fn tabs_init() -> Result<(), NwgError> { Ok(()) }
 
 #[cfg(feature = "canvas")]
-fn canvas_init() -> Result<(), SystemError> { canvas::create_canvas_classes() }
+fn canvas_init() -> Result<(), NwgError> { canvas::create_canvas_classes() }
 
 #[cfg(not(feature = "canvas"))]
-fn canvas_init() -> Result<(), SystemError> { Ok(()) }
+fn canvas_init() -> Result<(), NwgError> { Ok(()) }
 
 
 #[allow(unused_macros)]

@@ -4,7 +4,7 @@ use winapi::um::winnt::LPWSTR;
 use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_COMPOSITED};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
-use crate::{SystemError, Font};
+use crate::{NwgError, Font};
 use super::{ControlBase, ControlHandle};
 use std::mem;
 
@@ -272,12 +272,12 @@ impl<'a> TabsContainerBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut TabsContainer) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut TabsContainer) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("TabsContainer"))
         }?;
 
         out.handle = ControlBase::build_hwnd()
@@ -451,10 +451,24 @@ impl<'a> TabBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut Tab) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut Tab) -> Result<(), NwgError> {
+        use winapi::um::commctrl::WC_TABCONTROL;
+
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("Tab"))
+        }?;
+
+        match &parent {
+            &ControlHandle::Hwnd(h) => {
+                let class_name = unsafe { wh::get_window_class_name(h) };
+                if &class_name != WC_TABCONTROL {
+                    Err(NwgError::control_create("Tab requires a TabsContainer parent."))
+                } else {
+                    Ok(())
+                }
+            },
+            _ => Err(NwgError::control_create("Tab requires a TabsContainer parent."))
         }?;
 
         out.handle = ControlBase::build_hwnd()

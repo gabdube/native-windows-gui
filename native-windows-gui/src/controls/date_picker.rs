@@ -1,7 +1,7 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::to_utf16;
-use crate::{Font, SystemError};
+use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "DatePicker is not yet bound to a winapi object";
@@ -382,12 +382,12 @@ impl<'a> DatePickerBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut DatePicker) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut DatePicker) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("DatePicker"))
         }?;
 
         out.handle = ControlBase::build_hwnd()

@@ -8,10 +8,10 @@ use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
 use winapi::um::winuser::{WNDPROC, NMHDR};
 use winapi::um::commctrl::{NMTTDISPINFOW, SUBCLASSPROC};
-use super::base_helper::{get_system_error, to_utf16};
+use super::base_helper::to_utf16;
 use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY};
 use crate::controls::ControlHandle;
-use crate::{Event, EventData, MousePressEvent, SystemError};
+use crate::{Event, EventData, MousePressEvent, NwgError};
 use std::{ptr, mem};
 use std::rc::Rc;
 use std::marker::PhantomData;
@@ -221,7 +221,7 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
     ex_flags: Option<DWORD>,
     forced_flags: DWORD,
     parent: Option<HWND>
-) -> Result<ControlHandle, SystemError> 
+) -> Result<ControlHandle, NwgError> 
 {
     use winapi::um::winuser::{WS_EX_COMPOSITED, WS_OVERLAPPEDWINDOW, WS_VISIBLE, WS_CLIPCHILDREN, /*WS_EX_LAYERED*/};
     use winapi::um::winuser::{CreateWindowExW, AdjustWindowRectEx};
@@ -229,7 +229,7 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
     use winapi::um::libloaderapi::GetModuleHandleW;
 
     let hmod = GetModuleHandleW(ptr::null_mut());
-    if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
+    if hmod.is_null() { return Err(NwgError::initialization("GetModuleHandleW failed")); }
 
     let class_name = to_utf16(class_name);
     let window_title = to_utf16(window_title.unwrap_or("New Window"));
@@ -263,8 +263,8 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
     );
 
     if handle.is_null() {
-        println!("{:?}", get_system_error());
-        Err(SystemError::WindowCreationFailed)
+        // println!("{:?}",  super::base_helper::get_system_error());
+        Err(NwgError::initialization("Window creation failed"))
     } else {
         Ok(ControlHandle::Hwnd(handle))
     }
@@ -275,7 +275,7 @@ pub(crate) unsafe fn build_sysclass<'a>(
     class_name: &'a str,
     clsproc: WNDPROC,
     background: Option<HBRUSH>,
-) -> Result<(), SystemError> 
+) -> Result<(), NwgError> 
 {
     use winapi::um::winuser::{LoadCursorW, RegisterClassExW};
     use winapi::um::winuser::{CS_HREDRAW, CS_VREDRAW, COLOR_WINDOW, IDC_ARROW, WNDCLASSEXW};
@@ -304,19 +304,19 @@ pub(crate) unsafe fn build_sysclass<'a>(
 
     let class_token = RegisterClassExW(&class);
     if class_token == 0 && GetLastError() != ERROR_CLASS_ALREADY_EXISTS { 
-        Err(SystemError::SystemClassCreationFailed)
+        Err(NwgError::initialization("System class creation failed"))
     } else {
         Ok(())
     }
 }
 
 /// Create the window class for the base nwg window
-pub(crate) fn init_window_class() -> Result<(), SystemError> {
+pub(crate) fn init_window_class() -> Result<(), NwgError> {
     use winapi::um::libloaderapi::GetModuleHandleW;
     
     unsafe {
         let hmod = GetModuleHandleW(ptr::null_mut());
-        if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
+        if hmod.is_null() { return Err(NwgError::initialization("GetModuleHandleW failed")); }
 
         build_sysclass(hmod, "NativeWindowsGuiWindow", Some(blank_window_proc), None)?;
     }
@@ -326,7 +326,7 @@ pub(crate) fn init_window_class() -> Result<(), SystemError> {
 
 #[cfg(feature = "message-window")]
 /// Create a message only window. Used with the `MessageWindow` control
-pub(crate) fn create_message_window() -> Result<ControlHandle, SystemError> {
+pub(crate) fn create_message_window() -> Result<ControlHandle, NwgError> {
     use winapi::um::winuser::HWND_MESSAGE;
     use winapi::um::winuser::CreateWindowExW;
     use winapi::um::libloaderapi::GetModuleHandleW;
@@ -337,7 +337,7 @@ pub(crate) fn create_message_window() -> Result<ControlHandle, SystemError> {
 
     unsafe {
         let hmod = GetModuleHandleW(ptr::null_mut());
-        if hmod.is_null() { return Err(SystemError::GetModuleHandleFailed); }
+        if hmod.is_null() { return Err(NwgError::initialization("GetModuleHandleW failed")); }
         
         let handle = CreateWindowExW (
             0,
@@ -353,7 +353,7 @@ pub(crate) fn create_message_window() -> Result<ControlHandle, SystemError> {
         );
 
         if handle.is_null() {
-            Err(SystemError::WindowCreationFailed)
+            Err(NwgError::initialization("Message only window creation failed"))
         } else {
             Ok(ControlHandle::Hwnd(handle))
         }

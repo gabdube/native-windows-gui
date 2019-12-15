@@ -7,7 +7,7 @@ ImageButton use the same event as `Button`.
 
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_FLAT};
 use crate::win32::window_helper as wh;
-use crate::{SystemError, Bitmap};
+use crate::{NwgError, Bitmap};
 use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "ImageButton is not yet bound to a winapi object";
@@ -202,12 +202,12 @@ impl<'a> ImageButtonBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut ImageButton) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut ImageButton) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("ImageButton"))
         }?;
 
         out.handle = ControlBase::build_hwnd()
