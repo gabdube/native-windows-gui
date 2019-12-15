@@ -90,7 +90,7 @@ mod basic_app_ui {
                     }
                 };
 
-                nwg::bind_event_handler(handle, handle_events);
+                nwg::full_bind_event_handler(handle, handle_events);
             }
             
             return Ok(ui);

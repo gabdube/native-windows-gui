@@ -99,7 +99,7 @@ mod test_control_panel_ui {
                     }
                 };
 
-                bind_event_handler(handle, handle_events);
+                full_bind_event_handler(handle, handle_events);
             }
 
             // Layouts

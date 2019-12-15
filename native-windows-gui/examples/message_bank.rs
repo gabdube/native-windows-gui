@@ -17,7 +17,7 @@ pub struct MessageBank {
     message_title: nwg::TextInput,
     message_content: nwg::TextInput,
 
-    buttons: RefCell<Vec<nwg::Button>>
+    buttons: RefCell<Vec<nwg::Button>>,
 }
 
 impl MessageBank {
@@ -37,6 +37,19 @@ impl MessageBank {
         let blen = buttons.len() as u32;
         let (x, y) = (blen % 6, blen / 6);
         self.layout.add_child(x, y+1, &new_button);
+
+        let new_button_handle = new_button.handle;
+        let handler = nwg::bind_event_handler(&new_button.handle, &self.window.handle, move |evt, _evt_data, handle| {
+            match evt {
+                nwg::Event::OnButtonClick => {
+                    if handle == new_button_handle {
+                        nwg::simple_message(&title, &content);
+                    }
+                },
+                _ => {}
+            }
+        });
+
         buttons.push(new_button);
     }
 
@@ -106,7 +119,7 @@ mod message_bank_ui {
                     }
                 };
 
-                nwg::bind_event_handler(handle, handle_events);
+                nwg::full_bind_event_handler(handle, handle_events);
             }
 
             // Layout

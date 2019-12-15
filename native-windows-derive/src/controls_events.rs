@@ -159,7 +159,8 @@ impl ToTokens for ControlEvents {
                         _ => {}
                     }
                 };
-                nwg::bind_event_handler(handle, handle_events);
+                
+                nwg::full_bind_event_handler(handle, handle_events);
             }
         };
 

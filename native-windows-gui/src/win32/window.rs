@@ -26,6 +26,7 @@ const NO_DATA: EventData = EventData::NoData;
 pub struct EventHandler<F> {
     handles: Vec<HWND>,
     id: SUBCLASSPROC,
+    subclass_id: UINT_PTR,
     p: PhantomData<F>
 }
 
@@ -56,12 +57,12 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
 }
 
 /**
-    Set a window subclass the uses the `process_events` function of NWG.
-    The window subclass is applied to the window and all it's children (recursively).
+    Hook the window subclass with the default event dispatcher.
+    The hook is applied to the window and all it's children (recursively).
 
     Returns a `EventHandler` that can be passed to `unbind_event_handler` to remove the callbacks.
 */
-pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler<F>
+pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler<F>
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
     use winapi::um::commctrl::{SetWindowSubclass};
@@ -101,16 +102,66 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler<F>
     let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
     
     let callback_fn: SUBCLASSPROC = Some(process_events::<F>);
-    let mut handler = EventHandler { handles: vec![hwnd], id: callback_fn, p: PhantomData };
+    let subclass_id = hwnd as UINT_PTR;
+    let mut handler = EventHandler {
+        handles: vec![hwnd],
+        id: callback_fn,
+        subclass_id,
+        p: PhantomData
+    };
 
     unsafe {
         EnumChildWindows(hwnd, Some(handler_children), (&mut handler.handles as *mut Vec<HWND>) as LPARAM);
         EnumChildWindows(hwnd, Some(set_children_subclass::<F>), callback_value);
-        SetWindowSubclass(hwnd, callback_fn, 0, callback_value as UINT_PTR);
+        SetWindowSubclass(hwnd, callback_fn, subclass_id, callback_value as UINT_PTR);
     }
 
     handler
 }
+
+
+/**
+    Hook the window subclass with the default event dispatcher.
+    The hook is applied to the control and its parent. All common controls send their events to their parent.
+
+    Arguments:
+       - handle: Handle to the main control to hook
+       - parent_handle: Parent to the main control.
+       - f: User event callback
+
+    Returns a `EventHandler` that can be passed to `unbind_event_handler` to remove the callbacks.
+*/
+pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHandle, f: F) -> EventHandler<F>
+    where F: Fn(Event, EventData, ControlHandle) -> () + 'static
+{
+    use winapi::um::commctrl::{SetWindowSubclass};
+
+    let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
+    let parent_hwnd = parent_handle.hwnd().expect("Cannot bind control with an handle of type");
+    
+    // The callback function must be passed to each children of the control
+    // To do so, we must RC the callback
+    let callback = Rc::new(f);
+    let callback_ptr: *const F = Rc::into_raw(callback.clone());
+    let callback_ptr_parent: *const F = Rc::into_raw(callback.clone());
+
+    let callback_fn: SUBCLASSPROC = Some(process_events::<F>);
+    let subclass_id = hwnd as UINT_PTR;
+    let handler = EventHandler {
+        handles: vec![hwnd, parent_hwnd],
+        id: callback_fn,
+        subclass_id,
+        p: PhantomData
+    };
+
+    unsafe {
+        SetWindowSubclass(hwnd, callback_fn, subclass_id, callback_ptr as UINT_PTR);
+        SetWindowSubclass(parent_hwnd, callback_fn, subclass_id, callback_ptr_parent as UINT_PTR);
+    }
+
+    handler
+}
+
 
 /**
     Free all associated callbacks with the event handler.
@@ -121,10 +172,11 @@ pub fn unbind_event_handler<F>(handler: &EventHandler<F>)
     use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
 
     let id = handler.id;
+    let subclass_id = handler.subclass_id;
     for &handle in handler.handles.iter() {
         unsafe { 
             let mut callback_value: UINT_PTR = 0;
-            GetWindowSubclass(handle, id, 0, &mut callback_value);
+            GetWindowSubclass(handle, id, subclass_id, &mut callback_value);
 
             let callback: Rc<F> = Rc::from_raw(callback_value as *const F);
             mem::drop(callback);
