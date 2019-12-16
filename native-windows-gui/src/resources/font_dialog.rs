@@ -3,7 +3,7 @@ use winapi::um::commdlg::{CHOOSEFONTW, ChooseFontW};
 use winapi::um::wingdi::{LOGFONTW};
 use super::FontInfo;
 use crate::controls::ControlHandle;
-use crate::SystemError;
+use crate::NwgError;
 use std::cell::{RefCell};
 use std::{ptr, mem};
 use std::pin::Pin;
@@ -79,7 +79,7 @@ pub struct FontDialogBuilder {
 
 impl FontDialogBuilder {
 
-    pub fn build(self, _out: &mut FontDialog) -> Result<(), SystemError> {
+    pub fn build(self, _out: &mut FontDialog) -> Result<(), NwgError> {
         Ok(())
     }
 

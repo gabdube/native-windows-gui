@@ -160,11 +160,11 @@ fn release_header(canvas: &CanvasTest) {
 
 mod partial_canvas_test_ui {
     use super::*;
-    use crate::{PartialUi, SystemError, ControlHandle};
+    use crate::{PartialUi, NwgError, ControlHandle};
 
     impl PartialUi<CanvasTest> for CanvasTest {
 
-        fn build_partial<W: Into<ControlHandle>>(data: &mut CanvasTest, _parent: Option<W>) -> Result<(), SystemError> {
+        fn build_partial<W: Into<ControlHandle>>(data: &mut CanvasTest, _parent: Option<W>) -> Result<(), NwgError> {
             CanvasWindow::builder()
                 .flags(CanvasWindowFlags::POPUP)
                 .size((300, 300))

@@ -143,11 +143,11 @@ pub struct ControlsTest {
 
 mod partial_controls_test_ui {
     use super::*;
-    use crate::{PartialUi, SystemError, ControlHandle};
+    use crate::{PartialUi, NwgError, ControlHandle};
 
     impl PartialUi<ControlsTest> for ControlsTest {
 
-        fn build_partial<W: Into<ControlHandle>>(data: &mut ControlsTest, _parent: Option<W>) -> Result<(), SystemError> {
+        fn build_partial<W: Into<ControlHandle>>(data: &mut ControlsTest, _parent: Option<W>) -> Result<(), NwgError> {
             
             //
             // Resources
@@ -176,7 +176,7 @@ mod partial_controls_test_ui {
             #[cfg(feature = "file-dialog")]
             #[cfg(feature = "color-dialog")]
             #[cfg(feature = "font-dialog")]
-            fn init_dialog(data: &mut ControlsTest) -> Result<(), SystemError> {
+            fn init_dialog(data: &mut ControlsTest) -> Result<(), NwgError> {
                 FileDialog::builder()
                     .action(FileDialogAction::Open)
                     .multiselect(true)

@@ -1,6 +1,6 @@
 use winapi::shared::windef::HFONT;
 use crate::win32::resources_helper as rh;
-use crate::{SystemError};
+use crate::{NwgError};
 use std::ptr;
 
 
@@ -100,7 +100,7 @@ impl<'a> FontBuilder<'a> {
         self
     }
 
-    pub fn build(self, font: &mut Font) -> Result<(), SystemError> {
+    pub fn build(self, font: &mut Font) -> Result<(), NwgError> {
         font.handle = unsafe { rh::build_font(
             self.size,
             self.weight,

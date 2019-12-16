@@ -27,7 +27,7 @@ fn notice(noticer: &nwg::Notice) {
 
 use super::control_handle::ControlHandle;
 use crate::win32::{window_helper as wh, window::build_notice};
-use crate::SystemError;
+use crate::NwgError;
 
 
 /// An invisible component that can be triggered by other thread
@@ -94,13 +94,13 @@ impl NoticeBuilder {
         self
     }
 
-    pub fn build(self, out: &mut Notice) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut Notice) -> Result<(), NwgError> {
         let parent = match self.parent {
             Some(p) => match p.hwnd() {
                 Some(handle) => Ok(handle),
-                None => Err(SystemError::WrongParentType)
+                None => Err(NwgError::control_create("Wrong parent type"))
             },
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("Notice"))
         }?;
 
         out.handle = build_notice(parent);

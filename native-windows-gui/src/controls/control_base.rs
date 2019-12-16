@@ -3,7 +3,7 @@ use winapi::shared::windef::{HWND, HMENU};
 use super::ControlHandle;
 use crate::win32::window::{build_hwnd_control, build_timer, build_notice};
 use crate::win32::menu::build_hmenu_control;
-use crate::{SystemError, NwgError};
+use crate::{NwgError};
 
 const NOTICE: u32 = 1;
 const TRAY: u32 = 2;
@@ -163,7 +163,7 @@ impl HmenuBuilder {
         self
     }
 
-    pub fn build(self) -> Result<ControlHandle, SystemError> {
+    pub fn build(self) -> Result<ControlHandle, NwgError> {
         let handle = unsafe { build_hmenu_control(
             self.text,
             self.item,
@@ -206,7 +206,7 @@ impl TimerBuilder {
         self
     }
 
-    pub fn build(self) -> Result<ControlHandle, SystemError> {
+    pub fn build(self) -> Result<ControlHandle, NwgError> {
         let handle = unsafe { build_timer(
             self.parent.expect("Internal error. Timer without window parent"),
             self.interval,
@@ -231,8 +231,8 @@ impl OtherBuilder {
         self
     }
 
-    pub fn build(self) -> Result<ControlHandle, SystemError> {
-        let handle = self.parent.expect("Internal error. Notice without window parent");
+    pub fn build(self) -> Result<ControlHandle, NwgError> {
+        let handle = self.parent.expect("Internal error. Control without window parent");
         let base = match self.ty {
             NOTICE => build_notice(handle),
             TRAY => ControlHandle::SystemTray(handle),

@@ -5,32 +5,32 @@ use winapi::shared::windef::{HMENU, HWND};
 use winapi::shared::minwindef::UINT;
 use super::base_helper::to_utf16;
 use crate::controls::ControlHandle;
-use crate::{SystemError};
+use crate::{NwgError};
 use std::{mem, ptr};
 
 
 static mut MENU_ITEMS_ID: u32 = 1; 
 
 /// Build a system menu
-pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: bool, popup: bool, hmenu: Option<HMENU>, hwnd: Option<HWND>) -> Result<ControlHandle, SystemError> {
+pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: bool, popup: bool, hmenu: Option<HMENU>, hwnd: Option<HWND>) -> Result<ControlHandle, NwgError> {
     use winapi::um::winuser::{CreateMenu, CreatePopupMenu, GetMenu, SetMenu, DrawMenuBar, AppendMenuW};
     use winapi::um::winuser::{MF_STRING, MF_POPUP};
 
     if separator {
         if hmenu.is_none() {
-            return Err(SystemError::SeparatorWithoutMenuParent);
+            return Err(NwgError::menu_create("Separator without parent"));
         }
         return Ok(build_hmenu_separator(hmenu.unwrap()));
     }
 
     if popup {
-        let menu = CreatePopupMenu();
-        if menu.is_null() {
-            return Err(SystemError::MenuCreationFailed);
+        if hwnd.is_none() {
+            return Err(NwgError::menu_create("Popup menu without parent"));
         }
 
-        if hwnd.is_none() {
-            return Err(SystemError::PopMenuWithoutParent);
+        let menu = CreatePopupMenu();
+        if menu.is_null() {
+            return Err(NwgError::menu_create("Popup menu creation failed"));
         }
 
         use_menu_command(menu);
@@ -65,7 +65,7 @@ pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: b
             parent_menu = menubar;
             menu = CreateMenu();
             if menu.is_null() {
-                return Err(SystemError::MenuCreationFailed);
+                return Err(NwgError::menu_create("Menu without parent"));
             }
             use_menu_command(menu);
             AppendMenuW(menubar, flags, mem::transmute(menu), text.as_ptr());
@@ -84,7 +84,7 @@ pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: b
             parent_menu = parent;
             menu = CreateMenu();
             if menu.is_null() {
-                return Err(SystemError::MenuCreationFailed);
+                return Err(NwgError::menu_create("Menu without parent"));
             }
             use_menu_command(menu);
             AppendMenuW(parent, flags, mem::transmute(menu), text.as_ptr());

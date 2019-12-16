@@ -4,7 +4,7 @@
 use winapi::um::winnt::HANDLE;
 use winapi::um::winuser::IMAGE_CURSOR;
 use crate::win32::resources_helper as rh;
-use crate::{OemCursor, OemImage, SystemError};
+use crate::{OemCursor, OemImage, NwgError};
 use std::ptr;
 
 
@@ -58,7 +58,7 @@ impl<'a> CursorBuilder<'a> {
         self
     }
 
-    pub fn build(self, b: &mut Cursor) -> Result<(), SystemError> {
+    pub fn build(self, b: &mut Cursor) -> Result<(), NwgError> {
         let handle;
         
         if let Some(src) = self.source_text {

@@ -24,7 +24,7 @@ pub struct TestControlPanel {
 
 mod test_control_panel_ui {
     use super::*;
-    use crate::{NativeUi, SystemError};
+    use crate::{NativeUi, NwgError};
     use std::rc::Rc;
     use std::ops::Deref;
 
@@ -33,7 +33,7 @@ mod test_control_panel_ui {
     }
 
     impl NativeUi<TestControlPanel, TestControlPanelUi> for TestControlPanel {
-        fn build_ui(mut data: TestControlPanel) -> Result<Rc<TestControlPanelUi>, SystemError> {
+        fn build_ui(mut data: TestControlPanel) -> Result<Rc<TestControlPanelUi>, NwgError> {
             use crate::Event as E;
 
             // Controls

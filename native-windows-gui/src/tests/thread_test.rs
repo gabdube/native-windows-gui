@@ -61,11 +61,11 @@ fn notice_me(app: &ThreadTest) {
 
 mod partial_canvas_test_ui {
     use super::*;
-    use crate::{PartialUi, SystemError, ControlHandle};
+    use crate::{PartialUi, NwgError, ControlHandle};
 
     impl PartialUi<ThreadTest> for ThreadTest {
 
-        fn build_partial<W: Into<ControlHandle>>(data: &mut ThreadTest, _parent: Option<W>) -> Result<(), SystemError> {
+        fn build_partial<W: Into<ControlHandle>>(data: &mut ThreadTest, _parent: Option<W>) -> Result<(), NwgError> {
             
             Font::builder()
                 .size(40)

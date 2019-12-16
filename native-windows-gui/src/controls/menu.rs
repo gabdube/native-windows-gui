@@ -1,5 +1,5 @@
 use crate::win32::menu as mh;
-use crate::SystemError;
+use crate::NwgError;
 use super::{ControlBase, ControlHandle};
 use std::ptr;
 
@@ -104,9 +104,9 @@ impl<'a> MenuBuilder<'a> {
         self
     }
 
-    pub fn build(self, menu: &mut Menu) -> Result<(), SystemError> {
+    pub fn build(self, menu: &mut Menu) -> Result<(), NwgError> {
         if self.parent.is_none() {
-            return Err(SystemError::ControlWithoutParent);
+            return Err(NwgError::no_parent_menu());
         }
 
         menu.handle = ControlBase::build_hmenu()
@@ -182,9 +182,9 @@ impl<'a> MenuItemBuilder<'a> {
         self
     }
 
-    pub fn build(self, item: &mut MenuItem) -> Result<(), SystemError> {
+    pub fn build(self, item: &mut MenuItem) -> Result<(), NwgError> {
         if self.parent.is_none() {
-            return Err(SystemError::ControlWithoutParent);
+            return Err(NwgError::no_parent_menu());
         }
 
         item.handle = ControlBase::build_hmenu()
@@ -229,9 +229,9 @@ impl MenuSeparatorBuilder {
         self
     }
 
-    pub fn build(self, sep: &mut MenuSeparator) -> Result<(), SystemError> {
+    pub fn build(self, sep: &mut MenuSeparator) -> Result<(), NwgError> {
         if self.parent.is_none() {
-            return Err(SystemError::ControlWithoutParent);
+            return Err(NwgError::no_parent_menu());
         }
 
         sep.handle = ControlBase::build_hmenu()

@@ -41,7 +41,7 @@ mod basic_app_ui {
     }
 
     impl nwg::NativeUi<BasicApp, BasicAppUi> for BasicApp {
-        fn build_ui(mut data: BasicApp) -> Result<Rc<BasicAppUi>, nwg::SystemError> {
+        fn build_ui(mut data: BasicApp) -> Result<Rc<BasicAppUi>, nwg::NwgError> {
             use nwg::Event as E;
             
             // Controls

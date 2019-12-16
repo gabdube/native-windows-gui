@@ -3,7 +3,7 @@ use winapi::um::shobjidl::IFileDialog;
 use crate::win32::resources_helper as rh;
 
 use crate::win32::base_helper::to_utf16;
-use crate::{ControlHandle, SystemError, UserError};
+use crate::{ControlHandle, NwgError};
 use std::{fmt, ptr, mem};
 
 
@@ -61,10 +61,10 @@ impl FileDialog {
         • if there was a system error while reading the selected item  
         • if the dialog has the `multiselect` flag  
     */
-    pub fn get_selected_item(&self) -> Result<String, UserError> { 
+    pub fn get_selected_item(&self) -> Result<String, NwgError> { 
         
         if self.multiselect() {
-            return Err(UserError::FileDialog("FileDialog have the multiselect flag".into()))
+            return Err(NwgError::file_dialog("FileDialog have the multiselect flag"));
         }
 
         unsafe {
@@ -79,9 +79,9 @@ impl FileDialog {
         • if there was a system error while reading the selected items  
         • if the dialog has `Save` for action  
     */
-    pub fn get_selected_items(&self) -> Result<Vec<String>, UserError> {
+    pub fn get_selected_items(&self) -> Result<Vec<String>, NwgError> {
         if self.action == FileDialogAction::Save {
-            return Err(UserError::FileDialog("Save dialog cannot have more than one item selected".into()));
+            return Err(NwgError::file_dialog("Save dialog cannot have more than one item selected"));
         }
 
         unsafe {
@@ -105,11 +105,11 @@ impl FileDialog {
         • if there was a system error while setting the new flag value  
         • if the dialog has `Save` for action  
     */
-    pub fn set_multiselect(&self, multiselect: bool) -> Result<(), UserError> {
+    pub fn set_multiselect(&self, multiselect: bool) -> Result<(), NwgError> {
         use winapi::um::shobjidl::FOS_ALLOWMULTISELECT;
 
         if self.action == FileDialogAction::Save {
-            return Err(UserError::FileDialog("Cannot set multiselect flag for a save file dialog".into()));
+            return Err(NwgError::file_dialog("Cannot set multiselect flag for a save file dialog"));
         }
 
         let result = unsafe{ rh::toggle_dialog_flags(&mut *self.handle, FOS_ALLOWMULTISELECT, multiselect) };
@@ -126,7 +126,7 @@ impl FileDialog {
         • if the default folder do not identify a folder  
         • if the folder do not exists  
     */
-    pub fn set_default_folder<'a>(&self, folder: &'a str) -> Result<(), SystemError> {
+    pub fn set_default_folder<'a>(&self, folder: &'a str) -> Result<(), NwgError> {
         unsafe{ 
             let handle = &mut *self.handle;
             rh::file_dialog_set_default_folder(handle, &folder) 
@@ -140,7 +140,7 @@ impl FileDialog {
         The `filters` value must be a '|' separated string having this format: "Test(*.txt;*.rs)|Any(*.*)"  
         Where the fist part is the "human name" and the second part is a filter for the system.
     */
-    pub fn set_filters<'a>(&self, filters: &'a str) -> Result<(), SystemError> {
+    pub fn set_filters<'a>(&self, filters: &'a str) -> Result<(), NwgError> {
         unsafe{ 
             let handle = &mut *self.handle;
             rh::file_dialog_set_filters(handle, &filters) 
@@ -248,7 +248,7 @@ impl FileDialogBuilder {
         self
     }
 
-    pub fn build(self, out: &mut FileDialog) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut FileDialog) -> Result<(), NwgError> {
         unsafe {
             out.handle = rh::create_file_dialog(
                 self.action,

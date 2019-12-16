@@ -6,7 +6,7 @@ use crate::resources::OemImage;
 use super::base_helper::{get_system_error, to_utf16};
 
 #[allow(unused_imports)] use std::{ptr, mem};
-#[allow(unused_imports)] use crate::{SystemError, UserError};
+#[allow(unused_imports)] use crate::{NwgError};
 
 #[cfg(feature = "file-dialog")] use winapi::um::shobjidl_core::{IShellItem};
 #[cfg(feature = "file-dialog")] use crate::resources::FileDialogAction;
@@ -18,7 +18,7 @@ pub unsafe fn build_font(
     weight: u32,
     style: [bool; 3],
     family_name: Option<&str>,
-) -> Result<HFONT, SystemError> 
+) -> Result<HFONT, NwgError> 
 {  
     use winapi::um::wingdi::{DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH};
     use winapi::um::wingdi::CreateFontW;
@@ -52,8 +52,8 @@ pub unsafe fn build_font(
     drop(fam);
 
     if handle.is_null() {
-        println!("{:?}", get_system_error());
-        Err( SystemError::FontCreationFailed )
+        // println!("{:?}", get_system_error());
+        Err( NwgError::resource_create("Failed to create font") )
     } else {
         Ok( handle )
     }
@@ -65,7 +65,7 @@ pub unsafe fn build_image<'a>(
     size: Option<(u32, u32)>,
     strict: bool,
     image_type: u32
-) -> Result<HANDLE, SystemError>
+) -> Result<HANDLE, NwgError>
 {
     use winapi::um::winuser::{LR_LOADFROMFILE, LR_DEFAULTSIZE, LR_SHARED, IMAGE_ICON, IDC_ARROW, IDI_ERROR, IMAGE_CURSOR, IMAGE_BITMAP};
     use winapi::um::winuser::LoadImageW;
@@ -98,7 +98,7 @@ pub unsafe fn build_image<'a>(
     }
 
     if handle.is_null() {
-        Err(SystemError::ImageCreationFailed)
+        Err( NwgError::resource_create("Failed to create image") )
     } else {
         Ok(handle)
     }
@@ -107,7 +107,7 @@ pub unsafe fn build_image<'a>(
 pub unsafe fn build_oem_image(
     source: OemImage,
     size: Option<(u32, u32)>,
-) -> Result<HANDLE, SystemError> 
+) -> Result<HANDLE, NwgError> 
 {
     use winapi::um::winuser::{LR_DEFAULTSIZE, LR_SHARED, IMAGE_ICON, IMAGE_CURSOR, IMAGE_BITMAP};
     use winapi::um::winuser::LoadImageW;
@@ -136,14 +136,14 @@ pub unsafe fn build_oem_image(
     let handle = LoadImageW(ptr::null_mut(), res_identifier, c_res_type, width as i32, height as i32, flags);
 
     if handle.is_null() {
-        Err(SystemError::ImageCreationFailed)
+        Err( NwgError::resource_create("Failed to create image from system resource") )
     } else {
         Ok(handle)
     }
 }
 
 
-pub unsafe fn make_bitmap_transparent(handle: HANDLE, size: (i32, i32), key: [u8; 3]) -> Result<HANDLE, SystemError> {
+pub unsafe fn make_bitmap_transparent(handle: HANDLE, size: (i32, i32), key: [u8; 3]) -> Result<HANDLE, NwgError> {
     use winapi::um::wingdi::{RGB, TransparentBlt, CreateCompatibleDC, CreateCompatibleBitmap, DeleteDC, DeleteObject, SelectObject};
     use winapi::shared::windef::{HGDIOBJ};
 
@@ -173,7 +173,7 @@ pub unsafe fn make_bitmap_transparent(handle: HANDLE, size: (i32, i32), key: [u8
 
     match ok == 1 {
         true => Ok(dst_hbitmap as HANDLE),
-        false => Err(SystemError::Todo)
+        false => Err( NwgError::resource_create("Failed to remove bitmap background") )
     }
 }
 
@@ -187,7 +187,7 @@ pub unsafe fn create_file_dialog<'a, 'b>(
     multiselect: bool,
     default_folder: Option<String>,
     filters: Option<String>
-) -> Result<*mut IFileDialog, SystemError> 
+) -> Result<*mut IFileDialog, NwgError> 
 {
     use winapi::um::shobjidl_core::{CLSID_FileSaveDialog, CLSID_FileOpenDialog};
     use winapi::um::shobjidl::{FOS_PICKFOLDERS, FOS_ALLOWMULTISELECT, FOS_FORCEFILESYSTEM};
@@ -203,7 +203,7 @@ pub unsafe fn create_file_dialog<'a, 'b>(
     let mut handle: *mut IFileDialog = ptr::null_mut();
     let r = CoCreateInstance(&clsid, ptr::null_mut(), CLSCTX_INPROC_SERVER, &uuid, mem::transmute(&mut handle) );
     if r != S_OK {
-        return Err(SystemError::FileDialogCreationFailed);
+        return Err(NwgError::file_dialog("Filedialog creation failed"));
     }
 
     let file_dialog = &mut *handle;
@@ -211,16 +211,15 @@ pub unsafe fn create_file_dialog<'a, 'b>(
 
     // Set dialog options
     if file_dialog.GetOptions(&mut flags) != S_OK {
-        println!("get options");
         file_dialog.Release(); 
-        return Err(SystemError::FileDialogCreationFailed);
+        return Err(NwgError::file_dialog("Filedialog creation failed"));
     }
  
     let use_dir = if action == FileDialogAction::OpenDirectory { FOS_PICKFOLDERS } else { 0 };
     let multiselect = if multiselect { FOS_ALLOWMULTISELECT } else { 0 };
     if file_dialog.SetOptions(flags | FOS_FORCEFILESYSTEM | use_dir | multiselect) != S_OK {
         file_dialog.Release();
-        return Err(SystemError::FileDialogCreationFailed);
+        return Err(NwgError::file_dialog("Filedialog creation failed"));
     }
 
     
@@ -228,7 +227,7 @@ pub unsafe fn create_file_dialog<'a, 'b>(
     match &default_folder {
         &Some(ref f) => match file_dialog_set_default_folder(file_dialog, f) {
             Ok(_) => (),
-            Err(e) => { println!("set default folder"); file_dialog.Release(); return Err(e); }
+            Err(e) => { file_dialog.Release(); return Err(e); }
         },
         &None => ()
     }
@@ -247,7 +246,7 @@ pub unsafe fn create_file_dialog<'a, 'b>(
 
 
 #[cfg(feature = "file-dialog")]
-pub unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folder_name: &'a str) -> Result<(), SystemError> {
+pub unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folder_name: &'a str) -> Result<(), NwgError> {
     use winapi::um::shobjidl_core::{SFGAOF};
     use winapi::um::objidl::IBindCtx;
     use winapi::shared::{winerror::{S_OK, S_FALSE}, guiddef::REFIID, ntdef::{HRESULT, PCWSTR}};
@@ -266,7 +265,7 @@ pub unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folde
     let path = to_utf16(&folder_name);
 
     if SHCreateItemFromParsingName(path.as_ptr(), ptr::null_mut(), &IID_IShellItem(), mem::transmute(&mut shellitem) ) != S_OK {
-        return Err(SystemError::FileDialogCreationFailed);
+        return Err(NwgError::file_dialog("Failed to set default folder"));
     }
 
     let shellitem = &mut *shellitem;
@@ -276,17 +275,17 @@ pub unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folde
 
     if results != S_OK && results != S_FALSE {
         shellitem.Release();
-        return Err(SystemError::FileDialogCreationFailed);
+        return Err(NwgError::file_dialog("Failed to set default folder"));
     }
 
     if file_properties & SFGAO_FOLDER != SFGAO_FOLDER {
         shellitem.Release();
-        return Err(SystemError::FileDialogCreationFailed);
+        return Err(NwgError::file_dialog("Failed to set default folder"));
     }
 
     if dialog.SetDefaultFolder(shellitem) != S_OK {
         shellitem.Release();
-        return Err(SystemError::FileDialogCreationFailed);
+        return Err(NwgError::file_dialog("Failed to set default folder"));
     }
 
     shellitem.Release();
@@ -296,7 +295,7 @@ pub unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folde
 
 
 #[cfg(feature = "file-dialog")]
-pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a str) -> Result<(), SystemError> {
+pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a str) -> Result<(), NwgError> {
     use winapi::shared::minwindef::UINT;
     use winapi::um::shtypes::COMDLG_FILTERSPEC;
     use winapi::shared::winerror::S_OK;
@@ -307,8 +306,8 @@ pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a
     for f in filters.split('|') {
         let end = f.rfind('(');
         if end.is_none() {
-            println!("Bad extension filter format: {:?}", filters);
-            return Err(SystemError::FileDialogCreationFailed);
+            let err = format!("Bad extension filter format: {:?}", filters);
+            return Err(NwgError::file_dialog(&err));
         }
 
         let (_name, _filter) = f.split_at(end.unwrap());
@@ -322,19 +321,19 @@ pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a
     if dialog.SetFileTypes(filters_count, raw_filters.as_ptr()) == S_OK {
         Ok(())
     } else {
-        println!("Failed to set the filters using {:?}", filters);
-        Err(SystemError::FileDialogCreationFailed)
+        let err = format!("Failed to set the filters using {:?}", filters);
+        return Err(NwgError::file_dialog(&err));
     }
 }
 
 #[cfg(feature = "file-dialog")]
-pub unsafe fn filedialog_get_item(dialog: &mut IFileDialog) -> Result<String, UserError> {
+pub unsafe fn filedialog_get_item(dialog: &mut IFileDialog) -> Result<String, NwgError> {
     use winapi::shared::winerror::S_OK;
     
     let mut _item: *mut IShellItem = ptr::null_mut();
 
     if dialog.GetResult(&mut _item) != S_OK {
-        return Err(UserError::FileDialog("Failed to get result".to_string()));
+        return Err(NwgError::file_dialog("Failed to get dialog item"));
     }
 
     let text = get_ishellitem_path(&mut *_item);
@@ -344,7 +343,7 @@ pub unsafe fn filedialog_get_item(dialog: &mut IFileDialog) -> Result<String, Us
 }
 
 #[cfg(feature = "file-dialog")]
-pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<String>, UserError> {
+pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<String>, NwgError> {
     use winapi::um::shobjidl::IShellItemArray;
     use winapi::shared::{winerror::S_OK, minwindef::DWORD};
     
@@ -352,7 +351,7 @@ pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<S
     let mut _items: *mut IShellItemArray = ptr::null_mut();
 
     if dialog.GetResults( mem::transmute(&mut _items) ) != S_OK {
-        return Err(UserError::FileDialog("Failed to get results".into()));
+        return Err(NwgError::file_dialog("Failed to get dialog items"));
     }
 
     let items = &mut *_items;
@@ -374,7 +373,7 @@ pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<S
 }
 
 #[cfg(feature = "file-dialog")]
-unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<String, UserError> {
+unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<String, NwgError> {
     use winapi::um::shobjidl_core::SIGDN_FILESYSPATH;
     use winapi::shared::{ntdef::PWSTR, winerror::S_OK};
     use winapi::um::combaseapi::CoTaskMemFree;
@@ -382,7 +381,7 @@ unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<String, UserError
 
     let mut item_path: PWSTR = ptr::null_mut();
     if item.GetDisplayName(SIGDN_FILESYSPATH, &mut item_path) != S_OK {
-        return Err(UserError::FileDialog("Failed to get file name".into()));
+        return Err(NwgError::file_dialog("Failed to get file name"));
     }
 
     let text = from_wide_ptr(item_path);
@@ -393,19 +392,19 @@ unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<String, UserError
 }
 
 #[cfg(feature = "file-dialog")]
-pub unsafe fn file_dialog_options(dialog: &mut IFileDialog) -> Result<u32, UserError> {
+pub unsafe fn file_dialog_options(dialog: &mut IFileDialog) -> Result<u32, NwgError> {
     use winapi::shared::winerror::S_OK;
 
     let mut flags = 0;
     if dialog.GetOptions(&mut flags) != S_OK {
-        return Err(UserError::FileDialog("Failed to get the file dialog options".into()));
+        return Err(NwgError::file_dialog("Failed to get the file dialog options"));
     }
 
     Ok(flags)
 }
 
 #[cfg(feature = "file-dialog")]
-pub unsafe fn toggle_dialog_flags(dialog: &mut IFileDialog, flag: u32, enabled: bool) -> Result<(), UserError> {
+pub unsafe fn toggle_dialog_flags(dialog: &mut IFileDialog, flag: u32, enabled: bool) -> Result<(), NwgError> {
     use winapi::shared::winerror::S_OK;
     
     let mut flags = file_dialog_options(dialog)?;
@@ -415,7 +414,7 @@ pub unsafe fn toggle_dialog_flags(dialog: &mut IFileDialog, flag: u32, enabled: 
     };
 
     if dialog.SetOptions(flags) != S_OK {
-        return Err(UserError::FileDialog("Failed to set the file dialog options".into()));
+        return Err(NwgError::file_dialog("Failed to set the file dialog options"));
     } else {
         Ok(())
     }

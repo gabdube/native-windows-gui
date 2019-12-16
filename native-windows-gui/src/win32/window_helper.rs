@@ -186,6 +186,7 @@ pub unsafe fn set_window_enabled(handle: HWND, enabled: bool) {
     UpdateWindow(handle);
 }
 
+#[cfg(feature = "tabs")]
 pub unsafe fn get_window_class_name(handle: HWND) -> String {
     use std::ffi::OsString;
     use std::os::windows::ffi::OsStringExt;

@@ -4,7 +4,7 @@
 use winapi::um::winnt::HANDLE;
 use winapi::um::winuser::IMAGE_ICON;
 use crate::win32::resources_helper as rh;
-use crate::{OemImage, OemIcon, SystemError};
+use crate::{OemImage, OemIcon, NwgError};
 use std::ptr;
 
 
@@ -65,7 +65,7 @@ impl<'a> IconBuilder<'a> {
         self
     }
 
-    pub fn build(self, b: &mut Icon) -> Result<(), SystemError> {
+    pub fn build(self, b: &mut Icon) -> Result<(), NwgError> {
         let handle;
         
         if let Some(src) = self.source_text {

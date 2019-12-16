@@ -4,7 +4,7 @@
 use winapi::um::winnt::HANDLE;
 use winapi::um::winuser::IMAGE_BITMAP;
 use crate::win32::resources_helper as rh;
-use crate::{OemBitmap, OemImage, SystemError};
+use crate::{OemBitmap, OemImage, NwgError};
 use std::ptr;
 
 
@@ -72,7 +72,7 @@ impl<'a> BitmapBuilder<'a> {
         self
     }
 
-    pub fn build(self, b: &mut Bitmap) -> Result<(), SystemError> {
+    pub fn build(self, b: &mut Bitmap) -> Result<(), NwgError> {
         let mut handle;
         
         if let Some(src) = self.source_text {

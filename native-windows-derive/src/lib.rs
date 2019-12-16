@@ -91,7 +91,7 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
     layouts.organize_layouts();
 
     quote! {
-        fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, nwg::SystemError> {
+        fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, nwg::NwgError> {
 
             #(#fields)*
 

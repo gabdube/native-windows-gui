@@ -29,7 +29,7 @@ use winapi::um::shellapi::{Shell_NotifyIconW, NOTIFYICONDATAW};
 use super::{ControlBase, ControlHandle};
 use crate::win32::base_helper::to_utf16;
 use crate::win32::window_helper as wh;
-use crate::{Icon, SystemError};
+use crate::{Icon, NwgError};
 use std::{mem, ptr};
 
 const NOT_BOUND: &'static str = "TrayNotification is not yet bound to a winapi object";
@@ -287,7 +287,7 @@ impl<'a> TrayNotificationBuilder<'a> {
         self
     }
 
-    pub fn build(self, out: &mut TrayNotification) -> Result<(), SystemError> {
+    pub fn build(self, out: &mut TrayNotification) -> Result<(), NwgError> {
         use winapi::um::shellapi::{NIM_ADD, NIF_ICON, NIF_TIP, NIF_SHOWTIP, NIF_INFO, NOTIFYICONDATAW_u, NOTIFYICON_VERSION_4,
          NIF_REALTIME, NIF_MESSAGE, NIS_HIDDEN, NIF_STATE};
         use winapi::shared::windef::HICON;
@@ -317,9 +317,9 @@ impl<'a> TrayNotificationBuilder<'a> {
         let parent = match self.parent {
             Some(p) => match p.hwnd() {
                 Some(handle) => Ok(handle),
-                None => Err(SystemError::WrongParentType)
+                None => Err(NwgError::control_create("TrayNotification must be window-like control."))
             },
-            None => Err(SystemError::ControlWithoutParent)
+            None => Err(NwgError::no_parent("Button"))
         }?;
 
         let icon = match self.icon {

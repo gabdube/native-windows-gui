@@ -2,7 +2,7 @@ use winapi::shared::{minwindef::DWORD, windef::COLORREF};
 use winapi::um::commdlg::{CHOOSECOLORW, CC_RGBINIT, ChooseColorW};
 use winapi::um::wingdi::{GetBValue, GetRValue, GetGValue};
 use crate::controls::ControlHandle;
-use crate::SystemError;
+use crate::NwgError;
 use std::cell::{RefCell};
 use std::{ptr, mem};
 use std::pin::Pin;
@@ -54,7 +54,7 @@ pub struct ColorDialogBuilder {
 
 impl ColorDialogBuilder {
 
-    pub fn build(self, _out: &mut ColorDialog) -> Result<(), SystemError> {
+    pub fn build(self, _out: &mut ColorDialog) -> Result<(), NwgError> {
         Ok(())
     }
 
