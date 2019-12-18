@@ -109,11 +109,11 @@ impl GridLayout {
             base: ptr::null_mut(),
             children: Vec::new(),
             margins: [5, 5, 5, 5],
+            spacing: 5,
             min_size: [0, 0],
             max_size: [u32::max_value(), u32::max_value()],
             column_count: None,
-            row_count: None,
-            spacing: 5,
+            row_count: None
         };
 
         GridLayoutBuilder { layout }

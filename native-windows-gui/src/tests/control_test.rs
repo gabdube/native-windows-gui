@@ -53,6 +53,7 @@ pub struct ControlsTest {
     tree_tab_layout: GridLayout,
     list_view_tab_layout: GridLayout,
     panel_layout: GridLayout,
+    tab_container_layout: BoxLayout,
 
     // Control window
     pub window: Window,
@@ -658,11 +659,11 @@ mod partial_controls_test_ui {
             //
             // Layout
             //
-            VBoxLayout::builder()
+            BoxLayout::builder()
                 .margin([5, 5, 25, 5])
                 .parent(&data.window)
                 .child(0, &data.controls_holder)
-                .build();
+                .build(&data.tab_container_layout);
 
             GridLayout::builder()
                 .parent(&data.panel)

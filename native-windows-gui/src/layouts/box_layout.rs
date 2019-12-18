@@ -8,8 +8,8 @@ use std::ptr;
 
 
 /// The orientation of a box layout
-#[derive(Copy, Clone)]
-enum LayoutTypeId {
+#[derive(Copy, Clone, Debug)]
+pub enum BoxLayoutType {
     Vertical,
     Horizontal
 }
@@ -20,14 +20,10 @@ pub struct BoxLayoutItem {
     /// The handle to the control in the item
     control: HWND,
 
-    /// The column position of the control in the layout
-    pub col: u32,
+    /// The position of the control in the layout
+    pub cell: u32,
 
-    /// The row position of the control in the layout
-    pub row: u32,
-
-    /// The number column/row this item should span. Should be 1 for single column item.
-    /// The column or row is determined by the layout type.
+    /// The number column/row this item should span. Should be 1 for single cell item.
     pub span: u32,
 }
 
@@ -39,7 +35,7 @@ pub struct BoxLayoutInner {
     base: HWND,
 
     /// The orientation of the layout
-    ty: LayoutTypeId,
+    ty: BoxLayoutType,
 
     /// The children of the control that fit in the layout
     children: Vec<BoxLayoutItem>,
@@ -62,34 +58,46 @@ pub struct BoxLayoutInner {
 }
 
 
-/// A layout that lines up control horizontally
+/// A layout that lines up control horizontally or vertically
 /// NWG layouts use interior mutability to manage their controls.
-#[derive(Debug)]
-pub struct HBoxLayout {
+#[derive(Clone)]
+pub struct BoxLayout {
     inner: Rc<RefCell<BoxLayoutInner>>
 }
 
-impl HBoxLayout {
+impl BoxLayout {
 
     pub fn builder() -> BoxLayoutBuilder {
-        let layout = HBoxLayout {
+        let layout = BoxLayoutInner {
             base: ptr::null_mut(),
+            ty: BoxLayoutType::Vertical,
             children: Vec::new(),
-            margins: [10, 5, 10, 5],
+            margins: [5, 10, 5, 10],
             spacing: 5,
+            min_size: [0, 0],
+            max_size: [u32::max_value(), u32::max_value()],
+            cell_count: None,
         };
 
-        BoxLayoutBuilder { layout: LayoutType::Horizontal(layout) }
+        BoxLayoutBuilder { layout: layout }
     }
 
     /// Private function that update the layout and the children
     fn update_layout(&self, mut width: u32, mut height: u32) -> () {
-        let [m_top, m_right, m_bottom, m_left] = self.margins;
-        let sp = self.spacing;
+        let inner = self.inner.borrow();
+        if inner.base.is_null() || inner.children.len() == 0 {
+            return;
+        }
+        
+        let [m_top, m_right, m_bottom, m_left] = inner.margins;
+        let sp = inner.spacing;
 
-        let column_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
+        let cell_count = match inner.cell_count {
+            Some(c) => c,
+            None => inner.children.iter().map(|item| item.cell + item.span).max().unwrap_or(1)
+        };
 
-        if width < (m_right + m_left) + ((sp * 2) * column_count) {
+        if width < (m_right + m_left) + ((sp * 2) * cell_count) {
             return;
         }
 
@@ -102,195 +110,161 @@ impl HBoxLayout {
         height = height - m_top - m_bottom;
 
         // Apply spacing
-        width = width - ((sp * 2) * column_count);
+        width = width - ((sp * 2) * cell_count);
         height = height - (sp * 2);
 
-        let item_width = width / column_count;
-        let item_height = height;
+        let _item_width = width / cell_count;
+        let _item_height = height / cell_count;
+        let sp2 = sp * 2;
 
-        let y = (m_top + sp) as i32;
+        let _y = (m_top + sp) as i32;
+        let _x = (m_left + sp) as i32;
 
-        for &(i, handle) in self.children.iter() {
-            let x = m_left + (sp + (sp * 2 * i)) + (item_width * i);
+        for item in inner.children.iter() {
+            let x = m_left + (sp + (sp2 * item.cell)) + (_item_width * item.cell);
+            let y = m_top + (sp + (sp2 * item.cell)) + (_item_height * item.cell);
 
-            unsafe {
-                wh::set_window_position(handle, x as i32, y);
-                wh::set_window_size(handle, item_width, item_height, false);
+            let local_width = (_item_width * item.span) + (sp2 * (item.span - 1));
+            let local_height = (_item_height * item.span) + (sp2 * (item.span - 1));
+
+            match inner.ty {
+                BoxLayoutType::Horizontal => unsafe {
+                    wh::set_window_position(item.control, x as i32, _y);
+                    wh::set_window_size(item.control, local_width, _item_height, false);
+                },
+                BoxLayoutType::Vertical => unsafe {
+                    wh::set_window_position(item.control, _x, y as i32);
+                    wh::set_window_size(item.control, width, local_height, false);
+                },
             }
         }
 
     } 
 
-}
-
-/// A layout that lines up control vertically
-/// NWG layouts use interior mutability to manage their controls.
-#[derive(Debug)]
-pub struct VBoxLayout {
-    inner: Rc<RefCell<BoxLayoutInner>>
-}
-
-
-impl VBoxLayout {
-
-    pub fn builder() -> BoxLayoutBuilder {
-        let layout = VBoxLayout {
-            base: ptr::null_mut(),
-            children: Vec::new(),
-            margins: [5, 10, 5, 10],
-            spacing: 5,
-        };
-
-        BoxLayoutBuilder { layout: LayoutType::Vertical(layout) }
-    }
-
-    /// Private function that update the layout and the children
-    fn update_layout(&self, mut width: u32, mut height: u32) -> () {
-        let [m_top, m_right, m_bottom, m_left] = self.margins;
-        let sp = self.spacing;
-
-        let row_count = self.children.iter().map(|(i, _)| *i).max().unwrap_or(0) + 1;
-
-        if width < m_right + m_left + (sp * 2) {
-            return;
-        }
-
-        if height < m_top + m_bottom + ((sp * 2) * row_count) {
-            return;
-        }
-
-        // Apply margins
-        width = width - m_right - m_left;
-        height = height - m_top - m_bottom;
-
-        // Apply spacing
-        width = width - (sp * 2);
-        height = height - ((sp * 2) * row_count);
-
-        let item_width = width;
-        let item_height = height / row_count;
-
-        let x = (m_left + sp) as i32;
-
-        for &(i, handle) in self.children.iter() {
-            let y = m_top + (sp + (sp * 2 * i)) + (item_height * i);
-
-            unsafe {
-                wh::set_window_position(handle, x, y as i32);
-                wh::set_window_size(handle, item_width, item_height, false);
-            }
-        }
-
-    } 
-
-}
-
-
-enum LayoutType {
-    Vertical(VBoxLayout),
-    Horizontal(HBoxLayout)
 }
 
 pub struct BoxLayoutBuilder {
-    layout: LayoutType
+    layout: BoxLayoutInner
 }
 
 impl BoxLayoutBuilder {
 
     /// Set the layout parent. The handle must be a window object otherwise the function will panic
     pub fn parent<W: Into<ControlHandle>>(mut self, p: W) -> BoxLayoutBuilder {
-        let parent = p.into();
-        match &mut self.layout {
-            LayoutType::Vertical(layout) => layout.base = parent.hwnd().expect("Parent must be HWND"),
-            LayoutType::Horizontal(layout) => layout.base = parent.hwnd().expect("Parent must be HWND"),
-        };
+        self.layout.base = p.into().hwnd().expect("Parent must be HWND");
         self
     }
 
-    /// Add a children to the layout at the position `p`. If an item is already at the selected position, the old child will be replaced.
+    pub fn layout_type(mut self, ty: BoxLayoutType) -> BoxLayoutBuilder {
+        self.layout.ty = ty;
+        self
+    }
+
+    /// Add a children to the layout at the position `col` and `row`.
+    /// This is a shortcut over `child_item` for item with default span.
     /// The handle must be a window object otherwise the function will panic
-    pub fn child<W: Into<ControlHandle>>(mut self, p: u32, c: W) -> BoxLayoutBuilder {
+    pub fn child<W: Into<ControlHandle>>(mut self, cell: u32, c: W) -> BoxLayoutBuilder {
         let h = c.into().hwnd().expect("Child must be HWND");
+        self.layout.children.push(BoxLayoutItem {
+            control: h,
+            cell,
+            span: 1,
+        });
 
-        let children = match &mut self.layout {
-            LayoutType::Vertical(layout) => &mut layout.children,
-            LayoutType::Horizontal(layout) => &mut layout.children
-        };
+        self
+    }
 
-        if let Some(i) = children.iter().position(|(p2, _)| p == *p2) {
-            children[i] = (p, h);
-        } else {
-            children.push((p, h))
-        }
-
+    /// Add a children to the layout
+    /// The handle must be a window object otherwise the function will panic
+    pub fn child_item(mut self, item: BoxLayoutItem) -> BoxLayoutBuilder {
+        self.layout.children.push(item);
         self
     }
 
     /// Set the margins of the layout. The four values are in this order: top, right, bottom, left.
     pub fn margin(mut self, m: [u32; 4]) -> BoxLayoutBuilder {
-        match &mut self.layout {
-            LayoutType::Vertical(layout) => layout.margins = m,
-            LayoutType::Horizontal(layout) => layout.margins = m,
-        };
+        self.layout.margins = m;
         self
     }
 
     /// Set the size of the space between the children in the layout. Default value is 5.
     pub fn spacing(mut self, sp: u32) -> BoxLayoutBuilder {
-        match &mut self.layout {
-            LayoutType::Vertical(layout) => layout.spacing = sp,
-            LayoutType::Horizontal(layout) => layout.spacing = sp,
-        };
+        self.layout.spacing = sp;
+        self
+    }
+
+    /// Sets the minimum size of the layout
+    pub fn min_size(mut self, sz: [u32; 2]) -> BoxLayoutBuilder {
+        self.layout.min_size = sz;
+        self
+    }
+
+    /// Sets the maximum size of the layout
+    pub fn max_size(mut self, sz: [u32; 2]) -> BoxLayoutBuilder {
+        self.layout.max_size = sz;
+        self
+    }
+
+    /// Set the number of cell in the layout
+    /// Cells without children control will be left blank
+    pub fn cell_count(mut self, count: Option<u32>) -> BoxLayoutBuilder {
+        self.layout.cell_count = count;
         self
     }
 
     /// Build the layout object and bind the callback.
     /// Children must only contains window object otherwise this method will panic.
-    pub fn build(self) {
+    pub fn build(self, layout: &BoxLayout) {
         use winapi::um::winuser::WM_SIZE;
         use winapi::shared::minwindef::{HIWORD, LOWORD};
 
-        match self.layout {
-            LayoutType::Vertical(layout) => {
-                unsafe {
-                    let (w, h) = wh::get_window_size(layout.base);
-                    layout.update_layout(w, h);
-                }
+        let (w, h) = unsafe { wh::get_window_size(self.layout.base) };
+        let base_handle = ControlHandle::Hwnd(self.layout.base);
 
-                let base_handle = ControlHandle::Hwnd(layout.base);
-                let cb = move |_h, msg, _w, l| {
-                    if msg == WM_SIZE {
-                        let size = l as u32;
-                        let width = LOWORD(size) as u32;
-                        let height = HIWORD(size) as u32;
-                        VBoxLayout::update_layout(&layout, width, height);
-                    }
-                    None
-                };
+        // Saves the new layout. TODO: should free the old one too (if any)
+        {
+            let mut layout_inner = layout.inner.borrow_mut();
+            *layout_inner = self.layout;        
+        }
 
-                bind_raw_event_handler(&base_handle, 0, cb);
-            },
+        // Initial layout update
+        layout.update_layout(w, h);
 
-            LayoutType::Horizontal(layout) => {
-                unsafe {
-                    let (w, h) = wh::get_window_size(layout.base);
-                    layout.update_layout(w, h);
-                }
-
-                let base_handle = ControlHandle::Hwnd(layout.base);
-                let cb = move |_h, msg, _w, l| {
-                    if msg == WM_SIZE {
-                        let size = l as u32;
-                        let width = LOWORD(size) as u32;
-                        let height = HIWORD(size) as u32;
-                        HBoxLayout::update_layout(&layout, width, height);
-                    }
-                    None
-                };
-
-                bind_raw_event_handler(&base_handle, 0, cb);
+        // Bind the event handler
+        let event_layout = layout.clone();
+        let cb = move |_h, msg, _w, l| {
+            if msg == WM_SIZE {
+                let size = l as u32;
+                let width = LOWORD(size) as u32;
+                let height = HIWORD(size) as u32;
+                BoxLayout::update_layout(&event_layout, width, height);
             }
+            None
         };
+
+        bind_raw_event_handler(&base_handle, 0, cb);
     }
 
 }
+
+impl Default for BoxLayout {
+
+    fn default() -> BoxLayout {
+        let inner = BoxLayoutInner {
+            base: ptr::null_mut(),
+            ty: BoxLayoutType::Vertical,
+            children: Vec::new(),
+            margins: [5, 5, 5, 5],
+            min_size: [0, 0],
+            max_size: [u32::max_value(), u32::max_value()],
+            cell_count: None,
+            spacing: 5,
+        };
+
+        BoxLayout {
+            inner: Rc::new(RefCell::new(inner))
+        }
+    }
+
+}
+

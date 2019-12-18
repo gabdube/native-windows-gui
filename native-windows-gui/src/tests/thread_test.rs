@@ -14,6 +14,8 @@ pub struct ThreadTest {
     resources: RefCell<ThreadResources>,
     pub window: Window,
 
+    layout: BoxLayout,
+
     font: Font,
 
     counter: TextInput,
@@ -113,14 +115,14 @@ mod partial_canvas_test_ui {
                 .parent(&data.window)
                 .build(&mut data.notice)?;
 
-            VBoxLayout::builder()
+            BoxLayout::builder()
                 .parent(&data.window)
                 .child(0, &data.counter)
                 .child(1, &data.timer_start_btn)
                 .child(2, &data.timer_stop_btn)
                 .child(3, &data.sleep_btn)
                 .child(4, &data.thread_sleep_btn)
-                .build();
+                .build(&data.layout);
 
             Ok(())
         }

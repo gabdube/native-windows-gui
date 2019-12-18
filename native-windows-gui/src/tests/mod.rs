@@ -13,6 +13,9 @@ use thread_test::*;
 #[derive(Default)]
 pub struct TestControlPanel {
     window: Window,
+
+    layout: BoxLayout,
+
     controls_test_button: Button,
     canvas_test_button: Button,
     thread_test_button: Button,
@@ -103,12 +106,12 @@ mod test_control_panel_ui {
             }
 
             // Layouts
-            VBoxLayout::builder()
+            BoxLayout::builder()
                 .parent(&ui.window)
                 .child(0, &ui.controls_test_button)
                 .child(1, &ui.canvas_test_button)
                 .child(2, &ui.thread_test_button)
-                .build();
+                .build(&ui.layout);
 
             Ok(ui)
         }
