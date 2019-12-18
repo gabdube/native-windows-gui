@@ -72,8 +72,31 @@ pub struct GridLayoutInner {
     spacing: u32
 }
 
-/// A layout that lays out widgets in a grid
-/// NWG layouts use interior mutability to manage their controls.
+/** A layout that lays out widgets in a grid
+ NWG layouts use interior mutability to manage their controls.
+
+ A GridLayouts has the following properties:
+   * margins - The top, right, bottom, left margins of the layout - (default: [5, 5, 5, 5])
+   * spacing - The spacing between children controls - (default: 5)
+   * min_size - The minimum size of the layout - (default: [0, 0])
+   * max_size - The maximum size of the layout - (default: [u32::max_value(), u32::max_value()])
+   * column_count - Number of columns - (default: None),
+   * row_count - Number of rows - (default: None),
+
+ ```rust
+    use native_windows_gui as nwg;
+    fn layout(layout: &nwg::GridLayout, window: &nwg::Window, item1: &nwg::Button, item2: &nwg::Button) {
+        nwg::GridLayout::builder()
+            .parent(window)
+            .max_row(Some(6))
+            .spacing(5)
+            .margin([0,0,0,0])
+            .child(0, 0, item1)
+            .child_item(nwg::GridLayoutItem::new(item2, 1, 0, 2, 1))
+            .build(&layout);
+    }
+ ```
+*/
 #[derive(Clone)]
 pub struct GridLayout {
     inner: Rc<RefCell<GridLayoutInner>>
@@ -134,6 +157,36 @@ impl GridLayout {
 
         let (w, h) = unsafe { wh::get_window_size(base) };
         self.update_layout(w as u32, h as u32);
+    }
+
+    /// Resize the layout as if the parent window had the specified size.
+    ///
+    /// Arguments:
+    ///   w: New width of the layout
+    ///   h: New height of the layout
+    ///
+    ///  Panic:
+    ///   - The layout must have been successfully built otherwise this function will panic.
+    pub fn resize(&self, w: u32, h: u32) {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() {
+            panic!("Grid layout is not bound to a parent control.")
+        }
+        self.update_layout(w, h);
+    }
+
+    /// Resize the layout to fit the parent window size
+    ///
+    /// Panic:
+    ///   - The layout must have been successfully built otherwise this function will panic.
+    pub fn fit(&self) {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() {
+            panic!("Grid layout is not bound to a parent control.")
+        }
+
+        let (w, h) = unsafe { wh::get_window_size(inner.base) };
+        self.update_layout(w, h);
     }
 
     fn update_layout(&self, mut width: u32, mut height: u32) -> () {

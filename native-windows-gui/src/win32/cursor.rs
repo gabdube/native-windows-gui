@@ -1,14 +1,5 @@
 /*!
     A global object that wraps the system cursor
-
-    ```
-    use native_windows_gui as nwg;
-
-    pub fn handle_cursor(cursor: &nwg::Image) {
-        let (x, y) = nwg::GlobalCursor::position();
-        nwg::GlobalCursor::set(cursor);
-    }
-    ```
 */
 use crate::Cursor;
 use crate::controls::ControlHandle;

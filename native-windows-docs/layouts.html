@@ -7,8 +7,8 @@
     <title>Native Windows GUI guide - Introduction</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-
-
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 </head>
 <body class="rustdoc">
 <!--[if lte IE 8]>
@@ -92,8 +92,102 @@
     <div id='page'>
 
 
-        <h1 class="title">Native Windows GUI: Layouts</h1>
-        <br/><br/>
+<h1 class="title">Native Windows GUI: Layouts</h1>
+A layout resizes and moves the children controls of a Window control<br><br>
+Native windows GUI includes three type of layouts: HBoxLayout, VBoxLayout and GridLayout.<br>
+
+<ul>
+    <li>A VBoxLayout lays out widgets in vertical line</li>
+    <li>A HBoxLayout lays out widgets in horizontal</li>
+    <li>A GridLayout lays out widgets in a grid</li>
+</ul>
+
+<h3>Basic usage</h3>  
+
+Just like most NWG objects, layouts are created using a builder api.
+
+When using the <code>NativeUi</code> trait to initialize a GUI application, layout building must be the last action (ie: after events binding).<br>
+Because layouts uses interior mutability, the fact that the application will be behind a <code>Rc</code> won't be an issue.<br><br>
+
+<div class="highlight"><pre><span></span><span class="n">nwg</span>::<span class="n">GridLayout</span>::<span class="n">builder</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">parent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">window</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">max_row</span><span class="p">(</span><span class="nb">Some</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">spacing</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">margin</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">child</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">item1</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">child_item</span><span class="p">(</span><span class="n">nwg</span>::<span class="n">GridLayoutItem</span>::<span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">item2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="o">&amp;</span><span class="n">layout</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+<br>
+
+
+
+<h3>Layout items</h3> 
+
+There's two way to add a child to a layout:
+
+<ul>
+    <li>The simple way using <code>.child(column, row, control)</code></li>
+    <li>The extended way using <code>.child_item(nwg::GridLayoutItem)</code></li>
+</ul>
+
+If the child do not span across multiple cells, <code>child</code> is the way to go.<br><br>
+
+If the child must spans across multiple cells, use a GridLayoutItem. Note that <code>child</code> will also create a GridLayoutItem under the hood.
+
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">GridLayoutItem</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">control</span>: <span class="nc">HWND</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">col</span>: <span class="kt">u32</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">row</span>: <span class="kt">u32</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">col_span</span>: <span class="kt">u32</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">row_span</span>: <span class="kt">u32</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">new</span><span class="o">&lt;</span><span class="n">W</span>: <span class="nb">Into</span><span class="o">&lt;</span><span class="n">ControlHandle</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">c</span>: <span class="nc">W</span><span class="p">,</span><span class="w"> </span><span class="n">col</span>: <span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">row</span>: <span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">col_span</span>: <span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">row_span</span>: <span class="kt">u32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">GridLayoutItem</span><span class="w"></span>
+</pre></div>
+
+<br>
+
+<h3>Layout Configuration</h3>  
+
+All layouts have the following properties:
+
+<ul>
+<li> margins - The top, right, bottom, left margins of the layout - (default: [5, 5, 5, 5])</li>
+<li> spacing - The spacing between children controls - (default: 5) </li>
+<li> min_size - The minimum size of the layout - (default: [0, 0]) </li>
+<li> max_size - The maximum size of the layout - (default: [u32::max_value(), u32::max_value()]) </li>
+<li> column_count - Number of columns - (default: None), </li>
+<li> row_count - Number of rows - (default: None), </li>
+</ul>
+
+It's possible to change the properties of controls at runtime. Be sure to call <code>layout.fit()</code> to show the changes.
+
+<br><br>
+
+<h3>Layout update</h3>
+A layout automatically updates when the parent window is resized or whenever a new layout item is added.<br><br>
+Additionally, the methods <code>resize(w,h)</code> and <code>fit()</code> can be used to resize the layout manually.<br>
+You must call <code>fit</code> after editing the margin, spacing and other non-children layout properties.
+<br><br>
+
+
+<h3>Interior Mutability</h3>
+Layouts uses interior mutability to manage their configuration and their children control.
+As such, any layout methods only require an immutable reference. <br><br>
+
+This <b>includes</b> the layout builder <code>build</code> function.
+<br><br>
+
+
+<h3>Examples</h3>
+
+<ul>
+    <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator.rs">Calculator</a>( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator_d.rs">derive version</a> ) shows how to use a grid layout.</li>
+    <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank.rs">Message bank</a>( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank_d.rs">derive version</a> ) shows how to update a grid layout dynamically.</li>
+</ul>
+
+<br><br><br>
 
     </div>
 </div>
