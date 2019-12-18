@@ -82,6 +82,91 @@ impl BoxLayout {
         BoxLayoutBuilder { layout: layout }
     }
 
+    /// Add a children control to the grid layout. 
+    /// This is a simplified interface over `add_child_item`
+    ///
+    /// Panic:
+    ///   - The layout must have been successfully built otherwise this function will panic.
+    ///   - The control must be window-like and be initialized
+    pub fn add_child<W: Into<ControlHandle>>(&self, cell: u32, c: W) {
+        let h = c.into().hwnd().expect("Child must be HWND");
+        let item = BoxLayoutItem {
+            control: h,
+            cell,
+            span: 1
+        };
+
+        self.add_child_item(item);
+    }
+    
+    /// Add a children control to the grid layout. 
+    ///
+    /// Panic:
+    ///   - The layout must have been successfully built otherwise this function will panic.
+    ///   - The control must be window-like and be initialized
+    pub fn add_child_item(&self, i: BoxLayoutItem) {
+        let base = {
+            let mut inner = self.inner.borrow_mut();
+            if inner.base.is_null() {
+                panic!("Box layout is not bound to a parent control.")
+            }
+
+            inner.children.push(i);
+            inner.base
+        };
+        
+
+        let (w, h) = unsafe { wh::get_window_size(base) };
+        self.update_layout(w as u32, h as u32);
+    }
+
+    /// Resize the layout as if the parent window had the specified size.
+    ///
+    /// Arguments:
+    ///   w: New width of the layout
+    ///   h: New height of the layout
+    ///
+    ///  Panic:
+    ///   - The layout must have been successfully built otherwise this function will panic.
+    pub fn resize(&self, w: u32, h: u32) {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() {
+            panic!("Box layout is not bound to a parent control.")
+        }
+        self.update_layout(w, h);
+    }
+
+    /// Resize the layout to fit the parent window size
+    ///
+    /// Panic:
+    ///   - The layout must have been successfully built otherwise this function will panic.
+    pub fn fit(&self) {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() {
+            panic!("Box layout is not bound to a parent control.")
+        }
+        let (w, h) = unsafe { wh::get_window_size(inner.base) };
+        self.update_layout(w, h);
+    }
+
+    /// Set the margins of the layout. The four values are in this order: top, right, bottom, left.
+    pub fn margin(&self, m: [u32; 4]) {
+        let mut inner = self.inner.borrow_mut();
+        inner.margins = m;
+    }
+
+    /// Set the size of the space between the children in the layout. Default value is 5.
+    pub fn spacing(&self, sp: u32) {
+        let mut inner = self.inner.borrow_mut();
+        inner.spacing = sp;
+    }
+
+    /// Sets the minimum size of the layout
+    pub fn min_size(&self, sz: [u32; 2]) {
+        let mut inner = self.inner.borrow_mut();
+        inner.min_size = sz;
+    }
+
     /// Private function that update the layout and the children
     fn update_layout(&self, mut width: u32, mut height: u32) -> () {
         let inner = self.inner.borrow();
@@ -110,8 +195,14 @@ impl BoxLayout {
         height = height - m_top - m_bottom;
 
         // Apply spacing
-        width = width - ((sp * 2) * cell_count);
-        height = height - (sp * 2);
+        let (width, height) = match inner.ty {
+            BoxLayoutType::Horizontal => {
+                (width - (sp * 2 * cell_count), height - (sp * 2))
+            },
+            BoxLayoutType::Vertical => {
+                (width - (sp * 2), height - (sp * 2 * cell_count))
+            },
+        };
 
         let _item_width = width / cell_count;
         let _item_height = height / cell_count;
@@ -130,7 +221,7 @@ impl BoxLayout {
             match inner.ty {
                 BoxLayoutType::Horizontal => unsafe {
                     wh::set_window_position(item.control, x as i32, _y);
-                    wh::set_window_size(item.control, local_width, _item_height, false);
+                    wh::set_window_size(item.control, local_width, height, false);
                 },
                 BoxLayoutType::Vertical => unsafe {
                     wh::set_window_position(item.control, _x, y as i32);

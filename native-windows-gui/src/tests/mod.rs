@@ -108,6 +108,7 @@ mod test_control_panel_ui {
             // Layouts
             BoxLayout::builder()
                 .parent(&ui.window)
+                .margin([5,5,5,5])
                 .child(0, &ui.controls_test_button)
                 .child(1, &ui.canvas_test_button)
                 .child(2, &ui.thread_test_button)

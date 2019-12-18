@@ -94,11 +94,10 @@
 
 <h1 class="title">Native Windows GUI: Layouts</h1>
 A layout resizes and moves the children controls of a Window control<br><br>
-Native windows GUI includes three type of layouts: HBoxLayout, VBoxLayout and GridLayout.<br>
+Native windows GUI includes 2 type of layouts: BoxLayout, BoxLayout and GridLayout.<br>
 
 <ul>
-    <li>A VBoxLayout lays out widgets in vertical line</li>
-    <li>A HBoxLayout lays out widgets in horizontal</li>
+    <li>A BoxLayout lays out widgets in vertical line or horizontal line</li>
     <li>A GridLayout lays out widgets in a grid</li>
 </ul>
 
@@ -111,6 +110,8 @@ Just like most NWG objects, layouts are created using a builder api.
 
 When using the <code>NativeUi</code> trait to initialize a GUI application, layout building must be the last action (ie: after events binding).<br>
 Because layouts uses interior mutability, the fact that the application will be behind a <code>Rc</code> won't be an issue.<br><br>
+
+A grid layout example:
 
 <div class="highlight"><pre><span></span><span class="n">nwg</span>::<span class="n">GridLayout</span>::<span class="n">builder</span><span class="p">()</span><span class="w"></span>
 <span class="w">    </span><span class="p">.</span><span class="n">parent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">window</span><span class="p">)</span><span class="w"></span>
@@ -160,12 +161,13 @@ All layouts have the following properties:
 <li> spacing - The spacing between children controls - (default: 5) </li>
 <li> min_size - The minimum size of the layout - (default: [0, 0]) </li>
 <li> max_size - The maximum size of the layout - (default: [u32::max_value(), u32::max_value()]) </li>
-<li> column_count - Number of columns - (default: None), </li>
-<li> row_count - Number of rows - (default: None), </li>
 </ul>
 
 It's possible to change the properties of controls at runtime. Be sure to call <code>layout.fit()</code> to show the changes.
+<br><br>
 
+Additionally, <code>GridLayout</code> and <code>BoxLayout</code> have <code>column_count, row_count</code> and <code>cell_count</code> respectively
+to set the number of cells in the layout. Cells without controls are left empty.
 <br><br>
 
 <h3>Layout update</h3>
