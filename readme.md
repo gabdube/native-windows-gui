@@ -15,7 +15,7 @@ have "irreconcilable design decisions" and cannot support some key features. Fut
 in other libraries.
 
 If you've managed to read though this introduction, you should know that my twitter handle
-is [#gdube_dev](https://twitter.com/gdube_dev) and you can support this project with *GitHub Sponsors*.
+is [#gdube_dev](https://twitter.com/gdube_dev) and you can support this project with [*GitHub Sponsors*](https://github.com/sponsors/gabdube).
 Any support is greatly appreciated.
 
 ## Installation
