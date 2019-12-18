@@ -189,6 +189,42 @@ impl GridLayout {
         self.update_layout(w, h);
     }
 
+    /// Set the margins of the layout. The four values are in this order: top, right, bottom, left.
+    pub fn margin(&self, m: [u32; 4]) {
+        let mut inner = self.inner.borrow_mut();
+        inner.margins = m;
+    }
+
+    /// Set the size of the space between the children in the layout. Default value is 5.
+    pub fn spacing(&self, sp: u32) {
+        let mut inner = self.inner.borrow_mut();
+        inner.spacing = sp;
+    }
+
+    /// Sets the minimum size of the layout
+    pub fn min_size(&self, sz: [u32; 2]) {
+        let mut inner = self.inner.borrow_mut();
+        inner.min_size = sz;
+    }
+
+    /// Sets the maximum size of the layout
+    pub fn max_size(&self, sz: [u32; 2]) {
+        let mut inner = self.inner.borrow_mut();
+        inner.max_size = sz;
+    }
+
+    /// Set the number of column in the layout
+    pub fn max_column(&self, count: Option<u32>) {
+        let mut inner = self.inner.borrow_mut();
+        inner.column_count = count;
+    }
+
+    /// Set the number of row in the layout
+    pub fn max_row(&self, count: Option<u32>) {
+        let mut inner = self.inner.borrow_mut();
+        inner.row_count = count;
+    }
+
     fn update_layout(&self, mut width: u32, mut height: u32) -> () {
         let inner = self.inner.borrow();
         if inner.base.is_null() || inner.children.len() == 0 {

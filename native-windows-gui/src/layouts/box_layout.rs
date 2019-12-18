@@ -2,17 +2,71 @@ use crate::controls::{ControlHandle};
 use crate::win32::window::bind_raw_event_handler;
 use crate::win32::window_helper as wh;
 use winapi::shared::windef::{HWND};
+use std::rc::Rc;
+use std::cell::RefCell;
 use std::ptr;
+
+
+/// The orientation of a box layout
+#[derive(Copy, Clone)]
+enum LayoutTypeId {
+    Vertical,
+    Horizontal
+}
+
+/// A control item in a BoxLayout
+#[derive(Debug)]
+pub struct BoxLayoutItem {
+    /// The handle to the control in the item
+    control: HWND,
+
+    /// The column position of the control in the layout
+    pub col: u32,
+
+    /// The row position of the control in the layout
+    pub row: u32,
+
+    /// The number column/row this item should span. Should be 1 for single column item.
+    /// The column or row is determined by the layout type.
+    pub span: u32,
+}
+
+
+/// A layout that lays out widgets in a line
+/// This is the inner data shared between the callback and the application
+pub struct BoxLayoutInner {
+    /// The control that holds the layout
+    base: HWND,
+
+    /// The orientation of the layout
+    ty: LayoutTypeId,
+
+    /// The children of the control that fit in the layout
+    children: Vec<BoxLayoutItem>,
+
+    /// The top, right, bottom, left space around the layout
+    margins: [u32; 4],
+
+    /// The minimum size of the layout. Used if `base` is smaller than `min_size`.
+    min_size: [u32; 2],
+
+    /// The maximum size of the layout. Used if `base` is bigger than `min_size`.
+    max_size: [u32; 2],
+
+    /// The number of column/row. If None, compute the value from children.
+    /// The column or row is determined by the layout type.
+    cell_count: Option<u32>,
+
+    /// The spacing between controls
+    spacing: u32
+}
 
 
 /// A layout that lines up control horizontally
 /// NWG layouts use interior mutability to manage their controls.
 #[derive(Debug)]
 pub struct HBoxLayout {
-    base: HWND,
-    children: Vec<(u32, HWND)>,
-    margins: [u32; 4],
-    spacing: u32
+    inner: Rc<RefCell<BoxLayoutInner>>
 }
 
 impl HBoxLayout {
@@ -70,12 +124,10 @@ impl HBoxLayout {
 }
 
 /// A layout that lines up control vertically
+/// NWG layouts use interior mutability to manage their controls.
 #[derive(Debug)]
 pub struct VBoxLayout {
-    base: HWND,
-    children: Vec<(u32, HWND)>,
-    margins: [u32; 4],
-    spacing: u32
+    inner: Rc<RefCell<BoxLayoutInner>>
 }
 
 

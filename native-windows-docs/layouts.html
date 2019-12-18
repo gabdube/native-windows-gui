@@ -102,6 +102,9 @@ Native windows GUI includes three type of layouts: HBoxLayout, VBoxLayout and Gr
     <li>A GridLayout lays out widgets in a grid</li>
 </ul>
 
+To learn how to use templates with <code>native-windows-derive</code> see <a href="nwd_layouts.html">the derive section</a>
+<br><br>
+
 <h3>Basic usage</h3>  
 
 Just like most NWG objects, layouts are created using a builder api.
@@ -124,7 +127,7 @@ Because layouts uses interior mutability, the fact that the application will be 
 
 <h3>Layout items</h3> 
 
-There's two way to add a child to a layout:
+There's two ways to add a child to a layout:
 
 <ul>
     <li>The simple way using <code>.child(column, row, control)</code></li>
@@ -183,8 +186,8 @@ This <b>includes</b> the layout builder <code>build</code> function.
 <h3>Examples</h3>
 
 <ul>
-    <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator.rs">Calculator</a>( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator_d.rs">derive version</a> ) shows how to use a grid layout.</li>
-    <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank.rs">Message bank</a>( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank_d.rs">derive version</a> ) shows how to update a grid layout dynamically.</li>
+    <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator.rs">Calculator</a> ( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator_d.rs">derive version</a> ) shows how to use a grid layout.</li>
+    <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank.rs">Message bank</a> ( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank_d.rs">derive version</a> ) shows how to update a grid layout dynamically.</li>
 </ul>
 
 <br><br><br>
