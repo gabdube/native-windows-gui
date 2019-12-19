@@ -1,7 +1,6 @@
 pub(crate) mod base_helper;
 pub(crate) mod window_helper;
 pub(crate) mod resources_helper;
-pub(crate) mod image_decoder;
 pub(crate) mod window;
 pub(crate) mod menu;
 pub(crate) mod message_box;
@@ -10,12 +9,12 @@ pub(crate) mod cursor;
 #[cfg(feature = "tabs")]
 pub(crate) mod tabs;
 
-#[cfg(feature = "canvas")]
-pub(crate) mod canvas;
-
 #[cfg(feature = "file-dialog")] use winapi::shared::guiddef::GUID;
 use std::{mem, ptr};
 use crate::errors::NwgError;
+
+#[cfg(feature = "image-ext")]
+pub(crate) mod image_decoder;
 
 
 /**
@@ -129,8 +128,7 @@ pub fn init_common_controls() -> Result<(), NwgError> {
 
     window::init_window_class()?;
     tabs_init()?;
-    canvas_init()?;
-
+    
     match unsafe { CoInitialize(ptr::null_mut()) } {
         S_OK | S_FALSE => Ok(()),
         _ => Err(NwgError::initialization("CoInitialize failed"))
@@ -142,13 +140,6 @@ fn tabs_init() -> Result<(), NwgError> { tabs::create_tab_classes() }
 
 #[cfg(not(feature = "tabs"))]
 fn tabs_init() -> Result<(), NwgError> { Ok(()) }
-
-#[cfg(feature = "canvas")]
-fn canvas_init() -> Result<(), NwgError> { canvas::create_canvas_classes() }
-
-#[cfg(not(feature = "canvas"))]
-fn canvas_init() -> Result<(), NwgError> { Ok(()) }
-
 
 #[allow(unused_macros)]
 macro_rules! define_guid {

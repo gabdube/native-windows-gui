@@ -86,13 +86,11 @@ This is the main project git. It is separated in multiple sections
   - HBoxLayout
   - VBoxLayout
   - GridLayout
-- A canvas powered by *Direct2D* to draw custom controls
-  - A single line cannot express how much work was put into this
 - The most common dialog boxes
   - File dialog (save, open, open folder)
   - Font dialog
   - Color dialog
-- Support for low level system message capture. 
+- Support for low level system message capture.
 - Cross compiling and testing from Linux to Windows with Wine and mingw.
   - Not all features are supported (but over 90% are, thanks WINE!)
   - See `https://zork.net/~st/jottings/rust-windows-and-debian.html` for the steps to follow

@@ -3,9 +3,6 @@ use crate::*;
 mod control_test;
 use control_test::*;
 
-mod canvas_test;
-use canvas_test::*;
-
 mod thread_test;
 use thread_test::*;
 
@@ -20,12 +17,10 @@ pub struct TestControlPanel {
     layout: BoxLayout,
 
     controls_test_button: Button,
-    canvas_test_button: Button,
     thread_test_button: Button,
     images_test_button: Button,
 
     controls_tests: ControlsTest,
-    canvas_tests: CanvasTest,
     thread_tests: ThreadTest,
     images_tests: ImagesTest,
 }
@@ -58,12 +53,6 @@ mod test_control_panel_ui {
                 .build(&mut data.controls_test_button)?;
 
             Button::builder()
-                .text("Canvas tests")
-                .enabled(cfg!(feature = "canvas"))
-                .parent(&data.window)
-                .build(&mut data.canvas_test_button)?;
-
-            Button::builder()
                 .text("Thread tests")
                 .parent(&data.window)
                 .build(&mut data.thread_test_button)?;
@@ -75,7 +64,6 @@ mod test_control_panel_ui {
 
             // Partials
             ControlsTest::build_partial(&mut data.controls_tests, Some(&data.window))?;
-            CanvasTest::build_partial(&mut data.canvas_tests, Some(&data.window))?;
             ThreadTest::build_partial(&mut data.thread_tests, Some(&data.window))?;
             ImagesTest::build_partial(&mut data.images_tests, Some(&data.window))?;
 
@@ -85,7 +73,6 @@ mod test_control_panel_ui {
             // Events
             let mut window_handles = vec![&ui.window.handle];
             window_handles.append(&mut ui.controls_tests.handles());
-            window_handles.append(&mut ui.canvas_tests.handles());
             window_handles.append(&mut ui.thread_tests.handles());
 
             for handle in window_handles.iter() {
@@ -93,7 +80,6 @@ mod test_control_panel_ui {
                 let handle_events = move |evt, evt_data, handle| {
 
                     evt_ui.controls_tests.process_event(evt, &evt_data, handle);
-                    evt_ui.canvas_tests.process_event(evt, &evt_data, handle);
                     evt_ui.thread_tests.process_event(evt, &evt_data, handle);
                     evt_ui.images_tests.process_event(evt, &evt_data, handle);
 
@@ -101,8 +87,6 @@ mod test_control_panel_ui {
                         E::OnButtonClick =>
                             if &handle == &evt_ui.controls_test_button {
                                 show_control_test(&evt_ui.inner);
-                            } else if &handle == &evt_ui.canvas_test_button {
-                                show_canvas_test(&evt_ui.inner);
                             } else if &handle == &evt_ui.thread_test_button {
                                 show_thread_test(&evt_ui.inner);
                             } else if &handle == &evt_ui.images_test_button {
@@ -124,9 +108,8 @@ mod test_control_panel_ui {
                 .parent(&ui.window)
                 .margin([5,5,5,5])
                 .child(0, &ui.controls_test_button)
-                .child(1, &ui.canvas_test_button)
+                .child(1, &ui.images_test_button)
                 .child(2, &ui.thread_test_button)
-                .child(3, &ui.images_test_button)
                 .build(&ui.layout);
 
             Ok(ui)
@@ -147,11 +130,6 @@ fn show_control_test(app: &TestControlPanel) {
     app.controls_tests.window.set_visible(true);
     app.controls_tests.panel.set_visible(true);
     app.controls_tests.window.set_focus();
-}
-
-fn show_canvas_test(app: &TestControlPanel) {
-    app.canvas_tests.window.set_visible(true);
-    app.canvas_tests.window.set_focus();
 }
 
 fn show_thread_test(app: &TestControlPanel) {

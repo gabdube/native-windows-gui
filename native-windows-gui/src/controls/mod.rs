@@ -43,9 +43,6 @@ mod tray_notification;
 #[cfg(feature = "message-window")]
 mod message_window;
 
-#[cfg(feature = "canvas")]
-mod canvas;
-
 #[cfg(feature = "list-view")]
 mod list_view;
 
@@ -99,9 +96,6 @@ pub use tray_notification::{TrayNotificationFlags, TrayNotification, TrayNotific
 
 #[cfg(feature = "message-window")]
 pub use message_window::{MessageWindow, MessageWindowBuilder};
-
-#[cfg(feature = "canvas")]
-pub use canvas::*;
 
 #[cfg(feature = "list-view")]
 pub use list_view::{ListView, ListViewBuilder, ListViewFlags};
