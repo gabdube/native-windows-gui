@@ -4,10 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <title>Native Windows GUI guide - Introduction</title>
+    <title>Native Windows GUI guide - Dialogs</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 </head>
 <body class="rustdoc">
@@ -78,12 +79,6 @@
         </ul>
     </li>
     
-    <li><a href="canvas.html"><b>9.</b> The canvas </a>
-    <ul class="section">
-        <li><a href="canvas_base.html"><b>9.1.</b> Basics </a></li>
-    </ul>
-    </li>
-    
     </ul>
     </div>
     <!-- NAV END -->
@@ -91,9 +86,54 @@
 <div id='page-wrapper'>
     <div id='page'>
 
-
         <h1 class="title">Native Windows GUI: Dialogs</h1>
-        <br/><br/>
+        Dialogs are premade window that returns values.<br><br>
+        Dialogs are not required for every application, as such they are all feature-gated.<br>
+        Native windows GUI includes 3 builtin dialogs:<br>
+
+        <ul>
+            <li>FileDialog (feature: <code>file-dialog</code>): fetch file path to load or save something</li>
+            <li>ColorDialog (feature: <code>color-dialog</code>): fetch and saves color data in a RGB format</li>
+            <li>FontDialog (feature: <code>font-dialog</code>): select a system font with optional customization</li>
+        </ul>
+
+        See the <a href="https://github.com/gabdube/nwg-private/tree/master/showcase">Showcase</a> for the dialog examples
+        <br><br>
+
+        <h3>Basic usage</h3>
+
+        Dialogs are <b>resources</b> and not controls.<br><br>
+        Because of this, dialogs do not need a parent and they cannot accept children.<br>
+
+        Just like the other NWG components, dialogs are created with builders. The documentation enumerates their parameters.<br><br>
+
+        Dialogs are called by using the method <code>run</code> on FileDialog and the method <code>show(parent)</code> on the other dialogs.
+        This method <b>will block the current function</b>. This is because dialogs have their own events loop. Because of this, the other window
+        in the same thread should be disabled while the dialog is running. This is done automatically setting the parent parameter in a dialog.
+        <br><br>
+
+        Once the user selects a value, the selected value will be saved in the dialog object. Each dialog has a specific method to fetch this data.<br>
+
+<div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">open_directory_dialog</span><span class="p">.</span><span class="n">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">app</span><span class="p">.</span><span class="n">file_dialog_result</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">open_directory_dialog</span><span class="p">.</span><span class="n">get_selected_item</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">app</span><span class="p">.</span><span class="n">file_dialog_result</span><span class="p">.</span><span class="n">set_text</span><span class="p">(</span><span class="o">&amp;</span><span class="n">directory</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+        <h3>File dialog</h3>
+
+        FileDialog uses the common item dialog (<a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/bb776913(v=vs.85)?redirectedfrom=MSDN">link</a>)
+        It supports the <code>FileDialogAction::Open</code>, <code>FileDialogAction::OpenDiectory</code> and <code>FileDialogAction::Save</code>.
+        <br><br>
+
+        <h3>Color dialog</h3>
+
+        <h3>Font dialog</h3>
+
+        <br><br>
 
     </div>
 </div>

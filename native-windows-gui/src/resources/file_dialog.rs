@@ -24,6 +24,25 @@ pub enum FileDialogAction {
 
 /**
     A file dialog control
+
+    The file dialog builders accepts the following parameters:
+        * title: The title of the dialog
+        * parent: The parent of the dialog (can be None or set at a later time)
+        * action: The action to execute. Open, OpenDirectory for Save
+        * multiselect: Whether the user can select more than one file. Only supported with the Open action
+        * default_folder: Default folder to show in the dialog.
+        * filters: If defined, filter the files that the user can select (In a Open dialog) or which extension to add to the saved file (in a Save dialog)
+
+    ```rust
+        use native_windows_gui as nwg;
+        fn layout(dialog: &mut nwg::FileDialog) {
+            nwg::FileDialog::builder()
+                .title("Hello")
+                .action(nwg::FileDialogAction::Open)
+                .multiselect(true)
+                .build(dialog);
+        }
+    ```
 */
 pub struct FileDialog {
     parent: Option<HWND>,
