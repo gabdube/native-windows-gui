@@ -9,6 +9,9 @@ use canvas_test::*;
 mod thread_test;
 use thread_test::*;
 
+mod images_test;
+use images_test::*;
+
 
 #[derive(Default)]
 pub struct TestControlPanel {
@@ -19,10 +22,12 @@ pub struct TestControlPanel {
     controls_test_button: Button,
     canvas_test_button: Button,
     thread_test_button: Button,
+    images_test_button: Button,
 
     controls_tests: ControlsTest,
     canvas_tests: CanvasTest,
     thread_tests: ThreadTest,
+    images_tests: ImagesTest,
 }
 
 mod test_control_panel_ui {
@@ -42,7 +47,7 @@ mod test_control_panel_ui {
             // Controls
             Window::builder()
                 .flags(WindowFlags::WINDOW | WindowFlags::VISIBLE)
-                .size((200, 150))
+                .size((200, 200))
                 .position((1100, 300))
                 .title("Tests Control Panel")
                 .build(&mut data.window)?;
@@ -63,10 +68,16 @@ mod test_control_panel_ui {
                 .parent(&data.window)
                 .build(&mut data.thread_test_button)?;
 
+            Button::builder()
+                .text("Image buttons")
+                .parent(&data.window)
+                .build(&mut data.images_test_button)?;
+
             // Partials
             ControlsTest::build_partial(&mut data.controls_tests, Some(&data.window))?;
             CanvasTest::build_partial(&mut data.canvas_tests, Some(&data.window))?;
             ThreadTest::build_partial(&mut data.thread_tests, Some(&data.window))?;
+            ImagesTest::build_partial(&mut data.images_tests, Some(&data.window))?;
 
             // Wrap-up
             let ui = Rc::new(TestControlPanelUi { inner: data });
@@ -84,6 +95,7 @@ mod test_control_panel_ui {
                     evt_ui.controls_tests.process_event(evt, &evt_data, handle);
                     evt_ui.canvas_tests.process_event(evt, &evt_data, handle);
                     evt_ui.thread_tests.process_event(evt, &evt_data, handle);
+                    evt_ui.images_tests.process_event(evt, &evt_data, handle);
 
                     match evt {
                         E::OnButtonClick =>
@@ -93,6 +105,8 @@ mod test_control_panel_ui {
                                 show_canvas_test(&evt_ui.inner);
                             } else if &handle == &evt_ui.thread_test_button {
                                 show_thread_test(&evt_ui.inner);
+                            } else if &handle == &evt_ui.images_test_button {
+                                show_images_test(&evt_ui.inner);
                             },
                         E::OnWindowClose => 
                             if handle == evt_ui.window.handle {
@@ -112,6 +126,7 @@ mod test_control_panel_ui {
                 .child(0, &ui.controls_test_button)
                 .child(1, &ui.canvas_test_button)
                 .child(2, &ui.thread_test_button)
+                .child(3, &ui.images_test_button)
                 .build(&ui.layout);
 
             Ok(ui)
@@ -142,6 +157,11 @@ fn show_canvas_test(app: &TestControlPanel) {
 fn show_thread_test(app: &TestControlPanel) {
     app.thread_tests.window.set_visible(true);
     app.thread_tests.window.set_focus();
+}
+
+fn show_images_test(app: &TestControlPanel) {
+    app.images_tests.window.set_visible(true);
+    app.images_tests.window.set_focus();
 }
 
 fn close(_app: &TestControlPanel) {

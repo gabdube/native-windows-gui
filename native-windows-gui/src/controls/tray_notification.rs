@@ -16,7 +16,7 @@
     ```
     use native_windows_gui as nwg;
 
-    fn notice_user(tray: &nwg::TrayNotification, image: &nwg::Image) {
+    fn notice_user(tray: &nwg::TrayNotification, image: &nwg::Icon) {
         let flags = nwg::TrayNotificationFlags::USER_ICON | nwg::TrayNotificationFlags::LARGE_ICON;
         tray.show("Hello World", Some("Welcome to my application"), Some(flags), Some(image));
     }
