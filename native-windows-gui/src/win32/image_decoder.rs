@@ -1,58 +1,9 @@
-/*!
-    A wrapper over a jpeg file (*.jpg)
-*/
-use winapi::Interface;
-use crate::NwgError;
-use std::ptr;
-
-
-
-/// A wrapper over a jpeg file (*.jpg)
-#[allow(unused)]
-#[derive(Default)]
-pub struct Jpeg {
-}
-
-impl Jpeg {
-
-    pub fn builder<'a>() -> JpegBuilder<'a> {
-        JpegBuilder {
-            source_text: None
-        }
-    }
-
-}
-
-
-pub struct JpegBuilder<'a> {
-    source_text: Option<&'a str>
-}
-
-impl<'a> JpegBuilder<'a> {
-
-    pub fn source_file(mut self, t: Option<&'a str>) -> JpegBuilder<'a> {
-        self.source_text = t;
-        self
-    }
-
-    pub fn build(self, img: &Jpeg) -> Result<(), NwgError> {
-        unsafe {
-            let factory = create_image_factory()?;
-            let decoder = create_decoder(&*factory)?;
-
-            (&*decoder).Release();
-            (&*factory).Release();
-        }
-
-        Ok(())
-    }
-
-}
-
-
 use winapi::um::wincodec::{IWICImagingFactory, IWICBitmapDecoder};
 use winapi::ctypes::c_void;
 use winapi::shared::winerror::S_OK;
+use winapi::Interface;
+use crate::{NwgError};
+use std::ptr;
 
 
 unsafe fn create_image_factory() -> Result<*mut IWICImagingFactory, NwgError> {
@@ -76,13 +27,19 @@ unsafe fn create_image_factory() -> Result<*mut IWICImagingFactory, NwgError> {
     Ok(image_factory)
 }
 
-unsafe fn create_decoder(fact: &IWICImagingFactory) -> Result<*mut IWICBitmapDecoder, NwgError> {
-    use winapi::um::wincodec::{GUID_ContainerFormatJpeg};
+unsafe fn create_decoder_from_file<'a>(fact: &IWICImagingFactory, path: &'a str) -> Result<*mut IWICBitmapDecoder, NwgError> {
+    use winapi::um::wincodec::{GUID_ContainerFormatJpeg, WICDecodeMetadataCacheOnDemand};
+    use winapi::um::winnt::GENERIC_READ;
+    use crate::win32::base_helper::to_utf16;
+
+    let path = to_utf16(path);
 
     let mut decoder: *mut IWICBitmapDecoder = ptr::null_mut();
-    let result = fact.CreateDecoder(
-        &GUID_ContainerFormatJpeg,
+    let result = fact.CreateDecoderFromFilename(
+        path.as_ptr(),
         ptr::null(),
+        GENERIC_READ,
+        WICDecodeMetadataCacheOnDemand,
         (&mut decoder as *mut *mut IWICBitmapDecoder) as *mut *mut IWICBitmapDecoder
     );
 

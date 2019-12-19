@@ -4,9 +4,6 @@ mod icon;
 mod cursor;
 mod bitmap;
 
-#[cfg(feature = "jpeg")]
-mod jpeg;
-
 #[cfg(feature = "file-dialog")]
 mod file_dialog;
 
@@ -21,9 +18,6 @@ pub use system_images::*;
 pub use icon::{Icon, IconBuilder};
 pub use cursor::{Cursor, CursorBuilder};
 pub use bitmap::{Bitmap, BitmapBuilder};
-
-#[cfg(feature = "jpeg")]
-pub use jpeg::{Jpeg, JpegBuilder};
 
 #[cfg(feature = "file-dialog")]
 pub use file_dialog::{FileDialog, FileDialogAction};

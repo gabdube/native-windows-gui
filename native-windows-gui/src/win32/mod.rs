@@ -1,6 +1,7 @@
 pub(crate) mod base_helper;
 pub(crate) mod window_helper;
 pub(crate) mod resources_helper;
+pub(crate) mod image_decoder;
 pub(crate) mod window;
 pub(crate) mod menu;
 pub(crate) mod message_box;

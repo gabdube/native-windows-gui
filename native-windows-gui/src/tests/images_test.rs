@@ -2,8 +2,7 @@ use crate::*;
 
 #[derive(Default)]
 pub struct ImagesTest {
-    pub window: Window,
-    jpeg_test: Jpeg,
+    pub window: Window
 }
 
 mod partial_image_test_ui {
@@ -13,10 +12,6 @@ mod partial_image_test_ui {
     impl PartialUi<ImagesTest> for ImagesTest {
 
         fn build_partial<W: Into<ControlHandle>>(data: &mut ImagesTest, _parent: Option<W>) -> Result<(), NwgError> {
-            
-            Jpeg::builder()
-              .source_file(Some("./test_rc/cat.jpg"))
-              .build(&mut data.jpeg_test)?;
             
             Window::builder()
                 .flags(WindowFlags::WINDOW)
