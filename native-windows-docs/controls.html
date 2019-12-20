@@ -77,13 +77,7 @@
             <li><a href="low_events.html"><b>8.1.</b> Raw event handling </a></li>
         </ul>
     </li>
-    
-    <li><a href="canvas.html"><b>9.</b> The canvas </a>
-    <ul class="section">
-        <li><a href="canvas_base.html"><b>9.1.</b> Basics </a></li>
-    </ul>
-    </li>
-    
+
     </ul>
     </div>
     <!-- NAV END -->
@@ -92,7 +86,53 @@
     <div id='page'>
 
         <h1 class="title">Native Windows GUI: Controls</h1>
+
+        Controls are UI elements that can be interacted with.<br>
+        Native windows GUI wraps over 25 different controls in a safe rust-friendly interface.
         <br/><br/>
+
+        To keep compile time low, most controls are feature-gated. 
+        <br/><br/>
+
+        <h3>Control builder</h3>  
+        Controls are created using a <b>builder</b> API. On each control type, the method <code>builder</code> can be
+        called in instantiate a builder object. Builder names use the following format: <code>[ControlName]Builder</code>. Ex: (<code>ButtonBuilder</code>).
+        <br/><br/>
+
+        Each control documentation enumerates the properties accepted by the builder.
+        <br><br>
+
+        <h3>Window control</h3> 
+
+        The window control is be the base of any GUI application. A Window control is a container and can contain children.
+        <br><br>
+
+        In the case of system tray applications, a <code>MessageWindow</code> can be used.
+        <br><br>
+        
+        <h3>Children controls</h3>  
+
+        All non-window control require a parent. 
+
+        <br><br>
+
+        <h3>Control events</h3>  
+
+        Controls can raise <code>Events</code> when interacted with. The events that can be raised by a control are
+        in the their documentation.<br/><br/>
+
+        All controls have specific events (ex: <code>OnButtonClick</code>) and generic events that are shared (ex: <code>OnPaint</code>).<br/><br/>
+
+        More on this in the next section
+
+        <br><br>
+
+        <h3>Implementation</h3>
+        Every control is implemented as a wrapper over a low level window handle. As such, most of them only take the size of a pointer.<br><br>
+
+        In some case, controls that support custom collections (ex: ListBox and ComboBox) also uses Rust collections internally to store the rust data.
+        <br/><br/>
+
 
     </div>
 </div>
