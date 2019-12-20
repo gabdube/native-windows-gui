@@ -47,7 +47,7 @@ impl ImageFrame {
 
         let image = wh::send_message(handle, STM_GETIMAGE, IMAGE_BITMAP as usize, 0);
         if image != 0 {
-            Some(Bitmap { handle: image as HANDLE, owned: false } )
+            Some(Bitmap { handle: image as HANDLE, owned: false })
         } else {
             None
         }

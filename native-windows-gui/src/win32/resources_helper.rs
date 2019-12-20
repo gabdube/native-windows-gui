@@ -1,4 +1,4 @@
-use winapi::shared::windef::{HFONT};
+use winapi::shared::windef::{HFONT, HBITMAP};
 use winapi::ctypes::c_int;
 use winapi::um::winnt::HANDLE;
 
@@ -12,6 +12,14 @@ use super::base_helper::{get_system_error, to_utf16};
 #[cfg(feature = "file-dialog")] use crate::resources::FileDialogAction;
 #[cfg(feature = "file-dialog")] use winapi::um::shobjidl::{IFileDialog, IFileOpenDialog};
 
+
+pub fn is_bitmap(handle: HBITMAP) -> bool {
+    use winapi::um::wingdi::GetBitmapBits;
+    use winapi::shared::minwindef::LPVOID;
+
+    let mut bits: [u8; 1] = [0; 1];
+    unsafe { GetBitmapBits(handle, 1, &mut bits as *mut [u8; 1] as LPVOID) != 0 }
+}
 
 pub unsafe fn build_font(
     size: u32,

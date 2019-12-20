@@ -5,7 +5,8 @@ that indicates what the button does when the user selects it.
 
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_PUSHLIKE, BS_FLAT};
 use crate::win32::window_helper as wh;
-use crate::{NwgError, Font};
+use crate::win32::resources_helper as rh;
+use crate::{NwgError, Font, Bitmap, Icon};
 use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "Button is not yet bound to a winapi object";
@@ -13,7 +14,15 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Button handle is not HWND!";
 
 
 bitflags! {
+    /**
+        NONE:     No flags. Equivalent to a invisible blank button.
+        VISIBLE:  The button is immediatly visible after creation
+        DISABLED: The button cannot be interacted with by the user. It also has a grayed out look.
+        FLAT:     The button do not have a visual style
+        CHECK:    The button acts like a checkbox. It keeps its pushed state when clicked once.
+    */
     pub struct ButtonFlags: u32 {
+        const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const FLAT = BS_FLAT;
@@ -23,7 +32,32 @@ bitflags! {
 
 /**
 A push button is a rectangle containing an application-defined text label.
-Use `ImageButton` if you need to have a button that contains an icon or a bitmap.
+Use `ImageButton` if you need to have a button that ONLY contains an icon or a bitmap.
+
+Builder parameters:
+  * parent:   Required. The button parent container.
+  * text:     The button text.
+  * size:     The button size.
+  * position: The button position.
+  * enabled:  If the button can be used by the user. It also has a grayed out look.
+  * flags:    A combination of the ButtonFlags values.
+  * font:     The font used for the button text
+  * bitmap:   A bitmap to display next to the button text. If this value is set, icon is ignored.
+  * icon:     An icon to display next to the button text
+
+
+```rust
+    use native_windows_gui as nwg;
+    fn build_button(button: &mut nwg::Button, window: &nwg::Window, font: &nwg::Font) {
+        nwg::Button::builder()
+            .text("Hello")
+            .flags(nwg::ButtonFlags::VISIBLE | nwg::ButtonFlags::CHECK)
+            .font(Some(font))
+            .parent(window)
+            .build(button);
+    }
+```
+
 */
 #[derive(Default, Debug)]
 pub struct Button {
@@ -40,7 +74,70 @@ impl Button {
             enabled: true,
             flags: None,
             font: None,
-            parent: None
+            parent: None,
+            bitmap: None,
+            icon: None
+        }
+    }
+
+    /// Simulate a user click
+    pub fn click(&self) {
+        use winapi::um::winuser::{BM_CLICK};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, BM_CLICK, 0, 0);
+    }
+
+    /// Sets the bitmap image of the button. Replace the current bitmap or icon.
+    /// Set `image` to `None` to remove the image
+    pub fn set_bitmap<'a>(&self, image: Option<&'a Bitmap>) {
+        use winapi::um::winuser::{BM_SETIMAGE, IMAGE_BITMAP};
+        use winapi::shared::minwindef::{WPARAM, LPARAM};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
+        wh::send_message(handle, BM_SETIMAGE, IMAGE_BITMAP as WPARAM, image_handle);
+    }
+
+    /// Sets the bitmap image of the button. Replace the current bitmap or icon.
+    /// Set `image` to `None` to remove the image
+    pub fn set_icon<'a>(&self, image: Option<&'a Icon>) {
+        use winapi::um::winuser::{BM_SETIMAGE, IMAGE_ICON};
+        use winapi::shared::minwindef::{WPARAM, LPARAM};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
+        wh::send_message(handle, BM_SETIMAGE, IMAGE_ICON as WPARAM, image_handle);
+    }
+
+    /// Returns the current image in the buffer.
+    /// If the button has a bitmap, the value will be returned in `bitmap`
+    /// If the button has a icon, the value will be returned in `icon`
+    pub fn get_image<'a>(&self, bitmap: &mut Option<Bitmap>, icon: &mut Option<Icon>) {
+        use winapi::um::winuser::{BM_GETIMAGE, IMAGE_BITMAP, IMAGE_ICON};
+        use winapi::shared::minwindef::WPARAM;
+        use winapi::shared::windef::HBITMAP;
+        use winapi::um::winnt::HANDLE;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let bitmap_handle = wh::send_message(handle, BM_GETIMAGE, IMAGE_BITMAP as WPARAM, 0);
+        let icon_handle = wh::send_message(handle, BM_GETIMAGE, IMAGE_ICON as WPARAM, 0);
+
+        *bitmap = None;
+        *icon = None;
+
+        if bitmap_handle != 0 && rh::is_bitmap(bitmap_handle as HBITMAP) {
+            *bitmap = Some(Bitmap { handle: bitmap_handle as HANDLE, owned: false });
+        } else if icon_handle != 0 {
+            *icon = Some(Icon { handle: icon_handle as HANDLE, owned: false });
         }
     }
 
@@ -175,6 +272,8 @@ pub struct ButtonBuilder<'a> {
     enabled: bool,
     flags: Option<ButtonFlags>,
     font: Option<&'a Font>,
+    bitmap: Option<&'a Bitmap>,
+    icon: Option<&'a Icon>,
     parent: Option<ControlHandle>
 }
 
@@ -210,6 +309,16 @@ impl<'a> ButtonBuilder<'a> {
         self
     }
 
+    pub fn bitmap(mut self, bit: Option<&'a Bitmap>) -> ButtonBuilder<'a> {
+        self.bitmap = bit;
+        self
+    }
+
+    pub fn icon(mut self, ico: Option<&'a Icon>) -> ButtonBuilder<'a> {
+        self.icon = ico;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ButtonBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -238,6 +347,12 @@ impl<'a> ButtonBuilder<'a> {
         }
 
         out.set_enabled(self.enabled);
+
+        if self.bitmap.is_some() {
+            out.set_bitmap(self.bitmap);
+        } else if self.icon.is_some() {
+            out.set_icon(self.icon);
+        }
 
         Ok(())
     }

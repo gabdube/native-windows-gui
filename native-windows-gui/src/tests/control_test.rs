@@ -28,8 +28,10 @@ pub struct ControlsTest {
 
     window_icon: Icon,
     love_icon: Icon,
+    love_small_icon: Icon,
     ferris: Bitmap,
     popcorn: Bitmap,
+    popcorn_small: Bitmap,
     arial_font: Font,
     wait_cursor: Cursor,
     
@@ -89,6 +91,7 @@ pub struct ControlsTest {
     test_track2: TrackBar,
 
     test_image_button: ImageButton,
+    test_image_button2: Button,
 
     test_open_file_button: Button,
     test_open_directory_button: Button,
@@ -161,6 +164,11 @@ mod partial_controls_test_ui {
                 .source_file(Some("./test_rc/love.ico"))
                 .build(&mut data.love_icon)?;
 
+            Icon::builder()
+                .source_file(Some("./test_rc/love.ico"))
+                .size(Some((25, 25)))
+                .build(&mut data.love_small_icon)?;
+
             Bitmap::builder()
                 .source_file(Some("./test_rc/ferris.bmp"))
                 .build(&mut data.ferris)?;
@@ -169,6 +177,11 @@ mod partial_controls_test_ui {
                 .source_file(Some("./test_rc/popcorn.bmp"))
                 .size(Some((80, 80)))
                 .build(&mut data.popcorn)?;
+
+            Bitmap::builder()
+                .source_file(Some("./test_rc/popcorn.bmp"))
+                .size(Some((25, 25)))
+                .build(&mut data.popcorn_small)?;
 
             Cursor::builder()
                 .source_system(Some(OemCursor::Wait))
@@ -422,6 +435,13 @@ mod partial_controls_test_ui {
                 .image(Some(&data.popcorn))
                 .parent(&data.basics_control_tab2)
                 .build(&mut data.test_image_button)?;
+
+            Button::builder()
+                .position((110, 10))
+                .size((140, 40))
+                .icon(Some(&data.love_small_icon))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_image_button2)?;
 
             Button::builder()
                 .text("Open file")
@@ -851,6 +871,7 @@ fn run_window_tests(app: &ControlsTest, _evt: Event) {
 
 fn run_button_tests(app: &ControlsTest, _evt: Event) {
     if !app.runs.borrow().button {
+
         assert_eq!(&app.test_button.text(), "A simple button");
         app.test_button.set_text("New Text");
         assert_eq!(&app.test_button.text(), "New Text");
@@ -863,10 +884,12 @@ fn run_button_tests(app: &ControlsTest, _evt: Event) {
         app.test_button.set_size(120, 35);
         assert_eq!(app.test_button.size(), (120, 35));
 
-        assert_eq!(app.test_button.visible(), true);
-        app.test_button.set_visible(false);
-        assert_eq!(app.test_button.visible(), false);
-        app.test_button.set_visible(true);
+        if app.basics_control_tab.visible() {
+            assert_eq!(app.test_button.visible(), true);
+            app.test_button.set_visible(false);
+            assert_eq!(app.test_button.visible(), false);
+            app.test_button.set_visible(true);
+        }
 
         app.test_button.set_focus();
         assert_eq!(app.test_button.focus(), true);
@@ -877,12 +900,27 @@ fn run_button_tests(app: &ControlsTest, _evt: Event) {
         app.test_button.set_enabled(false);
         assert_eq!(app.test_button.enabled(), false);
 
+
+        let mut icon = None;
+        let mut bitmap = None;
+        app.test_image_button2.get_image(&mut bitmap, &mut icon);
+        assert!(icon.is_some() && bitmap.is_none());
+
+        app.test_image_button2.set_bitmap(Some(&app.popcorn_small));
+        app.test_image_button2.get_image(&mut bitmap, &mut icon);
+        assert!(icon.is_none() && bitmap.is_some());
+
+        app.test_image_button2.set_icon(None);
+        app.test_image_button2.get_image(&mut bitmap, &mut icon);
+        assert!(icon.is_none() && bitmap.is_none());
+
         app.runs.borrow_mut().button = true;
     } else {
         app.test_button.set_text("A simple button");
         app.test_button.set_position(10, 10);
         app.test_button.set_size(130, 30);
         app.test_button.set_enabled(true);
+        app.test_image_button2.set_icon(Some(&app.love_small_icon));
         app.runs.borrow_mut().button = false;
     }
 }

@@ -344,6 +344,21 @@ impl Tab {
         let item_ptr = &item as *const TCITEMW;
         wh::send_message(tab_view_handle, TCM_SETITEMW, tab_index, item_ptr as LPARAM);
     }
+
+    /// Return true if the control is visible to the user. Will return true even if the 
+    /// control is outside of the parent client view (ex: at the position (10000, 10000))
+    pub fn visible(&self) -> bool {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::get_window_visibility(handle) }
+    }
+
+    /// Show or hide the control to the user
+    pub fn set_visible(&self, v: bool) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_visibility(handle, v) }
+    }
     
 
     //

@@ -58,7 +58,7 @@ mod test_control_panel_ui {
                 .build(&mut data.thread_test_button)?;
 
             Button::builder()
-                .text("Image buttons")
+                .text("Images")
                 .parent(&data.window)
                 .build(&mut data.images_test_button)?;
 
