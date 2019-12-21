@@ -4,8 +4,7 @@ import glob, re
 from os import path
 
 APP_DIR = path.dirname(path.abspath(__file__))
-NAV = r"""
-<!-- NAV BEGIN -->
+NAV = r"""<!-- NAV BEGIN -->
 <div id="nav">
     <button id="toggle-nav">
         <span class="sr-only">Toggle navigation</span>
@@ -67,8 +66,7 @@ NAV = r"""
 
 </ul>
 </div>
-<!-- NAV END -->
-"""
+<!-- NAV END -->"""
 
 NAV_BEGIN = "<!-- NAV BEGIN -->"
 NAV_END = "<!-- NAV END -->"
@@ -79,7 +77,7 @@ for filename in glob.glob(APP_DIR+"/*.html"):
     with open(filename) as f:
         data = f.read()
 
-    fixed = headers_re.sub(data, NAV)
+    fixed = headers_re.sub(NAV, data)
 
     with open(filename, 'w') as f:
         f.write(fixed)
