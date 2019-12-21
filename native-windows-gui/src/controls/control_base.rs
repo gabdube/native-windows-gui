@@ -9,6 +9,36 @@ const NOTICE: u32 = 1;
 const TRAY: u32 = 2;
 
 
+/**
+    Control base is a low level interface to create base Windows handle (HWND, HMENU, TIMER, etc).
+    This is used internally by every controls.
+
+
+```rust
+use native_windows_gui as nwg;
+
+fn basic_stuff(window: &nwg::Window) -> Result<(), nwg::NwgError> {
+    nwg::ControlBase::build_hwnd()
+        .class_name("BUTTON")
+        .forced_flags(0)
+        .flags(0)
+        .size((100, 100))
+        .position((100, 100))
+        .text("HELLO")
+        .parent(Some(window.handle))
+        .build()?;
+
+    nwg::ControlBase::build_hmenu()
+        .text("Item")
+        .item(true)
+        .parent(window.handle)
+        .build()?;
+
+    Ok(())
+}
+```
+
+*/
 #[derive(Debug, Clone)]
 pub struct ControlBase;
 

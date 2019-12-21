@@ -1,6 +1,8 @@
 use winapi::shared::windef::{HWND, HMENU};
 
-
+/**
+    Inner handle type used internally by each control.
+*/
 #[derive(Debug, Clone, Copy)]
 pub enum ControlHandle {
     NoHandle,

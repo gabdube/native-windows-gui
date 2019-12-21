@@ -437,7 +437,7 @@ mod partial_controls_test_ui {
             ImageButton::builder()
                 .position((10, 10))
                 .size((90, 90))
-                .image(Some(&data.popcorn))
+                .bitmap(Some(&data.popcorn))
                 .parent(&data.basics_control_tab2)
                 .build(&mut data.test_image_button)?;
 

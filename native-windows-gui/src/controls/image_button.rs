@@ -1,13 +1,7 @@
-/*!
-A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
-that indicates what the button does when the user selects it.
-
-ImageButton use the same event as `Button`.
-*/
-
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_FLAT};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
-use crate::{NwgError, Bitmap};
+use crate::win32::resources_helper as rh;
+use crate::{NwgError, Bitmap, Icon};
 use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "ImageButton is not yet bound to a winapi object";
@@ -18,13 +12,37 @@ bitflags! {
     pub struct ImageButtonFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
-        const FLAT = BS_FLAT;
     }
 }
 
 /**
-A push button is a rectangle containing an application-defined icon or bitmap.
-Use `Button` if you need to have a button that contains a label.
+A push button is a rectangle containing an application-defined text label.
+Use `Button` if you need to have a button that can also contains text.
+
+**Builder parameters:**
+  * `parent`:   **Required.** The button parent container.
+  * `size`:     The button size.
+  * `position`: The button position.
+  * `enabled`:  If the button can be used by the user. It also has a grayed out look if disabled.
+  * `flags`:    A combination of the ButtonFlags values.
+  * `bitmap`:   A bitmap to display next to the button text. If this value is set, icon is ignored.
+  * `icon`:     An icon to display next to the button text
+
+**Control events:**
+  * `OnButtonClick`: When the button is clicked once by the user
+  * `OnButtonDoubleClick`: When the button is clicked twice rapidly by the user
+  * `MousePress(_)`: Generic mouse press events on the button
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_button(button: &mut nwg::ImageButton, window: &nwg::Window, ico: &nwg::Icon) {
+    nwg::ImageButton::builder()
+        .icon(Some(ico))
+        .parent(window)
+        .build(button);
+}
+```
 */
 #[derive(Default, Debug)]
 pub struct ImageButton {
@@ -40,27 +58,14 @@ impl ImageButton {
             enabled: true,
             flags: None,
             parent: None,
-            image: None
+            bitmap: None,
+            icon: None,
         }
     }
 
-    pub fn image(&self) -> Option<Bitmap> {
-        use winapi::um::winuser::{BM_GETIMAGE, IMAGE_BITMAP};
-        use winapi::shared::minwindef::{WPARAM};
-        use winapi::um::winnt::HANDLE;
-
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let image = wh::send_message(handle, BM_GETIMAGE, IMAGE_BITMAP as WPARAM, 0);
-        if image == 0 {
-            None
-        } else {
-            Some(Bitmap { handle: handle as HANDLE, owned: false } )
-        }
-    }
-    
-    pub fn set_image<'a>(&self, image: Option<&'a Bitmap>) {
+    /// Sets the bitmap image of the button. Replace the current bitmap or icon.
+    /// Set `image` to `None` to remove the image
+    pub fn set_bitmap<'a>(&self, image: Option<&'a Bitmap>) {
         use winapi::um::winuser::{BM_SETIMAGE, IMAGE_BITMAP};
         use winapi::shared::minwindef::{WPARAM, LPARAM};
 
@@ -69,6 +74,44 @@ impl ImageButton {
 
         let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
         wh::send_message(handle, BM_SETIMAGE, IMAGE_BITMAP as WPARAM, image_handle);
+    }
+
+    /// Sets the bitmap image of the button. Replace the current bitmap or icon.
+    /// Set `image` to `None` to remove the image
+    pub fn set_icon<'a>(&self, image: Option<&'a Icon>) {
+        use winapi::um::winuser::{BM_SETIMAGE, IMAGE_ICON};
+        use winapi::shared::minwindef::{WPARAM, LPARAM};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
+        wh::send_message(handle, BM_SETIMAGE, IMAGE_ICON as WPARAM, image_handle);
+    }
+
+    /// Returns the current image in the buffer.
+    /// If the button has a bitmap, the value will be returned in `bitmap`
+    /// If the button has a icon, the value will be returned in `icon`
+    pub fn get_image<'a>(&self, bitmap: &mut Option<Bitmap>, icon: &mut Option<Icon>) {
+        use winapi::um::winuser::{BM_GETIMAGE, IMAGE_BITMAP, IMAGE_ICON};
+        use winapi::shared::minwindef::WPARAM;
+        use winapi::shared::windef::HBITMAP;
+        use winapi::um::winnt::HANDLE;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let bitmap_handle = wh::send_message(handle, BM_GETIMAGE, IMAGE_BITMAP as WPARAM, 0);
+        let icon_handle = wh::send_message(handle, BM_GETIMAGE, IMAGE_ICON as WPARAM, 0);
+
+        *bitmap = None;
+        *icon = None;
+
+        if bitmap_handle != 0 && rh::is_bitmap(bitmap_handle as HBITMAP) {
+            *bitmap = Some(Bitmap { handle: bitmap_handle as HANDLE, owned: false });
+        } else if icon_handle != 0 {
+            *icon = Some(Icon { handle: icon_handle as HANDLE, owned: false });
+        }
     }
 
     /// Returns true if the control currently has the keyboard focus
@@ -165,7 +208,8 @@ pub struct ImageButtonBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     enabled: bool,
-    image: Option<&'a Bitmap>,
+    bitmap: Option<&'a Bitmap>,
+    icon: Option<&'a Icon>,
     flags: Option<ImageButtonFlags>,
     parent: Option<ControlHandle>
 }
@@ -197,8 +241,13 @@ impl<'a> ImageButtonBuilder<'a> {
         self
     }
 
-    pub fn image(mut self, i: Option<&'a Bitmap>) -> ImageButtonBuilder<'a> {
-        self.image = i;
+    pub fn bitmap(mut self, bit: Option<&'a Bitmap>) -> ImageButtonBuilder<'a> {
+        self.bitmap = bit;
+        self
+    }
+
+    pub fn icon(mut self, ico: Option<&'a Icon>) -> ImageButtonBuilder<'a> {
+        self.icon = ico;
         self
     }
 
@@ -220,8 +269,10 @@ impl<'a> ImageButtonBuilder<'a> {
             .parent(Some(parent))
             .build()?;
 
-        if self.image.is_some() {
-            out.set_image(self.image);
+        if self.bitmap.is_some() {
+            out.set_bitmap(self.bitmap);
+        } else if self.icon.is_some() {
+            out.set_icon(self.icon);
         }
 
         out.set_enabled(self.enabled);

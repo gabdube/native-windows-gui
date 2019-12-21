@@ -9,6 +9,14 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: DatePicker handle is not HWND!
 
 
 bitflags! {
+
+    /**
+        The DatePickerFlags flags
+
+        * NONE:     No flags. Equivalent to a invisible date picker.
+        * VISIBLE:  The date picker is immediatly visible after creation
+        * DISABLED: The date picker cannot be interacted with by the user. It also has a grayed out look.
+    */
     pub struct DatePickerFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
@@ -17,6 +25,7 @@ bitflags! {
 
 /**
     A date struct that can be passed to a date time picker control.
+    Fields are self explanatory.
 */
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct DatePickerValue {
@@ -26,6 +35,48 @@ pub struct DatePickerValue {
 }
 
 
+
+/**
+A date and time picker (DTP) control provides a simple and intuitive interface through which to exchange date and time information with a user.
+For example, with a DTP control you can ask the user to enter a date and then easily retrieve the selection.
+
+
+**Builder parameters:**
+  * `parent`:   **Required.** The dtp parent container.
+  * `size`:     The dtp size.
+  * `position`: The dtp position.
+  * `enabled`:  If the dtp can be used by the user. It also has a grayed out look if disabled.
+  * `flags`:    A combination of the DatePickerFlags values.
+  * `font`:     The font used for the dtp text
+  * `date`:     The default date as a `DatePickerValue` value
+  * `format`:   The format of the date. See the `set_format` method.
+  * `range`:    The accepted range of dates. The value is inclusive.
+
+**Control events:**
+  * `OnDatePickerClosed`: When the datepicker dropdown is closed
+  * `OnDatePickerDropdown`: When the datepicker dropdown is opened
+  * `OnDatePickerChanged`: When a new value in a datepicker is choosen
+  * `MousePress(_)`: Generic mouse press events on the checkbox
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_dtp(date: &mut nwg::DatePicker, window: &nwg::Window) {
+    let v = nwg::DatePickerValue { year: 2000, month: 10, day: 5 };
+    let v1 = nwg::DatePickerValue { year: 2000, month: 10, day: 5 };
+    let v2 = nwg::DatePickerValue { year: 2012, month: 10, day: 5 };
+    
+    nwg::DatePicker::builder()
+        .size((200, 300))
+        .position((0, 0))
+        .date(Some(v))
+        .format(Some("'YEAR: 'yyyy"))
+        .range(Some([v1, v2]))
+        .parent(window)
+        .build(date);
+}
+```
+*/
 #[derive(Default, Debug)]
 pub struct DatePicker {
     pub handle: ControlHandle
@@ -50,25 +101,25 @@ impl DatePicker {
         Sets the date format of the control
 
         About the format string:  
-        - "d" 	    The one- or two-digit day.  
-        - "dd" 	    The two-digit day. Single-digit day values are preceded by a zero.  
-        - "ddd" 	The three-character weekday abbreviation.  
-        - "dddd" 	The full weekday name.  
-        - "M" 	    The one- or two-digit month number.  
-        - "MM" 	    The two-digit month number. Single-digit values are preceded by a zero.  
-        - "MMM" 	The three-character month abbreviation.  
-        - "MMMM" 	The full month name.  
-        - "t" 	    The one-letter AM/PM abbreviation (that is, AM is displayed as "A").  
-        - "tt" 	    The two-letter AM/PM abbreviation (that is, AM is displayed as "AM").  
-        - "yy" 	    The last two digits of the year (that is, 1996 would be displayed as "96").  
-        - "yyyy" 	The full year (that is, 1996 would be displayed as "1996").   
+        - `d` 	    The one- or two-digit day.  
+        - `dd` 	    The two-digit day. Single-digit day values are preceded by a zero.  
+        - `ddd` 	The three-character weekday abbreviation.  
+        - `dddd` 	The full weekday name.  
+        - `M` 	    The one- or two-digit month number.  
+        - `MM` 	    The two-digit month number. Single-digit values are preceded by a zero.  
+        - `MMM` 	The three-character month abbreviation.  
+        - `MMMM` 	The full month name.  
+        - `t` 	    The one-letter AM/PM abbreviation (that is, AM is displayed as "A").  
+        - `tt` 	    The two-letter AM/PM abbreviation (that is, AM is displayed as "AM").  
+        - `yy` 	    The last two digits of the year (that is, 1996 would be displayed as "96").  
+        - `yyyy` 	The full year (that is, 1996 would be displayed as "1996").   
 
-        - "h" 	The one- or two-digit hour in 12-hour format.
-        - "hh" 	The two-digit hour in 12-hour format. Single-digit values are preceded by a zero.
-        - "H" 	The one- or two-digit hour in 24-hour format.
-        - "HH" 	The two-digit hour in 24-hour format. Single-digit values are preceded by a zero.
-        - "m" 	The one- or two-digit minute.
-        - "mm" 	The two-digit minute. Single-digit values are preceded by a zero.
+        - `h` 	The one- or two-digit hour in 12-hour format.
+        - `hh` 	The two-digit hour in 12-hour format. Single-digit values are preceded by a zero.
+        - `H` 	The one- or two-digit hour in 24-hour format.
+        - `HH` 	The two-digit hour in 24-hour format. Single-digit values are preceded by a zero.
+        - `m` 	The one- or two-digit minute.
+        - `mm` 	The two-digit minute. Single-digit values are preceded by a zero.
         
         Furthermore, any string enclosed in `'` can be used in the format to display text.  
         For example, to display the current date with the format `'Today is: Tuesday Mar 23, 1996`, the format string is `'Today is: 'dddd MMM dd', 'yyyy`. 
