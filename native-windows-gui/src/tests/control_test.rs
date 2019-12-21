@@ -92,6 +92,7 @@ pub struct ControlsTest {
 
     test_image_button: ImageButton,
     test_image_button2: Button,
+    test_button_checkbox: CheckBox,
 
     test_open_file_button: Button,
     test_open_directory_button: Button,
@@ -275,6 +276,7 @@ mod partial_controls_test_ui {
                 .text("Tree view")
                 .parent(&data.controls_holder)
                 .build(&mut data.tree_tab)?;
+
             Tab::builder()
                 .text("List view")
                 .parent(&data.controls_holder)
@@ -429,6 +431,9 @@ mod partial_controls_test_ui {
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_track2)?;
 
+            //
+            // Control tab 2
+            //
             ImageButton::builder()
                 .position((10, 10))
                 .size((90, 90))
@@ -443,6 +448,17 @@ mod partial_controls_test_ui {
                 .parent(&data.basics_control_tab2)
                 .build(&mut data.test_image_button2)?;
 
+            CheckBox::builder()
+                .flags(CheckBoxFlags::VISIBLE | CheckBoxFlags::PUSHLIKE)
+                .text("A check box button")
+                .position((260, 10))
+                .size((140, 40))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_button_checkbox)?;
+
+            //
+            // Dialogs
+            //
             Button::builder()
                 .text("Open file")
                 .parent(&data.dialog_tab)
@@ -485,6 +501,9 @@ mod partial_controls_test_ui {
                 .parent(&data.dialog_tab)
                 .build(&mut data.test_font_output)?;
 
+            //
+            // Treeview
+            //
             TreeView::builder()
                 .parent(&data.tree_tab)
                 .build(&mut data.test_tree)?;
@@ -504,6 +523,9 @@ mod partial_controls_test_ui {
                 .parent(&data.tree_tab)
                 .build(&mut data.test_tree_remove)?;
 
+            //
+            // Listview
+            //
             ListView::builder()
                 .parent(&data.list_view_tab)
                 .build(&mut data.test_list_view)?;

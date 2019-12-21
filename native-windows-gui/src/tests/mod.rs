@@ -41,7 +41,7 @@ mod test_control_panel_ui {
 
             // Controls
             Window::builder()
-                .flags(WindowFlags::WINDOW | WindowFlags::VISIBLE)
+                .flags(WindowFlags::WINDOW)
                 .size((200, 200))
                 .position((1100, 300))
                 .title("Tests Control Panel")
@@ -92,9 +92,13 @@ mod test_control_panel_ui {
                             } else if &handle == &evt_ui.images_test_button {
                                 show_images_test(&evt_ui.inner);
                             },
+                        E::OnInit => 
+                            if handle == evt_ui.window.handle {
+                                show(&evt_ui.inner);
+                            },
                         E::OnWindowClose => 
                             if handle == evt_ui.window.handle {
-                                close(&evt_ui.inner);
+                                close();
                             },
                         _ => {}
                     }
@@ -142,7 +146,11 @@ fn show_images_test(app: &TestControlPanel) {
     app.images_tests.window.set_focus();
 }
 
-fn close(_app: &TestControlPanel) {
+fn show(app: &TestControlPanel) {
+    app.window.set_visible(true);
+}
+
+fn close() {
     stop_thread_dispatch();
 }
 

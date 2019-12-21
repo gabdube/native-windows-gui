@@ -14,13 +14,57 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Combobox handle is not HWND!";
 
 
 bitflags! {
+    /**
+        The ComboBox flags
+
+        * NONE:     No flags. Equivalent to a invisible combobox.
+        * VISIBLE:  The combobox is immediatly visible after creation
+        * DISABLED: The combobox cannot be interacted with by the user. It also has a grayed out look.
+    */
     pub struct ComboBoxFlags: u32 {
+        const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
     }
 }
 
+/**
+A combo box consists of a list and a selection field. The list presents the options that a user can select,
+and the selection field displays the current selection.
 
+
+**Builder parameters:**
+  * `parent`:         **Required.** The combobox parent container.
+  * `size`:           The combobox size.
+  * `position`:       The combobox position.
+  * `enabled`:        If the combobox can be used by the user. It also has a grayed out look if disabled.
+  * `flags`:          A combination of the ComboBoxFlags values.
+  * `font`:           The font used for the combobox text
+  * `collection`:     The default collection of the combobox
+  * `selected_index`: The default selected index. None means no values are selected.  
+
+**Control events:**
+  * `OnComboBoxClosed`: When the combobox dropdown is closed
+  * `OnComboBoxDropdown`: When the combobox dropdown is opened
+  * `OnComboxBoxSelection`: When a new value in a combobox is choosen
+  * `MousePress(_)`: Generic mouse press events on the checkbox
+  * `OnMouseMove`: Generic mouse mouse event
+
+
+```rust
+use native_windows_gui as nwg;
+fn build_combobox(combo: &mut nwg::ComboBox<&'static str>, window: &nwg::Window) {
+    let data = vec!["one", "two"];
+    
+    nwg::ComboBox::builder()
+        .size((200, 300))
+        .collection(data)
+        .selected_index(Some(0))
+        .parent(window)
+        .build(combo);
+}
+```
+*/
 #[derive(Default, Debug)]
 pub struct ComboBox<D: Display+Default> {
     pub handle: ControlHandle,
@@ -33,6 +77,7 @@ impl<D: Display+Default> ComboBox<D> {
         ComboBoxBuilder {
             size: (100, 25),
             position: (0, 0),
+            enabled: false,
             flags: None,
             font: None,
             collection: None,
@@ -386,6 +431,7 @@ impl<D: Display+Default> ComboBox<D> {
 pub struct ComboBoxBuilder<'a, D: Display+Default> {
     size: (i32, i32),
     position: (i32, i32),
+    enabled: bool,
     flags: Option<ComboBoxFlags>,
     font: Option<&'a Font>,
     collection: Option<Vec<D>>,
@@ -430,6 +476,11 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
         self
     }
 
+    pub fn enabled(mut self, e: bool) -> ComboBoxBuilder<'a, D> {
+        self.enabled = e;
+        self
+    }
+
     pub fn build(self, out: &mut ComboBox<D>) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
@@ -458,6 +509,8 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
         if self.selected_index.is_some() {
             out.set_selection(self.selected_index);
         }
+
+        out.set_enabled(self.enabled);
 
         Ok(())
     }

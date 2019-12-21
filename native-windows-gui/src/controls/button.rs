@@ -1,9 +1,4 @@
-/*!
-A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
-that indicates what the button does when the user selects it.
-*/
-
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_PUSHLIKE, BS_FLAT};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use crate::win32::resources_helper as rh;
 use crate::{NwgError, Font, Bitmap, Icon};
@@ -15,18 +10,16 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Button handle is not HWND!";
 
 bitflags! {
     /**
-        NONE:     No flags. Equivalent to a invisible blank button.
-        VISIBLE:  The button is immediatly visible after creation
-        DISABLED: The button cannot be interacted with by the user. It also has a grayed out look.
-        FLAT:     The button do not have a visual style
-        CHECK:    The button acts like a checkbox. It keeps its pushed state when clicked once.
+        The button flags
+
+        * NONE:     No flags. Equivalent to a invisible blank button.
+        * VISIBLE:  The button is immediatly visible after creation
+        * DISABLED: The button cannot be interacted with by the user. It also has a grayed out look.
     */
     pub struct ButtonFlags: u32 {
         const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
-        const FLAT = BS_FLAT;
-        const CHECK = BS_PUSHLIKE;
     }
 }
 
@@ -34,28 +27,33 @@ bitflags! {
 A push button is a rectangle containing an application-defined text label.
 Use `ImageButton` if you need to have a button that ONLY contains an icon or a bitmap.
 
-Builder parameters:
-  * parent:   Required. The button parent container.
-  * text:     The button text.
-  * size:     The button size.
-  * position: The button position.
-  * enabled:  If the button can be used by the user. It also has a grayed out look.
-  * flags:    A combination of the ButtonFlags values.
-  * font:     The font used for the button text
-  * bitmap:   A bitmap to display next to the button text. If this value is set, icon is ignored.
-  * icon:     An icon to display next to the button text
+**Builder parameters:**
+  * `parent`:   **Required.** The button parent container.
+  * `text`:     The button text.
+  * `size`:     The button size.
+  * `position`: The button position.
+  * `enabled`:  If the button can be used by the user. It also has a grayed out look if disabled.
+  * `flags`:    A combination of the ButtonFlags values.
+  * `font`:     The font used for the button text
+  * `bitmap`:   A bitmap to display next to the button text. If this value is set, icon is ignored.
+  * `icon`:     An icon to display next to the button text
 
+**Control events:**
+  * `OnButtonClick`: When the button is clicked once by the user
+  * `OnButtonDoubleClick`: When the button is clicked twice rapidly by the user
+  * `MousePress(_)`: Generic mouse press events on the button
+  * `OnMouseMove`: Generic mouse mouse event
 
 ```rust
-    use native_windows_gui as nwg;
-    fn build_button(button: &mut nwg::Button, window: &nwg::Window, font: &nwg::Font) {
-        nwg::Button::builder()
-            .text("Hello")
-            .flags(nwg::ButtonFlags::VISIBLE | nwg::ButtonFlags::CHECK)
-            .font(Some(font))
-            .parent(window)
-            .build(button);
-    }
+use native_windows_gui as nwg;
+fn build_button(button: &mut nwg::Button, window: &nwg::Window, font: &nwg::Font) {
+    nwg::Button::builder()
+        .text("Hello")
+        .flags(nwg::ButtonFlags::VISIBLE)
+        .font(Some(font))
+        .parent(window)
+        .build(button);
+}
 ```
 
 */

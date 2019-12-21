@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_AUTOCHECKBOX, BS_AUTO3STATE};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_AUTOCHECKBOX, BS_AUTO3STATE, BS_PUSHLIKE};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
@@ -8,10 +8,21 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: CheckBox handle is not HWND!";
 
 
 bitflags! {
+    /**
+        The CheckBox flags
+
+        * NONE:     No flags. Equivalent to a invisible default checkbox.
+        * VISIBLE:  The checkbox is immediatly visible after creation
+        * DISABLED: The checkbox cannot be interacted with by the user. It also has a grayed out look.
+        * TRISTATE: The checkbox will have a 3rd state
+        * PUSHLIKE: The checkbox will look like a regular button
+    */
     pub struct CheckBoxFlags: u32 {
+        const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const TRISTATE = BS_AUTO3STATE;
+        const PUSHLIKE = BS_PUSHLIKE;
     }
 }
 
@@ -26,10 +37,38 @@ pub enum CheckBoxState {
 }
 
 /**
-A check box consists of a square box and an application-defined label, icon, or bitmap that indicates a choice the user can make by selecting the button.
+A check box consists of a square box and an application-defined labe that indicates a choice the user can make by selecting the button.
 Applications typically display check boxes to enable the user to choose one or more options that are not mutually exclusive.
 
-Note: Internally, check box are `Button` and as such, they trigger the same events
+**Builder parameters:**
+  * `parent`:           **Required.** The checkbox parent container.
+  * `text`:             The checkbox text.
+  * `size`:             The checkbox size.
+  * `position`:         The checkbox position.
+  * `enabled`:          If the checkbox can be used by the user. It also has a grayed out look if disabled.
+  * `flags`:            A combination of the CheckBoxFlags values.
+  * `font`:             The font used for the checkbox text
+  * `background_color`: The background color of the checkbox. Defaults to the default window background (light gray)
+  * `check_state`:      The default check state
+
+**Control events:**
+  * `OnButtonClick`: When the checkbox is clicked once by the user
+  * `OnButtonDoubleClick`: When the checkbox is clicked twice rapidly by the user
+  * `MousePress(_)`: Generic mouse press events on the checkbox
+  * `OnMouseMove`: Generic mouse mouse event
+
+
+```rust
+use native_windows_gui as nwg;
+fn build_checkbox(button: &mut nwg::CheckBox, window: &nwg::Window, font: &nwg::Font) {
+    nwg::CheckBox::builder()
+        .text("Hello")
+        .flags(nwg::CheckBoxFlags::VISIBLE)
+        .font(Some(font))
+        .parent(window)
+        .build(button);
+}
+```
 */
 #[derive(Default, Debug)]
 pub struct CheckBox {
@@ -43,6 +82,7 @@ impl CheckBox {
             text: "A checkbox",
             size: (100, 25),
             position: (0, 0),
+            enabled: true,
             background_color: None,
             check_state: CheckBoxState::Unchecked,
             flags: None,
@@ -265,6 +305,7 @@ pub struct CheckBoxBuilder<'a> {
     text: &'a str,
     size: (i32, i32),
     position: (i32, i32),
+    enabled: bool,
     background_color: Option<[u8; 3]>,
     check_state: CheckBoxState,
     flags: Option<CheckBoxFlags>,
@@ -291,6 +332,11 @@ impl<'a> CheckBoxBuilder<'a> {
 
     pub fn position(mut self, pos: (i32, i32)) -> CheckBoxBuilder<'a> {
         self.position = pos;
+        self
+    }
+
+    pub fn enabled(mut self, e: bool) -> CheckBoxBuilder<'a> {
+        self.enabled = e;
         self
     }
 
@@ -338,6 +384,8 @@ impl<'a> CheckBoxBuilder<'a> {
         if self.font.is_some() {
             out.set_font(self.font);
         }
+
+        out.set_enabled(self.enabled);
 
         if self.background_color.is_some() {
             out.hook_background_color(self.background_color.unwrap());
