@@ -77,12 +77,12 @@ mod basic_app_ui {
                 let handle_events = move |evt, _evt_data, handle| {
                     match evt {
                         E::OnButtonClick => {
-                            if handle == evt_ui.hello_button.handle {
+                            if &handle == &evt_ui.hello_button {
                                 BasicApp::say_hello(&evt_ui.inner);
                             }
                         },
                         E::OnWindowClose => {
-                            if handle == evt_ui.window.handle {
+                            if &handle == &evt_ui.window {
                                 BasicApp::say_goodbye(&evt_ui.inner);
                             }
                         },

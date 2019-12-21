@@ -256,7 +256,7 @@
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 
 <span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NativeUi</span><span class="o">&lt;</span><span class="n">BasicApp</span><span class="p">,</span><span class="w"> </span><span class="n">BasicAppUi</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">BasicApp</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="k">fn</span> <span class="nf">build_ui</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span>: <span class="nc">BasicApp</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Rc</span><span class="o">&lt;</span><span class="n">BasicAppUi</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">SystemError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">fn</span> <span class="nf">build_ui</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span>: <span class="nc">BasicApp</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Rc</span><span class="o">&lt;</span><span class="n">BasicAppUi</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NwgError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="k">use</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Event</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">E</span><span class="p">;</span><span class="w"></span>
 <span class="w">            </span>
 <span class="w">            </span><span class="c1">// Controls</span>
@@ -292,12 +292,12 @@
 <span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">handle_events</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">_evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                    </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                        </span><span class="n">E</span>::<span class="n">OnButtonClick</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">hello_button</span><span class="p">.</span><span class="n">handle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">hello_button</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                                </span><span class="n">BasicApp</span>::<span class="n">say_hello</span><span class="p">(</span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">inner</span><span class="p">);</span><span class="w"></span>
 <span class="w">                            </span><span class="p">}</span><span class="w"></span>
 <span class="w">                        </span><span class="p">},</span><span class="w"></span>
 <span class="w">                        </span><span class="n">E</span>::<span class="n">OnWindowClose</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">handle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                                </span><span class="n">BasicApp</span>::<span class="n">say_goodbye</span><span class="p">(</span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">inner</span><span class="p">);</span><span class="w"></span>
 <span class="w">                            </span><span class="p">}</span><span class="w"></span>
 <span class="w">                        </span><span class="p">},</span><span class="w"></span>
@@ -305,7 +305,7 @@
 <span class="w">                    </span><span class="p">}</span><span class="w"></span>
 <span class="w">                </span><span class="p">};</span><span class="w"></span>
 
-<span class="w">                </span><span class="n">nwg</span>::<span class="n">bind_event_handler</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">handle_events</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="n">nwg</span>::<span class="n">full_bind_event_handler</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">handle_events</span><span class="p">);</span><span class="w"></span>
 <span class="w">            </span><span class="p">}</span><span class="w"></span>
 <span class="w">            </span>
 <span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">ui</span><span class="p">);</span><span class="w"></span>
@@ -388,13 +388,13 @@ You can see that there are no way to fetch our application data from these param
 Inside the callback, the developer needs to do three things:
 <ul>
     <li>Match the event value. <code>match evt</code></li>
-    <li>Check which control sent the event. <code>handle == evt_ui.hello_button.handle</code></li>
+    <li>Check which control sent the event. <code>&handle == &evt_ui.hello_button</code></li>
     <li>Call the required functions</li> <code>BasicApp::say_hello(&evt_ui.inner);</code>
 </ul> <br>
 
 And that is all for events handling. Thankfully, <b>native-windows-derive</b> handles all of this for us!<br><br>
 
-Note that <code>bind_event_handler</code> applies to the parent and <b>all it's children</b>. This means you only need to bind handlers on <b>TOP LEVEL window</b>.
+Note that <code>full_bind_event_handler</code> applies to the parent and <b>all its children</b>. This means you only need to bind handlers on <b>TOP LEVEL window</b>.
 
 <h3>End note</h3>
 

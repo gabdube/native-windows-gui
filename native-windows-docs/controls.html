@@ -139,18 +139,33 @@
         Calling the methods of an uninitialized control will cause a <b>panic</b>.
         <br><br>
 
-        <h3>Window control</h3> 
+        <h3>Window / Container controls</h3> 
 
-        The window control is be the base of any GUI application. A Window control is a container and can contain children.
+        Most controls in NWG cannot hold children. Those that can are called "container controls". This includes <b>Window</b>, <b>Tab Container</b>,
+        and <b>Tab</b>. TabContainer should only contains tab controls.<br><br>
+
+        Container controls can also use <b>layouts</b>. More on that in <a href="file:///C:/Users/Gab/Documents/projects/native-windows-gui/native-windows-docs/layouts.html">the layout section</a>
         <br><br>
 
-        In the case of system tray applications, a <code>MessageWindow</code> can be used.
+        The window control is be the base of any GUI application. It represents a top level system window. Every NWG application will have a window.
+        This also includes system tray applications. In this case, the window should be a <code>MessageWindow</code>, an invisible window that only dispatch messages.
         <br><br>
-        
-        <h3>Children controls</h3>  
 
-        All non-window control require a parent. 
+        Window controls are highly customizable. System decorated window (aka normal window), popup window, and transparent window can be created by selecting the right <code> WindowFlags</code>.
+        <br><br>
 
+<div class="highlight"><pre style="width: auto;"><span></span><span class="n">nwg</span>::<span class="n">Window</span>::<span class="n">builder</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">flags</span><span class="p">(</span><span class="n">nwg</span>::<span class="n">WindowFlags</span>::<span class="n">WINDOW</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">WindowFlags</span>::<span class="n">VISIBLE</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">size</span><span class="p">((</span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="mi">115</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">position</span><span class="p">((</span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="mi">300</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">title</span><span class="p">(</span><span class="s">&quot;Basic example&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">window</span><span class="p">)</span><span class="o">?</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+            
+
+        <h3>Controls hierarchy</h3>  
+
+        All non-window control require a parent. If no parent is defined when building a new control, the build function will return a <code>NwgError::ControlCreationError</code>.
         <br><br>
 
         <h3>Control events</h3>  

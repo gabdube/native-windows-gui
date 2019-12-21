@@ -114,7 +114,7 @@
 
         Once the user selects a value, the selected value will be saved in the dialog object. Each dialog has a specific method to fetch this data.<br>
 
-<div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">open_directory_dialog</span><span class="p">.</span><span class="n">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre style="width: auto;"><span></span><span class="k">if</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">open_directory_dialog</span><span class="p">.</span><span class="n">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">app</span><span class="p">.</span><span class="n">file_dialog_result</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span><span class="w"></span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">open_directory_dialog</span><span class="p">.</span><span class="n">get_selected_item</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="n">app</span><span class="p">.</span><span class="n">file_dialog_result</span><span class="p">.</span><span class="n">set_text</span><span class="p">(</span><span class="o">&amp;</span><span class="n">directory</span><span class="p">);</span><span class="w"></span>
@@ -126,7 +126,7 @@
         <h3>File dialog</h3>
 
         FileDialog uses the common item dialog (<a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/bb776913(v=vs.85)?redirectedfrom=MSDN">link</a>)
-        It supports the <code>FileDialogAction::Open</code>, <code>FileDialogAction::OpenDiectory</code> and <code>FileDialogAction::Save</code>.
+        It supports the <code>FileDialogAction::Open</code>, <code>FileDialogAction::OpenDirectory</code> and <code>FileDialogAction::Save</code>.
         <br><br>
 
         <h3>Color dialog</h3>

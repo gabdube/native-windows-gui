@@ -23,6 +23,9 @@ static mut NOTICE_ID: u32 = 1;
 const NO_DATA: EventData = EventData::NoData;
 
 
+/**
+    An opaque structure that represent a window subclass hook. 
+*/
 pub struct EventHandler<F> {
     handles: Vec<HWND>,
     id: SUBCLASSPROC,
