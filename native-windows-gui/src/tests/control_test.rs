@@ -496,6 +496,7 @@ mod partial_controls_test_ui {
 
             TextInput::builder()
                 .parent(&data.dialog_tab)
+                .background_color(Some([255, 255, 255]))
                 .build(&mut data.test_color_output)?;
 
             Button::builder()
@@ -506,6 +507,7 @@ mod partial_controls_test_ui {
 
             TextInput::builder()
                 .parent(&data.dialog_tab)
+                .background_color(Some([255, 255, 255]))
                 .build(&mut data.test_font_output)?;
 
             //
@@ -517,6 +519,7 @@ mod partial_controls_test_ui {
 
             TextInput::builder()
                 .text("New Item")
+                .background_color(Some([255, 255, 255]))
                 .parent(&data.tree_tab)
                 .build(&mut data.test_tree_input)?;
 

@@ -43,7 +43,8 @@ impl TextInput {
             align: HTextAlign::Left,
             readonly: false,
             font: None,
-            parent: None
+            parent: None,
+            background_color: None
         }
     }
 
@@ -300,17 +301,22 @@ impl TextInput {
     }
 
     /// Center the text vertically. Can't believe that must be manually hacked in.
-    fn hook_non_client_size(&self) {
+    fn hook_non_client_size(&self, bg: Option<[u8; 3]>) {
         use crate::bind_raw_event_handler;
         use winapi::shared::windef::{HGDIOBJ, RECT, HBRUSH, POINT};
         use winapi::um::winuser::{WM_NCCALCSIZE, WM_NCPAINT, WM_SIZE, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW,};
         use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
         use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect, ScreenToClient, SetWindowPos};
-        use winapi::um::wingdi::SelectObject;
+        use winapi::um::wingdi::{SelectObject, CreateSolidBrush, RGB};
         use std::{mem, ptr};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         self.handle.hwnd().expect(BAD_HANDLE);
+
+        let brush = match bg {
+            Some(c) => unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) },
+            None => COLOR_WINDOW as HBRUSH
+        };
 
         unsafe {
 
@@ -376,8 +382,8 @@ impl TextInput {
                     };
 
                     let dc = GetDC(hwnd);
-                    FillRect(dc, &top, COLOR_WINDOW as HBRUSH);
-                    FillRect(dc, &bottom, COLOR_WINDOW as HBRUSH);
+                    FillRect(dc, &top, brush);
+                    FillRect(dc, &bottom, brush);
                     ReleaseDC(hwnd, dc);
                 },
                 WM_SIZE => {
@@ -404,7 +410,8 @@ pub struct TextInputBuilder<'a> {
     align: HTextAlign,
     readonly: bool,
     font: Option<&'a Font>,
-    parent: Option<ControlHandle>
+    parent: Option<ControlHandle>,
+    background_color: Option<[u8; 3]>,
 }
 
 impl<'a> TextInputBuilder<'a> {
@@ -454,6 +461,11 @@ impl<'a> TextInputBuilder<'a> {
         self
     }
 
+    pub fn background_color(mut self, color: Option<[u8;3]>) -> TextInputBuilder<'a> {
+        self.background_color = color;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TextInputBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -489,7 +501,7 @@ impl<'a> TextInputBuilder<'a> {
             .parent(Some(parent))
             .build()?;
 
-        out.hook_non_client_size();
+        out.hook_non_client_size(self.background_color);
 
         if self.limit > 0 {
             out.set_limit(self.limit);
