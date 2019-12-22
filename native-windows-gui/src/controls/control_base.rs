@@ -71,6 +71,8 @@ impl ControlBase {
     }
 }
 
+
+/// Low level HWND builder. Instanced by `ControlBase::build_hwnd`.
 #[derive(Default)]
 pub struct HwndBuilder {
     class_name: String,
@@ -145,6 +147,7 @@ impl HwndBuilder {
 }
 
 
+/// Low level HMENU builder. Instanced by `ControlBase::build_hmenu`.
 #[derive(Default)]
 pub struct HmenuBuilder {
     text: Option<String>,
@@ -209,6 +212,7 @@ impl HmenuBuilder {
 }
 
 
+/// Low level timer builder. Instanced by `ControlBase::build_timer`.
 #[derive(Default)]
 pub struct TimerBuilder {
     parent: Option<HWND>,
@@ -248,6 +252,8 @@ impl TimerBuilder {
 }
 
 
+/// Low level builder for controls without specific winapi contructors. 
+/// Instanced by `ControlBase::build_notice` or `ControlBase::build_tray_notification`.
 #[derive(Default)]
 pub struct OtherBuilder {
     parent: Option<HWND>,
