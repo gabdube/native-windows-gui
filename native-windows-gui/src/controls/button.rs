@@ -114,10 +114,10 @@ impl Button {
         wh::send_message(handle, BM_SETIMAGE, IMAGE_ICON as WPARAM, image_handle);
     }
 
-    /// Returns the current image in the buffer.
+    /// Returns the current image in the button.
     /// If the button has a bitmap, the value will be returned in `bitmap`
     /// If the button has a icon, the value will be returned in `icon`
-    pub fn get_image<'a>(&self, bitmap: &mut Option<Bitmap>, icon: &mut Option<Icon>) {
+    pub fn image<'a>(&self, bitmap: &mut Option<Bitmap>, icon: &mut Option<Icon>) {
         use winapi::um::winuser::{BM_GETIMAGE, IMAGE_BITMAP, IMAGE_ICON};
         use winapi::shared::minwindef::WPARAM;
         use winapi::shared::windef::HBITMAP;

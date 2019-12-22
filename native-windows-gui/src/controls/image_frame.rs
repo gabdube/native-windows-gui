@@ -1,11 +1,8 @@
-/*!
-An image frame is a control that display an `Bitmap` image resource. It also accept mouse clicks.
-*/
-
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
+use crate::win32::resources_helper as rh;
 use super::{ControlBase, ControlHandle};
-use crate::{Bitmap, NwgError};
+use crate::{Bitmap, Icon, NwgError};
 
 const NOT_BOUND: &'static str = "ImageFrame is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: ImageFrame handle is not HWND!";
@@ -18,7 +15,33 @@ bitflags! {
     }
 }
 
-/// Display a bitmap image in the application
+/**
+An image frame is a control that displays a `Bitmap` or a `Icon` image resource. It can also triggers mouse clicks.
+
+**Builder parameters:**
+  * `parent`:           **Required.** The image frame parent container.
+  * `size`:             The image frame size.
+  * `position`:         The image frame position.
+  * `flags`:            A combination of the ImageFrameFlags values.
+  * `background_color`: The background color of the image frame. Used if the image is smaller than the control
+  * `bitmap`:           A bitmap to display. If this value is set, icon is ignored.
+  * `icon`:             An icon to display
+
+**Control events:**
+  * `OnImageFrameClick`: When the image frame is clicked once by the user
+  * `OnImageFrameDoubleClick`: When the image frame is clicked twice rapidly by the user
+  * `MousePress(_)`: Generic mouse press events on the button
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_frame(button: &mut nwg::ImageFrame, window: &nwg::Window, ico: &nwg::Icon) {
+    nwg::ImageFrame::builder()
+        .parent(window)
+        .build(button);
+}
+```
+*/
 #[derive(Default, Debug)]
 pub struct ImageFrame {
     pub handle: ControlHandle
@@ -31,45 +54,61 @@ impl ImageFrame {
             size: (100, 100),
             position: (0, 0),
             flags: None,
-            image: None,
+            bitmap: None,
+            icon: None,
             parent: None,
             background_color: None
         }
     }
 
-    /// Get the image of the image frame
-    pub fn image(&self) -> Option<Bitmap> {
-        use winapi::um::winuser::{STM_GETIMAGE, IMAGE_BITMAP};
-        use winapi::um::winnt::HANDLE;
+    /// Sets the bitmap image of the image frame. Replace the current bitmap or icon.
+    /// Set `image` to `None` to remove the image
+    pub fn set_bitmap<'a>(&self, image: Option<&'a Bitmap>) {
+        use winapi::um::winuser::{STM_SETIMAGE, IMAGE_BITMAP};
+        use winapi::shared::minwindef::{WPARAM, LPARAM};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
-        let image = wh::send_message(handle, STM_GETIMAGE, IMAGE_BITMAP as usize, 0);
-        if image != 0 {
-            Some(Bitmap { handle: image as HANDLE, owned: false })
-        } else {
-            None
-        }
+        let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
+        wh::send_message(handle, STM_SETIMAGE, IMAGE_BITMAP as WPARAM, image_handle);
     }
 
-    /// Set the image of the image frame.
-    pub fn set_image(&self, image: Option<&Bitmap>) {
-        use winapi::um::winuser::{STM_SETIMAGE, IMAGE_BITMAP};
-        use winapi::um::wingdi::DeleteObject;
-        use winapi::um::winnt::HANDLE;
-        use std::{ptr};
+    /// Sets the bitmap image of the image frame. Replace the current bitmap or icon.
+    /// Set `image` to `None` to remove the image
+    pub fn set_icon<'a>(&self, image: Option<&'a Icon>) {
+        use winapi::um::winuser::{STM_SETIMAGE, IMAGE_ICON};
+        use winapi::shared::minwindef::{WPARAM, LPARAM};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
-        let new_image = image.map(|i| i.handle).unwrap_or(ptr::null_mut());
-        let old_image = wh::send_message(handle, STM_SETIMAGE, IMAGE_BITMAP as usize, new_image as isize);
+        let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
+        wh::send_message(handle, STM_SETIMAGE, IMAGE_ICON as WPARAM, image_handle);
+    }
 
-        if old_image != 0 {
-            unsafe {
-                DeleteObject(old_image as HANDLE);
-            }
+    /// Returns the current image in the image frame.
+    /// If the image frame has a bitmap, the value will be returned in `bitmap`
+    /// If the image frame has a icon, the value will be returned in `icon`
+    pub fn image<'a>(&self, bitmap: &mut Option<Bitmap>, icon: &mut Option<Icon>) {
+        use winapi::um::winuser::{STM_GETIMAGE, IMAGE_BITMAP, IMAGE_ICON};
+        use winapi::shared::minwindef::WPARAM;
+        use winapi::shared::windef::HBITMAP;
+        use winapi::um::winnt::HANDLE;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let bitmap_handle = wh::send_message(handle, STM_GETIMAGE, IMAGE_BITMAP as WPARAM, 0);
+        let icon_handle = wh::send_message(handle, STM_GETIMAGE, IMAGE_ICON as WPARAM, 0);
+
+        *bitmap = None;
+        *icon = None;
+
+        if bitmap_handle != 0 && rh::is_bitmap(bitmap_handle as HBITMAP) {
+            *bitmap = Some(Bitmap { handle: bitmap_handle as HANDLE, owned: false });
+        } else if icon_handle != 0 {
+            *icon = Some(Icon { handle: icon_handle as HANDLE, owned: false });
         }
     }
 
@@ -137,15 +176,14 @@ impl ImageFrame {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        use winapi::um::winuser::{SS_BITMAP, SS_CENTERIMAGE};
-        WS_VISIBLE | SS_BITMAP | SS_CENTERIMAGE
+        WS_VISIBLE
     }
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        use winapi::um::winuser::{SS_NOTIFY, WS_CHILD};
+        use winapi::um::winuser::{SS_NOTIFY, WS_CHILD, SS_CENTERIMAGE};
 
-        WS_CHILD | SS_NOTIFY
+        WS_CHILD | SS_NOTIFY | SS_CENTERIMAGE
     }
 
     /// Change the label background color to transparent.
@@ -183,7 +221,8 @@ pub struct ImageFrameBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<ImageFrameFlags>,
-    image: Option<&'a Bitmap>,
+    bitmap: Option<&'a Bitmap>,
+    icon: Option<&'a Icon>,
     parent: Option<ControlHandle>,
     background_color: Option<[u8; 3]>,
 }
@@ -205,8 +244,13 @@ impl<'a> ImageFrameBuilder<'a> {
         self
     }
 
-    pub fn image(mut self, image: Option<&'a Bitmap>) -> ImageFrameBuilder<'a> {
-        self.image = image;
+    pub fn bitmap(mut self, bit: Option<&'a Bitmap>) -> ImageFrameBuilder<'a> {
+        self.bitmap = bit;
+        self
+    }
+
+    pub fn icon(mut self, ico: Option<&'a Icon>) -> ImageFrameBuilder<'a> {
+        self.icon = ico;
         self
     }
 
@@ -221,8 +265,15 @@ impl<'a> ImageFrameBuilder<'a> {
     }
 
     pub fn build(self, out: &mut ImageFrame) -> Result<(), NwgError> {
-        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        use winapi::um::winuser::{SS_BITMAP, SS_ICON};
 
+        let mut flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        if self.icon.is_some() {
+            flags |= SS_ICON;
+        } else {
+            flags |= SS_BITMAP;
+        }
+        
         let parent = match self.parent {
             Some(p) => Ok(p),
             None => Err(NwgError::no_parent("ImageFrame"))
@@ -231,15 +282,16 @@ impl<'a> ImageFrameBuilder<'a> {
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
-            .ex_flags(::winapi::um::winuser::WS_EX_TRANSPARENT)
             .flags(flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))
             .build()?;
 
-        if self.image.is_some() {
-            out.set_image(self.image);
+        if self.bitmap.is_some() {
+            out.set_bitmap(self.bitmap);
+        } else if self.icon.is_some() {
+            out.set_icon(self.icon);
         }
 
         if self.background_color.is_some() {

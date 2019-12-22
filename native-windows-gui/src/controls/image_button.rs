@@ -16,7 +16,7 @@ bitflags! {
 }
 
 /**
-A push button is a rectangle containing an application-defined text label.
+A image button is a rectangle containing an application-defined image or icon.
 Use `Button` if you need to have a button that can also contains text.
 
 **Builder parameters:**
@@ -24,9 +24,9 @@ Use `Button` if you need to have a button that can also contains text.
   * `size`:     The button size.
   * `position`: The button position.
   * `enabled`:  If the button can be used by the user. It also has a grayed out look if disabled.
-  * `flags`:    A combination of the ButtonFlags values.
-  * `bitmap`:   A bitmap to display next to the button text. If this value is set, icon is ignored.
-  * `icon`:     An icon to display next to the button text
+  * `flags`:    A combination of the ImageButtonFlags values.
+  * `bitmap`:   A bitmap to display If this value is set, icon is ignored.
+  * `icon`:     An icon to display
 
 **Control events:**
   * `OnButtonClick`: When the button is clicked once by the user
@@ -89,10 +89,10 @@ impl ImageButton {
         wh::send_message(handle, BM_SETIMAGE, IMAGE_ICON as WPARAM, image_handle);
     }
 
-    /// Returns the current image in the buffer.
+    /// Returns the current image in the button.
     /// If the button has a bitmap, the value will be returned in `bitmap`
     /// If the button has a icon, the value will be returned in `icon`
-    pub fn get_image<'a>(&self, bitmap: &mut Option<Bitmap>, icon: &mut Option<Icon>) {
+    pub fn image<'a>(&self, bitmap: &mut Option<Bitmap>, icon: &mut Option<Icon>) {
         use winapi::um::winuser::{BM_GETIMAGE, IMAGE_BITMAP, IMAGE_ICON};
         use winapi::shared::minwindef::WPARAM;
         use winapi::shared::windef::HBITMAP;

@@ -350,7 +350,7 @@ mod partial_controls_test_ui {
                 .position((150, 110))
                 .size((130, 99))
                 .parent(&data.basics_control_tab)
-                .image(Some(&data.ferris))
+                .bitmap(Some(&data.ferris))
                 .background_color(Some([255,255,255]))
                 .build(&mut data.test_img_frame)?;
 
@@ -935,15 +935,15 @@ fn run_button_tests(app: &ControlsTest, _evt: Event) {
 
         let mut icon = None;
         let mut bitmap = None;
-        app.test_image_button2.get_image(&mut bitmap, &mut icon);
+        app.test_image_button2.image(&mut bitmap, &mut icon);
         assert!(icon.is_some() && bitmap.is_none());
 
         app.test_image_button2.set_bitmap(Some(&app.popcorn_small));
-        app.test_image_button2.get_image(&mut bitmap, &mut icon);
+        app.test_image_button2.image(&mut bitmap, &mut icon);
         assert!(icon.is_none() && bitmap.is_some());
 
         app.test_image_button2.set_icon(None);
-        app.test_image_button2.get_image(&mut bitmap, &mut icon);
+        app.test_image_button2.image(&mut bitmap, &mut icon);
         assert!(icon.is_none() && bitmap.is_none());
 
         app.runs.borrow_mut().button = true;

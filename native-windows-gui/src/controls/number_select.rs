@@ -43,7 +43,6 @@ NumberSelect is implemented as a custom control.
 use native_windows_gui as nwg;
 fn build_number_select(num_select: &mut nwg::NumberSelect, window: &nwg::Window, font: &nwg::Font) {
     nwg::NumberSelect::builder()
-        .value(1003)
         .font(Some(font))
         .parent(window)
         .build(num_select);
