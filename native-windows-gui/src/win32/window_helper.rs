@@ -56,7 +56,8 @@ pub fn start_timer(hwnd: HWND, id: u32, interval: u32) {
 }
 
 pub fn get_style(handle: HWND) -> UINT {
-    get_window_long(handle, ::winapi::um::winuser::GWL_STYLE) as UINT
+    use ::winapi::um::winuser::GWL_STYLE;
+    get_window_long(handle, GWL_STYLE) as UINT
 }
 
 pub fn send_message(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {

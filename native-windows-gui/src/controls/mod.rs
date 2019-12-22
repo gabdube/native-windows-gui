@@ -49,6 +49,9 @@ mod list_view;
 #[cfg(feature = "image-button")]
 mod image_button;
 
+#[cfg(feature = "number-select")]
+mod number_select;
+
 mod handle_from_control;
 
 pub use control_handle::ControlHandle;
@@ -102,5 +105,8 @@ pub use list_view::{ListView, ListViewBuilder, ListViewFlags};
 
 #[cfg(feature = "image-button")]
 pub use image_button::{ImageButton, ImageButtonBuilder, ImageButtonFlags};
+
+#[cfg(feature = "number-select")]
+pub use number_select::{NumberSelect, NumberSelectBuilder, NumberSelectFlags};
 
 pub use handle_from_control::*;

@@ -93,6 +93,7 @@ pub struct ControlsTest {
     test_image_button: ImageButton,
     test_image_button2: Button,
     test_button_checkbox: CheckBox,
+    test_number_select: NumberSelect,
 
     test_open_file_button: Button,
     test_open_directory_button: Button,
@@ -455,6 +456,12 @@ mod partial_controls_test_ui {
                 .size((140, 40))
                 .parent(&data.basics_control_tab2)
                 .build(&mut data.test_button_checkbox)?;
+
+            NumberSelect::builder()
+                .position((10, 110))
+                .size((140, 25))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_number_select)?;
 
             //
             // Dialogs
