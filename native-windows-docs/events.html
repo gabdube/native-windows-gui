@@ -7,8 +7,8 @@
     <title>Native Windows GUI guide - Events</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-
-
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 </head>
 <body class="rustdoc">
 <!--[if lte IE 8]>
@@ -41,6 +41,7 @@
     <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
     <li><a href="events.html"><b>3.2.</b> Events </a></li>
     <li><a href="helper.html"><b>3.3.</b> Helper functions </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
 </ul>
 </li>
 
@@ -86,7 +87,81 @@
     <div id='page'>
 
         <h1 class="title">Native Windows GUI: Events</h1>
-        <br/><br/>
+
+        NWG handles events by hooking the system events queue. This means that, unlike other GUI toolkit,
+        events are not really bound to a control. Instead, binding events is done <b>globally</b>.<br/><br/>
+        
+        Because of the Rust borrow checker and the way events are handled internally by the windows API, any "traditional"
+        way to bind events ends up being too complicated. The two last version of NWG taught me that.<br/><br/>
+
+        Note: to learn how to use raw events <code>HWND, WPARAM, LPARAM</code>, see <a href="low_events.html">low level events handling</a>.
+
+        <h3>Hooking the event queue</h3>  
+
+        Hooking the system events queue can be done by calling one of those two functions:
+        <ul>
+            <li><code>full_bind_event_handler(control_handle, callback)</code></li>
+            <li><code>bind_event_handler(control_handle, parent_handle, callback)</code></li>
+        </ul>
+
+        The first one <b>"full"</b> will hook the events of a control and ALL its children. 
+        It's the one that will be used the most; At least once for every top level window.<br><br>
+
+        The other one will hook the events of a control and its parent. Why the control and i parent?
+        <b>Because the common controls of WINAPI sends their events to their parent.</b> This method of hooking
+        is usually used when a callback is added dynamically. More on that <a href="dynamic_event.html">here</a>
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="kd">let</span><span class="w"> </span><span class="n">events_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">handle_events</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">nwg</span>::<span class="n">Event</span>::<span class="n">OnWindowClose</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">events_ui</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">nwg</span>::<span class="n">stop_thread_dispatch</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="n">nwg</span>::<span class="n">full_bind_event_handler</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">handle_events</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+
+
+        <h3>Callback parameters</h3>
+
+        Th event handler parse the raw winapi parameters into 3 values:
+
+        <ul>
+            <li>The <a href="#">Event</a></li>
+            <li>The <a href="#">EventData</a></li>
+            <li>The <a href="#">Handle</a></li>
+        </ul>
+
+        <code>Event</code> is an enum. Every event that can be raised by a NWG application is listed under it.
+        Some events, such as <code>MousePress(MousePressEvent)</code> also takes a sub-enum.<br><br>
+
+        <code>EventData</code> is also an enum. Most NWG events don't use data (<code>EventData::NoData</code>), this is because the raw data
+        that comes with winapi events are often limited to the size of 2 <code>usize</code>. For example, instead of passing the width and height
+        on a <code>Event::OnResize</code>, it's better to call <code>control.size()</code> in the callback.
+        
+        <br><br>
+
+        <code>Handle</code> is the handle of the control. The events callback is not aware of the control in the application, as such
+        it can only send the handle. To fix this, NWG supports comparison of control vs handle
+        <br><br><code>&handle == &events_ui.window</code><br><br>
+        As such it's up to the developer to check which controller sent the event.
+
+        <br><br>
+        
+        <h3>EventHandler</h3>
+
+        All event hooking funtions return a <code>EventHandler</code> object. This object is an opaque handle over the event hook and all the hooked controls.
+        Ignoring this value means that the callback and all its data will be leaked! In smaller appplication, it's perfectly fine to just ignore it, 
+        but in large, long-running applications it's better to free the handler when it is no longer needed. This is done with: <br><br>
+
+        <code>nwg::unbind_event_handler(&handler)</code>
+        
+        <br><br><br><br>
 
     </div>
 </div>
