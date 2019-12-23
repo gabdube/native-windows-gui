@@ -189,14 +189,18 @@ mod partial_controls_test_ui {
                 .source_system(Some(OemCursor::Wait))
                 .build(&mut data.wait_cursor)?;
 
+            
             #[cfg(feature = "file-dialog")]
             #[cfg(feature = "color-dialog")]
             #[cfg(feature = "font-dialog")]
             fn init_dialog(data: &mut ControlsTest) -> Result<(), NwgError> {
+                let dir = ::std::env::current_dir().unwrap();
+
                 FileDialog::builder()
                     .action(FileDialogAction::Open)
                     .multiselect(true)
                     .title("Open a file")
+                    .default_folder(dir.to_str().unwrap())
                     .build(&mut data.open_file_dialog)?;
 
                 FileDialog::builder()

@@ -1,6 +1,7 @@
 use winapi::shared::windef::{HFONT, HBITMAP};
 use winapi::ctypes::c_int;
 use winapi::um::winnt::HANDLE;
+use winapi::Interface;
 
 use crate::resources::OemImage;
 use super::base_helper::{get_system_error, to_utf16};
@@ -201,11 +202,10 @@ pub unsafe fn create_file_dialog<'a, 'b>(
     use winapi::um::shobjidl::{FOS_PICKFOLDERS, FOS_ALLOWMULTISELECT, FOS_FORCEFILESYSTEM};
     use winapi::um::combaseapi::CoCreateInstance;
     use winapi::shared::{wtypesbase::CLSCTX_INPROC_SERVER, winerror::S_OK};
-    use super::{UUIDOF_IFileDialog, UUIDOF_IFileOpenDialog};
 
     let (clsid, uuid) = match action {
-        FileDialogAction::Save => (CLSID_FileSaveDialog, UUIDOF_IFileDialog()),
-        _ => (CLSID_FileOpenDialog, UUIDOF_IFileOpenDialog())
+        FileDialogAction::Save => (CLSID_FileSaveDialog, IFileDialog::uuidof()),
+        _ => (CLSID_FileOpenDialog, IFileOpenDialog::uuidof())
     };
 
     let mut handle: *mut IFileDialog = ptr::null_mut();
@@ -259,7 +259,6 @@ pub unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folde
     use winapi::um::objidl::IBindCtx;
     use winapi::shared::{winerror::{S_OK, S_FALSE}, guiddef::REFIID, ntdef::{HRESULT, PCWSTR}};
     use winapi::ctypes::c_void;
-    use super::IID_IShellItem;
 
     const SFGAO_FOLDER: u32 = 0x20000000;
 
@@ -272,7 +271,7 @@ pub unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folde
     let mut shellitem: *mut IShellItem = ptr::null_mut();
     let path = to_utf16(&folder_name);
 
-    if SHCreateItemFromParsingName(path.as_ptr(), ptr::null_mut(), &IID_IShellItem(), mem::transmute(&mut shellitem) ) != S_OK {
+    if SHCreateItemFromParsingName(path.as_ptr(), ptr::null_mut(), &IShellItem::uuidof(), mem::transmute(&mut shellitem) ) != S_OK {
         return Err(NwgError::file_dialog("Failed to set default folder"));
     }
 
