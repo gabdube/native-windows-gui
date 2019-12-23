@@ -101,7 +101,7 @@ pub use tray_notification::{TrayNotificationFlags, TrayNotification, TrayNotific
 pub use message_window::{MessageWindow, MessageWindowBuilder};
 
 #[cfg(feature = "list-view")]
-pub use list_view::{ListView, ListViewBuilder, ListViewFlags};
+pub use list_view::{ListView, ListViewBuilder, ListViewFlags, ListViewColumn};
 
 #[cfg(feature = "image-button")]
 pub use image_button::{ImageButton, ImageButtonBuilder, ImageButtonFlags};
