@@ -147,6 +147,7 @@ fn show_images_test(app: &TestControlPanel) {
 }
 
 fn show(app: &TestControlPanel) {
+    Clipboard::set_text(&app.window, "Hello World!");
     app.window.set_visible(true);
 }
 

@@ -8,6 +8,9 @@ pub(crate) mod message_box;
 #[cfg(feature = "cursor")]
 pub(crate) mod cursor;
 
+#[cfg(feature = "clipboard")]
+pub(crate) mod clipboard;
+
 #[cfg(feature = "tabs")]
 pub(crate) mod tabs;
 

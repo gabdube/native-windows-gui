@@ -26,6 +26,9 @@ pub use win32::{
 #[cfg(feature="cursor")]
 pub use win32::cursor::GlobalCursor;
 
+#[cfg(feature="clipboard")]
+pub use win32::clipboard::Clipboard;
+
 mod resources;
 pub use resources::*;
 

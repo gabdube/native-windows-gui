@@ -124,8 +124,18 @@
 </pre></div>    
 
         <h3>Cursor</h3>
+        NWG wraps the system cursor with the <code>GlobalCursor</code> object. Not to be confused with a <code>Cursor</code> object, a cursor resource file (*.cur).
         <br/><br/>
 
+        GlobalCursor is hidden behind the <code>cursor</code> feature. Once enabled, it can be used to get/set the mouse position on screen, capture the cursor
+        outside of the application, detect a dragging gesture, and set the image of the cursor globally.<br><br>
+        
+        Lastly, the GlobalCursor object do not need to be instanced. It must be used as it is:
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="k">use</span><span class="w"> </span><span class="n">native_windows_gui</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">nwg</span><span class="p">;</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">GlobalCursor</span>::<span class="n">position</span><span class="p">();</span><span class="w"></span>
+</pre></div>
+        
         <h3>Clipboard</h3>
         <br/><br/>
 
