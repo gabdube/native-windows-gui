@@ -41,5 +41,8 @@ list-view = []
 image-button = []
 images-ext = []
 number-select = []
-all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "images-ext",
-       "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "image-button", "number-select"]
+cursor = []
+clipboard = []
+all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "images-ext", "cursor",
+       "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "image-button", "number-select",
+       "clipboard"]

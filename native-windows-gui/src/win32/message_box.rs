@@ -67,6 +67,20 @@ pub struct MessageParams<'a> {
 
     Parameters:  
     * params: A `MessageParams` structure that defines how the message box should look
+
+    ```rust
+    use native_windows_gui as nwg;
+    fn test_message() {
+        let p = nwg::MessageParams {
+            title: "Hey",
+            content: "Cats are cute",
+            buttons: nwg::MessageButtons::Ok,
+            icons: nwg::MessageIcons::Warning
+        };
+
+        assert!(nwg::message(&p) == nwg::MessageChoice::Ok)
+    }
+    ```
 */
 pub fn message<'a>(params: &MessageParams) -> MessageChoice {
     use winapi::um::winuser::{MB_ABORTRETRYIGNORE, MB_CANCELTRYCONTINUE, MB_OK, MB_OKCANCEL, MB_RETRYCANCEL, MB_YESNO,

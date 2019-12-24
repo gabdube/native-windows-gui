@@ -4,6 +4,8 @@ pub(crate) mod resources_helper;
 pub(crate) mod window;
 pub(crate) mod menu;
 pub(crate) mod message_box;
+
+#[cfg(feature = "cursor")]
 pub(crate) mod cursor;
 
 #[cfg(feature = "tabs")]

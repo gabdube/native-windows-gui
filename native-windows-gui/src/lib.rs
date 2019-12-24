@@ -8,10 +8,6 @@ use std::rc::Rc;
 #[cfg(test)]
 mod tests;
 
-#[cfg(feature="tests-linux")]
-#[cfg(test)]
-mod tests;
-
 mod errors;
 pub use errors::{NwgError};
 
@@ -24,9 +20,11 @@ pub use common_types::*;
 pub(crate) mod win32;
 pub use win32::{
  dispatch_thread_events, stop_thread_dispatch, enable_visual_styles, init_common_controls, 
- cursor::GlobalCursor,
  window::{EventHandler, full_bind_event_handler, bind_event_handler, unbind_event_handler, bind_raw_event_handler},
  message_box::{MessageButtons, MessageIcons, MessageChoice, MessageParams, message, fatal_message, error_message, simple_message}};
+
+#[cfg(feature="cursor")]
+pub use win32::cursor::GlobalCursor;
 
 mod resources;
 pub use resources::*;

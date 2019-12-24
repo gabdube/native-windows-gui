@@ -1,10 +1,15 @@
-/*!
-    A global object that wraps the system cursor
-*/
 use crate::Cursor;
 use crate::controls::ControlHandle;
 
-/// A global object used to manage the system cursor. See module level documentation
+/**
+    A global object that wraps the system cursor.
+    This object must not be instanced. The methods should be used this way:
+
+    ```rust
+        use native_windows_gui as nwg;
+        let (x,y) = nwg::GlobalCursor::position();
+    ```
+*/
 pub struct GlobalCursor;
 
 impl GlobalCursor {
@@ -147,6 +152,15 @@ impl GlobalCursor {
         Arguments:
         • `control`: The control that will capture the mouse input
         • `point`: A point in screen coordinates where the dragging begins. If `None`, use the `Cursor::position` value.
+
+        ```rust
+            use native_windows_gui as nwg;
+            fn dragging(c: &nwg::Window) {
+                if nwg::GlobalCursor::dragging(&c.handle, None) {
+                    println!("DRAGGING!")
+                }
+            }
+        ```
     */
     pub fn dragging(control: &ControlHandle, point: Option<(i32, i32)>) -> bool {
         use winapi::shared::ntdef::LONG;

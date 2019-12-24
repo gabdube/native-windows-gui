@@ -1,7 +1,6 @@
 use winapi::shared::windef::{HFONT, HBITMAP};
 use winapi::ctypes::c_int;
 use winapi::um::winnt::HANDLE;
-use winapi::Interface;
 
 use crate::resources::OemImage;
 use super::base_helper::{get_system_error, to_utf16};
@@ -9,6 +8,7 @@ use super::base_helper::{get_system_error, to_utf16};
 #[allow(unused_imports)] use std::{ptr, mem};
 #[allow(unused_imports)] use crate::{NwgError};
 
+#[cfg(feature = "file-dialog")] use winapi::Interface;
 #[cfg(feature = "file-dialog")] use winapi::um::shobjidl_core::{IShellItem};
 #[cfg(feature = "file-dialog")] use crate::resources::FileDialogAction;
 #[cfg(feature = "file-dialog")] use winapi::um::shobjidl::{IFileDialog, IFileOpenDialog};
