@@ -27,7 +27,7 @@ pub use win32::{
 pub use win32::cursor::GlobalCursor;
 
 #[cfg(feature="clipboard")]
-pub use win32::clipboard::Clipboard;
+pub use win32::clipboard::{Clipboard, ClipboardFormat, ClipboardData};
 
 mod resources;
 pub use resources::*;
