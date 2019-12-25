@@ -1,6 +1,9 @@
 use crate::*;
 use std::cell::RefCell;
 
+static BALL_DATA: &'static [u8] = include_bytes!("../../test_rc/ball.bmp");
+
+
 #[derive(Default)]
 #[allow(dead_code)]
 pub struct TestRun {
@@ -32,6 +35,7 @@ pub struct ControlsTest {
     ferris: Bitmap,
     popcorn: Bitmap,
     popcorn_small: Bitmap,
+    ball: Bitmap,
     arial_font: Font,
     wait_cursor: Cursor,
     
@@ -92,6 +96,7 @@ pub struct ControlsTest {
 
     test_image_button: ImageButton,
     test_image_button2: Button,
+    test_image_button3: Button,
     test_button_checkbox: CheckBox,
     test_number_select: NumberSelect,
 
@@ -174,6 +179,10 @@ mod partial_controls_test_ui {
             Bitmap::builder()
                 .source_file(Some("./test_rc/ferris.bmp"))
                 .build(&mut data.ferris)?;
+
+            Bitmap::builder()
+                .source_bin(Some(BALL_DATA))
+                .build(&mut data.ball)?;
 
             Bitmap::builder()
                 .source_file(Some("./test_rc/popcorn.bmp"))
@@ -452,6 +461,13 @@ mod partial_controls_test_ui {
                 .icon(Some(&data.love_small_icon))
                 .parent(&data.basics_control_tab2)
                 .build(&mut data.test_image_button2)?;
+
+            Button::builder()
+                .position((110, 55))
+                .size((140, 40))
+                .bitmap(Some(&data.ball))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_image_button3)?;
 
             CheckBox::builder()
                 .flags(CheckBoxFlags::VISIBLE | CheckBoxFlags::PUSHLIKE)

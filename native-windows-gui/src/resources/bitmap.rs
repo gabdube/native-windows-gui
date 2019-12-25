@@ -1,6 +1,3 @@
-/*!
-    A wrapper over a bitmap file (*.bmp)
-*/
 use winapi::um::winnt::HANDLE;
 use winapi::um::winuser::IMAGE_BITMAP;
 use crate::win32::resources_helper as rh;
@@ -9,7 +6,7 @@ use std::ptr;
 
 
 /// A wrapper over a bitmap file (*.bmp)
-/// See module documentation
+
 #[allow(unused)]
 pub struct Bitmap {
     pub handle: HANDLE,
@@ -79,8 +76,10 @@ impl<'a> BitmapBuilder<'a> {
             handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_BITMAP) };
         } else if let Some(src) = self.source_system {
             handle = unsafe { rh::build_oem_image(OemImage::Bitmap(src), self.size) };
+        } else if let Some(src) = self.source_bin { 
+            handle = unsafe { create_dib(src) };
         } else {
-            panic!("No source provided for Bitmap. TODO ERROR");
+            return Err(NwgError::resource_create("No source provided for Bitmap"));
         }
 
         if let Some(key) = self.transparency_key {
@@ -117,4 +116,62 @@ impl PartialEq for Bitmap {
         self.handle == other.handle
     }
 
+}
+
+
+/// Create a bitmap from memory
+unsafe fn create_dib(source: &[u8]) -> Result<HANDLE, NwgError> {
+    use winapi::um::wingdi::{CreateCompatibleBitmap, CreateCompatibleDC, SetDIBits, BITMAPFILEHEADER, BITMAPINFO, BITMAPINFOHEADER, DIB_RGB_COLORS, BI_RGB, RGBQUAD};
+    use winapi::shared::{ntdef::LONG, minwindef::DWORD};
+    use winapi::um::winuser::{GetDC, ReleaseDC};
+    use winapi::ctypes::c_void;
+    use std::mem;
+
+    // Check the header size requirement
+    let fheader_size = mem::size_of::<BITMAPFILEHEADER>();
+    let iheader_size = mem::size_of::<BITMAPINFOHEADER>();
+    let header_size = fheader_size + iheader_size;
+    if source.len() < header_size {
+        let msg = format!("Invalid source. The source size ({} bytes) is smaller than the required headers size ({} bytes).", source.len(), header_size);
+        return Err(NwgError::ResourceCreationError(msg));
+    }
+
+    // Read the bitmap file header
+    let src: *const u8 = source.as_ptr();
+    let fheader_ptr = src as *const BITMAPFILEHEADER;
+    let fheader: BITMAPFILEHEADER = ptr::read( fheader_ptr );
+
+    // Read the bitmap info header
+    let iheader_ptr = src.offset(fheader_size as isize) as *const BITMAPINFOHEADER;
+    let iheader: BITMAPINFOHEADER = ptr::read( iheader_ptr );
+
+    let (w, h) = (iheader.biWidth, iheader.biHeight);
+
+    let screen_dc = GetDC(ptr::null_mut());
+    let hdc = CreateCompatibleDC(screen_dc);
+    let bitmap = CreateCompatibleBitmap(screen_dc, w, h);
+    ReleaseDC(ptr::null_mut(), screen_dc);
+
+    let header = BITMAPINFOHEADER {
+        biSize: mem::size_of::<BITMAPINFOHEADER>() as DWORD,
+        biWidth: w as LONG, biHeight: h as LONG, 
+        biPlanes: 1, biBitCount: 24, biCompression: BI_RGB,
+        biSizeImage: (w * h * 3) as u32,
+        biXPelsPerMeter: 0, biYPelsPerMeter: 0,
+        biClrUsed: 0, biClrImportant: 0
+    };
+
+    let quad = RGBQUAD { rgbBlue: 0, rgbGreen: 0, rgbRed: 0, rgbReserved: 0 };
+    let info = BITMAPINFO {
+        bmiHeader: header,
+        bmiColors: [quad],
+    };
+
+    let data_ptr = source.as_ptr().offset(fheader.bfOffBits as isize) as *const c_void;
+    if 0 == SetDIBits(hdc, bitmap, 0, h as u32, data_ptr, &info, DIB_RGB_COLORS) {
+        let msg = "SetDIBits failed.".to_string();
+        return Err(NwgError::ResourceCreationError(msg));
+    }
+
+    return Ok(bitmap as HANDLE);
 }

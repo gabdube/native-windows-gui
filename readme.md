@@ -60,8 +60,6 @@ This is the main project git. It is separated in multiple sections
   - A procedural macro that generates GUI application from rust structure (pretty cool stuff IMO)
 - native-windows-docs
   - A hefty documentation that goes over everything you need to know about NWG
-- linda-cat-cafe
-  - The final result of the "cat cafe" tutorial in the docs
 - [showcase](https://github.com/gabdube/nwg-private/tree/master/showcase)
   - Images of the examples. If you've made a NWG application and want
   to share it here. Send me a message or open a PR. It's free real estate.
@@ -71,9 +69,20 @@ This is the main project git. It is separated in multiple sections
 - The WHOLE winapi control library [(reference)](https://docs.microsoft.com/en-us/windows/win32/controls/individual-control-info)
   - Some very niche controls are not supported: flat scroll bar, ip control, rebar, and pager.
 - Menus and menu bar
+- Accelerator (aka hotkey)
 - Image and font resource
+  - BMP
+  - ICO
+  - CUR
+  - PNG (WIC)
+  - GIF (WIC)
+  - JPG (WIC)
+  - TIFF (WIC)
+  - DDS (WIC)
   - Extended image formats with the Windows Imaging Component (WIC).
 - Tooltip and system tray notification
+- Cursor manipulation
+- A full clipboard wrapper
 - Partial templates support
   - Split large application into chunks
 - Dynamic controls support
@@ -90,7 +99,7 @@ This is the main project git. It is separated in multiple sections
   - File dialog (save, open, open folder)
   - Font dialog
   - Color dialog
-- Support for low level system message capture.
+- Support for low level system message capture
 - Cross compiling and testing from Linux to Windows with Wine and mingw.
   - Not all features are supported (but over 90% are, thanks WINE!)
   - See `https://zork.net/~st/jottings/rust-windows-and-debian.html` for the steps to follow
@@ -101,7 +110,7 @@ This was measured on a `Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz, 3401 Mhz, 4 Cor
 
 In release mode, the `basic` example weight **163kb** on disk and take **900kb** in memory. Launch time is instantaneous.
 
-The interactive test suite (with every features and 100's of tests) weight **844 kb** on disk and take **4MB** in memory. Launch time is still instantaneous.
+The interactive test suite (with every features and 100's of tests) weight **844 kb** on disk and take **8MB** in memory. Launch time is still instantaneous.
 
 Initial build time takes around **22 seconds** for a basic application. This is mainly due to `winapi-rs` initial compile time. Subsequent compile time takes around **0.7 seconds**.
 
@@ -111,6 +120,10 @@ The development of this library is considered "done". By that, I mean that
 there won't by any change to the API. Issues can be raised if a bug is found or
 if some area in the documentation are unclear. If I overlooked a very important feature,
 it might also be added.
+
+# License
+
+NWG use the MIT license
 
 ## Code example
 
@@ -285,5 +298,6 @@ For the icons used in the test suite (and only there):
 
 - **love.ico** is made by [Smashicons](https://smashicons.com/) from [www.flaticon.com](https://www.flaticon.com/)
 - **popcorn.bmp** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
+- **ball.bmp** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
 - **cat.jpg** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
 - **weird_cat.png** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
