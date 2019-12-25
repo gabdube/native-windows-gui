@@ -2,8 +2,10 @@ pub(crate) mod base_helper;
 pub(crate) mod window_helper;
 pub(crate) mod resources_helper;
 pub(crate) mod window;
-pub(crate) mod menu;
 pub(crate) mod message_box;
+
+#[cfg(feature = "menu")]
+pub(crate) mod menu;
 
 #[cfg(feature = "cursor")]
 pub(crate) mod cursor;

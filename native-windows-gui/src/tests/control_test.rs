@@ -607,6 +607,7 @@ mod partial_controls_test_ui {
 
             MenuItem::builder()
                 .text("Test item 2")
+                .check(true)
                 .parent(&data.window_submenu1)
                 .build(&mut data.window_menu_item2)?;
 
@@ -862,6 +863,12 @@ mod partial_controls_test_ui {
                     } else if &handle == &self.test_text_input {
                         set_tooltip_dynamic(self, &self.test_text_input.handle, _evt_data.on_tooltip_text());
                     },
+                E::OnMenuItemSelected => 
+                    if &handle == &self.window_menu_item1 {
+                        item_hello("menu item");
+                    } else if &handle == &self.pop_menu_item1 {
+                        item_hello("popup menu item");
+                    },
                 _ => {}
             }
         }
@@ -871,6 +878,10 @@ mod partial_controls_test_ui {
         }
 
     }
+}
+
+fn item_hello(m: &'static str) {
+    simple_message("Hello", &format!("Hello from {}!", m));
 }
 
 fn init_tree(app: &ControlsTest) {

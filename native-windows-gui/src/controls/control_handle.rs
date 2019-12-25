@@ -111,8 +111,8 @@ impl PartialEq for ControlHandle {
                 _ => false
             },
             // HMENU
-            &ControlHandle::Menu(h1, h2) => match other {
-                &ControlHandle::Menu(h3, h4) => h1 == h3 && h2 == h4,
+            &ControlHandle::Menu(_, h1) => match other {
+                &ControlHandle::Menu(_, h2) => h1 == h2,
                 _ => false
             },
             // HMENU

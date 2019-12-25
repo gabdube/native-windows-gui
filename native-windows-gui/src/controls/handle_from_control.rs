@@ -1,5 +1,5 @@
 use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, StatusBar, ImageFrame,
-    TrackBar, Menu, MenuItem, MenuSeparator, TextBox};
+    TrackBar, TextBox};
 use std::convert::From;
 
 #[allow(unused)]
@@ -35,10 +35,16 @@ handles!(TextBox);
 handles!(TextInput);
 handles!(StatusBar);
 handles!(TrackBar);
-handles!(Menu);
-handles!(MenuItem);
-handles!(MenuSeparator);
 
+#[cfg(feature = "menu")]
+use super::{Menu, MenuItem, MenuSeparator};
+
+#[cfg(feature = "menu")]
+handles!(Menu);
+#[cfg(feature = "menu")]
+handles!(MenuItem);
+#[cfg(feature = "menu")]
+handles!(MenuSeparator);
 
 #[cfg(feature = "combobox")]
 use super::ComboBox;

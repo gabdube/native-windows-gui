@@ -403,7 +403,7 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
     use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
-      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU};
+      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP};
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
@@ -430,6 +430,9 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
             let handle = ControlHandle::MenuItem(parent_handle, item_id);
             callback(Event::OnMenuItemSelected, NO_DATA, handle);
         },
+        WM_INITMENUPOPUP => {
+            callback(Event::OnMenuOpen, NO_DATA, ControlHandle::Menu(ptr::null_mut(), w as HMENU));
+        }
         WM_COMMAND => {
             let child_handle: HWND = mem::transmute(l);
             let message = HIWORD(w as u32) as u16;

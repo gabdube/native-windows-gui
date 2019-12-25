@@ -17,7 +17,9 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Menu/MenuItem handle is not HM
       - parent: A top level window, a menu or None. With a top level window, the menu is added to the menu bar if popup is set to false.
     
     **Control events:**
-      -- A menu does not raise any events
+      - OnMenuOpen: Sent when a drop-down menu or submenu is about to become active. 
+
+    **Menu Access Keys**
 
     Menu can have access keys. An access key is an underlined letter in the text of a menu item.
     When a menu is active, the user can select a menu item by pressing the key that corresponds to the item's underlined letter.
@@ -26,8 +28,7 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Menu/MenuItem handle is not HM
 
     To create an access key for a menu item, precede any character in the item's text string with an ampersand.
     For example, the text string "&Move" causes the system to underline the letter "M".
-
-
+    
     ```rust
     use native_windows_gui as nwg;
 
@@ -163,11 +164,14 @@ impl<'a> MenuBuilder<'a> {
    **Builder parameters:**
       - text: The text of the menu item
       - disabled: If the item can be selected by the user
+      - check: If the item should have a check mark next to it.
       - parent: A top level window or a menu. With a top level window, the menu item is added to the menu bar.
 
    **Control events:**
       - OnMenuItemSelected: When a menu item is selected. This can be done by clicking or using the hot-key.
 
+
+    **Menu Access Keys**
 
     Just like Menus, menu items can have access keys. An access key is an underlined letter in the text of a menu item.
     When a menu is active, the user can select a menu item by pressing the key that corresponds to the item's underlined letter.
@@ -176,7 +180,6 @@ impl<'a> MenuBuilder<'a> {
 
     To create an access key for a menu item, precede any character in the item's text string with an ampersand.
     For example, the text string "&Move" causes the system to underline the letter "M".
-
 
     ```rust
     use native_windows_gui as nwg;
@@ -201,6 +204,7 @@ impl MenuItem {
         MenuItemBuilder {
             text: "Menu Item",
             disabled: false,
+            check: false,
             parent: None
         }
     }
@@ -221,11 +225,28 @@ impl MenuItem {
         unsafe { mh::enable_menuitem(parent_handle, None, Some(id), v); }
     }
 
+    /// Sets the check state of a menu item
+    pub fn set_checked(&self, check: bool) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let (parent_handle, id) = self.handle.hmenu_item().expect(BAD_HANDLE);
+
+        unsafe { mh::check_menu_item(parent_handle, id, check); }
+    }
+
+    /// Returns the check state of a menu item
+    pub fn checked(&self) -> bool {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let (parent_handle, id) = self.handle.hmenu_item().expect(BAD_HANDLE);
+
+        unsafe { mh::menu_item_checked(parent_handle, id) }
+    }
+
 }
 
 pub struct MenuItemBuilder<'a> {
     text: &'a str,
     disabled: bool,
+    check: bool,
     parent: Option<ControlHandle>
 }
 
@@ -238,6 +259,11 @@ impl<'a> MenuItemBuilder<'a> {
 
     pub fn disabled(mut self, disabled: bool) -> MenuItemBuilder<'a> {
         self.disabled = disabled;
+        self
+    }
+
+    pub fn check(mut self, check: bool) -> MenuItemBuilder<'a> {
+        self.check = check;
         self
     }
 
@@ -258,7 +284,11 @@ impl<'a> MenuItemBuilder<'a> {
             .build()?;
 
         if self.disabled {
-            item.set_enabled(false)
+            item.set_enabled(false);
+        }
+
+        if self.check {
+            item.set_checked(true);
         }
 
         Ok(())

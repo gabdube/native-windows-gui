@@ -101,6 +101,9 @@ pub enum Event {
     /// When the trackbar thumb is released by the user
     TrackBarUpdated,
 
+    /// When a menu control is opened
+    OnMenuOpen,
+
     /// When the user selects on a menu item
     OnMenuItemSelected,
 

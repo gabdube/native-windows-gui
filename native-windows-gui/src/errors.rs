@@ -1,8 +1,6 @@
-/*!
+/**
     Error enums used in the native window gui crate
 */
-
-
 #[derive(Debug, Clone)]
 pub enum NwgError {
     Unknown,
@@ -10,11 +8,18 @@ pub enum NwgError {
     /// Fatal error that may happen when calling low level winapi functionalities
     InitializationError(String),
 
+    /// Error that may happen when creating a control.
     ControlCreationError(String),
-    MenuCreationError(String),
-    ResourceCreationError(String),
-    FileDialogError(String),
 
+    /// Error that may happen when creating a menu.
+    MenuCreationError(String),
+
+    /// Error that may happen when creating a resource.
+    ResourceCreationError(String),
+
+    /// Error raised by the FileDialog object
+    #[cfg(feature = "file-dialog")]
+    FileDialogError(String),
 }
 
 impl NwgError {
@@ -35,6 +40,7 @@ impl NwgError {
         NwgError::ResourceCreationError(e.into())
     }
 
+    #[cfg(feature = "file-dialog")]
     pub fn file_dialog<S: Into<String>>(e: S) -> NwgError {
         NwgError::FileDialogError(e.into())
     }

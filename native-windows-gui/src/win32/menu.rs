@@ -11,6 +11,7 @@ use std::{mem, ptr};
 
 static mut MENU_ITEMS_ID: u32 = 1; 
 
+
 /// Build a system menu
 pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: bool, popup: bool, hmenu: Option<HMENU>, hwnd: Option<HWND>) -> Result<ControlHandle, NwgError> {
     use winapi::um::winuser::{CreateMenu, CreatePopupMenu, GetMenu, SetMenu, DrawMenuBar, AppendMenuW};
@@ -171,6 +172,23 @@ pub unsafe fn is_menu_enabled(parent_menu: HMENU, menu: HMENU) -> bool {
     let menu_index = menu_index_in_parent(parent_menu, menu);
     is_menuitem_enabled(parent_menu, Some(menu_index), None)
 }
+
+pub unsafe fn check_menu_item(parent_menu: HMENU, id: u32, check: bool) {
+    use winapi::um::winuser::{CheckMenuItem, MF_BYCOMMAND, MF_CHECKED, MF_UNCHECKED};
+
+    let check = match check {
+        true => MF_CHECKED,
+        false => MF_UNCHECKED
+    };
+
+    CheckMenuItem(parent_menu, id, MF_BYCOMMAND | check);
+}
+
+pub unsafe fn menu_item_checked(parent_menu: HMENU, id: u32) -> bool {
+    use winapi::um::winuser::{GetMenuState, MF_BYCOMMAND, MF_CHECKED};
+    GetMenuState(parent_menu, id, MF_BYCOMMAND) & MF_CHECKED == MF_CHECKED
+}
+
 
 unsafe fn build_hmenu_separator(menu: HMENU) -> ControlHandle {
     use winapi::um::winuser::{GetMenuItemCount, SetMenuItemInfoW, AppendMenuW};

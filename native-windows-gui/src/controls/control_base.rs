@@ -1,9 +1,11 @@
 use winapi::shared::minwindef::DWORD;
-use winapi::shared::windef::{HWND, HMENU};
+use winapi::shared::windef::{HWND};
 use super::ControlHandle;
 use crate::win32::window::{build_hwnd_control, build_timer, build_notice};
-use crate::win32::menu::build_hmenu_control;
 use crate::{NwgError};
+
+#[cfg(feature = "menu")] use crate::win32::menu::build_hmenu_control;
+#[cfg(feature = "menu")] use winapi::shared::windef::{HMENU};
 
 const NOTICE: u32 = 1;
 const TRAY: u32 = 2;
@@ -48,6 +50,7 @@ impl ControlBase {
         HwndBuilder::default()
     }
 
+    #[cfg(feature = "menu")]
     pub fn build_hmenu() -> HmenuBuilder {
         HmenuBuilder::default()
     }
@@ -149,6 +152,7 @@ impl HwndBuilder {
 
 /// Low level HMENU builder. Instanced by `ControlBase::build_hmenu`.
 #[derive(Default)]
+#[cfg(feature = "menu")]
 pub struct HmenuBuilder {
     text: Option<String>,
     item: bool,
@@ -158,6 +162,7 @@ pub struct HmenuBuilder {
     parent_window: Option<HWND>,
 }
 
+#[cfg(feature = "menu")]
 impl HmenuBuilder {
 
     /// Set the text of the Menu
