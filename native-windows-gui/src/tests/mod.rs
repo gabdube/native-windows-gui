@@ -147,7 +147,10 @@ fn show_images_test(app: &TestControlPanel) {
 }
 
 fn show(app: &TestControlPanel) {
-    Clipboard::set_text(&app.window, "Hello World!");
+    let text = "Hello World from Native windows GUI!";
+    Clipboard::set_data_text(&app.window, text);
+    assert!(Some(text) == Clipboard::data_text(&app.window).as_ref().map(|s| s as &str));
+
     app.window.set_visible(true);
 }
 

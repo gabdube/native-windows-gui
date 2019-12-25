@@ -5,10 +5,10 @@ use crate::controls::ControlHandle;
     A global object that wraps the system cursor.
     This object must not be instanced. The methods should be used this way:
 
-    ```rust
-        use native_windows_gui as nwg;
-        let (x,y) = nwg::GlobalCursor::position();
-    ```
+```rust
+use native_windows_gui as nwg;
+let (x,y) = nwg::GlobalCursor::position();
+```
 */
 pub struct GlobalCursor;
 
@@ -142,25 +142,25 @@ impl GlobalCursor {
     }
 
     /**
-        Captures the mouse and tracks its movement until the user releases the left button, presses the ESC key, or moves
-        the mouse outside the drag rectangle around the specified point. 
+    Captures the mouse and tracks its movement until the user releases the left button, presses the ESC key, or moves
+    the mouse outside the drag rectangle around the specified point. 
 
-        Return `Ok(true)` if the user did not execute the actions mentioned above or `Ok(false)` if it did.
+    Return `Ok(true)` if the user did not execute the actions mentioned above or `Ok(false)` if it did.
 
-        Will panic if the control handle passed to the method is not a window or if the control is not yet initialized.
+    Will panic if the control handle passed to the method is not a window or if the control is not yet initialized.
 
-        Arguments:
-        • `control`: The control that will capture the mouse input
-        • `point`: A point in screen coordinates where the dragging begins. If `None`, use the `Cursor::position` value.
+    Arguments:
+    • `control`: The control that will capture the mouse input
+    • `point`: A point in screen coordinates where the dragging begins. If `None`, use the `Cursor::position` value.
 
-        ```rust
-            use native_windows_gui as nwg;
-            fn dragging(c: &nwg::Window) {
-                if nwg::GlobalCursor::dragging(&c.handle, None) {
-                    println!("DRAGGING!")
-                }
+    ```rust
+        use native_windows_gui as nwg;
+        fn dragging(c: &nwg::Window) {
+            if nwg::GlobalCursor::dragging(&c.handle, None) {
+                println!("DRAGGING!")
             }
-        ```
+        }
+    ```
     */
     pub fn dragging(control: &ControlHandle, point: Option<(i32, i32)>) -> bool {
         use winapi::shared::ntdef::LONG;
