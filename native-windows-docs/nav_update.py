@@ -28,6 +28,7 @@ NAV = r"""<!-- NAV BEGIN -->
     <li><a href="events.html"><b>3.2.</b> Events </a></li>
     <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
     <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
 </ul>
 </li>
 

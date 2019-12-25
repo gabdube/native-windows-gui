@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <title>Native Windows GUI guide - Resources</title>
+    <title>Native Windows GUI guide - Limitations</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
 
@@ -87,9 +87,52 @@
 <div id='page-wrapper'>
     <div id='page'>
 
+        <h1 class="title">Native Windows GUI: Limitations </h1>
 
-        <h1 class="title">Native Windows GUI: Resources</h1>
+        Even though NWG wraps a very large amount of Windows functionalities, it is still a very old API.
+        As such there are a certain kind of applications that cannot be developed with NWG (at least for now).
         <br/><br/>
+
+        <h3>Fancy looking applications</h3>
+
+        NWG will probably never reach the level of customization a HTML/CSS application can provide. There's a few reason for that.
+        <br><br>
+
+        NWG controls cannot be customized. There is a theme API, but the documentation in very sparse, and it probably wont be implemented in NWG core.
+        <br><br>
+
+        NWG does not have a drawing API. Originally, NWG would have a built-in canvas control that wrapped Direct2D, but the implementation was removed
+        from the library because it was too bulky and because it was not possible to finish it before the january 2020 deadline.
+        <br><br>
+
+        Transparency is not supported. NWG controls with transparency flickers ALOT. It's almost a health hazard for people with epilepsy.
+        One way to get rid of this flaw is to outright remove transparency between controls.
+        <br><br>
+
+        NWG has limited animation capabilities. Animations are handled by using timers, and they are far from optimal to use. Also, it's impossible to
+        create animations without a drawing API. The canvas control should fix his issue.
+        <br><br>
+
+        NWG has limited support for resource types. NWG can load fonts and the most common images format, but it lacks the ability to play music and videos.
+        Those features will never be in the core. They should be implemented as external libraries.
+        <br><br>
+
+        NWG do not come with plotting controls or any kind of 3D api. Those will have to be implemented after canvas.
+
+        <br><br>
+
+        <h3>Data efficiency</h3>
+
+        Data efficiency in NWG collection controls is very inefficient. There's lots of duplicated data. This means that if your application must log
+        hundread of thousand of items, it will have a hard time.
+
+        <br><br>
+
+        This can be fixed by implementing <code>OWNDER_DATA</code> over the controls, but this will take alot of efforts and it will be implemented as 
+        an external library.
+
+        <br><br>
+        <br><br>
 
     </div>
 </div>

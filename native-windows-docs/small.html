@@ -42,6 +42,7 @@
     <li><a href="events.html"><b>3.2.</b> Events </a></li>
     <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
     <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
 </ul>
 </li>
 
@@ -86,8 +87,37 @@
 <div id='page-wrapper'>
     <div id='page'>
 
-        <h1 class="title">NWG   : Small application layout</h1>
+        <h1 class="title">NWG: Small application layout</h1>
+
+        This section will go in details on how to origanize a small NWG application.
+        <br><br>
+        An application can be considered small when it has one interface and less than 10 controls. For example,
+        all NWG examples are classified as small applications while the test suite is not.
         <br/><br/>
+
+        <h3>Overview</h3>
+        
+        <ol>
+            <li>Define a struct that will hold your non-gui application data</li>
+            <li>Define another struct that will hold the GUI data</li>
+            <li>Add you application struct to the GUI struct members behind a RefCell</li>
+            <li>Define the gui functions by <code>impl</code> the GUI struct</li>
+            <li>Implement <code>NativeUi</code> for the GUI struct (manually or with NWD)</li>
+            <li>In the main funtion, initialize the application struct and the GUI struct</li>
+            <li>Call <code>build_ui</code> with the initialized data</li>
+            <li>Start processing events</li>
+        </ol>
+        <br/>
+
+        <h3>Defining the structs</h3>
+        <br/><br/>
+
+        <h3>Implementing NativeUI</h3>
+        <br/><br/>
+
+        <h3>Initializing</h3>
+        <br/><br/>
+
 
     </div>
 </div>
