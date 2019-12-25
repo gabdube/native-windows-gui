@@ -8,7 +8,7 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Menu/MenuItem handle is not HM
 
 
 /** 
-    A windows menu. Can represent a menu in a window menubar or a submenu in another menu
+    A windows menu. Can represent a menu in a window menubar, a context menu, or a submenu in another menu
 
     **Builder parameters:**
       - text: The text of the menu

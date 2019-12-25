@@ -11,6 +11,8 @@ mod status_bar;
 mod image_frame;
 mod tooltip;
 mod track_bar;
+
+#[cfg(feature = "menu")]
 mod menu;
 
 #[cfg(feature = "timer")]
@@ -67,6 +69,9 @@ pub use status_bar::StatusBar;
 pub use image_frame::{ImageFrame, ImageFrameFlags};
 pub use tooltip::{Tooltip, TooltipIcon};
 pub use track_bar::{TrackBar, TrackBarFlags};
+
+
+#[cfg(feature = "menu")]
 pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder};
 
 

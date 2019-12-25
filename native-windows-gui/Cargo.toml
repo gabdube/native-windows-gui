@@ -43,9 +43,10 @@ images-ext = []
 number-select = []
 cursor = []
 clipboard = []
+menu = []
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "images-ext", "cursor",
        "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "image-button", "number-select",
-       "clipboard"]
+       "clipboard", "menu"]
 
 [package.metadata.docs.rs]
 features = [ "all" ]
