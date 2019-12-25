@@ -101,8 +101,8 @@ pub enum Event {
     /// When the trackbar thumb is released by the user
     TrackBarUpdated,
 
-    /// When the user click on a menu item
-    OnMenuItemClick,
+    /// When the user selects on a menu item
+    OnMenuItemSelected,
 
     /// When the user hovers over a callback tooltip
     /// The callback will also receive a `EventData::OnTooltipText`

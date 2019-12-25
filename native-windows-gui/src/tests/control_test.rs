@@ -587,12 +587,12 @@ mod partial_controls_test_ui {
             // Menu
             //
             Menu::builder()
-                .text("Test menu")
+                .text("&Test menu")
                 .parent(&data.window)
                 .build(&mut data.window_menu)?;
 
             Menu::builder()
-                .text("Test Submenu")
+                .text("Test &Submenu")
                 .parent(&data.window_menu)
                 .build(&mut data.window_submenu1)?;
             

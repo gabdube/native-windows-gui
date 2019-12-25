@@ -428,7 +428,7 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
             let parent_handle: HMENU = mem::transmute(l);
             let item_id = GetMenuItemID(parent_handle, w as i32);
             let handle = ControlHandle::MenuItem(parent_handle, item_id);
-            callback(Event::OnMenuItemClick, NO_DATA, handle);
+            callback(Event::OnMenuItemSelected, NO_DATA, handle);
         },
         WM_COMMAND => {
             let child_handle: HWND = mem::transmute(l);
