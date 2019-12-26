@@ -9,7 +9,8 @@ use crate::{NwgError};
 use std::{mem, ptr};
 
 
-static mut MENU_ITEMS_ID: u32 = 1; 
+pub const MENU_ITEM_ID_BEGIN: u32 = 10000;
+static mut MENU_ITEMS_ID: u32 = MENU_ITEM_ID_BEGIN; 
 
 
 /// Build a system menu

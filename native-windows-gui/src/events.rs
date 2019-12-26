@@ -104,6 +104,9 @@ pub enum Event {
     /// When a menu control is opened
     OnMenuOpen,
 
+    /// When a menu is hovered (either through mouse or keyboard)
+    OnMenuHover,
+
     /// When the user selects on a menu item
     OnMenuItemSelected,
 

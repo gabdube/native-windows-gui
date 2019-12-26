@@ -401,12 +401,13 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
     use std::ffi::OsString;
 
     use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
-    use winapi::um::winuser::{GetClassNameW, GetMenuItemID};
+    use winapi::um::winuser::{GetClassNameW, GetMenuItemID, GetSubMenu};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
-      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP};
+      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP, WM_MENUSELECT};
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
+    use super::menu::MENU_ITEM_ID_BEGIN;
 
     let callback_ptr = data as *const F;
     let callback = Rc::from_raw(callback_ptr);
@@ -433,6 +434,17 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
         WM_INITMENUPOPUP => {
             callback(Event::OnMenuOpen, NO_DATA, ControlHandle::Menu(ptr::null_mut(), w as HMENU));
         }
+        WM_MENUSELECT => {
+            let index = LOWORD(w as u32) as u32;
+            let parent = l as HMENU;
+            if index < MENU_ITEM_ID_BEGIN {
+                // Item is a sub menu
+                callback(Event::OnMenuHover, NO_DATA, ControlHandle::Menu(parent, GetSubMenu(parent, index as i32)));
+            } else {
+                // Item is a menu item
+                callback(Event::OnMenuHover, NO_DATA, ControlHandle::MenuItem(parent, index));
+            }
+        },
         WM_COMMAND => {
             let child_handle: HWND = mem::transmute(l);
             let message = HIWORD(w as u32) as u16;

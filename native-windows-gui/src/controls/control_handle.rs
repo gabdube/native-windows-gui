@@ -121,8 +121,8 @@ impl PartialEq for ControlHandle {
                 _ => false
             },
             // HMENU / ITEM
-            &ControlHandle::MenuItem(value1, id1) => match other {
-                &ControlHandle::MenuItem(value2, id2) => value1 == value2 && id1 == id2,
+            &ControlHandle::MenuItem(_, id1) => match other {
+                &ControlHandle::MenuItem(_, id2) => id1 == id2,
                 _ => false
             },
             // TIMER 

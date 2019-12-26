@@ -18,6 +18,7 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Menu/MenuItem handle is not HM
     
     **Control events:**
       - OnMenuOpen: Sent when a drop-down menu or submenu is about to become active. 
+      - OnMenuHover: When the user hovers the menu
 
     **Menu Access Keys**
 
@@ -169,6 +170,7 @@ impl<'a> MenuBuilder<'a> {
 
    **Control events:**
       - OnMenuItemSelected: When a menu item is selected. This can be done by clicking or using the hot-key.
+      - OnMenuHover: When the user hovers the menu
 
 
     **Menu Access Keys**
@@ -298,7 +300,11 @@ impl<'a> MenuItemBuilder<'a> {
 /**
     A menu separator. Can be added between two menu item to separte them. Cannot be added to a menubar.
 
-    A menu separator builder only take a parent and cannot trigger events.
+    **Builder parameters:**
+      - parent: A top level window or a menu. With a top level window, the menu item is added to the menu bar.
+
+   **Control events:**
+      - OnMenuHover: When the user hovers the menu
 
     ```rust
     use native_windows_gui as nwg;
