@@ -43,7 +43,7 @@ See it for yourself. NWG has plenty of example and a fully interactive test suit
 git clone git@github.com:gabdube/native-windows-gui.git
 cd native-windows-gui/native-windows-gui
 
-cargo test everything --features "all interactive"  # For the test suite
+cargo test everything --features "all"  # For the test suite
 cargo run --example basic
 cargo run --example calculator
 cargo run --example message_bank

@@ -3,14 +3,13 @@ Native Windows GUI menu base.
 */
 use winapi::shared::windef::{HMENU, HWND};
 use winapi::shared::minwindef::UINT;
-use super::base_helper::to_utf16;
+use super::base_helper::{CUSTOM_ID_BEGIN, to_utf16};
 use crate::controls::ControlHandle;
 use crate::{NwgError};
 use std::{mem, ptr};
 
 
-pub const MENU_ITEM_ID_BEGIN: u32 = 10000;
-static mut MENU_ITEMS_ID: u32 = MENU_ITEM_ID_BEGIN; 
+static mut MENU_ITEMS_ID: u32 = CUSTOM_ID_BEGIN; 
 
 
 /// Build a system menu

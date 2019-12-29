@@ -8,7 +8,7 @@ use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
 use winapi::um::winuser::{WNDPROC, NMHDR};
 use winapi::um::commctrl::{NMTTDISPINFOW, SUBCLASSPROC};
-use super::base_helper::to_utf16;
+use super::base_helper::{CUSTOM_ID_BEGIN, to_utf16};
 use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY};
 use crate::controls::ControlHandle;
 use crate::{Event, EventData, MousePressEvent, NwgError};
@@ -407,7 +407,6 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
-    use super::menu::MENU_ITEM_ID_BEGIN;
 
     let callback_ptr = data as *const F;
     let callback = Rc::from_raw(callback_ptr);
@@ -437,7 +436,7 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
         WM_MENUSELECT => {
             let index = LOWORD(w as u32) as u32;
             let parent = l as HMENU;
-            if index < MENU_ITEM_ID_BEGIN {
+            if index < CUSTOM_ID_BEGIN {
                 // Item is a sub menu
                 callback(Event::OnMenuHover, NO_DATA, ControlHandle::Menu(parent, GetSubMenu(parent, index as i32)));
             } else {

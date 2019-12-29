@@ -10,6 +10,9 @@ mod label;
 mod status_bar;
 mod image_frame;
 mod tooltip;
+
+
+#[cfg(feature = "trackbar")]
 mod track_bar;
 
 #[cfg(feature = "menu")]
@@ -68,15 +71,16 @@ pub use label::{Label, LabelFlags};
 pub use status_bar::StatusBar;
 pub use image_frame::{ImageFrame, ImageFrameFlags};
 pub use tooltip::{Tooltip, TooltipIcon};
-pub use track_bar::{TrackBar, TrackBarFlags};
 
+
+#[cfg(feature = "trackbar")]
+pub use track_bar::{TrackBar, TrackBarFlags};
 
 #[cfg(feature = "menu")]
 pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder};
 
 #[cfg(feature = "menu")]
 pub use control_base::HmenuBuilder;
-
 
 #[cfg(feature = "timer")]
 pub use timer::{Timer, TimerBuilder};

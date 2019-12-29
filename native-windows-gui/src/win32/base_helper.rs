@@ -1,6 +1,8 @@
 use std::{ptr};
 use winapi::shared::minwindef::DWORD;
 
+pub const CUSTOM_ID_BEGIN: u32 = 10000;
+
 
 pub fn to_utf16<'a>(s: &'a str) -> Vec<u16> {
     use std::ffi::OsStr;

@@ -22,7 +22,6 @@ native-windows-derive = { path = "../native-windows-derive/" }
 winapi-build = "0.1.1"
 
 [features]
-interactive = []
 file-dialog = []
 color-dialog = []
 font-dialog = []
@@ -44,9 +43,10 @@ number-select = []
 cursor = []
 clipboard = []
 menu = []
+trackbar = []
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "images-ext", "cursor",
        "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "image-button", "number-select",
-       "clipboard", "menu"]
+       "clipboard", "menu", "trackbar"]
 
 [package.metadata.docs.rs]
 features = [ "all" ]

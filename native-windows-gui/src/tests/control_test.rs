@@ -622,7 +622,7 @@ mod partial_controls_test_ui {
                 .build(&mut data.pop_menu)?;
 
             MenuItem::builder()
-                .text("Popup item 1")
+                .text("Popup item 1\tCTRL+P")
                 .parent(&data.pop_menu)
                 .build(&mut data.pop_menu_item1)?;
 
@@ -799,10 +799,6 @@ mod partial_controls_test_ui {
                     if &handle == &self.window {
                         init_tree(self, );
                     },
-                E::OnMouseMove => 
-                    if &handle == &self.test_img_frame {
-                        set_cursor(self);
-                    },
                 E::OnButtonClick =>
                     if &handle == &self.run_window_test {
                         run_window_tests(self, evt);
@@ -890,10 +886,6 @@ fn init_tree(app: &ControlsTest) {
     let view = tree.insert_item("A tree View", Some(&item), TreeInsert::First);
     tree.insert_item("AHHHHHHH", Some(&view), TreeInsert::First);
     tree.insert_item("Items", Some(&item), TreeInsert::First);
-}
-
-fn set_cursor(app: &ControlsTest) {
-    GlobalCursor::set(&app.wait_cursor)
 }
 
 fn show_pop_menu(app: &ControlsTest, _evt: Event) {
