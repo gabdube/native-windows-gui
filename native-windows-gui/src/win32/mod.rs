@@ -16,6 +16,9 @@ pub(crate) mod clipboard;
 #[cfg(feature = "tabs")]
 pub(crate) mod tabs;
 
+#[cfg(feature = "extern-canvas")]
+pub(crate) mod extern_canvas;
+
 use std::{mem, ptr};
 use crate::errors::NwgError;
 
@@ -24,7 +27,7 @@ pub(crate) mod image_decoder;
 
 
 /**
-    Dispatch system events in the current thread
+    Dispatch system events in the current thread. This method will pause the thread until there are events to process.
 */
 pub fn dispatch_thread_events() {
     use winapi::um::winuser::MSG;
@@ -35,6 +38,31 @@ pub fn dispatch_thread_events() {
         while GetMessageW(&mut msg, ptr::null_mut(), 0, 0) != 0 {
             TranslateMessage(&msg); 
             DispatchMessageW(&msg); 
+        }
+    }
+}
+
+
+/**
+    Dispatch system evetns in the current thread AND execute a callback after each peeking attempt.
+    Unlike `dispath_thread_events`, this method will not pause the thread while waiting for events.
+*/
+pub fn dispatch_thread_events_with_callback<F>(mut cb: F) 
+    where F: FnMut() -> () + 'static
+{
+    use winapi::um::winuser::MSG;
+    use winapi::um::winuser::{PeekMessageW, TranslateMessage, DispatchMessageW, PM_REMOVE, WM_QUIT};
+
+    unsafe {
+        let mut msg: MSG = mem::zeroed();
+        while msg.message != WM_QUIT {
+            let has_message = PeekMessageW(&mut msg, ptr::null_mut(), 0, 0, PM_REMOVE) != 0;
+            if has_message {
+                TranslateMessage(&msg); 
+                DispatchMessageW(&msg); 
+            }
+
+            cb();
         }
     }
 }
@@ -134,6 +162,7 @@ pub fn init_common_controls() -> Result<(), NwgError> {
 
     window::init_window_class()?;
     tabs_init()?;
+    extern_canvas_init()?;
     
     match unsafe { CoInitialize(ptr::null_mut()) } {
         S_OK | S_FALSE => Ok(()),
@@ -146,3 +175,11 @@ fn tabs_init() -> Result<(), NwgError> { tabs::create_tab_classes() }
 
 #[cfg(not(feature = "tabs"))]
 fn tabs_init() -> Result<(), NwgError> { Ok(()) }
+
+
+#[cfg(feature = "extern-canvas")]
+fn extern_canvas_init() -> Result<(), NwgError> { extern_canvas::create_extern_canvas_classes() }
+
+#[cfg(not(feature = "extern-canvas"))]
+fn extern_canvas_init() -> Result<(), NwgError> { Ok(()) }
+

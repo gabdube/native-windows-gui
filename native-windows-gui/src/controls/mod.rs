@@ -57,6 +57,9 @@ mod image_button;
 #[cfg(feature = "number-select")]
 mod number_select;
 
+#[cfg(feature = "extern-canvas")]
+mod extern_canvas;
+
 mod handle_from_control;
 
 pub use control_handle::ControlHandle;
@@ -120,5 +123,8 @@ pub use image_button::{ImageButton, ImageButtonBuilder, ImageButtonFlags};
 
 #[cfg(feature = "number-select")]
 pub use number_select::{NumberSelect, NumberSelectBuilder, NumberSelectFlags};
+
+#[cfg(feature = "extern-canvas")]
+pub use extern_canvas::{ExternCanvas, ExternCanvasBuilder, ExternCanvasFlags};
 
 pub use handle_from_control::*;

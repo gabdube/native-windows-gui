@@ -160,8 +160,7 @@ fn close() {
 
 #[test]
 fn everything() {
-    enable_visual_styles();
-    init_common_controls().expect("Failed to init controls");
+    nwg::init().expect("Failed to init Native Windows GUI");
     
     let app = TestControlPanel::build_ui(Default::default()).expect("Failed to build UI");
 

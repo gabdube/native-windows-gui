@@ -278,6 +278,7 @@ pub(crate) unsafe fn build_sysclass<'a>(
     class_name: &'a str,
     clsproc: WNDPROC,
     background: Option<HBRUSH>,
+    style: Option<UINT>
 ) -> Result<(), NwgError> 
 {
     use winapi::um::winuser::{LoadCursorW, RegisterClassExW};
@@ -287,7 +288,7 @@ pub(crate) unsafe fn build_sysclass<'a>(
 
     let class_name = to_utf16(class_name);
     let background: HBRUSH = background.unwrap_or(mem::transmute(COLOR_WINDOW as usize));
-    let style: UINT = CS_HREDRAW | CS_VREDRAW;
+    let style: UINT = style.unwrap_or(CS_HREDRAW | CS_VREDRAW);
 
     let class =
     WNDCLASSEXW {
@@ -321,7 +322,7 @@ pub(crate) fn init_window_class() -> Result<(), NwgError> {
         let hmod = GetModuleHandleW(ptr::null_mut());
         if hmod.is_null() { return Err(NwgError::initialization("GetModuleHandleW failed")); }
 
-        build_sysclass(hmod, "NativeWindowsGuiWindow", Some(blank_window_proc), None)?;
+        build_sysclass(hmod, "NativeWindowsGuiWindow", Some(blank_window_proc), None, None)?;
     }
     
     Ok(())

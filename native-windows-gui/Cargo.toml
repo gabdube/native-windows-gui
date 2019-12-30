@@ -17,6 +17,8 @@ bitflags = { version = "1.1.0" }
 
 [dev-dependencies]
 native-windows-derive = { path = "../native-windows-derive/" }
+glutin = "0.21"
+gl = "0.6"
 
 [build-dependencies]
 winapi-build = "0.1.1"
@@ -44,9 +46,10 @@ cursor = []
 clipboard = []
 menu = []
 trackbar = []
+extern-canvas = []
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "images-ext", "cursor",
        "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "image-button", "number-select",
-       "clipboard", "menu", "trackbar"]
+       "clipboard", "menu", "trackbar", "extern-canvas"]
 
 [package.metadata.docs.rs]
 features = [ "all" ]

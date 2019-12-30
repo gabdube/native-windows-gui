@@ -80,8 +80,8 @@ pub struct GridLayoutInner {
    * spacing - The spacing between children controls - (default: 5)
    * min_size - The minimum size of the layout - (default: [0, 0])
    * max_size - The maximum size of the layout - (default: [u32::max_value(), u32::max_value()])
-   * column_count - Number of columns - (default: None),
-   * row_count - Number of rows - (default: None),
+   * max_column - Number of columns - (default: None),
+   * max_row - Number of rows - (default: None),
 
  ```rust
     use native_windows_gui as nwg;

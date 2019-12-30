@@ -13,7 +13,9 @@ struct InnerColorDialog {
     dialog: CHOOSECOLORW,
 }
 
-/// Displays a modal dialog box that allows the user to choose a specific color value.
+/**
+ Displays a modal dialog box that allows the user to choose a specific color value.
+*/
 pub struct ColorDialog {
     data: RefCell<InnerColorDialog>,
 }

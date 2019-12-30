@@ -46,11 +46,11 @@ impl NwgError {
     }
 
     pub fn no_parent(name: &'static str) -> NwgError {
-        NwgError::ControlCreationError(format!("No parent define for {:?} control", name))
+        NwgError::ControlCreationError(format!("No parent defined for {:?} control", name))
     }
 
     pub fn no_parent_menu() -> NwgError {
-        NwgError::MenuCreationError("No parent define for menu".to_string())
+        NwgError::MenuCreationError("No parent defined for menu".to_string())
     }
 
 }

@@ -33,18 +33,18 @@ pub enum Event {
     /// When a control needs to be redrawn
     OnPaint,
     
-    /// When a control is resized by the user. This is typically applied to top level windows.
+    /// When a control is resized by the user. 
+    /// This is typically applied to top level windows but it also applies to children when layouts are used.
     OnResize,
 
     /// When a control is moved by the user. This is typically applied to top level windows.
+    /// This is typically applied to top level windows but it also applies to children when layouts are used.
     OnMove,
 
     /// When a bar like control value is changed.
-    /// Controls affected: TrackBack
     OnVerticalScroll,
 
     /// When a bar like control value is changed.
-    /// Controls affected: TrackBack
     OnHorizontalScroll,
 
     /// When a button is clicked. Similar to a MouseUp event, but only for button control

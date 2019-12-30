@@ -1,25 +1,21 @@
-/*!
-    A basic top level window.
-*/
-
-use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_CLIPCHILDREN, WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION,
-WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME};
+use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION,
+WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_CLIPCHILDREN};
 
 use crate::win32::window_helper as wh;
 use crate::{NwgError, Icon};
 use super::{ControlBase, ControlHandle};
 
-const NOT_BOUND: &'static str = "Window is not yet bound to a winapi object";
-const BAD_HANDLE: &'static str = "INTERNAL ERROR: Window handle is not HWND!";
+const NOT_BOUND: &'static str = "ExternCanvas is not yet bound to a winapi object";
+const BAD_HANDLE: &'static str = "INTERNAL ERROR: ExternCanvas handle is not HWND!";
 
 
 bitflags! {
 
     /**
-        The window flags. 
-
-        Example: `WindowFlags::MAIN_WINDOW | WindowFlags::VISIBLE`
-
+        The extern canvas flags. 
+        
+        Note that the window flags only applies if the the extern canvas is a top level window (it has no parents).
+        
         Window flags:
         * MAIN_WINDOW: Combine all the top level system window decoration: A title, a system menu, a resizable frame, and the close, minimize, maximize buttons
         * WINDOW:  A window with a title, a system menu, a close button, and a non resizable border. 
@@ -29,9 +25,11 @@ bitflags! {
         * MAXIMIZED: Create the window as maximized
         * MINIMIZED: Create the window as minimized
         * RESIZABLE: Add a resizable border
+
+        General flags:
         * VISIBLE: Show the window right away
     */
-    pub struct WindowFlags: u32 {
+    pub struct ExternCanvasFlags: u32 {
         const MAIN_WINDOW = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX;
         const WINDOW = WS_CAPTION | WS_SYSMENU;
         const MINIMIZE_BOX = WS_MINIMIZEBOX;
@@ -46,18 +44,23 @@ bitflags! {
 }
 
 /**
-    A basic top level window. At least one top level window is required to make a NWG application.
+    An ExternCanvas is a window/children control that is painted to by an external API (such as OpenGL, Vulkan or DirectX).
+    
+    When building a ExternCanvas, leaving the parent field empty will create a window-like canvas. If a parent is set, the canvas
+    will be a children control (like a button).
+
+    When used as a chidren, ExternCanvas can be used as a way to add highly dynamic controls to a NWG application (ex: a video player).
 */
 #[derive(Default)]
-pub struct Window {
+pub struct ExternCanvas {
     pub handle: ControlHandle
 }
 
-impl Window {
+impl ExternCanvas {
 
-    pub fn builder<'a>() -> WindowBuilder<'a> {
-        WindowBuilder {
-            title: "New Window",
+    pub fn builder<'a>() -> ExternCanvasBuilder<'a> {
+        ExternCanvasBuilder {
+            title: "New Canvas",
             size: (500, 500),
             position: (300, 300),
             flags: None,
@@ -184,64 +187,72 @@ impl Window {
 
     /// Winapi class name used during control creation
     pub fn class_name(&self) -> &'static str {
-        "NativeWindowsGuiWindow"
+        "NWG_EXTERN_CANVAS"
     }
 
     // Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_OVERLAPPEDWINDOW | WS_VISIBLE
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN
     }
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        WS_CLIPCHILDREN
+        0
     }
 }
 
 
-pub struct WindowBuilder<'a> {
+pub struct ExternCanvasBuilder<'a> {
     title: &'a str,
     size: (i32, i32),
     position: (i32, i32),
-    flags: Option<WindowFlags>,
+    flags: Option<ExternCanvasFlags>,
     icon: Option<&'a Icon>,
     parent: Option<ControlHandle>
 }
 
-impl<'a> WindowBuilder<'a> {
+impl<'a> ExternCanvasBuilder<'a> {
 
-    pub fn flags(mut self, flags: WindowFlags) -> WindowBuilder<'a> {
+    pub fn flags(mut self, flags: ExternCanvasFlags) -> ExternCanvasBuilder<'a> {
         self.flags = Some(flags);
         self
     }
 
-    pub fn title(mut self, text: &'a str) -> WindowBuilder<'a> {
+    pub fn title(mut self, text: &'a str) -> ExternCanvasBuilder<'a> {
         self.title = text;
         self
     }
 
-    pub fn size(mut self, size: (i32, i32)) -> WindowBuilder<'a> {
+    pub fn size(mut self, size: (i32, i32)) -> ExternCanvasBuilder<'a> {
         self.size = size;
         self
     }
 
-    pub fn position(mut self, pos: (i32, i32)) -> WindowBuilder<'a> {
+    pub fn position(mut self, pos: (i32, i32)) -> ExternCanvasBuilder<'a> {
         self.position = pos;
         self
     }
 
-    pub fn icon(mut self, ico: Option<&'a Icon>) -> WindowBuilder<'a> {
+    pub fn icon(mut self, ico: Option<&'a Icon>) -> ExternCanvasBuilder<'a> {
         self.icon = ico;
         self
     }
 
-    pub fn parent<C: Into<ControlHandle>>(mut self, p: Option<C>) -> WindowBuilder<'a> {
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: Option<C>) -> ExternCanvasBuilder<'a> {
         self.parent = p.map(|p2| p2.into());
         self
     }
 
-    pub fn build(self, out: &mut Window) -> Result<(), NwgError> {
-        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+    pub fn build(self, out: &mut ExternCanvas) -> Result<(), NwgError> {
+        use winapi::um::winuser::{WS_CHILD};
+
+        let mut flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        // Remove window flags if a parent is set
+        if self.parent.is_some() {
+            flags &= !(WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX);
+            flags |= WS_CHILD;
+        }
 
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())

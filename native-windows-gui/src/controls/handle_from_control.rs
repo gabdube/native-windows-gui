@@ -162,3 +162,9 @@ use super::{ListView};
 #[cfg(feature = "list-view")]
 handles!(ListView);
 
+#[cfg(feature = "extern-canvas")]
+use super::{ExternCanvas};
+
+#[cfg(feature = "extern-canvas")]
+handles!(ExternCanvas);
+
