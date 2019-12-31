@@ -160,7 +160,7 @@ fn close() {
 
 #[test]
 fn everything() {
-    nwg::init().expect("Failed to init Native Windows GUI");
+    init().expect("Failed to init Native Windows GUI");
     
     let app = TestControlPanel::build_ui(Default::default()).expect("Failed to build UI");
 

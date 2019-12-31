@@ -69,6 +69,17 @@ impl ExternCanvas {
         }
     }
 
+    /// Invalidate the whole drawing region. For canvas that are children control, this should be called in the paint event.
+    pub fn invalidate(&self) {
+        use winapi::um::winuser::InvalidateRect;
+        use std::ptr;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        unsafe { InvalidateRect(handle, ptr::null(), 1); }
+    }
+
     /// Return the icon of the window
     pub fn icon(&self) -> Option<Icon> {
         use winapi::um::winuser::WM_GETICON;
