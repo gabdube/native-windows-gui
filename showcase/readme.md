@@ -18,7 +18,7 @@
 ![font dialog](font_dialog.png)
 
 # Tray notification
-![tray notification](tray_notification.png)
+![tray notification](tray_notification_.png)
 
 # Extern canvas OpenGL
 ![extern canvas](opengl_canvas.png)
