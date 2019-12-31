@@ -37,7 +37,7 @@ extern crate native_windows_derive as nwd;  // Optional. Only if the derive macr
 
 ## Trying it out
 
-See it for yourself. NWG has plenty of example and a fully interactive test suite. The only thing you need is to:
+See it for yourself. NWG has plenty of example and a fully interactive test suite. The only thing you need to do is:
 
 ```bash
 git clone git@github.com:gabdube/native-windows-gui.git
@@ -47,6 +47,7 @@ cargo test everything --features "all"  # For the test suite
 cargo run --example basic
 cargo run --example calculator
 cargo run --example message_bank
+cargo run --example opengl_canvas --features "color-dialog extern-canvas"
 # etc
 ```
 

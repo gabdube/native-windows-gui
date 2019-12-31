@@ -163,6 +163,7 @@ pub fn init_common_controls() -> Result<(), NwgError> {
     window::init_window_class()?;
     tabs_init()?;
     extern_canvas_init()?;
+    frame_init()?;
     
     match unsafe { CoInitialize(ptr::null_mut()) } {
         S_OK | S_FALSE => Ok(()),
@@ -182,4 +183,10 @@ fn extern_canvas_init() -> Result<(), NwgError> { extern_canvas::create_extern_c
 
 #[cfg(not(feature = "extern-canvas"))]
 fn extern_canvas_init() -> Result<(), NwgError> { Ok(()) }
+
+#[cfg(feature = "frame")]
+fn frame_init() -> Result<(), NwgError> { window::create_frame_classes() }
+
+#[cfg(not(feature = "frame"))]
+fn frame_init() -> Result<(), NwgError> { Ok(()) }
 

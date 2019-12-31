@@ -328,6 +328,22 @@ pub(crate) fn init_window_class() -> Result<(), NwgError> {
     Ok(())
 }
 
+
+#[cfg(feature = "frame")]
+/// Create the window class for the frame control
+pub(crate) fn create_frame_classes() -> Result<(), NwgError> {
+    use winapi::um::libloaderapi::GetModuleHandleW;
+    
+    unsafe {
+        let hmod = GetModuleHandleW(ptr::null_mut());
+        if hmod.is_null() { return Err(NwgError::initialization("GetModuleHandleW failed")); }
+
+        build_sysclass(hmod, "NWG_FRAME", Some(blank_window_proc), None, None)?;
+    }
+    
+    Ok(())
+}
+
 #[cfg(feature = "message-window")]
 /// Create a message only window. Used with the `MessageWindow` control
 pub(crate) fn create_message_window() -> Result<ControlHandle, NwgError> {

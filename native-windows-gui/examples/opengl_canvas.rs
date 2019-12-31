@@ -2,7 +2,7 @@
     How to use an external rendering API with the NWG ExternalCanvas.
     Also show how NWG controls can be subclassed
 
-    Requires the follwing features: `cargo run example opengl_canvas --features "color-dialog extern-canvas"`
+    Requires the follwing features: `cargo run --example opengl_canvas --features "color-dialog extern-canvas"`
 */
 extern crate glutin;
 extern crate gl;

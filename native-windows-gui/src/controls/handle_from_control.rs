@@ -207,3 +207,10 @@ use super::{ExternCanvas};
 #[cfg(feature = "extern-canvas")]
 handles!(ExternCanvas);
 
+
+#[cfg(feature = "frame")]
+use super::{Frame};
+
+#[cfg(feature = "frame")]
+handles!(Frame);
+

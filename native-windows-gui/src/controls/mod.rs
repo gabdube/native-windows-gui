@@ -60,6 +60,9 @@ mod number_select;
 #[cfg(feature = "extern-canvas")]
 mod extern_canvas;
 
+#[cfg(feature = "frame")]
+mod frame;
+
 mod handle_from_control;
 
 pub use control_handle::ControlHandle;
@@ -126,5 +129,8 @@ pub use number_select::{NumberSelect, NumberSelectBuilder, NumberSelectFlags};
 
 #[cfg(feature = "extern-canvas")]
 pub use extern_canvas::{ExternCanvas, ExternCanvasBuilder, ExternCanvasFlags};
+
+#[cfg(feature = "frame")]
+pub use frame::{Frame, FrameBuilder, FrameFlags};
 
 pub use handle_from_control::*;
