@@ -24,6 +24,45 @@ macro_rules! handles {
     };
 }
 
+/**
+Automatically implements the functionnalities required to process an external struct as a NWG control
+
+```rust
+#[macro_use] extern crate native_windows_gui as nwg;
+
+pub struct TestControl {
+    edit: nwg::TextEdit,
+    custom_data: String,
+}
+
+subclass_control!(TestControl, TextEdit, edit);
+```
+*/
+#[macro_export]
+macro_rules! subclass_control {
+    ($ty:ident, $base_type:ident, $field: ident) => {
+        impl ::std::ops::Deref for $ty {
+            type Target = $crate::$base_type;
+            fn deref(&self) -> &$crate::$base_type { &self.$field }
+        }
+        
+        impl ::std::ops::DerefMut for $ty {
+            fn deref_mut(&mut self) -> &mut Self::Target {&mut self.$field }
+        }
+        
+        impl Into<$crate::ControlHandle> for &$ty {
+            fn into(self) -> $crate::ControlHandle { self.$field.handle.clone() }
+        }
+        
+        impl PartialEq<$ty> for $crate::ControlHandle {
+            fn eq(&self, other: &$ty) -> bool {
+                *self == other.$field.handle
+            }
+        }
+        
+    }
+}
+
 handles!(Window);
 handles!(Button);
 handles!(CheckBox);

@@ -99,9 +99,10 @@ This is the main project git. It is separated in multiple sections
   - File dialog (save, open, open folder)
   - Font dialog
   - Color dialog
-- Support for low level system message capture
+- An canvas that can be used by external rendering APIs
+- Support for low level system message capture (HWND, MSG, WPARAM, LPARAM)
 - Cross compiling and testing from Linux to Windows with Wine and mingw.
-  - Not all features are supported (but over 90% are, thanks WINE!)
+  - Not all features are supported (but the majority are, thanks WINE!)
   - See `https://zork.net/~st/jottings/rust-windows-and-debian.html` for the steps to follow
 
 ## Performance

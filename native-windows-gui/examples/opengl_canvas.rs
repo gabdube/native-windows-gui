@@ -6,12 +6,9 @@
 */
 extern crate glutin;
 extern crate gl;
-extern crate native_windows_gui as nwg;
+#[macro_use] extern crate native_windows_gui as nwg;
 
-use std::{
-    cell::RefCell,
-    ops::{Deref, DerefMut}
-};
+use std::cell::RefCell;
 use crate::glutin::{
     ContextBuilder, GlRequest, GlProfile, PossiblyCurrent, RawContext, Api,
     dpi::PhysicalSize,
@@ -31,7 +28,7 @@ To register a custom struct as a NWG control with full support you need to imple
   * Into<nwg::ControlHandle>
   * PartialEq<SubclassControl> for nwg::ControlHandle
 
-You can either to it manually or the `register_control(type, base_type, field)` macro.
+You can either to it manually or the `subclass_control!(type, base_type, field)` macro.
 */
 #[derive(Default)]
 pub struct OpenGlCanvas {
@@ -149,6 +146,10 @@ impl OpenGlCanvas {
 
 }
 
+subclass_control!(OpenGlCanvas, ExternCanvas, canvas);
+
+/**
+use std::ops::{Deref, DerefMut};
 impl Deref for OpenGlCanvas {
     type Target = nwg::ExternCanvas;
     fn deref(&self) -> &nwg::ExternCanvas { &self.canvas }
@@ -166,7 +167,7 @@ impl PartialEq<OpenGlCanvas> for nwg::ControlHandle {
     fn eq(&self, other: &OpenGlCanvas) -> bool {
         *self == other.handle
     }
-}
+}*/
 
 
 
@@ -207,8 +208,10 @@ impl ExternCanvas {
     pub fn select_bg_color(&self) {
         if self.color_dialog.show(Some(&self.window)) {
             let [r, g, b] = self.color_dialog.color();
+            let [r, g, b] = [r as f32 / 225.0, g as f32 / 225.0, b as f32 / 225.0];
+
             unsafe {
-                gl::ClearColor(f32::from(r) / 255.0, f32::from(g) / 255.0, f32::from(b) / 255.0, 1.0);
+                gl::ClearColor(r, g, b, 1.0);
             }
         }
     }
