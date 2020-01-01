@@ -27,6 +27,21 @@ pub struct BoxLayoutItem {
     pub span: u32,
 }
 
+impl BoxLayoutItem {
+
+    /// Initialize a new grid layout item
+    pub fn new<W: Into<ControlHandle>>(c: W, cell: u32, span: u32) -> BoxLayoutItem {
+        let control = c.into().hwnd().expect("Child must be HWND");
+
+        BoxLayoutItem {
+            control,
+            cell,
+            span
+        }
+    }
+
+}
+
 
 /// A layout that lays out widgets in a line
 /// This is the inner data shared between the callback and the application

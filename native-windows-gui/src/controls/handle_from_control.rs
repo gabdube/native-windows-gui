@@ -112,7 +112,7 @@ impl<D: Display+Default> PartialEq<ComboBox<D>> for ControlHandle {
     }
 }
 
-#[cfg(feature = "combobox")]
+#[cfg(feature = "listbox")]
 use super::ListBox;
 
 #[cfg(feature = "listbox")]

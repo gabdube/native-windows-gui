@@ -1,6 +1,6 @@
 use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::{WPARAM, LPARAM};
-use winapi::um::winuser::{LBS_MULTIPLESEL, LBS_NOSEL, WS_VISIBLE};
+use winapi::um::winuser::{LBS_MULTIPLESEL, LBS_NOSEL, WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::{Font, NwgError};
@@ -15,8 +15,19 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: ListBox handle is not HWND!";
 
 
 bitflags! {
+    /**
+        The listbox flags
+
+        * NONE:     No flags. Equivalent to a invisible listbox.
+        * VISIBLE:  The listbox is immediatly visible after creation
+        * DISABLED: The listbox cannot be interacted with by the user. It also has a grayed out look.
+        * MULTI_SELECT: It is possible for the user to select more than 1 item at a time
+        * NO_SELECT: It is impossible for the user to select the listbox items
+    */
     pub struct ListBoxFlags: u32 {
+        const NONE = 0;
         const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
         const MULTI_SELECT = LBS_MULTIPLESEL;
         const NO_SELECT = LBS_NOSEL;
     }
@@ -463,7 +474,7 @@ impl<D: Display+Default> ListBox<D> {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        ::winapi::um::winuser::WS_VISIBLE
+        WS_VISIBLE
     }
 
     /// Winapi flags required by the control

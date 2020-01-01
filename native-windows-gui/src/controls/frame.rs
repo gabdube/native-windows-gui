@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_BORDER, WS_CHILD, WS_CLIPCHILDREN};
 use crate::win32::window_helper as wh;
 use crate::{NwgError};
 use super::{ControlBase, ControlHandle};
@@ -8,10 +8,19 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Frame handle is not HWND!";
 
 
 bitflags! {
+    /**
+        The frame flags
+
+        * NONE:     No flags. Equivalent to a invisible frame without borders.
+        * VISIBLE:  The frame is immediatly visible after creation
+        * DISABLED: The frame chidlren cannot be interacted with by the user.
+        * BORDER: The frame has a thin black border
+    */
     pub struct FrameFlags: u32 {
         const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const BORDER = WS_BORDER;
     }
 }
 
@@ -124,12 +133,12 @@ impl Frame {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        ::winapi::um::winuser::WS_VISIBLE
+        WS_VISIBLE | WS_BORDER
     }
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        ::winapi::um::winuser::WS_CHILD
+        WS_CHILD | WS_CLIPCHILDREN
     }
 
 }

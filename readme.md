@@ -48,7 +48,7 @@ cargo run --example basic
 cargo run --example calculator
 cargo run --example message_bank
 cargo run --example opengl_canvas --features "color-dialog extern-canvas"
-# etc
+cargo run --example partials --features "listbox frame"
 ```
 
 ## Project structure
