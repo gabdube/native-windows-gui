@@ -31,11 +31,11 @@ Automatically implements the functionnalities required to process an external st
 #[macro_use] extern crate native_windows_gui as nwg;
 
 pub struct TestControl {
-    edit: nwg::TextEdit,
+    edit: nwg::TextInput,
     custom_data: String,
 }
 
-subclass_control!(TestControl, TextEdit, edit);
+subclass_control!(TestControl, TextInput, edit);
 ```
 */
 #[macro_export]

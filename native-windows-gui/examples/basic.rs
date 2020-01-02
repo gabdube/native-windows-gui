@@ -70,29 +70,25 @@ mod basic_app_ui {
             let ui = Rc::new(BasicAppUi { inner: data });
 
             // Events
-            let window_handles = [&ui.window.handle];
+            let evt_ui = ui.clone();
+            let handle_events = move |evt, _evt_data, handle| {
+                match evt {
+                    E::OnButtonClick => {
+                        if &handle == &evt_ui.hello_button {
+                            BasicApp::say_hello(&evt_ui.inner);
+                        }
+                    },
+                    E::OnWindowClose => {
+                        if &handle == &evt_ui.window {
+                            BasicApp::say_goodbye(&evt_ui.inner);
+                        }
+                    },
+                    _ => {}
+                }
+            };
 
-            for handle in window_handles.iter() {
-                let evt_ui = ui.clone();
-                let handle_events = move |evt, _evt_data, handle| {
-                    match evt {
-                        E::OnButtonClick => {
-                            if &handle == &evt_ui.hello_button {
-                                BasicApp::say_hello(&evt_ui.inner);
-                            }
-                        },
-                        E::OnWindowClose => {
-                            if &handle == &evt_ui.window {
-                                BasicApp::say_goodbye(&evt_ui.inner);
-                            }
-                        },
-                        _ => {}
-                    }
-                };
+            nwg::full_bind_event_handler(&ui.window.handle, handle_events);
 
-                nwg::full_bind_event_handler(handle, handle_events);
-            }
-            
             return Ok(ui);
         }
     }

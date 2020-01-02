@@ -35,6 +35,37 @@ bitflags! {
 
 /**
 A list box is a control window that contains a simple list of items from which the user can choose.
+
+**Builder parameters:**
+  * `parent`:          **Required.** The listbox parent container.
+  * `size`:            The listbox size.
+  * `position`:        The listbox position.
+  * `enabled`:         If the listbox can be used by the user. It also has a grayed out look if disabled.
+  * `flags`:           A combination of the ListBoxFlags values.
+  * `font`:            The font used for the listbox text
+  * `collection`:      The default collections of the listbox
+  * `selected_index`:  The default selected index in the listbox collection
+  * `multi_selection`: The collections of indices to set as selected in a multi selection listbox 
+
+**Control events:**
+  * `OnListBoxSelect`: When the current listbox selection is changed
+  * `OnListBoxDoubleClick`: When a listbox item is clicked twice rapidly
+  * `MousePress(_)`: Generic mouse press events on the listbox
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_listbox(listb: &mut nwg::ListBox<&'static str>, window: &nwg::Window, font: &nwg::Font) {
+    nwg::ListBox::builder()
+        .flags(nwg::ListBoxFlags::VISIBLE | nwg::ListBoxFlags::MULTI_SELECT)
+        .collection(vec!["Hello", "World", "!!!!"])
+        .multi_selection(vec![0, 1, 2])
+        .font(Some(font))
+        .parent(window)
+        .build(listb);
+}
+```
+
 */
 #[derive(Default, Debug)]
 pub struct ListBox<D: Display+Default> {
@@ -48,6 +79,7 @@ impl<D: Display+Default> ListBox<D> {
         ListBoxBuilder {
             size: (100, 300),
             position: (0, 0),
+            enabled: true,
             flags: None,
             font: None,
             collection: None,
@@ -495,6 +527,7 @@ impl<D: Display+Default> ListBox<D> {
 pub struct ListBoxBuilder<'a, D: Display+Default> {
     size: (i32, i32),
     position: (i32, i32),
+    enabled: bool,
     flags: Option<ListBoxFlags>,
     font: Option<&'a Font>,
     collection: Option<Vec<D>>,
@@ -542,6 +575,11 @@ impl<'a, D: Display+Default> ListBoxBuilder<'a, D> {
 
     pub fn multi_selection(mut self, select: Vec<usize>) -> ListBoxBuilder<'a, D> {
         self.multi_selection = select;
+        self
+    }
+
+    pub fn enabled(mut self, enabled: bool) -> ListBoxBuilder<'a, D> {
+        self.enabled = enabled;
         self
     }
 

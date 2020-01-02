@@ -16,20 +16,61 @@ pub struct PartialDemo {
     menu: nwg::ListBox<&'static str>,
     frame1: nwg::Frame,
     frame2: nwg::Frame,
-    frame3: nwg::Frame
+    frame3: nwg::Frame,
+
+    people_ui: PeopleUi,
+    animal_ui: AnimalUi,
+    food_ui: FoodUi,
 }
 
 impl PartialDemo {
+
+    fn change_interface(&self) {
+        self.frame1.set_visible(false);
+        self.frame2.set_visible(false);
+        self.frame3.set_visible(false);
+
+        match self.menu.selection() {
+            None | Some(0) => self.frame1.set_visible(true),
+            Some(1) => self.frame2.set_visible(true),
+            Some(2) => self.frame3.set_visible(true),
+            Some(_) => unreachable!()
+        }
+    }
+
     fn exit(&self) {
         nwg::stop_thread_dispatch();
     }
 }
+
+#[derive(Default)]
+pub struct PeopleUi {
+    layout: nwg::GridLayout,
+
+    label1: nwg::Label,
+    label2: nwg::Label,
+    label3: nwg::Label,
+
+    name_input: nwg::TextInput,
+    age_input: nwg::TextInput,
+    job_input: nwg::TextInput,
+}
+
+#[derive(Default)]
+pub struct AnimalUi {
+}
+
+#[derive(Default)]
+pub struct FoodUi {
+}
+
 
 //
 // ALL of this stuff is handled by native-windows-derive
 //
 mod partial_demo_ui {
     use native_windows_gui as nwg;
+    use self::nwg::PartialUi;
     use super::*;
     use std::rc::Rc;
     use std::ops::Deref;
@@ -68,23 +109,42 @@ mod partial_demo_ui {
                 .parent(&data.window)
                 .build(&mut data.frame3)?;
 
+            // Partials
+            PeopleUi::build_partial(&mut data.people_ui, Some(&data.frame1))?;
+            AnimalUi::build_partial(&mut data.animal_ui, Some(&data.frame2))?;
+            FoodUi::build_partial(&mut data.food_ui, Some(&data.frame3))?;
+
             // Wrap-up
             let ui = Rc::new(PartialDemoUi { inner: data });
 
             // Events
-            let evt_ui = ui.clone();
-            let handle_events = move |evt, _evt_data, handle| {
-                match evt {
-                    E::OnWindowClose => {
-                        if &handle == &evt_ui.window {
-                            PartialDemo::exit(&evt_ui.inner);
-                        }
-                    },
-                    _ => {}
-                }
-            };
+            let mut window_handles = vec![&ui.window.handle];
+            window_handles.append(&mut ui.people_ui.handles());
+            window_handles.append(&mut ui.animal_ui.handles());
+            window_handles.append(&mut ui.food_ui.handles());
 
-            nwg::full_bind_event_handler(&ui.window.handle, handle_events);
+            for handle in window_handles.iter() {
+                let evt_ui = ui.clone();
+                let handle_events = move |evt, evt_data, handle| {
+                    evt_ui.people_ui.process_event(evt, &evt_data, handle);
+                    evt_ui.animal_ui.process_event(evt, &evt_data, handle);
+                    evt_ui.food_ui.process_event(evt, &evt_data, handle);
+                    
+                    match evt {
+                        E::OnListBoxSelect => 
+                            if &handle == &evt_ui.menu {
+                                PartialDemo::change_interface(&evt_ui.inner);
+                            },
+                        E::OnWindowClose => 
+                            if &handle == &evt_ui.window {
+                                PartialDemo::exit(&evt_ui.inner);
+                            },
+                        _ => {}
+                    }
+                };
+
+                nwg::full_bind_event_handler(handle, handle_events);
+            }
 
             // Layout
 
@@ -111,6 +171,108 @@ mod partial_demo_ui {
         }
     }
 
+}
+
+mod partial_people_ui {
+    use native_windows_gui as nwg;
+    use self::nwg::{PartialUi, NwgError, ControlHandle};
+    use super::*;
+    
+    impl PartialUi<PeopleUi> for PeopleUi {
+
+        fn build_partial<W: Into<ControlHandle>>(data: &mut PeopleUi, parent: Option<W>) -> Result<(), NwgError> {
+            let parent = parent.unwrap().into();
+
+            nwg::Label::builder()
+                .text("Name:")
+                .parent(&parent)
+                .build(&mut data.label1)?;
+
+            nwg::Label::builder()
+                .text("Age:")
+                .parent(&parent)
+                .build(&mut data.label2)?;
+
+            nwg::Label::builder()
+                .text("Job:")
+                .parent(&parent)
+                .build(&mut data.label3)?;
+
+            nwg::TextInput::builder()
+                .text("John Doe")
+                .parent(&parent)
+                .build(&mut data.name_input)?;
+
+            nwg::TextInput::builder()
+                .text("75")
+                .parent(&parent)
+                .build(&mut data.age_input)?;
+
+            nwg::TextInput::builder()
+                .text("Programmer")
+                .parent(&parent)
+                .build(&mut data.job_input)?;
+
+            nwg::GridLayout::builder()
+                .parent(&parent)
+                .max_size([1000, 100])
+                .child(0, 0, &data.label1)
+                .child(0, 1, &data.label2)
+                .child(0, 2, &data.label3)
+                .child(1, 0, &data.name_input)
+                .child(1, 1, &data.age_input)
+                .child(1, 2, &data.job_input)
+                .build(&data.layout);
+
+            Ok(())
+        }
+
+        fn process_event<'a>(&self, _evt: nwg::Event, _evt_data: &nwg::EventData, _handle: ControlHandle) {
+        }
+
+        fn handles(&self) -> Vec<&ControlHandle> {
+            Vec::new()
+        }
+    }
+}
+
+mod partial_animal_ui {
+    use native_windows_gui as nwg;
+    use self::nwg::{PartialUi, NwgError, ControlHandle};
+    use super::*;
+
+    impl PartialUi<AnimalUi> for AnimalUi {
+
+        fn build_partial<W: Into<ControlHandle>>(_data: &mut AnimalUi, _parent: Option<W>) -> Result<(), NwgError> {
+            Ok(())
+        }
+
+        fn process_event<'a>(&self, _evt: nwg::Event, _evt_data: &nwg::EventData, _handle: ControlHandle) {
+        }
+
+        fn handles(&self) -> Vec<&ControlHandle> {
+            Vec::new()
+        }
+    }
+}
+
+mod partial_food_ui {
+    use native_windows_gui as nwg;
+    use self::nwg::{PartialUi, NwgError, ControlHandle};
+    use super::*;
+
+    impl PartialUi<FoodUi> for FoodUi {
+        fn build_partial<W: Into<ControlHandle>>(_data: &mut FoodUi, _parent: Option<W>) -> Result<(), NwgError> {
+            Ok(())
+        }
+
+        fn process_event<'a>(&self, _evt: nwg::Event, _evt_data: &nwg::EventData, _handle: ControlHandle) {
+        }
+
+        fn handles(&self) -> Vec<&ControlHandle> {
+            Vec::new()
+        }
+    }
 }
 
 
