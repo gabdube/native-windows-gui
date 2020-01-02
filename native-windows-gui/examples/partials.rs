@@ -72,23 +72,19 @@ mod partial_demo_ui {
             let ui = Rc::new(PartialDemoUi { inner: data });
 
             // Events
-            let window_handles = [&ui.window.handle];
+            let evt_ui = ui.clone();
+            let handle_events = move |evt, _evt_data, handle| {
+                match evt {
+                    E::OnWindowClose => {
+                        if &handle == &evt_ui.window {
+                            PartialDemo::exit(&evt_ui.inner);
+                        }
+                    },
+                    _ => {}
+                }
+            };
 
-            for handle in window_handles.iter() {
-                let evt_ui = ui.clone();
-                let handle_events = move |evt, _evt_data, handle| {
-                    match evt {
-                        E::OnWindowClose => {
-                            if &handle == &evt_ui.window {
-                                PartialDemo::exit(&evt_ui.inner);
-                            }
-                        },
-                        _ => {}
-                    }
-                };
-
-                nwg::full_bind_event_handler(handle, handle_events);
-            }
+            nwg::full_bind_event_handler(&ui.window.handle, handle_events);
 
             // Layout
 
