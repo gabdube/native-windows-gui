@@ -177,7 +177,6 @@ fn tabs_init() -> Result<(), NwgError> { tabs::create_tab_classes() }
 #[cfg(not(feature = "tabs"))]
 fn tabs_init() -> Result<(), NwgError> { Ok(()) }
 
-
 #[cfg(feature = "extern-canvas")]
 fn extern_canvas_init() -> Result<(), NwgError> { extern_canvas::create_extern_canvas_classes() }
 
