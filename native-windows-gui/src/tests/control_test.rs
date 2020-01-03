@@ -1475,7 +1475,7 @@ fn save_file(_app: &ControlsTest, _evt: Event) {}
 
 #[cfg(feature = "color-dialog")]
 fn color_select(app: &ControlsTest) {
-    if app.color_dialog.show(Some(&app.window)) {
+    if app.color_dialog.run(Some(&app.window)) {
         app.test_color_output.set_text(&format!("{:?}", app.color_dialog.color()))
     }
 }
@@ -1485,7 +1485,7 @@ fn color_select(_app: &ControlsTest) {}
 
 #[cfg(feature = "font-dialog")]
 fn font_select(app: &ControlsTest) {
-    if app.font_dialog.show(Some(&app.window)) {
+    if app.font_dialog.run(Some(&app.window)) {
         app.test_font_output.set_text(&format!("{:?}", app.font_dialog.font()))
     }
 }

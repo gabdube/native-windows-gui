@@ -208,7 +208,7 @@ impl ExternCanvas {
     }
 
     pub fn select_bg_color(&self) {
-        if self.color_dialog.show(Some(&self.window)) {
+        if self.color_dialog.run(Some(&self.window)) {
             let [r, g, b] = self.color_dialog.color();
             let [r, g, b] = [r as f32 / 225.0, g as f32 / 225.0, b as f32 / 225.0];
 
@@ -221,7 +221,7 @@ impl ExternCanvas {
     pub fn select_tri_color(&self) {
         use std::mem;
 
-        if self.color_dialog.show(Some(&self.window)) {
+        if self.color_dialog.run(Some(&self.window)) {
             let [r, g, b] = self.color_dialog.color();
             let [r, g, b] = [r as f32 / 225.0, g as f32 / 225.0, b as f32 / 225.0];
 

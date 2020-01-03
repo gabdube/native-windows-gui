@@ -127,15 +127,62 @@
 
 
         <h3>File dialog</h3>
+        <img src="../showcase/file_dialog.png" style="width: 500px" />
+        <br><br>
 
         FileDialog uses the common item dialog (<a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/bb776913(v=vs.85)?redirectedfrom=MSDN">link</a>)
         It supports the <code>FileDialogAction::Open</code>, <code>FileDialogAction::OpenDirectory</code> and <code>FileDialogAction::Save</code>.
         <br><br>
 
+        A file dialog can accept multiple files if the <code>multiselect</code> flag is set in the builder. The multiselect flag can also be changed
+        with the <code>set_multiselect</code> method. The multi select flag can only be used with opening dialogs.
+        <br><br>
+
+        To display a FileDialog, call <code>dialog.run()</code>. Just like the other dialog, this will start a new event loop.
+        <br><br>
+
+        To fetch the results of a file dialog, use the <code>dialog.get_selected_item()</code> for single select file dialog and
+        <code>dialog.get_selected_items()</code> for multi select file dialog. Calling the wrong method will return an Error.
+        <br><br>
+
+
         <h3>Color dialog</h3>
+        <img src="../showcase/color_dialog.png" style="width: 500px" />
+        <br><br>
+
+        A color dialog returns a color in a [R,G,B] format. The values will range from <code>[0u8, 0u8, 0u8]</code> (black)
+        to <code>[255, 255, 255]</code> (white).
+        <br><br>
+
+        To display a ColorDialog, call <code>dialog.run(parent)</code>. Although it is optional, you should specify a window as parent. Just like the other dialog, this will start a new event loop.
+        <br><br>
+
+        To fetch the results of a color dialog, use the <code>dialog.color()</code> method.
+        <br><br>
+
+        The color dialog allows the developer or the user to save up to 16 custom colors per dialogs. The user sets the color using the dialog interface, and the 
+        developer can set/get the colors using <code>set_saved_color(index, color)</code> or <code>saved_color(index)</code>. 
+        <br><br>
+
+        Set the saved colors in the <b>color dialog builder</b> using the <code>saved_color(index, color)</code> method.
 
         <h3>Font dialog</h3>
+        <img src="../showcase/font_dialog.png" style="height: 400px" />
+        <br><br>
 
+        A font dialog returns a <code>FontInfo</code> object that describes the font selected by the user <b>a not a font resource</b>.<br>
+        <br><br>
+
+        To display a FontDialog, call <code>dialog.run(parent)</code>. Although it is optional, you should specify a window as parent. Just like the other dialog, this will start a new event loop.
+        <br><br>
+
+        To fetch the results of a color dialog, use the <code>dialog.font()</code> method.
+        <br><br>
+
+        The font info can then be used to create font resources. Note that the default font resource provided by NWG is very simple and only supports
+        a size, a family and a weight.
+
+        <br><br>
         <br><br>
 
     </div>

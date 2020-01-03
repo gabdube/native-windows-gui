@@ -30,7 +30,7 @@ impl FontDialog {
 
     /// Execute the font dialog.
     /// This function will return `true` if the user select a font or `false` if the dialog is cancelled
-    pub fn show<C: Into<ControlHandle>>(&self, owner: Option<C>) -> bool {
+    pub fn run<C: Into<ControlHandle>>(&self, owner: Option<C>) -> bool {
         if owner.is_some() {
             let ownder_handle = owner.unwrap().into();
             self.data.borrow_mut().dialog.hwndOwner = ownder_handle.hwnd().expect("Color dialog must be a window control");

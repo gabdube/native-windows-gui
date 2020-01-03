@@ -72,7 +72,6 @@ This is the main project git. It is separated in multiple sections
 - The WHOLE winapi control library [(reference)](https://docs.microsoft.com/en-us/windows/win32/controls/individual-control-info)
   - Some very niche controls are not supported: flat scroll bar, ip control, rebar, and pager.
 - Menus and menu bar
-- Accelerator (aka hotkey)
 - Image and font resource
   - BMP
   - ICO
