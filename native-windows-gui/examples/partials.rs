@@ -2,7 +2,7 @@
     An application that load different interfaces using the partial feature.
     Partials can be used to split large GUI application into smaller bits.
 
-    Requires the following features: `cargo run --example partials --features "listbox frame"`
+    Requires the following features: `cargo run --example partials --features "listbox frame combobox checkbox"`
 */
 
 extern crate native_windows_gui as nwg;
@@ -58,10 +58,26 @@ pub struct PeopleUi {
 
 #[derive(Default)]
 pub struct AnimalUi {
+    layout: nwg::GridLayout,
+
+    label1: nwg::Label,
+    label2: nwg::Label,
+    label3: nwg::Label,
+
+    name_input: nwg::TextInput,
+    race_input: nwg::ComboBox<&'static str>,
+    is_soft_input: nwg::CheckBox
 }
 
 #[derive(Default)]
 pub struct FoodUi {
+    layout: nwg::GridLayout,
+
+    label1: nwg::Label,
+    label2: nwg::Label,
+
+    name_input: nwg::TextInput,
+    tasty_input: nwg::CheckBox,
 }
 
 
@@ -205,6 +221,7 @@ mod partial_people_ui {
 
             nwg::TextInput::builder()
                 .text("75")
+                .flags(nwg::TextInputFlags::VISIBLE | nwg::TextInputFlags::NUMBER)
                 .parent(&parent)
                 .build(&mut data.age_input)?;
 
@@ -215,7 +232,8 @@ mod partial_people_ui {
 
             nwg::GridLayout::builder()
                 .parent(&parent)
-                .max_size([1000, 100])
+                .max_size([1000, 150])
+                .min_size([100, 120])
                 .child(0, 0, &data.label1)
                 .child(0, 1, &data.label2)
                 .child(0, 2, &data.label3)
@@ -243,7 +261,53 @@ mod partial_animal_ui {
 
     impl PartialUi<AnimalUi> for AnimalUi {
 
-        fn build_partial<W: Into<ControlHandle>>(_data: &mut AnimalUi, _parent: Option<W>) -> Result<(), NwgError> {
+        fn build_partial<W: Into<ControlHandle>>(data: &mut AnimalUi, parent: Option<W>) -> Result<(), NwgError> {
+            let parent = parent.unwrap().into();
+
+            nwg::Label::builder()
+                .text("Name:")
+                .parent(&parent)
+                .build(&mut data.label1)?;
+
+            nwg::Label::builder()
+                .text("Race:")
+                .parent(&parent)
+                .build(&mut data.label2)?;
+
+            nwg::Label::builder()
+                .text("Is fluffy:")
+                .parent(&parent)
+                .build(&mut data.label3)?;
+
+            nwg::TextInput::builder()
+                .text("Mittens")
+                .parent(&parent)
+                .build(&mut data.name_input)?;
+
+            nwg::ComboBox::builder()
+                .collection(vec!["Cat", "Dog", "Pidgeon", "Monkey"])
+                .selected_index(Some(0))
+                .parent(&parent)
+                .build(&mut data.race_input)?;
+
+            nwg::CheckBox::builder()
+                .text("")
+                .check_state(nwg::CheckBoxState::Checked)
+                .parent(&parent)
+                .build(&mut data.is_soft_input)?;
+
+            nwg::GridLayout::builder()
+                .parent(&parent)
+                .max_size([1000, 150])
+                .min_size([100, 120])
+                .child(0, 0, &data.label1)
+                .child(0, 1, &data.label2)
+                .child(0, 2, &data.label3)
+                .child(1, 0, &data.name_input)
+                .child(1, 1, &data.race_input)
+                .child(1, 2, &data.is_soft_input)
+                .build(&data.layout);
+
             Ok(())
         }
 
@@ -262,7 +326,40 @@ mod partial_food_ui {
     use super::*;
 
     impl PartialUi<FoodUi> for FoodUi {
-        fn build_partial<W: Into<ControlHandle>>(_data: &mut FoodUi, _parent: Option<W>) -> Result<(), NwgError> {
+        fn build_partial<W: Into<ControlHandle>>(data: &mut FoodUi, parent: Option<W>) -> Result<(), NwgError> {
+            let parent = parent.unwrap().into();
+
+            nwg::Label::builder()
+                .text("Name:")
+                .parent(&parent)
+                .build(&mut data.label1)?;
+
+            nwg::Label::builder()
+                .text("Tasty:")
+                .parent(&parent)
+                .build(&mut data.label2)?;
+
+            nwg::TextInput::builder()
+                .text("Banana")
+                .parent(&parent)
+                .build(&mut data.name_input)?;
+
+            nwg::CheckBox::builder()
+                .text("")
+                .check_state(nwg::CheckBoxState::Checked)
+                .parent(&parent)
+                .build(&mut data.tasty_input)?;
+
+            nwg::GridLayout::builder()
+                .parent(&parent)
+                .max_size([1000, 90])
+                .min_size([100, 80])
+                .child(0, 0, &data.label1)
+                .child(0, 1, &data.label2)
+                .child(1, 0, &data.name_input)
+                .child(1, 1, &data.tasty_input)
+                .build(&data.layout);
+
             Ok(())
         }
 

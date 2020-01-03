@@ -7,13 +7,23 @@ const NOT_BOUND: &'static str = "Label is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Label handle is not HWND!";
 
 bitflags! {
+    /**
+        The label flags
+
+        * NONE:     No flags. Equivalent to a invisible blank label.
+        * VISIBLE:  The label is immediatly visible after creation
+        * DISABLED: The label cannot be interacted with by the user. It also has a grayed out look.
+    */
     pub struct LabelFlags: u32 {
+        const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
     }
 }
 
-/// A label is a single line of static text
+/**
+A label is a single line of static text
+*/
 #[derive(Default, Debug)]
 pub struct Label {
     pub handle: ControlHandle

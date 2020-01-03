@@ -77,7 +77,7 @@ impl<D: Display+Default> ComboBox<D> {
         ComboBoxBuilder {
             size: (100, 25),
             position: (0, 0),
-            enabled: false,
+            enabled: true,
             flags: None,
             font: None,
             collection: None,
