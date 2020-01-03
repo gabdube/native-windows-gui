@@ -201,16 +201,19 @@ mod partial_people_ui {
 
             nwg::Label::builder()
                 .text("Name:")
+                .h_align(nwg::HTextAlign::Right)
                 .parent(&parent)
                 .build(&mut data.label1)?;
 
             nwg::Label::builder()
                 .text("Age:")
+                .h_align(nwg::HTextAlign::Right)
                 .parent(&parent)
                 .build(&mut data.label2)?;
 
             nwg::Label::builder()
                 .text("Job:")
+                .h_align(nwg::HTextAlign::Right)
                 .parent(&parent)
                 .build(&mut data.label3)?;
 
@@ -266,16 +269,19 @@ mod partial_animal_ui {
 
             nwg::Label::builder()
                 .text("Name:")
+                .h_align(nwg::HTextAlign::Right)
                 .parent(&parent)
                 .build(&mut data.label1)?;
 
             nwg::Label::builder()
                 .text("Race:")
+                .h_align(nwg::HTextAlign::Right)
                 .parent(&parent)
                 .build(&mut data.label2)?;
 
             nwg::Label::builder()
                 .text("Is fluffy:")
+                .h_align(nwg::HTextAlign::Right)
                 .parent(&parent)
                 .build(&mut data.label3)?;
 
@@ -331,11 +337,13 @@ mod partial_food_ui {
 
             nwg::Label::builder()
                 .text("Name:")
+                .h_align(nwg::HTextAlign::Right)
                 .parent(&parent)
                 .build(&mut data.label1)?;
 
             nwg::Label::builder()
                 .text("Tasty:")
+                .h_align(nwg::HTextAlign::Right)
                 .parent(&parent)
                 .build(&mut data.label2)?;
 

@@ -22,9 +22,12 @@ bitflags! {
     }
 }
 
-/// An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
-/// This control only allow a single line input. For block of text, use `TextBox`.
-/// Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/controls/about-edit-controls#text-and-input-styles
+/** 
+An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
+This control only allow a single line input. For block of text, use `TextBox`.
+Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/controls/about-edit-controls#text-and-input-styles
+
+*/
 #[derive(Default, Debug)]
 pub struct TextInput {
     pub handle: ControlHandle
@@ -370,14 +373,14 @@ impl TextInput {
                     let top = RECT {
                         left: 0,
                         top: pt1.y,
-                        right: window.right,
+                        right: client.right,
                         bottom: client.top
                     };
 
                     let bottom = RECT {
                         left: 0,
                         top: client.bottom,
-                        right: window.right,
+                        right: client.right,
                         bottom: pt2.y
                     };
 

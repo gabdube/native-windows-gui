@@ -1,6 +1,6 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
-use crate::{Font, NwgError};
+use crate::{Font, NwgError, HTextAlign, VTextAlign};
 use super::{ControlBase, ControlHandle};
 
 const NOT_BOUND: &'static str = "Label is not yet bound to a winapi object";
@@ -39,6 +39,8 @@ impl Label {
             flags: None,
             font: None,
             parent: None,
+            h_align: HTextAlign::Left,
+            v_align: VTextAlign::Top,
             background_color: None
         }
     }
@@ -167,34 +169,130 @@ impl Label {
         WS_CHILD | SS_NOTIFY
     }
 
-    /// Change the label background color to transparent.
-    /// Change the checkbox background color.
-    fn hook_background_color(&self, c: [u8; 3]) {
+    /// Center the text vertically.
+    fn hook_non_client_size(&self, bg: Option<[u8; 3]>, v_align: VTextAlign) {
         use crate::bind_raw_event_handler;
-        use winapi::um::winuser::{WM_CTLCOLORSTATIC};
-        use winapi::shared::{basetsd::UINT_PTR, windef::{HWND}, minwindef::LRESULT};
-        use winapi::um::wingdi::{CreateSolidBrush, RGB};
+        use winapi::shared::windef::{HWND, HGDIOBJ, RECT, HBRUSH, POINT};
+        use winapi::shared::{basetsd::UINT_PTR, minwindef::LRESULT};
+        use winapi::um::winuser::{WM_CTLCOLORSTATIC, WM_NCCALCSIZE, WM_NCPAINT, WM_SIZE, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW};
+        use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
+        use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect, ScreenToClient, SetWindowPos};
+        use winapi::um::wingdi::{SelectObject, CreateSolidBrush, RGB};
+        use std::{mem, ptr};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
-        let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
+
+        let brush = match bg {
+            Some(c) => unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) },
+            None => COLOR_WINDOW as HBRUSH
+        };
+
+        match v_align {
+            VTextAlign::Top => {},
+            VTextAlign::Center => {},
+            VTextAlign::Bottom => {},
+        };
+
+        unsafe {
+
+        if bg.is_some() {
+            bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+                match msg {
+                    WM_CTLCOLORSTATIC => {
+                        let child = l as HWND;
+                        if child == handle {
+                            return Some(brush as LRESULT);
+                        }
+                    },
+                    _ => {}
+                }
+    
+                None
+            });
+        }
         
-        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+
+        bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, w, l| {
             match msg {
-                WM_CTLCOLORSTATIC => {
-                    let child = l as HWND;
-                    if child == handle {
-                        return Some(brush as LRESULT);
-                    }
+                WM_NCCALCSIZE  => {
+                    if w == 0 { return None }
+
+                    // Calculate client area height needed for a font
+                    let font_handle = wh::get_window_font(hwnd);
+                    let mut r: RECT = mem::zeroed();
+                    let dc = GetDC(hwnd);
+                    
+                    let old = SelectObject(dc, font_handle as HGDIOBJ);
+                    let calc: [u16;2] = [75, 121];
+                    DrawTextW(dc, calc.as_ptr(), 2, &mut r, DT_CALCRECT | DT_LEFT);
+
+                    let client_height = r.bottom;
+
+                    SelectObject(dc, old);
+                    ReleaseDC(hwnd, dc);
+
+                    // Calculate NC area to center text.
+                    let mut client: RECT = mem::zeroed();
+                    let mut window: RECT = mem::zeroed();
+                    GetClientRect(hwnd, &mut client);
+                    GetWindowRect(hwnd, &mut window);
+
+                    let window_height = window.bottom - window.top;
+                    let center = ((window_height - client_height) / 2) - 1;
+                    
+                    // Save the info
+                    let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
+                    let info = &mut *info_ptr;
+
+                    info.rgrc[0].top += center;
+                    info.rgrc[0].bottom -= center;
+                },
+                WM_NCPAINT  => {
+                    let mut window: RECT = mem::zeroed();
+                    let mut client: RECT = mem::zeroed();
+                    GetWindowRect(hwnd, &mut window);
+                    GetClientRect(hwnd, &mut client);
+
+                    let mut pt1 = POINT {x: window.left, y: window.top};
+                    ScreenToClient(hwnd, &mut pt1);
+
+                    let mut pt2 = POINT {x: window.right, y: window.bottom};
+                    ScreenToClient(hwnd, &mut pt2);
+
+                    let top = RECT {
+                        left: 0,
+                        top: pt1.y,
+                        right: client.right,
+                        bottom: client.top
+                    };
+
+                    let bottom = RECT {
+                        left: 0,
+                        top: client.bottom,
+                        right: client.right,
+                        bottom: pt2.y
+                    };
+
+                    let dc = GetDC(hwnd);
+                    FillRect(dc, &top, brush);
+                    FillRect(dc, &bottom, brush);
+                    ReleaseDC(hwnd, dc);
+                },
+                WM_SIZE => {
+                    SetWindowPos(hwnd, ptr::null_mut(), 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
                 },
                 _ => {}
             }
 
             None
         });
+
+        }
     }
+
 }
 
 
@@ -205,6 +303,8 @@ pub struct LabelBuilder<'a> {
     background_color: Option<[u8; 3]>,
     flags: Option<LabelFlags>,
     font: Option<&'a Font>,
+    h_align: HTextAlign,
+    v_align: VTextAlign,
     parent: Option<ControlHandle>
 }
 
@@ -240,13 +340,26 @@ impl<'a> LabelBuilder<'a> {
         self
     }
 
+    pub fn h_align(mut self, align: HTextAlign) -> LabelBuilder<'a> {
+        self.h_align = align;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> LabelBuilder<'a> {
         self.parent = Some(p.into());
         self
     }
 
     pub fn build(self, out: &mut Label) -> Result<(), NwgError> {
-        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        use winapi::um::winuser::{SS_LEFT, SS_RIGHT, SS_CENTER};
+
+        let mut flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+
+        match self.h_align {
+            HTextAlign::Left => { flags |= SS_LEFT; },
+            HTextAlign::Right => { flags |= SS_RIGHT; },
+            HTextAlign::Center => { flags |= SS_CENTER; },
+        }
 
         let parent = match self.parent {
             Some(p) => Ok(p),
@@ -267,9 +380,7 @@ impl<'a> LabelBuilder<'a> {
             out.set_font(self.font);
         }
 
-        if self.background_color.is_some() {
-            out.hook_background_color(self.background_color.unwrap());
-        }
+        out.hook_non_client_size(self.background_color, self.v_align);
 
         Ok(())
     }

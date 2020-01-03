@@ -17,6 +17,11 @@
 ![color dialog](color_dialog.png)
 ![font dialog](font_dialog.png)
 
+# Partials
+![partials 0](partials0.png)
+![partials 1](partials1.png)
+![partials 2](partials2.png)
+
 # Tray notification
 ![tray notification](tray_notification_.png)
 
