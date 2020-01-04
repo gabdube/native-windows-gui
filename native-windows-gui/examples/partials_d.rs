@@ -18,7 +18,7 @@ pub struct PartialDemo {
     #[nwg_events( OnWindowClose: [PartialDemo::exit] )]
     window: nwg::Window,
 
-    #[nwg_layout(parent: window, layout_type: nwg::BoxLayoutType::Horizontal)]
+    #[nwg_layout(parent: window, layout_type: BoxLayoutType::Horizontal)]
     layout: nwg::BoxLayout,
 
     #[nwg_control(collection: vec!["People", "Animals", "Food"])]

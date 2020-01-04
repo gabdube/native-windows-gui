@@ -263,10 +263,27 @@ fn find_layout_attr<'a>(attrs: &'a[syn::Attribute], name: &'static str) -> Optio
 
 /// Parse the layout parameters
 fn parse_attr_collection(member: &syn::Ident, layout_attr: &syn::Attribute, attr: &mut AttributeCollection) {
-    let attributes: AttributeCollection = match syn::parse2(layout_attr.tokens.clone()) {
+    let mut attributes: AttributeCollection = match syn::parse2(layout_attr.tokens.clone()) {
         Ok(a) => a,
         Err(e) => panic!("Failed to parse layout attributes for #{}: {}", member, e)
     };
+
+    // Appends `nwg` before the layout type attribute value
+    if let Some(attr) = attributes.params.iter_mut().find(|attr| &attr.attr_id == "layout_type") {
+        match &mut attr.value {
+            syn::Expr::Path(p) => {
+                let first = p.path.segments.first().map(|seg| &seg.ident);
+                if first.is_some() && first.unwrap() != "nwg" {
+                    let seg = syn::PathSegment{ 
+                        ident: syn::Ident::new("nwg", pm2::Span::call_site()),
+                        arguments: syn::PathArguments::None
+                    };
+                    p.path.segments.insert(0, seg);
+                }
+            },
+            _ => {}
+        }
+    }
 
     *attr = attributes;
 }
@@ -354,12 +371,15 @@ fn parse_layout_item(mem: &syn::Ident, attr_col: &AttributeCollection) -> Layout
     for p in attr_col.params.iter() {
         let attr_name = p.attr_id.to_string();
         match &attr_name as &str {
+            // Grid layout
             "col" => { col = int_value(&p.value) },
             "row" => { row = int_value(&p.value) },
             "col_span" => { col_span = int_value(&p.value) },
             "row_span" => { row_span = int_value(&p.value) },
+
+            // Box layout
             "cell" => { col = int_value(&p.value) },
-            "span" => { row = int_value(&p.value) },
+            "cell_span" => { col_span = int_value(&p.value) },
             _ => {}
         }
     }
