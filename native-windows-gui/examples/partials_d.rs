@@ -26,15 +26,15 @@ pub struct PartialDemo {
     #[nwg_events( OnListBoxSelect: [PartialDemo::change_interface] )]
     menu: nwg::ListBox<&'static str>,
 
-    #[nwg_control()]
+    #[nwg_control]
     #[nwg_layout_item(layout: layout, cell: 1, cell_span: 3)]
     frame1: nwg::Frame,
 
-    #[nwg_control()]
+    #[nwg_control]
     #[nwg_layout_item(layout: layout, cell: 1, cell_span: 3)]
     frame2: nwg::Frame,
 
-    #[nwg_control()]
+    #[nwg_control]
     #[nwg_layout_item(layout: layout, cell: 1, cell_span: 3)]
     frame3: nwg::Frame,
 

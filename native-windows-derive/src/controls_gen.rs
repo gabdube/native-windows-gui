@@ -34,10 +34,15 @@ struct ControlParameters {
 
 impl Parse for ControlParameters {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let content;
-        parenthesized!(content in input);
+        use syn::group::parse_parens;
+        let mut params = None;
+
+        if let Ok(parens) = parse_parens(input) {
+            params = Some(parens.content.parse_terminated(ControlParam::parse)?);
+        }
+
         Ok(ControlParameters {
-            params: content.parse_terminated(ControlParam::parse)?
+            params: params.unwrap_or(Punctuated::new())
         })
     }
 }
