@@ -8,6 +8,18 @@ use quote::{ToTokens};
 // Shared stuff between LayoutChild and LayoutAttribute
 //
 
+#[derive(Debug, Copy, Clone)]
+pub enum LayoutType {
+    Unknown,
+    BoxLayout,
+    GridLayout,
+}
+
+impl Default for LayoutType {
+    fn default() -> LayoutType { LayoutType::Unknown }
+}
+
+
 #[derive(Debug)]
 #[allow(unused)]
 struct Attribute {
@@ -48,6 +60,7 @@ impl Parse for AttributeCollection {
 
 #[derive(Debug)]
 struct LayoutChild {
+    layout_type: LayoutType,
     member: syn::Ident,
     col: u32,
     row: u32,
@@ -59,10 +72,23 @@ impl ToTokens for LayoutChild {
 
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
         let member = &self.member;
-        let [c, r, cs, rs] = [self.col, self.row, self.col_span, self.row_span];
-        let item_tk = quote! { 
-            child_item(nwg::GridLayoutItem::new(&ui.#member, #c, #r, #cs, #rs))
+
+        let item_tk = match self.layout_type {
+            LayoutType::GridLayout => {
+                let [c, r, cs, rs] = [self.col, self.row, self.col_span, self.row_span];
+                quote! { 
+                    child_item(nwg::GridLayoutItem::new(&ui.#member, #c, #r, #cs, #rs))
+                }
+            },
+            LayoutType::BoxLayout => {
+                let [cell, span] = [self.col, self.col_span];
+                quote! { 
+                    child_item(nwg::BoxLayoutItem::new(&ui.#member, #cell, #span))
+                }
+            },
+            _ => panic!("LayoutType for item {:?} was not set", self)
         };
+        
         item_tk.to_tokens(tokens);
     }
     
@@ -94,6 +120,7 @@ impl<'a> ToTokens for LayoutAttribute<'a> {
 
 #[derive(Debug, Default)]
 struct LayoutParams {
+    layout_type: LayoutType,
     member: Option<syn::Ident>,
     ty: Option<syn::Ident>,
     children: Vec<LayoutChild>,
@@ -150,7 +177,10 @@ impl ControlLayouts {
         let mut attributes = AttributeCollection::default();
         parse_attr_collection(&member, &attr, &mut attributes);
 
+        let layout_type = parse_layout_type(&field.ty);
+
         self.layouts.push(LayoutParams {
+            layout_type,
             member: Some(member.clone()),
             ty: Some(extract_layout_type(&field.ty)),
             children: Vec::with_capacity(5),
@@ -172,15 +202,19 @@ impl ControlLayouts {
         parse_attr_collection(&member, &attr, &mut col);
 
         let parent_name = layout_item_parent(&member, &col, &self.layouts);
-        let layout_item = parse_layout_item(&member, &col);
+        let mut layout_item = parse_layout_item(&member, &col);
 
         let parent_layout = self.layouts.iter_mut().find(|l| l.member.as_ref() == Some(&parent_name));
         match parent_layout {
-            Some(pl) => pl.children.push(layout_item),
+            Some(pl) => {
+                layout_item.layout_type = pl.layout_type;
+                pl.children.push(layout_item);
+            },
             None => {
                 // The parent layout might not have been defined yet.
                 // In such case, create new layout and add the children
                 let lp = LayoutParams {
+                    layout_type: LayoutType::Unknown,
                     member: Some(parent_name),
                     ty: None,
                     children: vec![layout_item],
@@ -324,11 +358,14 @@ fn parse_layout_item(mem: &syn::Ident, attr_col: &AttributeCollection) -> Layout
             "row" => { row = int_value(&p.value) },
             "col_span" => { col_span = int_value(&p.value) },
             "row_span" => { row_span = int_value(&p.value) },
+            "cell" => { col = int_value(&p.value) },
+            "span" => { row = int_value(&p.value) },
             _ => {}
         }
     }
 
     LayoutChild {
+        layout_type: LayoutType::Unknown,
         member: mem.clone(),
         col,
         row,
@@ -336,3 +373,23 @@ fn parse_layout_item(mem: &syn::Ident, attr_col: &AttributeCollection) -> Layout
         row_span
     }
 }
+
+/// Parse the layout type
+fn parse_layout_type(ty: &syn::Type) -> LayoutType {
+    match ty {
+        syn::Type::Path(p) => {
+            let path = &p.path;
+            let seg = path.segments.last().unwrap();
+            let name = &seg.ident;
+            if name == "GridLayout" {
+                LayoutType::GridLayout
+            } else if name == "BoxLayout" {
+                LayoutType::BoxLayout
+            } else {
+                panic!("Unknown layout type: {}", name);
+            }
+        },
+        t => panic!("Expected Path type got: {:?}", t)
+    }
+}
+
