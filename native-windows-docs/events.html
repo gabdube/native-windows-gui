@@ -104,7 +104,14 @@
         This is easily done by calling <code>dispatch_thread_events</code> function.<br><br>
 
         In order to break the event loop, a call to <code>stop_thread_dispatch</code> must be done. <b>Closing all the active windows is not enough!
-        In a case like this, the event loop will beep running in the background until the process is killed.</b>
+        In a case like this, the event loop will beep running in the background until the process is killed.</b><br><br>
+
+        The method <code>dispatch_thread_events</code> uses <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessage">GetMessage</a>
+        under the hood and will block the thread.<br><br>
+
+        Now, in some instances blocking the thread might not be wanted (ex: <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/opengl_canvas.rs">opengl canvas</a>).
+        In such cases, it's possible to pass a callback using the <code>dispatch_thread_events_with_callback</code>. Note that this function will not block the thread!
+        It's the equivalent of using a <code>loop</code>.
 
 <div class="highlight"><pre style="width: auto;"><span></span><span class="k">fn</span> <span class="nf">exit</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">stop_thread_dispatch</span><span class="p">();</span><span class="w"></span>
@@ -112,7 +119,12 @@
 
 <span class="c1">// ...</span>
 <span class="n">dispatch_thread_events</span><span class="p">();</span><span class="w"></span>
+
+<span class="n">nwg</span>::<span class="n">dispatch_thread_events_with_callback</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span>
+<span class="p">});</span><span class="w"></span>
 </pre></div>
+            
             
 
         <h3>Hooking the event queue</h3>  
