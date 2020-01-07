@@ -7,7 +7,8 @@
     <title>NWG guide - Small application layout</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 </head>
 <body class="rustdoc">
@@ -96,6 +97,10 @@
         all NWG examples are classified as small applications while the test suite is not.
         <br/><br/>
 
+        Note that you don't <b>really</b> have to follow the whole "NativeUi" setup for very small applications, for example see 
+        <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/basic_barebone.rs">the barebone example</a>.
+        <br/><br/>
+
         <h3>Overview</h3>
         
         <ol>
@@ -111,14 +116,42 @@
         <br/>
 
         <h3>Defining the structs</h3>
+
+        Assuming your application has data that must be stored.
+        <br/><br/>
+
+        Next, it's time to define the UI struct. 
         <br/><br/>
 
         <h3>Implementing NativeUI</h3>
+
+        Assuming you're not using native-windows-derive, you will have to manually implement the NativeUi trait.
         <br/><br/>
 
         <h3>Initializing</h3>
-        <br/><br/>
 
+<div class="highlight"><pre style="width: auto;"><span></span><span class="n">nwg</span>::<span class="n">init</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to init Native Windows GUI&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">data</span>: <span class="nc">RefCell</span><span class="o">&lt;</span><span class="n">MyData</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Initializing... */</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">app</span>: <span class="nc">MyApp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MyApp</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="p">..</span><span class="nb">Default</span>::<span class="n">default</span><span class="p">()</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MyApp</span>::<span class="n">build_ui</span><span class="p">(</span><span class="n">app</span><span class="p">).</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to build UI&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="n">nwg</span>::<span class="n">dispatch_thread_events</span><span class="p">();</span><span class="w"></span>
+</pre></div>
+            
+    Once everything is done, there's only initialization that's left to do. As this point everything is straightforward so...<br><br>
+    
+    1. Call the <code>init</code> function of nwg.<br><br>
+
+    2. Initialize your data struct and Ui struct.<br><br>
+
+    3. Call the <code>build_ui</code> method defined by <code>NativeUi</code>.<br><br>
+
+    4. As the final touch, call <code>dispatch_thread_events</code> to dispatch the events to our applications
+            
+
+    <br><br>
+    <br><br>
 
     </div>
 </div>

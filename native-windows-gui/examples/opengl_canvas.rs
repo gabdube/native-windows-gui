@@ -131,6 +131,7 @@ impl OpenGlCanvas {
             gl::Clear(gl::COLOR_BUFFER_BIT);
             gl::DrawArrays(gl::TRIANGLES, 0, 3);
             ctx.swap_buffers().unwrap();
+            self.canvas.invalidate()
         });
     }
 
@@ -191,12 +192,6 @@ impl ExternCanvas {
     pub fn show(&self) {
         self.window.set_visible(true);
         self.window.set_focus();
-    }
-
-    pub fn paint(&self) {
-        // Only needed when the canvas is a children control.
-        // This tells the system that the canvas was rendered from outside.
-        self.canvas.invalidate()
     }
 
     pub fn exit(&self) {
@@ -292,11 +287,6 @@ mod extern_canvas_ui {
                 let evt_ui = ui.clone();
                 let handle_events = move |evt, _evt_data, handle| {
                     match evt {
-                        E::OnPaint => {
-                            if &handle == &evt_ui.canvas {
-                                ExternCanvas::paint(&evt_ui.inner);
-                            }
-                        },
                         E::OnResize => {
                             if &handle == &evt_ui.canvas {
                                 ExternCanvas::resize_canvas(&evt_ui.inner);
