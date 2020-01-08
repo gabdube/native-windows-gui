@@ -111,7 +111,7 @@
 
         Now, in some instances blocking the thread might not be wanted (ex: <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/opengl_canvas.rs">opengl canvas</a>).
         In such cases, it's possible to pass a callback using the <code>dispatch_thread_events_with_callback</code>. Note that this function will not block the thread!
-        It's the equivalent of using a <code>loop</code>.
+        It's the equivalent of using a <code>loop</code> statement.
 
 <div class="highlight"><pre style="width: auto;"><span></span><span class="k">fn</span> <span class="nf">exit</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">stop_thread_dispatch</span><span class="p">();</span><span class="w"></span>
