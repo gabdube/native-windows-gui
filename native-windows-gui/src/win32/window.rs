@@ -33,6 +33,16 @@ pub struct EventHandler<F> {
     p: PhantomData<F>
 }
 
+/**
+    An opaque structure that represent a window subclass hook. 
+*/
+pub struct RawEventHandler<F> {
+    handle: HWND,
+    id: SUBCLASSPROC,
+    subclass_id: UINT_PTR,
+    p: PhantomData<F>
+}
+
 
 /// Note. While there might be a race condition here, it does not matter because
 /// All controls are thread local and the true id is (HANDLE + NOTICE_ID)
@@ -64,6 +74,8 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
     The hook is applied to the window and all it's children (recursively).
 
     Returns a `EventHandler` that can be passed to `unbind_event_handler` to remove the callbacks.
+
+    This function will panic if `handle` is not a window handle.
 */
 pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler<F>
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
@@ -142,8 +154,6 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHand
     let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
     let parent_hwnd = parent_handle.hwnd().expect("Cannot bind control with an handle of type");
     
-    // The callback function must be passed to each children of the control
-    // To do so, we must RC the callback
     let callback = Rc::new(f);
     let callback_ptr: *const F = Rc::into_raw(callback.clone());
     let callback_ptr_parent: *const F = Rc::into_raw(callback.clone());
@@ -184,7 +194,7 @@ pub fn unbind_event_handler<F>(handler: &EventHandler<F>)
             let callback: Rc<F> = Rc::from_raw(callback_value as *const F);
             mem::drop(callback);
 
-            RemoveWindowSubclass(handle, id, 0);
+            RemoveWindowSubclass(handle, id, subclass_id);
         };
     }
 }
@@ -196,20 +206,48 @@ pub fn unbind_event_handler<F>(handler: &EventHandler<F>)
     When assigning multiple callback to the same control, a different `id` must be specified for each call
     or otherwise, the old callback will be replaced by the new one. See `Label::hook_background_color` for example.
 */
-pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) 
+pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) -> RawEventHandler<F>
     where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
 {
     use winapi::um::commctrl::SetWindowSubclass;
     
-    match handle {
-        &ControlHandle::Hwnd(v) => unsafe {
+    let (handle, callback_fn) = match handle {
+        &ControlHandle::Hwnd(h) => unsafe {
+            let callback_fn: SUBCLASSPROC = Some(process_raw_events::<F>);
             let proc: Box<F> = Box::new(f);
             let proc_data: DWORD_PTR = mem::transmute(proc);
-            SetWindowSubclass(v, Some(process_raw_events::<F>), id, proc_data);
+            SetWindowSubclass(h, callback_fn, id, proc_data);
+            (h,  callback_fn)
         },
         htype => panic!("Cannot bind control with an handle of type {:?}.", htype)
-    }
+    };
 
+    RawEventHandler {
+        handle,
+        id: callback_fn,
+        subclass_id: id,
+        p: PhantomData
+    }
+}
+
+pub fn unbind_raw_event_handler<F>(handler: &RawEventHandler<F>)
+    where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
+{
+    use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
+
+    let id = handler.id;
+    let subclass_id = handler.subclass_id;
+    let handle = handler.handle;
+
+    unsafe {
+        let mut callback_value: UINT_PTR = 0;
+        GetWindowSubclass(handle, id, subclass_id, &mut callback_value);
+
+        let callback: Rc<F> = Rc::from_raw(callback_value as *const F);
+        mem::drop(callback);
+
+        RemoveWindowSubclass(handle, id, subclass_id);
+    }
 }
 
 /**

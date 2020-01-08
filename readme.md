@@ -122,7 +122,7 @@ Initial build time takes around **22 seconds** for a basic application. This is 
 The development of this library is considered "done". By that, I mean that
 there won't by any change to the API. Issues can be raised if a bug is found or
 if some area in the documentation are unclear. If I overlooked a very important feature,
-it might also be added.
+it will most likely be added.
 
 # License
 
