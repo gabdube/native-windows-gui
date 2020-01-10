@@ -93,7 +93,6 @@ mod basic_app_ui {
         }
     }
 
-
     impl Deref for BasicAppUi {
         type Target = BasicApp;
 
@@ -103,8 +102,6 @@ mod basic_app_ui {
     }
 
 }
-
-
 
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");

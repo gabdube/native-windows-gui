@@ -230,6 +230,9 @@ pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) -> 
     }
 }
 
+/**
+    Remove the raw event handler from the associated window.
+*/
 pub fn unbind_raw_event_handler<F>(handler: &RawEventHandler<F>)
     where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
 {

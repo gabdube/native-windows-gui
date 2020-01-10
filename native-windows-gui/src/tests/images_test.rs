@@ -24,7 +24,6 @@ mod partial_image_test_ui {
         }
 
         fn process_event<'a>(&self, _evt: Event, mut _evt_data: &EventData, _handle: ControlHandle) {
-            use crate::Event as E;
         }
 
         fn handles(&self) -> Vec<&ControlHandle> {
