@@ -19,6 +19,9 @@ pub struct FreeingTest {
     layout: GridLayout,
     bind_handler_btn: Button,
     custom_bind_button: Button,
+
+    bind_handler_btn2: Button,
+    custom_bind_button2: Button,
 }
 
 impl FreeingTest {
@@ -58,7 +61,7 @@ mod partial_freeing_test_ui {
             
             Window::builder()
                 .flags(WindowFlags::WINDOW)
-                .size((400, 200))
+                .size((400, 150))
                 .position((450, 100))
                 .title("Freeing stuff")
                 .build(&mut data.window)?;
@@ -73,12 +76,24 @@ mod partial_freeing_test_ui {
                 .parent(&data.window)
                 .build(&mut data.custom_bind_button)?;
 
+            Button::builder()
+                .text("Bind handler")
+                .parent(&data.window)
+                .build(&mut data.bind_handler_btn2)?;
+
+            Button::builder()
+                .text("Do something else!")
+                .parent(&data.window)
+                .build(&mut data.custom_bind_button2)?;
+
             GridLayout::builder()
                 .parent(&data.window)
                 .max_column(Some(2))
-                .max_row(Some(3))
+                .max_row(Some(2))
                 .child(0, 0, &data.bind_handler_btn)
                 .child(1, 0, &data.custom_bind_button)
+                .child(0, 1, &data.bind_handler_btn2)
+                .child(1, 1, &data.custom_bind_button2)
                 .build(&data.layout);
 
             Ok(())

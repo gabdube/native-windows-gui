@@ -142,7 +142,9 @@
         <br/><br/>
 
         To free a raw event handler call:<br>
-        <code>nwg::unbind_raw_event_handler(&handler)</code>
+        <code>nwg::unbind_raw_event_handler(&handler)</code><br/><br/>
+
+        <b>Calling unbind twice or trying to unbind an handler after destroying its parent will cause the function to panic.</b>
 
         <br/><br/>
 
