@@ -210,7 +210,7 @@ impl TabsContainer {
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
 
-        bind_raw_event_handler(&parent_handle, 0, move |_hwnd, msg, _w, l| { unsafe {
+        bind_raw_event_handler(&parent_handle, handle as usize, move |_hwnd, msg, _w, l| { unsafe {
             match msg {
                 WM_NOTIFY => {
                     let nmhdr: &NMHDR = mem::transmute(l);
@@ -227,7 +227,7 @@ impl TabsContainer {
             None
         } });
 
-        bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, _w, l| { unsafe {
+        bind_raw_event_handler(&self.handle, handle as usize, move |hwnd, msg, _w, l| { unsafe {
             match msg {
                 WM_SIZE => {
                     let mut data = (hwnd, LOWORD(l as u32) as u32, HIWORD(l as u32) as u32);

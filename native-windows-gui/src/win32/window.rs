@@ -22,6 +22,8 @@ static mut NOTICE_ID: u32 = 1;
 
 const NO_DATA: EventData = EventData::NoData;
 
+type RawCallback = dyn Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT>;
+
 
 /**
     An opaque structure that represent a window subclass hook. 
@@ -36,11 +38,10 @@ pub struct EventHandler<F> {
 /**
     An opaque structure that represent a window subclass hook. 
 */
-pub struct RawEventHandler<F> {
+pub struct RawEventHandler {
     handle: HWND,
     id: SUBCLASSPROC,
-    subclass_id: UINT_PTR,
-    p: PhantomData<F>
+    subclass_id: UINT_PTR
 }
 
 
@@ -206,18 +207,21 @@ pub fn unbind_event_handler<F>(handler: &EventHandler<F>)
     When assigning multiple callback to the same control, a different `id` must be specified for each call
     or otherwise, the old callback will be replaced by the new one. See `Label::hook_background_color` for example.
 */
-pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) -> RawEventHandler<F>
+pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) -> RawEventHandler
     where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
 {
     use winapi::um::commctrl::SetWindowSubclass;
+
+    // TODO: should check if the event handler is already bound
     
     let (handle, callback_fn) = match handle {
         &ControlHandle::Hwnd(h) => unsafe {
-            let callback_fn: SUBCLASSPROC = Some(process_raw_events::<F>);
-            let proc: Box<F> = Box::new(f);
-            let proc_data: DWORD_PTR = mem::transmute(proc);
-            SetWindowSubclass(h, callback_fn, id, proc_data);
-            (h,  callback_fn)
+            let callback_fn: SUBCLASSPROC = Some(process_raw_events);
+            let boxed_proc: Box<RawCallback> = Box::new(f);
+            let boxed_proc_wrapper: Box<*mut RawCallback> = Box::new(Box::into_raw(boxed_proc));
+            let proc_data: *mut *mut RawCallback = Box::into_raw(boxed_proc_wrapper);
+            SetWindowSubclass(h, callback_fn, id, proc_data as UINT_PTR);
+            (h, callback_fn)
         },
         htype => panic!("Cannot bind control with an handle of type {:?}.", htype)
     };
@@ -225,16 +229,14 @@ pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) -> 
     RawEventHandler {
         handle,
         id: callback_fn,
-        subclass_id: id,
-        p: PhantomData
+        subclass_id: id
     }
 }
 
 /**
     Remove the raw event handler from the associated window.
 */
-pub fn unbind_raw_event_handler<F>(handler: &RawEventHandler<F>)
-    where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
+pub fn unbind_raw_event_handler(handler: &RawEventHandler)
 {
     use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
 
@@ -246,7 +248,9 @@ pub fn unbind_raw_event_handler<F>(handler: &RawEventHandler<F>)
         let mut callback_value: UINT_PTR = 0;
         GetWindowSubclass(handle, id, subclass_id, &mut callback_value);
 
-        let callback: Rc<F> = Rc::from_raw(callback_value as *const F);
+        let callback_wrapper_ptr = callback_value as *mut *mut RawCallback;
+        let callback_wrapper: Box<*mut RawCallback> = Box::from_raw(callback_wrapper_ptr);
+        let callback: Box<RawCallback> = Box::from_raw(*callback_wrapper);
         mem::drop(callback);
 
         RemoveWindowSubclass(handle, id, subclass_id);
@@ -575,12 +579,12 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
     A window subclass procedure that dispatch the windows control events to the associated application control
 */
 #[allow(unused_variables)]
-unsafe extern "system" fn process_raw_events<F>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT 
-    where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
-{
-    let callback: Box<F> = mem::transmute(data);
+unsafe extern "system" fn process_raw_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
+    let callback_wrapper_ptr = data as *mut *mut RawCallback;
+    let callback: Box<RawCallback> = Box::from_raw(*callback_wrapper_ptr);
+
     let result = callback(hwnd, msg, w, l);
-    mem::forget(callback);
+    Box::into_raw(callback);
 
     match result {
         Some(r) => r,

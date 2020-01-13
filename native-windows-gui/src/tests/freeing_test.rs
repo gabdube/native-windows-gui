@@ -1,10 +1,15 @@
 use crate::*;
+use winapi::um::winuser::WM_LBUTTONUP;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 
 #[derive(Default)]
 struct FreeingData {
     raw_handler_bound: bool,
+    raw_callback_id: usize,
+    raw_handler: Option<RawEventHandler>,
+    rc: Rc<()>
 }
 
 #[derive(Default)]
@@ -19,7 +24,26 @@ pub struct FreeingTest {
 impl FreeingTest {
 
     fn bind_raw_handler(&self) {
+        let mut data = self.data.borrow_mut();
+        if data.raw_handler_bound {
+            self.bind_handler_btn.set_text("Bind raw handler");
+            data.raw_handler_bound = false;
+            unbind_raw_event_handler(&data.raw_handler.take().unwrap());
+        } else {
+            self.bind_handler_btn.set_text("Unbind raw handler");
+            data.raw_handler_bound = true;
+            data.raw_callback_id += 1;
 
+            let send_rc = data.rc.clone();
+            let handler = bind_raw_event_handler(&self.custom_bind_button.handle, data.raw_callback_id, move |_hwnd, msg, _w, _l| {
+                if msg == WM_LBUTTONUP {
+                    simple_message("Raw handler", &format!("Button WM_LBUTTONUP hook. Rc has {:?} strong count", Rc::strong_count(&send_rc)) );
+                }
+                None
+            });
+
+            data.raw_handler = Some(handler);
+        }
     }
 
 }
@@ -34,7 +58,7 @@ mod partial_freeing_test_ui {
             
             Window::builder()
                 .flags(WindowFlags::WINDOW)
-                .size((300, 300))
+                .size((400, 200))
                 .position((450, 100))
                 .title("Freeing stuff")
                 .build(&mut data.window)?;
