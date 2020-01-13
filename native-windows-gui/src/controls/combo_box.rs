@@ -65,7 +65,7 @@ fn build_combobox(combo: &mut nwg::ComboBox<&'static str>, window: &nwg::Window)
 }
 ```
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct ComboBox<D: Display+Default> {
     pub handle: ControlHandle,
     collection: RefCell<Vec<D>>

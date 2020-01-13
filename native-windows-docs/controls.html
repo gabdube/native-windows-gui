@@ -183,9 +183,12 @@
         <br><br>
 
         <h3>Implementation</h3>
-        Every control is implemented as a wrapper over a low level window handle. As such, most of them only take the size of a pointer.<br><br>
+        Every control is implemented as a wrapper over a low level window handle. As such, <b>most*</b> of them only take the size of a pointer.<br><br>
+        
+        Some built-in controls lacks critical feature on their own. To fix this, nwg extends those controls with <a href="low_events.html">raw events handlers</a>.
+        <br><br>
 
-        In some case, controls that support custom collections (ex: ListBox and ComboBox) also uses Rust collections internally to store the rust data.
+        Also, controls that support custom collections (ex: ListBox and ComboBox) also uses Rust collections internally to store the rust data.
         <br/><br/>
 
 

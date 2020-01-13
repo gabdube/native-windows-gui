@@ -42,7 +42,7 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Menu/MenuItem handle is not HM
     }
     ```
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct Menu {
     pub handle: ControlHandle
 }

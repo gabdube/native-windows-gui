@@ -1,7 +1,8 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
-use crate::{Font, NwgError, HTextAlign, VTextAlign};
+use crate::{Font, NwgError, HTextAlign, VTextAlign, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
+use std::cell::RefCell;
 
 const NOT_BOUND: &'static str = "Label is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Label handle is not HWND!";
@@ -24,9 +25,11 @@ bitflags! {
 /**
 A label is a single line of static text
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct Label {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
+    handler1: RefCell<Option<RawEventHandler>>,
 }
 
 impl Label {
@@ -199,7 +202,7 @@ impl Label {
         unsafe {
 
         if bg.is_some() {
-            bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+            let handler0 = bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
                 match msg {
                     WM_CTLCOLORSTATIC => {
                         let child = l as HWND;
@@ -212,10 +215,11 @@ impl Label {
     
                 None
             });
-        }
-        
 
-        bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, w, l| {
+            *self.handler0.borrow_mut() = Some(handler0);
+        }
+
+        let handler1 = bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, w, l| {
             match msg {
                 WM_NCCALCSIZE  => {
                     if w == 0 { return None }
@@ -290,11 +294,27 @@ impl Label {
             None
         });
 
+        *self.handler1.borrow_mut() = Some(handler1);
+
         }
     }
 
 }
 
+
+impl Drop for Label {
+    fn drop(&mut self) {
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+
+        let handler = self.handler1.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+    }
+}
 
 pub struct LabelBuilder<'a> {
     text: &'a str,

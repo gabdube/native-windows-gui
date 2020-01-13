@@ -38,7 +38,7 @@ A frame is a rectangle containing children controls. Frame is implemented as a c
   * `MousePress(_)`: Generic mouse press events on the button
   * `OnMouseMove`: Generic mouse mouse event
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct Frame {
     pub handle: ControlHandle
 }

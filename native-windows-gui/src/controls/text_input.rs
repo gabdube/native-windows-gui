@@ -4,8 +4,9 @@
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, ES_AUTOHSCROLL};
 use crate::win32::window_helper as wh;
-use crate::{Font, NwgError, HTextAlign};
+use crate::{Font, NwgError, HTextAlign, RawEventHandler};
 use super::{ControlBase, ControlHandle};
+use std::cell::RefCell;
 use std::ops::Range;
 use std::char;
 
@@ -28,9 +29,10 @@ This control only allow a single line input. For block of text, use `TextBox`.
 Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/controls/about-edit-controls#text-and-input-styles
 
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct TextInput {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
 }
 
 impl TextInput {
@@ -323,7 +325,7 @@ impl TextInput {
 
         unsafe {
 
-        bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, w, l| {
+        let handler = bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, w, l| {
             match msg {
                 WM_NCCALCSIZE  => {
                     if w == 0 { return None }
@@ -398,9 +400,22 @@ impl TextInput {
             None
         });
 
+        *self.handler0.borrow_mut() = Some(handler);
+
         }
     }
 
+}
+
+impl Drop for TextInput {
+    fn drop(&mut self) {
+        use crate::unbind_raw_event_handler;
+        
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+    }
 }
 
 pub struct TextInputBuilder<'a> {

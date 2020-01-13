@@ -1,7 +1,8 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_GROUP};
 use crate::win32::window_helper as wh;
-use crate::{Font, NwgError};
+use crate::{Font, NwgError, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
+use std::cell::RefCell;
 
 const NOT_BOUND: &'static str = "RadioButton is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: RadioButton handle is not HWND!";
@@ -27,9 +28,10 @@ icon, or bitmap that indicates a choice the user can make by selecting the butto
 
 Note: Internally, check box are `Button` and as such, they trigger the same events
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct RadioButton {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
 }
 
 impl RadioButton {
@@ -46,7 +48,6 @@ impl RadioButton {
             parent: None
         }
     }
-
 
     /// Return the check state of the check box
     pub fn check_state(&self) -> RadioButtonState {
@@ -213,7 +214,7 @@ impl RadioButton {
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
         let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
         
-        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+        let handler = bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
             match msg {
                 WM_CTLCOLORSTATIC => {
                     let child = l as HWND;
@@ -226,8 +227,19 @@ impl RadioButton {
 
             None
         });
+
+        *self.handler0.borrow_mut() = Some(handler);
     }
 
+}
+
+impl Drop for RadioButton {
+    fn drop(&mut self) {
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+    }
 }
 
 pub struct RadioButtonBuilder<'a> {

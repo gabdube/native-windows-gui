@@ -67,7 +67,7 @@ fn build_listbox(listb: &mut nwg::ListBox<&'static str>, window: &nwg::Window, f
 ```
 
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct ListBox<D: Display+Default> {
     pub handle: ControlHandle,
     collection: RefCell<Vec<D>>

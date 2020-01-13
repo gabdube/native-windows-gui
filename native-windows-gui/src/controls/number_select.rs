@@ -50,7 +50,7 @@ fn build_number_select(num_select: &mut nwg::NumberSelect, window: &nwg::Window,
 ```
 
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct NumberSelect {
     pub handle: ControlHandle,
     edit: TextInput,

@@ -1,7 +1,8 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_AUTOCHECKBOX, BS_AUTO3STATE, BS_PUSHLIKE};
 use crate::win32::window_helper as wh;
-use crate::{Font, NwgError};
+use crate::{Font, NwgError, RawEventHandler};
 use super::{ControlBase, ControlHandle};
+use std::cell::RefCell;
 
 const NOT_BOUND: &'static str = "CheckBox is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: CheckBox handle is not HWND!";
@@ -70,9 +71,10 @@ fn build_checkbox(button: &mut nwg::CheckBox, window: &nwg::Window, font: &nwg::
 }
 ```
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct CheckBox {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
 }
 
 impl CheckBox {
@@ -284,7 +286,7 @@ impl CheckBox {
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
         let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
         
-        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+        let handler = bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
             match msg {
                 WM_CTLCOLORSTATIC => {
                     let child = l as HWND;
@@ -297,8 +299,21 @@ impl CheckBox {
 
             None
         });
+
+        *self.handler0.borrow_mut() = Some(handler);
     }
 
+}
+
+impl Drop for CheckBox {
+    fn drop(&mut self) {
+        use crate::unbind_raw_event_handler;
+        
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+    }
 }
 
 pub struct CheckBoxBuilder<'a> {

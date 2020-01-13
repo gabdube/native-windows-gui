@@ -2,8 +2,9 @@ use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::WS_VISIBLE;
 use winapi::um::commctrl::{TBS_AUTOTICKS, TBS_VERT, TBS_HORZ, TBS_TOP, TBS_BOTTOM, TBS_LEFT, TBS_RIGHT, TBS_NOTICKS, TBS_ENABLESELRANGE};
 use crate::win32::window_helper as wh;
-use crate::NwgError;
+use crate::{NwgError, RawEventHandler};
 use super::{ControlBase, ControlHandle};
+use std::cell::RefCell;
 use std::ops::Range;
 
 const NOT_BOUND: &'static str = "TrackBar is not yet bound to a winapi object";
@@ -30,15 +31,16 @@ bitflags! {
 A trackbar is a window that contains a slider (sometimes called a thumb) in a channel, and optional tick marks.
 When the user moves the slider, using either the mouse or the direction keys, the trackbar sends notification messages to indicate the change.
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct TrackBar {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
 }
 
 impl TrackBar {
 
-    pub fn builder() -> TrackbarBuilder {
-        TrackbarBuilder {
+    pub fn builder() -> TrackBarBuilder {
+        TrackBarBuilder {
             size: (100, 20),
             position: (0, 0),
             range: None,
@@ -249,7 +251,7 @@ impl TrackBar {
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
         let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
         
-        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+        let handler = bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
             match msg {
                 WM_CTLCOLORSTATIC => {
                     let child = l as HWND;
@@ -262,12 +264,25 @@ impl TrackBar {
 
             None
         });
+
+        *self.handler0.borrow_mut() = Some(handler);
     }
 
 }
 
+impl Drop for TrackBar {
+    fn drop(&mut self) {
+        use crate::unbind_raw_event_handler;
+        
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+    }
+}
 
-pub struct TrackbarBuilder {
+
+pub struct TrackBarBuilder {
     size: (i32, i32),
     position: (i32, i32),
     range: Option<Range<usize>>,
@@ -278,44 +293,44 @@ pub struct TrackbarBuilder {
     background_color: Option<[u8; 3]>,
 }
 
-impl TrackbarBuilder {
+impl TrackBarBuilder {
 
-    pub fn flags(mut self, flags: TrackBarFlags) -> TrackbarBuilder {
+    pub fn flags(mut self, flags: TrackBarFlags) -> TrackBarBuilder {
         self.flags = Some(flags);
         self
     }
 
-    pub fn size(mut self, size: (i32, i32)) -> TrackbarBuilder {
+    pub fn size(mut self, size: (i32, i32)) -> TrackBarBuilder {
         self.size = size;
         self
     }
 
-    pub fn position(mut self, pos: (i32, i32)) -> TrackbarBuilder {
+    pub fn position(mut self, pos: (i32, i32)) -> TrackBarBuilder {
         self.position = pos;
         self
     }
 
-    pub fn range(mut self, range: Option<Range<usize>>) -> TrackbarBuilder {
+    pub fn range(mut self, range: Option<Range<usize>>) -> TrackBarBuilder {
         self.range = range;
         self
     }
 
-    pub fn selected_range(mut self, range: Option<Range<usize>>) -> TrackbarBuilder {
+    pub fn selected_range(mut self, range: Option<Range<usize>>) -> TrackBarBuilder {
         self.selected_range = range;
         self
     }
 
-    pub fn pos(mut self, pos: Option<usize>) -> TrackbarBuilder {
+    pub fn pos(mut self, pos: Option<usize>) -> TrackBarBuilder {
         self.pos = pos;
         self
     }
 
-    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TrackbarBuilder {
+    pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TrackBarBuilder {
         self.parent = Some(p.into());
         self
     }
 
-    pub fn background_color(mut self, color: Option<[u8;3]>) -> TrackbarBuilder {
+    pub fn background_color(mut self, color: Option<[u8;3]>) -> TrackBarBuilder {
         self.background_color = color;
         self
     }

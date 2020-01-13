@@ -2,7 +2,8 @@ use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use crate::win32::window_helper as wh;
 use crate::win32::resources_helper as rh;
 use super::{ControlBase, ControlHandle};
-use crate::{Bitmap, Icon, NwgError};
+use crate::{Bitmap, Icon, NwgError, RawEventHandler, unbind_raw_event_handler};
+use std::cell::RefCell;
 
 const NOT_BOUND: &'static str = "ImageFrame is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: ImageFrame handle is not HWND!";
@@ -42,9 +43,10 @@ fn build_frame(button: &mut nwg::ImageFrame, window: &nwg::Window, ico: &nwg::Ic
 }
 ```
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct ImageFrame {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
 }
 
 impl ImageFrame {
@@ -200,7 +202,7 @@ impl ImageFrame {
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
         let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
         
-        bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+        let handler = bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
             match msg {
                 WM_CTLCOLORSTATIC => {
                     let child = l as HWND;
@@ -213,8 +215,19 @@ impl ImageFrame {
 
             None
         });
+
+        *self.handler0.borrow_mut() = Some(handler);
     }
 
+}
+
+impl Drop for ImageFrame {
+    fn drop(&mut self) {
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+    }
 }
 
 pub struct ImageFrameBuilder<'a> {

@@ -77,7 +77,7 @@ fn build_dtp(date: &mut nwg::DatePicker, window: &nwg::Window) {
 }
 ```
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct DatePicker {
     pub handle: ControlHandle
 }

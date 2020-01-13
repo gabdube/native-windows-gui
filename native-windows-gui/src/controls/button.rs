@@ -57,7 +57,7 @@ fn build_button(button: &mut nwg::Button, window: &nwg::Window, font: &nwg::Font
 ```
 
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct Button {
     pub handle: ControlHandle
 }

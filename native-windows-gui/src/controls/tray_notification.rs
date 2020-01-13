@@ -1,29 +1,3 @@
-/*!
-    A control that handle system tray notification.
-    A TrayNotification wraps a single icon in the Windows system tray.
-    
-    An application can have many TrayNotification, but each window (aka parent) can only have a single traynotification.
-    It is possible to create system tray only application with the `MessageOnlyWindow` control.
-
-    A system tray will receive events if `callback` is set to true in the builder (the default behaviour).
-    The control will generate mouse events such as `OnMouseMove` when the user interact with the tray icon or the message popup.
-    A system tray will also receive a `OnContextMenu` when the user right click the icon. It is highly recommended handle this message and display a popup menu
-
-    You can't get information (such as visibility) because Windows don't want you to.
-
-    ## Example
-
-    ```
-    use native_windows_gui as nwg;
-
-    fn notice_user(tray: &nwg::TrayNotification, image: &nwg::Icon) {
-        let flags = nwg::TrayNotificationFlags::USER_ICON | nwg::TrayNotificationFlags::LARGE_ICON;
-        tray.show("Hello World", Some("Welcome to my application"), Some(flags), Some(image));
-    }
-    ```
-
-    Winapi docs: https://docs.microsoft.com/en-us/windows/win32/shell/notification-area
-*/
 use winapi::um::shellapi::{NIIF_NONE, NIIF_INFO, NIIF_WARNING, NIIF_ERROR, NIIF_USER, NIIF_NOSOUND, NIIF_LARGE_ICON, NIIF_RESPECT_QUIET_TIME};
 use winapi::um::shellapi::{Shell_NotifyIconW, NOTIFYICONDATAW};
 use super::{ControlBase, ControlHandle};
@@ -50,7 +24,32 @@ bitflags! {
 }
 
 
-/// TrayNotification manager. See module level documentation
+/**
+    A control that handle system tray notification.
+    A TrayNotification wraps a single icon in the Windows system tray.
+    
+    An application can have many TrayNotification, but each window (aka parent) can only have a single traynotification.
+    It is possible to create system tray only application with the `MessageOnlyWindow` control.
+
+    A system tray will receive events if `callback` is set to true in the builder (the default behaviour).
+    The control will generate mouse events such as `OnMouseMove` when the user interact with the tray icon or the message popup.
+    A system tray will also receive a `OnContextMenu` when the user right click the icon. It is highly recommended handle this message and display a popup menu
+
+    You can't get information on the state of a tray notification (such as visibility) because Windows don't want you to.
+
+    ## Example
+
+    ```
+    use native_windows_gui as nwg;
+
+    fn notice_user(tray: &nwg::TrayNotification, image: &nwg::Icon) {
+        let flags = nwg::TrayNotificationFlags::USER_ICON | nwg::TrayNotificationFlags::LARGE_ICON;
+        tray.show("Hello World", Some("Welcome to my application"), Some(flags), Some(image));
+    }
+    ```
+
+    Winapi docs: https://docs.microsoft.com/en-us/windows/win32/shell/notification-area
+*/
 #[derive(Default)]
 pub struct TrayNotification {
     pub handle: ControlHandle,

@@ -1,14 +1,16 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use crate::win32::window_helper as wh;
-use crate::{Font, NwgError};
+use crate::{Font, NwgError, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlHandle, ControlBase};
+use std::cell::RefCell;
 
 const NOT_BOUND: &'static str = "StatusBar is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: StatusBar handle is not HWND!";
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct StatusBar {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
 }
 
 
@@ -113,15 +115,26 @@ impl StatusBar {
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
-        bind_raw_event_handler(&parent_handle, handle as usize, move |_hwnd, msg, _w, _l| {
+        let handler = bind_raw_event_handler(&parent_handle, handle as usize, move |_hwnd, msg, _w, _l| {
             if msg == WM_SIZE {
                 wh::send_message(handle, WM_SIZE, 0, 0);
             }
 
             None
         });
+
+        *self.handler0.borrow_mut() = Some(handler);
     }
 
+}
+
+impl Drop for StatusBar {
+    fn drop(&mut self) {
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+    }
 }
 
 pub struct StatusBarBuilder<'a> {

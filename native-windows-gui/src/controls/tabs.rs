@@ -4,9 +4,10 @@ use winapi::um::winnt::LPWSTR;
 use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_COMPOSITED};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
-use crate::{NwgError, Font};
+use crate::{NwgError, Font, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
 use std::mem;
+use std::cell::RefCell;
 
 const NOT_BOUND: &'static str = "TabsContainer/Tab is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: TabsContainer/Tab handle is not HWND!";
@@ -23,9 +24,11 @@ bitflags! {
 A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
 that indicates what the button does when the user selects it.
 */
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct TabsContainer {
     pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
+    handler1: RefCell<Option<RawEventHandler>>,
 }
 
 impl TabsContainer {
@@ -210,7 +213,7 @@ impl TabsContainer {
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
 
-        bind_raw_event_handler(&parent_handle, handle as usize, move |_hwnd, msg, _w, l| { unsafe {
+        let handler0 = bind_raw_event_handler(&parent_handle, handle as usize, move |_hwnd, msg, _w, l| { unsafe {
             match msg {
                 WM_NOTIFY => {
                     let nmhdr: &NMHDR = mem::transmute(l);
@@ -227,7 +230,7 @@ impl TabsContainer {
             None
         } });
 
-        bind_raw_event_handler(&self.handle, handle as usize, move |hwnd, msg, _w, l| { unsafe {
+        let handler1 = bind_raw_event_handler(&self.handle, handle as usize, move |hwnd, msg, _w, l| { unsafe {
             match msg {
                 WM_SIZE => {
                     let mut data = (hwnd, LOWORD(l as u32) as u32, HIWORD(l as u32) as u32);
@@ -243,6 +246,23 @@ impl TabsContainer {
 
             None
         } } );
+
+        *self.handler0.borrow_mut() = Some(handler0);
+        *self.handler1.borrow_mut() = Some(handler1);
+    }
+}
+
+impl Drop for TabsContainer {
+    fn drop(&mut self) {
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+
+        let handler = self.handler1.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
     }
 }
 
