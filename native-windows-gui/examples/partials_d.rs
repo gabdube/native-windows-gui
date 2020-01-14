@@ -8,7 +8,7 @@
 extern crate native_windows_gui as nwg;
 extern crate native_windows_derive as nwd;
 
-use nwd::{NwgUi};
+use nwd::{NwgUi, NwgPartial};
 use nwg::NativeUi;
 
 
@@ -38,8 +38,13 @@ pub struct PartialDemo {
     #[nwg_layout_item(layout: layout, cell: 1, cell_span: 3)]
     frame3: nwg::Frame,
 
+    #[nwg_partial(parent=frame1)]
     people_ui: PeopleUi,
+
+    #[nwg_partial(parent=frame2)]
     animal_ui: AnimalUi,
+
+    #[nwg_partial(parent=frame3)]
     food_ui: FoodUi,
 }
 
@@ -63,40 +68,87 @@ impl PartialDemo {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, NwgPartial)]
 pub struct PeopleUi {
+
+    #[nwg_layout(parent: window, max_size: [1000, 150], min_size: [100, 120])]
     layout: nwg::GridLayout,
 
+    #[nwg_control(text="Name:", align=HTextAlign::Right)]
+    #[nwg_layout_item(layout: layout, col: 0, row: 0)]
     label1: nwg::Label,
+
+    #[nwg_control(text="Age:", align=HTextAlign::Right)]
+    #[nwg_layout_item(layout: layout, col: 0, row: 1)]
     label2: nwg::Label,
+
+    #[nwg_control(text="Job:", align=HTextAlign::Right)]
+    #[nwg_layout_item(layout: layout, col: 0, row: 2)]
     label3: nwg::Label,
 
+    #[nwg_control(text="John Doe")]
+    #[nwg_layout_item(layout: layout, col: 1, row: 0)]
     name_input: nwg::TextInput,
+
+    #[nwg_control(text="75:", flags="NUMBER")]
+    #[nwg_layout_item(layout: layout, col: 1, row: 1)]
     age_input: nwg::TextInput,
+
+    #[nwg_control(text="Programmer")]
+    #[nwg_layout_item(layout: layout, col: 1, row: 2)]
     job_input: nwg::TextInput,
 }
 
-#[derive(Default)]
+#[derive(Default, NwgPartial)]
 pub struct AnimalUi {
+    #[nwg_layout(parent: window, max_size: [1000, 150], min_size: [100, 120])]
     layout: nwg::GridLayout,
 
+    #[nwg_control(text="Name:", align=HTextAlign::Right)]
+    #[nwg_layout_item(layout: layout, col: 0, row: 0)]
     label1: nwg::Label,
+
+    #[nwg_control(text="Race:", align=HTextAlign::Right)]
+    #[nwg_layout_item(layout: layout, col: 0, row: 1)]
     label2: nwg::Label,
+
+    #[nwg_control(text="Is fluffy:", align=HTextAlign::Right)]
+    #[nwg_layout_item(layout: layout, col: 0, row: 2)]
     label3: nwg::Label,
 
+    #[nwg_control(text="Mittens")]
+    #[nwg_layout_item(layout: layout, col: 1, row: 0)]
     name_input: nwg::TextInput,
+
+    #[nwg_control(collection=vec!["Cat", "Dog", "Pidgeon", "Monkey"], seleted_index=Some(0)]
+    #[nwg_layout_item(layout: layout, col: 1, row: 1)]
     race_input: nwg::ComboBox<&'static str>,
+
+    #[nwg_control(text="", check_state=CheckBoxState::Checked)]
+    #[nwg_layout_item(layout: layout, col: 1, row: 2)]
     is_soft_input: nwg::CheckBox
 }
 
-#[derive(Default)]
+#[derive(Default, NwgPartial)]
 pub struct FoodUi {
+    
+    #[nwg_layout(parent: window, max_size: [1000, 150], min_size: [100, 120])]
     layout: nwg::GridLayout,
 
+    #[nwg_control(text="Name:", align=HTextAlign::Right)]
+    #[nwg_layout_item(layout: layout, col: 0, row: 0)]
     label1: nwg::Label,
+
+    #[nwg_control(text="Tasty:", align=HTextAlign::Right)]
+    #[nwg_layout_item(layout: layout, col: 0, row: 1)]
     label2: nwg::Label,
 
+    #[nwg_control(text="Banana")]
+    #[nwg_layout_item(layout: layout, col: 1, row: 0)]
     name_input: nwg::TextInput,
+
+    #[nwg_control(text="", check_state: CheckBoxState::Checked)]
+    #[nwg_layout_item(layout: layout, col: 1, row: 1)]
     tasty_input: nwg::CheckBox,
 }
 
