@@ -10,6 +10,9 @@ use syn::token::Comma;
 #[macro_use]
 extern crate quote;
 
+//mod base;
+//use base::NwgUi;
+
 mod controls_gen;
 use controls_gen::ControlGen;
 
@@ -22,6 +25,7 @@ use controls_layouts::ControlLayouts;
 
 struct BaseNames {
     n_module: syn::Ident,
+    n_partial_module: syn::Ident,
     n_struct: syn::Ident,
     n_struct_ui: syn::Ident,
 }
@@ -46,9 +50,12 @@ fn to_snake_case(s: &str) -> String {
 fn parse_base_names(d: &DeriveInput) -> BaseNames {
     let base_name = d.ident.to_string();
     let module_name = format!("{}_ui", to_snake_case(&base_name));
+    let partial_module = format!("partial_{}_ui", to_snake_case(&base_name));
     let struct_name = format!("{}Ui", &base_name);
+    
     BaseNames {
         n_module: syn::Ident::new(&module_name, pm2::Span::call_site()),
+        n_partial_module: syn::Ident::new(&partial_module, pm2::Span::call_site()),
         n_struct: syn::Ident::new(&base_name, pm2::Span::call_site()),
         n_struct_ui: syn::Ident::new(&struct_name, pm2::Span::call_site()),
     }
@@ -106,7 +113,7 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
     }
 }
 
-#[proc_macro_derive(NwgUi, attributes(nwg_control, nwg_events, nwg_layout, nwg_layout_item))]
+#[proc_macro_derive(NwgUi, attributes(nwg_control, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
 pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     let base = parse_macro_input!(input as DeriveInput);
 
@@ -151,4 +158,37 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     };
 
     pm::TokenStream::from(derive_ui)
+}
+
+#[proc_macro_derive(NwgPartial, attributes(nwg_control, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
+pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
+    let base = parse_macro_input!(input as DeriveInput);
+
+    let names = parse_base_names(&base);
+    let ui_data = parse_ui_data(&base).expect("NWG derive can only be implemented on structs");
+
+    let partial_name = &names.n_partial_module;
+    let struct_name = &names.n_struct;
+
+    let partial_ui = quote! {
+        mod #partial_name {
+            use native_windows_gui as nwg;
+            use super::*;
+        
+            impl nwg::PartialUi<#struct_name> for #struct_name {
+                fn build_partial<W: Into<nwg::ControlHandle>>(_data: &mut #struct_name, _parent: Option<W>) -> Result<(), nwg::NwgError> {
+                    Ok(())
+                }
+
+                fn process_event<'a>(&self, _evt: nwg::Event, _evt_data: &nwg::EventData, _handle: nwg::ControlHandle) {
+                }
+
+                fn handles(&self) -> Vec<&nwg::ControlHandle> {
+                    Vec::new()
+                }
+            }
+        }
+    };
+
+    pm::TokenStream::from(partial_ui)
 }

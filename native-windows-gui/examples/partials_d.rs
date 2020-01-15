@@ -120,7 +120,7 @@ pub struct AnimalUi {
     #[nwg_layout_item(layout: layout, col: 1, row: 0)]
     name_input: nwg::TextInput,
 
-    #[nwg_control(collection=vec!["Cat", "Dog", "Pidgeon", "Monkey"], seleted_index=Some(0)]
+    #[nwg_control(collection=vec!["Cat", "Dog", "Pidgeon", "Monkey"], seleted_index=Some(0))]
     #[nwg_layout_item(layout: layout, col: 1, row: 1)]
     race_input: nwg::ComboBox<&'static str>,
 
