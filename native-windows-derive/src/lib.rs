@@ -13,8 +13,8 @@ extern crate quote;
 mod controls;
 use controls::ControlGen;
 
-mod controls_events;
-use controls_events::ControlEvents;
+mod events;
+use events::ControlEvents;
 
 mod controls_layouts;
 use controls_layouts::ControlLayouts;

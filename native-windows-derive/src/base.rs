@@ -1,16 +1,20 @@
 use quote::{ToTokens};
 
+const TOP_LEVEL: &'static [&'static str] = &[
+    "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow"
+];
+
 
 #[derive(Debug)]
 pub struct NwgItem<'a> {
     id: &'a syn::Ident,
+    parent_id: Option<String>,
     ty: &'a syn::Ident,
 
     names: Vec<syn::Ident>,
     values: Vec<syn::Expr>,
 
     weight: u32,
-    parent_is_fine: bool,
 }
 
 impl<'a> NwgItem<'a> {
@@ -35,10 +39,6 @@ impl<'a> NwgItem<'a> {
         }
     }
 
-    fn no_parent(&self) -> bool {
-        !self.names.iter().any(|n| n == "parent")
-    }
-
     fn expand_flags(&mut self) {
         let flags_index = self.names.iter().position(|n| n == "flags");
         if let Some(i) = flags_index {
@@ -49,7 +49,7 @@ impl<'a> NwgItem<'a> {
 
     fn expand_parent(&mut self) {
         let parent_index = self.names.iter().position(|n| n == "parent");
-        if self.parent_is_fine || parent_index.is_none() {
+        if parent_index.is_none() {
             return;
         }
 
@@ -57,6 +57,7 @@ impl<'a> NwgItem<'a> {
         let parent_expr: syn::Expr = match &self.values[i] {
             syn::Expr::Path(p) => {
                 let id = &p.path.segments.last().unwrap().ident;
+                self.parent_id = Some(id.to_string());
                 syn::parse_str(&format!("&data.{}", id)).unwrap()
             },
             _ => { panic!("Bad expression type for parent of field {}", self.id); }
@@ -116,7 +117,6 @@ impl<'a> ToTokens for NwgUiEvents<'a> {
 
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
         let events_tk = quote! {
-
         };
 
         events_tk.to_tokens(tokens);
@@ -149,10 +149,6 @@ pub struct NwgUi<'a> {
 impl<'a> NwgUi<'a> {
 
     pub fn build(data: &'a syn::DataStruct) -> NwgUi<'a> {
-        const TOP_LEVEL: &'static [&'static str] = &[
-            "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow"
-        ];
-
         let named_fields = match &data.fields {
             syn::Fields::Named(n) => &n.named,
             _ => panic!("Ui structure must have named fields")
@@ -168,39 +164,60 @@ impl<'a> NwgUi<'a> {
 
             let f = NwgItem {
                 id: field.ident.as_ref().unwrap(),
+                parent_id: None,
                 ty: NwgItem::extract_type(field),
                 names,
                 values,
                 weight: 0,
-                parent_is_fine: false,
             };
 
             controls.push(f);
         }
 
-        // Second pass: Auto parent
+        // Second pass: parent stuff
         for i in 0..(controls.len()) {
-            if controls[i].no_parent() {
+            let has_attr_parent = controls[i].names.iter().any(|n| n == "parent");
+            if has_attr_parent {
+                controls[i].expand_parent();
+            } else {
                 let parent = controls[0..i]
                     .iter().rev()
                     .find(|i| TOP_LEVEL.iter().any(|top| i.ty == top) );
                 
                 if let Some(parent) = parent {
+                    let parent_id = Some(parent.id.to_string());
                     let parent_expr: syn::Expr = syn::parse_str(&format!("&data.{}", parent.id)).unwrap();
                     controls[i].names.push(syn::Ident::new("parent", pm2::Span::call_site()));
                     controls[i].values.push(parent_expr);
-                    controls[i].parent_is_fine = true;
+                    controls[i].parent_id = parent_id;
                 }
             }
         }
 
-        // Second pass: Helpers
-        for control in controls.iter_mut() {
-            control.expand_flags();
-            control.expand_parent();
+        // Third pass: Parent Weight
+        fn compute_weight(controls: &[NwgItem], index: usize, weight: &mut u32) {
+            match &controls[index].parent_id {
+                Some(p) => 
+                    if let Some(parent_index) = controls.iter().position(|c| &c.id == &p) {
+                        compute_weight(controls, parent_index, weight);
+                        *weight += 1;
+                    },
+                None => {}
+            }
+        };
+
+        for i in 0..(controls.len()) {
+            let mut weight = 0;
+            compute_weight(&controls, i, &mut weight);
+            controls[i].weight = weight;
         }
 
-        // Third pass: sort by weight
+        // Fourth pass: Helpers
+        for control in controls.iter_mut() {
+            control.expand_flags();
+        }
+
+        // Fifth pass: sort by weight
         controls.sort_unstable_by(|a, b| a.weight.cmp(&b.weight));
 
         //println!("{:#?}", controls);
