@@ -6,7 +6,7 @@
 extern crate native_windows_gui as nwg;
 extern crate native_windows_derive as nwd;
 
-use nwd::NwgUi;
+use nwd::NwgUi2;
 use nwg::NativeUi;
 
 
@@ -20,7 +20,7 @@ enum Token {
 }
 
 
-#[derive(Default, NwgUi)]
+#[derive(Default, NwgUi2)]
 pub struct Calculator {
 
     #[nwg_control(size: (300, 150), position: (300, 300), title: "Calculator")]

@@ -9,7 +9,10 @@ const TOP_LEVEL: &'static [&'static str] = &[
 pub struct NwgItem<'a> {
     id: &'a syn::Ident,
     parent_id: Option<String>,
+
     ty: &'a syn::Ident,
+
+    layout: Option<crate::layouts::LayoutChild>,
 
     names: Vec<syn::Ident>,
     values: Vec<syn::Expr>,
@@ -165,12 +168,14 @@ impl<'a> NwgUi<'a> {
                 id: field.ident.as_ref().unwrap(),
                 parent_id: None,
                 ty: NwgItem::extract_type(field),
+                layout: None,
                 names,
                 values,
                 weight: 0,
             };
 
             events.generate_events(field);
+
             controls.push(f);
         }
 

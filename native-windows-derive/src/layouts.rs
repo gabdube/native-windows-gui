@@ -59,7 +59,7 @@ impl Parse for AttributeCollection {
 //
 
 #[derive(Debug)]
-struct LayoutChild {
+pub struct LayoutChild {
     layout_type: LayoutType,
     member: syn::Ident,
     col: u32,
@@ -119,7 +119,7 @@ impl<'a> ToTokens for LayoutAttribute<'a> {
 //
 
 #[derive(Debug, Default)]
-struct LayoutParams {
+pub struct LayoutParams {
     layout_type: LayoutType,
     member: Option<syn::Ident>,
     ty: Option<syn::Ident>,
