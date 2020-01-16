@@ -2,8 +2,6 @@
 extern crate bitflags;
 extern crate winapi;
 
-use std::rc::Rc;
-
 #[cfg(feature="all")]
 #[cfg(test)]
 mod tests;
@@ -62,7 +60,7 @@ pub trait PartialUi<D> {
     For an example on how to implement this trait, see the **Small application layout** section in the NWG documentation.
 */
 pub trait NativeUi<D, UI> {
-    fn build_ui(d: D) -> Result<Rc<UI>, NwgError>;
+    fn build_ui(d: D) -> Result<UI, NwgError>;
 }
 
 

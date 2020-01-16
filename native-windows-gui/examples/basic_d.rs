@@ -7,11 +7,11 @@
 extern crate native_windows_gui as nwg;
 extern crate native_windows_derive as nwd;
 
-use nwd::NwgUi;
+use nwd::NwgUi2;
 use nwg::NativeUi;
 
 
-#[derive(Default, NwgUi)]
+#[derive(Default, NwgUi2)]
 pub struct BasicApp {
     #[nwg_control(size: (300, 115), position: (300, 300), title: "Basic example", flags: "WINDOW|VISIBLE")]
     #[nwg_events( OnWindowClose: [BasicApp::say_goodbye] )]
