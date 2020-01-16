@@ -10,6 +10,7 @@ pub struct NwgItem<'a> {
     values: Vec<syn::Expr>,
 
     weight: u32,
+    parent_is_fine: bool,
 }
 
 impl<'a> NwgItem<'a> {
@@ -34,12 +35,34 @@ impl<'a> NwgItem<'a> {
         }
     }
 
+    fn no_parent(&self) -> bool {
+        !self.names.iter().any(|n| n == "parent")
+    }
+
     fn expand_flags(&mut self) {
         let flags_index = self.names.iter().position(|n| n == "flags");
         if let Some(i) = flags_index {
             let old_flags = self.values[i].clone();
             self.values[i] = crate::controls::expand_flags(&self.id, &self.ty, old_flags);
         }
+    }
+
+    fn expand_parent(&mut self) {
+        let parent_index = self.names.iter().position(|n| n == "parent");
+        if self.parent_is_fine || parent_index.is_none() {
+            return;
+        }
+
+        let i = parent_index.unwrap();
+        let parent_expr: syn::Expr = match &self.values[i] {
+            syn::Expr::Path(p) => {
+                let id = &p.path.segments.last().unwrap().ident;
+                syn::parse_str(&format!("&data.{}", id)).unwrap()
+            },
+            _ => { panic!("Bad expression type for parent of field {}", self.id); }
+        };
+        
+        self.values[i] = parent_expr;
     }
 
 }
@@ -126,6 +149,10 @@ pub struct NwgUi<'a> {
 impl<'a> NwgUi<'a> {
 
     pub fn build(data: &'a syn::DataStruct) -> NwgUi<'a> {
+        const TOP_LEVEL: &'static [&'static str] = &[
+            "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow"
+        ];
+
         let named_fields = match &data.fields {
             syn::Fields::Named(n) => &n.named,
             _ => panic!("Ui structure must have named fields")
@@ -145,14 +172,32 @@ impl<'a> NwgUi<'a> {
                 names,
                 values,
                 weight: 0,
+                parent_is_fine: false,
             };
 
             controls.push(f);
         }
 
-        // Second pass: Helpers
+        // Second pass: Auto parent
         for i in 0..(controls.len()) {
-            controls[i].expand_flags();
+            if controls[i].no_parent() {
+                let parent = controls[0..i]
+                    .iter().rev()
+                    .find(|i| TOP_LEVEL.iter().any(|top| i.ty == top) );
+                
+                if let Some(parent) = parent {
+                    let parent_expr: syn::Expr = syn::parse_str(&format!("&data.{}", parent.id)).unwrap();
+                    controls[i].names.push(syn::Ident::new("parent", pm2::Span::call_site()));
+                    controls[i].values.push(parent_expr);
+                    controls[i].parent_is_fine = true;
+                }
+            }
+        }
+
+        // Second pass: Helpers
+        for control in controls.iter_mut() {
+            control.expand_flags();
+            control.expand_parent();
         }
 
         // Third pass: sort by weight
