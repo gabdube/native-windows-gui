@@ -116,10 +116,7 @@ pub struct NwgUiEvents<'a>(&'a NwgUi<'a>);
 impl<'a> ToTokens for NwgUiEvents<'a> {
 
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
-        let events_tk = quote! {
-        };
-
-        events_tk.to_tokens(tokens);
+        self.0.events.to_tokens(tokens);
     }
 
 }
@@ -144,6 +141,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
 pub struct NwgUi<'a> {
     pub data: &'a syn::DataStruct,
     pub controls: Vec<NwgItem<'a>>,
+    pub events: crate::events::ControlEvents,
 }
 
 impl<'a> NwgUi<'a> {
@@ -155,6 +153,7 @@ impl<'a> NwgUi<'a> {
         };
         
         let mut controls: Vec<NwgItem> = Vec::with_capacity(named_fields.len());
+        let mut events = crate::events::ControlEvents::with_capacity(named_fields.len());
 
         // First pass: names & default values
         for field in named_fields {
@@ -171,6 +170,7 @@ impl<'a> NwgUi<'a> {
                 weight: 0,
             };
 
+            events.generate_events(field);
             controls.push(f);
         }
 
@@ -220,9 +220,7 @@ impl<'a> NwgUi<'a> {
         // Fifth pass: sort by weight
         controls.sort_unstable_by(|a, b| a.weight.cmp(&b.weight));
 
-        //println!("{:#?}", controls);
-
-        NwgUi { data, controls }
+        NwgUi { data, controls, events }
     }
 
     pub fn controls(&self) -> NwgUiControls {
