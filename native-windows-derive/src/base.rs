@@ -13,7 +13,7 @@ struct NwgControl<'a> {
 
     ty: &'a syn::Ident,
 
-    layout: Option<LayoutChild>,
+    layout: Option<LayoutChild<'a>>,
 
     names: Vec<syn::Ident>,
     values: Vec<syn::Expr>,
@@ -102,6 +102,24 @@ impl<'a> NwgLayout<'a> {
         }
     }
 
+    fn expand_parent(&mut self) {
+        let parent_index = self.names.iter().position(|n| n == "parent");
+        if parent_index.is_none() {
+            return;
+        }
+
+        let i = parent_index.unwrap();
+        let parent_expr: syn::Expr = match &self.values[i] {
+            syn::Expr::Path(p) => {
+                let id = &p.path.segments.last().unwrap().ident;
+                syn::parse_str(&format!("&ui.{}", id)).unwrap()
+            },
+            _ => { panic!("Bad expression type for parent of field {}", self.id); }
+        };
+        
+        self.values[i] = parent_expr;
+    }
+
 }
 
 
@@ -166,7 +184,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
 
         struct LayoutGen<'b> {
             layout: &'b NwgLayout<'b>,
-            //children: Vec<&'b NwgControl<'b>>
+            children: Vec<&'b NwgControl<'b>>
         }
 
         impl<'b> ToTokens for LayoutGen<'b> {
@@ -175,6 +193,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                 let id = &self.layout.id;
                 let names = &self.layout.names;
                 let values = &self.layout.values;
+
                 let layout_tk = quote! {
                     nwg::#ty::builder()
                         #(.#names(#values))*
@@ -186,7 +205,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
 
         let ui = &self.0;
         let layouts: Vec<LayoutGen> = ui.layouts.iter()
-            .map(|layout| LayoutGen { layout } )
+            .map(|layout| LayoutGen { layout, children: Vec::new() } )
             .collect();
 
         let layouts_tk = quote! {
@@ -215,7 +234,7 @@ impl<'a> NwgUi<'a> {
         };
         
         let mut controls = Vec::with_capacity(named_fields.len());
-        let mut layouts = Vec::new();
+        let mut layouts = Vec::with_capacity(named_fields.len());
         let mut events = ControlEvents::with_capacity(named_fields.len());
 
         // First pass: parse controls, layouts, and events
@@ -224,13 +243,12 @@ impl<'a> NwgUi<'a> {
                 let id = field.ident.as_ref().unwrap();
                 let ty = NwgControl::parse_type(field);
                 let (names, values) = crate::controls::control_parameters(field);
-                let layout = LayoutChild::parse(field);
 
                 let f = NwgControl {
                     id,
                     parent_id: None,
                     ty,
-                    layout,
+                    layout: LayoutChild::prepare(field),
                     names,
                     values,
                     weight: 0,
@@ -255,7 +273,26 @@ impl<'a> NwgUi<'a> {
             }
         }
 
-        // Second pass: parent stuff
+        // Parent stuff
+        for i in 0..(layouts.len()) {
+            let has_attr_parent = layouts[i].names.iter().any(|n| n == "parent");
+            if has_attr_parent {
+                layouts[i].expand_parent();
+            } else {
+                panic!("Auto detection of layout parent is not yet implemented!");
+            }
+
+            for control in controls.iter_mut() {
+                let layout = &layouts[i];
+                if control.layout.is_none() { continue; }
+
+                if let Some(layout) = control.layout.as_mut() {
+                    if layout.id == 
+                    layout.parse(&layouts[i].ty);
+                }
+            }
+        }
+        
         for i in 0..(controls.len()) {
             let has_attr_parent = controls[i].names.iter().any(|n| n == "parent");
             if has_attr_parent {
@@ -275,7 +312,7 @@ impl<'a> NwgUi<'a> {
             }
         }
 
-        // Third pass: Parent Weight
+        // Parent Weight
         fn compute_weight(controls: &[NwgControl], index: usize, weight: &mut u32) {
             match &controls[index].parent_id {
                 Some(p) => 
@@ -293,12 +330,12 @@ impl<'a> NwgUi<'a> {
             controls[i].weight = weight;
         }
 
-        // Fourth pass: Helpers
+        // Helpers
         for control in controls.iter_mut() {
             control.expand_flags();
         }
 
-        // Fifth pass: sort by weight
+        // Sort by weight
         controls.sort_unstable_by(|a, b| a.weight.cmp(&b.weight));
 
         NwgUi { controls, layouts, events }

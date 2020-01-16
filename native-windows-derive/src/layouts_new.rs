@@ -14,15 +14,22 @@ pub struct BoxLayoutChild {
     cell_span: u32,
 }
 
-pub enum LayoutChild {
+pub enum LayoutChild<'a> {
+    Init(&'a pm2::TokenStream),
     Grid(GridLayoutChild),
     Box(BoxLayoutChild)
 }
 
-impl LayoutChild {
+impl<'a> LayoutChild<'a> {
 
-    pub fn parse(field: &syn::Field) -> Option<LayoutChild> {
-        None
+    pub fn prepare(field: &syn::Field) -> Option<LayoutChild> {
+        field.attrs.iter()
+            .find(|attr| attr.path.get_ident().map(|id| id == "nwg_layout").unwrap_or(false) )
+            .map(|attr| LayoutChild::Init(&attr.tokens) )
+    }
+
+    pub fn parse(&mut self, parent_type: &syn::Ident) {
+
     }
 
 }
