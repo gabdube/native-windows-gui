@@ -99,7 +99,7 @@ impl ControlEvents {
         }
     }
 
-    pub fn generate_events(&mut self, field: &syn::Field) {
+    pub fn parse(&mut self, field: &syn::Field) {
         let attrs = &field.attrs;
         if attrs.len() == 0 { return; }
 

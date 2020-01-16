@@ -388,6 +388,10 @@ impl GridLayoutBuilder {
     pub fn build(self, layout: &GridLayout) {
         use winapi::um::winuser::WM_SIZE;
         use winapi::shared::minwindef::{HIWORD, LOWORD};
+
+        if self.layout.base.is_null() {
+            panic!("Gridlayout does not have a parent.")
+        }
         
         let (w, h) = unsafe { wh::get_window_size(self.layout.base) };
         let base_handle = ControlHandle::Hwnd(self.layout.base);

@@ -1,18 +1,19 @@
 use quote::{ToTokens};
+use crate::layouts_new::{LayoutChild, layout_parameters};
+use crate::events::ControlEvents;
 
 const TOP_LEVEL: &'static [&'static str] = &[
     "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow"
 ];
 
 
-#[derive(Debug)]
-pub struct NwgItem<'a> {
+struct NwgControl<'a> {
     id: &'a syn::Ident,
     parent_id: Option<String>,
 
     ty: &'a syn::Ident,
 
-    layout: Option<crate::layouts::LayoutChild>,
+    layout: Option<LayoutChild>,
 
     names: Vec<syn::Ident>,
     values: Vec<syn::Expr>,
@@ -20,17 +21,17 @@ pub struct NwgItem<'a> {
     weight: u32,
 }
 
-impl<'a> NwgItem<'a> {
+impl<'a> NwgControl<'a> {
 
     fn valid(field: &syn::Field) -> bool {
         field.attrs.iter().any(|attr| 
             attr.path.get_ident()
-                .map(|ident| ident == "nwg_control" || ident == "nwg_partial" )
+                .map(|ident| ident == "nwg_control" )
                 .unwrap_or(false)
         )
     }
 
-    fn extract_type(field: &syn::Field) -> &syn::Ident {
+    fn parse_type(field: &syn::Field) -> &syn::Ident {
         // TODO: extract type from nwg_control first
         
         match &field.ty {
@@ -72,6 +73,38 @@ impl<'a> NwgItem<'a> {
 }
 
 
+struct NwgLayout<'a> {
+    id: &'a syn::Ident,
+    ty: &'a syn::Ident,
+    names: Vec<syn::Ident>,
+    values: Vec<syn::Expr>,
+}
+
+impl<'a> NwgLayout<'a> {
+
+    fn valid(field: &syn::Field) -> bool {
+        field.attrs.iter().any(|attr| 
+            attr.path.get_ident()
+                .map(|ident| ident == "nwg_layout" )
+                .unwrap_or(false)
+        )
+    }
+
+    fn parse_type(field: &syn::Field) -> &syn::Ident {
+        // TODO: extract type from nwg_layout first
+        
+        match &field.ty {
+            syn::Type::Path(p) => match p.path.segments.last() {
+                Some(seg) => &seg.ident,
+                None => panic!("Impossible to parse type for field {:?}. Try specifying it in the nwg_control attribute.", field.ident)
+            },
+            _ => panic!("Impossible to parse type for field {:?}. Try specifying it in the nwg_control attribute.", field.ident)
+        }
+    }
+
+}
+
+
 pub struct NwgUiControls<'a>(&'a NwgUi<'a>);
 
 impl<'a> ToTokens for NwgUiControls<'a> {
@@ -79,7 +112,7 @@ impl<'a> ToTokens for NwgUiControls<'a> {
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
 
         struct ControlGen<'b> {
-            item: &'b NwgItem<'b>
+            item: &'b NwgControl<'b>
         }
 
         impl<'b> ToTokens for ControlGen<'b> {
@@ -130,8 +163,34 @@ pub struct NwgUiLayouts<'a>(&'a NwgUi<'a>);
 impl<'a> ToTokens for NwgUiLayouts<'a> {
 
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
-        let layouts_tk = quote! {
 
+        struct LayoutGen<'b> {
+            layout: &'b NwgLayout<'b>,
+            //children: Vec<&'b NwgControl<'b>>
+        }
+
+        impl<'b> ToTokens for LayoutGen<'b> {
+            fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+                let ty = &self.layout.ty;
+                let id = &self.layout.id;
+                let names = &self.layout.names;
+                let values = &self.layout.values;
+                let layout_tk = quote! {
+                    nwg::#ty::builder()
+                        #(.#names(#values))*
+                        .build(&ui.#id);
+                };
+                layout_tk.to_tokens(tokens);
+            }
+        }
+
+        let ui = &self.0;
+        let layouts: Vec<LayoutGen> = ui.layouts.iter()
+            .map(|layout| LayoutGen { layout } )
+            .collect();
+
+        let layouts_tk = quote! {
+            #(#layouts)*
         };
 
         layouts_tk.to_tokens(tokens);
@@ -142,9 +201,9 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
 
 
 pub struct NwgUi<'a> {
-    pub data: &'a syn::DataStruct,
-    pub controls: Vec<NwgItem<'a>>,
-    pub events: crate::events::ControlEvents,
+    controls: Vec<NwgControl<'a>>,
+    layouts: Vec<NwgLayout<'a>>,
+    events: ControlEvents,
 }
 
 impl<'a> NwgUi<'a> {
@@ -155,28 +214,45 @@ impl<'a> NwgUi<'a> {
             _ => panic!("Ui structure must have named fields")
         };
         
-        let mut controls: Vec<NwgItem> = Vec::with_capacity(named_fields.len());
-        let mut events = crate::events::ControlEvents::with_capacity(named_fields.len());
+        let mut controls = Vec::with_capacity(named_fields.len());
+        let mut layouts = Vec::new();
+        let mut events = ControlEvents::with_capacity(named_fields.len());
 
-        // First pass: names & default values
+        // First pass: parse controls, layouts, and events
         for field in named_fields {
-            if !NwgItem::valid(field) { continue; }
+            if NwgControl::valid(field) {
+                let id = field.ident.as_ref().unwrap();
+                let ty = NwgControl::parse_type(field);
+                let (names, values) = crate::controls::control_parameters(field);
+                let layout = LayoutChild::parse(field);
 
-            let (names, values) = crate::controls::control_parameters(field);
+                let f = NwgControl {
+                    id,
+                    parent_id: None,
+                    ty,
+                    layout,
+                    names,
+                    values,
+                    weight: 0,
+                };
 
-            let f = NwgItem {
-                id: field.ident.as_ref().unwrap(),
-                parent_id: None,
-                ty: NwgItem::extract_type(field),
-                layout: None,
-                names,
-                values,
-                weight: 0,
-            };
+                events.parse(field);
 
-            events.generate_events(field);
+                controls.push(f);
+            }
 
-            controls.push(f);
+            if NwgLayout::valid(field) {
+
+                let id = field.ident.as_ref().unwrap();
+                let ty = NwgLayout::parse_type(field);
+                let (names, values) = layout_parameters(field);
+
+                let layout = NwgLayout {
+                    id, ty, names, values,
+                };
+
+                layouts.push(layout);
+            }
         }
 
         // Second pass: parent stuff
@@ -200,7 +276,7 @@ impl<'a> NwgUi<'a> {
         }
 
         // Third pass: Parent Weight
-        fn compute_weight(controls: &[NwgItem], index: usize, weight: &mut u32) {
+        fn compute_weight(controls: &[NwgControl], index: usize, weight: &mut u32) {
             match &controls[index].parent_id {
                 Some(p) => 
                     if let Some(parent_index) = controls.iter().position(|c| &c.id == &p) {
@@ -225,7 +301,7 @@ impl<'a> NwgUi<'a> {
         // Fifth pass: sort by weight
         controls.sort_unstable_by(|a, b| a.weight.cmp(&b.weight));
 
-        NwgUi { data, controls, events }
+        NwgUi { controls, layouts, events }
     }
 
     pub fn controls(&self) -> NwgUiControls {

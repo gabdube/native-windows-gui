@@ -19,6 +19,8 @@ use events::ControlEvents;
 mod layouts;
 use layouts::ControlLayouts;
 
+mod layouts_new;
+
 mod base;
 use base::NwgUi;
 
@@ -87,7 +89,7 @@ fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
     for f in named_fields.iter() {
         if let Some(control) = controls::generate_control(f) {
             fields.push(control);
-            events.generate_events(f);
+            events.parse(f);
             layouts.add_item(f);
         }
 
