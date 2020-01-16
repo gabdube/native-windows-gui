@@ -16,8 +16,8 @@ use controls::ControlGen;
 mod events;
 use events::ControlEvents;
 
-mod controls_layouts;
-use controls_layouts::ControlLayouts;
+mod layouts;
+use layouts::ControlLayouts;
 
 mod base;
 use base::NwgUi;
