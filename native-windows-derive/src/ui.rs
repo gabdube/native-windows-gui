@@ -1,5 +1,5 @@
 use quote::{ToTokens};
-use crate::layouts_new::{LayoutChild, BoxLayoutChild, GridLayoutChild, layout_parameters};
+use crate::layouts::{LayoutChild, BoxLayoutChild, GridLayoutChild, layout_parameters};
 use crate::events::ControlEvents;
 
 const TOP_LEVEL: &'static [&'static str] = &[

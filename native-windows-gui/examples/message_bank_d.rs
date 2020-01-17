@@ -18,7 +18,7 @@ pub struct MessageBank {
     #[nwg_events( OnWindowClose: [MessageBank::exit] )]
     window: nwg::Window,
     
-    #[nwg_layout(parent: window, max_row: Some(6))]
+    #[nwg_layout(parent: window, max_row: Some(6), spacing: 3)]
     layout: nwg::GridLayout,
 
     #[nwg_control(text: "Save")]

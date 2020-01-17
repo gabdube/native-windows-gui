@@ -4,23 +4,13 @@ extern crate proc_macro2 as pm2;
 #[macro_use]
 extern crate syn;
 use syn::DeriveInput;
-use syn::punctuated::Punctuated;
-use syn::token::Comma;
 
 #[macro_use]
 extern crate quote;
 
 mod controls;
-use controls::ControlGen;
-
 mod events;
-use events::ControlEvents;
-
 mod layouts;
-use layouts::ControlLayouts;
-
-mod layouts_new;
-
 mod shared;
 
 mod ui;
@@ -72,100 +62,8 @@ fn parse_ui_data(d: &DeriveInput) -> Option<&syn::DataStruct> {
     }
 } 
 
-fn parse_named_fields(d: &syn::DataStruct) -> Option<&Punctuated<syn::Field, Comma>> {
-    match &d.fields {
-        syn::Fields::Named(n) => Some(&n.named),
-        _ => None
-    }
-} 
-
-fn generate_build_ui(n: &BaseNames, s: &syn::DataStruct) -> pm2::TokenStream {
-    let struct_name = &n.n_struct;
-    let ui_struct_name = &n.n_struct_ui;
-
-    let named_fields = parse_named_fields(s).expect("Ui structure must have named fields");
-
-    let mut fields: Vec<ControlGen> = Vec::with_capacity(named_fields.len());
-    let mut events = ControlEvents::with_capacity(named_fields.len());
-    let mut layouts = ControlLayouts::new();
-    for f in named_fields.iter() {
-        if let Some(control) = controls::generate_control(f) {
-            fields.push(control);
-            events.parse(f);
-            layouts.add_item(f);
-        }
-
-        layouts.add_layout(f);
-    }
-
-    controls::organize_controls(&mut fields);
-    layouts.organize_layouts();
-
-    quote! {
-        fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, nwg::NwgError> {
-
-            #(#fields)*
-
-            let ui = Rc::new(#ui_struct_name { inner: data });
-
-            #events
-
-            #layouts
-            
-            Ok(ui)
-        }
-    }
-}
-
 #[proc_macro_derive(NwgUi, attributes(nwg_control, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
 pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
-    let base = parse_macro_input!(input as DeriveInput);
-
-    let names = parse_base_names(&base);
-    let ui_data = parse_ui_data(&base).expect("NWG derive can only be implemented on structs");
-
-    let build_ui_function = generate_build_ui(&names, &ui_data);
-    let module_name = &names.n_module;
-    let struct_name = &names.n_struct;
-    let ui_struct_name = &names.n_struct_ui;
-
-    let derive_ui = quote! {
-        mod #module_name {
-            use native_windows_gui as nwg;
-            use super::*;
-            use std::ops::Deref;
-            use std::rc::Rc;
-            use std::fmt;
-
-            pub struct #ui_struct_name {
-                inner: #struct_name
-            }
-
-            impl nwg::NativeUi<#struct_name, #ui_struct_name> for #struct_name {
-                #build_ui_function
-            }
-
-            impl Deref for #ui_struct_name {
-                type Target = #struct_name;
-        
-                fn deref(&self) -> &#struct_name {
-                    &self.inner
-                }
-            }
-
-            impl fmt::Debug for #ui_struct_name {
-                fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                    write!(f, "[#ui_struct_name Ui]")
-                }
-            }
-        }
-    };
-
-    pm::TokenStream::from(derive_ui)
-}
-
-#[proc_macro_derive(NwgUi2, attributes(nwg_control, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
-pub fn derive_ui2(input: pm::TokenStream) -> pm::TokenStream {
     let base = parse_macro_input!(input as DeriveInput);
     let names = parse_base_names(&base);
     let ui_data = parse_ui_data(&base).expect("NWG derive can only be implemented on structs");
