@@ -74,6 +74,7 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
 
     let ui = NwgUi::build(&ui_data, false);
     let controls = ui.controls();
+    let partials = ui.partials();
     let layouts = ui.layouts();
     let events = ui.events();
 
@@ -92,6 +93,7 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
             impl nwg::NativeUi<#struct_name, Rc<#ui_struct_name>> for #struct_name {
                 fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, nwg::NwgError> {
                     #controls
+                    #partials
 
                     let ui = Rc::new(#ui_struct_name { inner: data });
 

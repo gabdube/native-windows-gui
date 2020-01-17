@@ -157,6 +157,22 @@ impl<'a> NwgLayout<'a> {
 
 }
 
+struct NwgPartial<'a> {
+    id: &'a syn::Ident,
+    parent: Option<&'a syn::Ident>,
+}
+
+
+impl<'a> NwgPartial<'a> {
+    fn valid(field: &syn::Field) -> bool {
+        field.attrs.iter().any(|attr| 
+            attr.path.get_ident()
+                .map(|ident| ident == "nwg_partial" )
+                .unwrap_or(false)
+        )
+    }
+}
+
 
 pub struct NwgUiControls<'a>(&'a NwgUi<'a>);
 
@@ -285,10 +301,25 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
 }
 
 
+pub struct NwgUiPartials<'a>(&'a NwgUi<'a>);
+
+impl<'a> ToTokens for NwgUiPartials<'a> {
+
+    fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+
+        let partials_tk = quote! {
+        };
+
+        partials_tk.to_tokens(tokens);
+    }
+
+}
+
 
 pub struct NwgUi<'a> {
     controls: Vec<NwgControl<'a>>,
     layouts: Vec<NwgLayout<'a>>,
+    partials: Vec<NwgPartial<'a>>,
     events: ControlEvents,
 }
 
@@ -302,6 +333,7 @@ impl<'a> NwgUi<'a> {
         
         let mut controls = Vec::with_capacity(named_fields.len());
         let mut layouts = Vec::with_capacity(named_fields.len());
+        let mut partials = Vec::with_capacity(named_fields.len());
         let mut events = ControlEvents::with_capacity(named_fields.len());
 
         let partial_parent_expr: syn::Expr = syn::parse_str("parent_ref.unwrap()").unwrap();
@@ -330,8 +362,7 @@ impl<'a> NwgUi<'a> {
                 controls.push(f);
             }
 
-            if NwgLayout::valid(field) {
-
+            else if NwgLayout::valid(field) {
                 let id = field.ident.as_ref().unwrap();
                 let ty = NwgLayout::parse_type(field);
                 let (names, values) = layout_parameters(field);
@@ -341,6 +372,15 @@ impl<'a> NwgUi<'a> {
                 };
 
                 layouts.push(layout);
+            }
+
+            else if NwgPartial::valid(field) {
+                let partial = NwgPartial {
+                    id: field.ident.as_ref().unwrap(),
+                    parent: None
+                };
+
+                partials.push(partial);
             }
         }
 
@@ -420,7 +460,7 @@ impl<'a> NwgUi<'a> {
         // Sort by weight
         controls.sort_unstable_by(|a, b| a.weight.cmp(&b.weight));
 
-        NwgUi { controls, layouts, events }
+        NwgUi { controls, layouts, partials, events }
     }
 
     pub fn controls(&self) -> NwgUiControls {
@@ -433,6 +473,10 @@ impl<'a> NwgUi<'a> {
 
     pub fn layouts(&self) -> NwgUiLayouts {
         NwgUiLayouts(self)
+    }
+
+    pub fn partials(&self) -> NwgUiPartials {
+        NwgUiPartials(self)
     }
 
 }
