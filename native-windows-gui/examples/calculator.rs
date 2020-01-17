@@ -137,7 +137,7 @@ mod calculator_ui {
         inner: Calculator
     }
 
-    impl nwg::NativeUi<Calculator, CalculatorUi> for Calculator {
+    impl nwg::NativeUi<Calculator, Rc<CalculatorUi>> for Calculator {
         fn build_ui(mut data: Calculator) -> Result<Rc<CalculatorUi>, nwg::NwgError> {
             use nwg::Event as E;
             

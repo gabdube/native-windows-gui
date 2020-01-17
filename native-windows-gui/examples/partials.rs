@@ -2,7 +2,7 @@
     An application that load different interfaces using the partial feature.
     Partials can be used to split large GUI application into smaller bits.
 
-    Requires the following features: `cargo run --example partials --features "listbox frame combobox checkbox"`
+    Requires the following features: `cargo run --example partials --features "listbox frame combobox"`
 */
 
 extern crate native_windows_gui as nwg;
@@ -95,7 +95,7 @@ mod partial_demo_ui {
         inner: PartialDemo
     }
 
-    impl nwg::NativeUi<PartialDemo, PartialDemoUi> for PartialDemo {
+    impl nwg::NativeUi<PartialDemo, Rc<PartialDemoUi>> for PartialDemo {
         fn build_ui(mut data: PartialDemo) -> Result<Rc<PartialDemoUi>, nwg::NwgError> {
             use nwg::Event as E;
             

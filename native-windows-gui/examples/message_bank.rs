@@ -72,7 +72,7 @@ mod message_bank_ui {
         inner: MessageBank
     }
 
-    impl nwg::NativeUi<MessageBank, MessageBankUi> for MessageBank {
+    impl nwg::NativeUi<MessageBank, Rc<MessageBankUi>> for MessageBank {
         fn build_ui(mut data: MessageBank) -> Result<Rc<MessageBankUi>, nwg::NwgError> {
             use nwg::Event as E;
             

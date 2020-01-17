@@ -149,7 +149,7 @@ impl OpenGlCanvas {
 
 subclass_control!(OpenGlCanvas, ExternCanvas, canvas);
 
-// subclass_control generates th following code
+// subclass_control generates the following code
 
 /*
 use std::ops::{Deref, DerefMut};
@@ -247,7 +247,7 @@ mod extern_canvas_ui {
         inner: ExternCanvas
     }
 
-    impl nwg::NativeUi<ExternCanvas, ExternCanvasUi> for ExternCanvas {
+    impl nwg::NativeUi<ExternCanvas, Rc<ExternCanvasUi>> for ExternCanvas {
         fn build_ui(mut data: ExternCanvas) -> Result<Rc<ExternCanvasUi>, nwg::NwgError> {
             use nwg::Event as E;
             
