@@ -72,10 +72,10 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     let struct_name = &names.n_struct;
     let ui_struct_name = &names.n_struct_ui;
 
-    let ui = NwgUi::build(&ui_data);
+    let ui = NwgUi::build(&ui_data, false);
     let controls = ui.controls();
-    let events = ui.events();
     let layouts = ui.layouts();
+    let events = ui.events();
 
     let derive_ui = quote! {
         mod #module_name {
@@ -130,13 +130,27 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
     let partial_name = &names.n_partial_module;
     let struct_name = &names.n_struct;
 
+    let ui_data = parse_ui_data(&base).expect("NWG derive can only be implemented on structs");
+    let ui = NwgUi::build(&ui_data, true);
+    let controls = ui.controls();
+    let layouts = ui.layouts();
+    //let events = ui.events();
+
     let partial_ui = quote! {
         mod #partial_name {
             use native_windows_gui as nwg;
             use super::*;
         
             impl nwg::PartialUi<#struct_name> for #struct_name {
-                fn build_partial<W: Into<nwg::ControlHandle>>(_data: &mut #struct_name, _parent: Option<W>) -> Result<(), nwg::NwgError> {
+
+                #[allow(unused)]
+                fn build_partial<W: Into<nwg::ControlHandle>>(data: &mut #struct_name, _parent: Option<W>) -> Result<(), nwg::NwgError> {
+                    let parent = _parent.map(|p| p.into());
+                    let parent_ref = parent.as_ref();
+                    #controls
+
+                    let ui = data;
+                    #layouts
                     Ok(())
                 }
 

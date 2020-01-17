@@ -71,6 +71,24 @@ impl<'a> NwgControl<'a> {
         self.values[i] = parent_expr;
     }
 
+    fn expand_types(&mut self) {
+        let expand_types = ["h_align", "check_state"];
+        for t in expand_types.iter() {
+            if let Some(i) = self.names.iter().position(|n| n == t) {
+                match &mut self.values[i] {
+                    syn::Expr::Path(p) =>  {
+                        let seg = syn::PathSegment{ 
+                            ident: syn::Ident::new("nwg", pm2::Span::call_site()),
+                            arguments: syn::PathArguments::None
+                        };
+                        p.path.segments.insert(0, seg)
+                    },
+                    _ => {}
+                } 
+            }
+        }
+    }
+
 }
 
 
@@ -119,6 +137,22 @@ impl<'a> NwgLayout<'a> {
         };
         
         self.values[i] = parent_expr;
+    }
+
+    fn expand_types(&mut self) {
+        let type_index = self.names.iter().position(|n| n == "layout_type");
+        if let Some(i) = type_index {
+            match &mut self.values[i] {
+                syn::Expr::Path(p) =>  {
+                    let seg = syn::PathSegment{ 
+                        ident: syn::Ident::new("nwg", pm2::Span::call_site()),
+                        arguments: syn::PathArguments::None
+                    };
+                    p.path.segments.insert(0, seg)
+                },
+                _ => {}
+            }
+        }
     }
 
 }
@@ -189,6 +223,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
             fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
                 let c = &self.0;
                 let id = &c.id;
+
                 let item_tk = match c.layout {
                     Some(LayoutChild::Grid( GridLayoutChild {col, row, col_span, row_span} )) => 
                         quote! { 
@@ -259,7 +294,7 @@ pub struct NwgUi<'a> {
 
 impl<'a> NwgUi<'a> {
 
-    pub fn build(data: &'a syn::DataStruct) -> NwgUi<'a> {
+    pub fn build(data: &'a syn::DataStruct, partial: bool) -> NwgUi<'a> {
         let named_fields = match &data.fields {
             syn::Fields::Named(n) => &n.named,
             _ => panic!("Ui structure must have named fields")
@@ -268,6 +303,9 @@ impl<'a> NwgUi<'a> {
         let mut controls = Vec::with_capacity(named_fields.len());
         let mut layouts = Vec::with_capacity(named_fields.len());
         let mut events = ControlEvents::with_capacity(named_fields.len());
+
+        let partial_parent_expr: syn::Expr = syn::parse_str("parent_ref.unwrap()").unwrap();
+        let parent_ident = syn::Ident::new("parent", pm2::Span::call_site());
 
         // First pass: parse controls, layouts, and events
         for field in named_fields {
@@ -312,7 +350,12 @@ impl<'a> NwgUi<'a> {
             if has_attr_parent {
                 layouts[i].expand_parent();
             } else {
-                panic!("Auto detection of layout parent is not yet implemented!");
+                if partial {
+                    layouts[i].names.push(parent_ident.clone());
+                    layouts[i].values.push(partial_parent_expr.clone());
+                } else {
+                    panic!("Auto detection of layout parent outside of partial is not yet implemented!");
+                }  
             }
 
             // Match the layout item to the layout object
@@ -339,7 +382,7 @@ impl<'a> NwgUi<'a> {
                 if let Some(parent) = parent {
                     let parent_id = Some(parent.id.to_string());
                     let parent_expr: syn::Expr = syn::parse_str(&format!("&data.{}", parent.id)).unwrap();
-                    controls[i].names.push(syn::Ident::new("parent", pm2::Span::call_site()));
+                    controls[i].names.push(parent_ident.clone());
                     controls[i].values.push(parent_expr);
                     controls[i].parent_id = parent_id;
                 }
@@ -367,6 +410,11 @@ impl<'a> NwgUi<'a> {
         // Helpers
         for control in controls.iter_mut() {
             control.expand_flags();
+            control.expand_types();
+        }
+
+        for layout in layouts.iter_mut() {
+            layout.expand_types();
         }
 
         // Sort by weight
