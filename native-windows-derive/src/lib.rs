@@ -21,8 +21,10 @@ use layouts::ControlLayouts;
 
 mod layouts_new;
 
-mod base;
-use base::NwgUi;
+mod shared;
+
+mod ui;
+use ui::NwgUi;
 
 
 struct BaseNames {

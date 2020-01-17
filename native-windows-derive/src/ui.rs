@@ -1,5 +1,5 @@
 use quote::{ToTokens};
-use crate::layouts_new::{LayoutChild, layout_parameters};
+use crate::layouts_new::{LayoutChild, BoxLayoutChild, GridLayoutChild, layout_parameters};
 use crate::events::ControlEvents;
 
 const TOP_LEVEL: &'static [&'static str] = &[
@@ -13,7 +13,8 @@ struct NwgControl<'a> {
 
     ty: &'a syn::Ident,
 
-    layout: Option<LayoutChild<'a>>,
+    layout: Option<LayoutChild>,
+    layout_index: usize,
 
     names: Vec<syn::Ident>,
     values: Vec<syn::Expr>,
@@ -182,9 +183,32 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
 
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
 
+        struct ControlLayout<'b>(&'b NwgControl<'b>);
+
+        impl<'b> ToTokens for ControlLayout<'b> {
+            fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+                let c = &self.0;
+                let id = &c.id;
+                let item_tk = match c.layout {
+                    Some(LayoutChild::Grid( GridLayoutChild {col, row, col_span, row_span} )) => 
+                        quote! { 
+                            child_item(nwg::GridLayoutItem::new(&ui.#id, #col, #row, #col_span, #row_span))
+                        },
+                    Some(LayoutChild::Box( BoxLayoutChild {cell, cell_span} )) => 
+                        quote! { 
+                            child_item(nwg::BoxLayoutItem::new(&ui.#id, #cell, #cell_span))
+                        },
+                    Some(_) => panic!("Unprocessed layout item"),
+                    None => panic!("Unfiltered layout item")
+                };
+
+                item_tk.to_tokens(tokens);
+            }
+        }
+
         struct LayoutGen<'b> {
             layout: &'b NwgLayout<'b>,
-            children: Vec<&'b NwgControl<'b>>
+            children: Vec<ControlLayout<'b>>
         }
 
         impl<'b> ToTokens for LayoutGen<'b> {
@@ -193,10 +217,12 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                 let id = &self.layout.id;
                 let names = &self.layout.names;
                 let values = &self.layout.values;
+                let children = &self.children;
 
                 let layout_tk = quote! {
                     nwg::#ty::builder()
                         #(.#names(#values))*
+                        #(.#children)*
                         .build(&ui.#id);
                 };
                 layout_tk.to_tokens(tokens);
@@ -204,8 +230,14 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
         }
 
         let ui = &self.0;
-        let layouts: Vec<LayoutGen> = ui.layouts.iter()
-            .map(|layout| LayoutGen { layout, children: Vec::new() } )
+        let layouts: Vec<LayoutGen> = ui.layouts.iter().enumerate()
+            .map(|(i, layout)| LayoutGen {
+                layout,
+                children: ui.controls.iter()
+                  .filter(|c| c.layout.is_some() && c.layout_index == i)
+                  .map(|c| ControlLayout(c) )
+                  .collect(),
+            })
             .collect();
 
         let layouts_tk = quote! {
@@ -249,6 +281,7 @@ impl<'a> NwgUi<'a> {
                     parent_id: None,
                     ty,
                     layout: LayoutChild::prepare(field),
+                    layout_index: 0,
                     names,
                     values,
                     weight: 0,
@@ -282,13 +315,14 @@ impl<'a> NwgUi<'a> {
                 panic!("Auto detection of layout parent is not yet implemented!");
             }
 
+            // Match the layout item to the layout object
             for control in controls.iter_mut() {
-                let layout = &layouts[i];
-                if control.layout.is_none() { continue; }
-
-                if let Some(layout) = control.layout.as_mut() {
-                    if layout.id == 
-                    layout.parse(&layouts[i].ty);
+                if let Some(child_layout) = control.layout.as_mut() {
+                    let layout = &layouts[i];
+                    if child_layout.parent_matches(&layout.id) {
+                        child_layout.parse(&layout.ty);
+                        control.layout_index = i;
+                    }
                 }
             }
         }

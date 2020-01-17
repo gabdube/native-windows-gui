@@ -1,57 +1,17 @@
 use proc_macro2 as pm2;
-use syn::punctuated::Punctuated;
-use syn::parse::{Parse, ParseStream};
 use quote::{ToTokens};
 use std::cell::RefCell;
+use crate::shared::{Parameters, Param};
 
 
 static TOP_LEVEL: &'static [&'static str] = &[
     "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow"
 ];
 
-
-#[allow(unused)]
-struct ControlParam {
-    ident: syn::Ident,
-    sep: Token![:],
-    e: syn::Expr,
-}
-
-impl Parse for ControlParam {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        Ok(ControlParam {
-            ident: input.parse()?,
-            sep: input.parse()?,
-            e: input.parse()?,
-        })
-    }
-}
-
-
-struct ControlParameters {
-    params: Punctuated<ControlParam, Token![,]>
-}
-
-impl Parse for ControlParameters {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        use syn::group::parse_parens;
-        let mut params = None;
-
-        if let Ok(parens) = parse_parens(input) {
-            params = Some(parens.content.parse_terminated(ControlParam::parse)?);
-        }
-
-        Ok(ControlParameters {
-            params: params.unwrap_or(Punctuated::new())
-        })
-    }
-}
-
-
 pub struct ControlGen<'a> {
     ty: syn::Ident,
     member: &'a syn::Ident,
-    params: RefCell<ControlParameters>,  
+    params: RefCell<Parameters>,  
 }
 
 impl<'a> ToTokens for ControlGen<'a> {
@@ -91,7 +51,7 @@ pub fn generate_control<'a>(field: &'a syn::Field) -> Option<ControlGen<'a>> {
 
     let ty = extract_control_type(&field.ty);
     
-    let params: ControlParameters = match syn::parse2(attr.tokens.clone()) {
+    let params: Parameters = match syn::parse2(attr.tokens.clone()) {
         Ok(a) => a,
         Err(e) => panic!("Failed to parse field #{}: {}", member, e)
     };
@@ -143,7 +103,7 @@ pub fn control_parameters(field: &syn::Field) -> (Vec<syn::Ident>, Vec<syn::Expr
         None => unreachable!()
     };
 
-    let ctrl: ControlParameters = match syn::parse2(attr.tokens.clone()) {
+    let ctrl: Parameters = match syn::parse2(attr.tokens.clone()) {
         Ok(a) => a,
         Err(e) => panic!("Failed to parse field #{}: {}", member, e)
     };
@@ -291,7 +251,7 @@ fn auto_parent<'a>(control: &ControlGen<'a>, parent: &ControlGen<'a>) -> bool {
     }
 
     let parent_expr = format!("&data.{}", parent.member);
-    let parent_param = ControlParam {
+    let parent_param = Param {
         ident: syn::Ident::new("parent", pm2::Span::call_site()),
         sep: syn::token::Colon(pm2::Span::call_site()),
         e: syn::parse_str(&parent_expr).unwrap(),
