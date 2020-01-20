@@ -140,7 +140,7 @@
 
         The other one will hook the events of a control and its parent. Why the control and the parent?
         <b>Because the common controls of WINAPI sends their events to their parent.</b> This method of hooking
-        is usually used when a callback is added dynamically. More on that <a href="dynamic_event.html">here</a>
+        is usually used when a callback is added dynamically. More on that <a href="dynamic_event.html">in the dynamic events section</a>.
 
 <div class="highlight"><pre style="width: auto;"><span></span><span class="kd">let</span><span class="w"> </span><span class="n">events_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w"></span>
 <span class="kd">let</span><span class="w"> </span><span class="n">handle_events</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>

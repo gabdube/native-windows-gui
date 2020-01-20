@@ -124,7 +124,7 @@ there won't by any change to the API. Issues can be raised if a bug is found or
 if some area in the documentation are unclear. If I overlooked a very important feature,
 it will most likely be added.
 
-# License
+## License
 
 NWG use the MIT license
 
@@ -218,7 +218,7 @@ mod basic_app_ui {
         inner: BasicApp
     }
 
-    impl nwg::NativeUi<BasicApp, BasicAppUi> for BasicApp {
+    impl nwg::NativeUi<BasicApp, Rc<BasicAppUi>> for BasicApp {
         fn build_ui(mut data: BasicApp) -> Result<Rc<BasicAppUi>, nwg::NwgError> {
             use nwg::Event as E;
 
@@ -248,32 +248,26 @@ mod basic_app_ui {
             let ui = Rc::new(BasicAppUi { inner: data });
 
             // Events
-            let window_handles = [&ui.window.handle];
-
-            for handle in window_handles.iter() {
-                let evt_ui = ui.clone();
-                let handle_events = move |evt, _evt_data, handle| {
-                    match evt {
-                        E::OnButtonClick => {
-                            if &handle == &evt_ui.hello_button {
-                                BasicApp::say_hello(&evt_ui.inner);
-                            }
+            let evt_ui = ui.clone();
+            let handle_events = move |evt, _evt_data, handle| {
+                match evt {
+                    E::OnButtonClick => 
+                        if &handle == &evt_ui.hello_button {
+                            BasicApp::say_hello(&evt_ui.inner);
                         },
-                        E::OnWindowClose => {
-                            if &handle == &evt_ui.window {
-                                BasicApp::say_goodbye(&evt_ui.inner);
-                            }
+                    E::OnWindowClose => 
+                        if &handle == &evt_ui.window {
+                            BasicApp::say_goodbye(&evt_ui.inner);
                         },
-                        _ => {}
-                    }
-                };
+                    _ => {}
+                }
+            };
 
-                nwg::full_bind_event_handler(handle, handle_events);
-            }
+            nwg::full_bind_event_handler(&ui.window.handle, handle_events);
+
             return Ok(ui);
         }
     }
-
 
     impl Deref for BasicAppUi {
         type Target = BasicApp;
@@ -285,12 +279,11 @@ mod basic_app_ui {
 
 }
 
-
-
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
 
     let _ui = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
+
     nwg::dispatch_thread_events();
 }
 ```

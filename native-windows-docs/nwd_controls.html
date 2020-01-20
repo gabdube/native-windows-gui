@@ -7,7 +7,8 @@
     <title>Native Windows GUI guide - Derive controls</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 </head>
 <body class="rustdoc">
@@ -89,6 +90,105 @@
     <div id='page'>
 
         <h1 class="title">Native Windows Derive: Controls</h1>
+        The first thing to define in a derive UI are the controls. Native windows derive maps the builder api in to a list of attributes.
+        This way, definining the control parameters will only take a single line above the struct member definition.<br><br>
+
+        Also, be sure to check out the <a href="controls.html">controls docs</a>.
+
+        <br/><br/>
+
+        <h3>Attributes</h3>
+        <br/><br/>
+
+        <h3>Parent detection</h3>
+
+        In most circumstances, most of the controls in a UI will have the same parent; the window. Because nobody wants to copy and paste "<code>parent: window</code>"
+        on each children controls, the derive macro can guess the parent by looking up the fields defined before the control in the ui struct. Derive will choose the first
+        control marked with <code>nwg_control</code> that supports children.
+        <br><br>
+
+        If no parent is defined in the attributes, and no parent can be guessed the parent value will be left empty. The derive macro will not panic, but the resulting
+        code will raise a <code>ControlCreationError("no parent")</code> error.
+        <br><br>
+
+        Here is an example that shows how NWD guess the parents:
+
+<div class="highlight"><pre style="width:auto"><span></span><span class="cp">#[derive(NwgUi)]</span><span class="w"></span>
+<span class="k">struct</span> <span class="nc">MyUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// No auto parent</span>
+<span class="w">    </span><span class="n">label</span>: <span class="nc">nwg</span>::<span class="n">Label</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// No auto parent</span>
+<span class="w">    </span><span class="n">window</span>: <span class="nc">nwg</span>::<span class="n">Window</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// parent: window</span>
+<span class="w">    </span><span class="n">label</span>: <span class="nc">nwg</span>::<span class="n">Label</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// parent: window</span>
+<span class="w">    </span><span class="n">frame</span>: <span class="nc">nwg</span>::<span class="n">Frame</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// parent: frame</span>
+<span class="w">    </span><span class="n">button</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+        <h3>Compressed flags</h3>
+
+        Defining flags can take alot of space. In order to fix this, NWG supports a "compressed" flags format. Where the flag enum is ignored.
+        This only works with the <code>flags</code> parameters because it's possible for NWD to guess the right type. For example, here's the
+        compressed flag definition VS the normal flag definition.
+
+<div class="highlight"><pre style="width: auto;"><span ></span><span class="cp">#[derive(NwgUi)]</span><span class="w"></span>
+<span class="k">struct</span> <span class="nc">MyUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control(flags: </span><span class="s">&quot;WINDOW|VISIBLE&quot;</span><span class="cp">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">window1</span>: <span class="nc">nwg</span>::<span class="n">Window</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(flags: WindowFlags::WINDOW | WindowFlags::VISIBLE)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">window1</span>: <span class="nc">nwg</span>::<span class="n">Window</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+            
+        <h3>Subclassed controls</h3>
+
+        By default, NWD can guess the control builder by looking up the structure member type. When a user type is used, this is no longer possible.
+        To fix this, it's possible to pass the <code>type</code> parameter to the <code>nwg_control</code> attribute. <code>type</code> won't be evaluated
+        as a builder parameter.
+        <br><br>
+
+        When not using <code>type</code> and still using custom values, NWD will try to instance a custom builder object using the builder naming scheme defined
+        in the <a href="controls.html">controls docs</a>.
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="k">struct</span> <span class="nc">CustomButton1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">base</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">struct</span> <span class="nc">CustomButton2</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">base</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">struct</span> <span class="nc">CustomButton2Builder</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">build</span><span class="p">(</span><span class="n">btn</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">CustomButton2</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NwgError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//...</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="n">subclass_control</span><span class="o">!</span><span class="p">(</span><span class="n">CustomButton1</span><span class="p">,</span><span class="w"> </span><span class="n">Button</span><span class="p">,</span><span class="w"> </span><span class="n">base</span><span class="p">);</span><span class="w"></span>
+<span class="n">subclass_control</span><span class="o">!</span><span class="p">(</span><span class="n">CustomButton2</span><span class="p">,</span><span class="w"> </span><span class="n">Button</span><span class="p">,</span><span class="w"> </span><span class="n">base</span><span class="p">);</span><span class="w"></span>
+
+<span class="cp">#[derive(NwgUi)]</span><span class="w"></span>
+<span class="k">struct</span> <span class="nc">MyUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
+<span class="w">    </span><span class="n">window1</span>: <span class="nc">nwg</span>::<span class="n">Window</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(type=Button)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">test_button1</span>: <span class="nc">CustomButton1</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
+<span class="w">    </span><span class="n">test_button2</span>: <span class="nc">CustomButton2</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+            
+            
         <br/><br/>
 
     </div>
