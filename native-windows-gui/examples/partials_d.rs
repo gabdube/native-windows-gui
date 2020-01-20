@@ -90,7 +90,7 @@ pub struct PeopleUi {
     #[nwg_layout_item(layout: layout, col: 1, row: 0)]
     name_input: nwg::TextInput,
 
-    #[nwg_control(text: "75:", flags: "NUMBER")]
+    #[nwg_control(text: "75", flags: "NUMBER|VISIBLE")]
     #[nwg_layout_item(layout: layout, col: 1, row: 1)]
     age_input: nwg::TextInput,
 
@@ -132,7 +132,7 @@ pub struct AnimalUi {
 #[derive(Default, NwgPartial)]
 pub struct FoodUi {
     
-    #[nwg_layout(max_size: [1000, 150], min_size: [100, 120])]
+    #[nwg_layout(max_size: [1000, 90], min_size: [100, 80])]
     layout: nwg::GridLayout,
 
     #[nwg_control(text: "Name:", h_align: HTextAlign::Right)]

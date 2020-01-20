@@ -487,16 +487,22 @@ impl<'a> NwgUi<'a> {
             if has_attr_parent {
                 controls[i].expand_parent();
             } else {
+                // Rewind the controls set the parent to the nearest control that supports children
                 let parent = controls[0..i]
                     .iter().rev()
                     .find(|i| TOP_LEVEL.iter().any(|top| i.ty == top) );
-                
+            
                 if let Some(parent) = parent {
                     let parent_id = Some(parent.id.to_string());
                     let parent_expr: syn::Expr = syn::parse_str(&format!("&data.{}", parent.id)).unwrap();
                     controls[i].names.push(parent_ident.clone());
                     controls[i].values.push(parent_expr);
                     controls[i].parent_id = parent_id;
+                } else if partial {
+                    // If no parent is found, but we are in a partial, use the partial parent.
+                    controls[i].names.push(parent_ident.clone());
+                    controls[i].values.push(partial_parent_expr.clone());
+                    controls[i].parent_id = Some(parent_ident.to_string());
                 }
             }
         }
