@@ -82,6 +82,7 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
         mod #module_name {
             use super::*;
             use native_windows_gui as nwg;
+            use nwg::PartialUi;
             use std::ops::Deref;
             use std::rc::Rc;
             use std::fmt;
@@ -141,6 +142,7 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
     let partial_ui = quote! {
         mod #partial_name {
             use native_windows_gui as nwg;
+            use nwg::PartialUi;
             use super::*;
         
             impl nwg::PartialUi<#struct_name> for #struct_name {

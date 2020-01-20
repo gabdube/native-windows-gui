@@ -38,13 +38,13 @@ pub struct PartialDemo {
     #[nwg_layout_item(layout: layout, cell: 1, cell_span: 3)]
     frame3: nwg::Frame,
 
-    #[nwg_partial(parent=frame1)]
+    #[nwg_partial(parent: frame1)]
     people_ui: PeopleUi,
 
-    #[nwg_partial(parent=frame2)]
+    #[nwg_partial(parent: frame2)]
     animal_ui: AnimalUi,
 
-    #[nwg_partial(parent=frame3)]
+    #[nwg_partial(parent: frame3)]
     food_ui: FoodUi,
 }
 

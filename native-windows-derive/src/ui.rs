@@ -159,7 +159,8 @@ impl<'a> NwgLayout<'a> {
 
 struct NwgPartial<'a> {
     id: &'a syn::Ident,
-    parent: Option<&'a syn::Ident>,
+    ty: &'a syn::Ident,
+    parent: Option<syn::Ident>,
 }
 
 
@@ -170,6 +171,45 @@ impl<'a> NwgPartial<'a> {
                 .map(|ident| ident == "nwg_partial" )
                 .unwrap_or(false)
         )
+    }
+
+    fn parse_type(field: &syn::Field) -> &syn::Ident {
+        match &field.ty {
+            syn::Type::Path(p) => match p.path.segments.last() {
+                Some(seg) => &seg.ident,
+                None => panic!("Impossible to parse type for field {:?}. Try specifying it in the nwg_partial attribute.", field.ident)
+            },
+            _ => panic!("Impossible to parse type for field {:?}. Try specifying it in the nwg_partial attribute.", field.ident)
+        }
+    }
+
+    fn parse_parent(field: &syn::Field) -> Option<syn::Ident> {
+        use crate::shared::Parameters;
+
+        let nwg_partial = |attr: &&syn::Attribute| {
+            attr.path.get_ident()
+              .map(|id| id == "nwg_partial" )
+              .unwrap_or(false)
+        };
+
+        let attr = match field.attrs.iter().find(nwg_partial) {
+            Some(attr) => attr,
+            None => unreachable!()
+        };
+
+        let params: Parameters = match syn::parse2(attr.tokens.clone()) {
+            Ok(p) => p,
+            Err(e) => panic!("Failed to parse field #{}: {}", field.ident.as_ref().unwrap(), e)
+        };
+
+        let parent_value = params.params.iter().find(|p| p.ident == "parent").map(|p| &p.e);
+        match parent_value {
+            Some(v) => match v {
+                syn::Expr::Path(p) => p.path.segments.last().map(|seg| seg.ident.clone()),
+                _ => None,
+            },
+            None => None
+        }
     }
 }
 
@@ -307,9 +347,40 @@ impl<'a> ToTokens for NwgUiPartials<'a> {
 
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
 
-        let partials_tk = quote! {
-        };
+        struct PartialGen<'b> {
+            item: &'b NwgPartial<'b>
+        }
 
+        impl<'b> ToTokens for PartialGen<'b> {
+            fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+                let i = &self.item;
+                let ty = &i.ty;
+                let id = &i.id;
+                let parent = &i.parent;
+
+                let partial_tk = if parent.is_none() {
+                    quote! {
+                        #ty::build_partial::<&nwg::Window>(&mut data.#id, None)?;
+                    }
+                } else {
+                    quote! {
+                        #ty::build_partial(&mut data.#id, Some(&data.#parent))?;
+                    }
+                };
+                
+                partial_tk.to_tokens(tokens);
+            }
+        }
+
+        let ui = &self.0;
+        let partials: Vec<PartialGen> = ui.partials.iter()
+            .map(|item| PartialGen { item })
+            .collect();
+
+        let partials_tk = quote! {
+            #(#partials)*
+        };
+        
         partials_tk.to_tokens(tokens);
     }
 
@@ -377,7 +448,8 @@ impl<'a> NwgUi<'a> {
             else if NwgPartial::valid(field) {
                 let partial = NwgPartial {
                     id: field.ident.as_ref().unwrap(),
-                    parent: None
+                    ty: NwgPartial::parse_type(field),
+                    parent: NwgPartial::parse_parent(field),
                 };
 
                 partials.push(partial);
