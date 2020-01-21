@@ -7,7 +7,8 @@
     <title>Native Windows GUI guide - Resources</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 </head>
 <body class="rustdoc">
@@ -89,6 +90,57 @@
 
 
         <h1 class="title">Native Windows GUI: Raw handles</h1>
+
+        Native windows controls handle are public and always accessible using the field <code>handle</code>.
+        <br><br>
+        
+        Wrapping external handles should only be done on a <code>Window</code> as it only control that doesn't expose
+        window class specific functions.
+
+        <br><br>
+        For example, here's the definition of <code>ControlHandle</code> and the definition of the Window control:
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="cp">#[derive(Default)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">handle</span>: <span class="nc">ControlHandle</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">wrap_extern_window</span><span class="p">(</span><span class="n">hwnd</span>: <span class="nc">HWND</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">handle</span>: <span class="nc">nwg</span>::<span class="n">ControlHandle</span>::<span class="n">Hwnd</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+            
+                
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">ControlHandle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">NoHandle</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">Hwnd</span><span class="p">(</span><span class="n">HWND</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// (Parent menu / Menu). </span>
+<span class="w">    </span><span class="sd">/// Parent menu must be there as WINAPI does not have any function to fetch the parent</span>
+<span class="w">    </span><span class="n">Menu</span><span class="p">(</span><span class="n">HMENU</span><span class="p">,</span><span class="w"> </span><span class="n">HMENU</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// (Parent window / Menu). </span>
+<span class="w">    </span><span class="n">PopMenu</span><span class="p">(</span><span class="n">HWND</span><span class="p">,</span><span class="w"> </span><span class="n">HMENU</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// (Parent menu / Unique ID). </span>
+<span class="w">    </span><span class="n">MenuItem</span><span class="p">(</span><span class="n">HMENU</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Notice control</span>
+<span class="w">    </span><span class="n">Notice</span><span class="p">(</span><span class="n">HWND</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Timer control</span>
+<span class="w">    </span><span class="n">Timer</span><span class="p">(</span><span class="n">HWND</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// System tray control</span>
+<span class="w">    </span><span class="n">SystemTray</span><span class="p">(</span><span class="n">HWND</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+
+
         <br/><br/>
 
     </div>
