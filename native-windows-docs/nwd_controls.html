@@ -47,38 +47,37 @@
 </ul>
 </li>
 
-<li><a href="controls_lib.html"><b>4.</b> Controls encyclopedia </a></li>
-
-<li><a href="intermediate.html"><b>5.</b> Intermediate </a>
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
 <ul class="section">
-    <li><a href="layouts.html"><b>5.1.</b> Layouts </a></li>
-    <li><a href="resources.html"><b>5.2.</b> Resources </a></li>
-    <li><a href="dialogs.html"><b>5.3.</b> Dialogs </a></li>
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
 </ul>
 </li>
 
-<li><a href="advanced.html"><b>6.</b> Advanced </a>
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
 <ul class="section">
-    <li><a href="partial.html"><b>6.1.</b> Partials ui </a></li>
-    <li><a href="dynamic_control.html"><b>6.2.</b> Dynamic control </a></li>
-    <li><a href="dynamic_event.html"><b>6.3.</b> Dynamic events </a></li>
-    <li><a href="multithreading.html"><b>6.4.</b> Multithreading </a></li>
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
 </ul>
 </li>
 
-<li><a href="derive.html"><b>7.</b> Native-windows-derive </a>
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
 <ul class="section">
-    <li><a href="nwd_basics.html"><b>7.1.</b> Basics </a></li>
-    <li><a href="nwd_controls.html"><b>7.1.</b> Controls </a></li>
-    <li><a href="nwd_events.html"><b>7.2.</b> Events </a></li>
-    <li><a href="nwd_layouts.html"><b>7.3.</b> Layouts </a></li>
-    <li><a href="nwd_partial.html"><b>7.4.</b> Partials </a></li>
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_events.html"><b>6.2.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.3.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.4.</b> Partials </a></li>
 </ul>
 </li>
 
-<li><a href="low.html"><b>8.</b> Low level stuff </a>
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
     <ul class="section">
-        <li><a href="low_events.html"><b>8.1.</b> Raw event handling </a></li>
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
     </ul>
 </li>
 
@@ -98,7 +97,31 @@
         <br/><br/>
 
         <h3>Attributes</h3>
-        <br/><br/>
+
+        As mentionned in the controls docs, almost every components of NWG use the same builder based approach. Builders API are easy
+        to understand at the cost of being verbose. In order to keep UI the initialization to a minimum, NWD translates the builder API
+        into a list of 
+        
+        <br><br>
+        <code>nwg_control(builder_field: builder_value,*)</code>
+        <br><br>
+
+        This has the benefits of keeping boilerplate code to a minimal amount and it also keep the control parameters next to the type definition,
+        making things easier to understand for anyone reading the code.<br><br>
+
+        Example:<br>
+
+<div class="highlight"><pre style="width:auto;"><span></span><span class="cp">#[nwg_control(text: </span><span class="s">&quot;Heisenberg&quot;</span><span class="cp">, size: (280, 25), position: (10, 10))]</span><span class="w"></span>
+<span class="n">name_edit</span>: <span class="nc">nwg</span>::<span class="n">TextInput</span><span class="p">,</span><span class="w"></span>
+
+<span class="c1">// is the same as </span>
+
+<span class="n">nwg</span>::<span class="n">TextInput</span>::<span class="n">builder</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">text</span><span class="p">(</span><span class="s">&quot;Heisenberg&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">size</span><span class="p">((</span><span class="mi">280</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">position</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">build</span><span class="p">(&mut data.text_edit);</span><span class="w"></span>
+</pre></div>
 
         <h3>Parent detection</h3>
 
@@ -136,7 +159,10 @@
 
         Defining flags can take alot of space. In order to fix this, NWG supports a "compressed" flags format. Where the flag enum is ignored.
         This only works with the <code>flags</code> parameters because it's possible for NWD to guess the right type. For example, here's the
-        compressed flag definition VS the normal flag definition.
+        compressed flag definition VS the normal flag definition.<br><br>
+
+        It's also worth noting that there is no need to import NWG in the local scope of your module when using native window values (such as flags definition).
+
 
 <div class="highlight"><pre style="width: auto;"><span ></span><span class="cp">#[derive(NwgUi)]</span><span class="w"></span>
 <span class="k">struct</span> <span class="nc">MyUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -157,6 +183,9 @@
 
         When not using <code>ty</code> and still using custom values, NWD will try to instance a custom builder object by calling <code>MyType::builder</code>.
         The custom builder must work in the same way built-in builders works.
+        <br><br>
+
+        For an example see: <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/subclassing_d.rs">the subclassing example.</a>
 
 <div class="highlight"><pre style="width: auto;"><span></span><span class="k">struct</span> <span class="nc">CustomButton1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">base</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="w"></span>

@@ -150,17 +150,17 @@ impl ToTokens for ControlEvents {
         }
 
         let events_tk = quote! {
-            let window_handles: &[&nwg::ControlHandle] = &[#(&ui.#handles.handle),*];
+            let window_handles: &[&ControlHandle] = &[#(&ui.#handles.handle),*];
             for handle in window_handles.iter() {
                 let evt_ui = ui.clone();
                 let handle_events = move |_evt, _evt_data, _handle| {
                     match _evt { 
-                        #( nwg::Event::#events => #callbacks ),*
+                        #( Event::#events => #callbacks ),*
                         _ => {}
                     }
                 };
                 
-                nwg::full_bind_event_handler(handle, handle_events);
+                full_bind_event_handler(handle, handle_events);
             }
         };
 

@@ -76,6 +76,7 @@
 <li><a href="low.html"><b>7.</b> Low level stuff </a>
     <ul class="section">
         <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
     </ul>
 </li>
 
@@ -97,6 +98,10 @@ Native windows GUI includes 2 type of layouts: BoxLayout and GridLayout.<br>
 </ul>
 
 To learn how to use layouts with <code>native-windows-derive</code> see <a href="nwd_layouts.html">the derive section</a>
+<br><br>
+
+For an example on how to use layout see <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator.rs">the calculator example</a> 
+(and <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator_d.rs">the derive version</a>)
 <br><br>
 
 <h3>Basic usage</h3>  
@@ -133,12 +138,12 @@ There's two ways to add a child to a layout:
 
 <ul>
     <li>The simple way using <code>.child(column, row, control)</code></li>
-    <li>The extended way using <code>.child_item(nwg::GridLayoutItem)</code></li>
+    <li>The extended way using <code>.child_item(nwg::[TYPE]LayoutItem)</code></li>
 </ul>
 
 If the child do not span across multiple cells, <code>child</code> is the way to go.<br><br>
 
-If the child must spans across multiple cells, use a GridLayoutItem. Note that <code>child</code> will also create a GridLayoutItem under the hood.
+If the child must spans across multiple cells, use a [TYPE]LayoutItem (ex: <code>GridLayoutItem</code>). Note that <code>child</code> will also create a GridLayoutItem under the hood.
 
 <div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">GridLayoutItem</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">control</span>: <span class="nc">HWND</span><span class="p">,</span><span class="w"></span>

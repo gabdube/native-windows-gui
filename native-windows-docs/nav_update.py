@@ -62,6 +62,7 @@ NAV = r"""<!-- NAV BEGIN -->
 <li><a href="low.html"><b>7.</b> Low level stuff </a>
     <ul class="section">
         <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
     </ul>
 </li>
 

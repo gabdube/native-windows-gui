@@ -300,7 +300,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                 let children = &self.children;
 
                 let layout_tk = quote! {
-                    nwg::#ty::builder()
+                    #ty::builder()
                         #(.#names(#values))*
                         #(.#children)*
                         .build(&ui.#id);
@@ -349,7 +349,7 @@ impl<'a> ToTokens for NwgUiPartials<'a> {
 
                 let partial_tk = if parent.is_none() {
                     quote! {
-                        #ty::build_partial::<&nwg::Window>(&mut data.#id, None)?;
+                        #ty::build_partial::<&Window>(&mut data.#id, None)?;
                     }
                 } else {
                     quote! {
