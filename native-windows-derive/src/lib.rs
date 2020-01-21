@@ -80,9 +80,8 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
 
     let derive_ui = quote! {
         mod #module_name {
+            use native_windows_gui::*;
             use super::*;
-            use native_windows_gui as nwg;
-            use nwg::PartialUi;
             use std::ops::Deref;
             use std::rc::Rc;
             use std::fmt;
@@ -91,8 +90,8 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
                 inner: #struct_name
             }
 
-            impl nwg::NativeUi<#struct_name, Rc<#ui_struct_name>> for #struct_name {
-                fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, nwg::NwgError> {
+            impl NativeUi<#struct_name, Rc<#ui_struct_name>> for #struct_name {
+                fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, NwgError> {
                     #controls
                     #partials
 
@@ -141,14 +140,13 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
 
     let partial_ui = quote! {
         mod #partial_name {
-            use native_windows_gui as nwg;
-            use nwg::PartialUi;
+            use native_windows_gui::*;
             use super::*;
         
-            impl nwg::PartialUi<#struct_name> for #struct_name {
+            impl PartialUi<#struct_name> for #struct_name {
 
                 #[allow(unused)]
-                fn build_partial<W: Into<nwg::ControlHandle>>(data: &mut #struct_name, _parent: Option<W>) -> Result<(), nwg::NwgError> {
+                fn build_partial<W: Into<ControlHandle>>(data: &mut #struct_name, _parent: Option<W>) -> Result<(), NwgError> {
                     let parent = _parent.map(|p| p.into());
                     let parent_ref = parent.as_ref();
                     #controls
@@ -158,10 +156,10 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
                     Ok(())
                 }
 
-                fn process_event<'a>(&self, _evt: nwg::Event, _evt_data: &nwg::EventData, _handle: nwg::ControlHandle) {
+                fn process_event<'a>(&self, _evt: Event, _evt_data: &EventData, _handle: ControlHandle) {
                 }
 
-                fn handles(&self) -> Vec<&nwg::ControlHandle> {
+                fn handles(&self) -> Vec<&ControlHandle> {
                     Vec::new()
                 }
             }

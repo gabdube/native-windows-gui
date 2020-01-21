@@ -40,7 +40,7 @@ mod test_control_panel_ui {
         inner: TestControlPanel
     }
 
-    impl NativeUi<TestControlPanel, TestControlPanelUi> for TestControlPanel {
+    impl NativeUi<TestControlPanel, Rc<TestControlPanelUi>> for TestControlPanel {
         fn build_ui(mut data: TestControlPanel) -> Result<Rc<TestControlPanelUi>, NwgError> {
             use crate::Event as E;
 

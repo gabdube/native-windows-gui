@@ -58,6 +58,10 @@ pub fn control_parameters(field: &syn::Field) -> (Vec<syn::Ident>, Vec<syn::Expr
     let mut exprs = Vec::with_capacity(params.len());
 
     for p in params {
+        if p.ident == "ty" {
+            continue;
+        }
+
         names.push(p.ident);
         exprs.push(p.e);
     }

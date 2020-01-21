@@ -171,7 +171,7 @@
     
     Each control is a thin wrapper over a window handle (HWND). For more complex controls (such as listboxes), the control may contains extra data.
     Controls implements the <code>Default</code> trait. Controls returned by default functions are considered <b>uninitialized</b>. Calling their methods
-    will make the program panic.<br><br>
+    will cause the program to panic.<br><br>
 
     Ui actions (displaying a message box in this case) should be implemented as structure methods. That is in no way a hard rule though.
     Any type of functions can be used. It just wraps nicely with the way the derive macro handles the events. 

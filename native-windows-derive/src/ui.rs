@@ -1,6 +1,7 @@
 use quote::{ToTokens};
 use crate::layouts::{LayoutChild, BoxLayoutChild, GridLayoutChild, layout_parameters};
 use crate::events::ControlEvents;
+use crate::shared::Parameters;
 
 const TOP_LEVEL: &'static [&'static str] = &[
     "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow"
@@ -33,8 +34,28 @@ impl<'a> NwgControl<'a> {
     }
 
     fn parse_type(field: &syn::Field) -> &syn::Ident {
-        // TODO: extract type from nwg_control first
+        // Check for `type` in nwg_control
+        let nwg_control = |attr: &&syn::Attribute| {
+            attr.path.get_ident()
+              .map(|id| id == "nwg_control" )
+              .unwrap_or(false)
+        };
+
+        let attr = match field.attrs.iter().find(nwg_control) {
+            Some(attr) => attr,
+            None => unreachable!()
+        };
+
+        let params: Parameters = match syn::parse2(attr.tokens.clone()) {
+            Ok(p) => p,
+            Err(e) => panic!("Failed to parse field #{}: {}", field.ident.as_ref().unwrap(), e)
+        };
+
+        if let Some(t) = params.params.iter().find(|p| p.ident == "ty").map(|p| &p.e) {
+            println!("#{:?}", t);
+        }
         
+        // Use field type
         match &field.ty {
             syn::Type::Path(p) => match p.path.segments.last() {
                 Some(seg) => &seg.ident,
@@ -69,24 +90,6 @@ impl<'a> NwgControl<'a> {
         };
         
         self.values[i] = parent_expr;
-    }
-
-    fn expand_types(&mut self) {
-        let expand_types = ["h_align", "check_state"];
-        for t in expand_types.iter() {
-            if let Some(i) = self.names.iter().position(|n| n == t) {
-                match &mut self.values[i] {
-                    syn::Expr::Path(p) =>  {
-                        let seg = syn::PathSegment{ 
-                            ident: syn::Ident::new("nwg", pm2::Span::call_site()),
-                            arguments: syn::PathArguments::None
-                        };
-                        p.path.segments.insert(0, seg)
-                    },
-                    _ => {}
-                } 
-            }
-        }
     }
 
 }
@@ -139,22 +142,6 @@ impl<'a> NwgLayout<'a> {
         self.values[i] = parent_expr;
     }
 
-    fn expand_types(&mut self) {
-        let type_index = self.names.iter().position(|n| n == "layout_type");
-        if let Some(i) = type_index {
-            match &mut self.values[i] {
-                syn::Expr::Path(p) =>  {
-                    let seg = syn::PathSegment{ 
-                        ident: syn::Ident::new("nwg", pm2::Span::call_site()),
-                        arguments: syn::PathArguments::None
-                    };
-                    p.path.segments.insert(0, seg)
-                },
-                _ => {}
-            }
-        }
-    }
-
 }
 
 struct NwgPartial<'a> {
@@ -184,8 +171,6 @@ impl<'a> NwgPartial<'a> {
     }
 
     fn parse_parent(field: &syn::Field) -> Option<syn::Ident> {
-        use crate::shared::Parameters;
-
         let nwg_partial = |attr: &&syn::Attribute| {
             attr.path.get_ident()
               .map(|id| id == "nwg_partial" )
@@ -232,7 +217,7 @@ impl<'a> ToTokens for NwgUiControls<'a> {
                 let names = &item.names;
                 let values = &item.values;
                 let control_tk = quote! {
-                    nwg::#ty::builder()
+                    #ty::builder()
                         #(.#names(#values))*
                         .build(&mut data.#member)?;
                 };
@@ -283,11 +268,11 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                 let item_tk = match c.layout {
                     Some(LayoutChild::Grid( GridLayoutChild {col, row, col_span, row_span} )) => 
                         quote! { 
-                            child_item(nwg::GridLayoutItem::new(&ui.#id, #col, #row, #col_span, #row_span))
+                            child_item(GridLayoutItem::new(&ui.#id, #col, #row, #col_span, #row_span))
                         },
                     Some(LayoutChild::Box( BoxLayoutChild {cell, cell_span} )) => 
                         quote! { 
-                            child_item(nwg::BoxLayoutItem::new(&ui.#id, #cell, #cell_span))
+                            child_item(BoxLayoutItem::new(&ui.#id, #cell, #cell_span))
                         },
                     Some(_) => panic!("Unprocessed layout item"),
                     None => panic!("Unfiltered layout item")
@@ -528,11 +513,6 @@ impl<'a> NwgUi<'a> {
         // Helpers
         for control in controls.iter_mut() {
             control.expand_flags();
-            control.expand_types();
-        }
-
-        for layout in layouts.iter_mut() {
-            layout.expand_types();
         }
 
         // Sort by weight
