@@ -11,6 +11,57 @@ use nwg::NativeUi;
 
 type UserButton = nwg::Button;
 
+#[allow(dead_code)]
+#[derive(Default)]
+pub struct CustomButton {
+    base: nwg::Button,
+    data: usize
+}
+
+// Implements default trait so that the control can be used by native windows derive
+// The parameters are: subclass_control!(user type, base type, base field name)
+nwg::subclass_control!(CustomButton, Button, base);
+
+//
+// Implement a builder API compatible with native window derive
+//
+
+impl CustomButton {
+    fn builder<'a>() -> CustomButtonBuilder<'a> {
+        CustomButtonBuilder {
+            button_builder: nwg::Button::builder().text("Custom button with builder"),
+            data: 0
+        }
+    }
+}
+
+pub struct CustomButtonBuilder<'a> {
+    button_builder: nwg::ButtonBuilder<'a>,
+    data: usize
+}
+
+impl<'a> CustomButtonBuilder<'a> {
+    pub fn data(mut self, v: usize) -> CustomButtonBuilder<'a> {
+        self.data = v;
+        self
+    }
+
+    pub fn parent<C: Into<nwg::ControlHandle>>(mut self, p: C) -> CustomButtonBuilder<'a> {
+        self.button_builder = self.button_builder.parent(p);
+        self
+    }
+
+    pub fn build(self, btn: &mut CustomButton) -> Result<(), nwg::NwgError> {
+        self.button_builder.build(&mut btn.base)?;
+        btn.data = self.data;
+        Ok(())
+    }
+}
+
+//
+// Actual interface code
+//
+
 #[derive(Default, NwgUi)]
 pub struct SubclassApp {
     #[nwg_control(size: (300, 300), position: (700, 300), title: "Subclass example")]
@@ -22,22 +73,38 @@ pub struct SubclassApp {
 
     #[nwg_control(text: "Simple button")]
     #[nwg_layout_item(layout: layout, cell: 0)]
+    #[nwg_events( OnButtonClick: [SubclassApp::button_click1] )]
     button1: nwg::Button,
 
-    #[nwg_control(ty: Button, text: "User type button")]
+    #[nwg_control(text: "User type button")]
     #[nwg_layout_item(layout: layout, cell: 1)]
+    #[nwg_events( OnButtonClick: [SubclassApp::button_click2] )]
     button2: UserButton,
 
-    #[nwg_control(text: "Subclassed button")]
+    #[nwg_control(ty: Button, text: "Subclassed button")]
     #[nwg_layout_item(layout: layout, cell: 2)]
-    button3: nwg::Button,
+    #[nwg_events( OnButtonClick: [SubclassApp::button_click3(SELF, CTRL)] )]
+    button3: CustomButton,
 
-    #[nwg_control(text: "Custom builder button")]
+    #[nwg_control(data: 100)]
     #[nwg_layout_item(layout: layout, cell: 3)]
-    button4: nwg::Button,
+    #[nwg_events( OnButtonClick: [SubclassApp::button_click3(SELF, CTRL)] )]
+    button4: CustomButton,
 }
 
 impl SubclassApp {
+
+    fn button_click1(&self) {
+        nwg::simple_message("Simple button", "Hey, I'm a simple button!");
+    }
+
+    fn button_click2(&self) {
+        nwg::simple_message("User type button", "Hey, I'm a button with a use type def!");
+    }
+
+    fn button_click3(&self, button: &CustomButton) {
+        nwg::simple_message("Custom button", &format!("Hey, I'm a button with custom data! The data is {}!", button.data) );
+    }
 
     fn exit(&self) {
         nwg::stop_thread_dispatch();

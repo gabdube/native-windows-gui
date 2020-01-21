@@ -151,11 +151,11 @@
         <h3>Subclassed controls</h3>
 
         By default, NWD can guess the control builder by looking up the structure member type. When a user type is used, this is no longer possible.
-        To fix this, it's possible to pass the <code>type</code> parameter to the <code>nwg_control</code> attribute. <code>type</code> won't be evaluated
+        To fix this, it's possible to pass the <code>ty</code> parameter to the <code>nwg_control</code> attribute. <code>ty</code> won't be evaluated
         as a builder parameter.
         <br><br>
 
-        When not using <code>type</code> and still using custom values, NWD will try to instance a custom builder object by calling <code>MyType::builder</code>.
+        When not using <code>ty</code> and still using custom values, NWD will try to instance a custom builder object by calling <code>MyType::builder</code>.
         The custom builder must work in the same way built-in builders works.
 
 <div class="highlight"><pre style="width: auto;"><span></span><span class="k">struct</span> <span class="nc">CustomButton1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -180,7 +180,7 @@
 <span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
 <span class="w">    </span><span class="n">window1</span>: <span class="nc">nwg</span>::<span class="n">Window</span><span class="p">,</span><span class="w"></span>
 
-<span class="w">    </span><span class="cp">#[nwg_control(type=Button)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control(ty=Button)]</span><span class="w"></span>
 <span class="w">    </span><span class="n">test_button1</span>: <span class="nc">CustomButton1</span><span class="p">,</span><span class="w"></span>
 
 <span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>

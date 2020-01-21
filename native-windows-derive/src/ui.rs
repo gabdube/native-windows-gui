@@ -12,7 +12,7 @@ struct NwgControl<'a> {
     id: &'a syn::Ident,
     parent_id: Option<String>,
 
-    ty: &'a syn::Ident,
+    ty: syn::Ident,
 
     layout: Option<LayoutChild>,
     layout_index: usize,
@@ -33,7 +33,7 @@ impl<'a> NwgControl<'a> {
         )
     }
 
-    fn parse_type(field: &syn::Field) -> &syn::Ident {
+    fn parse_type(field: &syn::Field) -> syn::Ident {
         // Check for `type` in nwg_control
         let nwg_control = |attr: &&syn::Attribute| {
             attr.path.get_ident()
@@ -51,14 +51,18 @@ impl<'a> NwgControl<'a> {
             Err(e) => panic!("Failed to parse field #{}: {}", field.ident.as_ref().unwrap(), e)
         };
 
-        if let Some(t) = params.params.iter().find(|p| p.ident == "ty").map(|p| &p.e) {
-            println!("#{:?}", t);
+        match params.params.iter().find(|p| p.ident == "ty").map(|p| &p.e) {
+            Some(syn::Expr::Path(p)) => match p.path.segments.last().map(|seg| seg.ident.clone()) {
+                Some(ty) => { return ty; }
+                None => {}
+            },
+            _ => {}
         }
         
         // Use field type
         match &field.ty {
             syn::Type::Path(p) => match p.path.segments.last() {
-                Some(seg) => &seg.ident,
+                Some(seg) => seg.ident.clone(),
                 None => panic!("Impossible to parse type for field {:?}. Try specifying it in the nwg_control attribute.", field.ident)
             },
             _ => panic!("Impossible to parse type for field {:?}. Try specifying it in the nwg_control attribute.", field.ident)
@@ -212,7 +216,7 @@ impl<'a> ToTokens for NwgUiControls<'a> {
         impl<'b> ToTokens for ControlGen<'b> {
             fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
                 let item = &self.item;
-                let ty = item.ty;
+                let ty = &item.ty;
                 let member = item.id;
                 let names = &item.names;
                 let values = &item.values;
