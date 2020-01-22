@@ -187,19 +187,44 @@ impl<'a> ToTokens for EventCallbackCol<'a> {
                 quote!{ if &_handle == &evt_ui.#member { #path(#args) } }
             }
             _ => {
-                let first_member = &cb[0].member;
-                let first_path = &cb[0].path;
-                let first_args = &cb[0].args;
+                
+                // Group callbacks by members
+                let mut members_callbacks: HashMap<&syn::Ident, Vec<(&syn::Path, &Args)>> = HashMap::new();
+                for c in cb.iter() {
+                    let mc = members_callbacks.entry(&c.member).or_insert(Vec::new());
+                    mc.push((&c.path, &c.args));
+                }
 
-                let members: Vec<&syn::Ident> = cb[1..].iter().map(|c| &c.member).collect();
-                let paths: Vec<&syn::Path> = cb[1..].iter().map(|c| &c.path).collect();
-                let args: Vec<&Punctuated<syn::Expr, Token![,]>> = cb[1..].iter().map(|c| &c.args).collect();
+                let members: Vec<&&syn::Ident> = members_callbacks.keys().collect();
+                let values: Vec<PathArgs> = members_callbacks.values().map(|c| PathArgs(c) ).collect();
+
+                let member0 = members[0];
+                let value0 = &values[0];
+                let members = &members[1..];
+                let values = &values[1..];
 
                 quote!{
-                    if &_handle == &evt_ui.#first_member { #first_path(#first_args) }
-                    #(else if &_handle == &evt_ui.#members { #paths(#args) })*
+                    if &_handle == &evt_ui.#member0 { #value0 }
+                    #(else if &_handle == &evt_ui.#members { #values })*
                 }
             }
+        };
+
+        tk.to_tokens(tokens);
+    }
+}
+
+
+type Args = Punctuated<syn::Expr, Token![,]>;
+struct PathArgs<'a> (&'a [(&'a syn::Path, &'a Args)]);
+
+impl<'a> ToTokens for PathArgs<'a> {
+
+    fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+        let paths = self.0.iter().map(|pa| pa.0);
+        let args = self.0.iter().map(|pa| pa.1);
+        let tk = quote! {
+            #(#paths(#args);)*
         };
 
         tk.to_tokens(tokens);
