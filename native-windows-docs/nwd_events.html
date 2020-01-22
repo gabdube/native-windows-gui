@@ -7,6 +7,8 @@
     <title>Native Windows GUI guide - Derive events</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 
 </head>
@@ -88,6 +90,50 @@
     <div id='page'>
 
         <h1 class="title">Native Windows Derive: Events</h1>
+
+        After defining the controls, it's time to bind the events. Every events defined in a Ui struct is regrouped in
+        a single event hook.
+
+        <h3>Events base</h3>
+
+        Defining events works by defining the events type and then, associate one or more callback to it.<br><br>
+
+        Template: <br>
+        <code>nwg_events( EVENT_TYPE: [CALLBACK(ARGS),*] )</code><br><br>
+
+        Details: <br>
+        <ul>
+            <li><b>EVENT_TYPE</b> is any value of the <code>Event</code> enum.</li>
+            <li><b>CALLBACK</b> is the function that will be called when the event is triggered.</li>
+            <li><b>ARGS</b> specifies the parameters of the callback (optional, see the next section).</li>
+        </ul>
+        <br>
+
+        Example: <br>
+        <code>nwg_events(<br>
+        &nbsp;&nbsp;OnButtonClick: [TestApp::callback1, TestApp::callback2],<br>
+        &nbsp;&nbsp;OnMouseMove: [TestApp::callback1(SELF, CTRL)]<br>
+        )</code><br>
+
+        <h3>Events arguments</h3>
+
+        By default, native windows derive assumes the callback is a method of the Ui structure. So for example,
+        <code>TestApp::callback1</code> assumes the method has the following signature <code>callback1(&self)</code>.<br><br>
+
+        That's very limiting. For example, if the same callback is used by two different controls, there's no way to differenciate them.
+        In order to fix this, NWD lets you define the callbacks parameters using those identifiers:
+
+        <ul>
+            <li><b>SELF</b>: Sends the ui struct <code>&UiStruct</code>. If there are no parameters, this is the default. </li>
+            <li><b>CTRL</b>: Sends the control that triggered the event. Ex: <code>&Button</code></li>
+            <li><b>HANDLE</b>: Sends the handle of the control. <code>&ControlHandle</code></li>
+            <li><b>EVT</b>: Sends the event that was triggered. <code>&Event</code></li>
+            <li><b>EVT_DATA</b>: Sends the <i>data</i> of the event that was triggered. <code>&EventData</code></li>
+        </ul>
+
+        It's also possible to do not use any parameters, ex: <code>TestApp::callback1()</code>.
+
+        <br/><br/>
         <br/><br/>
 
     </div>

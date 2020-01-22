@@ -92,6 +92,7 @@ pub struct SubclassApp {
     button4: CustomButton,
 }
 
+
 impl SubclassApp {
 
     fn button_click1(&self) {
