@@ -30,6 +30,7 @@ bitflags! {
         * VISIBLE: Show the window right away
     */
     pub struct ExternCanvasFlags: u32 {
+        const NONE = 0;
         const MAIN_WINDOW = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_THICKFRAME | WS_MAXIMIZEBOX;
         const WINDOW = WS_CAPTION | WS_SYSMENU;
         const MINIMIZE_BOX = WS_MINIMIZEBOX;
@@ -203,12 +204,12 @@ impl ExternCanvas {
 
     // Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE
     }
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        0
+        WS_CLIPCHILDREN
     }
 }
 

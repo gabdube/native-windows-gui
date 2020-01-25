@@ -4,7 +4,7 @@ use crate::events::ControlEvents;
 use crate::shared::Parameters;
 
 const TOP_LEVEL: &'static [&'static str] = &[
-    "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow"
+    "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow", "ExternCanvas"
 ];
 
 
@@ -586,6 +586,11 @@ impl<'a> NwgUi<'a> {
         }
         
         for i in 0..(controls.len()) {
+            let top_level = TOP_LEVEL.iter().any(|top| &controls[i].ty == top );
+            if top_level {
+                continue;
+            }
+
             let has_attr_parent = controls[i].names.iter().any(|n| n == "parent");
             if has_attr_parent {
                 controls[i].expand_parent();
