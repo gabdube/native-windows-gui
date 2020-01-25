@@ -34,7 +34,7 @@ impl<'a> NwgControl<'a> {
     }
 
     fn parse_type(field: &syn::Field) -> syn::Ident {
-        // Check for `type` in nwg_control
+        // Check for `ty` in nwg_control
         let nwg_control = |attr: &&syn::Attribute| {
             attr.path.get_ident()
               .map(|id| id == "nwg_control" )
@@ -98,6 +98,61 @@ impl<'a> NwgControl<'a> {
 
 }
 
+
+struct NwgResource<'a> {
+    id: &'a syn::Ident,
+    ty: syn::Ident,
+    names: Vec<syn::Ident>,
+    values: Vec<syn::Expr>,
+}
+
+impl<'a> NwgResource<'a> {
+
+    fn valid(field: &syn::Field) -> bool {
+        field.attrs.iter().any(|attr| 
+            attr.path.get_ident()
+                .map(|ident| ident == "nwg_resource" )
+                .unwrap_or(false)
+        )
+    }
+
+    fn parse_type(field: &syn::Field) -> syn::Ident {
+        // Check for `ty` in nwg_resource
+        let nwg_resource = |attr: &&syn::Attribute| {
+            attr.path.get_ident()
+              .map(|id| id == "nwg_resource" )
+              .unwrap_or(false)
+        };
+
+        let attr = match field.attrs.iter().find(nwg_resource) {
+            Some(attr) => attr,
+            None => unreachable!()
+        };
+
+        let params: Parameters = match syn::parse2(attr.tokens.clone()) {
+            Ok(p) => p,
+            Err(e) => panic!("Failed to parse field #{}: {}", field.ident.as_ref().unwrap(), e)
+        };
+
+        match params.params.iter().find(|p| p.ident == "ty").map(|p| &p.e) {
+            Some(syn::Expr::Path(p)) => match p.path.segments.last().map(|seg| seg.ident.clone()) {
+                Some(ty) => { return ty; }
+                None => {}
+            },
+            _ => {}
+        }
+        
+        // Use field type
+        match &field.ty {
+            syn::Type::Path(p) => match p.path.segments.last() {
+                Some(seg) => seg.ident.clone(),
+                None => panic!("Impossible to parse type for field {:?}. Try specifying it in the nwg_resource attribute.", field.ident)
+            },
+            _ => panic!("Impossible to parse type for field {:?}. Try specifying it in the nwg_resource attribute.", field.ident)
+        }
+    }
+
+}
 
 struct NwgLayout<'a> {
     id: &'a syn::Ident,
@@ -244,6 +299,48 @@ impl<'a> ToTokens for NwgUiControls<'a> {
 
 }
 
+pub struct NwgUiResources<'a>(&'a NwgUi<'a>);
+
+impl<'a> ToTokens for NwgUiResources<'a> {
+
+    fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+        
+        struct ResourceGen<'b> {
+            item: &'b NwgResource<'b>
+        }
+
+        impl<'b> ToTokens for ResourceGen<'b> {
+            fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
+                let item = &self.item;
+                let ty = &item.ty;
+                let member = item.id;
+                let names = &item.names;
+                let values = &item.values;
+                let resource_tk = quote! {
+                    #ty::builder()
+                        #(.#names(#values))*
+                        .build(&mut data.#member)?;
+                };
+
+                resource_tk.to_tokens(tokens);
+            }
+        }
+
+        let ui = &self.0;
+        let resources: Vec<ResourceGen> = ui.resources.iter()
+            .map(|item| ResourceGen { item })
+            .collect();
+
+        let resources_tk = quote! {
+            #(#resources)*
+        };
+
+        resources_tk.to_tokens(tokens);
+    }
+
+}
+
+
 
 pub struct NwgUiEvents<'a>(&'a NwgUi<'a>);
 
@@ -378,6 +475,7 @@ impl<'a> ToTokens for NwgUiPartials<'a> {
 
 pub struct NwgUi<'a> {
     controls: Vec<NwgControl<'a>>,
+    resources: Vec<NwgResource<'a>>,
     layouts: Vec<NwgLayout<'a>>,
     partials: Vec<NwgPartial<'a>>,
     events: ControlEvents,
@@ -392,6 +490,7 @@ impl<'a> NwgUi<'a> {
         };
         
         let mut controls = Vec::with_capacity(named_fields.len());
+        let mut resources = Vec::with_capacity(named_fields.len());
         let mut layouts = Vec::with_capacity(named_fields.len());
         let mut partials = Vec::with_capacity(named_fields.len());
         let mut events = ControlEvents::with_capacity(named_fields.len());
@@ -404,7 +503,7 @@ impl<'a> NwgUi<'a> {
             if NwgControl::valid(field) {
                 let id = field.ident.as_ref().unwrap();
                 let ty = NwgControl::parse_type(field);
-                let (names, values) = crate::controls::control_parameters(field);
+                let (names, values) = crate::controls::parameters(field, "nwg_control");
 
                 let f = NwgControl {
                     id,
@@ -420,6 +519,21 @@ impl<'a> NwgUi<'a> {
                 events.parse(field);
 
                 controls.push(f);
+            }
+
+            if NwgResource::valid(field) {
+                let id = field.ident.as_ref().unwrap();
+                let ty = NwgResource::parse_type(field);
+                let (names, values) = crate::controls::parameters(field, "nwg_resource");
+                
+                let f = NwgResource {
+                    id,
+                    ty,
+                    names,
+                    values,
+                };
+
+                resources.push(f);
             }
 
             else if NwgLayout::valid(field) {
@@ -522,11 +636,15 @@ impl<'a> NwgUi<'a> {
         // Sort by weight
         controls.sort_unstable_by(|a, b| a.weight.cmp(&b.weight));
 
-        NwgUi { controls, layouts, partials, events }
+        NwgUi { controls, resources, layouts, partials, events }
     }
 
     pub fn controls(&self) -> NwgUiControls {
         NwgUiControls(self)
+    }
+
+    pub fn resources(&self) -> NwgUiResources {
+        NwgUiResources(self)
     }
 
     pub fn events(&self) -> NwgUiEvents {

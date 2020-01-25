@@ -1,6 +1,6 @@
 use crate::shared::Parameters;
 
-pub fn control_parameters(field: &syn::Field) -> (Vec<syn::Ident>, Vec<syn::Expr>) {
+pub fn parameters(field: &syn::Field, attr_id: &'static str) -> (Vec<syn::Ident>, Vec<syn::Expr>) {
     let member = match field.ident.as_ref() {
         Some(m) => m,
         None => unreachable!()
@@ -8,7 +8,7 @@ pub fn control_parameters(field: &syn::Field) -> (Vec<syn::Ident>, Vec<syn::Expr
 
     let nwg_control = |attr: &&syn::Attribute| {
         attr.path.get_ident()
-          .map(|id| id == "nwg_control" )
+          .map(|id| id == attr_id )
           .unwrap_or(false)
     };
 

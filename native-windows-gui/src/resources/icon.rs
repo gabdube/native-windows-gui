@@ -73,7 +73,7 @@ impl<'a> IconBuilder<'a> {
         } else if let Some(src) = self.source_system {
             handle = unsafe { rh::build_oem_image(OemImage::Icon(src), self.size) };
         } else {
-            panic!("No source provided for Icon. TODO ERROR");
+            return Err(NwgError::resource_create("No source provided for Icon"));
         }
 
         *b = Icon { handle: handle?, owned: true };

@@ -62,7 +62,7 @@ fn parse_ui_data(d: &DeriveInput) -> Option<&syn::DataStruct> {
     }
 } 
 
-#[proc_macro_derive(NwgUi, attributes(nwg_control, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
+#[proc_macro_derive(NwgUi, attributes(nwg_control, nwg_resource, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
 pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     let base = parse_macro_input!(input as DeriveInput);
     let names = parse_base_names(&base);
@@ -74,6 +74,7 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
 
     let ui = NwgUi::build(&ui_data, false);
     let controls = ui.controls();
+    let resources = ui.resources();
     let partials = ui.partials();
     let layouts = ui.layouts();
     let events = ui.events();
@@ -92,6 +93,7 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
 
             impl NativeUi<#struct_name, Rc<#ui_struct_name>> for #struct_name {
                 fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, NwgError> {
+                    #resources
                     #controls
                     #partials
 
@@ -123,7 +125,7 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     pm::TokenStream::from(derive_ui)
 }
 
-#[proc_macro_derive(NwgPartial, attributes(nwg_control, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
+#[proc_macro_derive(NwgPartial, attributes(nwg_control, nwg_resource, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
 pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
     let base = parse_macro_input!(input as DeriveInput);
 
@@ -135,6 +137,7 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
     let ui_data = parse_ui_data(&base).expect("NWG derive can only be implemented on structs");
     let ui = NwgUi::build(&ui_data, true);
     let controls = ui.controls();
+    let resources = ui.resources();
     let layouts = ui.layouts();
     //let events = ui.events();
 
@@ -149,6 +152,8 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
                 fn build_partial<W: Into<ControlHandle>>(data: &mut #struct_name, _parent: Option<W>) -> Result<(), NwgError> {
                     let parent = _parent.map(|p| p.into());
                     let parent_ref = parent.as_ref();
+                    
+                    #resources
                     #controls
 
                     let ui = data;

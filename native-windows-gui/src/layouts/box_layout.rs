@@ -192,6 +192,14 @@ impl BoxLayout {
         let [m_top, m_right, m_bottom, m_left] = inner.margins;
         let sp = inner.spacing;
 
+        let [min_w, min_h] = inner.min_size;
+        if width < min_w { width = min_w; }
+        if height < min_h { height = min_h; }
+
+        let [max_w, max_h] = inner.max_size;
+        if width > max_w { width = max_w; }
+        if height > max_h { height = max_h; }
+
         let cell_count = match inner.cell_count {
             Some(c) => c,
             None => inner.children.iter().map(|item| item.cell + item.span).max().unwrap_or(1)
@@ -377,4 +385,3 @@ impl Default for BoxLayout {
     }
 
 }
-
