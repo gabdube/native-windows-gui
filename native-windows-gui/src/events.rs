@@ -37,6 +37,12 @@ pub enum Event {
     /// This is typically applied to top level windows but it also applies to children when layouts are used.
     OnResize,
 
+    /// When a control is about to be resized by the user. 
+    OnResizeBegin,
+
+    /// When a control stops being resized
+    OnResizeEnd,
+
     /// When a control is moved by the user. This is typically applied to top level windows.
     /// This is typically applied to top level windows but it also applies to children when layouts are used.
     OnMove,
