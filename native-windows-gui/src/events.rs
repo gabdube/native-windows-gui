@@ -38,10 +38,18 @@ pub enum Event {
     OnResize,
 
     /// When a control is about to be resized by the user. 
+    /// This does not triggers on maximize
     OnResizeBegin,
 
     /// When a control stops being resized
+    /// This does not triggers on maximize
     OnResizeEnd,
+
+    // When a window control is maximized
+    OnWindowMaximize,
+
+    // When a window control is minimized
+    OnWindowMinimize,
 
     /// When a control is moved by the user. This is typically applied to top level windows.
     /// This is typically applied to top level windows but it also applies to children when layouts are used.

@@ -469,7 +469,8 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
     use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID, GetSubMenu};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
-      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP, WM_MENUSELECT, WM_EXITSIZEMOVE, WM_ENTERSIZEMOVE};
+      WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP, WM_MENUSELECT, WM_EXITSIZEMOVE,
+      WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED};
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
@@ -555,10 +556,16 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
                 _ => {}
             }
         },
+        WM_SIZE => {
+            match w {
+                SIZE_MAXIMIZED => callback(Event::OnWindowMaximize, NO_DATA, base_handle),
+                SIZE_MINIMIZED => callback(Event::OnWindowMinimize, NO_DATA, base_handle),
+                _ => callback(Event::OnResize, NO_DATA, base_handle)
+            }
+        },
         WM_EXITSIZEMOVE => callback(Event::OnResizeEnd, NO_DATA, base_handle),
         WM_ENTERSIZEMOVE => callback(Event::OnResizeBegin, NO_DATA, base_handle),
         WM_TIMER => callback(Event::OnTimerTick, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),
-        WM_SIZE => callback(Event::OnResize, NO_DATA, base_handle),
         WM_MOVE => callback(Event::OnMove, NO_DATA, base_handle),
         WM_HSCROLL => callback(Event::OnHorizontalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
         WM_VSCROLL => callback(Event::OnVerticalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
