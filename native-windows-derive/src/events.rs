@@ -79,7 +79,7 @@ struct EventCallback {
 /// Wrapper over a basic event dispatcher
 pub struct ControlEvents {
     handles: Vec<syn::Ident>,
-    callbacks: HashMap<syn::Ident, Vec<EventCallback>>,
+    callbacks: HashMap<syn::Pat, Vec<EventCallback>>,
     callback_args_cache: HashMap<usize, syn::Expr>,
 }
 
@@ -89,7 +89,7 @@ impl ControlEvents {
         let mut cache = HashMap::with_capacity(4);
         cache.insert(0, syn::parse_str("&evt_ui.inner").unwrap());
         cache.insert(2, syn::parse_str("&_handle").unwrap());
-        cache.insert(3, syn::parse_str("&_evt").unwrap());
+        cache.insert(3, syn::parse_str("_evt").unwrap());
         cache.insert(4, syn::parse_str("&_evt_data").unwrap());
 
         ControlEvents {
@@ -119,8 +119,9 @@ impl ControlEvents {
         };
 
         for callback_def in callback_definitions.params.iter() {
+            let mapped_event = map_event_enum(&callback_def.callback_id);
             let evt_callbacks = self.callbacks
-                .entry(callback_def.callback_id.clone())
+                .entry(mapped_event)
                 .or_insert(Vec::with_capacity(3));
 
             for cb_fn in callback_def.callbacks.iter() {
@@ -142,10 +143,10 @@ impl ToTokens for ControlEvents {
     fn to_tokens(&self, tokens: &mut pm2::TokenStream) {
         let handles = &self.handles;
 
-        let mut events = Vec::with_capacity(self.callbacks.len());
+        let mut pats: Vec<&syn::Pat> = Vec::with_capacity(self.callbacks.len());
         let mut callbacks = Vec::with_capacity(self.callbacks.len());
-        for (evt, cb) in self.callbacks.iter() {
-            events.push(evt);
+        for (pat, cb) in self.callbacks.iter() {
+            pats.push(pat);
             callbacks.push(EventCallbackCol(cb));
         }
 
@@ -155,7 +156,7 @@ impl ToTokens for ControlEvents {
                 let evt_ui = ui.clone();
                 let handle_events = move |_evt, _evt_data, _handle| {
                     match _evt { 
-                        #( Event::#events => #callbacks ),*
+                        #( #pats => #callbacks ),*
                         _ => {}
                     }
                 };
@@ -261,6 +262,7 @@ fn top_level_window(field: &syn::Field) -> bool {
     }
 }
 
+
 fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, Token![,]>>, cache: &HashMap<usize, syn::Expr>) -> Punctuated<syn::Expr, Token![,]> {
     let mut p = Punctuated::new();
     if args.is_none() {
@@ -286,4 +288,17 @@ fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, T
     }
     
     p
+}
+
+
+fn map_event_enum(ident: &syn::Ident) -> syn::Pat {
+    let evt = ident.to_string();
+    let pat = match &evt as &str {
+        "MousePressLeftUp" | "MousePressLeftDown" | "MousePressRightUp" | "MousePressRightDown" => {
+            format!("Event::MousePress(MousePressEvent::{})", evt)
+        },
+        _ => format!("Event::{}", evt)
+    };
+
+    syn::parse_str(&pat).unwrap()
 }
