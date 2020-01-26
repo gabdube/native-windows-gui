@@ -28,11 +28,12 @@ pub fn create_extern_canvas_classes() -> Result<(), NwgError>  {
 
 
 unsafe extern "system" fn extern_canvas_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::um::winuser::{WM_CREATE};
+    use winapi::um::winuser::{WM_CREATE, WM_ERASEBKGND};
     use winapi::um::winuser::{DefWindowProcW};
 
     let handled = match msg {
         WM_CREATE => Some(0),
+        WM_ERASEBKGND => Some(1),
         _ => None
     };
 

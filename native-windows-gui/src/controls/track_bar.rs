@@ -361,3 +361,9 @@ impl TrackBarBuilder {
     }
 
 }
+
+impl PartialEq for TrackBar {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}

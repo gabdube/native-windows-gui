@@ -23,7 +23,7 @@ bitflags! {
 /// This control allow multi line input. For a single line of text, use `TextInput`.
 ///
 /// Note: Use `\r\n` to input a new line not just `\n`.
-#[derive(Default, Debug)]
+#[derive(Default, PartialEq, Eq)]
 pub struct TextBox {
     pub handle: ControlHandle
 }

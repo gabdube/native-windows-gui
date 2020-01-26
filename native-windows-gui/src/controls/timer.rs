@@ -125,3 +125,9 @@ impl TimerBuilder {
     }
 
 }
+
+impl PartialEq for Timer {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}

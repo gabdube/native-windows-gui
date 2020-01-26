@@ -50,7 +50,7 @@ bitflags! {
 
     Winapi docs: https://docs.microsoft.com/en-us/windows/win32/shell/notification-area
 */
-#[derive(Default)]
+#[derive(Default, PartialEq, Eq)]
 pub struct TrayNotification {
     pub handle: ControlHandle,
 }

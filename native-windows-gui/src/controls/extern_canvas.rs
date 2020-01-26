@@ -1,5 +1,5 @@
 use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION,
-WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_CLIPCHILDREN};
+WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_CLIPCHILDREN, WS_CLIPSIBLINGS };
 
 use crate::win32::window_helper as wh;
 use crate::{NwgError, Icon};
@@ -209,7 +209,7 @@ impl ExternCanvas {
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        WS_CLIPCHILDREN
+        WS_CLIPCHILDREN | WS_CLIPSIBLINGS 
     }
 }
 

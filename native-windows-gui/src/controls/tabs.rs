@@ -266,6 +266,12 @@ impl Drop for TabsContainer {
     }
 }
 
+impl PartialEq for TabsContainer {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}
+
 
 pub struct TabsContainerBuilder<'a> {
     size: (i32, i32),
@@ -324,7 +330,7 @@ impl<'a> TabsContainerBuilder<'a> {
 /**
     A subwindow in a TabContainer widget
 */
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq)]
 pub struct Tab {
     pub handle: ControlHandle
 }

@@ -621,3 +621,9 @@ impl<'a, D: Display+Default> ListBoxBuilder<'a, D> {
     }
 
 }
+
+impl<D: Display+Default> PartialEq for ListBox<D> {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}

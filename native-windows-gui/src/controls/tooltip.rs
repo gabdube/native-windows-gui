@@ -30,7 +30,7 @@ clicks a mouse button, moves the pointer away from the tool, or simply waits for
 A tooltip can be applied to multiple controls, each with their own custom text.
 This is done/undone using the `register`/`unregister` functions.
 */
-#[derive(Default, Debug)]
+#[derive(Default, PartialEq, Eq)]
 pub struct Tooltip {
     pub handle: ControlHandle
 }

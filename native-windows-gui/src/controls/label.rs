@@ -406,3 +406,9 @@ impl<'a> LabelBuilder<'a> {
     }
 
 }
+
+impl PartialEq for Label {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}

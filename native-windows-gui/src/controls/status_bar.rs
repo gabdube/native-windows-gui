@@ -180,3 +180,9 @@ impl<'a> StatusBarBuilder<'a> {
     }
 
 }
+
+impl PartialEq for StatusBar {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}

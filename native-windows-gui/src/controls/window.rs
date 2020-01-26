@@ -48,7 +48,7 @@ bitflags! {
 /**
     A basic top level window. At least one top level window is required to make a NWG application.
 */
-#[derive(Default)]
+#[derive(Default, PartialEq, Eq)]
 pub struct Window {
     pub handle: ControlHandle
 }

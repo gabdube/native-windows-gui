@@ -31,7 +31,7 @@ use crate::NwgError;
 
 
 /// An invisible component that can be triggered by other thread
-#[derive(Default)]
+#[derive(Default, PartialEq, Eq)]
 pub struct Notice {
     pub handle: ControlHandle
 }

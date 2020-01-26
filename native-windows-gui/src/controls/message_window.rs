@@ -20,7 +20,7 @@ use crate::NwgError;
     A message only top level window. At least one top level window is required to make a NWG application.
     See the module documentation
 */
-#[derive(Default)]
+#[derive(Default, PartialEq, Eq)]
 pub struct MessageWindow {
     pub handle: ControlHandle
 }

@@ -412,3 +412,9 @@ impl<'a> CheckBoxBuilder<'a> {
     }
 
 }
+
+impl PartialEq for CheckBox {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}

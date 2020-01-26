@@ -60,7 +60,7 @@ pub struct TreeItem {
 /**
 A tree-view control is a window that displays a hierarchical list of items
 */
-#[derive(Default, Debug)]
+#[derive(Default, PartialEq, Eq)]
 pub struct TreeView {
     pub handle: ControlHandle
 } 

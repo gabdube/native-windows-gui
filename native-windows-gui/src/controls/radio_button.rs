@@ -327,3 +327,9 @@ impl<'a> RadioButtonBuilder<'a> {
     }
 
 }
+
+impl PartialEq for RadioButton {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}

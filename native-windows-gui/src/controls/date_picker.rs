@@ -77,7 +77,7 @@ fn build_dtp(date: &mut nwg::DatePicker, window: &nwg::Window) {
 }
 ```
 */
-#[derive(Default)]
+#[derive(Default, PartialEq, Eq)]
 pub struct DatePicker {
     pub handle: ControlHandle
 }
@@ -470,7 +470,6 @@ impl<'a> DatePickerBuilder<'a> {
     }
 
 }
-
 
 
 use winapi::um::commctrl::DATETIMEPICKERINFO;

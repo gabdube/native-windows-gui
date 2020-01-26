@@ -42,7 +42,7 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Menu/MenuItem handle is not HM
     }
     ```
 */
-#[derive(Default)]
+#[derive(Default, PartialEq, Eq)]
 pub struct Menu {
     pub handle: ControlHandle
 }
@@ -195,7 +195,7 @@ impl<'a> MenuBuilder<'a> {
     }
     ```
 */
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq)]
 pub struct MenuItem {
     pub handle: ControlHandle
 }
@@ -316,7 +316,7 @@ impl<'a> MenuItemBuilder<'a> {
     }
     ```
 */
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq)]
 pub struct MenuSeparator {
     pub handle: ControlHandle
 }

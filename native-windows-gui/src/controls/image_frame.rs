@@ -315,3 +315,9 @@ impl<'a> ImageFrameBuilder<'a> {
     }
 
 }
+
+impl PartialEq for ImageFrame {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}

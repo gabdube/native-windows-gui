@@ -44,7 +44,7 @@ fn build_button(button: &mut nwg::ImageButton, window: &nwg::Window, ico: &nwg::
 }
 ```
 */
-#[derive(Default)]
+#[derive(Default, PartialEq, Eq)]
 pub struct ImageButton {
     pub handle: ControlHandle
 }

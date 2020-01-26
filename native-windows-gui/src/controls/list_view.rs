@@ -98,7 +98,7 @@ impl ListViewColumn {
 A list-view control is a window that displays a collection of items.
 List-view controls provide several ways to arrange and display items and are much more flexible than simple ListBox.
 */
-#[derive(Default)]
+#[derive(Default, Eq, PartialEq)]
 pub struct ListView {
     pub handle: ControlHandle
 }

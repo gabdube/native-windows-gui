@@ -541,3 +541,9 @@ impl<'a> TextInputBuilder<'a> {
     }
 
 }
+
+impl PartialEq for TextInput {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}
