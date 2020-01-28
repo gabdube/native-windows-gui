@@ -75,8 +75,6 @@ impl NoticeSender {
 
         unsafe {
             SendNotifyMessageW(self.hwnd as HWND, wh::NOTICE_MESSAGE, self.id as WPARAM, self.hwnd as LPARAM);
-            /*let res = PostThreadMessageW(self.thread_id, wh::NOTICE_MESSAGE, self.id as WPARAM, self.hwnd as LPARAM);
-            println!("{:?}", res);*/
         }
     }
 
