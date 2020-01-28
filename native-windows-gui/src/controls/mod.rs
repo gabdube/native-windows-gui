@@ -51,9 +51,6 @@ mod message_window;
 #[cfg(feature = "list-view")]
 mod list_view;
 
-#[cfg(feature = "image-button")]
-mod image_button;
-
 #[cfg(feature = "number-select")]
 mod number_select;
 

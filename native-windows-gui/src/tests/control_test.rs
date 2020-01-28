@@ -94,7 +94,7 @@ pub struct ControlsTest {
     test_track1: TrackBar,
     test_track2: TrackBar,
 
-    test_image_button: ImageButton,
+    test_image_button: Button,
     test_image_button2: Button,
     test_image_button3: Button,
     test_button_checkbox: CheckBox,
@@ -448,7 +448,8 @@ mod partial_controls_test_ui {
             //
             // Control tab 2
             //
-            ImageButton::builder()
+            Button::builder()
+                .flags(ButtonFlags::VISIBLE | ButtonFlags::BITMAP)
                 .position((10, 10))
                 .size((90, 90))
                 .bitmap(Some(&data.popcorn))

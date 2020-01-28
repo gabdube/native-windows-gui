@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_ICON, BS_BITMAP};
 use crate::win32::window_helper as wh;
 use crate::win32::resources_helper as rh;
 use crate::{NwgError, Font, Bitmap, Icon};
@@ -15,11 +15,15 @@ bitflags! {
         * NONE:     No flags. Equivalent to a invisible blank button.
         * VISIBLE:  The button is immediatly visible after creation
         * DISABLED: The button cannot be interacted with by the user. It also has a grayed out look.
+        * BITMAP: The button will display a bitmap image with no text. Must have a bitmap or else it will only show text.
+        * ICON: The button will display a icon image with no text. Must have a icon or else it will only show text.
     */
     pub struct ButtonFlags: u32 {
         const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const ICON = BS_ICON;
+        const BITMAP = BS_BITMAP;
     }
 }
 
