@@ -1,6 +1,9 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use crate::win32::window_helper as wh;
-use crate::{NwgError, Font, bind_raw_event_handler};
+use crate::{NwgError, Font};
 use super::{ControlBase, ControlHandle, TextInput, Button};
 
 const NOT_BOUND: &'static str = "UpDown is not yet bound to a winapi object";
@@ -19,6 +22,34 @@ bitflags! {
         const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+    }
+}
+
+#[derive(Copy, Clone)]
+enum NumberSelectData {
+    Int { value: i64, step: i64, max: i64, min: i64 },
+    Float { value: f64, step: f64, max: f64, min: f64, decimals: u8 },
+}
+
+impl NumberSelectData {
+
+    pub fn formatted_value(&self) -> String {
+        match self {
+            NumberSelectData::Int{ value, ..} => format!("{}", value),
+            NumberSelectData::Float{ value, decimals, ..} => format!("{:.*}", *decimals as usize, value),
+        }
+    }
+
+}
+
+impl Default for NumberSelectData {
+    fn default() -> NumberSelectData {
+        NumberSelectData::Int { 
+            value: 0,
+            step: 1,
+            max: i64::max_value(),
+            min: i64::min_value(),
+        }
     }
 }
 
@@ -53,6 +84,7 @@ fn build_number_select(num_select: &mut nwg::NumberSelect, window: &nwg::Window,
 #[derive(Default)]
 pub struct NumberSelect {
     pub handle: ControlHandle,
+    data: Rc<RefCell<NumberSelectData>>,
     edit: TextInput,
     btn_up: Button,
     btn_down: Button,
@@ -64,6 +96,7 @@ impl NumberSelect {
         NumberSelectBuilder {
             size: (100, 25),
             position: (0, 0),
+            data: NumberSelectData::default(),
             enabled: true,
             flags: None,
             font: None,
@@ -183,6 +216,7 @@ impl NumberSelect {
 pub struct NumberSelectBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
+    data: NumberSelectData,
     enabled: bool,
     flags: Option<NumberSelectFlags>,
     font: Option<&'a Font>,
@@ -216,6 +250,80 @@ impl<'a> NumberSelectBuilder<'a> {
         self
     }
 
+    // Int values
+    pub fn value_int(mut self, v: i64) -> NumberSelectBuilder<'a> {
+        match &mut self.data {
+            NumberSelectData::Int { value, .. } => { *value = v; }
+            data => *data = NumberSelectData::Int { value: v, step: 1, max: i64::max_value(), min: i64::min_value() }
+        }
+        self
+    }
+
+    pub fn step_int(mut self, v: i64) -> NumberSelectBuilder<'a> {
+        match &mut self.data {
+            NumberSelectData::Int { step, .. } => { *step = v; }
+            data => *data = NumberSelectData::Int { value: 0, step: v, max: i64::max_value(), min: i64::min_value() }
+        }
+        self
+    }
+
+    pub fn max_int(mut self, v: i64) -> NumberSelectBuilder<'a> {
+        match &mut self.data {
+            NumberSelectData::Int { max, .. } => { *max = v; }
+            data => *data = NumberSelectData::Int { value: 0, step: 1, max: v, min: i64::min_value() }
+        }
+        self
+    }
+
+    pub fn min_int(mut self, v: i64) -> NumberSelectBuilder<'a> {
+        match &mut self.data {
+            NumberSelectData::Int { min, .. } => { *min = v; }
+            data => *data = NumberSelectData::Int { value: 0, step: 1, max: i64::max_value(), min: v }
+        }
+        self
+    }
+
+    // Float values
+    pub fn value_float(mut self, v: f64) -> NumberSelectBuilder<'a> {
+        match &mut self.data {
+            NumberSelectData::Float { value, .. } => { *value = v; }
+            data => *data = NumberSelectData::Float { value: v, step: 1.0, max: 1000000.0, min: -1000000.0, decimals: 2 }
+        }
+        self
+    }
+
+    pub fn step_float(mut self, v: f64) -> NumberSelectBuilder<'a> {
+        match &mut self.data {
+            NumberSelectData::Float { step, .. } => { *step = v; }
+            data => *data = NumberSelectData::Float { value: 0.0, step: v, max: 1000000.0, min: -1000000.0, decimals: 2 }
+        }
+        self
+    }
+
+    pub fn max_float(mut self, v: f64) -> NumberSelectBuilder<'a> {
+        match &mut self.data {
+            NumberSelectData::Float { max, .. } => { *max = v; }
+            data => *data = NumberSelectData::Float { value: 0.0, step: 1.0, max: v, min: -1000000.0, decimals: 2 }
+        }
+        self
+    }
+
+    pub fn min_float(mut self, v: f64) -> NumberSelectBuilder<'a> {
+        match &mut self.data {
+            NumberSelectData::Float { min, .. } => { *min = v; }
+            data => *data = NumberSelectData::Float { value: 0.0, step: 1.0, max: 1000000.0, min: v, decimals: 2 }
+        }
+        self
+    }
+
+    pub fn decimals(mut self, v: u8) -> NumberSelectBuilder<'a> {
+        match &mut self.data {
+            NumberSelectData::Float { decimals, .. } => { *decimals = v; }
+            data => *data = NumberSelectData::Float { value: 0.0, step: 1.0, max: 1000000.0, min: -1000000.0, decimals: v }
+        }
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> NumberSelectBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -241,6 +349,7 @@ impl<'a> NumberSelectBuilder<'a> {
             .build()?;
 
         TextInput::builder()
+            .text(&self.data.formatted_value())
             .size((w-19, h))
             .parent(&out.handle)
             .build(&mut out.edit)?;
@@ -265,11 +374,7 @@ impl<'a> NumberSelectBuilder<'a> {
             out.edit.set_font(self.font);
         }
 
-        bind_raw_event_handler(&out.handle, 0, move |_hwnd, msg, _w, _l| {
-            match msg {
-                _ => None,
-            }
-        });
+        *out.data.borrow_mut() = self.data;
 
         Ok(())
     }

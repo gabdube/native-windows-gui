@@ -479,6 +479,9 @@ mod partial_controls_test_ui {
                 .build(&mut data.test_button_checkbox)?;
 
             NumberSelect::builder()
+                .value_float(10.505)
+                .step_float(0.5)
+                .decimals(2)
                 .position((10, 110))
                 .size((140, 25))
                 .parent(&data.basics_control_tab2)
