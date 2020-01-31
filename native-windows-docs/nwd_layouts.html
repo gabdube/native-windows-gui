@@ -7,7 +7,8 @@
     <title>Native Windows GUI guide - Derive layouts</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 </head>
 <body class="rustdoc">
@@ -89,6 +90,49 @@
     <div id='page'>
 
         <h1 class="title">Native Windows Derive: Layouts</h1>
+
+        The next step in the native windows derive journey are the layouts.
+        <br/><br/>
+
+        <h3>Layout</h3>
+
+        Just like controls and resources, the derive macro translate the builder API of the layouts into a list of
+
+        <br><br>
+        <code>nwg_layout(builder_field: builder_value,*)</code>
+        <br><br>
+
+        Unlike controls, NWD wont guess the parent of the layout. This might be changed in the future in a minor release.
+
+        <br/><br/>
+
+        <h3>Layout Item</h3>
+
+        After defining the layout attributes, it's time to mark the children of the layout. This is done using 
+
+        <br><br>
+        <code>nwg_layout_item(layout: layout_name, item_field: item_value,*)</code>
+        <br><br>
+
+        In this case <code>item_field: item_value</code> are the attributes of a <code>LayoutItem</code>. For example <code>GridLayoutItem</code>.
+        Also, just like <code>nwg_layout</code>, the layout parameter cannot be guessed by NWD.
+
+        <h3>Examples</h3>
+        
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Calculator</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_layout(parent: window, spacing: 2, min_size: [150, 140]</span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">grid</span>: <span class="nc">nwg</span>::<span class="n">GridLayout</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(text: </span><span class="s">&quot;&quot;</span><span class="cp">, align: nwg::HTextAlign::Right, readonly: true)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_layout_item(layout: grid, col: 0, row: 0, col_span: 5)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">input</span>: <span class="nc">nwg</span>::<span class="n">TextInput</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+        <ul>
+            <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator.rs">Calculator</a> ( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator_d.rs">derive version</a> ) shows how to use a grid layout.</li>
+            <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank.rs">Message bank</a> ( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank_d.rs">derive version</a> ) shows how to update a grid layout dynamically.</li>
+        </ul>
         <br/><br/>
 
     </div>
