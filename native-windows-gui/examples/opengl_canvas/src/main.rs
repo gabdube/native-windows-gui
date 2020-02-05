@@ -131,7 +131,6 @@ impl OpenGlCanvas {
             gl::Clear(gl::COLOR_BUFFER_BIT);
             gl::DrawArrays(gl::TRIANGLES, 0, 3);
             ctx.swap_buffers().unwrap();
-            self.canvas.invalidate()
         });
     }
 
@@ -211,6 +210,8 @@ impl ExternCanvas {
                 gl::ClearColor(r, g, b, 1.0);
             }
         }
+
+        self.window.invalidate();
     }
     
     pub fn select_tri_color(&self) {
@@ -232,6 +233,8 @@ impl ExternCanvas {
                 gl::BufferSubData(gl::ARRAY_BUFFER, 0, vertex_size as gl::types::GLsizeiptr, vertex_data.as_ptr() as *const _);
             }
         }
+
+        self.window.invalidate();
     }
 
 }
