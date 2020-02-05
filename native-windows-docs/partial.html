@@ -7,6 +7,8 @@
     <title>Native Windows GUI guide - Partials</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 
 </head>
@@ -89,7 +91,32 @@
     <div id='page'>
 
         <h1 class="title">Native Windows GUI: Partials</h1>
+
+        With small applications, controls, resources and layouts can usually fit within a single UI struct. That won't always be the case.
+        Native windows GUI partials are a way to extend GUI beyond a single structure. Partials are only a way to organize data, and do not use
+        any kind of special methods.
         <br/><br/>
+
+        <h3>PartialUi</h3>
+
+        Just like <code>NativeUi</code>, <code>PartialUi</code> is a trait that must be implemented on a UI struct. Here's the trait definition:<br><br>
+
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="n">PartialUi</span><span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">build_partial</span><span class="o">&lt;</span><span class="n">W</span>: <span class="nb">Into</span><span class="o">&lt;</span><span class="n">ControlHandle</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">d</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">parent</span>: <span class="nb">Option</span><span class="o">&lt;</span><span class="n">W</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span><span class="w"> </span><span class="n">NwgError</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">process_event</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_evt</span>: <span class="nc">Event</span><span class="p">,</span><span class="w"> </span><span class="n">_evt_data</span>: <span class="kp">&amp;</span><span class="nc">EventData</span><span class="p">,</span><span class="w"> </span><span class="n">_handle</span>: <span class="nc">ControlHandle</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">handles</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">ControlHandle</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[]</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+        
+        A partial ui <b>must</b> be part of another UI.
+
+
+        <h3>Examples</h3>
+
+        <ul>
+            <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/partials.rs">Partials</a> ( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/partials_d.rs">derive version</a> ) shows how to use partials.</li>
+        </ul>
+        <br/>
 
     </div>
 </div>

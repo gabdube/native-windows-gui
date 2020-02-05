@@ -43,7 +43,7 @@ pub use layouts::*;
     The goal of `NativeUi` and `PartialUi` is to provide a common way to define NWG applications.
     Native-windows-derive can automatically implements this trait.
 
-    For an example on how to implement this trait, see the **Large application layout** section in the NWG documentation.
+    For an example on how to implement this trait
 */
 pub trait PartialUi<D> {
     fn build_partial<W: Into<ControlHandle>>(d: &mut D, parent: Option<W>) -> Result<(), NwgError>;

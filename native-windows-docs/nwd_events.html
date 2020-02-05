@@ -134,7 +134,30 @@
 
         It's also possible to not use any parameters, ex: <code>TestApp::callback1()</code>.
 
-        <br/><br/>
+        <h3>Example</h3>
+
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Demo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//...</span>
+<span class="w">    </span><span class="cp">#[nwg_events(</span>
+<span class="cp">        OnButtonClick: [Demo::button1, Demo::button2]</span><span class="p">,</span><span class="w">            </span><span class="c1">// Multiple callbacks</span>
+<span class="w">        </span><span class="n">OnMouseMove</span>: <span class="p">[</span><span class="n">Demo</span>::<span class="n">moving</span><span class="p">(</span><span class="n">SELF</span><span class="p">,</span><span class="w"> </span><span class="n">CTRL</span><span class="p">),</span><span class="w"> </span><span class="n">Demo</span>::<span class="n">move2</span><span class="p">()],</span><span class="w">   </span><span class="c1">// With custom params &amp; for a static method</span>
+<span class="w">    </span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">add_message_btn</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+            
+        <br/>
+        Some events are defined as sub enums (ex: <code>MousePress</code>). In those case, the sub enums values must be used. For example,
+        if someone wants to handle a "left up events", a code similar to this should be used:
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Demo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_events(MousePressLeftUp: [Demo::test]</span><span class="p">,)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">frame1</span>: <span class="nc">nwg</span>::<span class="n">Frame</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+            
+
         <br/><br/>
 
     </div>

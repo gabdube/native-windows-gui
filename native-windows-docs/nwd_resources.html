@@ -91,9 +91,28 @@
 
         <h1 class="title">Native Windows Derive: Resources</h1>
 
-        The derive macro for the NWG resources works the exact same was as <code>nwg_control</code>
+        The derive macro for the NWG resources works the exact same way as <code>nwg_control</code>, with a few less features because resources are
+        much less complicated than controls.
 
+        <h3>Attributes</h3>
+
+        Just like controls, NWD translates the builder API of resources into a list of 
+
+        <br><br>
+        <code>nwg_resources(builder_field: builder_value,*)</code>
+        <br><br>
+
+        Example:<br>
+
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">App</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_resource(source_file: Some(</span><span class="s">&quot;./pencil.ico&quot;</span><span class="cp">), size: Some((16, 16)), strict: true )]</span><span class="w"></span>
+<span class="w">    </span><span class="n">pen_icon</span>: <span class="nc">nwg</span>::<span class="n">Icon</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+            
         <br/><br/>
+        Unlike controls, resources cannot have a parent nor can they trigger events.<br/><br/>
+
         <br/><br/>
 
     </div>
