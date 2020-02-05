@@ -110,12 +110,14 @@
         </ul>
         <br>
 
-        Example: <br>
-        <code>nwg_events(<br>
-        &nbsp;&nbsp;OnButtonClick: [TestApp::callback1, TestApp::callback2],<br>
-        &nbsp;&nbsp;OnMouseMove: [TestApp::callback1(SELF, CTRL)]<br>
-        )</code><br>
-
+        Example:
+<div class="highlight"><pre style="width: auto;"><span></span><span class="cp">#[nwg_events(</span>
+<span class="cp">    OnButtonClick: [TestApp::callback1, TestApp::callback2]</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">OnMouseMove</span>: <span class="p">[</span><span class="n">TestApp</span>::<span class="n">callback1</span><span class="p">(</span><span class="n">SELF</span><span class="p">,</span><span class="w"> </span><span class="n">CTRL</span><span class="p">)]</span><span class="w"></span>
+<span class="p">)]</span><span class="w"></span>
+<span class="n">window</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="p">,</span><span class="w"></span>
+</pre></div>
+            
         <h3>Events arguments</h3>
 
         By default, native windows derive assumes the callback is a method of the Ui structure. So for example,
