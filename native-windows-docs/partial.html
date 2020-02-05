@@ -108,9 +108,25 @@
 <span class="w">    </span><span class="k">fn</span> <span class="nf">handles</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">ControlHandle</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[]</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
-        
-        A partial ui <b>must</b> be part of another UI.
+        <br>
+        <b>build_partial</b><br><br>
 
+        <code>build_partial</code> is the meat of the partial. It initialize the resources, the controls, and the layouts. Optionally you can spend a parent control
+        to this method. For partial without top level window, this parent control will be the root. <br><br>
+
+        <b>process_event</b><br><br>
+
+        <code>process_event</code> role is to process the NWG events. The method will be called inside a nwg callback and dispatch the callback
+        the same way the event handlers works.<br><br>
+
+        <b>handles</b><br><br>
+
+        <code>handles</code> is the easiest method to implement. It's role is to return the handle to the top level windows of the partial.
+        If the partial do not have any window, it should return an empty array.
+
+        <h3>Implementing partials into NativeUi</h3>
+
+        A partial ui <b>must</b> be part of another UI.
 
         <h3>Examples</h3>
 
