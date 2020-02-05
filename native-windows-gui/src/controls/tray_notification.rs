@@ -37,14 +37,43 @@ bitflags! {
 
     You can't get information on the state of a tray notification (such as visibility) because Windows don't want you to.
 
+    **Builder parameters:**
+        * `parent`:       **Required.** The tray notification parent container.
+        * `icon`:         **Required.** The icon to display in the system tray
+        * `tips`:         Display a simple tooltip when hovering the icon in the system tray
+        * `flags`:        A combination of the TrayNotificationFlags values.
+        * `visible`:      If the icon should be visible in the system tray
+        * `realtime`:     If the balloon notification cannot be displayed immediately, discard it.
+        * `info`:         Display a fancy tooltip when the system tray icon is hovered (replaces tip) 
+        * `balloon_icon`: The icon to display in the fancy tooltip  
+        * `info_title`:   The title of the fancy tooltip  
+
+    **Control events:**
+        * `OnContextMenu`: When the user right clicks on the system tray icon
+        * `OnTrayNotificationShow`: When a TrayNotification info popup (not the tooltip) is shown 
+        * `OnTrayNotificationHide`: When a TrayNotification info popup (not the tooltip) is hidden 
+        * `OnTrayNotificationTimeout`: When a TrayNotification is closed due to a timeout
+        * `OnTrayNotificationUserClose`: When a TrayNotification is closed due to a user click
+
     ## Example
 
-    ```
+    ```rust
     use native_windows_gui as nwg;
 
     fn notice_user(tray: &nwg::TrayNotification, image: &nwg::Icon) {
         let flags = nwg::TrayNotificationFlags::USER_ICON | nwg::TrayNotificationFlags::LARGE_ICON;
         tray.show("Hello World", Some("Welcome to my application"), Some(flags), Some(image));
+    }
+    ```
+
+    ```rust
+    use native_windows_gui as nwg;
+    fn build_tray(tray: &mut nwg::TrayNotification, window: &nwg::Window, icon: &nwg::Icon) {
+        nwg::TrayNotification::builder()
+            .parent(window)
+            .icon(Some(icon))
+            .tip(Some("Hello"))
+            .build(tray);
     }
     ```
 

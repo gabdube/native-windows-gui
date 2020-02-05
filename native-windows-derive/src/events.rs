@@ -99,6 +99,17 @@ impl ControlEvents {
         }
     }
 
+    pub fn add_top_level_handle(&mut self, field: &syn::Field) {
+        let attrs = &field.attrs;
+        if attrs.len() == 0 { return; }
+
+        let member = field.ident.as_ref().expect("Cannot find member name when generating control");
+
+        if top_level_window(field) {
+            self.handles.push(member.clone());
+        }
+    }
+
     pub fn parse(&mut self, field: &syn::Field) {
         let attrs = &field.attrs;
         if attrs.len() == 0 { return; }
@@ -108,10 +119,6 @@ impl ControlEvents {
             Some(a) => a,
             None => { return; }
         };
-
-        if top_level_window(field) {
-            self.handles.push(member.clone());
-        }
 
         let callback_definitions: CallbackDefinitions = match syn::parse2(attr.tokens.clone()) {
             Ok(a) => a,
@@ -249,7 +256,7 @@ fn find_events_attr(attrs: &[syn::Attribute]) -> Option<&syn::Attribute> {
 
 
 fn top_level_window(field: &syn::Field) -> bool {
-    static TOP_LEVEL: &'static [&'static str] = &["Window", "FancyWindow"];
+    static TOP_LEVEL: &'static [&'static str] = &["Window", "FancyWindow", "MessageWindow"];
 
     match &field.ty {
         syn::Type::Path(p) => {

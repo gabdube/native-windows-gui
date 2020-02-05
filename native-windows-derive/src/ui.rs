@@ -516,6 +516,7 @@ impl<'a> NwgUi<'a> {
                     weight: 0,
                 };
 
+                events.add_top_level_handle(field);
                 events.parse(field);
 
                 controls.push(f);

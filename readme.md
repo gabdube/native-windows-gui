@@ -8,7 +8,8 @@ the quirks and rough edges of the API by providing a simple, safe and rust-like 
 Native Windows GUI keeps things simple. This means small compile time, minimal resources usage
 and less time searching the documentation and more time for you to develop your application.
 
-Of course, you don't have to take my word for it, check out the [showcase](https://github.com/gabdube/nwg-private/tree/master/showcase).
+Of course, you don't have to take my word for it, check out the [showcase](https://github.com/gabdube/nwg-private/tree/master/showcase) and the 
+[examples](https://github.com/gabdube/nwg-private/tree/master/native-windows-gui/examples).
 
 This is the 3rd and final version of NWG. It is considered "mature" or, as I would say
 "the backlog is empty, and it will most likely stay that way". This version implements pretty much
@@ -50,7 +51,8 @@ cargo run --example basic
 cargo run --example calculator
 cargo run --example message_bank
 cargo run --example opengl_canvas --features "color-dialog extern-canvas"
-cargo run --example partials --features "listbox frame"
+cargo run --example partials --features "listbox frame combobox"
+cargo run --example system_tray --features "tray-notification message-window menu cursor"
 ```
 
 ## Project structure
