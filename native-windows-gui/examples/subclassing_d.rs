@@ -1,5 +1,7 @@
 /*!
     Example on how to use custom types directly with native windows derive
+
+    `cargo run --example subclassing_d`
 */
 
 

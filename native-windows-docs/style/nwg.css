@@ -8,6 +8,6 @@ input[id^="spoiler"]:checked + label + .spoiler { opacity: 1; height: auto; }
 code { background-color: #E5E5E5; border-radius: 2px; padding: 0 3px; }
 
 .highlight { overflow-x: auto; }
-.highlight > pre { width: max-content; margin: 0; }
+.highlight > pre { width: max-content; margin: 0; margin-top: 10px;}
 
 h4 { font-size: 17px; }

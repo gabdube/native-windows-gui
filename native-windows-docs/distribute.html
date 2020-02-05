@@ -4,9 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <title>Native Windows GUI guide - Multithreading</title>
+    <title>Native Windows GUI guide - Distributing</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 
 </head>
@@ -89,9 +91,35 @@
 <div id='page-wrapper'>
     <div id='page'>
 
-        <h1 class="title">Native Windows GUI: Multithreading</h1>
-        <br/><br/>
+        <h1 class="title">Native Windows GUI: Distributing</h1>
+        <p>Here's two things you should really keep in mind distributing NWG binaries</p>
 
+        <br>
+
+        <h3>Disable the console</h3>
+
+        By default Rust binary will show a console. Include <br><br>
+        
+        <code>#![windows_subsystem = "windows"]</code>
+
+        <br><br>
+        At the top of your program to disable it.
+
+        <br><br>
+
+        <h3>Include MSVC dependencies</h3>
+
+        Assuming you are using the <b>MSVC</b> toolchain (you should), the rust binary won't include the CRT dependencies (see <a href="https://github.com/rust-lang/rfcs/blob/master/text/1721-crt-static.md">link</a>). This will may stop 
+        your binary from running on other computer. To fix this, create a file called <code>.cargo\config</code> in your projects root directory with the following contents:<br><br>
+
+<div class="highlight"><pre style="width:auto;"><span></span><span class="k">[target.x86_64-pc-windows-msvc]</span>
+<span class="n">rustflags</span> <span class="o">=</span> <span class="k">[&quot;-Ctarget-feature=+crt-static&quot;]</span>
+<span class="k">[target.i686-pc-windows-msvc]</span>
+<span class="n">rustflags</span> <span class="o">=</span> <span class="k">[&quot;-Ctarget-feature=+crt-static&quot;]</span>
+</pre></div>
+            
+
+        <br><br><br>
     </div>
 </div>
 

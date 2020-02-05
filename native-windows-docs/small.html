@@ -44,6 +44,7 @@
     <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
     <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
     <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
 </ul>
 </li>
 
@@ -106,7 +107,7 @@
         <ol>
             <li>Define a struct that will hold your non-gui application data</li>
             <li>Define another struct that will hold the GUI data</li>
-            <li>Add you application struct to the GUI struct members behind a RefCell</li>
+            <li>Add your application struct to the GUI struct members behind a Refcell</li>
             <li>Define the gui functions by <code>impl</code> the GUI struct</li>
             <li>Implement <code>NativeUi</code> for the GUI struct (manually or with NWD)</li>
             <li>In the main funtion, initialize the application struct and the GUI struct</li>
@@ -139,6 +140,7 @@
 <span class="n">nwg</span>::<span class="n">dispatch_thread_events</span><span class="p">();</span><span class="w"></span>
 </pre></div>
             
+    <br>
     Once everything is done, there's only initialization that's left to do. As this point everything is straightforward so...<br><br>
     
     1. Call the <code>init</code> function of nwg.<br><br>
