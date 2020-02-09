@@ -30,6 +30,7 @@ fn basic_stuff(window: &nwg::Window) -> Result<(), nwg::NwgError> {
         .parent(Some(window.handle))
         .build()?;
 
+    #[cfg(feature = "menu")]
     nwg::ControlBase::build_hmenu()
         .text("Item")
         .item(true)

@@ -7,7 +7,17 @@ The notice object only serve to "wake up" the GUI thread.
 A notice must have a parent window.
 
 ## Example
+
+```rust
+use native_windows_gui as nwg;
+fn build_notice(notice: &mut nwg::Notice, window: &nwg::Window) {
+    nwg::Notice::builder()
+        .parent(window)
+        .build(notice);
+}
 ```
+
+```rust
 use native_windows_gui as nwg;
 use std::thread;
 use std::time;
