@@ -90,7 +90,26 @@
     <div id='page'>
 
         <h1 class="title">Native Windows GUI: Multithreading</h1>
-        <br/><br/>
+
+        Win32 is a single threaded API. That means a window and all it's children control will be contained on a single thread (the GUI thread).
+        This is a problem is an application has a method that blocks the GUI thread (ex: reading a large file) because doing so will make the UI
+        unusable for the duration of the method. This section will explain how NWG fix this problem.<br><br>
+
+        <h3>The notice object</h3>  
+
+        <br><br>
+
+        <h3>Running windows on multiple threads</h3> 
+
+        NWG does not have any global state. As such it's possible to create as many GUI thread as you might want. Each GUI thread can have its own windows.
+        Blocking one of the GUI thread won't block the second.<br><br>
+
+        <h3>Example</h3>
+
+        <ul>
+            <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/multithreading_d.rs">Multithreading</a>: shows two UI running in their own GUI thread.</li>
+        </ul>
+        <br/>
 
     </div>
 </div>

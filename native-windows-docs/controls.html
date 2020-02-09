@@ -91,11 +91,8 @@
 
         <h1 class="title">Native Windows GUI: Controls</h1>
 
-        Controls are UI elements that can be interacted with.<br>
-        Native windows GUI wraps over 25 different controls in a safe rust-friendly interface.
-        <br/><br/>
-
-        To keep compile time low, most controls are feature-gated. 
+        Controls are UI elements that can be interacted with. Native windows GUI wraps over 25 different controls in a safe rust-friendly interface.
+        This section explains the basics of using NWG controls.
         <br/><br/>
 
         To learn how to use controls with <code>native-windows-derive</code> see <a href="nwd_controls.html">the derive section</a>
@@ -184,6 +181,10 @@
         <br><br>
 
         <h3>Implementation</h3>
+
+        To keep compile time low, most controls are feature-gated. 
+        <br/><br/>
+
         Every control is implemented as a wrapper over a low level window handle. As such, <b>most*</b> of them only take the size of a pointer.<br><br>
         
         Some built-in controls lacks critical feature on their own. To fix this, nwg extends those controls with <a href="low_events.html">raw events handlers</a>.

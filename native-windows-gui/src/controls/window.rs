@@ -76,6 +76,16 @@ impl Window {
         unsafe { InvalidateRect(handle, ::std::ptr::null(), 1); }
     }
 
+    /// Close the window as if the user clicked the X button.
+    pub fn close(&self) {
+        use winapi::um::winuser::WM_CLOSE;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::post_message(handle, WM_CLOSE, 0, 0);
+    }
+
     /// Return the icon of the window
     pub fn icon(&self) -> Option<Icon> {
         use winapi::um::winuser::WM_GETICON;

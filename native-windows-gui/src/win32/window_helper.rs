@@ -64,6 +64,10 @@ pub fn send_message(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     unsafe { ::winapi::um::winuser::SendMessageW(hwnd, msg, w, l) }
 }
 
+pub fn post_message(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) {
+    unsafe { ::winapi::um::winuser::PostMessageW(hwnd, msg, w, l) };
+}
+
 pub unsafe fn set_focus(handle: HWND) {
     ::winapi::um::winuser::SetFocus(handle);
 }
