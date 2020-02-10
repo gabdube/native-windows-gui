@@ -27,7 +27,7 @@ pub unsafe fn create_image_factory() -> Result<*mut IWICImagingFactory, NwgError
     Ok(image_factory)
 }
 
-unsafe fn create_decoder_from_file<'a>(fact: &IWICImagingFactory, path: &'a str) -> Result<*mut IWICBitmapDecoder, NwgError> {
+pub unsafe fn create_decoder_from_file<'a>(fact: &IWICImagingFactory, path: &'a str) -> Result<*mut IWICBitmapDecoder, NwgError> {
     use winapi::um::wincodec::{WICDecodeMetadataCacheOnDemand};
     use winapi::um::winnt::GENERIC_READ;
     use crate::win32::base_helper::to_utf16;
