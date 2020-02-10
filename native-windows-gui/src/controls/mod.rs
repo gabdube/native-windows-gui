@@ -7,10 +7,13 @@ mod radio_button;
 mod text_input;
 mod text_box;
 mod label;
-mod status_bar;
 mod image_frame;
-mod tooltip;
 
+#[cfg(feature = "status-bar")]
+mod status_bar;
+
+#[cfg(feature = "tooltip")]
+mod tooltip;
 
 #[cfg(feature = "trackbar")]
 mod track_bar;
@@ -71,10 +74,14 @@ pub use radio_button::{RadioButton, RadioButtonState, RadioButtonFlags};
 pub use text_input::{TextInput, TextInputFlags};
 pub use text_box::{TextBox, TextBoxFlags};
 pub use label::{Label, LabelFlags};
-pub use status_bar::StatusBar;
 pub use image_frame::{ImageFrame, ImageFrameFlags};
-pub use tooltip::{Tooltip, TooltipIcon};
 
+
+#[cfg(feature = "status-bar")]
+pub use status_bar::StatusBar;
+
+#[cfg(feature = "tooltip")]
+pub use tooltip::{Tooltip, TooltipIcon};
 
 #[cfg(feature = "trackbar")]
 pub use track_bar::{TrackBar, TrackBarFlags};

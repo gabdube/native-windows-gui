@@ -1,4 +1,4 @@
-use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, StatusBar, ImageFrame, TextBox};
+use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, ImageFrame, TextBox};
 use std::convert::From;
 
 #[allow(unused)]
@@ -71,8 +71,19 @@ handles!(Label);
 handles!(RadioButton);
 handles!(TextBox);
 handles!(TextInput);
+
+
+#[cfg(feature = "status-bar")]
+use super::StatusBar;
+
+#[cfg(feature = "status-bar")]
 handles!(StatusBar);
 
+#[cfg(feature = "tooltip")]
+use super::Tooltip;
+
+#[cfg(feature = "tooltip")]
+handles!(Tooltip);
 
 #[cfg(feature = "trackbar")]
 use super::TrackBar;
