@@ -8,8 +8,9 @@ use std::ptr;
     A image decoder. Can load an extended number of image file format from a filename, from a file handle, or from a stream.
 
     ImageDecoder do not take any parameter to build, but it still provides a builder API to match the other component of NWG.
-
     You can also use `ImageDecoder::new` to avoid the builder API.
+
+    
 
 ```rust
 use native_windows_gui as nwg;
