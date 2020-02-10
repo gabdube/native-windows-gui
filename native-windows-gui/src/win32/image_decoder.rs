@@ -6,7 +6,7 @@ use crate::{NwgError};
 use std::ptr;
 
 
-unsafe fn create_image_factory() -> Result<*mut IWICImagingFactory, NwgError> {
+pub unsafe fn create_image_factory() -> Result<*mut IWICImagingFactory, NwgError> {
     use winapi::um::combaseapi::CoCreateInstance;
     use winapi::um::wincodec::CLSID_WICImagingFactory;
     use winapi::shared::wtypesbase::CLSCTX_INPROC_SERVER;

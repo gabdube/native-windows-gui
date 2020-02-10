@@ -22,7 +22,7 @@ pub(crate) mod extern_canvas;
 use std::{mem, ptr};
 use crate::errors::NwgError;
 
-#[cfg(feature = "image-ext")]
+#[cfg(feature = "image-decoder")]
 pub(crate) mod image_decoder;
 
 

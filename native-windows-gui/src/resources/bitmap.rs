@@ -6,7 +6,6 @@ use std::ptr;
 
 
 /// A wrapper over a bitmap file (*.bmp)
-
 #[allow(unused)]
 pub struct Bitmap {
     pub handle: HANDLE,

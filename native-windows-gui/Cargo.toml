@@ -37,7 +37,7 @@ message-window = []
 timer = []
 notice = []
 list-view = []
-images-ext = []
+image-decoder = []
 number-select = []
 cursor = []
 clipboard = []
@@ -45,7 +45,7 @@ menu = []
 trackbar = []
 extern-canvas = []
 frame = []
-all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "images-ext", "cursor",
+all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "cursor", "image-decoder",
        "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "number-select", "clipboard", "menu", 
        "trackbar", "extern-canvas", "frame"]
 
