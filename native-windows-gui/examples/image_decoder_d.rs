@@ -61,7 +61,21 @@ impl ImageDecoderApp {
     }
 
     fn read_file(&self) {
-        let image = self.decoder.from_filename(&self.file_name.text());
+        let image = match self.decoder.from_filename(&self.file_name.text()) {
+            Ok(img) => img,
+            Err(_) => { println!("Could not read image!"); return; }
+        };
+        
+        println!("Frame count: {}", image.frame_count());
+        println!("Format: {:?}", image.container_format());
+
+        let frame = match image.frame(0) {
+            Ok(bmp) => bmp,
+            Err(_) => { println!("Could not read image!"); return; }
+        };
+
+        println!("Resolution: {:?}", frame.resolution());
+        println!("Size: {:?}", frame.size());
     }
 
     fn exit(&self) {

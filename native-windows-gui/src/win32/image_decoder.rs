@@ -44,7 +44,7 @@ pub unsafe fn create_decoder_from_file<'a>(fact: &IWICImagingFactory, path: &'a 
     );
 
     if result != S_OK {
-        return Err(NwgError::resource_create("Failed to create a jpeg decoder"));
+        return Err(NwgError::resource_create("Failed to create a bitmap decoder"));
     }
 
     Ok(decoder)

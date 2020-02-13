@@ -23,7 +23,7 @@ pub use cursor::{Cursor, CursorBuilder};
 pub use bitmap::{Bitmap, BitmapBuilder};
 
 #[cfg(feature = "image-decoder")]
-pub use image_decoder::{ImageDecoder, BitmapSource, BitmapFrame, ImageDecoderBuilder};
+pub use image_decoder::{ImageDecoder, BitmapSource, BitmapFrame, ImageDecoderBuilder, ContainerFormat};
 
 #[cfg(feature = "file-dialog")]
 pub use file_dialog::{FileDialog, FileDialogAction, FileDialogBuilder};

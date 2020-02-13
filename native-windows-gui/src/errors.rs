@@ -21,6 +21,10 @@ pub enum NwgError {
     /// Error raised by the FileDialog object
     #[cfg(feature = "file-dialog")]
     FileDialogError(String),
+
+    /// Error raised by the ImageDecoder feature
+    #[cfg(feature = "image-decoder")]
+    ImageDecoderError(i32, String),
 }
 
 impl NwgError {
@@ -44,6 +48,11 @@ impl NwgError {
     #[cfg(feature = "file-dialog")]
     pub fn file_dialog<S: Into<String>>(e: S) -> NwgError {
         NwgError::FileDialogError(e.into())
+    }
+
+    #[cfg(feature = "image-decoder")]
+    pub fn image_decoder<S: Into<String>>(code: i32, e: S) -> NwgError {
+        NwgError::ImageDecoderError(code, e.into())
     }
 
     pub fn no_parent(name: &'static str) -> NwgError {

@@ -52,6 +52,8 @@ cargo run --example calculator
 cargo run --example message_bank
 cargo run --example partials --features "listbox frame combobox"
 cargo run --example system_tray --features "tray-notification message-window menu cursor"
+cargo run --example dialog_multithreading_d --features "notice"
+cargo run --example image_decoder_d --features "image-decoder file-dialog"
 
 cd examples/opengl_canvas
 cargo run
