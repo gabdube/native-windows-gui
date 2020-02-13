@@ -1,6 +1,3 @@
-/*!
-    A wrapper over a icon file (*.ico)
-*/
 use winapi::um::winnt::HANDLE;
 use winapi::um::winuser::IMAGE_ICON;
 use crate::win32::resources_helper as rh;
@@ -8,8 +5,31 @@ use crate::{OemImage, OemIcon, NwgError};
 use std::ptr;
 
 
-/// A wrapper over a icon file (*.ico)
-/// See module documentation
+/**
+A wrapper over a icon file (*.ico)
+
+Note that icon object are only used as display resources (ie: it's impossible to read pixels or resized it).
+If those features are needed, see the `image-decoder` feature.
+
+To display a icon in an application, see the `ImageFrame` control.
+
+Example:
+
+```rust
+use native_windows_gui as nwg;
+
+fn load_icon() -> nwg::Icon {
+    let mut icon = nwg::Icon::default();
+
+    nwg::Icon::builder()
+        .source_file(Some("Hello.cur"))
+        .strict(true)
+        .build(&mut icon);
+
+    icon
+}
+
+*/
 #[allow(unused)]
 pub struct Icon {
     pub handle: HANDLE,

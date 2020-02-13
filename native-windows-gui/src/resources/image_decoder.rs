@@ -17,7 +17,7 @@ use std::{ptr, mem};
 
     ```rust
     use native_windows_gui as nwg;
-    fn open_image(decoder: &nwg::ImageDecoder) -> Result<nwg::ImageFrame, nwg::NwgError> {
+    fn open_image(decoder: &nwg::ImageDecoder) -> Result<nwg::ImageData, nwg::NwgError> {
         decoder
             .from_filename("corn.png")?
             .frame(0)

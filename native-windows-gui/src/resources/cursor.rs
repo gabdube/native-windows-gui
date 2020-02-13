@@ -1,6 +1,3 @@
-/*!
-    A wrapper over a cursor file (*.cur)
-*/
 use winapi::um::winnt::HANDLE;
 use winapi::um::winuser::IMAGE_CURSOR;
 use crate::win32::resources_helper as rh;
@@ -8,8 +5,28 @@ use crate::{OemCursor, OemImage, NwgError};
 use std::ptr;
 
 
-/// A wrapper over a cursor file (*.cur)
-/// See module documentation
+/**
+A wrapper over a cursor file (*.cur)
+
+Cursor resources can be used with the `cursor` feature
+
+Example:
+
+```rust
+use native_windows_gui as nwg;
+
+fn load_cursor() -> nwg::Cursor {
+    let mut cursor = nwg::Cursor::default();
+
+    nwg::Cursor::builder()
+        .source_file(Some("Hello.cur"))
+        .strict(true)
+        .build(&mut cursor);
+
+    cursor
+}
+
+*/
 #[allow(unused)]
 pub struct Cursor {
     pub handle: HANDLE,

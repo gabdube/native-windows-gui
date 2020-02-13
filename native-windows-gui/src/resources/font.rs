@@ -4,9 +4,11 @@ use crate::{NwgError};
 use std::ptr;
 
 
-/// Represent a font parameters. Returned by the font dialog when the user selected a font.
-/// Can also be used to create a Font resource using `Font::from_info`
-/// For more information on the parameters see: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-logfonta
+/** 
+Represent a font parameters. Returned by the font dialog when the user selected a font.
+Can also be used to create a Font resource using `Font::from_info`
+For more information on the parameters see: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-logfonta
+*/
 #[derive(Debug, Clone)]
 pub struct FontInfo {
     /// The size of the selected font, in units of 1/10 of a point
@@ -42,7 +44,33 @@ pub struct FontInfo {
 }
 
 
-/// A system font
+/**
+
+Represent a system font.
+
+Can be used with any controls that draws text. Due to the very limited way win32 can draw text,
+only family, size and weight can be configured.
+
+Example:
+
+```rust
+use native_windows_gui as nwg;
+
+fn build_font() -> nwg::Font {
+    let mut font = nwg::Font::default();
+
+    nwg::Font::builder()
+        .size(16)
+        .family("Arial")
+        .weight(1000)
+        .build(&mut font);
+
+    font
+}
+
+```
+
+*/
 #[derive(PartialEq, Eq, Debug)]
 pub struct Font {
     pub(crate) handle: HFONT
@@ -64,11 +92,14 @@ impl Default for Font {
 
 }
 
-/// Builds a font struct
-///
-/// - size: Size of the font
-/// - weight: Weight of the font. A value betweem 0 and 1000. 0 use the system default, 100 is very thin, 1000 is very bold.
-/// - family: Family name of the font (ex: Arial). Can be None to use the system default.
+/**
+Builds a font struct
+
+Parameters:
+    - size: Size of the font
+    - weight: Weight of the font. A value betweem 0 and 1000. 0 use the system default, 100 is very thin, 1000 is very bold.
+    - family: Family name of the font (ex: Arial). Can be None to use the system default.
+*/
 pub struct FontBuilder<'a> {
     size: u32,
     weight: u32,

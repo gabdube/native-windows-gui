@@ -5,7 +5,33 @@ use crate::{OemBitmap, OemImage, NwgError};
 use std::ptr;
 
 
-/// A wrapper over a bitmap file (*.bmp)
+/** 
+A wrapper over a bitmap file (*.bmp)
+
+Note that Bitmap object are only used as display resources (ie: it's impossible to read pixels or resized it).
+If those features are needed, see the `image-decoder` feature.
+
+To display a bitmap in an application, see the `ImageFrame` control.
+
+Example:
+
+```rust
+use native_windows_gui as nwg;
+
+fn load_bitmap() -> nwg::Bitmap {
+    let mut bitmap = nwg::Bitmap::default();
+
+    nwg::Bitmap::builder()
+        .source_file(Some("Hello.bmp"))
+        .strict(true)
+        .build(&mut bitmap);
+
+    bitmap
+}
+
+```
+
+*/
 #[allow(unused)]
 pub struct Bitmap {
     pub handle: HANDLE,
