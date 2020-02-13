@@ -1,7 +1,7 @@
 use winapi::um::wincodec::{IWICImagingFactory, IWICBitmapDecoder, IWICBitmapFrameDecode, WICPixelFormatGUID};
 use winapi::shared::winerror::S_OK;
-use crate::win32::image_decoder::{create_image_factory, create_decoder_from_file};
-use crate::NwgError;
+use crate::win32::image_decoder::{create_image_factory, create_decoder_from_file, create_bitmap_from_wic};
+use crate::{NwgError, Bitmap};
 use std::{ptr, mem};
 
 
@@ -13,11 +13,13 @@ use std::{ptr, mem};
 
     There's not much reason to have more than 1 image decoder per application.
 
+    Images loaded from a decoder cannot be used as-is by an image frame. They must first be converted to a bitmap resource.
+
     ```rust
     use native_windows_gui as nwg;
-    fn open_image(decoder: &nwg::ImageDecoder) -> Result<nwg::BitmapFrame, nwg::NwgError> {
+    fn open_image(decoder: &nwg::ImageDecoder) -> Result<nwg::ImageFrame, nwg::NwgError> {
         decoder
-            .from_filename("poop.png")?
+            .from_filename("corn.png")?
             .frame(0)
     }
     ```
@@ -31,7 +33,7 @@ use std::{ptr, mem};
     ```
 */
 pub struct ImageDecoder {
-    factory: *mut IWICImagingFactory,
+    pub factory: *mut IWICImagingFactory,
 }
 
 impl ImageDecoder {
@@ -52,29 +54,29 @@ impl ImageDecoder {
         * If there is an error during the decoding, returns a NwgError.
         * If the image decoder was not initialized, this method panics
 
-        This method returns a BitmapSource object.
+        This method returns a ImageSource object.
     */
-    pub fn from_filename<'a>(&self, path: &'a str) -> Result<BitmapSource, NwgError> {
+    pub fn from_filename<'a>(&self, path: &'a str) -> Result<ImageSource, NwgError> {
         if self.factory.is_null() {
             panic!("ImageDecoder is not yet bound to a winapi object");
         }
 
         let decoder = unsafe { create_decoder_from_file(&*self.factory, path) }?;
 
-        Ok(BitmapSource { decoder })
+        Ok(ImageSource { decoder })
     }
 
 }
 
 
 /**
-    Represents a bitmap data source in read only mode.
+    Represents a image data source in read only mode.
 */
-pub struct BitmapSource {
-    decoder: *mut IWICBitmapDecoder
+pub struct ImageSource {
+    pub decoder: *mut IWICBitmapDecoder
 }
 
-impl BitmapSource {
+impl ImageSource {
 
     /**
         Return the number of frame in the image. For most format (ex: PNG), this will be 1.
@@ -87,10 +89,10 @@ impl BitmapSource {
     }
 
     /**
-        Return the image data of the requested frame in a BitmapFrame object.
+        Return the image data of the requested frame in a ImageData object.
     */
-    pub fn frame(&self, index: u32) -> Result<BitmapFrame, NwgError> {
-        let mut bitmap = BitmapFrame { frame: ptr::null_mut() };
+    pub fn frame(&self, index: u32) -> Result<ImageData, NwgError> {
+        let mut bitmap = ImageData { frame: ptr::null_mut() };
         let hr = unsafe { (&*self.decoder).GetFrame(index, &mut bitmap.frame) };
         match hr {
             S_OK => Ok(bitmap),
@@ -98,7 +100,7 @@ impl BitmapSource {
         }
     }
 
-    /*  Retrieves the container format of the bitmap source. 
+    /*  Retrieves the container format of the image source. 
 
         See https://docs.microsoft.com/en-us/windows/win32/wic/-wic-guids-clsids#container-formats
     */
@@ -128,11 +130,11 @@ impl BitmapSource {
 /**
     Represents a source of pixel that can be read, but cannot be written back to.
 */
-pub struct BitmapFrame {
-    frame: *mut IWICBitmapFrameDecode
+pub struct ImageData {
+    pub frame: *mut IWICBitmapFrameDecode
 }
 
-impl BitmapFrame {
+impl ImageData {
 
     /// Retrieves the sampling rate between pixels and physical world measurements.
     pub fn resolution(&self) -> (f64, f64) {
@@ -156,6 +158,73 @@ impl BitmapFrame {
         let mut fmt = unsafe { mem::zeroed() };
         unsafe { (&*self.frame).GetPixelFormat(&mut fmt) };
         fmt
+    }
+
+    /**
+        Copy the frame pixels into a buffer.
+
+        Parameters:
+            pixel_size: defines the size of a pixel in bytes. In a typical RGBA image, this would be 4 (1 byte for each component).
+                        If unsure, use the pixel_format.
+
+        May return an error if the pixel data could not be read
+    */
+    pub fn pixels(&self, pixel_size: u32) -> Result<Vec<u8>, NwgError> {
+        let (w, h) = self.size();
+        let scanline = w * pixel_size;
+        let buffer_size = (w * h * pixel_size) as usize;
+        let mut buffer: Vec<u8> = Vec::with_capacity(buffer_size);
+        
+        let hr = unsafe {
+            buffer.set_len(buffer_size);
+            (&*self.frame).CopyPixels(ptr::null(), scanline, buffer_size as u32, buffer.as_mut_ptr())
+        };
+
+        match hr {
+            S_OK => Ok(buffer),
+            err => Err(NwgError::image_decoder(err, "Could not read image pixels"))
+        }
+    }
+
+    /**
+        Copy a region of the frames pixel into a buffer.
+
+        Parameters:
+            offset: The [x,y] offset at which the region begins
+            size: The [width, height] size of the region
+            pixel_size: defines the size of a pixel in bytes. In a typical RGBA image, this would be 4 (1 byte for each component).
+                        If unsure, use the pixel_format.
+
+        May return an error if the pixel data could not be read
+    */
+    pub fn region_pixels(&self, offset: [i32;2], size: [i32;2], pixel_size: u32) -> Result<Vec<u8>, NwgError> {
+        use winapi::um::wincodec::WICRect;
+
+        let [x, y] = offset;
+        let [w, h] = size;
+        let scanline = (w as u32) * pixel_size;
+        let buffer_size = (scanline * (h as u32)) as usize;
+        let mut buffer: Vec<u8> = Vec::with_capacity(buffer_size);
+
+        let region = WICRect { X: x, Y: y, Width: w, Height: h };
+        
+        let hr = unsafe {
+            buffer.set_len(buffer_size);
+            (&*self.frame).CopyPixels(&region, scanline, buffer_size as u32, buffer.as_mut_ptr())
+        };
+
+        match hr {
+            S_OK => Ok(buffer),
+            err => Err(NwgError::image_decoder(err, "Could not read image pixels"))
+        }
+    }
+
+    /**
+        Create a bitmap resource the the image data. This resource can then be used in the other NWG component.
+        The bitmap returned is considered "owned".
+    */
+    pub fn as_bitmap(&self) -> Result<Bitmap, NwgError> {
+        unsafe { create_bitmap_from_wic(self) }
     }
 
 }
@@ -194,13 +263,13 @@ impl Drop for ImageDecoder {
     }
 }
 
-impl Drop for BitmapSource {
+impl Drop for ImageSource {
     fn drop(&mut self) {
         unsafe { (&*self.decoder).Release(); }
     }
 }
 
-impl Drop for BitmapFrame {
+impl Drop for ImageData {
     fn drop(&mut self) {
         unsafe { (&*self.frame).Release(); }
     }

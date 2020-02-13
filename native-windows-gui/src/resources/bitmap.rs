@@ -76,7 +76,7 @@ impl<'a> BitmapBuilder<'a> {
         } else if let Some(src) = self.source_system {
             handle = unsafe { rh::build_oem_image(OemImage::Bitmap(src), self.size) };
         } else if let Some(src) = self.source_bin { 
-            handle = unsafe { create_dib(src) };
+            handle = unsafe { bitmap_from_memory(src) };
         } else {
             return Err(NwgError::resource_create("No source provided for Bitmap"));
         }
@@ -117,9 +117,23 @@ impl PartialEq for Bitmap {
 
 }
 
+impl Drop for Bitmap {
 
-/// Create a bitmap from memory
-unsafe fn create_dib(source: &[u8]) -> Result<HANDLE, NwgError> {
+    fn drop(&mut self) {
+        use winapi::um::wingdi::DeleteObject;
+        if self.owned {
+            unsafe { DeleteObject(self.handle); }
+        }
+    }
+
+}
+
+
+/** 
+    Create a bitmap from memory.
+    The memory must contain the whole file (including the bitmap header).
+*/
+unsafe fn bitmap_from_memory(source: &[u8]) -> Result<HANDLE, NwgError> {
     use winapi::um::wingdi::{CreateCompatibleBitmap, CreateCompatibleDC, SetDIBits, BITMAPFILEHEADER, BITMAPINFO, BITMAPINFOHEADER, DIB_RGB_COLORS, BI_RGB, RGBQUAD};
     use winapi::shared::{ntdef::LONG, minwindef::DWORD};
     use winapi::um::winuser::{GetDC, ReleaseDC};

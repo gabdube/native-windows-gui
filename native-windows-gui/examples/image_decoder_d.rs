@@ -11,10 +11,14 @@ extern crate native_windows_derive as nwd;
 use nwd::NwgUi;
 use nwg::NativeUi;
 use std::{env};
+use std::cell::RefCell;
 
 
 #[derive(Default, NwgUi)]
 pub struct ImageDecoderApp {
+    // The image that will be loaded dynamically
+    loaded_image: RefCell<Option<nwg::Bitmap>>,
+
     #[nwg_control(size: (400, 300), position: (400, 150), title: "Image decoder")]
     #[nwg_events( OnWindowClose: [ImageDecoderApp::exit] )]
     window: nwg::Window,
@@ -25,7 +29,7 @@ pub struct ImageDecoderApp {
     #[nwg_resource]
     decoder: nwg::ImageDecoder,
 
-    #[nwg_resource(title: "Open File", action: nwg::FileDialogAction::Open, filters: "Png(*.png)|Jpeg(*.jpg;*.jpeg)|DDS(*.dds)|TIFF(*.tiff)|BMP(*.bmp)")]
+    #[nwg_resource(title: "Open File", action: nwg::FileDialogAction::Open, filters: "Png(*.png)|Jpeg(*.jpg;*.jpeg)|DDS(*.dds)|TIFF(*.tiff)|BMP(*.bmp)|Any (*.*)")]
     dialog: nwg::FileDialog,
 
     #[nwg_control(text: "Open")]
@@ -71,11 +75,21 @@ impl ImageDecoderApp {
 
         let frame = match image.frame(0) {
             Ok(bmp) => bmp,
-            Err(_) => { println!("Could not read image!"); return; }
+            Err(_) => { println!("Could not read image frame!"); return; }
         };
 
         println!("Resolution: {:?}", frame.resolution());
         println!("Size: {:?}", frame.size());
+
+        // Create a new Bitmap image from the image data
+        match frame.as_bitmap() {
+            Ok(bitmap) => {
+                let mut img = self.loaded_image.borrow_mut();
+                img.replace(bitmap);
+                self.img.set_bitmap(img.as_ref());
+            },
+            Err(_) => { println!("Could not convert image to bitmap!"); }
+        }
     }
 
     fn exit(&self) {
