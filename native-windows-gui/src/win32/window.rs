@@ -14,7 +14,6 @@ use crate::controls::ControlHandle;
 use crate::{Event, EventData, MousePressEvent, NwgError};
 use std::{ptr, mem};
 use std::rc::Rc;
-use std::marker::PhantomData;
 
 
 static mut TIMER_ID: u32 = 1; 
@@ -23,16 +22,15 @@ static mut NOTICE_ID: u32 = 1;
 const NO_DATA: EventData = EventData::NoData;
 
 type RawCallback = dyn Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT>;
-
+type Callback = dyn Fn(Event, EventData, ControlHandle) -> ();
 
 /**
     An opaque structure that represent a window subclass hook. 
 */
-pub struct EventHandler<F> {
+pub struct EventHandler {
     handles: Vec<HWND>,
     id: SUBCLASSPROC,
-    subclass_id: UINT_PTR,
-    p: PhantomData<F>
+    subclass_id: UINT_PTR
 }
 
 /**
@@ -78,7 +76,7 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
 
     This function will panic if `handle` is not a window handle.
 */
-pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler<F>
+pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
     use winapi::um::commctrl::{SetWindowSubclass};
@@ -87,21 +85,24 @@ pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler<
     /**
         Function that iters over a top level window and bind the events dispatch callback
     */
-    unsafe extern "system" fn set_children_subclass<F>(h: HWND, p: LPARAM) -> i32 
-        where F: Fn(Event, EventData, ControlHandle) -> () + 'static
-    {
-        let cb: Rc<F> = Rc::from_raw(p as *const F);
+    unsafe extern "system" fn set_children_subclass(h: HWND, p: LPARAM) -> i32 {
+        let ptr = p as *mut *const Callback;
+        let cb: Rc<Callback> = Rc::from_raw(*ptr);
 
-        let callback = cb.clone();
-        let callback_ptr: *const F = Rc::into_raw(callback);
-        let callback_value = callback_ptr as UINT_PTR;
-        SetWindowSubclass(h, Some(process_events::<F>), 0, callback_value);
+        // Simply increase the rc count because the callback
+        // will also be stored into the current children window. 
+        mem::forget(cb.clone());
+        SetWindowSubclass(h, Some(process_events), 0, p as UINT_PTR);
 
+        // Do not decrease the refcount
         mem::forget(cb);
 
         1
     }
 
+    /**
+        Push the children window handle into the EventHandler
+    */
     unsafe extern "system" fn handler_children(h: HWND, p: LPARAM) -> i32 {
         let handles_ptr: *mut Vec<HWND> = p as *mut Vec<HWND>;
         let handles = &mut *handles_ptr;
@@ -109,27 +110,26 @@ pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler<
         1
     }
 
+    let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
+
     // The callback function must be passed to each children of the control
     // To do so, we must RC the callback
-    let callback = Rc::new(f);
-    let callback_ptr: *const F = Rc::into_raw(callback);
-    let callback_value = callback_ptr as LPARAM;
-
-    let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
+    let callback: Rc<Callback> = Rc::new(f);
+    let callback_box: Box<*const Callback> = Box::new(Rc::into_raw(callback));
+    let callback_ptr: *mut *const Callback = Box::into_raw(callback_box);
     
-    let callback_fn: SUBCLASSPROC = Some(process_events::<F>);
+    let callback_fn: SUBCLASSPROC = Some(process_events);
     let subclass_id = hwnd as UINT_PTR;
     let mut handler = EventHandler {
         handles: vec![hwnd],
         id: callback_fn,
-        subclass_id,
-        p: PhantomData
+        subclass_id
     };
 
     unsafe {
         EnumChildWindows(hwnd, Some(handler_children), (&mut handler.handles as *mut Vec<HWND>) as LPARAM);
-        EnumChildWindows(hwnd, Some(set_children_subclass::<F>), callback_value);
-        SetWindowSubclass(hwnd, callback_fn, subclass_id, callback_value as UINT_PTR);
+        EnumChildWindows(hwnd, Some(set_children_subclass), callback_ptr as LPARAM);
+        SetWindowSubclass(hwnd, callback_fn, subclass_id, callback_ptr as UINT_PTR);
     }
 
     handler
@@ -147,7 +147,7 @@ pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler<
 
     Returns a `EventHandler` that can be passed to `unbind_event_handler` to remove the callbacks.
 */
-pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHandle, f: F) -> EventHandler<F>
+pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHandle, f: F) -> EventHandler
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
     use winapi::um::commctrl::{SetWindowSubclass};
@@ -155,17 +155,21 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHand
     let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
     let parent_hwnd = parent_handle.hwnd().expect("Cannot bind control with an handle of type");
     
-    let callback = Rc::new(f);
-    let callback_ptr: *const F = Rc::into_raw(callback.clone());
-    let callback_ptr_parent: *const F = Rc::into_raw(callback.clone());
+    let callback: Rc<Callback> = Rc::new(f);
+    let parent_callback = callback.clone();
 
-    let callback_fn: SUBCLASSPROC = Some(process_events::<F>);
+    let callback_box: Box<*const Callback> = Box::new(Rc::into_raw(callback));
+    let callback_box_parent: Box<*const Callback> = Box::new(Rc::into_raw(parent_callback));
+
+    let callback_ptr: *mut *const Callback = Box::into_raw(callback_box);
+    let callback_ptr_parent: *mut *const Callback = Box::into_raw(callback_box_parent);
+
+    let callback_fn: SUBCLASSPROC = Some(process_events);
     let subclass_id = hwnd as UINT_PTR;
     let handler = EventHandler {
         handles: vec![hwnd, parent_hwnd],
         id: callback_fn,
         subclass_id,
-        p: PhantomData
     };
 
     unsafe {
@@ -180,8 +184,7 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHand
 /**
     Free all associated callbacks with the event handler.
 */
-pub fn unbind_event_handler<F>(handler: &EventHandler<F>)
-    where F: Fn(Event, EventData, ControlHandle) -> () + 'static
+pub fn unbind_event_handler(handler: &EventHandler)
 {
     use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
 
@@ -192,7 +195,9 @@ pub fn unbind_event_handler<F>(handler: &EventHandler<F>)
             let mut callback_value: UINT_PTR = 0;
             GetWindowSubclass(handle, id, subclass_id, &mut callback_value);
 
-            let callback: Rc<F> = Rc::from_raw(callback_value as *const F);
+            let callback_ptr = callback_value as *mut *const Callback;
+            let box_callback: Box<*const Callback> = Box::from_raw(callback_ptr);
+            let callback: Rc<Callback> = Rc::from_raw(*box_callback);
             mem::drop(callback);
 
             RemoveWindowSubclass(handle, id, subclass_id);
@@ -460,9 +465,7 @@ unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l:
     A window subclass procedure that dispatch the windows control events to the associated application control
 */
 #[allow(unused_variables)]
-unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT 
-    where F: Fn(Event, EventData, ControlHandle) -> () + 'static
-{
+unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;
 
@@ -475,8 +478,8 @@ unsafe extern "system" fn process_events<'a, F>(hwnd: HWND, msg: UINT, w: WPARAM
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
 
-    let callback_ptr = data as *const F;
-    let callback = Rc::from_raw(callback_ptr);
+    let callback_ptr = data as *mut *const Callback;
+    let callback: Rc<Callback> = Rc::from_raw(*callback_ptr);
     let base_handle = ControlHandle::Hwnd(hwnd);
 
     match msg {
@@ -691,9 +694,7 @@ unsafe fn listbox_commands(m: u16) -> Event {
     }
 }
 
-unsafe fn handle_tooltip_callback<'a, F>(notif: *mut NMTTDISPINFOW, callback: &Rc<F>) 
-  where F: Fn(Event, EventData, ControlHandle) -> () + 'static
-{
+unsafe fn handle_tooltip_callback<'a>(notif: *mut NMTTDISPINFOW, callback: &Rc<Callback>) {
     use crate::events::ToolTipTextData;
 
     let notif = &mut *notif;
@@ -702,9 +703,7 @@ unsafe fn handle_tooltip_callback<'a, F>(notif: *mut NMTTDISPINFOW, callback: &R
     callback(Event::OnTooltipText, data, handle);
 }
 
-unsafe fn handle_default_notify_callback<'a, F>(notif: *const NMHDR, callback: &Rc<F>) 
-  where F: Fn(Event, EventData, ControlHandle) -> () + 'static
-{
+unsafe fn handle_default_notify_callback<'a>(notif: *const NMHDR, callback: &Rc<Callback>){
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;
     use winapi::um::winnt::WCHAR;

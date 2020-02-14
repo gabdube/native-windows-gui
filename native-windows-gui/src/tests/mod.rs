@@ -6,9 +6,6 @@ use control_test::*;
 mod thread_test;
 use thread_test::*;
 
-mod images_test;
-use images_test::*;
-
 mod freeing_test;
 use freeing_test::*;
 
@@ -21,12 +18,10 @@ pub struct TestControlPanel {
 
     controls_test_button: Button,
     thread_test_button: Button,
-    //images_test_button: Button,
     free_test_button: Button,
 
     controls_tests: ControlsTest,
     thread_tests: ThreadTest,
-    images_tests: ImagesTest,
     freeing_tests: FreeingTest,
 }
 
@@ -62,11 +57,6 @@ mod test_control_panel_ui {
                 .parent(&data.window)
                 .build(&mut data.thread_test_button)?;
 
-            /*Button::builder()
-                .text("Images")
-                .parent(&data.window)
-                .build(&mut data.images_test_button)?;*/
-
             Button::builder()
                 .text("Freeing")
                 .parent(&data.window)
@@ -75,7 +65,6 @@ mod test_control_panel_ui {
             // Partials
             ControlsTest::build_partial(&mut data.controls_tests, Some(&data.window))?;
             ThreadTest::build_partial(&mut data.thread_tests, Some(&data.window))?;
-            //ImagesTest::build_partial(&mut data.images_tests, Some(&data.window))?;
             FreeingTest::build_partial(&mut data.freeing_tests, Some(&data.window))?;
 
             // Wrap-up
@@ -93,7 +82,6 @@ mod test_control_panel_ui {
 
                     evt_ui.controls_tests.process_event(evt, &evt_data, handle);
                     evt_ui.thread_tests.process_event(evt, &evt_data, handle);
-                    //evt_ui.images_tests.process_event(evt, &evt_data, handle);
                     evt_ui.freeing_tests.process_event(evt, &evt_data, handle);
 
                     match evt {
@@ -102,9 +90,7 @@ mod test_control_panel_ui {
                                 show_control_test(&evt_ui.inner);
                             } else if &handle == &evt_ui.thread_test_button {
                                 show_thread_test(&evt_ui.inner);
-                            }/* else if &handle == &evt_ui.images_test_button {
-                                show_images_test(&evt_ui.inner);
-                            }*/ else if &handle == &evt_ui.free_test_button {
+                            } else if &handle == &evt_ui.free_test_button {
                                 show_freeing_test(&evt_ui.inner);
                             },
                         E::OnInit => 
@@ -127,7 +113,6 @@ mod test_control_panel_ui {
                 .parent(&ui.window)
                 .margin([5,5,5,5])
                 .child(0, &ui.controls_test_button)
-                //.child(1, &ui.images_test_button)
                 .child(1, &ui.thread_test_button)
                 .child(2, &ui.free_test_button)
                 .build(&ui.layout);
@@ -155,11 +140,6 @@ fn show_control_test(app: &TestControlPanel) {
 fn show_thread_test(app: &TestControlPanel) {
     app.thread_tests.window.set_visible(true);
     app.thread_tests.window.set_focus();
-}
-
-fn show_images_test(app: &TestControlPanel) {
-    app.images_tests.window.set_visible(true);
-    app.images_tests.window.set_focus();
 }
 
 fn show_freeing_test(app: &TestControlPanel) {

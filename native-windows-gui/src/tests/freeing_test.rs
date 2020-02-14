@@ -9,6 +9,10 @@ struct FreeingData {
     raw_handler_bound: bool,
     raw_callback_id: usize,
     raw_handler: Option<RawEventHandler>,
+
+    handler_bound: bool,
+    handler: Option<EventHandler>,
+
     rc: Rc<()>
 }
 
@@ -46,6 +50,36 @@ impl FreeingTest {
             });
 
             data.raw_handler = Some(handler);
+        }
+    }
+
+    fn bind_handler(&self) {
+        let mut data = self.data.borrow_mut();
+        if data.handler_bound {
+            self.bind_handler_btn2.set_text("Bind handler");
+            data.handler_bound = false;
+            unbind_event_handler(&data.handler.take().unwrap());
+        } else {
+            self.bind_handler_btn2.set_text("Unbind handler");
+            data.handler_bound = true;
+
+            let send_rc = data.rc.clone();
+            let bind_handler_btn2 = self.custom_bind_button2.handle;
+
+            let handler = bind_event_handler(&self.custom_bind_button2.handle, &self.window.handle, move |event, _event_data, ctrl| {
+                match event {
+                    Event::OnButtonClick => {
+                        if &ctrl == &bind_handler_btn2 {    
+                            simple_message("Raw handler", &format!("Button WM_LBUTTONUP hook. Rc has {:?} strong count", Rc::strong_count(&send_rc)) );
+                        }
+                    },
+                    _ => {}
+                }
+
+                ()
+            });
+
+            data.handler = Some(handler);
         }
     }
 
@@ -106,6 +140,8 @@ mod partial_freeing_test_ui {
                 E::OnButtonClick => 
                     if &handle == &self.bind_handler_btn {
                         FreeingTest::bind_raw_handler(self)
+                    } else if &handle == &self.bind_handler_btn2 {
+                        FreeingTest::bind_handler(self)
                     }
                 _ => {}
             }
