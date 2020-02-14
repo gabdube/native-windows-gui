@@ -30,3 +30,6 @@
 
 # Image decoder
 ![image decoder](image_decoder.png)
+
+# Localization
+![localize](localize.png)

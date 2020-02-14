@@ -67,6 +67,12 @@ impl CalendarNames {
     fn load_months(&self, locale: &nwg::Locale) {
         let mut months_string = String::new();
 
+        months_string.push_str(&locale.display_name());
+        months_string.push_str("\r\n\r\n");
+
+
+        println!("{:?}", locale.calendar());
+
         for i in 1..=12 {
             let month_name = locale.month_name(i);
             months_string.push_str(&month_name);

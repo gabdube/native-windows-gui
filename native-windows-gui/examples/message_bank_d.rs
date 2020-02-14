@@ -1,6 +1,8 @@
 /*!
     An application that saves messages into buttons. 
     Demonstrate the dynamic functions of NWG.
+
+    `cargo run --example message_bank`
 */
 
 extern crate native_windows_gui as nwg;
