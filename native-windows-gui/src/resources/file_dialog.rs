@@ -1,4 +1,3 @@
-use winapi::shared::windef::HWND;
 use winapi::um::shobjidl::IFileDialog;
 use crate::win32::resources_helper as rh;
 
@@ -27,7 +26,6 @@ pub enum FileDialogAction {
 
     The file dialog builders accepts the following parameters:
         * title: The title of the dialog
-        * parent: The parent of the dialog (can be None or set at a later time)
         * action: The action to execute. Open, OpenDirectory for Save
         * multiselect: Whether the user can select more than one file. Only supported with the Open action
         * default_folder: Default folder to show in the dialog.
@@ -45,7 +43,6 @@ pub enum FileDialogAction {
     ```
 */
 pub struct FileDialog {
-    parent: Option<HWND>,
     handle: *mut IFileDialog,
     action: FileDialogAction
 }
@@ -53,7 +50,13 @@ pub struct FileDialog {
 impl FileDialog {
 
     pub fn builder() -> FileDialogBuilder {
-        FileDialogBuilder::new()
+        FileDialogBuilder {
+            title: None,
+            action: FileDialogAction::Save,
+            multiselect: false,
+            default_folder: None,
+            filters: None
+        }
     }
 
     /// Return the action type executed by this dialog
@@ -66,12 +69,18 @@ impl FileDialog {
         If the dialog was accepted, `get_selected_item` or `get_selected_items` can be used to find the selected file(s)
     
         It's important to note that `run` blocks the current thread until the user as chosen a file (similar to `dispatch_thread_events`)
+
+        The parent argument must be a window control otherwise the method will panic.
     */
-    pub fn run(&self) -> bool { 
+    pub fn run<C: Into<ControlHandle>>(&self, parent: Option<C>) -> bool { 
         use winapi::shared::winerror::S_OK;
 
-        let parent = self.parent.clone().unwrap_or(ptr::null_mut());
-        unsafe { (&mut *self.handle).Show(parent) == S_OK }
+        let parent_handle = match parent {
+            Some(p) => p.into().hwnd().expect("File dialog parent must be a window control"),
+            None => ptr::null_mut()
+        };
+
+        unsafe { (&mut *self.handle).Show(parent_handle) == S_OK }
     }
 
     /**
@@ -199,7 +208,6 @@ impl fmt::Debug for FileDialog {
 impl Default for FileDialog {
     fn default() -> FileDialog {
         FileDialog {
-            parent: None,
             handle: ptr::null_mut(),
             action: FileDialogAction::Open
         }
@@ -208,7 +216,7 @@ impl Default for FileDialog {
 
 impl PartialEq for FileDialog {
     fn eq(&self, other: &Self) -> bool {
-        self.parent == other.parent && self.action == other.action
+        self.handle == other.handle && self.action == other.action
     }
 }
 
@@ -219,7 +227,6 @@ impl Eq for FileDialog {}
 */
 pub struct FileDialogBuilder {
     pub title: Option<String>,
-    pub parent: Option<ControlHandle>,
     pub action: FileDialogAction,
     pub multiselect: bool,
     pub default_folder: Option<String>,
@@ -227,22 +234,6 @@ pub struct FileDialogBuilder {
 }
 
 impl FileDialogBuilder {
-
-    pub fn new() -> FileDialogBuilder {
-        FileDialogBuilder {
-            title: None,
-            parent: None,
-            action: FileDialogAction::Save,
-            multiselect: false,
-            default_folder: None,
-            filters: None
-        }
-    }
-
-    pub fn parent<C: Into<ControlHandle>>(mut self, p: Option<C>) -> FileDialogBuilder {
-        self.parent = p.map(|p2| p2.into());
-        self
-    }
 
     pub fn title<S: Into<String>>(mut self, t: S) -> FileDialogBuilder {
         self.title = Some(t.into());
@@ -279,7 +270,6 @@ impl FileDialogBuilder {
             )?;
         }
 
-        out.parent = self.parent.map(|p| p.hwnd().unwrap());
         out.action = self.action;
         
         if let Some(title) = self.title {

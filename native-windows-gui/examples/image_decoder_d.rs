@@ -55,7 +55,7 @@ impl ImageDecoderApp {
             }
         }
         
-        if self.dialog.run() {
+        if self.dialog.run(Some(&self.window)) {
             self.file_name.set_text("");
             if let Ok(directory) = self.dialog.get_selected_item() {
                 self.file_name.set_text(&directory);

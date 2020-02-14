@@ -112,7 +112,7 @@
         The method <code>dispatch_thread_events</code> uses <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessage">GetMessage</a>
         under the hood and will block the thread.<br><br>
 
-        Now, in some instances blocking the thread might not be wanted (ex: <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/opengl_canvas.rs">opengl canvas</a>).
+        Now, in some instances blocking the thread might not be wanted (ex: <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/opengl_canvas/src/main.rs">opengl canvas</a>).
         In such cases, it's possible to pass a callback using the <code>dispatch_thread_events_with_callback</code>. Note that this function will not block the thread!
         It's the equivalent of using a <code>loop</code> statement.
 

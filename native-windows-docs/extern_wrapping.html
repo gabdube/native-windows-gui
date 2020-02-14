@@ -95,27 +95,15 @@
 
         Native windows controls handle are public and always accessible using the field <code>handle</code>.
         <br><br>
-        
-        Wrapping external handles should only be done on a <code>Window</code> as it only control that doesn't expose
-        window class specific functions.
-
-        <br><br>
-        For example, here's the definition of <code>ControlHandle</code> and the definition of the Window control:
-
-<div class="highlight"><pre style="width: auto;"><span></span><span class="cp">#[derive(Default)]</span><span class="w"></span>
+        For example, here's the definition of <code>ControlHandle</code> and the Window control:
+            
+<div class="highlight"><pre>
+<span></span><span class="cp">#[derive(Default)]</span><span class="w"></span>
 <span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">handle</span>: <span class="nc">ControlHandle</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 
-<span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">wrap_extern_window</span><span class="p">(</span><span class="n">hwnd</span>: <span class="nc">HWND</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">handle</span>: <span class="nc">nwg</span>::<span class="n">ControlHandle</span>::<span class="n">Hwnd</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</pre></div>
-            
-                
-<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">ControlHandle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span></span><span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">ControlHandle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">NoHandle</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="n">Hwnd</span><span class="p">(</span><span class="n">HWND</span><span class="p">),</span><span class="w"></span>
 
@@ -139,8 +127,34 @@
 <span class="w">    </span><span class="n">SystemTray</span><span class="p">(</span><span class="n">HWND</span><span class="p">)</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+<br>
 
+    <h3>Unwrapping window handles</h3>
 
+    Assuming you know the handle on the control and want to directly access it's content, the ControlHandle object has those methods:
+
+    <ul>
+        <li><code>pub fn hwnd(&self) -> Option&lt;HWND&gt;</code></li>
+        <li><code>pub fn hmenu(&self) -> Option&lt;(HMENU, HMENU)&gt;</code></li>
+        <li><code>pub fn pop_hmenu(&self) -> Option&lt;(HWND, HMENU)&gt;</code></li>
+        <li><code>pub fn hmenu_item(&self) -> Option&lt;(HMENU, u32)&gt;</code></li>
+        <li><code>pub fn timer(&self) -> Option&lt;(HWND, u32)&gt;</code></li>
+        <li><code>pub fn notice(&self) -> Option&lt;(HWND, u32)&gt;</code></li>
+        <li><code>pub fn tray(&self) -> Option&lt;HWND&gt;</code></li>
+    </ul>
+
+    <h3>Wrapping external handles</h3>
+
+    Wrapping external handles should only be done on a <code>Window</code> as it only control that doesn't expose
+    window class specific functions. Wrapping external handles should be considered unsafe.
+    
+<div class="highlight"><pre style="width: auto;">
+<span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">wrap_extern_window</span><span class="p">(</span><span class="n">hwnd</span>: <span class="nc">HWND</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">handle</span>: <span class="nc">nwg</span>::<span class="n">ControlHandle</span>::<span class="n">Hwnd</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 
 
         <br/><br/>
