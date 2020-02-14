@@ -88,8 +88,11 @@ This is the main project git. It is separated in multiple sections
   - TIFF*
   - DDS*
   - *: Extended image formats with the Windows Imaging Component (WIC).
-- Tooltip and system tray notification
-- Cursor manipulation
+- Localization support
+  - Use NLS internally [(reference)](https://docs.microsoft.com/en-us/windows/win32/intl/national-language-support)
+- Tooltip
+- System tray notification
+- Cursor handling
 - A full clipboard wrapper
 - Partial templates support
   - Split large application into chunks
