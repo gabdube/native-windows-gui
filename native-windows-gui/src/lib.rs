@@ -40,6 +40,12 @@ pub use controls::*;
 mod layouts;
 pub use layouts::*;
 
+#[cfg(feature = "winnls")]
+mod locales;
+
+#[cfg(feature = "winnls")]
+pub use locales::*;
+
 
 /**
     PartialUi is a trait that can be implemented over a GUI structure that can be reused.

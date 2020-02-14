@@ -30,7 +30,7 @@ pub fn from_utf16(s: &[u16]) -> String {
 /**
     Read a string from a wide char pointer. Undefined behaviour if [ptr] is not null terminated.
 */
-#[cfg(feature = "file-dialog")]
+#[cfg(any(feature = "file-dialog"))]
 pub unsafe fn from_wide_ptr(ptr: *mut u16) -> String {
     use std::slice::from_raw_parts;
 

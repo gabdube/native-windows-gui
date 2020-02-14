@@ -167,5 +167,7 @@ fn everything() {
 
     app.window.set_focus();
 
+    println!("{:?}", Locale::user());
+
     dispatch_thread_events();
 }
