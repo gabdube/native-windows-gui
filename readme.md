@@ -54,6 +54,7 @@ cargo run --example partials --features "listbox frame combobox"
 cargo run --example system_tray --features "tray-notification message-window menu cursor"
 cargo run --example dialog_multithreading_d --features "notice"
 cargo run --example image_decoder_d --features "image-decoder file-dialog"
+cargo run --example month_name_d --features "winnls textbox"
 
 cd examples/opengl_canvas
 cargo run
@@ -89,7 +90,7 @@ This is the main project git. It is separated in multiple sections
   - DDS*
   - *: Extended image formats with the Windows Imaging Component (WIC).
 - Localization support
-  - Use NLS internally [(reference)](https://docs.microsoft.com/en-us/windows/win32/intl/national-language-support)
+  - Uses Windows National Language Support internally [(reference)](https://docs.microsoft.com/en-us/windows/win32/intl/national-language-support)
 - Tooltip
 - System tray notification
 - Cursor handling

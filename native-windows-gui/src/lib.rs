@@ -41,10 +41,10 @@ mod layouts;
 pub use layouts::*;
 
 #[cfg(feature = "winnls")]
-mod locales;
+mod winnls;
 
 #[cfg(feature = "winnls")]
-pub use locales::*;
+pub use winnls::*;
 
 
 /**

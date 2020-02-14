@@ -1,4 +1,4 @@
-use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, ImageFrame, TextBox};
+use super::{ControlHandle, Window, Button, CheckBox, RadioButton, TextInput, Label, ImageFrame};
 use std::convert::From;
 
 #[allow(unused)]
@@ -65,13 +65,18 @@ macro_rules! subclass_control {
 
 handles!(Window);
 handles!(Button);
-handles!(CheckBox);
 handles!(ImageFrame);
 handles!(Label);
+handles!(CheckBox);
 handles!(RadioButton);
-handles!(TextBox);
 handles!(TextInput);
 
+
+#[cfg(feature = "textbox")]
+use super::TextBox;
+
+#[cfg(feature = "textbox")]
+handles!(TextBox);
 
 #[cfg(feature = "status-bar")]
 use super::StatusBar;

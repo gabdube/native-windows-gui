@@ -1,6 +1,7 @@
 use winapi::um::winnls::{GetLocaleInfoEx, GetUserDefaultLocaleName, GetSystemDefaultLocaleName, LCTYPE};
 use winapi::um::winnt::{LOCALE_NAME_MAX_LENGTH};
 use crate::win32::base_helper::{to_utf16, from_utf16};
+use crate::NwgError;
 use std::ptr;
 
 
@@ -19,9 +20,12 @@ pub struct Locale {
 impl Locale {
 
     /// Create a new local from a locale name.
-    pub fn new(name: String) -> Locale {
+    pub fn new(name: String) -> Result<Locale, NwgError> {
         let name_buffer = to_utf16(&name);
-        Locale { name, name_buffer }
+        match Locale::locale_valid(&name_buffer) {
+            true => Ok(Locale { name, name_buffer }),
+            false => Err(NwgError::bad_locale("Locale name is not valid"))
+        }
     }
 
     /// Return the current user locale
@@ -123,6 +127,11 @@ impl Locale {
 
             from_utf16(&buffer)
         }
+    }
+
+    fn locale_valid(buffer: &[u16]) -> bool {
+        let result = unsafe { GetLocaleInfoEx(buffer.as_ptr(), 0x00000038, ptr::null_mut(), 0) };
+        result != 0
     }
 
 }

@@ -5,9 +5,11 @@ mod button;
 mod check_box;
 mod radio_button;
 mod text_input;
-mod text_box;
 mod label;
 mod image_frame;
+
+#[cfg(feature = "textbox")]
+mod text_box;
 
 #[cfg(feature = "status-bar")]
 mod status_bar;
@@ -72,10 +74,11 @@ pub use button::{Button, ButtonFlags, ButtonBuilder};
 pub use check_box::{CheckBox, CheckBoxState, CheckBoxFlags};
 pub use radio_button::{RadioButton, RadioButtonState, RadioButtonFlags};
 pub use text_input::{TextInput, TextInputFlags};
-pub use text_box::{TextBox, TextBoxFlags};
 pub use label::{Label, LabelFlags};
 pub use image_frame::{ImageFrame, ImageFrameFlags};
 
+#[cfg(feature = "textbox")]
+pub use text_box::{TextBox, TextBoxFlags};
 
 #[cfg(feature = "status-bar")]
 pub use status_bar::StatusBar;

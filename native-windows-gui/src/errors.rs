@@ -25,6 +25,10 @@ pub enum NwgError {
     /// Error raised by the ImageDecoder feature
     #[cfg(feature = "image-decoder")]
     ImageDecoderError(i32, String),
+
+    /// Error raised by on of the locale functions
+    #[cfg(feature = "winnls")]
+    BadLocale(String),
 }
 
 impl NwgError {
@@ -48,6 +52,11 @@ impl NwgError {
     #[cfg(feature = "file-dialog")]
     pub fn file_dialog<S: Into<String>>(e: S) -> NwgError {
         NwgError::FileDialogError(e.into())
+    }
+
+    #[cfg(feature = "winnls")]
+    pub fn bad_locale<S: Into<String>>(e: S) -> NwgError {
+        NwgError::BadLocale(e.into())
     }
 
     #[cfg(feature = "image-decoder")]
