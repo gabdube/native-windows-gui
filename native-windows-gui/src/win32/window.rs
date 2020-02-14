@@ -38,8 +38,8 @@ pub struct EventHandler {
 */
 pub struct RawEventHandler {
     handle: HWND,
-    id: SUBCLASSPROC,
-    subclass_id: UINT_PTR
+    subclass_proc: SUBCLASSPROC,
+    handler_id: UINT_PTR
 }
 
 
@@ -119,17 +119,16 @@ pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
     let callback_ptr: *mut *const Callback = Box::into_raw(callback_box);
     
     let callback_fn: SUBCLASSPROC = Some(process_events);
-    let subclass_id = hwnd as UINT_PTR;
     let mut handler = EventHandler {
         handles: vec![hwnd],
         id: callback_fn,
-        subclass_id
+        subclass_id: 0
     };
 
     unsafe {
         EnumChildWindows(hwnd, Some(handler_children), (&mut handler.handles as *mut Vec<HWND>) as LPARAM);
         EnumChildWindows(hwnd, Some(set_children_subclass), callback_ptr as LPARAM);
-        SetWindowSubclass(hwnd, callback_fn, subclass_id, callback_ptr as UINT_PTR);
+        SetWindowSubclass(hwnd, callback_fn, 0, callback_ptr as UINT_PTR);
     }
 
     handler
@@ -193,7 +192,10 @@ pub fn unbind_event_handler(handler: &EventHandler)
     for &handle in handler.handles.iter() {
         unsafe { 
             let mut callback_value: UINT_PTR = 0;
-            GetWindowSubclass(handle, id, subclass_id, &mut callback_value);
+            let result = GetWindowSubclass(handle, id, subclass_id, &mut callback_value);
+            if result == 0 {
+                panic!("Parent of hander was either freed or is already unbound");
+            }
 
             let callback_ptr = callback_value as *mut *const Callback;
             let box_callback: Box<*const Callback> = Box::from_raw(callback_ptr);
@@ -211,30 +213,41 @@ pub fn unbind_event_handler(handler: &EventHandler)
 
     When assigning multiple callback to the same control, a different `id` must be specified for each call
     or otherwise, the old callback will be replaced by the new one. See `Label::hook_background_color` for example.
+
+    If the event handler is already bound, this function will panic. 
+
 */
-pub fn bind_raw_event_handler<F>(handle: &ControlHandle, id: UINT_PTR, f: F) -> RawEventHandler
+pub fn bind_raw_event_handler<F>(handle: &ControlHandle, handler_id: UINT_PTR, f: F) -> RawEventHandler
     where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
 {
-    use winapi::um::commctrl::SetWindowSubclass;
+    use winapi::um::commctrl::{GetWindowSubclass, SetWindowSubclass};
 
-    // TODO: should check if the event handler is already bound
+    let subclass_proc: SUBCLASSPROC = Some(process_raw_events);
     
-    let (handle, callback_fn) = match handle {
+    let handle = match handle {
         &ControlHandle::Hwnd(h) => unsafe {
-            let callback_fn: SUBCLASSPROC = Some(process_raw_events);
+            // Check if the handler is already bound to the control
+            let mut tmp_value = 0;
+            let result = GetWindowSubclass(h, subclass_proc, handler_id, &mut tmp_value);
+            if result != 0 {
+                panic!("There is already a raw event handler bound with the handler ID {}", handler_id);
+            }
+
+            // Bind the callback
             let boxed_proc: Box<RawCallback> = Box::new(f);
             let boxed_proc_wrapper: Box<*mut RawCallback> = Box::new(Box::into_raw(boxed_proc));
             let proc_data: *mut *mut RawCallback = Box::into_raw(boxed_proc_wrapper);
-            SetWindowSubclass(h, callback_fn, id, proc_data as UINT_PTR);
-            (h, callback_fn)
+            SetWindowSubclass(h, subclass_proc, handler_id, proc_data as UINT_PTR);
+
+            h
         },
         htype => panic!("Cannot bind control with an handle of type {:?}.", htype)
     };
 
     RawEventHandler {
         handle,
-        id: callback_fn,
-        subclass_id: id
+        subclass_proc,
+        handler_id
     }
 }
 
@@ -246,15 +259,15 @@ pub fn unbind_raw_event_handler(handler: &RawEventHandler)
 {
     use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
 
-    let id = handler.id;
-    let subclass_id = handler.subclass_id;
+    let subclass_proc = handler.subclass_proc;
+    let handler_id = handler.handler_id;
     let handle = handler.handle;
 
     unsafe {
         let mut callback_value: UINT_PTR = 0;
-        let result = GetWindowSubclass(handle, id, subclass_id, &mut callback_value);
+        let result = GetWindowSubclass(handle, subclass_proc, handler_id, &mut callback_value);
         if result == 0 {
-            panic!("Parent of hander with id {} was either freed or is already unbound", subclass_id);
+            panic!("Parent of hander with handler id {} was either freed or is already unbound", handler_id);
         }
 
         let callback_wrapper_ptr = callback_value as *mut *mut RawCallback;
@@ -262,7 +275,7 @@ pub fn unbind_raw_event_handler(handler: &RawEventHandler)
         let callback: Box<RawCallback> = Box::from_raw(*callback_wrapper);
         mem::drop(callback);
 
-        RemoveWindowSubclass(handle, id, subclass_id);
+        RemoveWindowSubclass(handle, subclass_proc, handler_id);
     }
 }
 
