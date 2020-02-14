@@ -1,7 +1,15 @@
 use crate::*;
 use winapi::um::winuser::WM_LBUTTONUP;
 use std::cell::RefCell;
-use std::rc::Rc;
+
+
+struct MessageBoxOnDrop {}
+
+impl Drop for MessageBoxOnDrop {
+    fn drop(&mut self) {
+        simple_message("Dropped", "A MessageBoxOnDrop object was dropped");
+    }
+}
 
 
 #[derive(Default)]
@@ -12,8 +20,6 @@ struct FreeingData {
 
     handler_bound: bool,
     handler: Option<EventHandler>,
-
-    rc: Rc<()>
 }
 
 #[derive(Default)]
@@ -36,18 +42,23 @@ impl FreeingTest {
             self.bind_handler_btn.set_text("Bind raw handler");
             data.raw_handler_bound = false;
             unbind_raw_event_handler(&data.raw_handler.take().unwrap());
+            
+            assert!(has_raw_handler(&self.custom_bind_button.handle, data.raw_callback_id) == false);
         } else {
             self.bind_handler_btn.set_text("Unbind raw handler");
             data.raw_handler_bound = true;
             data.raw_callback_id += 1;
 
-            let send_rc = data.rc.clone();
+            let message = MessageBoxOnDrop{};
             let handler = bind_raw_event_handler(&self.custom_bind_button.handle, data.raw_callback_id, move |_hwnd, msg, _w, _l| {
                 if msg == WM_LBUTTONUP {
-                    simple_message("Raw handler", &format!("Button WM_LBUTTONUP hook. Rc has {:?} strong count", Rc::strong_count(&send_rc)) );
+                    &message;
+                    simple_message("Raw handler", &"Hello from raw dynamic handler");
                 }
                 None
             });
+
+            assert!(has_raw_handler(&self.custom_bind_button.handle, data.raw_callback_id));
 
             data.raw_handler = Some(handler);
         }
@@ -63,14 +74,15 @@ impl FreeingTest {
             self.bind_handler_btn2.set_text("Unbind handler");
             data.handler_bound = true;
 
-            let send_rc = data.rc.clone();
+            let message = MessageBoxOnDrop{};
             let bind_handler_btn2 = self.custom_bind_button2.handle;
 
             let handler = bind_event_handler(&self.custom_bind_button2.handle, &self.window.handle, move |event, _event_data, ctrl| {
                 match event {
                     Event::OnButtonClick => {
                         if &ctrl == &bind_handler_btn2 {    
-                            simple_message("Raw handler", &format!("Button WM_LBUTTONUP hook. Rc has {:?} strong count", Rc::strong_count(&send_rc)) );
+                            &message;
+                            simple_message("Handler", &"Hello from dynamic handler");
                         }
                     },
                     _ => {}

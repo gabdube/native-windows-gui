@@ -43,9 +43,11 @@ pub struct RawEventHandler {
 }
 
 
-/// Note. While there might be a race condition here, it does not matter because
-/// All controls are thread local and the true id is (HANDLE + NOTICE_ID)
-/// The same apply to timers
+/**
+    Note. While there might be a race condition here, it does not matter because
+    All controls are thread local and the true id is (HANDLE + NOTICE_ID)
+    The same apply to timers
+*/
 pub fn build_notice(parent: HWND) -> ControlHandle {
     let id = unsafe {
         let tmp = NOTICE_ID;
@@ -136,15 +138,16 @@ pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
 
 
 /**
-    Hook the window subclass with the default event dispatcher.
-    The hook is applied to the control and its parent. All common controls send their events to their parent.
+Hook the window subclass with the default event dispatcher.
+The hook is applied to the control and its parent. All common controls send their events to their parent.
 
-    Arguments:
-       - handle: Handle to the main control to hook
-       - parent_handle: Parent to the main control.
-       - f: User event callback
+Arguments:
+    - handle: Handle to the main control to hook
+    - parent_handle: Parent to the main control.
+    - f: User event callback
 
-    Returns a `EventHandler` that can be passed to `unbind_event_handler` to remove the callbacks.
+Returns a `EventHandler` that can be passed to `unbind_event_handler` to remove the callbacks.
+
 */
 pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHandle, f: F) -> EventHandler
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
@@ -182,6 +185,8 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHand
 
 /**
     Free all associated callbacks with the event handler.
+
+    This function will panic if the handler was already freed.
 */
 pub fn unbind_event_handler(handler: &EventHandler)
 {
@@ -208,14 +213,32 @@ pub fn unbind_event_handler(handler: &EventHandler)
 }
 
 /**
-    Set a window subclass the uses the `process_raw_events` function of NWG.
-    The subclass is only applied to the control itself and NOT the children.
 
-    When assigning multiple callback to the same control, a different `id` must be specified for each call
-    or otherwise, the old callback will be replaced by the new one. See `Label::hook_background_color` for example.
+Set a window subclass the uses the `process_raw_events` function of NWG.
+The subclass is only applied to the control itself and NOT the children.
 
-    If the event handler is already bound, this function will panic. 
+When assigning multiple callback to the same control, a different `id` must be specified for each call
+or otherwise, the old callback will be replaced by the new one. See `Label::hook_background_color` for example.
 
+If the event handler is already bound, this function will panic. If that's a possibility, use 
+the `has_raw_handler` method first.
+
+```rust
+use native_windows_gui as nwg;
+
+fn bind_raw_handler(window: &nwg::Window) -> nwg::RawEventHandler {
+    const WM_MOVE: u32 = 3287542; // Not the actual value, but who cares?
+    let handler_id = 2045;
+
+    nwg::bind_raw_event_handler(&window.handle, handler_id, move |_hwnd, msg, _w, _l| {
+        if msg == WM_MOVE {
+            println!("MOVING!");
+        }
+        None
+    })
+}
+
+```
 */
 pub fn bind_raw_event_handler<F>(handle: &ControlHandle, handler_id: UINT_PTR, f: F) -> RawEventHandler
     where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
@@ -249,6 +272,19 @@ pub fn bind_raw_event_handler<F>(handle: &ControlHandle, handler_id: UINT_PTR, f
         subclass_proc,
         handler_id
     }
+}
+
+/** 
+    Check if a raw handler with the specified handler_id is currently bound on the control.
+    This function will panic if the handle parameter is not a window control.
+*/
+pub fn has_raw_handler(handle: &ControlHandle, handler_id: UINT_PTR) -> bool {
+    use winapi::um::commctrl::{GetWindowSubclass};
+
+    let handle = handle.hwnd().expect("This type of control cannot have a raw handler.");
+    let subclass_proc: SUBCLASSPROC = Some(process_raw_events);
+    let mut tmp_value = 0;
+    unsafe { GetWindowSubclass(handle, subclass_proc, handler_id, &mut tmp_value) != 0 }
 }
 
 /**
@@ -333,7 +369,6 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
     );
 
     if handle.is_null() {
-        // println!("{:?}",  super::base_helper::get_system_error());
         Err(NwgError::initialization("Window creation failed"))
     } else {
         Ok(ControlHandle::Hwnd(handle))
