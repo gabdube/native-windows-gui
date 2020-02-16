@@ -1,5 +1,5 @@
 use winapi::um::winnls::{GetLocaleInfoEx, GetUserDefaultLocaleName, GetSystemDefaultLocaleName, LCTYPE};
-use winapi::um::winnt::{LOCALE_NAME_MAX_LENGTH};
+use winapi::um::winnt::{LOCALE_NAME_MAX_LENGTH, LPWSTR};
 use super::*;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::NwgError;
@@ -17,6 +17,9 @@ use native_windows_gui as nwg;
 let fr_locale = nwg::Locale::from_str("fr");
 let en_us_locale = nwg::Locale::from_str("en-US");
 let user_locale = nwg::Locale::user();
+let locales: Vec<String> = nwg::Locale::all();
+
+user_locale.display_name();
 ```
 */
 #[derive(Clone)]
@@ -36,11 +39,31 @@ impl Locale {
         }
     }
 
+    /// Create a new local from a locale name. If you have a String, use `new` instead.
     pub fn from_str<'a>(name: &'a str) -> Result<Locale, NwgError> {
         let name_buffer = to_utf16(name);
         match Locale::locale_valid(&name_buffer) {
             true => Ok(Locale { name: name.to_string(), name_buffer }),
             false => Err(NwgError::bad_locale("Locale name is not valid"))
+        }
+    }
+
+    /// Return the identifier (ex: en-US) of every supported locales.
+    pub fn all() -> Vec<String> {
+        use winapi::um::winnls::EnumSystemLocalesEx;
+        use winapi::shared::minwindef::{DWORD, BOOL, LPARAM};
+        use crate::win32::base_helper::from_wide_ptr;
+
+        unsafe extern "system" fn enum_locales(locale: LPWSTR, _flags: DWORD, p: LPARAM) -> BOOL {
+            let locales: *mut Vec<String> = p as *mut Vec<String>;
+            (&mut *locales).push(from_wide_ptr(locale));
+            1
+        }
+
+        unsafe {
+            let mut locales: Vec<String> = Vec::with_capacity(10);
+            EnumSystemLocalesEx(Some(enum_locales), 1, &mut locales as *mut Vec<String> as LPARAM, ptr::null_mut());
+            locales
         }
     }
 
@@ -210,7 +233,11 @@ impl Locale {
 
     /// Returns the negative positive currency mode. See NegativeCurrency
     pub fn negative_currency_mode(&self) -> NegativeCurrency {
-        unimplemented!()
+        let id = self.get_locale_info_int(0x00001009) as u32;
+        match id <= 15 {
+            true => unsafe { mem::transmute(id) },
+            false => NegativeCurrency::Mode1
+        }
     }
 
     /// Returns the short date format string, eg "MM/dd/yyyy"
@@ -269,6 +296,26 @@ impl Locale {
             2 => FirstDayOfYear::Mode2,
             _ => FirstDayOfYear::Mode0,
         }
+    }
+
+    /// ISO abbreviated language name, eg "en"
+    pub fn iso_lang_name(&self) -> String {
+        self.get_locale_info_string(0x00000059)
+    }
+
+    /// ISO abbreviated country/region name, eg "US"
+    pub fn iso_country_name(&self) -> String {
+        self.get_locale_info_string(0x0000005A)
+    }
+
+    /// Returns the english name of currency, eg "Euro"
+    pub fn currency_name(&self) -> String {
+        self.get_locale_info_string(0x00001007)
+    }
+
+    /// Returns the native name of currency, eg "euro"
+    pub fn native_currency_name(&self) -> String {
+        self.get_locale_info_string(0x00001008)
     }
 
     /**

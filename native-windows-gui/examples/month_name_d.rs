@@ -70,9 +70,6 @@ impl CalendarNames {
         months_string.push_str(&locale.display_name());
         months_string.push_str("\r\n\r\n");
 
-
-        println!("{:?}", locale.calendar());
-
         for i in 1..=12 {
             let month_name = locale.month_name(i);
             months_string.push_str(&month_name);
