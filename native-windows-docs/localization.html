@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <title>Native Windows GUI guide - Multithreading</title>
+    <title>Native Windows GUI guide - Introduction</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
     <link rel="stylesheet" type="text/css" href="style/pygments.css">
@@ -92,48 +92,38 @@
 <div id='page-wrapper'>
     <div id='page'>
 
-        <h1 class="title">Native Windows GUI: Multithreading</h1>
+        <h1 class="title">Native Windows GUI: Internationalization</h1>
 
-        Win32 is a single threaded API. That means a window and all it's children control will be contained on a single thread (the GUI thread).
-        This is a problem is an application has a method that blocks the GUI thread (ex: reading a large file) because doing so will make the UI
-        unusable for the duration of the method. This section will explain how NWG fix this problem.<br><br>
+        Native-Windows-GUI supports internationalization with the help of the Windows National language support (nls). NWG wraps
+        the API in a few structures and functions.<br><br>
+        
+        In this section, you will learn how to use the NLS wrappers
 
-        <h3>The notice object</h3>  
+        <h3>The Locale object</h3>
 
-        Assuming there is a task that will block the UI thread. It's obvious the first step would be to just move this task into another thread.
-        But then, how does the main thread will know when the task is completed? The answer is the <code>Notice</code> object.<br><br>
+        The locale object is where the bulk of the wrapper is. A locale object is constructed from a locale string and can be then used to
+        query information about the locale. There's a lot of information that can be extracted from a locale object. See the <code>Locale</code>
+        documentation for the methods.
 
-        Creating a notice object is pretty simple, it only needs a window parent.
+<div class="highlight"><pre style="width: auto;"><span></span><span class="kd">let</span><span class="w"> </span><span class="n">fr_locale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Locale</span>::<span class="n">from_str</span><span class="p">(</span><span class="s">&quot;fr&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">en_us_locale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Locale</span>::<span class="n">from_str</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">user_locale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Locale</span>::<span class="n">user</span><span class="p">();</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">locales</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Locale</span>::<span class="n">all</span><span class="p">();</span><span class="w"></span>
 
-        <ol>
-            <li>Bind the <code>OnNotice</code> event of the Notice object</li>
-            <li>Call the <code>sender()</code>. It will create a <code>NoticeSender</code> object.</li>
-            <li>Sends the NoticeSender object to the new thread</li>
-            <li>When the thread has done its work. Call <code>sender.notice</code>.</li>
-            <li>This will trigger the OnNotice event on the main GUI thread</li>
-        </ol>
-
-<div class="highlight"><pre style="width: auto;"><span></span><span class="kd">let</span><span class="w"> </span><span class="n">sender</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">noticer</span><span class="p">.</span><span class="n">sender</span><span class="p">();</span><span class="w"></span>
-
-<span class="n">thread</span>::<span class="n">spawn</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">thread</span>::<span class="n">sleep</span><span class="p">(</span><span class="n">time</span>::<span class="n">Duration</span>::<span class="n">new</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span><span class="w"></span>
-<span class="w">    </span><span class="n">sender</span><span class="p">.</span><span class="n">notice</span><span class="p">();</span><span class="w"></span>
-<span class="p">});</span><span class="w"></span>
+<span class="n">user_locale</span><span class="p">.</span><span class="n">display_name</span><span class="p">();</span><span class="w"></span>
 </pre></div>
             
-        <br>
+        <h3>Controls</h3>
 
-        <h3>Running windows on multiple threads</h3> 
+        Controls that must be localized (ex: the datetime picker) use the user locale.
 
-        NWG does not have any global state. As such it's possible to create as many GUI thread as you might want. Each GUI thread can have its own windows.
-        Blocking one of the GUI thread won't block the second. This is useful when implementing dialogs.<br><br>
-
-        <h3>Example</h3>
+        <h3>Examples</h3>
 
         <ul>
-            <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/dialog_multithreading_d.rs">Multithreading</a>: shows two UI running in their own GUI thread.</li>
+            <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/month_name_d.rs">Month name</a> shows how to read information from a locale.</li>
         </ul>
-        <br/>
+
+        <br/><br/>
 
     </div>
 </div>

@@ -444,8 +444,8 @@ impl Locale {
     }
 
     fn locale_valid(buffer: &[u16]) -> bool {
-        let result = unsafe { GetLocaleInfoEx(buffer.as_ptr(), 0x00000038, ptr::null_mut(), 0) };
-        result != 0
+        use winapi::um::winnls::IsValidLocaleName;
+        IsValidLocaleName(buffer.as_ptr()) != 0
     }
 
 }
