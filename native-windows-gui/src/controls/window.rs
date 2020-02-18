@@ -3,7 +3,7 @@
 */
 
 use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_CLIPCHILDREN, WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION,
-WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME};
+WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_POPUP, WS_EX_TOPMOST, WS_EX_ACCEPTFILES, WS_EX_COMPOSITED};
 
 use crate::win32::window_helper as wh;
 use crate::{NwgError, Icon};
@@ -42,6 +42,25 @@ bitflags! {
         const MAXIMIZED = WS_MAXIMIZE;
         const MINIMIZED = WS_MINIMIZE;
         const RESIZABLE = WS_THICKFRAME | WS_MAXIMIZEBOX;
+        const POPUP = WS_POPUP;
+    }
+}
+
+bitflags! {
+
+    /**
+        The extended window flags. 
+
+        Example: `WindowFlags::DRAG_AND_DROP | WindowFlags::TOPMOST`
+
+        Window flags:
+        * DRAG_AND_DROP: The window accepts drag-drop files.
+        * TOPMOST: The window should be placed above all non-topmost windows and should stay above them, even when the window is deactivated.
+    */
+    pub struct WindowExFlags: u32 {
+        const NONE = 0;
+        const TOPMOST = WS_EX_TOPMOST;
+        const ACCEPTFILES = WS_EX_ACCEPTFILES;
     }
 }
 
@@ -61,6 +80,7 @@ impl Window {
             size: (500, 500),
             position: (300, 300),
             flags: None,
+            ex_flags: None,
             icon: None,
             parent: None
         }
@@ -224,6 +244,7 @@ pub struct WindowBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<WindowFlags>,
+    ex_flags: Option<WindowExFlags>,
     icon: Option<&'a Icon>,
     parent: Option<ControlHandle>
 }
@@ -232,6 +253,11 @@ impl<'a> WindowBuilder<'a> {
 
     pub fn flags(mut self, flags: WindowFlags) -> WindowBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: WindowExFlags) -> WindowBuilder<'a> {
+        self.ex_flags = Some(flags);
         self
     }
 
@@ -263,9 +289,12 @@ impl<'a> WindowBuilder<'a> {
     pub fn build(self, out: &mut Window) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
+        let ex_flags = self.ex_flags.unwrap_or(WindowExFlags::NONE).bits() | WS_EX_COMPOSITED;
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
+            .ex_flags(ex_flags)
             .flags(flags)
             .size(self.size)
             .position(self.position)

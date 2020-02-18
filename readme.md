@@ -55,6 +55,7 @@ cargo run --example system_tray --features "tray-notification message-window men
 cargo run --example dialog_multithreading_d --features "notice"
 cargo run --example image_decoder_d --features "image-decoder file-dialog"
 cargo run --example month_name_d --features "winnls textbox"
+cargo run --example splash_screen_d --features "image-decoder"
 
 cd examples/opengl_canvas
 cargo run
