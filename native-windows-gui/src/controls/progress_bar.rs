@@ -30,6 +30,10 @@ pub enum ProgressBarState {
     Paused
 }
 
+/**
+    
+
+*/
 #[derive(Default, PartialEq, Eq)]
 pub struct ProgressBar {
     pub handle: ControlHandle

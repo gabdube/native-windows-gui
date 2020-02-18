@@ -445,7 +445,7 @@ impl Locale {
 
     fn locale_valid(buffer: &[u16]) -> bool {
         use winapi::um::winnls::IsValidLocaleName;
-        IsValidLocaleName(buffer.as_ptr()) != 0
+        unsafe { IsValidLocaleName(buffer.as_ptr()) != 0 }
     }
 
 }

@@ -99,6 +99,7 @@ pub struct ControlsTest {
     test_image_button3: Button,
     test_button_checkbox: CheckBox,
     test_number_select: NumberSelect,
+    test_rich: RichTextBox,
 
     test_open_file_button: Button,
     test_open_directory_button: Button,
@@ -199,9 +200,6 @@ mod partial_controls_test_ui {
                 .build(&mut data.wait_cursor)?;
 
             
-            #[cfg(feature = "file-dialog")]
-            #[cfg(feature = "color-dialog")]
-            #[cfg(feature = "font-dialog")]
             fn init_dialog(data: &mut ControlsTest) -> Result<(), NwgError> {
                 let dir = ::std::env::current_dir().unwrap();
 
@@ -231,10 +229,6 @@ mod partial_controls_test_ui {
 
                 Ok(())
             }
-
-            #[cfg(not(feature = "file-dialog"))]
-            #[cfg(feature = "color-dialog")]
-            fn init_dialog(_data: &mut ControlsTest) -> Result<(), SystemError> { Ok(()) }
 
             init_dialog(data)?;
 
@@ -486,6 +480,13 @@ mod partial_controls_test_ui {
                 .size((140, 25))
                 .parent(&data.basics_control_tab2)
                 .build(&mut data.test_number_select)?;
+
+            RichTextBox::builder()
+                .text("That's a rich text box!")
+                .position((10, 140))
+                .size((200, 200))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_rich)?;
 
             //
             // Dialogs

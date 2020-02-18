@@ -11,6 +11,9 @@ mod image_frame;
 #[cfg(feature = "textbox")]
 mod text_box;
 
+#[cfg(feature = "rich-textbox")]
+mod rich_text_box;
+
 #[cfg(feature = "status-bar")]
 mod status_bar;
 
@@ -79,6 +82,9 @@ pub use image_frame::{ImageFrame, ImageFrameFlags};
 
 #[cfg(feature = "textbox")]
 pub use text_box::{TextBox, TextBoxFlags};
+
+#[cfg(feature = "rich-textbox")]
+pub use rich_text_box::{RichTextBox, RichTextBoxFlags};
 
 #[cfg(feature = "status-bar")]
 pub use status_bar::StatusBar;

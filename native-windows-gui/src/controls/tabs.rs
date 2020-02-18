@@ -419,7 +419,7 @@ impl Tab {
         // Resize the tabs so that they match the tab view size and hide all children tabs
         let (w, h) = wh::get_window_size(tab_view_handle);
         let width = w - 11;
-        let height = h - 30;
+        let height = h - 33;
 
         // Resize the tab to match the tab view
         wh::set_window_size(current_handle, width, height, false);
