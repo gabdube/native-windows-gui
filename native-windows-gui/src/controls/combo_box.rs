@@ -32,6 +32,7 @@ bitflags! {
 A combo box consists of a list and a selection field. The list presents the options that a user can select,
 and the selection field displays the current selection.
 
+Requires the `combobox` feature. 
 
 **Builder parameters:**
   * `parent`:         **Required.** The combobox parent container.

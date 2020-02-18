@@ -24,6 +24,38 @@ bitflags! {
 
 /**
 A label is a single line of static text
+
+Label is not behind any features.
+
+**Builder parameters:**
+  * `parent`:           **Required.** The label parent container.
+  * `text`:             The label text.
+  * `size`:             The label size.
+  * `position`:         The label position.
+  * `enabled`:          If the label is enabled. A disabled label won't trigger events
+  * `flags`:            A combination of the LabelFlags values.
+  * `font`:             The font used for the label text
+  * `background_color`: The background color of the label
+  * `h_align`:          The horizontal aligment of the label
+  * `v_align`:          The vertical aligment of the label
+
+**Control events:**
+  * `OnLabelClick`: When the user click the label
+  * `OnLabelDoubleClick`: When the user double click a label
+  * `MousePress(_)`: Generic mouse press events on the label
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_label(button: &mut nwg::Label, window: &nwg::Window, font: &nwg::Font) {
+    nwg::Label::builder()
+        .text("Hello")
+        .font(Some(font))
+        .parent(window)
+        .build(button);
+}
+```
+
 */
 #[derive(Default)]
 pub struct Label {

@@ -31,6 +31,8 @@ bitflags! {
 A push button is a rectangle containing an application-defined text label.
 Use `ImageButton` if you need to have a button that ONLY contains an icon or a bitmap.
 
+Button is not behind any features.
+
 **Builder parameters:**
   * `parent`:   **Required.** The button parent container.
   * `text`:     The button text.

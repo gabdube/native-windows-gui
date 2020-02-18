@@ -10,6 +10,8 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Menu/MenuItem handle is not HM
 /** 
     A windows menu. Can represent a menu in a window menubar, a context menu, or a submenu in another menu
 
+    Requires the `menu` feature. 
+
     **Builder parameters:**
       - text: The text of the menu
       - disabled: If the menu can be selected by the user
@@ -162,6 +164,8 @@ impl<'a> MenuBuilder<'a> {
 /** 
     A windows menu item. Can be added to a menubar or another menu.
 
+    Requires the `menu` feature. 
+
    **Builder parameters:**
       - text: The text of the menu item
       - disabled: If the item can be selected by the user
@@ -299,6 +303,8 @@ impl<'a> MenuItemBuilder<'a> {
 
 /**
     A menu separator. Can be added between two menu item to separte them. Cannot be added to a menubar.
+
+    Requires the `menu` feature. 
 
     **Builder parameters:**
       - parent: A top level window or a menu. With a top level window, the menu item is added to the menu bar.

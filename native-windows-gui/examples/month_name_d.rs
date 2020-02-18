@@ -5,12 +5,6 @@
     Requires the following features: `cargo run --example month_name_d --features "winnls textbox"`
 */
 
-/*!
-    A very simple application that show your name in a message box.
-    See `basic` for the version without the derive macro
-*/
-
-
 extern crate native_windows_gui as nwg;
 extern crate native_windows_derive as nwd;
 

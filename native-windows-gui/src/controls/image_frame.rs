@@ -19,6 +19,8 @@ bitflags! {
 /**
 An image frame is a control that displays a `Bitmap` or a `Icon` image resource. It can also triggers mouse clicks.
 
+ImageFrame is not behind any features.
+
 **Builder parameters:**
   * `parent`:           **Required.** The image frame parent container.
   * `size`:             The image frame size.

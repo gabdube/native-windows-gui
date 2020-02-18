@@ -36,6 +36,8 @@ bitflags! {
 /**
 A list box is a control window that contains a simple list of items from which the user can choose.
 
+Requires the `list-box` feature. 
+
 **Builder parameters:**
   * `parent`:          **Required.** The listbox parent container.
   * `size`:            The listbox size.

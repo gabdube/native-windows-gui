@@ -40,6 +40,7 @@ pub struct DatePickerValue {
 A date and time picker (DTP) control provides a simple and intuitive interface through which to exchange date and time information with a user.
 For example, with a DTP control you can ask the user to enter a date and then easily retrieve the selection.
 
+Requires the `datetime-picker` feature. 
 
 **Builder parameters:**
   * `parent`:   **Required.** The dtp parent container.

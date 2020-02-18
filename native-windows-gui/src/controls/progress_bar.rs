@@ -31,7 +31,36 @@ pub enum ProgressBarState {
 }
 
 /**
-    
+A progress bar is a window that an application can use to indicate the progress of a lengthy operation.
+
+Requires the `progress-bar` feature. 
+
+**Builder parameters:**
+  * `parent`:   **Required.** The progress bar parent container.
+  * `size`:     The progress bar size.
+  * `position`: The progress bar position.
+  * `state`:    The initial state of the progress bar.
+  * `step`:     The value in which the progress bar value increase when `advance` is used.
+  * `pos`:      The initial value of the progress bar.
+  * `range`:    The minimum and maximum value in the progress bar.
+  * `enabled`:  If the progress bar is enabled. 
+  * `flags`:    A combination of the ProgressBarFlags values.
+
+**Control events:**
+  * `MousePress(_)`: Generic mouse press events on the progress bar
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_progress_bar(bar: &mut nwg::ProgressBar, window: &nwg::Window) {
+    nwg::ProgressBar::builder()
+        .state(nwg::ProgressBarState::Paused)
+        .step(10)
+        .range(0..100)
+        .parent(window)
+        .build(bar);
+}
+```
 
 */
 #[derive(Default, PartialEq, Eq)]

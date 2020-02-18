@@ -55,7 +55,9 @@ impl Default for NumberSelectData {
 
 /**
 A NumberSelect control is a pair of arrow buttons that the user can click to increment or decrement a value.
-NumberSelect is implemented as a custom control.
+NumberSelect is implemented as a custom control because the one provided by winapi really sucks.
+
+Requires the `number-select` feature. 
 
 **Builder parameters:**
   * `parent`:   **Required.** The number select parent container.

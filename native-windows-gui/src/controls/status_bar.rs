@@ -7,6 +7,33 @@ use std::cell::RefCell;
 const NOT_BOUND: &'static str = "StatusBar is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: StatusBar handle is not HWND!";
 
+/**
+A status bar is a horizontal window at the bottom of a parent window in which an application can display various kinds of status information.
+Status bar cannot stack, so there must be only one per window.
+
+Requires the `status-bar` feature. 
+
+**Builder parameters:**
+  * `parent`:   **Required.** The status bar parent container.
+  * `text`:     The status bar text.
+  * `font`:     The font used for the status bar text
+
+**Control events:**
+  * `MousePress(_)`: Generic mouse press events on the status bar
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_status(status: &mut nwg::StatusBar, window: &nwg::Window, font: &nwg::Font) {
+    nwg::StatusBar::builder()
+        .text("Hello")
+        .font(Some(font))
+        .parent(window)
+        .build(status);
+}
+```
+
+*/
 #[derive(Default)]
 pub struct StatusBar {
     pub handle: ControlHandle,

@@ -27,6 +27,8 @@ bitflags! {
 /**
 A frame is a rectangle containing children controls. Frame is implemented as a custom control.
 
+Requires the `frame` feature. 
+
 **Builder parameters:**
   * `parent`:   **Required.** The frame parent container.
   * `size`:     The frame size.

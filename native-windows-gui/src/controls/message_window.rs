@@ -2,6 +2,10 @@
     A message-only window enables you to send and receive messages. It is not visible, has no z-order, cannot be enumerated, and does not
     receive broadcast messages. The window simply dispatches messages.
 
+    A MessageWindow do not have any builder parameter, but still provides the API for the derive macro.
+
+    Requires the `message-window` feature. 
+
     ## Example
     ```
     use native_windows_gui as nwg;

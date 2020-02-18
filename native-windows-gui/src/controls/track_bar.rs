@@ -30,6 +30,38 @@ bitflags! {
 /**
 A trackbar is a window that contains a slider (sometimes called a thumb) in a channel, and optional tick marks.
 When the user moves the slider, using either the mouse or the direction keys, the trackbar sends notification messages to indicate the change.
+
+Requires the `trackbar` feature.
+
+**Builder parameters:**
+  * `parent`:           **Required.** The trackbar parent container.
+  * `size`:             The trackbar size.
+  * `position`:         The trackbar position.
+  * `enabled`:          If the trackbar can be used by the user. It also has a grayed out look if disabled.
+  * `flags`:            A combination of the TrackBarFlags values.
+  * `range`:            The value range of the trackbar
+  * `selected_range`:   The selected value range of the trackbar. Used with `TrackBarFlags::RANGE`
+  * `pos`:              The current value of the trackbar
+  * `background_color`: The background color the of the trackbar
+
+
+**Control events:**
+  * `OnVerticalScroll`: When the value of a trackbar with the VERTICAL flags is changed
+  * `OnHorizontalScroll`: When the value of a trackbar with the HORIZONTAL flags is changed
+  * `MousePress(_)`: Generic mouse press events on the button
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_trackbar(button: &mut nwg::TrackBar, window: &nwg::Window, font: &nwg::Font) {
+    nwg::TrackBar::builder()
+        .range(Some(0..100))
+        .pos(Some(10))
+        .parent(window)
+        .build(button);
+}
+```
+
 */
 #[derive(Default)]
 pub struct TrackBar {

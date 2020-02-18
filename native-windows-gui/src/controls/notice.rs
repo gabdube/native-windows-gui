@@ -4,7 +4,9 @@ An invisible component that can be triggered by other thread.
 A notice object do not send data between threads. Rust has already plenty of way to do this.
 The notice object only serve to "wake up" the GUI thread.
 
-A notice must have a parent window.
+A notice must still have a parent window.
+
+Requires the `notice` feature. 
 
 ## Example
 

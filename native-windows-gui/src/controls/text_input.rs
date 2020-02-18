@@ -28,6 +28,36 @@ An edit control is a rectangular control window to permit the user to enter and 
 This control only allow a single line input. For block of text, use `TextBox`.
 Winapi documentation: https://docs.microsoft.com/en-us/windows/win32/controls/about-edit-controls#text-and-input-styles
 
+TextInput is not behind any features.
+
+**Builder parameters:**
+  * `parent`:           **Required.** The text input parent container.
+  * `text`:             The text input text.
+  * `size`:             The text input size.
+  * `position`:         The text input position.
+  * `flags`:            A combination of the TextInputFlags values.
+  * `font`:             The font used for the text input text
+  * `limit`:            The maximum number of character that can be inserted in the control
+  * `readonly`:         If the text input should allow user input or not
+  * `password`:         The password character. If set to None, the textinput is a regular control.
+  * `align`:            The alignment of the text in the text input
+  * `background_color`: The color of the textinput top and bottom padding. This is not the white background under the text.
+
+**Control events:**
+  * `OnTextInput`: When a TextInput value is changed
+  * `MousePress(_)`: Generic mouse press events on the button
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_box(tbox: &mut nwg::TextInput, window: &nwg::Window, font: &nwg::Font) {
+    nwg::TextInput::builder()
+        .text("Hello")
+        .font(Some(font))
+        .parent(window)
+        .build(tbox);
+}
+```
 */
 #[derive(Default)]
 pub struct TextInput {

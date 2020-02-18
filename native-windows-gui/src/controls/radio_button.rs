@@ -11,6 +11,8 @@ bitflags! {
     pub struct RadioButtonFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+
+        /// If a radio button has this style, it creates a new radio button group
         const GROUP = WS_GROUP;
     }
 }
@@ -26,7 +28,71 @@ pub enum RadioButtonState {
 A radio button (also called option button) consists of a round button and an application-defined label, 
 icon, or bitmap that indicates a choice the user can make by selecting the button. An application typically uses radio buttons in a group box to enable the user to choose one of a set of related but mutually exclusive options.
 
-Note: Internally, check box are `Button` and as such, they trigger the same events
+Radiobutton is not behind any features.
+
+Note: Internally, radio buttons are `Button` and as such, they trigger the same events
+
+**Builder parameters:**
+  * `parent`:           **Required.** The radio button parent container.
+  * `text`:             The radio button text.
+  * `size`:             The radio button size.
+  * `position`:         The radio button position.
+  * `enabled`:          If the radio button can be used by the user. It also has a grayed out look if disabled.
+  * `flags`:            A combination of the RadioButtonFlags values.
+  * `font`:             The font used for the radio button text
+  * `background_color`: The background color of the radio button. Defaults to the default window background (light gray)
+  * `check_state`:      The default check state
+
+**Control events:**
+  * `OnButtonClick`: When the adio button is clicked once by the user
+  * `OnButtonDoubleClick`: When the adio button is clicked twice rapidly by the user
+  * `MousePress(_)`: Generic mouse press events on the adio button
+  * `OnMouseMove`: Generic mouse mouse event
+
+
+```rust
+use native_windows_gui as nwg;
+
+/// Build two group of checkboxes on the same parent with the GROUP flags
+fn build_radio_groups(radios: &mut [nwg::RadioButton], parent: &nwg::Window) {
+    use nwg::RadioButtonFlags as RadioF;
+
+    // Group 1
+    nwg::RadioButton::builder()
+      .flags(RadioF::VISIBLE | RadioF::GROUP)
+      .parent(parent)
+      .build(&mut radios[0]);
+
+    nwg::RadioButton::builder()
+      .parent(parent)
+      .build(&mut radios[1]);
+
+    // Group 2
+    nwg::RadioButton::builder()
+      .flags(RadioF::VISIBLE | RadioF::GROUP)
+      .parent(parent)
+      .build(&mut radios[2]);
+
+    nwg::RadioButton::builder()
+      .parent(parent)
+      .build(&mut radios[3]);
+}
+
+
+```
+
+```rust
+use native_windows_gui as nwg;
+fn build_radio(radio: &mut nwg::RadioButton, window: &nwg::Window, font: &nwg::Font) {
+    nwg::RadioButton::builder()
+        .text("Hello")
+        .flags(nwg::RadioButtonFlags::VISIBLE)
+        .font(Some(font))
+        .parent(window)
+        .build(radio);
+}
+```
+
 */
 #[derive(Default)]
 pub struct RadioButton {

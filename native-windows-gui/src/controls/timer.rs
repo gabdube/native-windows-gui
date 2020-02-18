@@ -1,35 +1,3 @@
-/*!
-    A timer is an invisible UI component that trigger the `OnTimerTick` event at the specified interval.
-    Timers are mosty used to handle animations OR to create a timeout. To sync multithreaded action see the `Notice` object.
-
-    A timer requires a top level window parent.
-
-    Note that timer SHOULD NOT be used when a consistent interval is needed. The timer event might be triggered much faster
-    than the `interval` value. For example, when a user resize a window, Timer OnTimerTick gets triggered each time the window size changes.
-
-    **Builder parameters:**
-        * `parent`:   **Required.** The button parent container. Should be a top level window
-        * `interval`:  The button text.
-        * `stopped`:   If the timer should start right away. By default timers starts "stopped". Be sure to include `stopped(false)` in your builder if you want the timer to start instantly.
-
-    **Control events:**
-        * `OnTimerTick`: When the timer ticks
-
-    ```
-    use native_windows_gui as nwg;
-
-    fn build_timer(parent: &nwg::Window)  {
-        let mut timer = Default::default();
-        nwg::Timer::builder()
-            .parent(parent)
-            .interval(100)
-            .stopped(false)
-            .build(&mut timer);
-    }
-    ```
-*/
-
-
 use crate::controls::ControlHandle;
 use crate::win32::{window_helper as wh, window::build_timer};
 use crate::NwgError;
@@ -39,8 +7,38 @@ const NOT_BOUND: &'static str = "Timer is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Timer handle is not Timer!";
 
 
-/// A timer is an invisible component that trigger a `OnTimerTick` event at the requested interval
-/// See the module documentation
+/**
+A timer is an invisible UI component that trigger the `OnTimerTick` event at the specified interval.
+Timers are mosty used to handle animations OR to create a timeout. To sync multithreaded action see the `Notice` object.
+
+A timer still requires a top level window parent.
+
+Note that timer SHOULD NOT be used when a consistent interval is needed. The timer event might be triggered much faster
+than the `interval` value. For example, when a user resize a window, Timer OnTimerTick gets triggered each time the window size changes.
+
+Requires the `timer` feature. 
+
+**Builder parameters:**
+    * `parent`:   **Required.** The button parent container. Should be a top level window
+    * `interval`:  The button text.
+    * `stopped`:   If the timer should start right away. By default timers starts "stopped". Be sure to include `stopped(false)` in your builder if you want the timer to start instantly.
+
+**Control events:**
+    * `OnTimerTick`: When the timer ticks
+
+```
+use native_windows_gui as nwg;
+
+fn build_timer(parent: &nwg::Window)  {
+    let mut timer = Default::default();
+    nwg::Timer::builder()
+        .parent(parent)
+        .interval(100)
+        .stopped(false)
+        .build(&mut timer);
+}
+```
+*/
 #[derive(Default)]
 pub struct Timer {
     pub handle: ControlHandle,

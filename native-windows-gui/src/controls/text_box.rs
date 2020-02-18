@@ -19,10 +19,40 @@ bitflags! {
 }
 
 
-/// An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
-/// This control allow multi line input. For a single line of text, use `TextInput`.
-///
-/// Note: Use `\r\n` to input a new line not just `\n`.
+/**
+An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
+This control allow multi line input. For a single line of text, use `TextInput`.
+
+Requires the `textbox` feature. 
+
+Note: Use `\r\n` to input a new line not just `\n`.
+
+**Builder parameters:**
+  * `parent`:   **Required.** The text box parent container.
+  * `text`:     The text box text.
+  * `size`:     The text box size.
+  * `position`: The text box position.
+  * `flags`:    A combination of the TextBoxFlags values.
+  * `font`:     The font used for the text box text
+  * `limit`:    The maximum number of character that can be inserted in the control
+  * `readonly`: If the textbox should allow user input or not
+
+**Control events:**
+  * `OnTextInput`: When a TextBox value is changed
+  * `MousePress(_)`: Generic mouse press events on the button
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_box(tbox: &mut nwg::TextBox, window: &nwg::Window, font: &nwg::Font) {
+    nwg::TextBox::builder()
+        .text("Hello")
+        .font(Some(font))
+        .parent(window)
+        .build(tbox);
+}
+```
+*/
 #[derive(Default, PartialEq, Eq)]
 pub struct TextBox {
     pub handle: ControlHandle

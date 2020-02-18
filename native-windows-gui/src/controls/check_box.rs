@@ -41,6 +41,8 @@ pub enum CheckBoxState {
 A check box consists of a square box and an application-defined labe that indicates a choice the user can make by selecting the button.
 Applications typically display check boxes to enable the user to choose one or more options that are not mutually exclusive.
 
+CheckBox is not behind any features.
+
 **Builder parameters:**
   * `parent`:           **Required.** The checkbox parent container.
   * `text`:             The checkbox text.

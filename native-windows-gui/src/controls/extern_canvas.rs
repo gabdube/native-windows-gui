@@ -51,6 +51,9 @@ bitflags! {
     will be a children control (like a button).
 
     When used as a chidren, ExternCanvas can be used as a way to add highly dynamic controls to a NWG application (ex: a video player).
+
+    Requires the `extern-canvas` feature. 
+
 */
 #[derive(Default)]
 pub struct ExternCanvas {
