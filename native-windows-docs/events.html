@@ -195,6 +195,10 @@
         but in large, long-running applications it's better to free the handler when it is no longer needed. This is done with: <br><br>
 
         <code>nwg::unbind_event_handler(&handler)</code>
+
+        <br><br>
+
+        Events handler are not freed automatically when they go out of scope!
         
         <br><br><br><br>
 

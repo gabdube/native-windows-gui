@@ -35,4 +35,4 @@
 ![localize](localize.png)
 
 # Splash
-![localize](localize.png)
+![localize](splash.png)

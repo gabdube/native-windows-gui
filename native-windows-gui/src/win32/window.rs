@@ -18,6 +18,7 @@ use std::rc::Rc;
 
 static mut TIMER_ID: u32 = 1; 
 static mut NOTICE_ID: u32 = 1; 
+static mut EVENT_HANDLER_ID: UINT_PTR = 1;
 
 const NO_DATA: EventData = EventData::NoData;
 
@@ -84,17 +85,24 @@ pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
     use winapi::um::commctrl::{SetWindowSubclass};
     use winapi::um::winuser::EnumChildWindows;
 
+    struct SetSubclassParam {
+        callback_ptr: *mut *const Callback,
+        subclass_id: UINT_PTR,
+    }
+
     /**
         Function that iters over a top level window and bind the events dispatch callback
     */
     unsafe extern "system" fn set_children_subclass(h: HWND, p: LPARAM) -> i32 {
-        let ptr = p as *mut *const Callback;
-        let cb: Rc<Callback> = Rc::from_raw(*ptr);
+        let params_ptr = p as *mut SetSubclassParam;
+        let params = &*params_ptr;
+        
+        let cb: Rc<Callback> = Rc::from_raw(*params.callback_ptr);
 
         // Simply increase the rc count because the callback
         // will also be stored into the current children window. 
         mem::forget(cb.clone());
-        SetWindowSubclass(h, Some(process_events), 0, p as UINT_PTR);
+        SetWindowSubclass(h, Some(process_events), params.subclass_id, params.callback_ptr as UINT_PTR);
 
         // Do not decrease the refcount
         mem::forget(cb);
@@ -121,16 +129,23 @@ pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
     let callback_ptr: *mut *const Callback = Box::into_raw(callback_box);
     
     let callback_fn: SUBCLASSPROC = Some(process_events);
+    let subclass_id = unsafe { EVENT_HANDLER_ID };
     let mut handler = EventHandler {
         handles: vec![hwnd],
         id: callback_fn,
-        subclass_id: 0
+        subclass_id,
     };
+
+
+    let params = Box::new(SetSubclassParam { callback_ptr, subclass_id });
+    let params_ptr: *mut SetSubclassParam = Box::into_raw(params);
 
     unsafe {
         EnumChildWindows(hwnd, Some(handler_children), (&mut handler.handles as *mut Vec<HWND>) as LPARAM);
-        EnumChildWindows(hwnd, Some(set_children_subclass), callback_ptr as LPARAM);
-        SetWindowSubclass(hwnd, callback_fn, 0, callback_ptr as UINT_PTR);
+        EnumChildWindows(hwnd, Some(set_children_subclass), params_ptr as LPARAM);
+        SetWindowSubclass(hwnd, callback_fn, subclass_id, callback_ptr as UINT_PTR);
+        EVENT_HANDLER_ID += 1;
+        Box::from_raw(params_ptr);
     }
 
     handler
@@ -167,7 +182,7 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHand
     let callback_ptr_parent: *mut *const Callback = Box::into_raw(callback_box_parent);
 
     let callback_fn: SUBCLASSPROC = Some(process_events);
-    let subclass_id = hwnd as UINT_PTR;
+    let subclass_id = unsafe { EVENT_HANDLER_ID };
     let handler = EventHandler {
         handles: vec![hwnd, parent_hwnd],
         id: callback_fn,
@@ -177,6 +192,7 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHand
     unsafe {
         SetWindowSubclass(hwnd, callback_fn, subclass_id, callback_ptr as UINT_PTR);
         SetWindowSubclass(parent_hwnd, callback_fn, subclass_id, callback_ptr_parent as UINT_PTR);
+        EVENT_HANDLER_ID += 1;
     }
 
     handler
@@ -194,6 +210,8 @@ pub fn unbind_event_handler(handler: &EventHandler)
 
     let id = handler.id;
     let subclass_id = handler.subclass_id;
+    let mut callback_ptr: *mut *const Callback = ptr::null_mut();
+
     for &handle in handler.handles.iter() {
         unsafe { 
             let mut callback_value: UINT_PTR = 0;
@@ -202,13 +220,17 @@ pub fn unbind_event_handler(handler: &EventHandler)
                 panic!("Parent of hander was either freed or is already unbound");
             }
 
-            let callback_ptr = callback_value as *mut *const Callback;
-            let box_callback: Box<*const Callback> = Box::from_raw(callback_ptr);
-            let callback: Rc<Callback> = Rc::from_raw(*box_callback);
+            callback_ptr = callback_value as *mut *const Callback;
+            let callback: Rc<Callback> = Rc::from_raw(*callback_ptr);
             mem::drop(callback);
 
             RemoveWindowSubclass(handle, id, subclass_id);
         };
+    }
+
+    // Finally free the pointer to the pointer to the callback
+    unsafe {
+        Box::from_raw(callback_ptr);
     }
 }
 

@@ -7,7 +7,8 @@
     <title>Native Windows GUI guide - Dynamic event</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
-
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 </head>
 <body class="rustdoc">
@@ -91,6 +92,56 @@
     <div id='page'>
 
         <h1 class="title">Native Windows GUI: Dynamic events</h1>
+
+        Just like controls, binding new events handler at runtime isn't very hard.
+
+        <br/><br/>
+
+        <h3>Dynamic binding</h3>
+
+        Binding event handler at runtime is done using <code>bind_event_handler</code>. <code>full_bind_event_handler</code>
+        can also be used, but it's overkill as it will bind the handler on all children too. <code>full_bind_event_handler</code> can still be used to by the events
+        of multiple new controls in one take.<br>
+
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">new_button_handle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_button</span><span class="p">.</span><span class="n">handle</span><span class="p">;</span><span class="w"></span>
+<span class="n">nwg</span>::<span class="n">bind_event_handler</span><span class="p">(</span><span class="o">&amp;</span><span class="n">new_button</span><span class="p">.</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">parent_window</span><span class="p">.</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">_evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">nwg</span>::<span class="n">Event</span>::<span class="n">OnButtonClick</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">new_button_handle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">nwg</span>::<span class="n">simple_message</span><span class="p">(</span><span class="o">&amp;</span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">content</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">});</span><span class="w"></span>
+</pre></div>
+
+        <br> 
+
+        As mentionned in the <b>Events</b> section, <code>bind_event_handler</code> also takes the parent control handle as argument as most control sends their
+        events to the parent.
+
+        <br><br>
+
+        Anothing thing to keep in mind, the handler callback is not aware of the control in the application, as such it can only send the handle.
+        In order to correctly dispatch the events, the handle of the controls must be moved to the handler callback and then the handle must be compared
+        to the one sent in the callback.<br><br>
+
+        <code>if handle == new_button_handle { ... }</code>
+
+        <br><br>
+
+        <h3>Freeing events handler</h3>
+
+        Unlike events freeing, which is done automatically when the controls go out of scope, events handler must be manually freed by calling the
+        <code>nwg::unbind_event_handler(&handler)</code> method.<br><br>
+
+        <h3>Example</h3>
+
+        <ul>
+            <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank.rs">Message bank</a> ( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank_d.rs">derive version</a> ) shows how to dynamically add controls and events.</li>
+            </ul>
+
         <br/><br/>
 
     </div>

@@ -7,6 +7,8 @@
     <title>Native Windows GUI guide - Dynamic control</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 
 </head>
@@ -97,8 +99,22 @@
 
         <h3>Dynamic creation</h3>
 
-        Adding controls at runtime is not something special. The only that changes is that it's not possible to use a derive macro.
+        Adding controls at runtime is not something special. It's just the matter of creating a new control from a builder and using
+        an existing window as its parent.
 
+<div class="highlight"><pre style="width: auto;"><span></span><span class="k">fn</span> <span class="nf">add_button</span><span class="p">(</span><span class="n">button</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Button</span><span class="p">,</span><span class="w"> </span><span class="n">window</span>: <span class="kp">&amp;</span><span class="nc">nwg</span>::<span class="n">Window</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">nwg</span>::<span class="n">Button</span>::<span class="n">builder</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">text</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">flags</span><span class="p">(</span><span class="n">nwg</span>::<span class="n">ButtonFlags</span>::<span class="n">VISIBLE</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">parent</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="n">button</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+        <h3>Dynamic freeing</h3>
+
+        Controls resources are freed at drop time. This means that you should store the control somewhere in your app otherwise the base 
+        handle will be freed just after being created.
 
         <h3>Example</h3>
 

@@ -123,11 +123,76 @@
         <b>handles</b><br><br>
 
         <code>handles</code> is the easiest method to implement. It's role is to return the handle to the top level windows of the partial.
-        If the partial do not have any window, it should return an empty array.
+        If the partial does not have any window, it should return an empty array.
 
         <h3>Implementing partials into NativeUi</h3>
 
-        A partial ui <b>must</b> be part of another UI.
+        A partial ui <b>must</b> be part of another UI. In other words, this means that the partial struct must be a member of the base UI struct.<br><br>
+
+        Next, after the initialization of the controls and in the <code>build_ui</code> function, the partial ui should be initialized]
+        the <code>build_partial</code> method.<br><br>
+
+        Before the default event binding, the <code>handles</code> methods should be called in order to add the partial window handle to the callback.
+        <br><br>
+
+        Finally, in the events handler, the <code>process_event</code> should be called in order to dispatch the base events to the partial.<br><br>
+
+        In code:<br>
+
+<div class="highlight"><pre><span></span><span class="cp">#[derive(Default)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">PartialDemo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">window</span>: <span class="nc">nwg</span>::<span class="n">Window</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">layout</span>: <span class="nc">nwg</span>::<span class="n">BoxLayout</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">menu</span>: <span class="nc">nwg</span>::<span class="n">ListBox</span><span class="o">&lt;&amp;</span><span class="nb">&#39;static</span><span class="w"> </span><span class="kt">str</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">frame1</span>: <span class="nc">nwg</span>::<span class="n">Frame</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">frame2</span>: <span class="nc">nwg</span>::<span class="n">Frame</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">frame3</span>: <span class="nc">nwg</span>::<span class="n">Frame</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">people_ui</span>: <span class="nc">PeopleUi</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">animal_ui</span>: <span class="nc">AnimalUi</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">food_ui</span>: <span class="nc">FoodUi</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">impl</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NativeUi</span><span class="o">&lt;</span><span class="n">PartialDemo</span><span class="p">,</span><span class="w"> </span><span class="n">Rc</span><span class="o">&lt;</span><span class="n">PartialDemoUi</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">PartialDemo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">fn</span> <span class="nf">build_ui</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span>: <span class="nc">PartialDemo</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Rc</span><span class="o">&lt;</span><span class="n">PartialDemoUi</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NwgError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">use</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Event</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">E</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span>
+<span class="w">        </span><span class="c1">// Controls</span>
+<span class="w">        </span><span class="c1">//...</span>
+
+<span class="w">        </span><span class="c1">// Partials</span>
+<span class="w">        </span><span class="n">PeopleUi</span>::<span class="n">build_partial</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">people_ui</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="o">&amp;</span><span class="n">data</span><span class="p">.</span><span class="n">frame1</span><span class="p">))</span><span class="o">?</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">AnimalUi</span>::<span class="n">build_partial</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">animal_ui</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="o">&amp;</span><span class="n">data</span><span class="p">.</span><span class="n">frame2</span><span class="p">))</span><span class="o">?</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">FoodUi</span>::<span class="n">build_partial</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">food_ui</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="o">&amp;</span><span class="n">data</span><span class="p">.</span><span class="n">frame3</span><span class="p">))</span><span class="o">?</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">// Wrap-up</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">PartialDemoUi</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">inner</span>: <span class="nc">data</span><span class="w"> </span><span class="p">});</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">// Events</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">window_handles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="o">&amp;</span><span class="n">ui</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">handle</span><span class="p">];</span><span class="w"></span>
+<span class="w">        </span><span class="n">window_handles</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">people_ui</span><span class="p">.</span><span class="n">handles</span><span class="p">());</span><span class="w"></span>
+<span class="w">        </span><span class="n">window_handles</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">animal_ui</span><span class="p">.</span><span class="n">handles</span><span class="p">());</span><span class="w"></span>
+<span class="w">        </span><span class="n">window_handles</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">food_ui</span><span class="p">.</span><span class="n">handles</span><span class="p">());</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">window_handles</span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">evt_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">handle_events</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">people_ui</span><span class="p">.</span><span class="n">process_event</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">animal_ui</span><span class="p">.</span><span class="n">process_event</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">food_ui</span><span class="p">.</span><span class="n">process_event</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="c1">// ...</span>
+<span class="w">            </span><span class="p">};</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">nwg</span>::<span class="n">full_bind_event_handler</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">handle_events</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">// Layout</span>
+<span class="w">        </span><span class="c1">// ...</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">ui</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 
         <h3>Examples</h3>
 
