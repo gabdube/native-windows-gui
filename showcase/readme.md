@@ -33,3 +33,6 @@
 
 # Localization
 ![localize](localize.png)
+
+# Splash
+![localize](localize.png)

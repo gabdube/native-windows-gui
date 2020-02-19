@@ -1,5 +1,5 @@
 /*!
-    A application that customize a window to display a splash screen.
+    A application that customize a window to display a splash screen. Click the splash screen to close the app.
 
     Requires the following features: `cargo run --example splash_screen_d --features "image-decoder"`
 */
