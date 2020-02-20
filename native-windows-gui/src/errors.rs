@@ -11,7 +11,6 @@ pub enum NwgError {
     /// Error that may happen when creating a control.
     ControlCreationError(String),
 
-
     /// Error that may happen when creating a menu.
     MenuCreationError(String),
 

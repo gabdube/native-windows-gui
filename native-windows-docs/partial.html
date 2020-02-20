@@ -127,15 +127,18 @@
 
         <h3>Implementing partials into NativeUi</h3>
 
-        A partial ui <b>must</b> be part of another UI. In other words, this means that the partial struct must be a member of the base UI struct.<br><br>
+        A partial ui <b>must</b> be part of another UI. In other words, this means that the partial struct must be a member of the base UI struct that also implements
+        the NativeUi trait.<br><br>
 
-        Next, after the initialization of the controls and in the <code>build_ui</code> function, the partial ui should be initialized]
+        Starting right into the <code>build_ui</code> function, after the initialization of the controls, the partial ui should be initialized using
         the <code>build_partial</code> method.<br><br>
 
-        Before the default event binding, the <code>handles</code> methods should be called in order to add the partial window handle to the callback.
+        Then, before the default events binding, the <code>handles</code> methods should be called in order to add the partial window handle to the callback.
         <br><br>
 
-        Finally, in the events handler, the <code>process_event</code> should be called in order to dispatch the base events to the partial.<br><br>
+        Finally, in the event handler, the <code>process_event</code> should be called in order to dispatch the base events to the partial.<br><br>
+
+        And there you go. PartialUi is implemented in your base UI.<br><br>
 
         In code:<br>
 

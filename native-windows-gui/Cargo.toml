@@ -50,9 +50,10 @@ status-bar = []
 winnls = []
 textbox = []
 rich-textbox = []
+image-list = []
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "cursor", "image-decoder",
        "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "number-select", "clipboard", "menu", 
-       "trackbar", "extern-canvas", "frame", "tooltip", "status-bar", "winnls", "textbox", "rich-textbox"]
+       "trackbar", "extern-canvas", "frame", "tooltip", "status-bar", "winnls", "textbox", "rich-textbox", "image-list"]
 
 [package.metadata.docs.rs]
 features = [ "all" ]

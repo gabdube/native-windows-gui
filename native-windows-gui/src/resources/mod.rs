@@ -16,6 +16,9 @@ mod color_dialog;
 #[cfg(feature = "font-dialog")]
 mod font_dialog;
 
+#[cfg(feature = "image-list")]
+mod image_list;
+
 pub use font::{Font, FontInfo, FontBuilder};
 pub use system_images::*;
 pub use icon::{Icon, IconBuilder};
@@ -33,3 +36,6 @@ pub use color_dialog::{ColorDialog, ColorDialogBuilder};
 
 #[cfg(feature = "font-dialog")]
 pub use font_dialog::{FontDialog, FontDialogBuilder};
+
+#[cfg(feature = "image-list")]
+pub use image_list::{ImageList, ImageListBuilder};
