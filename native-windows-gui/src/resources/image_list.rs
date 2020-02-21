@@ -46,7 +46,7 @@ impl ImageList {
         }
     }
 
-    /// Return the size of the images in the image list
+    /// Returns the size of the images in the image list
     pub fn size(&self) -> (i32, i32) {
         use winapi::um::commctrl::ImageList_GetIconSize;
 
@@ -58,7 +58,26 @@ impl ImageList {
         size
     }
 
-    /// Add a new bitmap to the image list. Returns the index to the image. Panics if the bitmap was not initialized
+    /// Sets the size of the image list. This clears all current image data.
+    pub fn set_size(&self, size: (i32, i32)) {
+        use winapi::um::commctrl::ImageList_SetIconSize;
+
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+
+        let (w, h) = size;
+        unsafe { ImageList_SetIconSize(self.handle, w, h); }
+    }
+
+    /// Returns the number of images in the image list
+    pub fn len(&self) -> u32 {
+        use winapi::um::commctrl::ImageList_GetImageCount;
+
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+
+        unsafe { ImageList_GetImageCount(self.handle) as u32 }
+    }
+
+    /// Adds a new bitmap to the image list. Returns the index to the image. Panics if the bitmap was not initialized
     pub fn add_bitmap(&self, bitmap: &Bitmap) -> i32 {
         use winapi::um::commctrl::ImageList_Add;
 
@@ -69,7 +88,7 @@ impl ImageList {
     }
 
     /**
-        Add a bitmap directly from a filename. The image is resized to the image list size.
+        Adds a bitmap directly from a filename. The image is resized to the image list size.
         Returns the index to the image or an error if the image could not be loaded
     */
     pub fn add_bitmap_from_filename(&self, filename: &str) -> Result<i32, NwgError> {
@@ -88,7 +107,7 @@ impl ImageList {
         unsafe { Ok(ImageList_Add(self.handle, bitmap.handle as HBITMAP, ptr::null_mut())) }
     }
 
-    /// Add a new icon to the image list. Returns the index to the image. Panics if the icon was not initialized
+    /// Adds a new icon to the image list. Returns the index to the image. Panics if the icon was not initialized
     pub fn add_icon(&self, icon: &Icon) -> i32 {
         use winapi::um::commctrl::ImageList_AddIcon;
         
@@ -99,7 +118,7 @@ impl ImageList {
     }
 
     /**
-        Add a icon directly from a filename. The image is resized to the image list size.
+        Adds a icon directly from a filename. The image is resized to the image list size.
         Returns the index to the image or an error if the image could not be loaded
     */
     pub fn add_icon_from_filename(&self, filename: &str) -> Result<i32, NwgError> {
@@ -119,7 +138,7 @@ impl ImageList {
     }
 
     /**
-        Remove the image at the specified index
+        Removes the image at the specified index
 
         When an image is removed, the indexes of the remaining images are adjusted so that the image indexes
         always range from zero to one less than the number of images in the image list. For example, if you
@@ -133,7 +152,7 @@ impl ImageList {
         unsafe { ImageList_Remove(self.handle, index); }
     }
 
-    /// Replace an image in the image list. Panics if the bitmap was not initialized
+    /// Replaces an image in the image list. Panics if the bitmap was not initialized
     pub fn replace_bitmap(&self, index: i32, bitmap: &Bitmap) {
         use winapi::um::commctrl::ImageList_Replace;
 
@@ -143,7 +162,7 @@ impl ImageList {
         unsafe { ImageList_Replace(self.handle, index, bitmap.handle as HBITMAP, ptr::null_mut()); }
     }
 
-    /// Replace an image in the image list by an icon. Panics if the icon was not initialized
+    /// Replaces an image in the image list by an icon. Panics if the icon was not initialized
     pub fn replace_icon(&self, index: i32, icon: &Icon) {
         use winapi::um::commctrl::ImageList_ReplaceIcon;
 
