@@ -2,12 +2,10 @@ use winapi::shared::minwindef::{WPARAM, LPARAM, BOOL};
 use winapi::shared::windef::HWND;
 use winapi::um::winnt::LPWSTR;
 use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_COMPOSITED};
-use crate::win32::window_helper as wh;
-use crate::win32::base_helper::{to_utf16};
-use crate::{NwgError, Font, RawEventHandler, unbind_raw_event_handler};
+use crate::win32::{base_helper::to_utf16, window_helper as wh};
+use crate::{NwgError, Font, RawEventHandler, ImageList, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
-use std::mem;
-use std::cell::RefCell;
+use std::{ptr, mem, cell::RefCell};
 
 const NOT_BOUND: &'static str = "TabsContainer/Tab is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: TabsContainer/Tab handle is not HWND!";
@@ -40,6 +38,9 @@ impl TabsContainer {
             parent: None,
             font: None,
             flags: None,
+
+            #[cfg(feature = "image-list")]
+            image_list: None
         }
     }
 
@@ -74,12 +75,55 @@ impl TabsContainer {
 
     /// Return the number of tabs in the view
     pub fn tab_count(&self) -> usize {
-        use winapi::um::commctrl::{TCM_GETITEMCOUNT};
+        use winapi::um::commctrl::TCM_GETITEMCOUNT;
             
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         wh::send_message(handle, TCM_GETITEMCOUNT, 0, 0) as usize
+    }
+
+    /**
+        Sets the image list of the tab container. Pass None to remove the image list.
+
+        This is only available is the feature "image-list" is enabled.
+    */
+    #[cfg(feature = "image-list")]
+    pub fn set_image_list(&self, list: Option<&ImageList>) {
+        use winapi::um::commctrl::TCM_SETIMAGELIST;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let list_handle = match list {
+            None => 0,
+            Some(list) => list.handle as _
+        };
+
+        wh::send_message(handle, TCM_SETIMAGELIST, 0, list_handle);
+    }
+
+    /**
+        Returns a reference to the current image list in the tab container. The image list
+        is not owned and dropping it won't free the resources.
+
+        This is only available is the feature "image-list" is enabled.
+    */
+    #[cfg(feature = "image-list")]
+    pub fn image_list(&self) -> Option<ImageList> {
+        use winapi::um::commctrl::TCM_GETIMAGELIST;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let handle = wh::send_message(handle, TCM_GETIMAGELIST, 0, 0);
+        match handle == 0 {
+            true => None,
+            false => Some(ImageList {
+                handle: handle as _,
+                owned: false,
+            })
+        }
     }
 
     //
@@ -279,6 +323,9 @@ pub struct TabsContainerBuilder<'a> {
     parent: Option<ControlHandle>,
     font: Option<&'a Font>,
     flags: Option<TabsContainerFlags>,
+
+    #[cfg(feature = "image-list")]
+    image_list: Option<&'a ImageList>
 }
 
 impl<'a> TabsContainerBuilder<'a> {
@@ -295,6 +342,12 @@ impl<'a> TabsContainerBuilder<'a> {
 
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TabsContainerBuilder<'a> {
         self.parent = Some(p.into());
+        self
+    }
+
+    #[cfg(feature = "image-list")]
+    pub fn image_list(mut self, list: Option<&'a ImageList>) -> TabsContainerBuilder<'a> {
+        self.image_list = list;
         self
     }
 
@@ -322,6 +375,19 @@ impl<'a> TabsContainerBuilder<'a> {
             out.set_font(self.font);
         }
 
+        // Image list
+        #[cfg(feature = "image-list")]
+        fn set_image_list(b: &TabsContainerBuilder, out: &mut TabsContainer) {
+            if b.image_list.is_some() {
+                out.set_image_list(b.image_list);
+            }
+        }
+
+        #[cfg(not(feature = "image-list"))]
+        fn set_image_list(_b: &TabsContainerBuilder, _out: &mut TabsContainer) {}
+
+        set_image_list(&self, out);
+
         Ok(())
     }
 }
@@ -340,11 +406,14 @@ impl Tab {
     pub fn builder<'a>() -> TabBuilder<'a> {
         TabBuilder {
             text: "Tab",
-            parent: None
+            parent: None,
+
+            #[cfg(feature = "image-list")]
+            image_index: None,
         }
     }
 
-    /// Set the title of the tab
+    /// Sets the title of the tab
     pub fn set_text<'a>(&self, text: &'a str) {
         use winapi::um::commctrl::{TCM_SETITEMW, TCIF_TEXT, TCITEMW};
         use winapi::um::winuser::GWL_USERDATA;
@@ -371,7 +440,48 @@ impl Tab {
         wh::send_message(tab_view_handle, TCM_SETITEMW, tab_index, item_ptr as LPARAM);
     }
 
-    /// Return true if the control is visible to the user. Will return true even if the 
+    /**
+        Sets the image of the tab. index is the index of the image in the tab container image list.
+
+        This is only available if the "image-list" feature is enabled
+    */
+    #[cfg(feature = "image-list")]
+    pub fn set_image_index(&self, index: Option<i32>) {
+        use winapi::um::commctrl::{TCM_SETITEMW, TCIF_IMAGE, TCITEMW};
+        use winapi::um::winuser::GWL_USERDATA;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let tab_index = (wh::get_window_long(handle, GWL_USERDATA) - 1) as WPARAM;
+        let tab_view_handle = wh::get_window_parent(handle);
+
+        let item = TCITEMW {
+            mask: TCIF_IMAGE,
+            dwState: 0,
+            dwStateMask: 0,
+            pszText: ptr::null_mut(),
+            cchTextMax: 0,
+            iImage: index.unwrap_or(-1),
+            lParam: 0
+        };
+
+        let item_ptr = &item as *const TCITEMW;
+        wh::send_message(tab_view_handle, TCM_SETITEMW, tab_index, item_ptr as LPARAM);
+    }
+
+    /**
+        Returns the index of image of the tab.
+        The index maps to the image list of the tab container.
+
+        This is only available if the "image-list" feature is enabled
+    */
+    #[cfg(feature = "image-list")]
+    pub fn image_index(&self) -> Option<i32> {
+        None
+    }
+
+    /// Returns true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -477,7 +587,10 @@ impl Tab {
 
 pub struct TabBuilder<'a> {
     text: &'a str,
-    parent: Option<ControlHandle>
+    parent: Option<ControlHandle>,
+
+    #[cfg(feature = "image-list")]
+    image_index: Option<i32>,
 }
 
 impl<'a> TabBuilder<'a> {
@@ -489,6 +602,12 @@ impl<'a> TabBuilder<'a> {
 
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TabBuilder<'a> {
         self.parent = Some(p.into());
+        self
+    }
+
+    #[cfg(feature = "image-list")]
+    pub fn image_index(mut self, index: Option<i32>) -> TabBuilder<'a> {
+        self.image_index = index;
         self
     }
 
@@ -521,6 +640,20 @@ impl<'a> TabBuilder<'a> {
             .build()?;
 
         out.bind_container(self.text);
+
+        // Image index
+
+        #[cfg(feature = "image-list")]
+        fn set_image_index<'a>(b: &TabBuilder<'a>, out: &mut Tab) {
+            if b.image_index.is_some() {
+                out.set_image_index(b.image_index);
+            }
+        }
+
+        #[cfg(not(feature = "image-list"))]
+        fn set_image_index<'a>(_b: &TabBuilder<'a>, _out: &mut Tab) {}
+
+        set_image_index(&self, out);
 
         Ok(())
     }

@@ -308,3 +308,6 @@ For the icons used in the test suite (and only there):
 - **ball.bmp** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
 - **cat.jpg** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
 - **weird_cat.png** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
+- **list_0.ico** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
+- **list_1.ico** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
+- **list_2.ico** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)

@@ -4,6 +4,8 @@ use crate::{Bitmap, Icon, NwgError};
 use std::ptr;
 
 
+const NOT_BOUND: &'static str = "ImageList is not yet bound to a winapi object";
+
 /**
 An image list is a collection of images of the same size, each of which can be referred to by its index.
 Image lists are used in controls such as tabs container and tree view in order to add icon next to the items.
@@ -30,7 +32,8 @@ fn build_image_list(list: &mut nwg::ImageList) {
 
 */
 pub struct ImageList {
-    pub handle: HIMAGELIST
+    pub handle: HIMAGELIST,
+    pub owned: bool
 }
 
 impl ImageList {
@@ -43,16 +46,76 @@ impl ImageList {
         }
     }
 
-    /// Add a new bitmap to the image list. Returns the index to the image.
-    pub fn add(&self, bitmap: &Bitmap) -> i32 {
+    /// Return the size of the images in the image list
+    pub fn size(&self) -> (i32, i32) {
+        use winapi::um::commctrl::ImageList_GetIconSize;
+
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+
+        let mut size = (0, 0);
+        unsafe { ImageList_GetIconSize(self.handle, &mut size.0, &mut size.1); }
+
+        size
+    }
+
+    /// Add a new bitmap to the image list. Returns the index to the image. Panics if the bitmap was not initialized
+    pub fn add_bitmap(&self, bitmap: &Bitmap) -> i32 {
         use winapi::um::commctrl::ImageList_Add;
+
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+        if bitmap.handle.is_null() { panic!("Bitmap was not initialized"); }
+
         unsafe { ImageList_Add(self.handle, bitmap.handle as HBITMAP, ptr::null_mut()) }
     }
 
-    /// Add a new icon to the image list. Returns the index to the image.
+    /**
+        Add a bitmap directly from a filename. The image is resized to the image list size.
+        Returns the index to the image or an error if the image could not be loaded
+    */
+    pub fn add_bitmap_from_filename(&self, filename: &str) -> Result<i32, NwgError> {
+        use winapi::um::commctrl::ImageList_Add;
+
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+
+        let (w, h) = self.size();
+        let mut bitmap = Bitmap::default();
+        Bitmap::builder()
+            .source_file(Some(filename))
+            .size(Some((w as u32, h as u32)))
+            .strict(true)
+            .build(&mut bitmap)?;
+
+        unsafe { Ok(ImageList_Add(self.handle, bitmap.handle as HBITMAP, ptr::null_mut())) }
+    }
+
+    /// Add a new icon to the image list. Returns the index to the image. Panics if the icon was not initialized
     pub fn add_icon(&self, icon: &Icon) -> i32 {
         use winapi::um::commctrl::ImageList_AddIcon;
+        
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+        if icon.handle.is_null() { panic!("Icon was not initialized"); }
+        
         unsafe { ImageList_AddIcon(self.handle, icon.handle as HICON) }
+    }
+
+    /**
+        Add a icon directly from a filename. The image is resized to the image list size.
+        Returns the index to the image or an error if the image could not be loaded
+    */
+    pub fn add_icon_from_filename(&self, filename: &str) -> Result<i32, NwgError> {
+        use winapi::um::commctrl::ImageList_AddIcon;
+
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+
+        let (w, h) = self.size();
+        let mut icon = Icon::default();
+        Icon::builder()
+            .source_file(Some(filename))
+            .size(Some((w as u32, h as u32)))
+            .strict(true)
+            .build(&mut icon)?;
+
+        unsafe { Ok(ImageList_AddIcon(self.handle, icon.handle as HICON)) }
     }
 
     /**
@@ -64,18 +127,29 @@ impl ImageList {
     */
     pub fn remove(&self, index: i32) {
         use winapi::um::commctrl::ImageList_Remove;
+
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+
         unsafe { ImageList_Remove(self.handle, index); }
     }
 
-    /// Replace an image in the image list
-    pub fn replace(&self, index: i32, bitmap: &Bitmap) {
+    /// Replace an image in the image list. Panics if the bitmap was not initialized
+    pub fn replace_bitmap(&self, index: i32, bitmap: &Bitmap) {
         use winapi::um::commctrl::ImageList_Replace;
+
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+        if bitmap.handle.is_null() { panic!("Bitmap was not initialized"); }
+        
         unsafe { ImageList_Replace(self.handle, index, bitmap.handle as HBITMAP, ptr::null_mut()); }
     }
 
-    /// Replace an image in the image list by an icon
+    /// Replace an image in the image list by an icon. Panics if the icon was not initialized
     pub fn replace_icon(&self, index: i32, icon: &Icon) {
         use winapi::um::commctrl::ImageList_ReplaceIcon;
+
+        if self.handle.is_null() { panic!(NOT_BOUND); }
+        if icon.handle.is_null() { panic!("Icon was not initialized"); }
+
         unsafe { ImageList_ReplaceIcon(self.handle, index, icon.handle as HICON); }
     }
 
@@ -85,9 +159,22 @@ impl Drop for ImageList {
     fn drop(&mut self) {
         use winapi::um::commctrl::ImageList_Destroy;
         unsafe {
-            ImageList_Destroy(self.handle);
+            if self.owned && !self.handle.is_null() {
+                ImageList_Destroy(self.handle);
+            }
         }
     }
+}
+
+impl Default for ImageList {
+
+    fn default() -> ImageList {
+        ImageList {
+            handle: ptr::null_mut(),
+            owned: false
+        }
+    }
+
 }
 
 pub struct ImageListBuilder {
@@ -124,6 +211,7 @@ impl ImageListBuilder {
             }
 
             list.handle = handle;
+            list.owned = true;
         }
         
         Ok(())

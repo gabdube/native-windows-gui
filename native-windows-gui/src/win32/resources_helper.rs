@@ -90,11 +90,11 @@ pub unsafe fn build_image<'a>(
             handle = match image_type {
                 IMAGE_ICON => {
                     let dr = (IDI_ERROR as usize) as *const u16;
-                    LoadImageW(ptr::null_mut(), dr, IMAGE_ICON, 0, 0, LR_CREATEDIBSECTION|LR_DEFAULTSIZE|LR_SHARED)
+                    LoadImageW(ptr::null_mut(), dr, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE|LR_SHARED)
                 },
                 IMAGE_CURSOR => {
                     let dr = (IDC_ARROW as usize) as *const u16;
-                    LoadImageW(ptr::null_mut(), dr, IMAGE_CURSOR, 0, 0, LR_CREATEDIBSECTION|LR_DEFAULTSIZE|LR_SHARED)
+                    LoadImageW(ptr::null_mut(), dr, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE|LR_SHARED)
                 },
                 IMAGE_BITMAP => {
                     let dr = (32754 as usize) as *const u16;
@@ -107,7 +107,7 @@ pub unsafe fn build_image<'a>(
     }
 
     if handle.is_null() {
-        Err( NwgError::resource_create("Failed to create image") )
+        Err( NwgError::resource_create(format!("Failed to create image from source '{}' ", source)))
     } else {
         Ok(handle)
     }

@@ -29,6 +29,7 @@ pub struct ControlsTest {
     // data
     runs: RefCell<TestRun>,
 
+    // Resources
     window_icon: Icon,
     love_icon: Icon,
     love_small_icon: Icon,
@@ -38,20 +39,13 @@ pub struct ControlsTest {
     ball: Bitmap,
     arial_font: Font,
     wait_cursor: Cursor,
+    tabs_image_list: ImageList,
     
-    #[cfg(feature = "file-dialog")]
+    // Dialogs
     open_file_dialog: FileDialog,
-
-    #[cfg(feature = "file-dialog")]
     open_directory_dialog: FileDialog,
-
-    #[cfg(feature = "file-dialog")]
     save_file_dialog: FileDialog,
-
-    #[cfg(feature = "color-dialog")]
     color_dialog: ColorDialog,
-
-    #[cfg(feature = "font-dialog")]
     font_dialog: FontDialog,
 
     // Layouts
@@ -68,6 +62,7 @@ pub struct ControlsTest {
     tray_icon_2: TrayNotification,
     status: StatusBar,
 
+    // First Tab
     controls_holder: TabsContainer,
     basics_control_tab: Tab,
     basics_control_tab2: Tab,
@@ -94,6 +89,7 @@ pub struct ControlsTest {
     test_track1: TrackBar,
     test_track2: TrackBar,
 
+    // Second Tab
     test_image_button: Button,
     test_image_button2: Button,
     test_image_button3: Button,
@@ -101,6 +97,7 @@ pub struct ControlsTest {
     test_number_select: NumberSelect,
     test_rich: RichTextBox,
 
+    // Third Tab
     test_open_file_button: Button,
     test_open_directory_button: Button,
     test_save_file_button: Button,
@@ -110,6 +107,7 @@ pub struct ControlsTest {
     test_select_font_button: Button,
     test_font_output: TextInput,
 
+    // Fourth Tab
     test_tree: TreeView,
     test_tree_input: TextInput,
     test_tree_add: Button,
@@ -199,39 +197,38 @@ mod partial_controls_test_ui {
                 .source_system(Some(OemCursor::Wait))
                 .build(&mut data.wait_cursor)?;
 
+            ImageList::builder()
+                .size((16, 16))
+                .build(&mut data.tabs_image_list)?;
+
+            data.tabs_image_list.add_icon_from_filename("./test_rc/list_0.ico")?;
+            data.tabs_image_list.add_icon_from_filename("./test_rc/list_1.ico")?;
+            data.tabs_image_list.add_icon_from_filename("./test_rc/list_2.ico")?;
             
-            fn init_dialog(data: &mut ControlsTest) -> Result<(), NwgError> {
-                let dir = ::std::env::current_dir().unwrap();
+            let dir = ::std::env::current_dir().unwrap();
+            FileDialog::builder()
+                .action(FileDialogAction::Open)
+                .multiselect(true)
+                .title("Open a file")
+                .default_folder(dir.to_str().unwrap())
+                .build(&mut data.open_file_dialog)?;
 
-                FileDialog::builder()
-                    .action(FileDialogAction::Open)
-                    .multiselect(true)
-                    .title("Open a file")
-                    .default_folder(dir.to_str().unwrap())
-                    .build(&mut data.open_file_dialog)?;
+            FileDialog::builder()
+                .action(FileDialogAction::OpenDirectory)
+                .title("Open a directory")
+                .build(&mut data.open_directory_dialog)?;
 
-                FileDialog::builder()
-                    .action(FileDialogAction::OpenDirectory)
-                    .title("Open a directory")
-                    .build(&mut data.open_directory_dialog)?;
+            FileDialog::builder()
+                .action(FileDialogAction::Save)
+                .title("Save a file")
+                .filters("Text(*.txt)|Any(*.*)")
+                .build(&mut data.save_file_dialog)?;
 
-                FileDialog::builder()
-                    .action(FileDialogAction::Save)
-                    .title("Save a file")
-                    .filters("Text(*.txt)|Any(*.*)")
-                    .build(&mut data.save_file_dialog)?;
+            ColorDialog::builder()
+                .build(&mut data.color_dialog)?;
 
-                ColorDialog::builder()
-                    .build(&mut data.color_dialog)?;
-
-                FontDialog::builder()
-                    .build(&mut data.font_dialog)?;
-
-                Ok(())
-            }
-
-            init_dialog(data)?;
-
+            FontDialog::builder()
+                .build(&mut data.font_dialog)?;
 
             Font::builder()
                 .size(20)
@@ -263,26 +260,31 @@ mod partial_controls_test_ui {
 
             TabsContainer::builder()
                 .parent(&data.window)
+                .image_list(Some(&data.tabs_image_list))
                 .build(&mut data.controls_holder)?;
 
             Tab::builder()
                 .text("Basic")
                 .parent(&data.controls_holder)
+                .image_index(Some(0))
                 .build(&mut data.basics_control_tab)?;
 
             Tab::builder()
                 .text("Basic 2")
                 .parent(&data.controls_holder)
+                .image_index(Some(0))
                 .build(&mut data.basics_control_tab2)?;
 
             Tab::builder()
                 .text("Dialog")
                 .parent(&data.controls_holder)
+                .image_index(Some(1))
                 .build(&mut data.dialog_tab)?;
 
             Tab::builder()
                 .text("Tree view")
                 .parent(&data.controls_holder)
+                .image_index(Some(2))
                 .build(&mut data.tree_tab)?;
 
             Tab::builder()
