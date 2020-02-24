@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Derive layouts</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+
+</head>
+<body class="rustdoc">
+<!--[if lte IE 8]>
+<div class="warning">
+    This old browser is unsupported and will most likely display funky
+    things.
+</div>
+<![endif]-->
+
+<!-- NAV BEGIN -->
+<div id="nav">
+    <button id="toggle-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+</div>
+
+    
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='index.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
+    <li><a href="localization.html"><b>4.4.</b> Internationalization </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_resources.html"><b>6.2.</b> Resources </a></li>
+    <li><a href="nwd_events.html"><b>6.3.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.4.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.5.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
+    </ul>
+</li>
+
+</ul>
+</div>
+<!-- NAV END -->
+
+<div id='page-wrapper'>
+    <div id='page'>
+
+        <h1 class="title">Native Windows Derive: Layouts</h1>
+
+        The next step in the native windows derive journey are the layouts.
+        <br/><br/>
+
+        <h3>Layout</h3>
+
+        Just like controls and resources, the derive macro translate the builder API of the layouts into a list of
+
+        <br><br>
+        <code>nwg_layout(builder_field: builder_value,*)</code>
+        <br><br>
+
+        Unlike controls, NWD wont guess the parent of the layout. This might be changed in the future in a minor release.
+
+        <br/><br/>
+
+        <h3>Layout Item</h3>
+
+        After defining the layout attributes, it's time to mark the children of the layout. This is done using 
+
+        <br><br>
+        <code>nwg_layout_item(layout: layout_name, item_field: item_value,*)</code>
+        <br><br>
+
+        In this case <code>item_field: item_value</code> are the attributes of a <code>LayoutItem</code>. For example <code>GridLayoutItem</code>.
+        Also, just like <code>nwg_layout</code>, the layout parameter cannot be guessed by NWD.
+
+        <h3>Examples</h3>
+        
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Calculator</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_layout(parent: window, spacing: 2, min_size: [150, 140]</span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">grid</span>: <span class="nc">nwg</span>::<span class="n">GridLayout</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(text: </span><span class="s">&quot;&quot;</span><span class="cp">, align: nwg::HTextAlign::Right, readonly: true)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_layout_item(layout: grid, col: 0, row: 0, col_span: 5)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">input</span>: <span class="nc">nwg</span>::<span class="n">TextInput</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+        <ul>
+            <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator.rs">Calculator</a> ( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/calculator_d.rs">derive version</a> ) shows how to use a grid layout.</li>
+            <li><a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank.rs">Message bank</a> ( <a href="https://github.com/gabdube/nwg-private/blob/master/native-windows-gui/examples/message_bank_d.rs">derive version</a> ) shows how to update a grid layout dynamically.</li>
+        </ul>
+        <br/><br/>
+
+    </div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>

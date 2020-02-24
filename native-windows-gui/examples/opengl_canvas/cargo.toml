@@ -1,0 +1,10 @@
+[package]
+name = "opengl-canvas"
+version = "1.0.0"
+authors = ["gdube <gdube.475@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+native-windows-gui = {path = "../../", features = ["extern-canvas", "color-dialog"]}
+glutin = "0.21"
+gl = "0.6"
