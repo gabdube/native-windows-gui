@@ -48,6 +48,7 @@ pub unsafe fn from_wide_ptr(ptr: *mut u16) -> String {
 
     (ERROR ID, Error message localized)
 */
+#[allow(unused)]
 pub unsafe fn get_system_error() -> (DWORD, String) { 
     use winapi::um::errhandlingapi::GetLastError;
     use winapi::um::winbase::{FormatMessageW, FORMAT_MESSAGE_FROM_SYSTEM};

@@ -68,7 +68,6 @@ pub unsafe fn build_font(
     }
 }
 
-
 pub unsafe fn build_image<'a>(
     source: &'a str,
     size: Option<(u32, u32)>,
@@ -76,6 +75,7 @@ pub unsafe fn build_image<'a>(
     image_type: u32
 ) -> Result<HANDLE, NwgError>
 {
+
     use winapi::um::winuser::{LR_LOADFROMFILE, LR_CREATEDIBSECTION, LR_DEFAULTSIZE, LR_SHARED, IMAGE_ICON, IDC_ARROW, IDI_ERROR, IMAGE_CURSOR, IMAGE_BITMAP};
     use winapi::um::winuser::LoadImageW;
 
@@ -111,6 +111,27 @@ pub unsafe fn build_image<'a>(
     } else {
         Ok(handle)
     }
+}
+
+#[cfg(feature="image-decoder")]
+pub unsafe fn build_image_decoder<'a>(
+    source: &'a str,
+    _size: Option<(u32, u32)>,
+    _strict: bool,
+    _image_type: u32
+) -> Result<HANDLE, NwgError>
+{
+    use crate::ImageDecoder;
+
+    let image_frame = ImageDecoder::new()?
+        .from_filename(source)?
+        .frame(0)?;
+    
+    let mut bitmap = image_frame.as_bitmap()?;
+
+    bitmap.owned = false;
+
+    Ok(bitmap.handle)
 }
 
 pub unsafe fn build_oem_image(

@@ -13,6 +13,9 @@ If those features are needed, see the `image-decoder` feature.
 
 To display a bitmap in an application, see the `ImageFrame` control.
 
+By default, bitmap resources do not support transparency BUT if `image-decoder` is enabled, bitmaps can be loaded
+from any file type supported by NWG (JPEG, PNG, BMP, ICO, DDS, TIFF).
+
 Example:
 
 ```rust
@@ -98,7 +101,15 @@ impl<'a> BitmapBuilder<'a> {
         let mut handle;
         
         if let Some(src) = self.source_text {
-            handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_BITMAP) };
+            handle = unsafe { 
+                #[cfg(feature="image-decoder")]
+                let handle = rh::build_image_decoder(src, self.size, self.strict, IMAGE_BITMAP);
+
+                #[cfg(not(feature="image-decoder"))]
+                let handle = rh::build_image(src, self.size, self.strict, IMAGE_BITMAP);
+
+                handle
+            };
         } else if let Some(src) = self.source_system {
             handle = unsafe { rh::build_oem_image(OemImage::Bitmap(src), self.size) };
         } else if let Some(src) = self.source_bin { 

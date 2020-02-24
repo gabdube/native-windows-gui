@@ -19,11 +19,12 @@ pub(crate) mod tabs;
 #[cfg(feature = "extern-canvas")]
 pub(crate) mod extern_canvas;
 
+#[cfg(feature = "image-decoder")]
+pub(crate) mod image_decoder;
+
 use std::{mem, ptr};
 use crate::errors::NwgError;
 
-#[cfg(feature = "image-decoder")]
-pub(crate) mod image_decoder;
 
 
 /**
