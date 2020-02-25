@@ -10,38 +10,25 @@ extern crate native_windows_derive as nwd;
 
 use nwd::NwgUi;
 use nwg::NativeUi;
-use std::cell::RefCell;
 
 
 #[derive(Default, NwgUi)]
 pub struct SplashScreen {
-    #[nwg_control(size: (500, 215), position: (700, 300), flags: "POPUP", ex_flags: WindowExFlags::TOPMOST)]
-    #[nwg_events( OnInit: [SplashScreen::init] )]
+    #[nwg_control(size: (500, 215), position: (700, 300), flags: "POPUP|VISIBLE", ex_flags: WindowExFlags::TOPMOST)]
     window: nwg::Window,
 
     #[nwg_resource]
     decoder: nwg::ImageDecoder,
-    splash: RefCell<nwg::Bitmap>,
 
-    #[nwg_control(size: (500, 215))]
+    #[nwg_resource(source_file: Some("./test_rc/splash.png"))]
+    splash: nwg::Bitmap,
+
+    #[nwg_control(size: (500, 215), bitmap: Some(&data.splash) )]
     #[nwg_events(OnImageFrameClick: [SplashScreen::exit])]
     image_frame: nwg::ImageFrame
 }
 
 impl SplashScreen {
-    
-    fn init(&self) {
-        let splash = self.decoder
-            .from_filename("./test_rc/splash.png").unwrap()
-            .frame(0).unwrap()
-            .as_bitmap().unwrap();
-
-        self.image_frame.set_bitmap(Some(&splash));
-
-        *self.splash.borrow_mut() = splash;
-        
-        self.window.set_visible(true);
-    }
 
     fn exit(&self) {
         nwg::stop_thread_dispatch();

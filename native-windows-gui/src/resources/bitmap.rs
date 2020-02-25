@@ -16,6 +16,17 @@ To display a bitmap in an application, see the `ImageFrame` control.
 By default, bitmap resources do not support transparency BUT if `image-decoder` is enabled, bitmaps can be loaded
 from any file type supported by NWG (JPEG, PNG, BMP, ICO, DDS, TIFF).
 
+**Builder parameters:**
+  * `parent`:   **Required.** The button parent container.
+  * `text`:     The button text.
+  * `size`:     The button size.
+  * `position`: The button position.
+  * `enabled`:  If the button can be used by the user. It also has a grayed out look if disabled.
+  * `flags`:    A combination of the ButtonFlags values.
+  * `font`:     The font used for the button text
+  * `bitmap`:   A bitmap to display next to the button text. If this value is set, icon is ignored.
+  * `icon`:     An icon to display next to the button text
+
 Example:
 
 ```rust
