@@ -201,9 +201,10 @@ mod partial_controls_test_ui {
                 .size((16, 16))
                 .build(&mut data.tabs_image_list)?;
 
-            data.tabs_image_list.add_icon_from_filename("./test_rc/list_0.ico")?;
-            data.tabs_image_list.add_icon_from_filename("./test_rc/list_1.ico")?;
-            data.tabs_image_list.add_icon_from_filename("./test_rc/list_2.ico")?;
+            data.tabs_image_list.add_bitmap_from_filename("./test_rc/list_0.png")?;
+            data.tabs_image_list.add_bitmap_from_filename("./test_rc/list_1.png")?;
+            data.tabs_image_list.add_bitmap_from_filename("./test_rc/list_2.png")?;
+            data.tabs_image_list.add_bitmap_from_filename("./test_rc/list_3.png")?;
             
             let dir = ::std::env::current_dir().unwrap();
             FileDialog::builder()
@@ -272,24 +273,25 @@ mod partial_controls_test_ui {
             Tab::builder()
                 .text("Basic 2")
                 .parent(&data.controls_holder)
-                .image_index(Some(0))
+                .image_index(Some(1))
                 .build(&mut data.basics_control_tab2)?;
 
             Tab::builder()
                 .text("Dialog")
                 .parent(&data.controls_holder)
-                .image_index(Some(1))
+                .image_index(Some(2))
                 .build(&mut data.dialog_tab)?;
 
             Tab::builder()
                 .text("Tree view")
                 .parent(&data.controls_holder)
-                .image_index(Some(2))
+                .image_index(Some(3))
                 .build(&mut data.tree_tab)?;
 
             Tab::builder()
                 .text("List view")
                 .parent(&data.controls_holder)
+                .image_index(Some(3))
                 .build(&mut data.list_view_tab)?;
 
             Button::builder()
