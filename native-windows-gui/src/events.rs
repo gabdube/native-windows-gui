@@ -163,6 +163,9 @@ pub enum EventData {
     /// The event has no data
     NoData,
 
+    /// Sets if the window should be closed after the event
+    OnWindowClose(WindowCloseData),
+
     /// Sets the text of a tooltip.
     /// The method `on_tooltip_text` should be used to access the inner data
     OnTooltipText(ToolTipTextData)
@@ -243,3 +246,26 @@ impl fmt::Debug for ToolTipTextData {
     }
 }
 
+
+pub struct WindowCloseData {
+    pub(crate) data: *mut bool
+}
+
+impl WindowCloseData {
+
+    /// Sets if the window should close after the event
+    pub fn close(&self, value: bool) {
+        unsafe{ *self.data = value; }
+    }
+
+    /// Returns true if the window will close after the event or false otherwise
+    pub fn closing(&self) -> bool {
+        unsafe{ *self.data }
+    }
+}
+
+impl fmt::Debug for WindowCloseData {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "WindowCloseData({})", self.closing())
+    }
+}

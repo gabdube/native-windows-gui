@@ -11,7 +11,7 @@ use winapi::um::commctrl::{NMTTDISPINFOW, SUBCLASSPROC};
 use super::base_helper::{CUSTOM_ID_BEGIN, to_utf16};
 use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY};
 use crate::controls::ControlHandle;
-use crate::{Event, EventData, MousePressEvent, NwgError};
+use crate::{Event, EventData, NwgError};
 use std::{ptr, mem};
 use std::rc::Rc;
 
@@ -538,6 +538,7 @@ unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l:
 unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;
+    use crate::events::*;
 
     use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID, GetSubMenu};
@@ -651,7 +652,13 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Notice(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {
-            callback(Event::OnWindowClose, NO_DATA, base_handle);
+            let mut should_exit = true;
+            let data = EventData::OnWindowClose(WindowCloseData { data: &mut should_exit as *mut bool });
+            callback(Event::OnWindowClose, data, base_handle);
+
+            if !should_exit {
+                return 0;
+            }
         },
         _ => {}
     }

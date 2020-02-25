@@ -17,15 +17,11 @@ By default, bitmap resources do not support transparency BUT if `image-decoder` 
 from any file type supported by NWG (JPEG, PNG, BMP, ICO, DDS, TIFF).
 
 **Builder parameters:**
-  * `parent`:   **Required.** The button parent container.
-  * `text`:     The button text.
-  * `size`:     The button size.
-  * `position`: The button position.
-  * `enabled`:  If the button can be used by the user. It also has a grayed out look if disabled.
-  * `flags`:    A combination of the ButtonFlags values.
-  * `font`:     The font used for the button text
-  * `bitmap`:   A bitmap to display next to the button text. If this value is set, icon is ignored.
-  * `icon`:     An icon to display next to the button text
+  * `source_file`:   The source of the bitmap if it is a file.
+  * `source_bin`:    The source of the bitmap if it is a binary blob.
+  * `source_system`: The source of the bitmap if it is a system resource (see OemBitmap)
+  * `size`:          Optional. Resize the image to this size.
+  * `strict`:        Use a system placeholder instead of panicking if the image source do no exists.
 
 Example:
 
@@ -59,7 +55,6 @@ impl Bitmap {
             source_text: None,
             source_bin: None,
             source_system: None,
-            transparency_key: None,
             size: None,
             strict: false
         }
@@ -71,7 +66,6 @@ pub struct BitmapBuilder<'a> {
     source_text: Option<&'a str>,
     source_bin: Option<&'a [u8]>,
     source_system: Option<OemBitmap>,
-    transparency_key: Option<[u8; 3]>,
     size: Option<(u32, u32)>,
     strict: bool,
 }
@@ -103,13 +97,8 @@ impl<'a> BitmapBuilder<'a> {
         self
     }
 
-    pub fn transparency_key(mut self, k: Option<[u8; 3]>) -> BitmapBuilder<'a> {
-        self.transparency_key = k;
-        self
-    }
-
     pub fn build(self, b: &mut Bitmap) -> Result<(), NwgError> {
-        let mut handle;
+        let handle;
         
         if let Some(src) = self.source_text {
             handle = unsafe { 
@@ -129,15 +118,6 @@ impl<'a> BitmapBuilder<'a> {
             return Err(NwgError::resource_create("No source provided for Bitmap"));
         }
 
-        if let Some(key) = self.transparency_key {
-            let size = match self.size {
-                Some((x, y)) => (x as i32, y as i32),
-                None => (0, 0)
-            };
-
-            handle = unsafe { rh::make_bitmap_transparent(handle?, size, key) };
-        }
-        
         *b = Bitmap { handle: handle?, owned: true };
     
         Ok(())
