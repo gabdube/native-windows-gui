@@ -115,3 +115,24 @@ pub unsafe fn create_bitmap_from_wic(image: &ImageData) -> Result<Bitmap, NwgErr
         }
     )
 }
+
+pub unsafe fn resize_bitmap(fact: &IWICImagingFactory, image: &ImageData, new_size: [u32;2]) -> Result<(), NwgError> {
+    use winapi::um::wincodec::{IWICBitmapScaler, IWICBitmapSource, WICBitmapInterpolationModeCubic};
+
+    let mut scaler: *mut IWICBitmapScaler = ptr::null_mut();
+    let result = fact.CreateBitmapScaler(&mut scaler);
+    if result != S_OK {
+        return Err(NwgError::image_decoder(result, "Could not create bitmap scaler"));
+    }
+
+    let [w, h] = new_size;
+    let image_source = image.frame as *const IWICBitmapSource;
+    let result = (&*scaler).Initialize(image_source, w, h, WICBitmapInterpolationModeCubic);
+    if result != S_OK {
+        return Err(NwgError::image_decoder(result, "Could not initialize bitmap scaler"));
+    }
+
+    (&*scaler).Release();
+    
+    Ok(())
+}

@@ -1,6 +1,6 @@
-use winapi::um::wincodec::{IWICImagingFactory, IWICBitmapDecoder, IWICBitmapFrameDecode, WICPixelFormatGUID};
+use winapi::um::wincodec::{IWICImagingFactory, IWICBitmapDecoder, IWICBitmapSource, WICPixelFormatGUID};
 use winapi::shared::winerror::S_OK;
-use crate::win32::image_decoder::{create_image_factory, create_decoder_from_file, create_bitmap_from_wic};
+use crate::win32::image_decoder as img;
 use crate::{NwgError, Bitmap};
 use std::{ptr, mem};
 
@@ -38,7 +38,7 @@ pub struct ImageDecoder {
 
 impl ImageDecoder {
     pub fn new() -> Result<ImageDecoder, NwgError> {
-        let factory = unsafe { create_image_factory() }?;
+        let factory = unsafe { img::create_image_factory() }?;
         Ok(ImageDecoder { factory })
     }
 
@@ -61,9 +61,16 @@ impl ImageDecoder {
             panic!("ImageDecoder is not yet bound to a winapi object");
         }
 
-        let decoder = unsafe { create_decoder_from_file(&*self.factory, path) }?;
+        let decoder = unsafe { img::create_decoder_from_file(&*self.factory, path) }?;
 
         Ok(ImageSource { decoder })
+    }
+
+    /**
+        Resize an image
+    */
+    pub fn resize_image(&self, image: &ImageData, new_size: [u32;2]) -> Result<(), NwgError> {
+        unsafe { img::resize_bitmap(&*self.factory, image, new_size) }
     }
 
 }
@@ -92,10 +99,10 @@ impl ImageSource {
         Return the image data of the requested frame in a ImageData object.
     */
     pub fn frame(&self, index: u32) -> Result<ImageData, NwgError> {
-        let mut bitmap = ImageData { frame: ptr::null_mut() };
-        let hr = unsafe { (&*self.decoder).GetFrame(index, &mut bitmap.frame) };
+        let mut bitmap = ptr::null_mut();
+        let hr = unsafe { (&*self.decoder).GetFrame(index, &mut bitmap) };
         match hr {
-            S_OK => Ok(bitmap),
+            S_OK => Ok(ImageData { frame: bitmap as *mut IWICBitmapSource }),
             err => Err(NwgError::image_decoder(err, "Could not read image frame"))
         }
     }
@@ -131,7 +138,7 @@ impl ImageSource {
     Represents a source of pixel that can be read, but cannot be written back to.
 */
 pub struct ImageData {
-    pub frame: *mut IWICBitmapFrameDecode
+    pub frame: *mut IWICBitmapSource
 }
 
 impl ImageData {
@@ -224,7 +231,7 @@ impl ImageData {
         The bitmap returned is considered "owned".
     */
     pub fn as_bitmap(&self) -> Result<Bitmap, NwgError> {
-        unsafe { create_bitmap_from_wic(self) }
+        unsafe { img::create_bitmap_from_wic(self) }
     }
 
 }
@@ -284,7 +291,7 @@ pub struct ImageDecoderBuilder {
 
 impl ImageDecoderBuilder {
     pub fn build(self, out: &mut ImageDecoder) -> Result<(), NwgError> {
-        let factory = unsafe { create_image_factory() }?;
+        let factory = unsafe { img::create_image_factory() }?;
         *out = ImageDecoder { factory };
         Ok(())
     }

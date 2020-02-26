@@ -1,0 +1,12 @@
+[workspace]
+
+members = [
+    "native-windows-gui",
+    "native-windows-derive",
+]
+
+[profile.dev]
+panic = 'abort'
+
+[profile.release]
+panic = 'abort'

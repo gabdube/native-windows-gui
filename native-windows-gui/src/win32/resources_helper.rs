@@ -116,16 +116,23 @@ pub unsafe fn build_image<'a>(
 #[cfg(feature="image-decoder")]
 pub unsafe fn build_image_decoder<'a>(
     source: &'a str,
-    _size: Option<(u32, u32)>,
+    size: Option<(u32, u32)>,
     _strict: bool,
     _image_type: u32
 ) -> Result<HANDLE, NwgError>
 {
     use crate::ImageDecoder;
 
-    let image_frame = ImageDecoder::new()?
+    let decoder = ImageDecoder::new()?;
+
+    let image_frame = decoder
         .from_filename(source)?
         .frame(0)?;
+
+    if let Some((width, height)) = size {
+        println!("{} {:?}", source, (width, height));
+        decoder.resize_image(&image_frame, [width, height])?;
+    }
     
     let mut bitmap = image_frame.as_bitmap()?;
 
