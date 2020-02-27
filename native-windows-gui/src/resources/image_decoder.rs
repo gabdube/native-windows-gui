@@ -67,9 +67,9 @@ impl ImageDecoder {
     }
 
     /**
-        Resize an image
+        Resize an image, returning the new resized image. The pixel format might change.
     */
-    pub fn resize_image(&self, image: &ImageData, new_size: [u32;2]) -> Result<(), NwgError> {
+    pub fn resize_image(&self, image: &ImageData, new_size: [u32;2]) -> Result<ImageData, NwgError> {
         unsafe { img::resize_bitmap(&*self.factory, image, new_size) }
     }
 

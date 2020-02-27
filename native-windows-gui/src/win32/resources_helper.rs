@@ -125,13 +125,13 @@ pub unsafe fn build_image_decoder<'a>(
 
     let decoder = ImageDecoder::new()?;
 
-    let image_frame = decoder
+    let mut image_frame = decoder
         .from_filename(source)?
         .frame(0)?;
 
     if let Some((width, height)) = size {
         println!("{} {:?}", source, (width, height));
-        decoder.resize_image(&image_frame, [width, height])?;
+        image_frame = decoder.resize_image(&image_frame, [width, height])?;
     }
     
     let mut bitmap = image_frame.as_bitmap()?;
