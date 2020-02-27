@@ -4,10 +4,10 @@ A tree-view control is a window that displays a hierarchical list of items
 
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
-use winapi::um::commctrl::HTREEITEM;
+use winapi::um::commctrl::{HIMAGELIST, HTREEITEM};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
-use crate::{Font, NwgError};
+use crate::{Font, ImageList, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
 
@@ -75,8 +75,58 @@ impl TreeView {
             enabled: true,
             flags: None,
             font: None,
-            parent: None
+            parent: None,
+            image_list: None,
         }
+    }
+
+    /// Sets the image list of the treeview
+    pub fn set_image_list(&self, list: Option<&ImageList>) {
+        use winapi::um::commctrl::{TVM_SETIMAGELIST, TVSIL_NORMAL};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let list_handle = list.map(|l| l.handle).unwrap_or(ptr::null_mut());
+
+        wh::send_message(handle, TVM_SETIMAGELIST, TVSIL_NORMAL, list_handle as _);
+    }
+
+    /// Returns the image list of the treeview or None if there is none.
+    /// The returned image list is not owned
+    pub fn image_list(&self) -> Option<ImageList> {
+        use winapi::um::commctrl::{TVM_GETIMAGELIST, TVSIL_NORMAL};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let handle = wh::send_message(handle, TVM_GETIMAGELIST, TVSIL_NORMAL, 0) as HIMAGELIST;
+        if handle.is_null() {
+            None
+        } else {
+            Some(ImageList { handle, owned: false })
+        }
+    }
+
+    /// Retrieves the amount, in pixels, that child items are indented relative to their parent items. 
+    pub fn indent(&self) -> u32 {
+        use winapi::um::commctrl::TVM_GETINDENT;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TVM_GETINDENT, 0, 0) as u32
+    }
+
+
+    /// Sets the width of indentation for a tree-view control and redraws the control to reflect the new width.
+    pub fn set_indent(&self, indent: u32) {
+        use winapi::um::commctrl::TVM_SETINDENT;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, TVM_SETINDENT, indent as _, 0);
     }
 
     /// Return the root item of the tree view if one is present.
@@ -223,7 +273,7 @@ impl TreeView {
 
     /// Return the total number of item in the tree view
     pub fn len(&self) -> usize {
-        use winapi::um::commctrl::{TVM_GETCOUNT};
+        use winapi::um::commctrl::TVM_GETCOUNT;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -363,7 +413,8 @@ pub struct TreeViewBuilder<'a> {
     enabled: bool,
     flags: Option<TreeViewFlags>,
     font: Option<&'a Font>,
-    parent: Option<ControlHandle>
+    parent: Option<ControlHandle>,
+    image_list: Option<&'a ImageList>,
 }
 
 
@@ -399,6 +450,11 @@ impl<'a> TreeViewBuilder<'a> {
         self
     }
 
+    pub fn image_list(mut self, list: Option<&'a ImageList>) -> TreeViewBuilder<'a> {
+        self.image_list = list;
+        self
+    }
+
     pub fn build(self, out: &mut TreeView) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
@@ -418,6 +474,10 @@ impl<'a> TreeViewBuilder<'a> {
 
         if self.font.is_some() {
             out.set_font(self.font);
+        }
+
+        if self.image_list.is_some() {
+            out.set_image_list(self.image_list);
         }
 
         out.set_enabled(self.enabled);
