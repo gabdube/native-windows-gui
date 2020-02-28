@@ -11,6 +11,65 @@ pub const NWG_INIT: UINT = WM_USER + 1;
 pub const NWG_TRAY: UINT = WM_USER + 2;
 
 
+/// Haha you maybe though that destroying windows would be easy right? WRONG.
+/// The window children must first be destroyed otherwise `DestroyWindow` will free them and the associated rust value will be ~CORRUPTED~
+pub fn destroy_window(hwnd: HWND) { 
+    use winapi::um::winuser::{SetParent, DestroyWindow};
+
+    // Remove the children from the window
+    iterate_window_children(hwnd, |child| {
+        unsafe {
+            set_window_visibility(child, false);
+            SetParent(child, ptr::null_mut());
+        }
+    });
+
+    unsafe { DestroyWindow(hwnd); }
+}
+
+/// Execute the callback for each first level children of the window 
+pub fn iterate_window_children<F>(hwnd_parent: HWND, cb: F) 
+    where F: FnMut(HWND) -> ()
+{
+    use winapi::um::winuser::EnumChildWindows;
+    use winapi::shared::minwindef::BOOL;
+
+    struct EnumChildData<F> {
+        parent: HWND,
+        callback: F,
+    }
+
+    unsafe extern "system" fn enum_child<F>(hwnd: HWND, p: LPARAM) -> BOOL 
+        where F: FnMut(HWND) -> ()
+    {
+        // Only iterate over the top level children
+        let enum_data_ptr = p as *mut EnumChildData<F>;
+        let enum_data = &mut *enum_data_ptr;
+        if get_window_parent(hwnd) == enum_data.parent {
+            (enum_data.callback)(hwnd);
+        };
+
+        1
+    }
+
+    unsafe {
+        let mut data = EnumChildData {
+            parent: hwnd_parent,    
+            callback: cb
+        };
+        EnumChildWindows(hwnd_parent, Some(enum_child::<F>), &mut data as *mut EnumChildData<F> as _);
+    }
+}
+
+#[cfg(any(feature="timer"))]
+pub fn window_valid(hwnd: HWND) -> bool {
+    use winapi::um::winuser::IsWindow;
+
+    unsafe {
+        IsWindow(hwnd) != 0
+    }
+}
+
 pub fn get_window_parent(hwnd: HWND) -> HWND {
     use winapi::um::winuser::GetParent;
     unsafe { GetParent(hwnd) }

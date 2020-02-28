@@ -118,7 +118,6 @@ impl TreeView {
         wh::send_message(handle, TVM_GETINDENT, 0, 0) as u32
     }
 
-
     /// Sets the width of indentation for a tree-view control and redraws the control to reflect the new width.
     pub fn set_indent(&self, indent: u32) {
         use winapi::um::commctrl::TVM_SETINDENT;
@@ -402,8 +401,9 @@ impl TreeView {
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
         use winapi::um::winuser::{WS_CHILD, WS_BORDER};
+        use winapi::um::commctrl::TVS_NOTOOLTIPS;
 
-        WS_CHILD | WS_BORDER
+        WS_CHILD | WS_BORDER | TVS_NOTOOLTIPS
     }
 }
 

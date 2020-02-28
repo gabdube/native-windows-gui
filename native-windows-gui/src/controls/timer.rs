@@ -4,6 +4,7 @@ use crate::NwgError;
 use std::cell::RefCell;
 
 const NOT_BOUND: &'static str = "Timer is not yet bound to a winapi object";
+const UNUSABLE_TIMER: &'static str = "Timer parent window was freed";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Timer handle is not Timer!";
 
 
@@ -11,7 +12,7 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Timer handle is not Timer!";
 A timer is an invisible UI component that trigger the `OnTimerTick` event at the specified interval.
 Timers are mosty used to handle animations OR to create a timeout. To sync multithreaded action see the `Notice` object.
 
-A timer still requires a top level window parent.
+A timer still requires a top level window parent. If the top level window parent is destroyed, the timer becomes invalid.
 
 Note that timer SHOULD NOT be used when a consistent interval is needed. The timer event might be triggered much faster
 than the `interval` value. For example, when a user resize a window, Timer OnTimerTick gets triggered each time the window size changes.
@@ -55,6 +56,14 @@ impl Timer {
         }
     }
 
+    /// Checks if the timer is still usable. A timer becomes unusable when the parent window is destroyed.
+    /// This will also return false if the timer is not initialized.
+    pub fn valid(&self) -> bool {
+        if self.handle.blank() { return false; }
+        let (hwnd, _) = self.handle.timer().expect(BAD_HANDLE);
+        wh::window_valid(hwnd)
+    }
+
     /// Returns the interval of the timer, in milliseconds.
     pub fn interval(&self) -> u32 {
         *self.interval.borrow()
@@ -68,6 +77,7 @@ impl Timer {
     /// Stops the timer.
     pub fn stop(&self) {
         if self.handle.blank() { panic!(NOT_BOUND); }
+        if !self.valid() { panic!(UNUSABLE_TIMER); }
         let (hwnd, id) = self.handle.timer().expect(BAD_HANDLE);
 
         wh::kill_timer(hwnd, id);
@@ -76,6 +86,7 @@ impl Timer {
     /// Starts the timer. If the timer is already running, this restarts it.
     pub fn start(&self) {
         if self.handle.blank() { panic!(NOT_BOUND); }
+        if !self.valid() { panic!(UNUSABLE_TIMER); }
         let (hwnd, id) = self.handle.timer().expect(BAD_HANDLE);
 
         wh::start_timer(hwnd, id, self.interval());

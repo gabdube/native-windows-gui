@@ -269,6 +269,18 @@ impl Button {
 
 }
 
+impl Drop for Button {
+
+    fn drop(&mut self) {
+        match &self.handle {
+            &ControlHandle::Hwnd(hwnd) => wh::destroy_window(hwnd),
+            _ => {}
+        }
+        
+    }
+
+}
+
 pub struct ButtonBuilder<'a> {
     text: &'a str,
     size: (i32, i32),
