@@ -61,7 +61,7 @@ pub fn iterate_window_children<F>(hwnd_parent: HWND, cb: F)
     }
 }
 
-#[cfg(any(feature="timer"))]
+#[cfg(any(feature="timer", feature="notice"))]
 pub fn window_valid(hwnd: HWND) -> bool {
     use winapi::um::winuser::IsWindow;
 

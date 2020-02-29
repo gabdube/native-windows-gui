@@ -1,10 +1,20 @@
-/*!
+use super::control_handle::ControlHandle;
+use crate::win32::{window_helper as wh, window::build_notice};
+use crate::NwgError;
+
+
+const NOT_BOUND: &'static str = "Notice is not yet bound to a winapi object";
+const UNUSABLE_NOTICE: &'static str = "Notice parent window was freed";
+const BAD_HANDLE: &'static str = "INTERNAL ERROR: Notice handle is not Notice!";
+
+/**
 An invisible component that can be triggered by other thread.
 
 A notice object do not send data between threads. Rust has already plenty of way to do this.
 The notice object only serve to "wake up" the GUI thread.
 
-A notice must still have a parent window.
+A notice must have a parent window. If the parent is destroyed before the notice, the notice becomes invalid.
+
 
 Requires the `notice` feature. 
 
@@ -36,13 +46,6 @@ fn notice(noticer: &nwg::Notice) {
 ```
 
 */
-
-use super::control_handle::ControlHandle;
-use crate::win32::{window_helper as wh, window::build_notice};
-use crate::NwgError;
-
-
-/// An invisible component that can be triggered by other thread
 #[derive(Default, PartialEq, Eq)]
 pub struct Notice {
     pub handle: ControlHandle
@@ -64,10 +67,39 @@ impl Notice {
         }
     }
 
+
+    /// Checks if the notice is still usable. A notice becomes unusable when the parent window is destroyed.
+    /// This will also return false if the notice is not initialized.
+    pub fn valid(&self) -> bool {
+        if self.handle.blank() { return false; }
+        let (hwnd, _) = self.handle.timer().expect(BAD_HANDLE);
+        wh::window_valid(hwnd)
+    } 
+
+    /// Return an handle to the notice window or `None` if the window was destroyed.
+    pub fn window_handle(&self) -> Option<ControlHandle> {
+        match self.valid() {
+            true => Some(ControlHandle::Hwnd(self.handle.notice().unwrap().0)),
+            false => None
+        }
+    }
+
+    /// Change the parent window of the notice. This won't update the NoticeSender already created.
+    /// Panics if the control is not a window-like control or if the notice was not initialized
+    pub fn set_window_handle<C: Into<ControlHandle>>(&mut self, window: C) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+
+        let hwnd = window.into().hwnd().expect("New notice parent is not a window control");
+        let (_, id) = self.handle.notice().expect(BAD_HANDLE);
+
+        self.handle = ControlHandle::Notice(hwnd, id);
+    }
+
     /// Create a new `NoticeSender` bound to this Notice
     pub fn sender(&self) -> NoticeSender {
-        if self.handle.blank() { panic!("Notice is not yet bound to a winapi object"); }
-        let (hwnd, id) = self.handle.notice().expect("INTERNAL ERROR: Notice handle has the wrong type!");
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        if !self.valid() { panic!(UNUSABLE_NOTICE); }
+        let (hwnd, id) = self.handle.notice().expect(BAD_HANDLE);
 
         NoticeSender { 
             hwnd: hwnd as usize,
