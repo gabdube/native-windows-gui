@@ -112,7 +112,7 @@
 
         Just like the other NWG components, dialogs are created with builders. The documentation enumerates their parameters.<br><br>
 
-        Dialogs are called by using the method <code>run</code> on FileDialog and the method <code>show(parent)</code> on the other dialogs.
+        Dialogs are called by using the method <code>run(parent)</code>.
         This method <b>will block the current function</b>. This is because dialogs have their own events loop. Because of this, the other window
         in the same thread should be disabled while the dialog is running. This is done automatically setting the parent parameter in a dialog.
         <br><br>
@@ -140,7 +140,7 @@
         with the <code>set_multiselect</code> method. The multi select flag can only be used with opening dialogs.
         <br><br>
 
-        To display a FileDialog, call <code>dialog.run()</code>. Just like the other dialog, this will start a new event loop.
+        To display a FileDialog, call <code>dialog.run(parent)</code>. Just like the other dialog, this will start a new event loop.
         <br><br>
 
         To fetch the results of a file dialog, use the <code>dialog.get_selected_item()</code> for single select file dialog and
