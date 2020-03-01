@@ -310,6 +310,8 @@ impl Drop for TrackBar {
         if let Some(h) = handler.as_ref() {
             unbind_raw_event_handler(h);
         }
+    
+        self.handle.destroy();
     }
 }
 

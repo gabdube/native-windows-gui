@@ -280,7 +280,11 @@ impl RichTextBox {
 
 }
 
-
+impl Drop for RichTextBox {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 pub struct RichTextBoxBuilder<'a> {
     text: &'a str,
     size: (i32, i32),

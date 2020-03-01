@@ -216,6 +216,11 @@ impl ExternCanvas {
     }
 }
 
+impl Drop for ExternCanvas {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 
 pub struct ExternCanvasBuilder<'a> {
     title: &'a str,

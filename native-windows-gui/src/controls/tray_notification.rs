@@ -240,6 +240,11 @@ impl TrayNotification {
 
 }
 
+impl Drop for TrayNotification {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 
 pub struct TrayNotificationBuilder<'a> {
     parent: Option<ControlHandle>,

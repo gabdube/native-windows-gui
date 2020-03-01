@@ -145,6 +145,11 @@ impl Frame {
 
 }
 
+impl Drop for Frame {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 pub struct FrameBuilder {
     size: (i32, i32),
     position: (i32, i32),

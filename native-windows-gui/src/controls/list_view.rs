@@ -216,6 +216,11 @@ impl ListView {
 
 }
 
+impl Drop for ListView {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 
 pub struct ListViewBuilder {
     size: (i32, i32),

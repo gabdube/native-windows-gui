@@ -293,6 +293,11 @@ impl ProgressBar {
 
 }
 
+impl Drop for ProgressBar {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 
 pub struct ProgressBarBuilder {
     size: (i32, i32),

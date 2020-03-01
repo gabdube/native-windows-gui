@@ -381,6 +381,12 @@ impl DatePicker {
 
 }
 
+impl Drop for DatePicker {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
+
 pub struct DatePickerBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),

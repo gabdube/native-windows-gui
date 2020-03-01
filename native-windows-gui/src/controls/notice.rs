@@ -51,14 +51,6 @@ pub struct Notice {
     pub handle: ControlHandle
 }
 
-/// NoticeSender sends message to its parent `Notice` from another thread
-#[derive(Clone, Copy)]
-pub struct NoticeSender {
-    hwnd: usize,
-    id: u32,
-}
-
-
 impl Notice {
 
     pub fn builder() -> NoticeBuilder {
@@ -108,6 +100,20 @@ impl Notice {
     }
 
 }
+
+impl Drop for Notice {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
+
+/// NoticeSender sends message to its parent `Notice` from another thread
+#[derive(Clone, Copy)]
+pub struct NoticeSender {
+    hwnd: usize,
+    id: u32,
+}
+
 
 impl NoticeSender {
 

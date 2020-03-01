@@ -1,4 +1,6 @@
 use winapi::shared::windef::{HWND, HMENU};
+use crate::win32::window_helper as wh;
+
 
 /**
     Inner handle type used internally by each control.
@@ -29,6 +31,17 @@ pub enum ControlHandle {
 }
 
 impl ControlHandle {
+
+    /// Destroy the underlying object and set the handle to `NoHandle`
+    /// Can be used to "reset" a UI component
+    pub fn destroy(&mut self) {
+        match self {
+            &mut ControlHandle::Hwnd(h) => wh::destroy_window(h),
+            _ => {}
+        }
+
+        *self = ControlHandle::NoHandle;
+    }
 
     pub fn blank(&self) -> bool {
         match self {

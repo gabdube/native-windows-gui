@@ -37,7 +37,11 @@ impl MessageWindow {
 
 }
 
-
+impl Drop for MessageWindow {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 pub struct MessageWindowBuilder {
 }
 

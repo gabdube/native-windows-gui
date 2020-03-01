@@ -407,6 +407,12 @@ impl TreeView {
     }
 }
 
+impl Drop for TreeView {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
+
 pub struct TreeViewBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),

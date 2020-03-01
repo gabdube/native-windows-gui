@@ -307,6 +307,8 @@ impl Drop for TabsContainer {
         if let Some(h) = handler.as_ref() {
             unbind_raw_event_handler(h);
         }
+    
+        self.handle.destroy();
     }
 }
 
@@ -583,6 +585,12 @@ impl Tab {
         wh::send_message(tab_view_handle, TCM_INSERTITEMW, next_index as WPARAM, tab_info_ptr as LPARAM);
     }
 
+}
+
+impl Drop for Tab {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
 }
 
 pub struct TabBuilder<'a> {

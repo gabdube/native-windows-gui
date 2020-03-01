@@ -428,6 +428,11 @@ impl<D: Display+Default> ComboBox<D> {
 
 }
 
+impl<D: Display+Default> Drop for ComboBox<D> {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 
 pub struct ComboBoxBuilder<'a, D: Display+Default> {
     size: (i32, i32),

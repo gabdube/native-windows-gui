@@ -526,6 +526,12 @@ impl<D: Display+Default> ListBox<D> {
 
 }
 
+impl Drop<D: Display+Default> for ListBox<D> {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
+
 pub struct ListBoxBuilder<'a, D: Display+Default> {
     size: (i32, i32),
     position: (i32, i32),

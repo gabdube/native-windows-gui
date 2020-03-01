@@ -304,7 +304,11 @@ impl TextBox {
 
 }
 
-
+impl Drop for TextBox {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 pub struct TextBoxBuilder<'a> {
     text: &'a str,
     size: (i32, i32),

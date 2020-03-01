@@ -360,6 +360,11 @@ impl Tooltip {
 
 }
 
+impl Drop for Tooltip {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 pub struct TooltipBuilder<'a> {
     title: Option<&'a str>,
     ico: Option<&'a Icon>,

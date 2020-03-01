@@ -94,6 +94,11 @@ impl Timer {
 
 }
 
+impl Drop for Timer {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
 
 pub struct TimerBuilder {
     parent: Option<ControlHandle>,
