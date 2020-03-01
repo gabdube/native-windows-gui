@@ -37,6 +37,7 @@ pub struct MessageBank {
     message_content: nwg::TextInput,
 
     buttons: RefCell<Vec<nwg::Button>>,
+    handlers: RefCell<Vec<nwg::EventHandler>>,
 }
 
 impl MessageBank {
@@ -53,12 +54,14 @@ impl MessageBank {
             .expect("Failed to build button");
 
         let mut buttons = self.buttons.borrow_mut();
+        let mut handlers = self.handlers.borrow_mut();
+
         let blen = buttons.len() as u32;
         let (x, y) = (blen % 6, blen / 6);
         self.layout.add_child(x, y+1, &new_button);
 
         let new_button_handle = new_button.handle;
-        nwg::bind_event_handler(&new_button.handle, &self.window.handle, move |evt, _evt_data, handle| {
+        let handler = nwg::bind_event_handler(&new_button.handle, &self.window.handle, move |evt, _evt_data, handle| {
             match evt {
                 nwg::Event::OnButtonClick => {
                     if handle == new_button_handle {
@@ -70,9 +73,15 @@ impl MessageBank {
         });
 
         buttons.push(new_button);
+        handlers.push(handler);
     }
 
     fn exit(&self) {
+        let handlers = self.handlers.borrow();
+        for handler in handlers.iter() {
+            nwg::unbind_event_handler(&handler);
+        }
+        
         nwg::stop_thread_dispatch();
     }
 

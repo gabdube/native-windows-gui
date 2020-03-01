@@ -131,10 +131,12 @@ mod calculator_ui {
     use native_windows_gui as nwg;
     use super::*;
     use std::rc::Rc;
+    use std::cell::RefCell;
     use std::ops::Deref;
 
     pub struct CalculatorUi {
-        inner: Calculator
+        inner: Calculator,
+        default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
     impl nwg::NativeUi<Calculator, Rc<CalculatorUi>> for Calculator {
@@ -174,7 +176,10 @@ mod calculator_ui {
             nwg::Button::builder().text("Clear").parent(&data.window).build(&mut data.btn_clear)?;
 
             // Wrap-up
-            let ui = Rc::new(CalculatorUi { inner: data });
+            let ui = Rc::new(CalculatorUi {
+                inner: data,
+                default_handler: Default::default()
+            });
 
             // Events
             let window_handles = [&ui.window.handle];
@@ -210,7 +215,9 @@ mod calculator_ui {
                     }
                 };
 
-                nwg::full_bind_event_handler(handle, handle_events);
+                ui.default_handler.borrow_mut().push(
+                    nwg::full_bind_event_handler(handle, handle_events)
+                );
             }
 
             // Layouts
@@ -241,6 +248,15 @@ mod calculator_ui {
         }
     }
 
+    impl CalculatorUi {
+        /// To make sure that everything is freed without issues, the default handler must be unbound.
+        pub fn destroy(&self) {
+            let mut handlers = self.default_handler.borrow_mut();
+            for handler in handlers.drain(0..) {
+                nwg::unbind_event_handler(&handler);
+            }
+        }
+    }
 
     impl Deref for CalculatorUi {
         type Target = Calculator;
@@ -257,7 +273,7 @@ mod calculator_ui {
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
 
-    let _app = Calculator::build_ui(Default::default()).expect("Failed to build UI");
-
+    let app = Calculator::build_ui(Default::default()).expect("Failed to build UI");
     nwg::dispatch_thread_events();
+    app.destroy();
 }

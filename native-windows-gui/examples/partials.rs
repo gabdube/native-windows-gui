@@ -89,10 +89,12 @@ mod partial_demo_ui {
     use self::nwg::PartialUi;
     use super::*;
     use std::rc::Rc;
+    use std::cell::RefCell;
     use std::ops::Deref;
 
     pub struct PartialDemoUi {
-        inner: PartialDemo
+        inner: PartialDemo,
+        default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
     impl nwg::NativeUi<PartialDemo, Rc<PartialDemoUi>> for PartialDemo {
@@ -131,7 +133,10 @@ mod partial_demo_ui {
             FoodUi::build_partial(&mut data.food_ui, Some(&data.frame3))?;
 
             // Wrap-up
-            let ui = Rc::new(PartialDemoUi { inner: data });
+            let ui = Rc::new(PartialDemoUi {
+                inner: data,
+                default_handler: Default::default()
+            });
 
             // Events
             let mut window_handles = vec![&ui.window.handle];
@@ -159,7 +164,9 @@ mod partial_demo_ui {
                     }
                 };
 
-                nwg::full_bind_event_handler(handle, handle_events);
+                ui.default_handler.borrow_mut().push(
+                    nwg::full_bind_event_handler(handle, handle_events)
+                );
             }
 
             // Layout
@@ -178,6 +185,15 @@ mod partial_demo_ui {
         }
     }
 
+    impl PartialDemoUi {
+        /// To make sure that everything is freed without issues, the default handler must be unbound.
+        pub fn destroy(&self) {
+            let mut handlers = self.default_handler.borrow_mut();
+            for handler in handlers.drain(0..) {
+                nwg::unbind_event_handler(&handler);
+            }
+        }
+    }
 
     impl Deref for PartialDemoUi {
         type Target = PartialDemo;
@@ -385,7 +401,7 @@ mod partial_food_ui {
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
 
-    let _ui = PartialDemo::build_ui(Default::default()).expect("Failed to build UI");
-    
+    let ui = PartialDemo::build_ui(Default::default()).expect("Failed to build UI");
     nwg::dispatch_thread_events();
+    ui.destroy();
 }

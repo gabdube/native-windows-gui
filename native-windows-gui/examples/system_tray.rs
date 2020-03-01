@@ -48,10 +48,12 @@ mod system_tray_ui {
     use native_windows_gui as nwg;
     use super::*;
     use std::rc::Rc;
+    use std::cell::RefCell;
     use std::ops::Deref;
 
     pub struct SystemTrayUi {
-        inner: SystemTray
+        inner: SystemTray,
+        default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
     impl nwg::NativeUi<SystemTray, Rc<SystemTrayUi>> for SystemTray {
@@ -94,7 +96,10 @@ mod system_tray_ui {
                 .build(&mut data.tray_item3)?;
 
             // Wrap-up
-            let ui = Rc::new(SystemTrayUi { inner: data });
+            let ui = Rc::new(SystemTrayUi {
+                inner: data,
+                default_handler: Default::default(),
+            });
 
             // Events
             let evt_ui = ui.clone();
@@ -116,9 +121,21 @@ mod system_tray_ui {
                 }
             };
 
-            nwg::full_bind_event_handler(&ui.window.handle, handle_events);
+            ui.default_handler.borrow_mut().push(
+                nwg::full_bind_event_handler(&ui.window.handle, handle_events)
+            );
 
             return Ok(ui);
+        }
+    }
+
+    impl SystemTrayUi {
+        /// To make sure that everything is freed without issues, the default handler must be unbound.
+        pub fn destroy(&self) {
+            let mut handlers = self.default_handler.borrow_mut();
+            for handler in handlers.drain(0..) {
+                nwg::unbind_event_handler(&handler);
+            }
         }
     }
 
@@ -136,7 +153,7 @@ mod system_tray_ui {
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
 
-    let _ui = SystemTray::build_ui(Default::default()).expect("Failed to build UI");
-    
+    let ui = SystemTray::build_ui(Default::default()).expect("Failed to build UI");
     nwg::dispatch_thread_events();
+    ui.destroy();
 }

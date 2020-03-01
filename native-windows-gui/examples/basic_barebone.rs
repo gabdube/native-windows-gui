@@ -44,7 +44,7 @@ fn main() {
     let window = Rc::new(window);
     let events_window = window.clone();
 
-    nwg::full_bind_event_handler(&window.handle, move |evt, _evt_data, handle| {
+    let handler = nwg::full_bind_event_handler(&window.handle, move |evt, _evt_data, handle| {
         use nwg::Event as E;
 
         match evt {
@@ -62,5 +62,6 @@ fn main() {
     });
 
     nwg::dispatch_thread_events();
+    nwg::unbind_event_handler(&handler);
 }
 

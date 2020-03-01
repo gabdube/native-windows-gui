@@ -192,6 +192,11 @@ fn main() {
 ```rust
 #![windows_subsystem = "windows"]
 
+/*!
+    A very simple application that show your name in a message box.
+    See `basic_d` for the derive version
+*/
+
 extern crate native_windows_gui as nwg;
 use nwg::NativeUi;
 
@@ -208,7 +213,7 @@ impl BasicApp {
     fn say_hello(&self) {
         nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
     }
-
+    
     fn say_goodbye(&self) {
         nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
         nwg::stop_thread_dispatch();
@@ -223,16 +228,18 @@ mod basic_app_ui {
     use native_windows_gui as nwg;
     use super::*;
     use std::rc::Rc;
+    use std::cell::RefCell;
     use std::ops::Deref;
 
     pub struct BasicAppUi {
-        inner: BasicApp
+        inner: BasicApp,
+        default_handler: RefCell<Option<nwg::EventHandler>>
     }
 
     impl nwg::NativeUi<BasicApp, Rc<BasicAppUi>> for BasicApp {
         fn build_ui(mut data: BasicApp) -> Result<Rc<BasicAppUi>, nwg::NwgError> {
             use nwg::Event as E;
-
+            
             // Controls
             nwg::Window::builder()
                 .flags(nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE)
@@ -256,7 +263,10 @@ mod basic_app_ui {
                 .build(&mut data.hello_button)?;
 
             // Wrap-up
-            let ui = Rc::new(BasicAppUi { inner: data });
+            let ui = Rc::new(BasicAppUi {
+                inner: data,
+                default_handler: Default::default(),
+            });
 
             // Events
             let evt_ui = ui.clone();
@@ -274,9 +284,19 @@ mod basic_app_ui {
                 }
             };
 
-            nwg::full_bind_event_handler(&ui.window.handle, handle_events);
+           *ui.default_handler.borrow_mut() = Some(nwg::full_bind_event_handler(&ui.window.handle, handle_events));
 
             return Ok(ui);
+        }
+    }
+
+    impl BasicAppUi {
+        /// To make sure that everything is freed without issues, the default handler must be unbound.
+        pub fn destroy(&self) {
+            let handler = self.default_handler.borrow();
+            if handler.is_some() {
+                nwg::unbind_event_handler(handler.as_ref().unwrap());
+            }
         }
     }
 
@@ -287,15 +307,14 @@ mod basic_app_ui {
             &self.inner
         }
     }
-
 }
 
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
 
-    let _ui = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
-
+    let ui = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
     nwg::dispatch_thread_events();
+    ui.destroy();
 }
 ```
 
