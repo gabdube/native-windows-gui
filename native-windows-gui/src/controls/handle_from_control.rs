@@ -230,3 +230,10 @@ use super::{Frame};
 #[cfg(feature = "frame")]
 handles!(Frame);
 
+
+#[cfg(feature = "rich-textbox")]
+use super::{RichTextBox};
+
+#[cfg(feature = "rich-textbox")]
+handles!(RichTextBox);
+

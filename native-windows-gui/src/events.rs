@@ -32,6 +32,15 @@ pub enum Event {
 
     /// When a control needs to be redrawn
     OnPaint,
+
+    /// When a key is pressed on a keyboard. Unlike OnKeyDown, this returns a char (ex: 'c') in a EventData::OnChar.
+    OnChar,
+
+    /// When a key is pressed on a keyboard. Use EventData::OnKey to check which key.
+    OnKeyPress,
+
+    /// When a key is pressed on a keyboard.Use EventData::OnKey to check which key.
+    OnKeyRelease,
     
     /// When a control is resized by the user. 
     /// This is typically applied to top level windows but it also applies to children when layouts are used.
@@ -168,7 +177,13 @@ pub enum EventData {
 
     /// Sets the text of a tooltip.
     /// The method `on_tooltip_text` should be used to access the inner data
-    OnTooltipText(ToolTipTextData)
+    OnTooltipText(ToolTipTextData),
+
+    /// The character inputted by a user by a `OnChar` event
+    OnChar(char),
+
+    /// The windows key code inputted by a user. See the `nwg::keys` module
+    OnKeyPress(u32)
 }
 
 impl EventData {
@@ -247,6 +262,7 @@ impl fmt::Debug for ToolTipTextData {
 }
 
 
+/// Opaque type that manage if a window should be closed after a OnClose event
 pub struct WindowCloseData {
     pub(crate) data: *mut bool
 }

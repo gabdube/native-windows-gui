@@ -874,6 +874,11 @@ mod partial_controls_test_ui {
                     } else if &handle == &self.pop_menu_item1 {
                         item_hello("popup menu item");
                     },
+                E::OnChar => {
+                    if &handle == &self.test_rich {
+                        print_char(_evt_data);
+                    }
+                },
                 _ => {}
             }
         }
@@ -1501,3 +1506,10 @@ fn font_select(app: &ControlsTest) {
 
 #[cfg(not(feature = "font-dialog"))]
 fn font_select(_app: &ControlsTest) {}
+
+fn print_char(data: &EventData) {
+    match data {
+        EventData::OnChar(c) => println!("{:?}", c),
+        _=>{}
+    }
+}

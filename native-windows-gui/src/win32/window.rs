@@ -538,13 +538,14 @@ unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l:
 unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;
+    use std::{char};
     use crate::events::*;
 
     use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID, GetSubMenu};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
       WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP, WM_MENUSELECT, WM_EXITSIZEMOVE,
-      WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED};
+      WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED, WM_KEYDOWN, WM_KEYUP, WM_CHAR};
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
@@ -554,6 +555,9 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
     let base_handle = ControlHandle::Hwnd(hwnd);
 
     match msg {
+        WM_KEYDOWN | WM_KEYUP => {
+
+        },
         WM_NOTIFY => {
             let code = {
                 let notif_ptr: *mut NMHDR = mem::transmute(l);
@@ -637,6 +641,7 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
                 _ => callback(Event::OnResize, NO_DATA, base_handle)
             }
         },
+        WM_CHAR => callback(Event::OnChar, EventData::OnChar(char::from_u32(w as u32).unwrap_or('?')), base_handle),
         WM_EXITSIZEMOVE => callback(Event::OnResizeEnd, NO_DATA, base_handle),
         WM_ENTERSIZEMOVE => callback(Event::OnResizeBegin, NO_DATA, base_handle),
         WM_TIMER => callback(Event::OnTimerTick, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),

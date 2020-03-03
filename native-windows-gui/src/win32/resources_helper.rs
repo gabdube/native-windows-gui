@@ -61,7 +61,6 @@ pub unsafe fn build_font(
     drop(fam);
 
     if handle.is_null() {
-        // println!("{:?}", get_system_error());
         Err( NwgError::resource_create("Failed to create font") )
     } else {
         Ok( handle )
@@ -130,7 +129,6 @@ pub unsafe fn build_image_decoder<'a>(
         .frame(0)?;
 
     if let Some((width, height)) = size {
-        println!("{} {:?}", source, (width, height));
         image_frame = decoder.resize_image(&image_frame, [width, height])?;
     }
     
