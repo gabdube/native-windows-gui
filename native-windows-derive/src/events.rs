@@ -91,6 +91,7 @@ impl ControlEvents {
         cache.insert(2, syn::parse_str("&_handle").unwrap());
         cache.insert(3, syn::parse_str("_evt").unwrap());
         cache.insert(4, syn::parse_str("&_evt_data").unwrap());
+        cache.insert(4, syn::parse_str("&_evt_data").unwrap());
 
         ControlEvents {
             handles: Vec::with_capacity(1),
@@ -277,7 +278,7 @@ fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, T
         return p;
     }
 
-    let values = ["SELF", "CTRL", "HANDLE", "EVT", "EVT_DATA"];
+    let values = ["SELF", "CTRL", "HANDLE", "EVT", "EVT_DATA", "RC_SELF"];
     for a in args.as_ref().unwrap().iter() {
         let pos = values.iter().position(|v| &a == &v );
         match pos {
@@ -289,6 +290,7 @@ fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, T
             Some(2) => { p.push(cache[&2].clone()); },
             Some(3) => { p.push(cache[&3].clone()); },
             Some(4) => { p.push(cache[&4].clone()); },
+            Some(5) => { p.push(cache[&5].clone()); },
             Some(_) => { unreachable!(); }
             None => panic!("Unknown callback argument: {}. Should be one of those values: {:?}", a, values)
         }

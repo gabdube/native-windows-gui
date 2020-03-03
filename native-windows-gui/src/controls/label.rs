@@ -26,7 +26,7 @@ bitflags! {
 }
 
 /**
-A label is a single line of static text
+A label is a single line of static text. Use `\r\n` to split the text on multiple lines.
 
 Label is not behind any features.
 
