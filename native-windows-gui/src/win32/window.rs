@@ -267,6 +267,8 @@ pub fn bind_raw_event_handler<F>(handle: &ControlHandle, handler_id: UINT_PTR, f
 {
     use winapi::um::commctrl::{GetWindowSubclass, SetWindowSubclass};
 
+    // IDS below 0XFFFF are reserved for normal events binding
+    let handler_id = handler_id + 0xFFFF;
     let subclass_proc: SUBCLASSPROC = Some(process_raw_events);
     
     let handle = match handle {
@@ -306,7 +308,7 @@ pub fn has_raw_handler(handle: &ControlHandle, handler_id: UINT_PTR) -> bool {
     let handle = handle.hwnd().expect("This type of control cannot have a raw handler.");
     let subclass_proc: SUBCLASSPROC = Some(process_raw_events);
     let mut tmp_value = 0;
-    unsafe { GetWindowSubclass(handle, subclass_proc, handler_id, &mut tmp_value) != 0 }
+    unsafe { GetWindowSubclass(handle, subclass_proc, handler_id + 0xFFFF, &mut tmp_value) != 0 }
 }
 
 /**

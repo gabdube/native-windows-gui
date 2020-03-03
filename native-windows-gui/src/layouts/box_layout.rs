@@ -360,7 +360,9 @@ impl BoxLayoutBuilder {
             None
         };
 
-        bind_raw_event_handler(&base_handle, 0, cb);
+        /// Keep generating ids so that multiple layouts can be applied to the same parent
+        static mut BOX_LAYOUT_ID: usize = 0x7FFF; 
+        bind_raw_event_handler(&base_handle, unsafe { BOX_LAYOUT_ID += 1; BOX_LAYOUT_ID }, cb);
     }
 
 }
