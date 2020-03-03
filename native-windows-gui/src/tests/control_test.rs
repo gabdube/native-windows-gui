@@ -333,7 +333,7 @@ mod partial_controls_test_ui {
                 .build(&mut data.test_date)?;
 
             Label::builder()
-                .text("A label")
+                .text("A label\r\nSecond line")
                 .position((10, 200))
                 .size((130, 30))
                 .background_color(Some([255, 255, 255]))

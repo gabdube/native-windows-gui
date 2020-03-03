@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, SS_WORDELLIPSIS};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError, HTextAlign, VTextAlign, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
@@ -19,6 +19,9 @@ bitflags! {
         const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+
+        /// Truncate the label if the text is too long. A label with this style CANNOT have multiple lines.
+        const ELIPSIS = SS_WORDELLIPSIS;
     }
 }
 
@@ -192,9 +195,9 @@ impl Label {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        use winapi::um::winuser::{SS_NOPREFIX, SS_LEFT, SS_WORDELLIPSIS};
+        use winapi::um::winuser::{SS_NOPREFIX, SS_LEFT};
 
-        WS_VISIBLE | SS_NOPREFIX | SS_LEFT | SS_WORDELLIPSIS
+        WS_VISIBLE | SS_NOPREFIX | SS_LEFT
     }
 
     /// Winapi flags required by the control
