@@ -1,7 +1,7 @@
-use crate::controls::{ControlHandle};
+use crate::controls::ControlHandle;
 use crate::win32::window::bind_raw_event_handler;
 use crate::win32::window_helper as wh;
-use winapi::shared::windef::{HWND};
+use winapi::shared::windef::HWND;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::ptr;
@@ -94,7 +94,7 @@ impl BoxLayout {
             cell_count: None,
         };
 
-        BoxLayoutBuilder { layout: layout }
+        BoxLayoutBuilder { layout }
     }
 
     /// Add a children control to the grid layout. 
@@ -269,6 +269,7 @@ impl BoxLayoutBuilder {
         self
     }
 
+    /// Type of the BoxLayout
     pub fn layout_type(mut self, ty: BoxLayoutType) -> BoxLayoutBuilder {
         self.layout.ty = ty;
         self
