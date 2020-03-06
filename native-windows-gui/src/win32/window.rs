@@ -592,7 +592,7 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
             }
         },
         WM_COMMAND => {
-            let child_handle: HWND = mem::transmute(l);
+            let child_handle: HWND = l as HWND;
             let message = HIWORD(w as u32) as u16;
             let handle = ControlHandle::Hwnd(child_handle);
             
@@ -694,7 +694,6 @@ unsafe extern "system" fn process_raw_events(hwnd: HWND, msg: UINT, w: WPARAM, l
 
 fn button_commands(m: u16) -> Event {
     use winapi::um::winuser::{BN_CLICKED, BN_DBLCLK};
-    
     match m {
         BN_CLICKED => Event::OnButtonClick,
         BN_DBLCLK => Event::OnButtonDoubleClick,

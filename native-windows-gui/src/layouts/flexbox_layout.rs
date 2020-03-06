@@ -31,7 +31,7 @@ impl FlexboxLayout {
         FlexboxLayoutBuilder { layout }
     }
 
-    fn update_layout(&self, mut width: u32, mut height: u32) -> Result<(), stretch::Error> {
+    fn update_layout(&self, width: u32, height: u32) -> Result<(), stretch::Error> {
         use stretch::{
             geometry::Size,
             node::Stretch,
@@ -50,6 +50,7 @@ impl FlexboxLayout {
         )?;
 
         stretch.compute_layout(node, Size::undefined())?;
+        
         let test = stretch.layout(node);
         println!("{:?}", test);
 
