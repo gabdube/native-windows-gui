@@ -5,6 +5,7 @@ use winapi::shared::windef::HWND;
 use std::{ptr, rc::Rc, cell::RefCell};
 
 use stretch::{
+    number::Number,
     geometry::{Point, Size, Rect},
     node::{Node, Stretch},
     style::*
@@ -62,13 +63,9 @@ impl FlexboxLayout {
             children.push(stretch.new_node(child.style, Vec::new())?);
         }
 
-        let node = stretch.new_node(    
-            Style {
-                size: Size { width: Dimension::Points(width as f32), height: Dimension::Points(height as f32) },
-                ..Default::default()
-            },
-            children.clone()
-        )?;
+        let mut style = inner.style.clone();
+        style.size = Size { width: Dimension::Points(width as f32), height: Dimension::Points(height as f32) };
+        let node = stretch.new_node(style, children.clone())?;
 
         stretch.compute_layout(node, Size::undefined())?;
 
@@ -101,11 +98,6 @@ impl FlexboxLayoutBuilder {
         self
     }
 
-    pub fn flex_direction(mut self, value: FlexDirection) -> FlexboxLayoutBuilder {
-        self.layout.style.flex_direction = value;
-        self
-    }
-
     /// Add a new child to the layout build.
     /// Panics if `child` is not a window-like control.
     pub fn child<W: Into<ControlHandle>>(mut self, child: W) -> FlexboxLayoutBuilder {
@@ -116,6 +108,94 @@ impl FlexboxLayoutBuilder {
         });
         self
     }
+
+    //
+    // Base layout style
+    //
+
+    pub fn direction(mut self, value: Direction) -> FlexboxLayoutBuilder {
+        self.layout.style.direction = value;
+        self
+    }
+
+    pub fn flex_direction(mut self, value: FlexDirection) -> FlexboxLayoutBuilder {
+        self.layout.style.flex_direction = value;
+        self
+    }
+
+    pub fn flex_wrap(mut self, value: FlexWrap) -> FlexboxLayoutBuilder {
+        self.layout.style.flex_wrap = value;
+        self
+    }
+
+    pub fn overflow(mut self, value: Overflow) -> FlexboxLayoutBuilder {
+        self.layout.style.overflow = value;
+        self
+    }
+
+    pub fn align_items(mut self, value: AlignItems) -> FlexboxLayoutBuilder {
+        self.layout.style.align_items = value;
+        self
+    }
+
+    pub fn align_content(mut self, value: AlignContent) -> FlexboxLayoutBuilder {
+        self.layout.style.align_content = value;
+        self
+    }
+
+    pub fn justify_content(mut self, value: JustifyContent) -> FlexboxLayoutBuilder {
+        self.layout.style.justify_content = value;
+        self
+    }
+
+    pub fn margin(mut self, value: Rect<Dimension>) -> FlexboxLayoutBuilder {
+        self.layout.style.margin = value;
+        self
+    }
+
+    pub fn padding(mut self, value: Rect<Dimension>) -> FlexboxLayoutBuilder {
+        self.layout.style.padding = value;
+        self
+    }
+
+    pub fn border(mut self, value: Rect<Dimension>) -> FlexboxLayoutBuilder {
+        self.layout.style.border = value;
+        self
+    }
+
+    pub fn flex_grow(mut self, value: f32) -> FlexboxLayoutBuilder {
+        self.layout.style.flex_grow = value;
+        self
+    }
+
+    pub fn flex_shrink(mut self, value: f32) -> FlexboxLayoutBuilder {
+        self.layout.style.flex_shrink = value;
+        self
+    }
+
+    pub fn flex_basis(mut self, value: Dimension) -> FlexboxLayoutBuilder {
+        self.layout.style.flex_basis = value;
+        self
+    }
+
+    pub fn min_size(mut self, value: Size<Dimension>) -> FlexboxLayoutBuilder {
+        self.layout.style.min_size = value;
+        self
+    }
+
+    pub fn max_size(mut self, value: Size<Dimension>) -> FlexboxLayoutBuilder {
+        self.layout.style.max_size = value;
+        self
+    }
+
+    pub fn aspect_ratio(mut self, value: Number) -> FlexboxLayoutBuilder {
+        self.layout.style.aspect_ratio = value;
+        self
+    }
+
+    //
+    // Child layout style
+    //
 
     /// Set the size of of the current child.
     /// Panics if `child` was not called before.

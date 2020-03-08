@@ -88,15 +88,17 @@ mod flexbox_app_ui {
 
             // Layout
             use nwg::stretch::{geometry::{Size, Rect}, style::{Dimension, FlexDirection}};
-            pub const Fifty_PC: Dimension = Dimension::Percent(0.5);
+            const FIFTY_PC: Dimension = Dimension::Percent(0.5);
+            const PT_5: Dimension = Dimension::Points(10.0);
 
             nwg::FlexboxLayout::builder()
                 .parent(&ui.window)
                 .flex_direction(FlexDirection::Row)
+                .margin(Rect{ start: PT_5, end: PT_5, top: PT_5, bottom: PT_5 })
                 .child(&ui.button1)
-                    .child_size(Size { width: Fifty_PC, height: Dimension::Auto })
+                    .child_size(Size { width: FIFTY_PC, height: Dimension::Auto })
                 .child(&ui.button2)
-                    .child_size(Size { width: Dimension::Percent(0.25), height: Fifty_PC })
+                    .child_size(Size { width: Dimension::Percent(0.25), height: FIFTY_PC })
                 .child(&ui.button3)
                     .child_size(Size { width: Dimension::Percent(0.25), height: Dimension::Auto })
                 .build(&ui.layout);
