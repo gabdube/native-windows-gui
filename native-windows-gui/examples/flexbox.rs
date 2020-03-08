@@ -10,6 +10,10 @@ use nwg::NativeUi;
 #[derive(Default)]
 pub struct FlexBoxApp {
     window: nwg::Window,
+    layout: nwg::FlexboxLayout,
+    button1: nwg::Button,
+    button2: nwg::Button,
+    button3: nwg::Button
 }
 
 impl FlexBoxApp {
@@ -41,11 +45,25 @@ mod flexbox_app_ui {
             
             // Controls
             nwg::Window::builder()
-                .flags(nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE)
-                .size((300, 115))
+                .size((500, 300))
                 .position((300, 300))
-                .title("Basic example")
+                .title("Flexbox example")
                 .build(&mut data.window)?;
+
+            nwg::Button::builder()
+                .text("Btn 1")
+                .parent(&data.window)
+                .build(&mut data.button1)?;
+
+            nwg::Button::builder()
+                .text("Btn 2")
+                .parent(&data.window)
+                .build(&mut data.button2)?;
+
+            nwg::Button::builder()
+                .text("Btn 3")
+                .parent(&data.window)
+                .build(&mut data.button3)?;
 
             // Wrap-up
             let ui = Rc::new(FlexBoxAppUi {
@@ -66,6 +84,22 @@ mod flexbox_app_ui {
             };
 
            *ui.default_handler.borrow_mut() = Some(nwg::full_bind_event_handler(&ui.window.handle, handle_events));
+
+
+            // Layout
+            use nwg::stretch::{geometry::{Size, Rect}, style::{Dimension, FlexDirection}};
+            pub const Fifty_PC: Dimension = Dimension::Percent(0.5);
+
+            nwg::FlexboxLayout::builder()
+                .parent(&ui.window)
+                .flex_direction(FlexDirection::Row)
+                .child(&ui.button1)
+                    .child_size(Size { width: Fifty_PC, height: Dimension::Auto })
+                .child(&ui.button2)
+                    .child_size(Size { width: Dimension::Percent(0.25), height: Fifty_PC })
+                .child(&ui.button3)
+                    .child_size(Size { width: Dimension::Percent(0.25), height: Dimension::Auto })
+                .build(&ui.layout);
 
             return Ok(ui);
         }

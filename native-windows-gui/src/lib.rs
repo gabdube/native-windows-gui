@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate bitflags;
 extern crate winapi;
+pub extern crate stretch;
 
 #[cfg(feature="all")]
 #[cfg(test)]
