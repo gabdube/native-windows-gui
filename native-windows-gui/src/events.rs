@@ -157,12 +157,6 @@ pub enum Event {
 
     /// When a user click on the X button of a window
     OnWindowClose,
-
-    /// When most control receive keyboard focus
-    OnFocus,
-
-    /// When most control lose keyboard focus
-    OnFocusLost
 }
 
 

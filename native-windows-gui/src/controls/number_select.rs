@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use crate::win32::window_helper as wh;
 use crate::{NwgError, Font, RawEventHandler, bind_raw_event_handler, unbind_raw_event_handler};
-use super::{ControlBase, ControlHandle, TextInput, Button};
+use super::{ControlBase, ControlHandle, TextInput, Button, ButtonFlags};
 
 const NOT_BOUND: &'static str = "UpDown is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: UpDown handle is not HWND!";
@@ -37,6 +37,32 @@ impl NumberSelectData {
         match self {
             NumberSelectData::Int{ value, ..} => format!("{}", value),
             NumberSelectData::Float{ value, decimals, ..} => format!("{:.*}", *decimals as usize, value),
+        }
+    }
+
+    pub fn decrease(&mut self) {
+        match self {
+            NumberSelectData::Int{ value, step, min, ..} => {
+                *value -= *step;
+                *value = i64::max(*value, *min);
+            },
+            NumberSelectData::Float{ value, step, min, ..} => {
+                *value -= *step;
+                *value = f64::max(*value, *min);
+            }
+        }
+    }
+
+    pub fn increase(&mut self) {
+        match self {
+            NumberSelectData::Int{ value, step, max, ..} => {
+                *value += *step;
+                *value = i64::min(*value, *max);
+            },
+            NumberSelectData::Float{ value, step, max, ..} => {
+                *value += *step;
+                *value = f64::min(*value, *max);
+            }
         }
     }
 
@@ -216,6 +242,18 @@ impl NumberSelect {
 
 }
 
+impl Drop for NumberSelect {
+
+    fn drop(&mut self) {
+        if let Some(h) = self.handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+
+        self.handle.destroy();
+    }
+
+}
+
 pub struct NumberSelectBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
@@ -369,6 +407,7 @@ impl<'a> NumberSelectBuilder<'a> {
             .size((20, h/2+1))
             .position((w-20, -1))
             .parent(&out.handle)
+            .flags(ButtonFlags::VISIBLE)
             .build(&mut out.btn_up)?;
 
         Button::builder()
@@ -376,6 +415,7 @@ impl<'a> NumberSelectBuilder<'a> {
             .size((20, h/2+1))
             .position((w-20, (h/2)-1))
             .parent(&out.handle)
+            .flags(ButtonFlags::VISIBLE)    
             .build(&mut out.btn_down)?;
 
         if self.font.is_some() {
@@ -387,22 +427,34 @@ impl<'a> NumberSelectBuilder<'a> {
         let handler_data = out.data.clone();
         let plus_button = out.btn_up.handle.clone();
         let minus_button = out.btn_down.handle.clone();
+        let text_handle = out.edit.handle.clone();
 
         let handler = bind_raw_event_handler(&out.handle, 0x4545, move |_hwnd, msg, w, l| {
             use winapi::shared::windef::HWND;
             use winapi::um::winuser::{WM_COMMAND, BN_CLICKED};
             use winapi::shared::minwindef::HIWORD;
-
+            
             match msg {
                 WM_COMMAND => {
                     let handle = ControlHandle::Hwnd(l as HWND);
                     let message = HIWORD(w as u32) as u16;
                     if message == BN_CLICKED && handle == plus_button {
-                        println!("UP");
+                        let mut data = handler_data.borrow_mut();
+                        data.increase();
+
+                        let handle = text_handle.hwnd().unwrap();
+                        let text = data.formatted_value();
+                        unsafe { wh::set_window_text(handle, &text); }
                     } else if message == BN_CLICKED && handle == minus_button {
-                        println!("DOWN");
+                        let mut data = handler_data.borrow_mut();
+                        data.decrease();
+
+                        let handle = text_handle.hwnd().unwrap();
+                        let text = data.formatted_value();
+                        unsafe { wh::set_window_text(handle, &text); }
                     }
                 },
+                
                 _ => {}
             }
             None

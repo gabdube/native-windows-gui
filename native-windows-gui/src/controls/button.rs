@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_ICON, BS_BITMAP};
+use winapi::um::winuser::{WS_DISABLED, BS_ICON, BS_BITMAP, BS_NOTIFY, WS_VISIBLE, WS_CHILD};
 use crate::win32::window_helper as wh;
 use crate::win32::resources_helper as rh;
 use crate::{NwgError, Font, Bitmap, Icon};
@@ -15,8 +15,9 @@ bitflags! {
         * NONE:     No flags. Equivalent to a invisible blank button.
         * VISIBLE:  The button is immediatly visible after creation
         * DISABLED: The button cannot be interacted with by the user. It also has a grayed out look.
-        * BITMAP: The button will display a bitmap image with no text. Must have a bitmap or else it will only show text.
-        * ICON: The button will display a icon image with no text. Must have a icon or else it will only show text.
+        * BITMAP:   The button will display a bitmap image with no text. Must have a bitmap or else it will only show text.
+        * ICON:     The button will display a icon image with no text. Must have a icon or else it will only show text.
+        * NOTIFY:   Enable the `OnButtonDoubleClick` event
     */
     pub struct ButtonFlags: u32 {
         const NONE = 0;
@@ -24,6 +25,7 @@ bitflags! {
         const DISABLED = WS_DISABLED;
         const ICON = BS_ICON;
         const BITMAP = BS_BITMAP;
+        const NOTIFY = BS_NOTIFY;
     }
 }
 
@@ -257,14 +259,12 @@ impl Button {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        ::winapi::um::winuser::WS_VISIBLE
+        WS_VISIBLE | BS_NOTIFY
     }
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        use winapi::um::winuser::{BS_NOTIFY, WS_CHILD};
-
-        BS_NOTIFY | WS_CHILD
+        WS_CHILD
     }
 
 }
