@@ -87,20 +87,27 @@ mod flexbox_app_ui {
 
 
             // Layout
-            use nwg::stretch::{geometry::{Size, Rect}, style::{Dimension, FlexDirection}};
-            const FIFTY_PC: Dimension = Dimension::Percent(0.5);
-            const PT_5: Dimension = Dimension::Points(10.0);
+            use nwg::stretch::{geometry::{Size, Rect}, style::{Dimension as D, FlexDirection}};
+            const FIFTY_PC: D = D::Percent(0.5);
+            const PT_10: D = D::Points(10.0);
+            const PT_5: D = D::Points(5.0);
+            const PADDING: Rect<D> = Rect{ start: PT_10, end: PT_10, top: PT_10, bottom: PT_10 };
+            const MARGIN: Rect<D> = Rect{ start: PT_5, end: PT_5, top: PT_5, bottom: PT_5 };
 
             nwg::FlexboxLayout::builder()
                 .parent(&ui.window)
                 .flex_direction(FlexDirection::Row)
-                .margin(Rect{ start: PT_5, end: PT_5, top: PT_5, bottom: PT_5 })
+                .padding(PADDING)
                 .child(&ui.button1)
-                    .child_size(Size { width: FIFTY_PC, height: Dimension::Auto })
+                    .child_margin(MARGIN)
+                    .child_max_size(Size { width: D::Points(200.0), height: D::Undefined })
+                    .child_size(Size { width: FIFTY_PC, height: D::Auto })
                 .child(&ui.button2)
-                    .child_size(Size { width: Dimension::Percent(0.25), height: FIFTY_PC })
+                    .child_margin(MARGIN)
+                    .child_size(Size { width: D::Percent(0.25), height: FIFTY_PC })
                 .child(&ui.button3)
-                    .child_size(Size { width: Dimension::Percent(0.25), height: Dimension::Auto })
+                    .child_margin(MARGIN)
+                    .child_size(Size { width: D::Percent(0.25), height: D::Auto })
                 .build(&ui.layout);
 
             return Ok(ui);

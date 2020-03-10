@@ -211,6 +211,28 @@ impl FlexboxLayoutBuilder {
         self
     }
 
+    /// Set the margin of the current child.
+    /// Panics if `child` was not called before.
+    pub fn child_margin(mut self, value: Rect<Dimension>) -> FlexboxLayoutBuilder {
+        self.current_child().style.margin = value;
+        self
+    }
+
+    /// Set the min size of the current child.
+    /// Panics if `child` was not called before.
+    pub fn child_min_size(mut self, value: Size<Dimension>) -> FlexboxLayoutBuilder {
+        self.current_child().style.min_size = value;
+        self
+    }
+
+    /// Set the max size of the current child.
+    /// Panics if `child` was not called before.
+    pub fn child_max_size(mut self, value: Size<Dimension>) -> FlexboxLayoutBuilder {
+        self.current_child().style.max_size = value;
+        self
+    }
+
+
     /**
         Directly set the style parameter of the current child. Panics if `child` was not called before.
         
