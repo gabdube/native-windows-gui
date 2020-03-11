@@ -53,7 +53,7 @@ pub struct ControlsTest {
     tree_tab_layout: GridLayout,
     list_view_tab_layout: GridLayout,
     panel_layout: GridLayout,
-    tab_container_layout: BoxLayout,
+    tab_container_layout: FlexboxLayout,
 
     // Control window
     pub window: Window,
@@ -741,10 +741,9 @@ mod partial_controls_test_ui {
             //
             // Layout
             //
-            BoxLayout::builder()
-                .margin([5, 5, 25, 5])
+            FlexboxLayout::builder()
                 .parent(&data.window)
-                .child(0, &data.controls_holder)
+                .child(&data.controls_holder)
                 .build(&data.tab_container_layout);
 
             GridLayout::builder()

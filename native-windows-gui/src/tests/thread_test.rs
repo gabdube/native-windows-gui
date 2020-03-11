@@ -14,7 +14,7 @@ pub struct ThreadTest {
     resources: RefCell<ThreadResources>,
     pub window: Window,
 
-    layout: BoxLayout,
+    layout: FlexboxLayout,
 
     font: Font,
 
@@ -64,6 +64,7 @@ fn notice_me(app: &ThreadTest) {
 mod partial_canvas_test_ui {
     use super::*;
     use crate::{PartialUi, NwgError, ControlHandle};
+    use stretch::style::*;
 
     impl PartialUi<ThreadTest> for ThreadTest {
 
@@ -115,13 +116,16 @@ mod partial_canvas_test_ui {
                 .parent(&data.window)
                 .build(&mut data.notice)?;
 
-            BoxLayout::builder()
+            FlexboxLayout::builder()
                 .parent(&data.window)
-                .child(0, &data.counter)
-                .child(1, &data.timer_start_btn)
-                .child(2, &data.timer_stop_btn)
-                .child(3, &data.sleep_btn)
-                .child(4, &data.thread_sleep_btn)
+                .flex_direction(FlexDirection::Column)
+                .auto_size(true)
+                .auto_spacing(Some(5))
+                .child(&data.counter)
+                .child(&data.timer_start_btn)
+                .child(&data.timer_stop_btn)
+                .child(&data.sleep_btn)
+                .child(&data.thread_sleep_btn)
                 .build(&data.layout);
 
             Ok(())

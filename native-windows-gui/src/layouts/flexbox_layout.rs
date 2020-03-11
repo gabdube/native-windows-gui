@@ -47,7 +47,7 @@ impl FlexboxLayout {
             children: Vec::new()
         };
 
-        FlexboxLayoutBuilder { layout, current_index: None }
+        FlexboxLayoutBuilder { layout, current_index: None, auto_size: true, auto_spacing: Some(5) }
     }
 
     fn update_layout(&self, width: u32, height: u32) -> Result<(), stretch::Error> {
@@ -87,7 +87,9 @@ impl FlexboxLayout {
 
 pub struct FlexboxLayoutBuilder {
     layout: FlexboxLayoutInner,
-    current_index: Option<usize>
+    current_index: Option<usize>,
+    auto_size: bool,
+    auto_spacing: Option<u32>
 }
 
 impl FlexboxLayoutBuilder {
@@ -106,6 +108,20 @@ impl FlexboxLayoutBuilder {
             control: child.into().hwnd().unwrap(),
             style: Style::default()
         });
+        self
+    }
+
+    /// Make it so that the children of the layout all have equal size
+    /// This flags is erased when `size`, `max_size`, or `min_size` is set on the children.
+    pub fn auto_size(mut self, auto: bool) -> FlexboxLayoutBuilder {
+        self.auto_size = auto;
+        self
+    }
+
+    /// Automatically generate padding and margin for the parent layout and the children from the selected value.
+    /// This flags is erased when `padding` is called on the layout or when `child_margin` is called on the children
+    pub fn auto_spacing(mut self, auto: Option<u32>) -> FlexboxLayoutBuilder {
+        self.auto_spacing = auto;
         self
     }
 
@@ -145,11 +161,6 @@ impl FlexboxLayoutBuilder {
 
     pub fn justify_content(mut self, value: JustifyContent) -> FlexboxLayoutBuilder {
         self.layout.style.justify_content = value;
-        self
-    }
-
-    pub fn margin(mut self, value: Rect<Dimension>) -> FlexboxLayoutBuilder {
-        self.layout.style.margin = value;
         self
     }
 
@@ -201,6 +212,7 @@ impl FlexboxLayoutBuilder {
     /// Panics if `child` was not called before.
     pub fn child_size(mut self, size: Size<Dimension>) -> FlexboxLayoutBuilder {
         self.current_child().style.size = size;
+        self.auto_size = false;
         self
     }
 
@@ -222,6 +234,7 @@ impl FlexboxLayoutBuilder {
     /// Panics if `child` was not called before.
     pub fn child_min_size(mut self, value: Size<Dimension>) -> FlexboxLayoutBuilder {
         self.current_child().style.min_size = value;
+        self.auto_size = false;
         self
     }
 
@@ -229,6 +242,7 @@ impl FlexboxLayoutBuilder {
     /// Panics if `child` was not called before.
     pub fn child_max_size(mut self, value: Size<Dimension>) -> FlexboxLayoutBuilder {
         self.current_child().style.max_size = value;
+        self.auto_size = false;
         self
     }
 
@@ -250,12 +264,28 @@ impl FlexboxLayoutBuilder {
 
     /// Build the layout object and bind the callback.
     /// Children must only contains window object otherwise this method will panic.
-    pub fn build(self, layout: &FlexboxLayout) {
+    pub fn build(mut self, layout: &FlexboxLayout) {
         use winapi::um::winuser::WM_SIZE;
         use winapi::shared::minwindef::{HIWORD, LOWORD};
 
         let (w, h) = unsafe { wh::get_window_size(self.layout.base) };
         let base_handle = ControlHandle::Hwnd(self.layout.base);
+
+        // Auto compute size if enabled
+        if self.auto_size {
+            let children_count = self.layout.children.len();
+            let size = 1.0f32 / (children_count as f32);
+            for child in self.layout.children.iter_mut() {
+                match &self.layout.style.flex_direction {
+                    FlexDirection::Row | FlexDirection::RowReverse => {
+                        child.style.size = Size { width: Dimension::Percent(size), height: Dimension::Auto };
+                    },
+                    FlexDirection::Column | FlexDirection::ColumnReverse => {
+                        child.style.size = Size { width: Dimension::Auto, height: Dimension::Percent(size) };
+                    }
+                }
+            }
+        }
 
         // Saves the new layout. Free the old layout (if there is one)
         {

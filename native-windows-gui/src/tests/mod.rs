@@ -14,7 +14,7 @@ use freeing_test::*;
 pub struct TestControlPanel {
     window: Window,
 
-    layout: BoxLayout,
+    layout: FlexboxLayout,
 
     controls_test_button: Button,
     thread_test_button: Button,
@@ -30,6 +30,9 @@ mod test_control_panel_ui {
     use crate::{NativeUi, NwgError};
     use std::rc::Rc;
     use std::ops::Deref;
+
+    use stretch::geometry::*;
+    use stretch::style::*;
 
     pub struct TestControlPanelUi {
         inner: TestControlPanel
@@ -109,12 +112,19 @@ mod test_control_panel_ui {
             }
 
             // Layouts
-            BoxLayout::builder()
+            FlexboxLayout::builder()
                 .parent(&ui.window)
-                .margin([5,5,5,5])
-                .child(0, &ui.controls_test_button)
-                .child(1, &ui.thread_test_button)
-                .child(2, &ui.free_test_button)
+                .flex_direction(FlexDirection::Column)
+                .padding(Rect { start: Dimension::Points(5.0), end: Dimension::Points(5.0), top: Dimension::Points(5.0), bottom: Dimension::Points(5.0) } )
+                .child(&ui.controls_test_button)
+                    .child_margin(Rect { start: Dimension::Points(3.0), end: Dimension::Points(3.0), top: Dimension::Points(3.0), bottom: Dimension::Points(3.0) } )
+                    .child_size(Size { width: Dimension::Auto, height: Dimension::Percent(0.3333) })
+                .child(&ui.thread_test_button)
+                    .child_margin(Rect { start: Dimension::Points(3.0), end: Dimension::Points(3.0), top: Dimension::Points(3.0), bottom: Dimension::Points(3.0) } )
+                    .child_size(Size { width: Dimension::Auto, height: Dimension::Percent(0.3333) })
+                .child(&ui.free_test_button)
+                    .child_margin(Rect { start: Dimension::Points(3.0), end: Dimension::Points(3.0), top: Dimension::Points(3.0), bottom: Dimension::Points(3.0) } )
+                    .child_size(Size { width: Dimension::Auto, height: Dimension::Percent(0.3333) })
                 .build(&ui.layout);
 
             Ok(ui)
