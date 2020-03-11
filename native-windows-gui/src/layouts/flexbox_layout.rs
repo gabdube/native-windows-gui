@@ -166,6 +166,7 @@ impl FlexboxLayoutBuilder {
 
     pub fn padding(mut self, value: Rect<Dimension>) -> FlexboxLayoutBuilder {
         self.layout.style.padding = value;
+        self.auto_spacing = None;
         self
     }
 
@@ -227,6 +228,7 @@ impl FlexboxLayoutBuilder {
     /// Panics if `child` was not called before.
     pub fn child_margin(mut self, value: Rect<Dimension>) -> FlexboxLayoutBuilder {
         self.current_child().style.margin = value;
+        self.auto_spacing = None;
         self
     }
 
@@ -284,6 +286,16 @@ impl FlexboxLayoutBuilder {
                         child.style.size = Size { width: Dimension::Auto, height: Dimension::Percent(size) };
                     }
                 }
+            }
+        }
+
+        // Auto spacing if enabled
+        if let Some(spacing) = self.auto_spacing {
+            let spacing = Dimension::Points(spacing as f32);
+            let spacing = Rect { start: spacing, end: spacing, top: spacing, bottom: spacing};
+            self.layout.style.padding = spacing;
+            for child in self.layout.children.iter_mut() {
+                child.style.margin = spacing;
             }
         }
 

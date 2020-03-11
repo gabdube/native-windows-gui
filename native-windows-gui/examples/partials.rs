@@ -12,7 +12,7 @@ use nwg::NativeUi;
 #[derive(Default)]
 pub struct PartialDemo {
     window: nwg::Window,
-    layout: nwg::BoxLayout,
+    layout: nwg::FlexboxLayout,
     menu: nwg::ListBox<&'static str>,
     frame1: nwg::Frame,
     frame2: nwg::Frame,
@@ -170,15 +170,18 @@ mod partial_demo_ui {
             }
 
             // Layout
+            use nwg::stretch::{geometry::Size, style::Dimension as D};
 
-            nwg::BoxLayout::builder()
+            nwg::FlexboxLayout::builder()
                 .parent(&ui.window)
-                .layout_type(nwg::BoxLayoutType::Horizontal)
-                .cell_count(Some(4))
-                .child(0, &ui.menu)
-                .child_item(nwg::BoxLayoutItem::new(&ui.frame1, 1, 3))
-                .child_item(nwg::BoxLayoutItem::new(&ui.frame2, 1, 3))
-                .child_item(nwg::BoxLayoutItem::new(&ui.frame3, 1, 3))
+                .child(&ui.menu)
+                    .child_size(Size { width: D::Percent(0.3), height: D::Auto })
+                .child(&ui.frame1)
+                    .child_size(Size { width: D::Percent(0.7), height: D::Auto })
+                .child(&ui.frame2)
+                    //.child_size(Size { width: D::Percent(0.5), height: D::Auto })
+                .child(&ui.frame3)
+                    //.child_size(Size { width: D::Percent(0.5), height: D::Auto })
                 .build(&ui.layout);
             
             return Ok(ui);

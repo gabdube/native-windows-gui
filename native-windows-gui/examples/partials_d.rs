@@ -19,7 +19,7 @@ pub struct PartialDemo {
     window: nwg::Window,
 
     #[nwg_layout(parent: window, layout_type: BoxLayoutType::Horizontal)]
-    layout: nwg::BoxLayout,
+    layout: nwg::FlexboxLayout,
 
     #[nwg_control(collection: vec!["People", "Animals", "Food"])]
     #[nwg_layout_item(layout: layout, cell: 0)]

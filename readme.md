@@ -105,8 +105,7 @@ This is the main project git. It is separated in multiple sections
   - Communicate to the GUI thread from another thread
   - Run multiple window on different threads
 - Simple layout configurations
-  - HBoxLayout
-  - VBoxLayout
+  - FlexboxLayout
   - GridLayout
 - The most common dialog boxes
   - File dialog (save, open, open folder)
