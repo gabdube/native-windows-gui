@@ -31,9 +31,6 @@ mod test_control_panel_ui {
     use std::rc::Rc;
     use std::ops::Deref;
 
-    use stretch::geometry::*;
-    use stretch::style::*;
-
     pub struct TestControlPanelUi {
         inner: TestControlPanel
     }
@@ -114,17 +111,10 @@ mod test_control_panel_ui {
             // Layouts
             FlexboxLayout::builder()
                 .parent(&ui.window)
-                .flex_direction(FlexDirection::Column)
-                .padding(Rect { start: Dimension::Points(5.0), end: Dimension::Points(5.0), top: Dimension::Points(5.0), bottom: Dimension::Points(5.0) } )
+                .flex_direction(stretch::style::FlexDirection::Column)
                 .child(&ui.controls_test_button)
-                    .child_margin(Rect { start: Dimension::Points(3.0), end: Dimension::Points(3.0), top: Dimension::Points(3.0), bottom: Dimension::Points(3.0) } )
-                    .child_size(Size { width: Dimension::Auto, height: Dimension::Percent(0.3333) })
                 .child(&ui.thread_test_button)
-                    .child_margin(Rect { start: Dimension::Points(3.0), end: Dimension::Points(3.0), top: Dimension::Points(3.0), bottom: Dimension::Points(3.0) } )
-                    .child_size(Size { width: Dimension::Auto, height: Dimension::Percent(0.3333) })
                 .child(&ui.free_test_button)
-                    .child_margin(Rect { start: Dimension::Points(3.0), end: Dimension::Points(3.0), top: Dimension::Points(3.0), bottom: Dimension::Points(3.0) } )
-                    .child_size(Size { width: Dimension::Auto, height: Dimension::Percent(0.3333) })
                 .build(&ui.layout);
 
             Ok(ui)

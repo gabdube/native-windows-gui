@@ -178,10 +178,10 @@ mod partial_demo_ui {
                     .child_size(Size { width: D::Percent(0.3), height: D::Auto })
                 .child(&ui.frame1)
                     .child_size(Size { width: D::Percent(0.7), height: D::Auto })
-                .child(&ui.frame2)
-                    //.child_size(Size { width: D::Percent(0.5), height: D::Auto })
+                /*.child(&ui.frame2)
+                    .child_size(Size { width: D::Percent(0.5), height: D::Auto })
                 .child(&ui.frame3)
-                    //.child_size(Size { width: D::Percent(0.5), height: D::Auto })
+                    .child_size(Size { width: D::Percent(0.5), height: D::Auto })*/
                 .build(&ui.layout);
             
             return Ok(ui);
