@@ -95,8 +95,8 @@
         <h1 class="title">Native Windows GUI: Partials</h1>
 
         With small applications, controls, resources and layouts can usually fit within a single UI struct. That won't always be the case.
-        Native windows GUI partials are a way to extend GUI beyond a single structure. Partials are only a way to organize data, and do not use
-        any kind of special methods.
+        Native windows GUI partials are a way to extend GUI beyond a single structure. <b>Partials are only a way to organize data; they do not use
+        any kind of special methods.</b>
         <br/><br/>
 
         Partials are fully supported by <b>native-windows-derive</b>. See the <a href="nwd_partial.html">derive section</a> to learn how to use partial derive.
@@ -136,7 +136,7 @@
         Starting right into the <code>build_ui</code> function, after the initialization of the controls, the partial ui should be initialized using
         the <code>build_partial</code> method.<br><br>
 
-        Then, before the default events binding, the <code>handles</code> methods should be called in order to add the partial window handle to the callback.
+        Then, before the default events binding, the <code>handles</code> method should be called in order to add the partial window handle to the callback.
         <br><br>
 
         Finally, in the event handler, the <code>process_event</code> should be called in order to dispatch the base events to the partial.<br><br>

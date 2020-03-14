@@ -106,9 +106,11 @@ To learn how to use layouts with <code>native-windows-derive</code> see <a href=
 <h3>Basic usage</h3>  
 
 Just like most NWG objects, layouts are created using a builder api. A layout uses 1 parent control and 0 or more children control. For children or for the parent,
-the layout only accepts window-like controls (valid: buttons, edit, etc, not valid: menu, timer, notice, etc).<br><br>  
+the layout only accepts window-like controls (<b>valid</b>: buttons, edit, etc. <b>not valid</b>: menu, timer, notice, etc).<br><br>  
 
 Layouts implement default. A default layout must first be initialized with a builder. Trying to call methods on default builders will cause a panic.<br><br>
+
+Layouts resize their children automatically when the parent control is resized. This also triggers a <code>OnResize</code> event.br><br>
 
 <b>GridLayout</b> and <b>flexbox</b> have a similar builder API. With some exceptions when defining children. <br><br>
 
@@ -116,12 +118,20 @@ Layouts uses interior mutability, as such it's always possible to edit their pro
 
 <h3>Gridlayout</h3>  
 
-The GridLayout splits the parent control into a equally spaced grid. Children are placed in that grid using a [row, column] index.
+The GridLayout splits the parent control into an equally spaced grid. Children are placed in that grid using a [row, column] index.
 Optionally, children controls can span across more than one row/column.<br><br>
+
+Children in a gridlayout can be added using the <code>child</code> method or the <code>child_item</code> method. The first one is a simpler interface when the
+children control do not span across multiple cells. <code>child_item</code> is used to specify the row span and the column span of the children.<br><br>
+
+A gridlayout can be manually resized with the <code>resize</code> method. Also, if one of the layout properties was updates, the <code>fit</code> method can be used
+to show the change and refit the children in the parent.<br><br>
+
+Lastly, check out the grid layout docs for the layout properties.<br><br>
 
 A grid layout example:
 
-<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">GridLayout</span>::<span class="n">default</span><span class="p">();</span><span class="w"></span>
+<div class="highlight"><pre style="width: auto"><span></span><span class="kd">let</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">GridLayout</span>::<span class="n">default</span><span class="p">();</span><span class="w"></span>
 <span class="kd">let</span><span class="w"> </span><span class="n">window</span>: <span class="kp">&amp;</span><span class="nc">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cm">/*...*/</span><span class="p">;</span><span class="w"></span>
 <span class="kd">let</span><span class="w"> </span><span class="n">item1</span>: <span class="kp">&amp;</span><span class="nc">nwg</span>::<span class="n">Button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cm">/*...*/</span><span class="p">;</span><span class="w"></span>
 <span class="kd">let</span><span class="w"> </span><span class="n">item2</span>: <span class="kp">&amp;</span><span class="nc">nwg</span>::<span class="n">Label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cm">/*...*/</span><span class="p">;</span><span class="w"></span>
@@ -140,6 +150,41 @@ A grid layout example:
 
 <h3>FlexboxLayout</h3>  
 
+Flexbox layout uses <a href="https://github.com/vislyhq/stretch">stretch</a> to align children controls in a row or in column. <br><br>
+
+Internally, nwg controls (both the parent and the children) are associated with a stretch node/style. See the flexbox layout docs for the style methods.<br><br>
+
+At building time, a new children can be added to the layout using the <code>child</code> method. Following this method, any <code>child_*</code> method call will
+customize the style of this child. Another call to <code>child</code> will finalize the current child style<br><br>
+
+A flexbox layout example:
+
+<div class="highlight"><pre><span></span><span class="k">use</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">stretch</span>::<span class="p">{</span><span class="n">geometry</span>::<span class="p">{</span><span class="n">Size</span><span class="p">,</span><span class="w"> </span><span class="n">Rect</span><span class="p">},</span><span class="w"> </span><span class="n">style</span>::<span class="p">{</span><span class="n">Dimension</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">FlexDirection</span><span class="p">}};</span><span class="w"></span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">window</span>: <span class="kp">&amp;</span><span class="nc">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cm">/*...*/</span><span class="p">;</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">item1</span>: <span class="kp">&amp;</span><span class="nc">nwg</span>::<span class="n">Button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cm">/*...*/</span><span class="p">;</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">item2</span>: <span class="kp">&amp;</span><span class="nc">nwg</span>::<span class="n">Label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="cm">/*...*/</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">const</span><span class="w"> </span><span class="n">FIFTY_PC</span>: <span class="nc">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">D</span>::<span class="n">Percent</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">PT_10</span>: <span class="nc">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">D</span>::<span class="n">Points</span><span class="p">(</span><span class="mf">10.0</span><span class="p">);</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">PT_5</span>: <span class="nc">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">D</span>::<span class="n">Points</span><span class="p">(</span><span class="mf">5.0</span><span class="p">);</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">PADDING</span>: <span class="nc">Rect</span><span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rect</span><span class="p">{</span><span class="w"> </span><span class="n">start</span>: <span class="nc">PT_10</span><span class="p">,</span><span class="w"> </span><span class="n">end</span>: <span class="nc">PT_10</span><span class="p">,</span><span class="w"> </span><span class="n">top</span>: <span class="nc">PT_10</span><span class="p">,</span><span class="w"> </span><span class="n">bottom</span>: <span class="nc">PT_10</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">MARGIN</span>: <span class="nc">Rect</span><span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rect</span><span class="p">{</span><span class="w"> </span><span class="n">start</span>: <span class="nc">PT_5</span><span class="p">,</span><span class="w"> </span><span class="n">end</span>: <span class="nc">PT_5</span><span class="p">,</span><span class="w"> </span><span class="n">top</span>: <span class="nc">PT_5</span><span class="p">,</span><span class="w"> </span><span class="n">bottom</span>: <span class="nc">PT_5</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+
+
+<span class="n">nwg</span>::<span class="n">FlexboxLayout</span>::<span class="n">builder</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">parent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">window</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">flex_direction</span><span class="p">(</span><span class="n">FlexDirection</span>::<span class="n">Row</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">padding</span><span class="p">(</span><span class="n">PADDING</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">child</span><span class="p">(</span><span class="o">&amp;</span><span class="n">item1</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">child_margin</span><span class="p">(</span><span class="n">MARGIN</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">child_max_size</span><span class="p">(</span><span class="n">Size</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">width</span>: <span class="nc">D</span>::<span class="n">Points</span><span class="p">(</span><span class="mf">200.0</span><span class="p">),</span><span class="w"> </span><span class="n">height</span>: <span class="nc">D</span>::<span class="n">Undefined</span><span class="w"> </span><span class="p">})</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">child_size</span><span class="p">(</span><span class="n">Size</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">width</span>: <span class="nc">FIFTY_PC</span><span class="p">,</span><span class="w"> </span><span class="n">height</span>: <span class="nc">D</span>::<span class="n">Auto</span><span class="w"> </span><span class="p">})</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">child</span><span class="p">(</span><span class="o">&amp;</span><span class="n">item2</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">child_margin</span><span class="p">(</span><span class="n">MARGIN</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">child_size</span><span class="p">(</span><span class="n">Size</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">width</span>: <span class="nc">D</span>::<span class="n">Percent</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span><span class="w"> </span><span class="n">height</span>: <span class="nc">FIFTY_PC</span><span class="w"> </span><span class="p">});</span><span class="w"></span>
+</pre></div>
+    
 
 <br><br>
 
