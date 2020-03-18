@@ -13,7 +13,7 @@ use stretch::{
 
 
 #[derive(Debug)]
-pub struct FlexboxLayoutItem {
+struct FlexboxLayoutItem {
     /// The handle to the control in the item
     control: HWND,
     style: Style,
@@ -48,6 +48,64 @@ impl FlexboxLayout {
         };
 
         FlexboxLayoutBuilder { layout, current_index: None, auto_size: true, auto_spacing: Some(5) }
+    }
+
+    /**
+        Add a new children in the layout with the stretch style. 
+        
+        Panic:
+        * If the control is not a window-like control
+        * If the layout was not initialized
+    */
+    pub fn add_child<W: Into<ControlHandle>>(&self, c: W, style: Style) {
+        let mut inner = self.inner.borrow_mut();
+        if inner.base.is_null() {
+            panic!("Flexbox layout is not yet initialized!");
+        }
+
+        inner.children.push(FlexboxLayoutItem {
+            control: c.into().hwnd().expect("Control must be window like"),
+            style
+        });
+    }
+
+    /**
+        Remove a children from the layout
+        
+        Panic:
+        * If the control is not a window-like control
+        * If the control is not in the layout (see `has_child`)
+        * If the layout was not initialized
+    */
+    pub fn remove_child<W: Into<ControlHandle>>(&self, c: W) {
+        let mut inner = self.inner.borrow_mut();
+        if inner.base.is_null() {
+            panic!("Flexbox layout is not yet initialized!");
+        }
+
+        let handle = c.into().hwnd().expect("Control must be window like");
+        let index = inner.children.iter().position(|child| child.control == handle);
+        match index {
+            Some(i) => { inner.children.remove(i); },
+            None => { panic!("Control was not found in layout"); }
+        }
+    }
+
+    /**
+        Check if the selected control is a children in the layout.
+
+        Panic:
+        * If the control is not a window-like control.
+        * If the layout was not initialized
+    */
+    pub fn has_child<W: Into<ControlHandle>>(&self, c: W) -> bool {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() {
+            panic!("Flexbox layout is not yet initialized!");
+        }
+
+        let handle = c.into().hwnd().expect("Control must be window like");
+        inner.children.iter().any(|child| child.control == handle)
     }
 
     fn update_layout(&self, width: u32, height: u32) -> Result<(), stretch::Error> {

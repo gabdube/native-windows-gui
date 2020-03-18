@@ -30,7 +30,7 @@ impl GridLayoutItem {
 
     /// Initialize a new grid layout item
     pub fn new<W: Into<ControlHandle>>(c: W, col: u32, row: u32, col_span: u32, row_span: u32) -> GridLayoutItem {
-        let control = c.into().hwnd().expect("Child must be HWND");
+        let control = c.into().hwnd().expect("Child must be a window-like control (HWND handle)");
 
         GridLayoutItem {
             control,
@@ -119,14 +119,16 @@ impl GridLayout {
         GridLayoutBuilder { layout }
     }
 
-    /// Add a children control to the grid layout. 
-    /// This is a simplified interface over `add_child_item`
-    ///
-    /// Panic:
-    ///   - The layout must have been successfully built otherwise this function will panic.
-    ///   - The control must be window-like and be initialized
+    /**
+        Add a children control to the grid layout. 
+        This is a simplified interface over `add_child_item`
+        
+        Panic:
+        - If the layout was not yet initialized
+        - If the control is not window-like (HWND handle)
+    */
     pub fn add_child<W: Into<ControlHandle>>(&self, col: u32, row: u32, c: W) {
-        let h = c.into().hwnd().expect("Child must be HWND");
+        let h = c.into().hwnd().expect("Child must be a window-like control (HWND handle)");
         let item = GridLayoutItem {
             control: h,
             col,
@@ -138,17 +140,20 @@ impl GridLayout {
         self.add_child_item(item);
     }
     
-    /// Add a children control to the grid layout. 
-    ///
-    /// Panic:
-    ///   - The layout must have been successfully built otherwise this function will panic.
-    ///   - The control must be window-like and be initialized
+    /** Add a children control to the grid layout. 
+    
+     Panic:
+       - If the layout was not yet initialized
+       - If the control is not window-like (HWND handle)
+    */
     pub fn add_child_item(&self, i: GridLayoutItem) {
         let base = {
             let mut inner = self.inner.borrow_mut();
             if inner.base.is_null() {
-                panic!("Grid layout is not bound to a parent control.")
+                panic!("GridLayout is not initialized");
             }
+
+            // No need to check the layout item control because it's checked in `GridLayoutItem::new`
 
             inner.children.push(i);
             inner.base
@@ -157,6 +162,45 @@ impl GridLayout {
 
         let (w, h) = unsafe { wh::get_window_size(base) };
         self.update_layout(w as u32, h as u32);
+    }
+
+    /**
+        Remove the children control in the layout. See also `remove_child_by_pos`.
+
+        Panic:
+        - If the layout was not yet initialized
+        - If the control is not in the layout (see `has_child`)
+    */
+    pub fn remove_child<W: Into<ControlHandle>>(&self, c: W) {
+
+    }
+
+    /**
+        Remove the children control in the layout. See also `remove_child_by_pos`.
+
+        Panic:
+        - If the layout was not yet initialized
+        - If the control is not in the layout (see `has_child`)
+    */
+    pub fn remove_child_by_pos<W: Into<ControlHandle>>(&self, c: W) {
+
+    }
+
+    /**
+        Check if a window control is a children of the layout
+
+        Panic:
+        - If the layout was not yet initialized
+        - If the control is not in the layout (see `has_child`)
+    */
+    pub fn has_child<W: Into<ControlHandle>>(&self, c: W) -> bool {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() {
+            panic!("GridLayout is not initialized");
+        }
+
+        let handle = c.into().hwnd().expect("Children is not a window-like control (HWND handle)");
+        inner.children.iter().any(|c| c.control == handle )
     }
 
     /// Resize the layout as if the parent window had the specified size.
