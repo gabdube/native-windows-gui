@@ -71,7 +71,7 @@ pub struct SubclassApp {
     window: nwg::Window,
 
     #[nwg_layout(parent: window)]
-    layout: nwg::BoxLayout,
+    layout: nwg::FlexboxLayout,
 
     #[nwg_control(text: "Simple button")]
     #[nwg_layout_item(layout: layout, cell: 0)]

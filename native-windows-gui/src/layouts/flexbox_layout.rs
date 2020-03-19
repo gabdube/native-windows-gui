@@ -64,7 +64,7 @@ impl FlexboxLayout {
         }
 
         inner.children.push(FlexboxLayoutItem {
-            control: c.into().hwnd().expect("Control must be window like"),
+            control: c.into().hwnd().expect("Control must be window like (HWND handle)"),
             style
         });
     }
@@ -83,7 +83,7 @@ impl FlexboxLayout {
             panic!("Flexbox layout is not yet initialized!");
         }
 
-        let handle = c.into().hwnd().expect("Control must be window like");
+        let handle = c.into().hwnd().expect("Control must be window like (HWND handle)");
         let index = inner.children.iter().position(|child| child.control == handle);
         match index {
             Some(i) => { inner.children.remove(i); },
@@ -104,7 +104,7 @@ impl FlexboxLayout {
             panic!("Flexbox layout is not yet initialized!");
         }
 
-        let handle = c.into().hwnd().expect("Control must be window like");
+        let handle = c.into().hwnd().expect("Control must be window like (HWND handle)");
         inner.children.iter().any(|child| child.control == handle)
     }
 

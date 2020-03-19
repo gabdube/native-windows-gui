@@ -166,24 +166,62 @@ impl GridLayout {
 
     /**
         Remove the children control in the layout. See also `remove_child_by_pos`.
+        Note that the child control won't be hidden after being removed from the control.
 
         Panic:
         - If the layout was not yet initialized
         - If the control is not in the layout (see `has_child`)
     */
     pub fn remove_child<W: Into<ControlHandle>>(&self, c: W) {
+        let base = {
+            let mut inner = self.inner.borrow_mut();
+            if inner.base.is_null() {
+                panic!("GridLayout is not initialized");
+            }
 
+            let handle = c.into().hwnd().expect("Control must be window-like (HWND handle)");
+            let index = inner.children.iter().position(|item| item.control == handle);
+            match index {
+                Some(i) => { inner.children.remove(i); },
+                None => { panic!("Control is not in the layout"); }
+            }
+            
+            inner.base
+        };
+        
+
+        let (w, h) = unsafe { wh::get_window_size(base) };
+        self.update_layout(w as u32, h as u32);
     }
 
     /**
         Remove the children control in the layout. See also `remove_child_by_pos`.
+        Note that the child control won't be hidden after being removed from the control.
+
+        This method won't do anything if there is no control at the specified position.
 
         Panic:
         - If the layout was not yet initialized
-        - If the control is not in the layout (see `has_child`)
     */
-    pub fn remove_child_by_pos<W: Into<ControlHandle>>(&self, c: W) {
+    pub fn remove_child_by_pos<W: Into<ControlHandle>>(&self, col: u32, row: u32) {
+        let base = {
+            let mut inner = self.inner.borrow_mut();
+            if inner.base.is_null() {
+                panic!("GridLayout is not initialized");
+            }
 
+            let index = inner.children.iter().position(|item| item.col == col && item.row == row);
+            match index {
+                Some(i) => { inner.children.remove(i); },
+                None => {}
+            }
+            
+            inner.base
+        };
+        
+
+        let (w, h) = unsafe { wh::get_window_size(base) };
+        self.update_layout(w as u32, h as u32);
     }
 
     /**
