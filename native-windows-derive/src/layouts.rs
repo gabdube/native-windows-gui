@@ -10,16 +10,14 @@ pub struct GridLayoutChild {
 }
 
 #[derive(Clone, Copy)]
-pub struct BoxLayoutChild {
-    pub cell: u32,
-    pub cell_span: u32,
+pub struct FlexboxLayoutChild {
 }
 
 
 pub enum LayoutChild {
     Init(Parameters),
     Grid(GridLayoutChild),
-    Box(BoxLayoutChild)
+    Flexbox(FlexboxLayoutChild)
 }
 
 impl LayoutChild {
@@ -43,7 +41,6 @@ impl LayoutChild {
         };
 
         let [mut col, mut row, mut col_span, mut row_span] = [0, 0, 1, 1];
-        let [mut cell, mut cell_span] = [0, 1];
 
         match self {
             LayoutChild::Init(p) => for p in p.params.iter() {
@@ -54,10 +51,6 @@ impl LayoutChild {
                     "row" => { row = int_value(&p.e) },
                     "col_span" => { col_span = int_value(&p.e) },
                     "row_span" => { row_span = int_value(&p.e) },
-        
-                    // Box layout
-                    "cell" => { cell = int_value(&p.e) },
-                    "cell_span" => { cell_span = int_value(&p.e) },
                     _ => {}
                 }
             },
@@ -66,8 +59,8 @@ impl LayoutChild {
 
         if parent_type == "GridLayout" {
             *self = LayoutChild::Grid( GridLayoutChild { col, col_span, row, row_span } );
-        } else if parent_type == "BoxLayout" {
-            *self = LayoutChild::Box( BoxLayoutChild { cell, cell_span } );
+        } else if parent_type == "FlexboxLayout" {
+            *self = LayoutChild::Flexbox( FlexboxLayoutChild { } );
         } else {
             panic!("Unknown parent type: {:?}", parent_type);
         }

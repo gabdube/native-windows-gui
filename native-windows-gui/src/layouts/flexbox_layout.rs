@@ -57,16 +57,23 @@ impl FlexboxLayout {
         * If the control is not a window-like control
         * If the layout was not initialized
     */
-    pub fn add_child<W: Into<ControlHandle>>(&self, c: W, style: Style) {
-        let mut inner = self.inner.borrow_mut();
-        if inner.base.is_null() {
-            panic!("Flexbox layout is not yet initialized!");
-        }
+    pub fn add_child<W: Into<ControlHandle>>(&self, c: W, style: Style) -> Result<(), stretch::Error> {
+        let base = {
+            let mut inner = self.inner.borrow_mut();
+            if inner.base.is_null() {
+                panic!("Flexbox layout is not yet initialized!");
+            }
 
-        inner.children.push(FlexboxLayoutItem {
-            control: c.into().hwnd().expect("Control must be window like (HWND handle)"),
-            style
-        });
+            inner.children.push(FlexboxLayoutItem {
+                control: c.into().hwnd().expect("Control must be window like (HWND handle)"),
+                style
+            });
+
+            inner.base
+        };
+
+        let (w, h) = unsafe { wh::get_window_size(base) };
+        self.update_layout(w, h)
     }
 
     /**

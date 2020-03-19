@@ -30,10 +30,28 @@ impl PartialDemo {
         self.frame2.set_visible(false);
         self.frame3.set_visible(false);
 
+        let layout = &self.layout;
+        if layout.has_child(&self.frame1) { layout.remove_child(&self.frame1); }
+        if layout.has_child(&self.frame2) { layout.remove_child(&self.frame2); }
+        if layout.has_child(&self.frame3) { layout.remove_child(&self.frame3); }
+
+        use nwg::stretch::{geometry::Size, style::{Style, Dimension as D}};
+        let mut style = Style::default();
+        style.size = Size { width: D::Percent(0.7), height: D::Auto };
+
         match self.menu.selection() {
-            None | Some(0) => self.frame1.set_visible(true),
-            Some(1) => self.frame2.set_visible(true),
-            Some(2) => self.frame3.set_visible(true),
+            None | Some(0) => {
+                layout.add_child(&self.frame1, style).unwrap();
+                self.frame1.set_visible(true);
+            },
+            Some(1) => {
+                layout.add_child(&self.frame2, style).unwrap();
+                self.frame2.set_visible(true);
+            },
+            Some(2) => {
+                layout.add_child(&self.frame3, style).unwrap();
+                self.frame3.set_visible(true);
+            },
             Some(_) => unreachable!()
         }
     }
@@ -178,10 +196,6 @@ mod partial_demo_ui {
                     .child_size(Size { width: D::Percent(0.3), height: D::Auto })
                 .child(&ui.frame1)
                     .child_size(Size { width: D::Percent(0.7), height: D::Auto })
-                /*.child(&ui.frame2)
-                    .child_size(Size { width: D::Percent(0.5), height: D::Auto })
-                .child(&ui.frame3)
-                    .child_size(Size { width: D::Percent(0.5), height: D::Auto })*/
                 .build(&ui.layout);
             
             return Ok(ui);

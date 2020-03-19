@@ -1,5 +1,5 @@
 use quote::{ToTokens};
-use crate::layouts::{LayoutChild, BoxLayoutChild, GridLayoutChild, layout_parameters};
+use crate::layouts::{LayoutChild, FlexboxLayoutChild, GridLayoutChild, layout_parameters};
 use crate::events::ControlEvents;
 use crate::shared::Parameters;
 
@@ -371,9 +371,9 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                         quote! { 
                             child_item(GridLayoutItem::new(&ui.#id, #col, #row, #col_span, #row_span))
                         },
-                    Some(LayoutChild::Box( BoxLayoutChild {cell, cell_span} )) => 
+                    Some(LayoutChild::Flexbox( FlexboxLayoutChild {} )) => 
                         quote! { 
-                            child_item(BoxLayoutItem::new(&ui.#id, #cell, #cell_span))
+                            child(&ui.#id)
                         },
                     Some(_) => panic!("Unprocessed layout item"),
                     None => panic!("Unfiltered layout item")

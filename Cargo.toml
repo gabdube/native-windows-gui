@@ -3,6 +3,7 @@
 members = [
     "native-windows-gui",
     "native-windows-derive",
+    "native-windows-gui\\examples\\opengl_canvas",
 ]
 
 [profile.dev]
