@@ -2,7 +2,7 @@ use crate::controls::ControlHandle;
 use crate::win32::window_helper as wh;
 use crate::win32::window::{RawEventHandler, unbind_raw_event_handler, bind_raw_event_handler};
 use winapi::shared::windef::HWND;
-use std::{ptr, rc::Rc, cell::RefCell};
+use std::{ptr, rc::Rc, cell::{RefCell, RefMut, Ref} };
 
 use stretch::{
     number::Number,
@@ -13,14 +13,14 @@ use stretch::{
 
 
 #[derive(Debug)]
-struct FlexboxLayoutItem {
+pub struct FlexboxLayoutItem {
     /// The handle to the control in the item
     control: HWND,
     style: Style,
 }
 
 /// This is the inner data shared between the callback and the application
-pub struct FlexboxLayoutInner {
+struct FlexboxLayoutInner {
     base: HWND,
     handler: Option<RawEventHandler>,
     style: Style,
@@ -48,6 +48,36 @@ impl FlexboxLayout {
         };
 
         FlexboxLayoutBuilder { layout, current_index: None, auto_size: true, auto_spacing: Some(5) }
+    }
+
+    /**
+        Returns the style of the parent control
+        
+        Panic:
+        - The layout must have been successfully built otherwise this function will panic.
+    */
+    pub fn style(&self) -> Style {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() {
+            panic!("Flexbox layout is not yet initialized!");
+        }
+
+        inner.style.clone()
+    }
+
+    /**
+        Sets the style of the layout parent control
+
+        Panic:
+        - The layout must have been successfully built otherwise this function will panic.
+    */
+    pub fn set_style(&self, style: Style) {
+        let mut inner = self.inner.borrow_mut();
+        if inner.base.is_null() {
+            panic!("Flexbox layout is not yet initialized!");
+        }
+
+        inner.style = style;
     }
 
     /**
@@ -113,6 +143,60 @@ impl FlexboxLayout {
 
         let handle = c.into().hwnd().expect("Control must be window like (HWND handle)");
         inner.children.iter().any(|child| child.control == handle)
+    }
+
+    /**
+        Borrow the inner value of the flexbox layout. While the returned value lives, calling other method
+        of the the flexbox layout that modify the inner state will cause a panic. Simple looktup (ex: `has_child`) will still work.
+
+        Panic:
+        - The layout must have been successfully built otherwise this function will panic.
+    */
+    pub fn children(&self) -> FlexboxLayoutChildren {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() {
+            panic!("Flexbox layout is not yet initialized!");
+        }
+        
+        FlexboxLayoutChildren {
+            inner
+        }
+    }
+
+    /**
+        Borrow the inner value of the flexbox layout as mutable. While the returned value lives, calling other method
+        of the the flexbox layout will cause a panic.
+
+        If the children of the layout were modified, call `fit` to update the layout after `FlexboxLayoutChildrenMut` is dropped.
+
+        Panic:
+        - The layout must have been successfully built otherwise this function will panic.
+    */
+    pub fn children_mut(&self) -> FlexboxLayoutChildrenMut {
+        let inner = self.inner.borrow_mut();
+        if inner.base.is_null() {
+            panic!("Flexbox layout is not yet initialized!");
+        }
+
+        FlexboxLayoutChildrenMut {
+            inner
+        }
+    }
+
+    /** 
+        Resize the layout to fit the parent window size
+        
+        Panic:
+        - The layout must have been successfully built otherwise this function will panic.
+    */
+    pub fn fit(&self) -> Result<(), stretch::Error> {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() {
+            panic!("FlexboxLayout is not bound to a parent control.")
+        }
+
+        let (w, h) = unsafe { wh::get_window_size(inner.base) };
+        self.update_layout(w, h)
     }
 
     fn update_layout(&self, width: u32, height: u32) -> Result<(), stretch::Error> {
@@ -415,4 +499,29 @@ impl Default for FlexboxLayout {
         }
     }
 
+}
+
+
+/**
+    A wrapper that expose the inner collection of a flexboxlayout.
+*/
+pub struct FlexboxLayoutChildrenMut<'a> {
+    inner: RefMut<'a, FlexboxLayoutInner>
+}
+
+impl<'a> FlexboxLayoutChildrenMut<'a> {
+    pub fn children<'b>(&'b mut self) -> &'b mut Vec<FlexboxLayoutItem> {
+        &mut self.inner.children
+    }
+}
+
+
+pub struct FlexboxLayoutChildren<'a> {
+    inner: Ref<'a, FlexboxLayoutInner>
+}
+
+impl<'a> FlexboxLayoutChildren<'a> {
+    pub fn children<'b>(&'b self) -> &'b Vec<FlexboxLayoutItem> {
+        &self.inner.children
+    }
 }
