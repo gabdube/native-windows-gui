@@ -8,8 +8,8 @@ the quirks and rough edges of the API by providing a simple, safe and rust-like 
 Native Windows GUI keeps things simple. This means small compile time, minimal resources usage
 and less time searching the documentation and more time for you to develop your application.
 
-Of course, you don't have to take my word for it, check out the [showcase](https://github.com/gabdube/nwg-private/tree/master/showcase) and the 
-[examples](https://github.com/gabdube/nwg-private/tree/master/native-windows-gui/examples).
+Of course, you don't have to take my word for it, check out the [showcase](showcase) and the 
+[examples](native-windows-gui/examples).
 
 This is the 3rd and final version of NWG. It is considered "mature" or, as I would say
 "the backlog is empty, and it will most likely stay that way". This version implements pretty much
@@ -71,7 +71,7 @@ This is the main project git. It is separated in multiple sections
   - A procedural macro that generates GUI application from rust structure (pretty cool stuff IMO)
 - native-windows-docs
   - A hefty documentation that goes over everything you need to know about NWG
-- [showcase](https://github.com/gabdube/nwg-private/tree/master/showcase)
+- [showcase](showcase)
   - Images of the examples. If you've made a NWG application and want
   to share it here. Send me a message or open a PR. It's free real estate.
 
