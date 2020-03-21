@@ -105,7 +105,7 @@
         <br><br>
 
         NWG does not have a drawing API. Originally, NWG would have a built-in canvas control that wrapped Direct2D, but the implementation was removed
-        from the library because it was too bulky and because it was not possible to finish it before the january 2020 deadline.
+        from the library because it was too bulky and because it was not possible to finish it before the january 2020 deadline (heh).
         <br><br>
 
         Transparency is not supported. NWG controls with transparency flickers ALOT. It's almost a health hazard for people with epilepsy.
@@ -126,8 +126,8 @@
 
         <h3>Data efficiency</h3>
 
-        Data efficiency in NWG collection controls is very inefficient. There's lots of duplicated data. This means that if your application must log
-        hundread of thousand of items, it will have a hard time.
+        Data efficiency in NWG collection controls is very inefficient. NWG both allocate space to hold the rust specific data and the visible string value of the control.
+        This means that if your application must log hundread of thousand of items, it will have a hard time.
 
         <br><br>
 

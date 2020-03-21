@@ -78,6 +78,9 @@ pub trait NativeUi<D, UI> {
 /// Initialize some application wide GUI settings.
 /// This includes default styling and common controls resources.
 pub fn init() -> std::result::Result<(), errors::NwgError> {
-    enable_visual_styles();
+    if cfg!(not(feature="no-styling")) {
+        enable_visual_styles();
+    }
+    
     init_common_controls()
 }
