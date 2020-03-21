@@ -1,0 +1,12 @@
+[package]
+name = "nwg-embed-resources"
+version = "1.0.0"
+authors = ["gdube <gdube.475@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+native-windows-gui = {path = "../../", features=["no-styling"]}
+
+[build-dependencies]
+embed-resource = "1.3"
+

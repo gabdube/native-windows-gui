@@ -59,6 +59,10 @@ cargo run --example splash_screen_d --features "image-decoder"
 
 cd examples/opengl_canvas
 cargo run
+
+# The closest thing to a real application in the examples
+cd ../examples/sync-draw
+cargo run
 ```
 
 ## Project structure

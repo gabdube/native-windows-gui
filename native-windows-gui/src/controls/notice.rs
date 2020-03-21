@@ -64,7 +64,7 @@ impl Notice {
     /// This will also return false if the notice is not initialized.
     pub fn valid(&self) -> bool {
         if self.handle.blank() { return false; }
-        let (hwnd, _) = self.handle.timer().expect(BAD_HANDLE);
+        let (hwnd, _) = self.handle.notice().expect(BAD_HANDLE);
         wh::window_valid(hwnd)
     } 
 

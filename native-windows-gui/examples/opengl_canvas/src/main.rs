@@ -247,7 +247,8 @@ mod extern_canvas_ui {
     use std::ops::Deref;
 
     pub struct ExternCanvasUi {
-        inner: ExternCanvas
+        inner: ExternCanvas,
+        default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
     impl nwg::NativeUi<ExternCanvas, Rc<ExternCanvasUi>> for ExternCanvas {
@@ -281,7 +282,10 @@ mod extern_canvas_ui {
                 .build(&mut data.choose_color_btn2)?;
 
             // Wrap-up
-            let ui = Rc::new(ExternCanvasUi { inner: data });
+            let ui = Rc::new(ExternCanvasUi {
+                inner: data,
+                default_handler: RefCell::default(),
+            });
 
             // Events
             let window_handles = [&ui.window.handle];
@@ -316,7 +320,9 @@ mod extern_canvas_ui {
                     }
                 };
 
-                nwg::full_bind_event_handler(handle, handle_events);
+                ui.default_handler.borrow_mut().push(
+                    nwg::full_bind_event_handler(handle, handle_events)
+                );
             }
 
             // Layouts
@@ -333,6 +339,15 @@ mod extern_canvas_ui {
         }
     }
 
+    impl ExternCanvasUi {
+        /// To make sure that everything is freed without issues, the default handler must be unbound.
+        pub fn destroy(&self) {
+            let mut handlers = self.default_handler.borrow_mut();
+            for handler in handlers.drain(0..) {
+                nwg::unbind_event_handler(&handler);
+            }
+        }
+    }
 
     impl Deref for ExternCanvasUi {
         type Target = ExternCanvas;
@@ -355,9 +370,12 @@ pub fn main() {
 
     // Here we use the `with_callback` version of dispatch_thread_events
     // Internally the callback will be executed almost as fast as `loop { callback() }`
+    let callback_app = app.clone();
     nwg::dispatch_thread_events_with_callback(move || {
-        app.canvas.render();
+        callback_app.canvas.render();
     });
+
+    app.destroy();
 }
 
 
