@@ -1,0 +1,10 @@
+#define RT_MANIFEST 24
+1 RT_MANIFEST "embed_resources.exe.manifest"
+MAINICON ICON "../../test_rc/love.ico"
+
+
+STRINGTABLE
+{
+    0, "Enter your name here"
+    1, "Say my name"
+} 
