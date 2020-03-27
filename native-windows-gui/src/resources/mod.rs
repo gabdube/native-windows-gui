@@ -19,7 +19,7 @@ mod font_dialog;
 #[cfg(feature = "image-list")]
 mod image_list;
 
-#[cfg(feature = "embed-resources")]
+#[cfg(feature = "embed-resource")]
 mod embed;
 
 pub use font::{Font, FontInfo, FontBuilder};
@@ -43,6 +43,6 @@ pub use font_dialog::{FontDialog, FontDialogBuilder};
 #[cfg(feature = "image-list")]
 pub use image_list::{ImageList, ImageListBuilder};
 
-#[cfg(feature = "embed-resources")]
+#[cfg(feature = "embed-resource")]
 pub use embed::*;
 

@@ -6,7 +6,7 @@ edition = "2018"
 build = "build.rs"
 
 [dependencies]
-native-windows-gui = {path = "../../", features=["no-styling"]}
+native-windows-gui = {path = "../../", features=["no-styling", "embed-resource"]}
 native-windows-derive = {path = "../../../native-windows-derive"}
 
 [build-dependencies]

@@ -72,18 +72,19 @@ pub struct GridLayoutInner {
     spacing: u32
 }
 
-/** A layout that lays out widgets in a grid
- NWG layouts use interior mutability to manage their controls.
+/** 
+A layout that lays out widgets in a grid
+NWG layouts use interior mutability to manage their controls.
 
- A GridLayouts has the following properties:
-   * margins - The top, right, bottom, left margins of the layout - (default: [5, 5, 5, 5])
-   * spacing - The spacing between children controls - (default: 5)
-   * min_size - The minimum size of the layout - (default: [0, 0])
-   * max_size - The maximum size of the layout - (default: [u32::max_value(), u32::max_value()])
-   * max_column - Number of columns - (default: None),
-   * max_row - Number of rows - (default: None),
+A GridLayouts has the following properties:
+* margins - The top, right, bottom, left margins of the layout - (default: [5, 5, 5, 5])
+* spacing - The spacing between children controls - (default: 5)
+* min_size - The minimum size of the layout - (default: [0, 0])
+* max_size - The maximum size of the layout - (default: [u32::max_value(), u32::max_value()])
+* max_column - Number of columns - (default: None),
+* max_row - Number of rows - (default: None),
 
- ```rust
+```rust
     use native_windows_gui as nwg;
     fn layout(layout: &nwg::GridLayout, window: &nwg::Window, item1: &nwg::Button, item2: &nwg::Button) {
         nwg::GridLayout::builder()
@@ -95,7 +96,7 @@ pub struct GridLayoutInner {
             .child_item(nwg::GridLayoutItem::new(item2, 1, 0, 2, 1))
             .build(&layout);
     }
- ```
+```
 */
 #[derive(Clone)]
 pub struct GridLayout {
@@ -140,11 +141,12 @@ impl GridLayout {
         self.add_child_item(item);
     }
     
-    /** Add a children control to the grid layout. 
+    /** 
+    Add a children control to the grid layout. 
     
-     Panic:
-       - If the layout was not yet initialized
-       - If the control is not window-like (HWND handle)
+    Panic:
+        - If the layout was not yet initialized
+        - If the control is not window-like (HWND handle)
     */
     pub fn add_child_item(&self, i: GridLayoutItem) {
         let base = {

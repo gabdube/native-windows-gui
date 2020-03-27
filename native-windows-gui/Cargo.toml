@@ -53,10 +53,10 @@ textbox = []
 rich-textbox = []
 image-list = []
 no-styling = []
-embed-resources = []
+embed-resource = []
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "cursor", "image-decoder",
        "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "number-select", "clipboard", "menu", 
-       "trackbar", "extern-canvas", "frame", "tooltip", "status-bar", "winnls", "textbox", "rich-textbox", "image-list", "embed-resources"]
+       "trackbar", "extern-canvas", "frame", "tooltip", "status-bar", "winnls", "textbox", "rich-textbox", "image-list", "embed-resource"]
 
 [package.metadata.docs.rs]
 features = [ "all" ]

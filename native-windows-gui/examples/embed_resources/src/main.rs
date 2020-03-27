@@ -19,6 +19,9 @@ pub struct BasicApp {
     #[nwg_events( OnWindowClose: [BasicApp::say_goodbye] )]
     window: nwg::Window,
 
+    #[nwg_resource]
+    embed: nwg::EmbedResource,
+
     #[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10))]
     name_edit: nwg::TextInput,
 

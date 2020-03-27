@@ -1,6 +1,5 @@
 /*!
-    A very simple application that show your name in a message box.
-    See `basic_d` for the derive version
+    A very simple application that show how to use a flexbox layout.
 */
 
 extern crate native_windows_gui as nwg;
