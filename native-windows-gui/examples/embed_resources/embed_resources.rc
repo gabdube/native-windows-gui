@@ -1,10 +1,12 @@
 #define RT_MANIFEST 24
 1 RT_MANIFEST "embed_resources.exe.manifest"
 MAINICON ICON "../../test_rc/love.ico"
+1000 ICON "../../test_rc/cog.ico"
 
 
 STRINGTABLE
 {
     0, "Enter your name here"
     1, "Say my name"
+    2, "Embed example"
 } 

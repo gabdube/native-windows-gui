@@ -63,6 +63,10 @@ cargo run
 # The closest thing to a real application in the examples
 cd ../examples/sync-draw
 cargo run
+
+# Requires the console to be run as Admin because of the embed resource
+cd ../examples/embed_resources
+cargo run
 ```
 
 ## Project structure

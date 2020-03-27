@@ -1,7 +1,8 @@
 use winapi::shared::minwindef::HINSTANCE;
-use crate::win32::base_helper::to_utf16;
-use crate::{NwgError};
-use std::ptr;
+use crate::win32::base_helper::{to_utf16, from_utf16};
+use crate::NwgError;
+use super::Icon;
+use std::{ptr, slice};
 
 /**
 EmbedResource represent an embed resource file (".rc") inside on the executable module.
@@ -24,7 +25,7 @@ fn build_embed2() -> nwg::EmbedResource {
 ```
 */
 pub struct EmbedResource {
-    hinst: HINSTANCE,
+    pub hinst: HINSTANCE,
 }
 
 impl EmbedResource {
@@ -43,6 +44,38 @@ impl EmbedResource {
     pub fn builder() -> EmbedResourceBuilder {
         EmbedResourceBuilder {
             module: None
+        }
+    }
+
+    /// Load a string the the RC file STRINGTABLE. Returns `None` if `id` does not map to a string.
+    pub fn string(&self, id: u32) -> Option<String> {
+        use winapi::um::libloaderapi::LoadStringW;
+        unsafe {
+            let mut str_ptr = ptr::null_mut();
+            let ccount = LoadStringW(self.hinst, id, (&mut str_ptr) as *mut *mut u16 as _, 0);
+            match ccount {
+                0 => None,
+                count => {
+                    let str_slice = slice::from_raw_parts(str_ptr, count as usize);
+                    Some(from_utf16(str_slice))
+                }
+            }
+        }
+    }
+
+    /// Load an icon from the rc file. Returns `None` if `id` does not map to a string.
+    /// For more feature, use the `Icon::builder` with the `embed` parameter.
+    pub fn icon(&self, id: u32) -> Option<Icon> {
+        use winapi::um::winuser::{LoadImageW, IMAGE_ICON, LR_DEFAULTSIZE};
+
+        unsafe {
+            let id_rc = (id as usize) as _;
+            let icon = LoadImageW(self.hinst, id_rc, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
+            if icon.is_null() {
+                None
+            } else {
+                Some(Icon { handle: icon as _, owned: true } )
+            }
         }
     }
 

@@ -2,7 +2,7 @@ use winapi::shared::windef::{HFONT, HBITMAP};
 use winapi::ctypes::c_int;
 use winapi::um::winnt::HANDLE;
 
-use crate::resources::OemImage;
+use crate::resources::{EmbedResource, OemImage};
 use super::base_helper::{get_system_error, to_utf16};
 
 #[allow(unused_imports)] use std::{ptr, mem};
@@ -107,6 +107,52 @@ pub unsafe fn build_image<'a>(
 
     if handle.is_null() {
         Err( NwgError::resource_create(format!("Failed to create image from source '{}' ", source)))
+    } else {
+        Ok(handle)
+    }
+}
+
+
+#[cfg(feature = "embed-resource")]
+pub unsafe fn build_embed<'a> (
+    source: &'a EmbedResource,
+    source_id: u32,
+    size: Option<(u32, u32)>,
+    strict: bool,
+    image_type: u32
+) -> Result<HANDLE, NwgError> 
+{
+    use winapi::um::winuser::{LR_CREATEDIBSECTION, LR_DEFAULTSIZE, LR_SHARED, IMAGE_ICON, IDC_ARROW, IDI_ERROR, IMAGE_CURSOR, IMAGE_BITMAP};
+    use winapi::um::winuser::LoadImageW;
+
+    let (width, height) = size.unwrap_or((0,0));
+    let id_rc = (source_id as usize) as _;
+
+    let mut handle = LoadImageW(source.hinst, id_rc, image_type, width as i32, height as i32, 0);
+    if handle.is_null() {
+        let (code, _) = get_system_error();
+        if code == 2 && !strict {
+            // If the file was not found (err code: 2) and the loading is not strict, replace the image by the system error icon
+            handle = match image_type {
+                IMAGE_ICON => {
+                    let dr = (IDI_ERROR as usize) as *const u16;
+                    LoadImageW(ptr::null_mut(), dr, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE|LR_SHARED)
+                },
+                IMAGE_CURSOR => {
+                    let dr = (IDC_ARROW as usize) as *const u16;
+                    LoadImageW(ptr::null_mut(), dr, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE|LR_SHARED)
+                },
+                IMAGE_BITMAP => {
+                    let dr = (32754 as usize) as *const u16;
+                    LoadImageW(ptr::null_mut(), dr, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION|LR_DEFAULTSIZE|LR_SHARED)
+                },
+                _ => { unreachable!() }
+            };
+        }
+    }
+
+    if handle.is_null() {
+        Err( NwgError::resource_create(format!("Failed to create image from embed source with id {} ", source_id)))
     } else {
         Ok(handle)
     }
