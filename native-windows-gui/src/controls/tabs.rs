@@ -57,7 +57,7 @@ impl TabsContainer {
 
     /// Set the currently selected tab by index
     pub fn set_selected_tab(&self, index: usize) {
-        use winapi::um::commctrl::{TCM_SETCURSEL};
+        use winapi::um::commctrl::TCM_SETCURSEL;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -677,9 +677,15 @@ unsafe extern "system" fn resize_direct_children(handle: HWND, params: LPARAM) -
     1
 }
 
-unsafe extern "system" fn count_children(_handle: HWND, params: LPARAM) -> BOOL {
-    let count: &mut usize = ::std::mem::transmute(params);
-    *count += 1;
+unsafe extern "system" fn count_children(handle: HWND, params: LPARAM) -> BOOL {
+    use winapi::um::winuser::GWL_USERDATA;
+
+    if &wh::get_window_class_name(handle) == "NWG_TAB" {
+        let tab_index = (wh::get_window_long(handle, GWL_USERDATA)) as WPARAM;
+        let count: &mut usize = ::std::mem::transmute(params);
+        *count = usize::max(tab_index+1, *count);
+    }
+    
     1
 }
 

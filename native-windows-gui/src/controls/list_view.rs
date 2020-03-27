@@ -236,6 +236,21 @@ impl ListViewBuilder {
         self
     }
 
+    pub fn flags(mut self, flags: Option<ListViewFlags>) -> ListViewBuilder {
+        self.flags = flags;
+        self
+    }
+
+    pub fn size(mut self, size: (i32, i32)) -> ListViewBuilder {
+        self.size = size;
+        self
+    }
+
+    pub fn position(mut self, position: (i32, i32)) -> ListViewBuilder {
+        self.position = position;
+        self
+    }
+
     pub fn build(self, out: &mut ListView) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
