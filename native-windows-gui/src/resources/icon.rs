@@ -135,7 +135,7 @@ impl<'a> IconBuilder<'a> {
             }
 
             #[cfg(not(feature = "embed-resource"))]
-            fn build_embed(builder: IconBuilder) -> Result<HANDLE, NwgError> {
+            fn build_embed(_builder: IconBuilder) -> Result<HANDLE, NwgError> {
                 Err(NwgError::resource_create("No source provided for Icon"))
             }
 
