@@ -165,6 +165,13 @@ impl ExternCanvas {
         unsafe { wh::get_window_size(handle) }
     }
 
+    /// Return the physical size of canvas in pixels considering the dpi scale
+    pub fn physical_size(&self) -> (u32, u32) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::get_window_physical_size(handle) }
+    }
+
     /// Set the size of the button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
         if self.handle.blank() { panic!(NOT_BOUND); }

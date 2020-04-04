@@ -1,4 +1,5 @@
 use super::base_helper::{to_utf16, from_utf16};
+use super::high_dpi;
 use winapi::shared::windef::{HFONT, HWND};
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM, LRESULT};
 use winapi::um::winuser::WM_USER;
@@ -163,6 +164,7 @@ pub unsafe fn set_window_position(handle: HWND, x: i32, y: i32) {
     use winapi::um::winuser::SetWindowPos;
     use winapi::um::winuser::{SWP_NOZORDER, SWP_NOSIZE, SWP_NOACTIVATE};
 
+    let (x, y) = high_dpi::logical_to_physical(x, y);
     SetWindowPos(handle, ptr::null_mut(), x as c_int, y as c_int, 0, 0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
 }
 
@@ -174,13 +176,15 @@ pub unsafe fn get_window_position(handle: HWND) -> (i32, i32) {
     GetWindowRect(handle, &mut r);
 
     let parent = GetParent(handle);
-    if !parent.is_null() {
+    let (x, y) = if !parent.is_null() {
         let mut pt = POINT{x: r.left, y: r.top};
         ScreenToClient(parent, &mut pt);
         (pt.x as i32, pt.y as i32)
     } else {
         (r.left as i32, r.top as i32)
-    }
+    };
+
+    high_dpi::physical_to_logical(x, y)
 }
 
 pub unsafe fn set_window_size(handle: HWND, w: u32, h: u32, fix: bool) {
@@ -188,8 +192,7 @@ pub unsafe fn set_window_size(handle: HWND, w: u32, h: u32, fix: bool) {
     use winapi::um::winuser::{SWP_NOZORDER, SWP_NOMOVE, SWP_NOACTIVATE, SWP_NOCOPYBITS, GWL_STYLE, GWL_EXSTYLE};
     use winapi::shared::windef::RECT;
 
-    let mut w = w as c_int;
-    let mut h = h as c_int;
+    let (mut w, mut h) = high_dpi::logical_to_physical(w as i32, h as i32);
 
     if fix {
         let flags = GetWindowLongW(handle, GWL_STYLE) as u32;
@@ -205,13 +208,27 @@ pub unsafe fn set_window_size(handle: HWND, w: u32, h: u32, fix: bool) {
 }
 
 pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {
+    get_window_size_impl(handle, false)
+}
+
+pub unsafe fn get_window_physical_size(handle: HWND) -> (u32, u32) {
+    get_window_size_impl(handle, true)
+}
+
+unsafe fn get_window_size_impl(handle: HWND, return_physical: bool) -> (u32, u32) {
     use winapi::um::winuser::GetClientRect;
     use winapi::shared::windef::RECT;
     
     let mut r: RECT = mem::zeroed();
     GetClientRect(handle, &mut r);
 
-    (r.right as u32, r.bottom as u32)
+    let (w, h) = if return_physical {
+        (r.right, r.bottom)
+    } else {
+        high_dpi::physical_to_logical(r.right, r.bottom)
+    };
+
+    (w as u32, h as u32)
 }
 
 pub unsafe fn set_window_visibility(handle: HWND, visible: bool) {
