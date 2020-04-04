@@ -146,6 +146,10 @@ it will most likely be added.
 
 NWG use the MIT license
 
+## Contributors
+
+* yakov-bakhmatov (https://github.com/yakov-bakhmatov)
+
 ## Code example
 
 ### With native windows derive
