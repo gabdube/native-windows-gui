@@ -494,9 +494,10 @@ impl GridLayoutBuilder {
         let cb = move |_h, msg, _w, l| {
             if msg == WM_SIZE {
                 let size = l as u32;
-                let width = LOWORD(size) as u32;
-                let height = HIWORD(size) as u32;
-                GridLayout::update_layout(&event_layout, width, height);
+                let width = LOWORD(size) as i32;
+                let height = HIWORD(size) as i32;
+                let (w, h) = unsafe { crate::win32::high_dpi::physical_to_logical(width, height) };
+                GridLayout::update_layout(&event_layout, w as u32, h as u32);
             }
             None
         };

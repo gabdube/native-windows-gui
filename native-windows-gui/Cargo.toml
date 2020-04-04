@@ -15,6 +15,7 @@ winapi = { version = "0.3", features = [
 
 bitflags = { version = "1.1.0" }
 stretch = "0.3.2"
+muldiv = { version = "0.2", optional = true }
 
 [dev-dependencies]
 native-windows-derive = { path = "../native-windows-derive/" }
@@ -54,6 +55,7 @@ rich-textbox = []
 image-list = []
 no-styling = []
 embed-resource = []
+high-dpi = ["muldiv"]
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "cursor", "image-decoder",
        "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "number-select", "clipboard", "menu", 
        "trackbar", "extern-canvas", "frame", "tooltip", "status-bar", "winnls", "textbox", "rich-textbox", "image-list", "embed-resource"]
