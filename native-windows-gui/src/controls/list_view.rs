@@ -117,6 +117,7 @@ impl ListView {
         }
     }
 
+    /// Removes all item from the listview
     pub fn clear(&self) {
         use winapi::um::commctrl::LVM_DELETEALLITEMS;
 
