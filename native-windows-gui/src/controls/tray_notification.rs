@@ -1,3 +1,4 @@
+use winapi::shared::minwindef::UINT;
 use winapi::um::shellapi::{NIIF_NONE, NIIF_INFO, NIIF_WARNING, NIIF_ERROR, NIIF_USER, NIIF_NOSOUND, NIIF_LARGE_ICON, NIIF_RESPECT_QUIET_TIME};
 use winapi::um::shellapi::{Shell_NotifyIconW, NOTIFYICONDATAW};
 use super::{ControlBase, ControlHandle};
@@ -9,6 +10,7 @@ use std::{mem, ptr};
 const NOT_BOUND: &'static str = "TrayNotification is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: TrayNotification handle is not HWND!";
 
+const ICON_ID: UINT = 0;
 
 bitflags! {
     pub struct TrayNotificationFlags: u32 {
@@ -215,13 +217,29 @@ impl TrayNotification {
         }
     }
 
+    /// Removes the icon from the notification area (system tray).
+    ///
+    /// This function should be called when application terminates, because Windows does not remove notification icons automatically.
+    pub fn delete(&self) {
+        use winapi::um::shellapi::{NIF_ICON, NIM_DELETE};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        self.handle.tray().expect(BAD_HANDLE);
+
+        let mut data = self.notify_default();
+        data.uFlags = NIF_ICON;
+        unsafe {
+            Shell_NotifyIconW(NIM_DELETE, &mut data);
+        }
+    }
+
     fn notify_default(&self) -> NOTIFYICONDATAW {
         unsafe {
             let parent = self.handle.tray().unwrap();
             NOTIFYICONDATAW {
                 cbSize: mem::size_of::<NOTIFYICONDATAW>() as u32,
                 hWnd: parent,
-                uID: 0,
+                uID: ICON_ID,
                 uFlags: 0,
                 uCallbackMessage: 0,
                 hIcon: ptr::null_mut(),
@@ -406,7 +424,7 @@ impl<'a> TrayNotificationBuilder<'a> {
             let mut data = NOTIFYICONDATAW {
                 cbSize: mem::size_of::<NOTIFYICONDATAW>() as u32,
                 hWnd: parent,
-                uID: 0,
+                uID: ICON_ID,
                 uFlags: flags,
                 uCallbackMessage: wh::NWG_TRAY,
                 hIcon: icon,

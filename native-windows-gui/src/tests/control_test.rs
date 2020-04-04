@@ -151,6 +151,15 @@ pub struct ControlsTest {
     run_tray_test: Button,
 }
 
+impl ControlsTest {
+
+    pub fn delete_tray_icons(&self) {
+        self.tray_icon.delete();
+        self.tray_icon_2.delete();
+    }
+
+}
+
 mod partial_controls_test_ui {
     use super::*;
     use crate::{PartialUi, NwgError, ControlHandle};

@@ -168,4 +168,6 @@ fn everything() {
     app.window.set_focus();
 
     dispatch_thread_events();
+
+    app.controls_tests.delete_tray_icons();
 }

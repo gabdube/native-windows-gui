@@ -136,6 +136,7 @@ mod system_tray_ui {
             for handler in handlers.drain(0..) {
                 nwg::unbind_event_handler(&handler);
             }
+            self.tray.delete();
         }
     }
 

@@ -63,7 +63,9 @@ impl SystemTray {
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
 
-    let _ui = SystemTray::build_ui(Default::default()).expect("Failed to build UI");
+    let ui = SystemTray::build_ui(Default::default()).expect("Failed to build UI");
     
     nwg::dispatch_thread_events();
+
+    ui.tray.delete();
 }
