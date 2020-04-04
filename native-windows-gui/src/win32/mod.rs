@@ -3,6 +3,7 @@ pub(crate) mod window_helper;
 pub(crate) mod resources_helper;
 pub(crate) mod window;
 pub(crate) mod message_box;
+pub(crate) mod high_dpi;
 
 #[cfg(feature = "menu")]
 pub(crate) mod menu;

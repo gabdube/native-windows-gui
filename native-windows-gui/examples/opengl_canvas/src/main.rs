@@ -136,7 +136,7 @@ impl OpenGlCanvas {
 
     pub fn resize(&self) {
         self.ctx.borrow().as_ref().map(|ctx| unsafe {
-            let (w, h) = self.canvas.size();
+            let (w, h) = self.canvas.physical_size();
             gl::Viewport(0, 0, w as _, h as _);
             ctx.resize(PhysicalSize::new(w as f64, h as f64));
         });
@@ -360,6 +360,9 @@ mod extern_canvas_ui {
 }
 
 pub fn main() {
+    unsafe {
+        nwg::set_dpi_awareness();
+    };
     nwg::init().expect("Failed to init Native Windows GUI");
 
     let app = ExternCanvas::build_ui(Default::default()).expect("Failed to build UI");

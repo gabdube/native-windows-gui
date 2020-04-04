@@ -277,7 +277,12 @@ impl TabsContainer {
         let handler1 = bind_raw_event_handler(&self.handle, handle as usize, move |hwnd, msg, _w, l| { unsafe {
             match msg {
                 WM_SIZE => {
-                    let mut data = (hwnd, LOWORD(l as u32) as u32, HIWORD(l as u32) as u32);
+                    let size = l as u32;
+                    let width = LOWORD(size) as i32;
+                    let height = HIWORD(size) as i32;
+                    let (w, h) = crate::win32::high_dpi::physical_to_logical(width, height);
+
+                    let mut data = (hwnd, w as u32, h as u32);
                     
                     if data.1 > 11 { data.1 -= 11; }
                     if data.2 > 30 { data.2 -= 30; }

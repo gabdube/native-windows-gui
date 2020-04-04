@@ -161,6 +161,13 @@ fn close() {
 
 #[test]
 fn everything() {
+    #[cfg(feature = "high-dpi")]
+    {
+        unsafe {
+            crate::win32::high_dpi::set_dpi_awareness();
+        }
+    }
+
     init().expect("Failed to init Native Windows GUI");
     
     let app = TestControlPanel::build_ui(Default::default()).expect("Failed to build UI");

@@ -10,6 +10,7 @@ use winapi::um::winuser::{WNDPROC, NMHDR};
 use winapi::um::commctrl::{NMTTDISPINFOW, SUBCLASSPROC};
 use super::base_helper::{CUSTOM_ID_BEGIN, to_utf16};
 use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY};
+use super::high_dpi;
 use crate::controls::ControlHandle;
 use crate::{Event, EventData, NwgError};
 use std::{ptr, mem};
@@ -366,8 +367,10 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
     let ex_flags = ex_flags.unwrap_or(WS_EX_COMPOSITED);
     let flags = flags.unwrap_or(WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_VISIBLE) | forced_flags;
 
-    let (px, py) = pos.unwrap_or((0, 0));
-    let (mut sx, mut sy) = size.unwrap_or((500, 500));
+    let pos = pos.unwrap_or((0, 0));
+    let size = size.unwrap_or((500, 500));
+    let (px, py) = high_dpi::logical_to_physical(pos.0, pos.1);
+    let (mut sx, mut sy) = high_dpi::logical_to_physical(size.0, size.1);
     let parent_handle = parent.unwrap_or(ptr::null_mut());
     let menu = ptr::null_mut();
     let lp_params = ptr::null_mut();
@@ -553,7 +556,7 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
     use winapi::shared::minwindef::{HIWORD, LOWORD};
 
     let callback_ptr = data as *mut *const Callback;
-    let callback: Rc<Callback> = Rc::from_raw(*callback_ptr);
+    let callback: &Callback = &**callback_ptr;
     let base_handle = ControlHandle::Hwnd(hwnd);
 
     match msg {
@@ -567,8 +570,8 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
             };
         
             match code {
-                TTN_GETDISPINFOW => handle_tooltip_callback(mem::transmute::<_, *mut NMTTDISPINFOW>(l), &callback),
-                _ => handle_default_notify_callback(mem::transmute::<_, *const NMHDR>(l), &callback)
+                TTN_GETDISPINFOW => handle_tooltip_callback(mem::transmute::<_, *mut NMTTDISPINFOW>(l), callback),
+                _ => handle_default_notify_callback(mem::transmute::<_, *const NMHDR>(l), callback)
             }
         },
         WM_MENUCOMMAND => {
@@ -669,8 +672,6 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         },
         _ => {}
     }
-
-    mem::forget(callback);
 
     DefSubclassProc(hwnd, msg, w, l)
 }
@@ -777,7 +778,7 @@ unsafe fn listbox_commands(m: u16) -> Event {
     }
 }
 
-unsafe fn handle_tooltip_callback<'a>(notif: *mut NMTTDISPINFOW, callback: &Rc<Callback>) {
+unsafe fn handle_tooltip_callback<'a>(notif: *mut NMTTDISPINFOW, callback: &Callback) {
     use crate::events::ToolTipTextData;
 
     let notif = &mut *notif;
@@ -786,7 +787,7 @@ unsafe fn handle_tooltip_callback<'a>(notif: *mut NMTTDISPINFOW, callback: &Rc<C
     callback(Event::OnTooltipText, data, handle);
 }
 
-unsafe fn handle_default_notify_callback<'a>(notif: *const NMHDR, callback: &Rc<Callback>){
+unsafe fn handle_default_notify_callback<'a>(notif: *const NMHDR, callback: &Callback){
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;
     use winapi::um::winnt::WCHAR;

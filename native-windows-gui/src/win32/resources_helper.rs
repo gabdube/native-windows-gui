@@ -45,6 +45,8 @@ pub unsafe fn build_font(
         family_name_ptr = ptr::null();
     }
 
+    let (size, _) = super::high_dpi::logical_to_physical(size as i32, 0);
+
     let handle = CreateFontW(
         size as c_int,            // nHeight
         0, 0, 0,                  // nWidth, nEscapement, nOrientation
