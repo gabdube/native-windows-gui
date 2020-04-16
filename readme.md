@@ -120,6 +120,7 @@ This is the main project git. It is separated in multiple sections
   - Font dialog
   - Color dialog
 - An canvas that can be used by external rendering APIs
+- High-DPI aware
 - Support for low level system message capture (HWND, MSG, WPARAM, LPARAM)
 - Cross compiling and testing from Linux to Windows with Wine and mingw.
   - Not all features are supported (but the majority are, thanks WINE!)

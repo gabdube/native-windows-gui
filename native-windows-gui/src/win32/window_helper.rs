@@ -120,6 +120,11 @@ pub fn get_style(handle: HWND) -> UINT {
     get_window_long(handle, GWL_STYLE) as UINT
 }
 
+pub fn set_style(handle: HWND, style: u32) {
+    use ::winapi::um::winuser::GWL_STYLE;
+    set_window_long(handle, GWL_STYLE, style as usize);
+}
+
 pub fn send_message(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     unsafe { ::winapi::um::winuser::SendMessageW(hwnd, msg, w, l) }
 }
@@ -211,6 +216,7 @@ pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {
     get_window_size_impl(handle, false)
 }
 
+#[cfg(feature="high-dpi")]
 pub unsafe fn get_window_physical_size(handle: HWND) -> (u32, u32) {
     get_window_size_impl(handle, true)
 }

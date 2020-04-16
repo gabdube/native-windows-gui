@@ -1,12 +1,13 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LV_VIEW_TILE, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
-    LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVCF_FMT
+    LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVCF_FMT, LVITEMW, LVIF_TEXT
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
+use crate::win32::base_helper::to_utf16;
 use crate::NwgError;
-use std::ptr;
+use std::{mem, ptr};
 
 
 const NOT_BOUND: &'static str = "ListView is not yet bound to a winapi object";
@@ -31,17 +32,9 @@ bitflags! {
         * TILE_LIST: Each item appears as a full-sized icon with a label of one or more lines beside it.
     */
     pub struct ListViewFlags: u32 {
-        const NONE = LVS_REPORT;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
-
         const NO_HEADER = LVS_NOCOLUMNHEADER;
-
-        const ICON_LIST = LVS_ICON;
-        const SMALL_ICON_LIST = LVS_SMALLICON;
-        const SIMPLE_LIST = LVS_LIST;
-        const DETAILED_LIST = LVS_REPORT;
-        const TILE_LIST = LV_VIEW_TILE;
     }
 }
 
@@ -70,6 +63,28 @@ bitflags! {
 }
 
 
+#[derive(Copy, Clone, Debug)]
+#[repr(u8)]
+pub enum ListStyle {
+    Simple,
+    Detailed,
+    Icon,
+    SmallIcon,
+    Tile
+}
+
+impl ListStyle {
+    fn bits(&self) -> u32 {
+        match self {
+            ListStyle::Simple => LVS_LIST,
+            ListStyle::Detailed => LVS_REPORT,
+            ListStyle::Icon => LVS_ICON,
+            ListStyle::SmallIcon => LVS_SMALLICON,
+            ListStyle::Tile => LV_VIEW_TILE,
+        }
+    }
+}
+
 /// Represents a column in a detailed list view
 pub struct ListViewColumn {
     data: LVCOLUMNW
@@ -94,6 +109,18 @@ impl ListViewColumn {
 }
 
 
+/// Represents a list view item parameters
+#[derive(Default, Clone)]
+pub struct InsertListViewItem {
+    /// Index of the item to be inserted
+    /// If None and `insert_item` is used, the item is added at the end of the list
+    pub index: Option<i32>,
+
+    /// Text of the item to insert
+    pub text: String
+}
+
+
 /**
 A list-view control is a window that displays a collection of items.
 List-view controls provide several ways to arrange and display items and are much more flexible than simple ListBox.
@@ -113,8 +140,61 @@ impl ListView {
             size: (300, 300),
             position: (0, 0),
             flags: None,
-            parent: None
+            style: ListStyle::Simple,
+            parent: None,
+            item_count: 0
         }
+    }
+
+    /// Insert a new item into the list view
+    pub fn insert_item(&self, insert: InsertListViewItem) {
+        use winapi::um::commctrl::LVM_INSERTITEMW;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let mask = LVIF_TEXT;
+        let mut text = to_utf16(&insert.text);
+
+        let mut item: LVITEMW = unsafe { mem::zeroed() };
+        item.mask = mask;
+        item.iItem = insert.index.unwrap_or(i32::max_value());
+        item.pszText = text.as_mut_ptr();
+        item.cchTextMax = insert.text.len() as i32;
+
+        wh::send_message(handle, LVM_INSERTITEMW , 0, &item as *const LVITEMW as _);
+    }
+
+    /// Return the number of items in the list view
+    pub fn len(&self) -> usize {
+        use winapi::um::commctrl::LVM_GETITEMCOUNT;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, LVM_GETITEMCOUNT , 0, 0) as usize
+    }
+
+    /// Preallocate space for n number of item in the whole control.
+    /// For example calling this method with n=1000 while the list has 500 items will add space for 500 new items.
+    pub fn set_item_count(&self, n: u32) {
+        use winapi::um::commctrl::LVM_SETITEMCOUNT;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, LVM_SETITEMCOUNT, n as _, 0);
+    }
+
+    /// Enable or disable the redrawing of the control when a new item is added.
+    /// When inserting a large number of items, it's better to disable redraw and reenable it after the items are inserted.
+    pub fn set_redraw(&self, enabled: bool) {
+        use winapi::um::winuser::WM_SETREDRAW;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, WM_SETREDRAW, enabled as _, 0);
     }
 
     /// Removes all item from the listview
@@ -227,6 +307,8 @@ pub struct ListViewBuilder {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<ListViewFlags>,
+    style: ListStyle,
+    item_count: u32,
     parent: Option<ControlHandle>
 }
 
@@ -237,8 +319,8 @@ impl ListViewBuilder {
         self
     }
 
-    pub fn flags(mut self, flags: Option<ListViewFlags>) -> ListViewBuilder {
-        self.flags = flags;
+    pub fn flags(mut self, flags: ListViewFlags) -> ListViewBuilder {
+        self.flags = Some(flags);
         self
     }
 
@@ -252,8 +334,19 @@ impl ListViewBuilder {
         self
     }
 
+    pub fn item_count(mut self, count: u32) -> ListViewBuilder {
+        self.item_count = count;
+        self
+    }
+
+    pub fn style(mut self, style: ListStyle) -> ListViewBuilder {
+        self.style = style;
+        self
+    }
+
     pub fn build(self, out: &mut ListView) -> Result<(), NwgError> {
-        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        let mut flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        flags |= self.style.bits();
 
         let parent = match self.parent {
             Some(p) => Ok(p),
@@ -269,6 +362,10 @@ impl ListViewBuilder {
             .text("")
             .parent(Some(parent))
             .build()?;
+
+        if self.item_count > 0 {
+            out.set_item_count(self.item_count);
+        }
 
         Ok(())
     }
