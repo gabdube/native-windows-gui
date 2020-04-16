@@ -358,12 +358,27 @@ impl GridLayout {
         let item_height = height / row_count;
         let sp2 = sp * 2;
 
-        for item in inner.children.iter() {
-            let x = m_left + (sp + (sp2 * item.col)) + (item_width * item.col);
-            let y = m_top + (sp + (sp2 * item.row)) + (item_height * item.row);
+        let mut columns = vec![item_width; column_count as usize];
+        let mut rows = vec![item_height; row_count as usize];
+        let extra_width = width - item_width * column_count;
+        if extra_width > 0 {
+            for x in &mut columns[0..(extra_width as usize)] {
+                *x += 1;
+            }
+        }
+        let extra_height = height - item_height * row_count;
+        if extra_height > 0 {
+            for x in &mut rows[0..(extra_height as usize)] {
+                *x += 1;
+            }
+        }
 
-            let local_width = (item_width * item.col_span) + (sp2 * (item.col_span - 1));
-            let local_height = (item_height * item.row_span) + (sp2 * (item.row_span - 1));
+        for item in inner.children.iter() {
+            let x = m_left + (sp + (sp2 * item.col)) + &columns[0..(item.col as usize)].iter().sum();
+            let y = m_top + (sp + (sp2 * item.row)) + &rows[0..(item.row as usize)].iter().sum();
+
+            let local_width = &columns[(item.col as usize)..((item.col + item.col_span) as usize)].iter().sum() + (sp2 * (item.col_span - 1));
+            let local_height = &rows[(item.row as usize)..((item.row + item.row_span) as usize)].iter().sum() + (sp2 * (item.row_span - 1));
 
             unsafe {
                 wh::set_window_position(item.control, x as i32, y as i32);
