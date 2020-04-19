@@ -217,7 +217,7 @@ pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {
     get_window_size_impl(handle, false)
 }
 
-#[cfg(feature="high-dpi")]
+#[allow(unused)]
 pub unsafe fn get_window_physical_size(handle: HWND) -> (u32, u32) {
     get_window_size_impl(handle, true)
 }
