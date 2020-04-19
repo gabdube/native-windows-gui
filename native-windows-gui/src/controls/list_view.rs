@@ -1,13 +1,13 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
-    LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVCF_FMT, LVITEMW, LVIF_TEXT
+    LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::to_utf16;
-use crate::NwgError;
-use std::{mem, ptr};
+use crate::{NwgError, RawEventHandler, unbind_raw_event_handler};
+use std::{mem, cell::RefCell};
 
 
 const NOT_BOUND: &'static str = "ListView is not yet bound to a winapi object";
@@ -34,6 +34,8 @@ bitflags! {
     pub struct ListViewFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+
+        // Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
         const NO_HEADER = LVS_NOCOLUMNHEADER;
     }
 }
@@ -95,26 +97,18 @@ impl ListViewStyle {
 }
 
 /// Represents a column in a detailed list view
-pub struct ListViewColumn {
-    data: LVCOLUMNW
-}
+pub struct InsertListViewColumn {
+    /// Index of the column
+    pub index: Option<i32>,
 
-impl ListViewColumn {
+    /// Format of the column
+    pub fmt: Option<i32>,
 
-    pub fn format(&mut self, fmt: Option<ListViewColumnFlags>) {
-        let mut data = &mut self.data;
-        match fmt {
-            Some(fmt) => {
-                data.mask |= LVCF_FMT;
-                data.fmt = fmt.bits as i32;
-            },
-            None => {
-                data.mask &= !LVCF_FMT;
-                data.fmt = 0;
-            }
-        }
-    }
+    /// Width of the column in pixels
+    pub width: Option<i32>,
 
+    /// Text of the column to insert
+    pub text: String
 }
 
 
@@ -136,10 +130,15 @@ List-view controls provide several ways to arrange and display items and are muc
 
 Requires the `list-view` feature. 
 
+Windows is Shit:
+- The win32 header controls leaks megabytes of memory per seconds because it is shit, like this OS. As such, NO_HEADER is always ON.
+
+
 */
-#[derive(Default, Eq, PartialEq)]
+#[derive(Default)]
 pub struct ListView {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
 }
 
 impl ListView {
@@ -153,6 +152,41 @@ impl ListView {
             parent: None,
             item_count: 0
         }
+    }
+
+    /// Insert a column in the report. Column are only used with the Detailed list view style.
+    pub fn insert_column<I: Into<InsertListViewColumn>>(&self, insert: I) {
+        use winapi::um::commctrl::LVM_INSERTCOLUMNW;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        match self.list_style() {
+            ListViewStyle::Detailed => {},
+            _ => { return; }
+        }
+
+        let insert = insert.into();
+
+        let mut mask = LVCF_TEXT;
+        let mut text = to_utf16(&insert.text);
+
+        if insert.width.is_some() { mask |= LVCF_WIDTH; }
+
+        let mut item: LVCOLUMNW = unsafe { mem::zeroed() };
+        item.mask = mask;
+        item.cx = insert.width.unwrap_or(100);
+        item.pszText = text.as_mut_ptr();
+        item.cchTextMax = insert.text.len() as i32;
+
+        let col_count = self.column_len() as i32;
+    
+        wh::send_message(
+            handle, 
+            LVM_INSERTCOLUMNW, 
+            insert.index.unwrap_or(col_count) as usize, 
+            (&item as *const LVCOLUMNW) as _
+        );
     }
 
     /// Insert a new item into the list view
@@ -176,6 +210,13 @@ impl ListView {
         wh::send_message(handle, LVM_INSERTITEMW , 0, &item as *const LVITEMW as _);
     }
 
+    /// Insert multiple items into the control. Basically a loop over `insert_item`.
+    pub fn insert_items<I: Copy+Into<InsertListViewItem>>(&self, insert: &[I]) {
+        for &i in insert {
+            self.insert_item(i);
+        }
+    }
+
     /// Return the current style of the list view
     pub fn list_style(&self) -> ListViewStyle {
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -197,7 +238,7 @@ impl ListView {
         wh::set_style(handle, old_style | style.bits());
     }
 
-    /// Return the number of items in the list view
+    /// Returns the number of items in the list view
     pub fn len(&self) -> usize {
         use winapi::um::commctrl::LVM_GETITEMCOUNT;
 
@@ -205,6 +246,21 @@ impl ListView {
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         wh::send_message(handle, LVM_GETITEMCOUNT , 0, 0) as usize
+    }
+
+    /// Returns the number of columns in the list view
+    pub fn column_len(&self) -> usize {
+        use winapi::um::commctrl::LVM_GETCOLUMNWIDTH ;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let mut count = 0;
+        while wh::send_message(handle, LVM_GETCOLUMNWIDTH, count, 0) != 0 {
+            count += 1;
+        }
+
+        count
     }
 
     /// Preallocate space for n number of item in the whole control.
@@ -324,13 +380,18 @@ impl ListView {
     pub fn forced_flags(&self) -> u32 {
         use winapi::um::winuser::{WS_CHILD, WS_BORDER};
 
-        WS_CHILD | WS_BORDER
+        WS_CHILD | WS_BORDER | LVS_NOCOLUMNHEADER
     }
 
 }
 
 impl Drop for ListView {
     fn drop(&mut self) {
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+
         self.handle.destroy();
     }
 }
@@ -404,35 +465,42 @@ impl ListViewBuilder {
 
 }
 
-impl Default for ListViewColumn {
-
-    fn default() -> ListViewColumn {
-        let data = LVCOLUMNW {
-            mask: 0,
-            fmt: 0,
-            cx: 0,
-            pszText: ptr::null_mut(),
-            cchTextMax: 0,
-            iSubItem: 0,
-            iImage: 0,
-            iOrder: 0,
-            cxMin: 0,
-            cxDefault: 0,
-            cxIdeal: 0,
-        };
-
-        ListViewColumn { data }
-    }
-
-}
-
-impl From<&'static str> for InsertListViewItem {
-
-    fn from(i: &'static str) -> Self {
+impl<'a> From<&'a str> for InsertListViewItem {
+    fn from(i: &'a str) -> Self {
         InsertListViewItem {
             index: None,
             text: i.to_string()
         }
     }
+}
 
+impl From<String> for InsertListViewItem {
+    fn from(i: String) -> Self {
+        InsertListViewItem {
+            index: None,
+            text: i
+        }
+    }
+}
+
+impl<'a> From<&'a str> for InsertListViewColumn {
+    fn from(i: &'a str) -> Self {
+        InsertListViewColumn {
+            index: None,
+            fmt: None,
+            width: Some(100),
+            text: i.to_string()
+        }
+    }
+}
+
+impl From<String> for InsertListViewColumn {
+    fn from(i: String) -> Self {
+        InsertListViewColumn {
+            index: None,
+            fmt: None,
+            width: Some(100),
+            text: i
+        }
+    }
 }

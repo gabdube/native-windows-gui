@@ -14,7 +14,7 @@ use nwg::NativeUi;
 
 #[derive(Default, NwgUi)]
 pub struct DataViewApp {
-    #[nwg_control(size: (500, 350), position: (300, 300), title: "DataView")]
+    #[nwg_control(size: (500, 350), position: (300, 300), title: "DataView - Animals list")]
     #[nwg_events( OnWindowClose: [DataViewApp::exit], OnInit: [DataViewApp::load_data] )]
     window: nwg::Window,
 
@@ -24,7 +24,7 @@ pub struct DataViewApp {
     #[nwg_layout(parent: window)]
     layout: nwg::GridLayout,
 
-    #[nwg_control(item_count: 10, list_style: nwg::ListViewStyle::Simple)]
+    #[nwg_control(item_count: 10, list_style: nwg::ListViewStyle::Detailed, size: (500, 350))]
     #[nwg_layout_item(layout: layout, col: 0, col_span: 4, row: 0, row_span: 6)]
     data_view: nwg::ListView,
 
@@ -42,9 +42,14 @@ impl DataViewApp {
     
     fn load_data(&self) {
         let dv = &self.data_view;
+
+        dv.insert_column("Name");
+        dv.insert_column("Genus");
+
         dv.insert_item("Cat");
         dv.insert_item("Dog");
         dv.insert_item("Moose");
+        dv.insert_items(&["Duck", "Horse", "Boomalope"]);
     }
 
     fn update_view(&self) {
