@@ -24,7 +24,7 @@ pub struct DataViewApp {
     #[nwg_layout(parent: window)]
     layout: nwg::GridLayout,
 
-    #[nwg_control(item_count: 10)]
+    #[nwg_control(item_count: 10, list_style: nwg::ListViewStyle::Simple)]
     #[nwg_layout_item(layout: layout, col: 0, col_span: 4, row: 0, row_span: 6)]
     data_view: nwg::ListView,
 
@@ -32,7 +32,7 @@ pub struct DataViewApp {
     #[nwg_layout_item(layout: layout, col: 4, row: 0)]
     label: nwg::Label,
 
-    #[nwg_control(collection: vec!["Simple", "Details", "Icon", "Icon small", "Tile"], selected_index: Some(0), font: Some(&data.arial))]
+    #[nwg_control(collection: vec!["Simple", "Details", "Icon", "Icon small"], selected_index: Some(0), font: Some(&data.arial))]
     #[nwg_layout_item(layout: layout, col: 4, row: 1)]
     #[nwg_events( OnComboxBoxSelection: [DataViewApp::update_view] )]
     view_style: nwg::ComboBox<&'static str>
@@ -41,23 +41,24 @@ pub struct DataViewApp {
 impl DataViewApp {
     
     fn load_data(&self) {
-        self.data_view.insert_item(nwg::InsertListViewItem { 
-            text: "Item 1".to_string(),
-            ..Default::default()
-        })
+        let dv = &self.data_view;
+        dv.insert_item("Cat");
+        dv.insert_item("Dog");
+        dv.insert_item("Moose");
     }
 
     fn update_view(&self) {
         let value = self.view_style.selection_string();
         let view = &self.data_view;
 
-        /*match value.as_ref().map(|v| v as &str) {
-            Some("Icon") => view.set_list_type(nwg::ListViewFlags::ICON_LIST),
-            Some("Icon small") => view.set_list_type(nwg::ListViewFlags::SMALL_ICON_LIST),
-            Some("Details") => view.set_list_type(nwg::ListViewFlags::DETAILED_LIST),
-            Some("Tile") => view.set_list_type(nwg::ListViewFlags::TILE_LIST),
-            None | Some(_) => view.set_list_type(nwg::ListViewFlags::SIMPLE_LIST),
-        }*/
+        let style = match value.as_ref().map(|v| v as &str) {
+            Some("Icon") => nwg::ListViewStyle::Icon,
+            Some("Icon small") => nwg::ListViewStyle::SmallIcon,
+            Some("Details") => nwg::ListViewStyle::Detailed,
+            None | Some(_) => nwg::ListViewStyle::Simple,
+        };
+
+        view.set_list_style(style);
     }
 
     fn exit(&self) {

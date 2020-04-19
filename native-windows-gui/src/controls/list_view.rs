@@ -1,6 +1,6 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
 use winapi::um::commctrl::{
-    LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LV_VIEW_TILE, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
+    LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
     LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVCF_FMT, LVITEMW, LVIF_TEXT
 };
 use super::{ControlBase, ControlHandle};
@@ -65,22 +65,31 @@ bitflags! {
 
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
-pub enum ListStyle {
+pub enum ListViewStyle {
     Simple,
     Detailed,
     Icon,
     SmallIcon,
-    Tile
 }
 
-impl ListStyle {
+impl ListViewStyle {
+    fn from_bits(bits: u32) -> ListViewStyle {
+        let bits = bits & 0b11;
+        match bits {
+            LVS_ICON => ListViewStyle::Icon,
+            LVS_REPORT => ListViewStyle::Detailed,
+            LVS_SMALLICON => ListViewStyle::SmallIcon,
+            LVS_LIST => ListViewStyle::Simple,
+            _ => unreachable!()
+        }
+    }
+
     fn bits(&self) -> u32 {
         match self {
-            ListStyle::Simple => LVS_LIST,
-            ListStyle::Detailed => LVS_REPORT,
-            ListStyle::Icon => LVS_ICON,
-            ListStyle::SmallIcon => LVS_SMALLICON,
-            ListStyle::Tile => LV_VIEW_TILE,
+            ListViewStyle::Simple => LVS_LIST,
+            ListViewStyle::Detailed => LVS_REPORT,
+            ListViewStyle::Icon => LVS_ICON,
+            ListViewStyle::SmallIcon => LVS_SMALLICON,
         }
     }
 }
@@ -140,18 +149,20 @@ impl ListView {
             size: (300, 300),
             position: (0, 0),
             flags: None,
-            style: ListStyle::Simple,
+            style: ListViewStyle::Simple,
             parent: None,
             item_count: 0
         }
     }
 
     /// Insert a new item into the list view
-    pub fn insert_item(&self, insert: InsertListViewItem) {
+    pub fn insert_item<I: Into<InsertListViewItem>>(&self, insert: I) {
         use winapi::um::commctrl::LVM_INSERTITEMW;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let insert = insert.into();
 
         let mask = LVIF_TEXT;
         let mut text = to_utf16(&insert.text);
@@ -163,6 +174,27 @@ impl ListView {
         item.cchTextMax = insert.text.len() as i32;
 
         wh::send_message(handle, LVM_INSERTITEMW , 0, &item as *const LVITEMW as _);
+    }
+
+    /// Return the current style of the list view
+    pub fn list_style(&self) -> ListViewStyle {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let style = wh::get_style(handle);
+        
+        ListViewStyle::from_bits(style)
+    }
+
+    /// Sets the list view style of the control
+    pub fn set_list_style(&self, style: ListViewStyle) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let mut old_style = wh::get_style(handle);
+        old_style = old_style & !0b11;
+
+        wh::set_style(handle, old_style | style.bits());
     }
 
     /// Return the number of items in the list view
@@ -285,7 +317,7 @@ impl ListView {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        LVS_REPORT | WS_VISIBLE
+        WS_VISIBLE
     }
 
     /// Winapi flags required by the control
@@ -307,7 +339,7 @@ pub struct ListViewBuilder {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<ListViewFlags>,
-    style: ListStyle,
+    style: ListViewStyle,
     item_count: u32,
     parent: Option<ControlHandle>
 }
@@ -339,7 +371,7 @@ impl ListViewBuilder {
         self
     }
 
-    pub fn style(mut self, style: ListStyle) -> ListViewBuilder {
+    pub fn list_style(mut self, style: ListViewStyle) -> ListViewBuilder {
         self.style = style;
         self
     }
@@ -390,6 +422,17 @@ impl Default for ListViewColumn {
         };
 
         ListViewColumn { data }
+    }
+
+}
+
+impl From<&'static str> for InsertListViewItem {
+
+    fn from(i: &'static str) -> Self {
+        InsertListViewItem {
+            index: None,
+            text: i.to_string()
+        }
     }
 
 }
