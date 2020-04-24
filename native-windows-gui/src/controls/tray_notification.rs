@@ -242,6 +242,15 @@ impl TrayNotification {
 
 impl Drop for TrayNotification {
     fn drop(&mut self) {
+        use winapi::um::shellapi::NIM_DELETE;
+
+        if self.handle.tray().is_some() {
+            let mut data = self.notify_default();
+            unsafe {
+                Shell_NotifyIconW(NIM_DELETE, &mut data);
+            }
+        }
+
         self.handle.destroy();
     }
 }
