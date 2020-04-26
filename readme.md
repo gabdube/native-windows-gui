@@ -44,7 +44,8 @@ See it for yourself. NWG has plenty of example and a fully interactive test suit
 
 ```bash
 git clone git@github.com:gabdube/native-windows-gui.git
-cd native-windows-gui/native-windows-gui
+
+cd native-windows-gui/native-windows-gui # Running the tests from the workspace screw up the features
 
 cargo test everything --features "all"  # For the test suite
 cargo run --example basic

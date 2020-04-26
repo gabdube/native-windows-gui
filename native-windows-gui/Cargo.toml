@@ -24,6 +24,7 @@ native-windows-derive = { path = "../native-windows-derive/" }
 winapi-build = "0.1.1"
 
 [features]
+default = []
 file-dialog = []
 color-dialog = []
 font-dialog = []
@@ -62,4 +63,4 @@ all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progres
 
 [package.metadata.docs.rs]
 features = [ "all" ]
-all-features = true
+all-features = false

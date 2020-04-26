@@ -86,7 +86,7 @@ mod flexbox_app_ui {
 
 
             // Layout
-            use nwg::stretch::{geometry::{Size, Rect}, style::{Dimension as D, FlexDirection}};
+            use nwg::stretch::{geometry::{Size, Rect}, style::{Dimension as D, FlexDirection, AlignSelf}};
             const FIFTY_PC: D = D::Percent(0.5);
             const PT_10: D = D::Points(10.0);
             const PT_5: D = D::Points(5.0);
@@ -103,10 +103,12 @@ mod flexbox_app_ui {
                     .child_size(Size { width: FIFTY_PC, height: D::Auto })
                 .child(&ui.button2)
                     .child_margin(MARGIN)
+                    .child_align_self(AlignSelf::FlexEnd)
                     .child_size(Size { width: D::Percent(0.25), height: FIFTY_PC })
                 .child(&ui.button3)
                     .child_margin(MARGIN)
-                    .child_size(Size { width: D::Percent(0.25), height: D::Auto })
+                    .child_flex_grow(2.0)
+                    .child_size(Size { width: D::Auto, height: D::Auto })
                 .build(&ui.layout);
 
             return Ok(ui);
