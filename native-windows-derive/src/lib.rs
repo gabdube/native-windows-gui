@@ -106,6 +106,12 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
                 }
             }
 
+            impl #ui_struct_name {
+                pub fn destroy(&self) {
+                    
+                }
+            }
+
             impl Deref for #ui_struct_name {
                 type Target = #struct_name;
         
