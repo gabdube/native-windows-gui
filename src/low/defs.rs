@@ -20,29 +20,40 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
-use std::hash::Hash;
 use std::any::{Any, TypeId};
+use std::hash::Hash;
 
-use winapi::{UINT, LRESULT, DWORD, HBRUSH, ULONG_PTR, HMENU, BOOL, c_int, MENUITEMINFOW, IShellItem, HRESULT, IUnknownVtbl,
- IUnknown, PCWSTR, IBindCtx, REFIID, D2D1_FACTORY_TYPE, D2D1_FACTORY_OPTIONS, ID2D1Factory,c_void};
 use std::ops::{Deref, DerefMut};
+use winapi::{
+    c_int, c_void, IBindCtx, ID2D1Factory, IShellItem, IUnknown, IUnknownVtbl, BOOL,
+    D2D1_FACTORY_OPTIONS, D2D1_FACTORY_TYPE, DWORD, HBRUSH, HMENU, HRESULT, LRESULT, MENUITEMINFOW,
+    PCWSTR, REFIID, UINT, ULONG_PTR,
+};
 
-
-use events::{Event, EventCallback, EventArgs};
 use controls::ControlT;
+use events::{Event, EventArgs, EventCallback};
 use resources::ResourceT;
 
 // Custom message proc definitions
 
-pub const NWG_CUSTOM_MIN:        UINT = 0x400;  /// Minimum custom event value
-pub const NWG_PACK_USER_VALUE:   UINT = 0x400;  /// Message sent when packing a user value
-pub const NWG_PACK_CONTROL:      UINT = 0x401;  /// Message sent when packing a control
-pub const NWG_UNPACK:            UINT = 0x402;  /// Message sent when removing an element from the ui
-pub const NWG_BIND:              UINT = 0x403;  /// Message sent when binding an event to a control
-pub const NWG_UNBIND:            UINT = 0x404;  /// Message sent when unbinding an event from a control
-pub const NWG_PACK_RESOURCE:     UINT = 0x405;  /// Message sent when packing a resource
-pub const NWG_TRIGGER:           UINT = 0x406;  /// Message sent when triggering an event
-pub const NWG_CUSTOM_MAX:        UINT = 0x407;  /// Maximum custom event value
+pub const NWG_CUSTOM_MIN: UINT = 0x400;
+/// Minimum custom event value
+pub const NWG_PACK_USER_VALUE: UINT = 0x400;
+/// Message sent when packing a user value
+pub const NWG_PACK_CONTROL: UINT = 0x401;
+/// Message sent when packing a control
+pub const NWG_UNPACK: UINT = 0x402;
+/// Message sent when removing an element from the ui
+pub const NWG_BIND: UINT = 0x403;
+/// Message sent when binding an event to a control
+pub const NWG_UNBIND: UINT = 0x404;
+/// Message sent when unbinding an event from a control
+pub const NWG_PACK_RESOURCE: UINT = 0x405;
+/// Message sent when packing a resource
+pub const NWG_TRIGGER: UINT = 0x406;
+/// Message sent when triggering an event
+pub const NWG_CUSTOM_MAX: UINT = 0x407;
+/// Maximum custom event value
 
 // Value returned by a window proc if the message execution failed/succeeded
 
@@ -109,7 +120,7 @@ pub const BST_UNCHECKED: UINT = 0;
 pub const SS_NOTIFY: UINT = 256;
 pub const SS_RIGHT: UINT = 2;
 pub const SS_LEFT: UINT = 0;
-pub const SS_CENTER: UINT = 1;   
+pub const SS_CENTER: UINT = 1;
 pub const SS_NOPREFIX: UINT = 128;
 
 pub const CBS_DROPDOWNLIST: UINT = 3;
@@ -171,7 +182,7 @@ pub struct MENUINFO {
     pub cyMax: UINT,
     pub hbrBack: HBRUSH,
     pub dwContextHelpID: DWORD,
-    pub dwMenuData: ULONG_PTR
+    pub dwMenuData: ULONG_PTR,
 }
 
 // COM interfaces
@@ -280,56 +291,71 @@ extern "system" {
     pub fn SetMenuInfo(menu: HMENU, info: &mut MENUINFO) -> BOOL;
     pub fn RemoveMenu(menu: HMENU, pos: UINT, flags: UINT) -> BOOL;
     pub fn GetMenuItemID(menu: HMENU, index: c_int) -> UINT;
-    pub fn SetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
-    pub fn GetMenuItemInfoW(hMenu: HMENU, uItem: UINT, gByPosition: BOOL, lpmii: &mut MENUITEMINFOW) -> BOOL;
+    pub fn SetMenuItemInfoW(
+        hMenu: HMENU,
+        uItem: UINT,
+        gByPosition: BOOL,
+        lpmii: &mut MENUITEMINFOW,
+    ) -> BOOL;
+    pub fn GetMenuItemInfoW(
+        hMenu: HMENU,
+        uItem: UINT,
+        gByPosition: BOOL,
+        lpmii: &mut MENUITEMINFOW,
+    ) -> BOOL;
 
-    pub fn SHCreateItemFromParsingName(pszPath: PCWSTR, pbc: *mut IBindCtx, riid: REFIID, ppv: *mut *mut c_void) -> HRESULT;
+    pub fn SHCreateItemFromParsingName(
+        pszPath: PCWSTR,
+        pbc: *mut IBindCtx,
+        riid: REFIID,
+        ppv: *mut *mut c_void,
+    ) -> HRESULT;
 
     pub fn D2D1CreateFactory(
         factoryType: D2D1_FACTORY_TYPE,
-		riid: REFIID, 
-		pFactoryOptions: *const D2D1_FACTORY_OPTIONS,
-        ppIFactory: *mut *mut ID2D1Factory
+        riid: REFIID,
+        pFactoryOptions: *const D2D1_FACTORY_OPTIONS,
+        ppIFactory: *mut *mut ID2D1Factory,
     ) -> HRESULT;
 }
 
-// Arguments passed to the NWG custom events 
+// Arguments passed to the NWG custom events
 
-pub struct PackUserValueArgs<ID: Hash+Clone> {
+pub struct PackUserValueArgs<ID: Hash + Clone> {
     pub id: ID,
     pub tid: TypeId,
-    pub value: Box<Any>
+    pub value: Box<Any>,
 }
 
 pub struct UnpackArgs {
-    pub id: u64
+    pub id: u64,
 }
 
-pub struct PackControlArgs<ID: Hash+Clone> {
+pub struct PackControlArgs<ID: Hash + Clone> {
     pub id: ID,
-    pub value: Box<ControlT<ID>>
+    pub value: Box<ControlT<ID>>,
 }
 
-pub struct PackResourceArgs<ID: Hash+Clone> {
+pub struct PackResourceArgs<ID: Hash + Clone> {
     pub id: ID,
-    pub value: Box<ResourceT<ID>>
+    pub value: Box<ResourceT<ID>>,
 }
 
-pub struct BindArgs<ID: Hash+Clone+'static> {
+pub struct BindArgs<ID: Hash + Clone + 'static> {
     pub id: u64,
     pub cb_id: u64,
     pub event: Event,
-    pub cb: Box<EventCallback<ID>>
+    pub cb: Box<EventCallback<ID>>,
 }
 
 pub struct UnbindArgs {
     pub id: u64,
     pub cb_id: u64,
-    pub event: Event
+    pub event: Event,
 }
 
 pub struct TriggerArgs {
     pub id: u64,
     pub event: Event,
-    pub args: EventArgs
+    pub args: EventArgs,
 }

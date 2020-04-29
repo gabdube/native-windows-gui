@@ -18,43 +18,43 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use std::ptr;
-use std::mem;
 use std::hash::Hash;
+use std::mem;
+use std::ptr;
 
-use winapi::{HWND, HFONT, HBRUSH, WNDPROC, DWORD, LPARAM, BOOL, c_int};
+use winapi::{c_int, BOOL, DWORD, HBRUSH, HFONT, HWND, LPARAM, WNDPROC};
 
-use ui::{UiInner, Ui};
-use controls::{AnyHandle};
-use low::other_helper::to_utf16;
+use controls::AnyHandle;
 use error::{Error, SystemError};
+use low::other_helper::to_utf16;
+use ui::{Ui, UiInner};
 
 /**
     Params used to build a system class
 
-    Members:  
-    • `class_name`: System class name  
-    • `sysproc`: The system class procedure  
-    • `background`: If specified, the background color of the created window  
-    • `style`: System class style  
+    Members:
+    • `class_name`: System class name
+    • `sysproc`: The system class procedure
+    • `background`: If specified, the background color of the created window
+    • `style`: System class style
 */
 pub struct SysclassParams<S: Into<String>> {
     pub class_name: S,
     pub sysproc: WNDPROC,
     pub background: Option<HBRUSH>,
-    pub style: Option<u32>
+    pub style: Option<u32>,
 }
 
 /**
     Params used to build a system window
 
-    Members:  
-    • `title`: The window title  
-    • `class_name`: The system class to use  
-    • `position`: The window starting position  
-    • `size`: The window starting size  
-    • `flags`: Window creation flags  
-    • `parent`: Window parent. Can be null.  
+    Members:
+    • `title`: The window title
+    • `class_name`: The system class to use
+    • `position`: The window starting position
+    • `size`: The window starting size
+    • `flags`: Window creation flags
+    • `parent`: Window parent. Can be null.
 */
 pub struct WindowParams<S1: Into<String>, S2: Into<String>> {
     pub title: S1,
@@ -63,42 +63,46 @@ pub struct WindowParams<S1: Into<String>, S2: Into<String>> {
     pub size: (u32, u32),
     pub flags: DWORD,
     pub ex_flags: Option<DWORD>,
-    pub parent: HWND
+    pub parent: HWND,
 }
 
 /**
     Try to create a system class using the parameters provided in `SysclassParams`. Will not fail if
     the system class already exists.
-    
+
     Returns `Err(SystemError::SysclassCreationFailed)` if the system class creation failed.
 
     Note that if the system class window proc used is malformed, the program will most likely segfault.
 */
 pub unsafe fn build_sysclass<S: Into<String>>(p: SysclassParams<S>) -> Result<(), SystemError> {
-    use kernel32::{GetModuleHandleW, GetLastError};
+    use kernel32::{GetLastError, GetModuleHandleW};
     use user32::{LoadCursorW, RegisterClassExW};
-    use winapi::{WNDCLASSEXW, CS_HREDRAW, CS_VREDRAW, IDC_ARROW, COLOR_WINDOW, UINT, ERROR_CLASS_ALREADY_EXISTS};
+    use winapi::{
+        COLOR_WINDOW, CS_HREDRAW, CS_VREDRAW, ERROR_CLASS_ALREADY_EXISTS, IDC_ARROW, UINT,
+        WNDCLASSEXW,
+    };
 
     let hmod = GetModuleHandleW(ptr::null_mut());
-    if hmod.is_null() { return Err(SystemError::SystemClassCreation); }
+    if hmod.is_null() {
+        return Err(SystemError::SystemClassCreation);
+    }
 
     let class_name = to_utf16(p.class_name.into().as_ref());
 
     let background: HBRUSH = match p.background {
         Some(bg) => bg,
-        None => mem::transmute(COLOR_WINDOW as usize)
+        None => mem::transmute(COLOR_WINDOW as usize),
     };
 
     let style: UINT = match p.style {
         Some(s) => s as UINT,
-        None=> CS_HREDRAW | CS_VREDRAW
+        None => CS_HREDRAW | CS_VREDRAW,
     };
 
-    let class =
-    WNDCLASSEXW {
+    let class = WNDCLASSEXW {
         cbSize: mem::size_of::<WNDCLASSEXW>() as UINT,
         style: style,
-        lpfnWndProc: p.sysproc, 
+        lpfnWndProc: p.sysproc,
         cbClsExtra: 0,
         cbWndExtra: 0,
         hInstance: hmod,
@@ -107,11 +111,11 @@ pub unsafe fn build_sysclass<S: Into<String>>(p: SysclassParams<S>) -> Result<()
         hbrBackground: background,
         lpszMenuName: ptr::null(),
         lpszClassName: class_name.as_ptr(),
-        hIconSm: ptr::null_mut()
+        hIconSm: ptr::null_mut(),
     };
 
     let class_token = RegisterClassExW(&class);
-    if class_token == 0 && GetLastError() != ERROR_CLASS_ALREADY_EXISTS { 
+    if class_token == 0 && GetLastError() != ERROR_CLASS_ALREADY_EXISTS {
         Err(SystemError::SystemClassCreation)
     } else {
         Ok(())
@@ -120,58 +124,73 @@ pub unsafe fn build_sysclass<S: Into<String>>(p: SysclassParams<S>) -> Result<()
 
 /**
     Try to create a system class using the parameters provided in `WindowParams`.
-    
+
     Returns `Ok(HWND)` where HWND is the newly created window handle
     Returns `Err(SystemError::WindowCreationFail)` if the system window creation failed.
 
     Note that if the system class window proc used is malformed, the program will most likely segfault.
 */
-pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S1, S2>) -> Result<HWND, SystemError>{
+pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(
+    p: WindowParams<S1, S2>,
+) -> Result<HWND, SystemError> {
     use kernel32::GetModuleHandleW;
     use user32::{CreateWindowExW, GetDesktopWindow, GetWindowRect};
-    use winapi::{WS_EX_COMPOSITED, RECT};
+    use winapi::{RECT, WS_EX_COMPOSITED};
 
     let hmod = GetModuleHandleW(ptr::null_mut());
-    if hmod.is_null() { return Err(SystemError::WindowCreationFail); }
+    if hmod.is_null() {
+        return Err(SystemError::WindowCreationFail);
+    }
 
     let class_name = to_utf16(p.class_name.into().as_ref());
     let window_name = to_utf16(p.title.into().as_ref());
 
-    let px = match p.position.0 { 
+    let px = match p.position.0 {
         ::defs::CENTER_POSITION => {
             let mut rect: RECT = mem::uninitialized();
-            let parent = if p.parent.is_null() { GetDesktopWindow() } else {p.parent};
+            let parent = if p.parent.is_null() {
+                GetDesktopWindow()
+            } else {
+                p.parent
+            };
             GetWindowRect(parent, &mut rect);
-            (rect.right/2) - ((p.size.0/2) as i32)
-        },
-        x => x
+            (rect.right / 2) - ((p.size.0 / 2) as i32)
+        }
+        x => x,
     };
 
-    let py = match p.position.1 { 
+    let py = match p.position.1 {
         ::defs::CENTER_POSITION => {
             let mut rect: RECT = mem::uninitialized();
-            let parent = if p.parent.is_null() { GetDesktopWindow() } else {p.parent};
+            let parent = if p.parent.is_null() {
+                GetDesktopWindow()
+            } else {
+                p.parent
+            };
             GetWindowRect(parent, &mut rect);
-            (rect.bottom/2) - ((p.size.1/2) as i32)
-        },
-        y => y
+            (rect.bottom / 2) - ((p.size.1 / 2) as i32)
+        }
+        y => y,
     };
 
     let ex_flags = match p.ex_flags {
         Some(ex) => ex,
-        None => WS_EX_COMPOSITED
+        None => WS_EX_COMPOSITED,
     };
 
-    let handle = CreateWindowExW (
+    let handle = CreateWindowExW(
         ex_flags,
-        class_name.as_ptr(), window_name.as_ptr(),
+        class_name.as_ptr(),
+        window_name.as_ptr(),
         p.flags,
-        px, py,
-        p.size.0 as i32, p.size.1 as i32,
+        px,
+        py,
+        p.size.0 as i32,
+        p.size.1 as i32,
         p.parent,
         ptr::null_mut(),
         hmod,
-        ptr::null_mut()
+        ptr::null_mut(),
     );
 
     if handle.is_null() {
@@ -182,13 +201,13 @@ pub unsafe fn build_window<S1: Into<String>, S2: Into<String>>(p: WindowParams<S
     }
 }
 
-/** 
+/**
     Fix: Window size include the non client area. This behaviour is not wanted
-    Resize the client area to match the "true" size. 
+    Resize the client area to match the "true" size.
 */
 unsafe fn fix_overlapped_window_size(handle: HWND, size: (u32, u32)) {
-    use winapi::{RECT, SWP_NOMOVE, SWP_NOZORDER};
     use user32::{GetClientRect, SetWindowPos};
+    use winapi::{RECT, SWP_NOMOVE, SWP_NOZORDER};
 
     let mut rect: RECT = mem::uninitialized();
     GetClientRect(handle, &mut rect);
@@ -196,14 +215,22 @@ unsafe fn fix_overlapped_window_size(handle: HWND, size: (u32, u32)) {
     let (w, h) = (size.0 as c_int, size.1 as c_int);
     let delta_width = w - rect.right;
     let delta_height = h - rect.bottom;
-    
-    SetWindowPos(handle, ptr::null_mut(), 0, 0,
-      w+delta_width, h+delta_height,
-      SWP_NOMOVE|SWP_NOZORDER);
+
+    SetWindowPos(
+        handle,
+        ptr::null_mut(),
+        0,
+        0,
+        w + delta_width,
+        h + delta_height,
+        SWP_NOMOVE | SWP_NOZORDER,
+    );
 }
 
-
-unsafe extern "system" fn list_children_window<ID: Clone+Hash+'static>(handle: HWND, params: LPARAM) -> BOOL {
+unsafe extern "system" fn list_children_window<ID: Clone + Hash + 'static>(
+    handle: HWND,
+    params: LPARAM,
+) -> BOOL {
     let &mut (inner, ref mut ids): &mut (*mut UiInner<ID>, Vec<u64>) = mem::transmute(params);
 
     // Check if the window belongs to the ui
@@ -218,19 +245,26 @@ unsafe extern "system" fn list_children_window<ID: Clone+Hash+'static>(handle: H
     Return the children control found in the window. Includes the window menubar if one is present.
 */
 #[allow(unused_variables)]
-pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInner<ID>) -> Vec<u64> {
-    use user32::{GetMenu, EnumChildWindows};
+pub unsafe fn list_window_children<ID: Clone + Hash>(
+    handle: HWND,
+    ui: *mut UiInner<ID>,
+) -> Vec<u64> {
     use low::menu_helper::list_menu_children;
+    use user32::{EnumChildWindows, GetMenu};
 
     let mut children = Vec::new();
 
     let menu = GetMenu(handle);
     if !menu.is_null() {
-        children.append(&mut list_menu_children(&*ui, menu) );
+        children.append(&mut list_menu_children(&*ui, menu));
     }
 
     let mut params: (*mut UiInner<ID>, Vec<u64>) = (ui, children);
-    EnumChildWindows(handle, Some(list_children_window::<ID>), mem::transmute(&mut params));
+    EnumChildWindows(
+        handle,
+        Some(list_children_window::<ID>),
+        mem::transmute(&mut params),
+    );
 
     params.1
 }
@@ -238,21 +272,28 @@ pub unsafe fn list_window_children<ID: Clone+Hash>(handle: HWND, ui: *mut UiInne
 /// Set the font of a window
 pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: bool) {
     use user32::SendMessageW;
-    use winapi::{WM_SETFONT};
+    use winapi::WM_SETFONT;
 
     let font_handle = font_handle.unwrap_or(ptr::null_mut());
 
-    SendMessageW(handle, WM_SETFONT, mem::transmute(font_handle), redraw as LPARAM);
+    SendMessageW(
+        handle,
+        WM_SETFONT,
+        mem::transmute(font_handle),
+        redraw as LPARAM,
+    );
 }
 
 /// Get the window text
 #[inline(always)]
 pub unsafe fn get_window_text(handle: HWND) -> String {
-    use user32::{GetWindowTextW, GetWindowTextLengthW};
     use low::other_helper::from_utf16;
+    use user32::{GetWindowTextLengthW, GetWindowTextW};
 
     let mut buffer_size = GetWindowTextLengthW(handle) as usize;
-    if buffer_size == 0 { return String::new(); }
+    if buffer_size == 0 {
+        return String::new();
+    }
 
     buffer_size += 1;
     let mut buffer: Vec<u16> = Vec::with_capacity(buffer_size);
@@ -274,28 +315,38 @@ pub unsafe fn set_window_text<'a>(handle: HWND, text: &'a str) {
     SetWindowTextW(handle, text.as_ptr());
 }
 
-
 /// Set window position
 #[inline(always)]
 pub unsafe fn set_window_position(handle: HWND, x: i32, y: i32) {
     use user32::SetWindowPos;
-    use winapi::{SWP_NOZORDER, SWP_NOSIZE, SWP_NOACTIVATE};
+    use winapi::{SWP_NOACTIVATE, SWP_NOSIZE, SWP_NOZORDER};
 
-    SetWindowPos(handle, ptr::null_mut(), x as c_int, y as c_int, 0, 0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
+    SetWindowPos(
+        handle,
+        ptr::null_mut(),
+        x as c_int,
+        y as c_int,
+        0,
+        0,
+        SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE,
+    );
 }
 
 /// Get window position
 #[inline(always)]
 pub unsafe fn get_window_position(handle: HWND) -> (i32, i32) {
-    use user32::{GetWindowRect, ScreenToClient, GetParent};
-    use winapi::{RECT, POINT};
-    
+    use user32::{GetParent, GetWindowRect, ScreenToClient};
+    use winapi::{POINT, RECT};
+
     let mut r: RECT = mem::uninitialized();
     GetWindowRect(handle, &mut r);
 
     let parent = GetParent(handle);
     if !parent.is_null() {
-        let mut pt = POINT{x: r.left, y: r.top};
+        let mut pt = POINT {
+            x: r.left,
+            y: r.top,
+        };
         ScreenToClient(parent, &mut pt);
         (pt.x as i32, pt.y as i32)
     } else {
@@ -307,11 +358,21 @@ pub unsafe fn get_window_position(handle: HWND) -> (i32, i32) {
 #[inline(always)]
 pub unsafe fn set_window_size(handle: HWND, w: u32, h: u32, fix: bool) {
     use user32::SetWindowPos;
-    use winapi::{SWP_NOZORDER, SWP_NOMOVE, SWP_NOACTIVATE};
+    use winapi::{SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOZORDER};
 
-    SetWindowPos(handle, ptr::null_mut(), 0, 0, w as c_int, h as c_int, SWP_NOZORDER|SWP_NOMOVE|SWP_NOACTIVATE);
+    SetWindowPos(
+        handle,
+        ptr::null_mut(),
+        0,
+        0,
+        w as c_int,
+        h as c_int,
+        SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE,
+    );
 
-    if fix { fix_overlapped_window_size(handle, (w, h)); }
+    if fix {
+        fix_overlapped_window_size(handle, (w, h));
+    }
 }
 
 /// Get window size
@@ -319,7 +380,7 @@ pub unsafe fn set_window_size(handle: HWND, w: u32, h: u32, fix: bool) {
 pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {
     use user32::GetClientRect;
     use winapi::RECT;
-    
+
     let mut r: RECT = mem::uninitialized();
     GetClientRect(handle, &mut r);
 
@@ -329,7 +390,7 @@ pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {
 /// Get the window enabled state
 #[inline(always)]
 pub unsafe fn get_window_enabled(handle: HWND) -> bool {
-    use winapi::{GWL_STYLE, WS_DISABLED, UINT};
+    use winapi::{GWL_STYLE, UINT, WS_DISABLED};
 
     let style = get_window_long(handle, GWL_STYLE) as UINT;
     (style & WS_DISABLED) != WS_DISABLED
@@ -338,14 +399,14 @@ pub unsafe fn get_window_enabled(handle: HWND) -> bool {
 /// Set the window enabled state
 #[inline(always)]
 pub unsafe fn set_window_enabled(handle: HWND, enabled: bool) {
+    use user32::{InvalidateRect, UpdateWindow};
     use winapi::{GWL_STYLE, WS_DISABLED};
-    use user32::{UpdateWindow, InvalidateRect};
 
     let old_style = get_window_long(handle, GWL_STYLE) as usize;
     if enabled {
-        set_window_long(handle, GWL_STYLE, old_style&(!WS_DISABLED as usize) );
+        set_window_long(handle, GWL_STYLE, old_style & (!WS_DISABLED as usize));
     } else {
-        set_window_long(handle, GWL_STYLE, old_style|(WS_DISABLED as usize));
+        set_window_long(handle, GWL_STYLE, old_style | (WS_DISABLED as usize));
     }
 
     // Tell the control to redraw itself to show the new style.
@@ -372,33 +433,42 @@ pub unsafe fn get_window_visibility(handle: HWND) -> bool {
     IsWindowVisible(handle) != 0
 }
 
-
 #[inline(always)]
-pub fn handle_of_window<ID: Clone+Hash>(ui: &Ui<ID>, id: &ID, err: &'static str) -> Result<HWND, Error> {
+pub fn handle_of_window<ID: Clone + Hash>(
+    ui: &Ui<ID>,
+    id: &ID,
+    err: &'static str,
+) -> Result<HWND, Error> {
     match ui.handle_of(id) {
         Ok(AnyHandle::HWND(h)) => Ok(h),
         Ok(_) => Err(Error::BadParent(err.to_string())),
-        Err(e) => Err(e)
+        Err(e) => Err(e),
     }
 }
 
 #[inline(always)]
-pub fn handle_of_font<ID: Clone+Hash>(ui: &Ui<ID>, id: &ID, err: &'static str) -> Result<HFONT, Error> {
+pub fn handle_of_font<ID: Clone + Hash>(
+    ui: &Ui<ID>,
+    id: &ID,
+    err: &'static str,
+) -> Result<HFONT, Error> {
     match ui.handle_of(id) {
         Ok(AnyHandle::HFONT(h)) => Ok(h),
         Ok(_) => Err(Error::BadResource(err.to_string())),
-        Err(e) => Err(e)
+        Err(e) => Err(e),
     }
-} 
+}
 
-#[cfg(target_arch = "x86")] use winapi::LONG;
-#[cfg(target_arch = "x86_64")] use winapi::LONG_PTR;
+#[cfg(target_arch = "x86")]
+use winapi::LONG;
+#[cfg(target_arch = "x86_64")]
+use winapi::LONG_PTR;
 
 #[inline(always)]
 #[cfg(target_arch = "x86_64")]
 pub fn get_window_long(handle: HWND, index: c_int) -> LONG_PTR {
     use user32::GetWindowLongPtrW;
-    unsafe{ GetWindowLongPtrW(handle, index) }
+    unsafe { GetWindowLongPtrW(handle, index) }
 }
 
 #[inline(always)]
@@ -412,12 +482,16 @@ pub fn get_window_long(handle: HWND, index: c_int) -> LONG {
 #[cfg(target_arch = "x86_64")]
 pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
     use user32::SetWindowLongPtrW;
-    unsafe{ SetWindowLongPtrW(handle, index, v as LONG_PTR); }
+    unsafe {
+        SetWindowLongPtrW(handle, index, v as LONG_PTR);
+    }
 }
 
 #[inline(always)]
 #[cfg(target_arch = "x86")]
 pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
     use user32::SetWindowLongW;
-    unsafe { SetWindowLongW(handle, index, v as LONG); }
+    unsafe {
+        SetWindowLongW(handle, index, v as LONG);
+    }
 }

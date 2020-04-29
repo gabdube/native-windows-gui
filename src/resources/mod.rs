@@ -23,17 +23,16 @@ pub mod font;
 use std::any::TypeId;
 use std::hash::Hash;
 
-use ui::Ui;
 use controls::AnyHandle;
 use error::Error;
+use ui::Ui;
 
-pub use resources::font::{FontT, Font};
+pub use resources::font::{Font, FontT};
 
 /**
     Structures implementing this trait can be used by a Ui to build a Resource
 */
-pub trait ResourceT<ID: Clone+Hash> {
-
+pub trait ResourceT<ID: Clone + Hash> {
     /**
         Should return the TypeId of the generated resource. For example a `FontT` struct returns the TypeId of a `Font` struct.
     */
@@ -49,7 +48,6 @@ pub trait ResourceT<ID: Clone+Hash> {
     Structures implementing this trait are resources that can be stored in a Ui
 */
 pub trait Resource {
-
     /**
         Should return the underlying handle to the object
     */
@@ -59,5 +57,4 @@ pub trait Resource {
         If specified, should free any ressource allocated in the template `build` function.
     */
     fn free(&mut self) {}
-
 }

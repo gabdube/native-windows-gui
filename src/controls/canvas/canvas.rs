@@ -19,20 +19,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use std::hash::Hash;
-use std::ptr;
-use std::ops::{Deref, DerefMut};
-use std::marker::PhantomData;
 use std::collections::HashMap;
+use std::hash::Hash;
+use std::marker::PhantomData;
+use std::ops::{Deref, DerefMut};
+use std::ptr;
 
-use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget, ID2D1SolidColorBrush, ID2D1StrokeStyle, 
-  S_OK, D2D1_MATRIX_3X2_F};
+use winapi::{
+    ID2D1Factory, ID2D1HwndRenderTarget, ID2D1SolidColorBrush, ID2D1StrokeStyle, D2D1_MATRIX_3X2_F,
+    HWND, S_OK,
+};
 
-use controls::{Control, ControlType, AnyHandle};
-use error::{Error, SystemError};
-use super::{CanvasRenderer, RendererProtected, build_render_target, CANVAS_CLASS_NAME};
+use super::{build_render_target, CanvasRenderer, RendererProtected, CANVAS_CLASS_NAME};
+use controls::{AnyHandle, Control, ControlType};
 use defs;
-
+use error::{Error, SystemError};
 
 /**
     D2d resources held by a canvas
@@ -40,22 +41,22 @@ use defs;
 #[derive(Clone)]
 pub enum CanvasResources {
     SolidBrush(*mut ID2D1SolidColorBrush),
-    StrokeStyle(*mut ID2D1StrokeStyle)
+    StrokeStyle(*mut ID2D1StrokeStyle),
 }
 
 /**
     A blank control that can be painted to
 */
-pub struct Canvas<ID: Clone+Hash> {
+pub struct Canvas<ID: Clone + Hash> {
     handle: HWND,
     factory: *mut ID2D1Factory,
     render_target: *mut ID2D1HwndRenderTarget,
     must_recreate_target: bool,
     resources: HashMap<u64, CanvasResources>,
-    p: PhantomData<ID>
+    p: PhantomData<ID>,
 }
 
-impl<ID: Clone+Hash> Canvas<ID> {
+impl<ID: Clone + Hash> Canvas<ID> {
     /**
         Make the canvas "paint ready" and return an object to paint to it.
         In very very **very** rare case, the renderer creation can fail.
@@ -67,12 +68,12 @@ impl<ID: Clone+Hash> Canvas<ID> {
     /**
         Create a solid brush into the canvas and add it under the selected `name`.
 
-        Errors:  
-        • `Error::System` if the canvas could not create the brush.  
-        • `Error::KeyExists` if the a resource with the specified name already exists  
+        Errors:
+        • `Error::System` if the canvas could not create the brush.
+        • `Error::KeyExists` if the a resource with the specified name already exists
     */
     pub fn create_solid_brush(&mut self, name: &ID, brush: &defs::SolidBrush) -> Result<(), Error> {
-        use winapi::{D2D1_COLOR_F, D2D1_BRUSH_PROPERTIES};
+        use winapi::{D2D1_BRUSH_PROPERTIES, D2D1_COLOR_F};
 
         let id = Canvas::hash_id(name);
         if self.resources.contains_key(&id) {
@@ -80,29 +81,44 @@ impl<ID: Clone+Hash> Canvas<ID> {
         }
 
         let c = &brush.color;
-        let color = D2D1_COLOR_F{r: c.0, g: c.1, b: c.2, a: c.3};
-        let identity = D2D1_MATRIX_3X2_F {matrix: [[1.0, 0.0],[0.0, 1.0],[0.0, 0.0]]};
-        let property = D2D1_BRUSH_PROPERTIES { opacity: 1.0, transform: identity};
+        let color = D2D1_COLOR_F {
+            r: c.0,
+            g: c.1,
+            b: c.2,
+            a: c.3,
+        };
+        let identity = D2D1_MATRIX_3X2_F {
+            matrix: [[1.0, 0.0], [0.0, 1.0], [0.0, 0.0]],
+        };
+        let property = D2D1_BRUSH_PROPERTIES {
+            opacity: 1.0,
+            transform: identity,
+        };
         let mut brush: *mut ID2D1SolidColorBrush = ptr::null_mut();
-        let result = unsafe{ self.CreateSolidColorBrush(&color, &property, &mut brush) };
+        let result = unsafe { self.CreateSolidColorBrush(&color, &property, &mut brush) };
 
         if result == S_OK {
-            self.resources.insert(id, CanvasResources::SolidBrush(brush));
+            self.resources
+                .insert(id, CanvasResources::SolidBrush(brush));
             Ok(())
         } else {
-            Err(Error::System(SystemError::ComError("Failed to import brush".to_string())))
+            Err(Error::System(SystemError::ComError(
+                "Failed to import brush".to_string(),
+            )))
         }
     }
 
     /**
         Create a pen into the canvas and add it under the selected `name`.
 
-        Errors:  
-        • `Error::System` if the canvas could not create the brush.  
-        • `Error::KeyExists` if the a resource with the specified name already exists  
+        Errors:
+        • `Error::System` if the canvas could not create the brush.
+        • `Error::KeyExists` if the a resource with the specified name already exists
     */
     pub fn create_pen(&mut self, name: &ID, pen: &defs::Pen) -> Result<(), Error> {
-        use winapi::{D2D1_STROKE_STYLE_PROPERTIES, D2D1_CAP_STYLE, D2D1_LINE_JOIN, D2D1_DASH_STYLE};
+        use winapi::{
+            D2D1_CAP_STYLE, D2D1_DASH_STYLE, D2D1_LINE_JOIN, D2D1_STROKE_STYLE_PROPERTIES,
+        };
 
         let id = Canvas::hash_id(name);
         if self.resources.contains_key(&id) {
@@ -122,19 +138,28 @@ impl<ID: Clone+Hash> Canvas<ID> {
             lineJoin: line_join,
             miterLimit: pen.miter_limit,
             dashStyle: dash_style,
-            dashOffset: pen.dash_offset
+            dashOffset: pen.dash_offset,
         };
 
         let mut stroke_style: *mut ID2D1StrokeStyle = ptr::null_mut();
-        let result = unsafe{ (&mut *self.factory).CreateStrokeStyle(&stroke_style_prop, ptr::null(), 0, &mut stroke_style) };
+        let result = unsafe {
+            (&mut *self.factory).CreateStrokeStyle(
+                &stroke_style_prop,
+                ptr::null(),
+                0,
+                &mut stroke_style,
+            )
+        };
 
         if result == S_OK {
-            self.resources.insert(id, CanvasResources::StrokeStyle(stroke_style));
+            self.resources
+                .insert(id, CanvasResources::StrokeStyle(stroke_style));
             Ok(())
         } else {
-            Err(Error::System(SystemError::ComError("Failed to import brush".to_string())))
+            Err(Error::System(SystemError::ComError(
+                "Failed to import brush".to_string(),
+            )))
         }
-
     }
 
     /**
@@ -143,19 +168,29 @@ impl<ID: Clone+Hash> Canvas<ID> {
     pub fn redraw(&self) {
         use user32::RedrawWindow;
         use winapi::{RDW_ERASE, RDW_INVALIDATE};
-        unsafe { 
-            RedrawWindow(self.handle, ptr::null(), ptr::null_mut(), RDW_ERASE|RDW_INVALIDATE);
+        unsafe {
+            RedrawWindow(
+                self.handle,
+                ptr::null(),
+                ptr::null_mut(),
+                RDW_ERASE | RDW_INVALIDATE,
+            );
         }
     }
-    
+
     /**
-        Set the render target resolution.  
+        Set the render target resolution.
         If the control size do not match the render target size, the result will be upscaled or downscaled
     */
     pub fn set_render_size(&mut self, w: u32, h: u32) {
         use winapi::D2D_SIZE_U;
-        let render_size = D2D_SIZE_U{width: w, height: h};
-        unsafe{ self.Resize(&render_size); }
+        let render_size = D2D_SIZE_U {
+            width: w,
+            height: h,
+        };
+        unsafe {
+            self.Resize(&render_size);
+        }
     }
 
     /**
@@ -164,64 +199,95 @@ impl<ID: Clone+Hash> Canvas<ID> {
     pub fn get_dpi(&mut self) -> (f32, f32) {
         let mut x = 0.0f32;
         let mut y = 0.0f32;
-        unsafe { self.GetDpi(&mut x, &mut y); }
+        unsafe {
+            self.GetDpi(&mut x, &mut y);
+        }
         (x, y)
     }
 
     /**
-        Sets the dots per inch (DPI) of the render target.   
+        Sets the dots per inch (DPI) of the render target.
 
-        Arguments:  
-        • `dpix`:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.  
-        • `dpiy`:  A value greater than or equal to zero that specifies the vertical DPI of the render target.  
+        Arguments:
+        • `dpix`:  A value greater than or equal to zero that specifies the horizontal DPI of the render target.
+        • `dpiy`:  A value greater than or equal to zero that specifies the vertical DPI of the render target.
     */
     pub fn set_dpi(&mut self, dpix: f32, fpiy: f32) {
-        unsafe { self.SetDpi(dpix, fpiy); }
+        unsafe {
+            self.SetDpi(dpix, fpiy);
+        }
     }
 
     /// Hash an ID before inserting it in the canvas resources
     #[inline(always)]
     fn hash_id(id: &ID) -> u64 {
-        use std::hash::Hasher;
         use std::collections::hash_map::DefaultHasher;
+        use std::hash::Hasher;
         let mut s1 = DefaultHasher::new();
         id.hash(&mut s1);
         s1.finish()
     }
 
-    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
-    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
-    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
-    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
-    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
-    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, true); } }
-    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
-    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+    pub fn get_visibility(&self) -> bool {
+        unsafe { ::low::window_helper::get_window_visibility(self.handle) }
+    }
+    pub fn set_visibility(&self, visible: bool) {
+        unsafe {
+            ::low::window_helper::set_window_visibility(self.handle, visible);
+        }
+    }
+    pub fn get_position(&self) -> (i32, i32) {
+        unsafe { ::low::window_helper::get_window_position(self.handle) }
+    }
+    pub fn set_position(&self, x: i32, y: i32) {
+        unsafe {
+            ::low::window_helper::set_window_position(self.handle, x, y);
+        }
+    }
+    pub fn get_size(&self) -> (u32, u32) {
+        unsafe { ::low::window_helper::get_window_size(self.handle) }
+    }
+    pub fn set_size(&self, w: u32, h: u32) {
+        unsafe {
+            ::low::window_helper::set_window_size(self.handle, w, h, true);
+        }
+    }
+    pub fn get_enabled(&self) -> bool {
+        unsafe { ::low::window_helper::get_window_enabled(self.handle) }
+    }
+    pub fn set_enabled(&self, e: bool) {
+        unsafe {
+            ::low::window_helper::set_window_enabled(self.handle, e);
+        }
+    }
 }
 
-impl<ID: Clone+Hash> Control for Canvas<ID> {
-
+impl<ID: Clone + Hash> Control for Canvas<ID> {
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
     }
 
-    fn control_type(&self) -> ControlType { 
-        ControlType::Canvas 
+    fn control_type(&self) -> ControlType {
+        ControlType::Canvas
     }
 
     fn free(&mut self) {
-        unsafe{
-            use user32::{DestroyWindow, UnregisterClassW};
+        unsafe {
             use kernel32::GetModuleHandleW;
             use low::other_helper::to_utf16;
+            use user32::{DestroyWindow, UnregisterClassW};
 
             let factory = &mut *self.factory;
             let render_target = &mut *self.render_target;
 
             for (_, v) in self.resources.drain() {
                 match v {
-                    CanvasResources::SolidBrush(r) => { (&mut *r).Release(); },
-                    CanvasResources::StrokeStyle(s) => { (&mut *s).Release(); },
+                    CanvasResources::SolidBrush(r) => {
+                        (&mut *r).Release();
+                    }
+                    CanvasResources::StrokeStyle(s) => {
+                        (&mut *s).Release();
+                    }
                 }
             }
 
@@ -234,32 +300,28 @@ impl<ID: Clone+Hash> Control for Canvas<ID> {
             UnregisterClassW(cls.as_ptr(), hmod);
         };
     }
-
 }
 
-impl<'a, ID: Clone+Hash> Deref for Canvas<ID> {
+impl<'a, ID: Clone + Hash> Deref for Canvas<ID> {
     type Target = ID2D1HwndRenderTarget;
 
     #[inline(always)]
     fn deref(&self) -> &ID2D1HwndRenderTarget {
-        unsafe{ & *self.render_target }
+        unsafe { &*self.render_target }
     }
-
 }
 
-impl<'a, ID: Clone+Hash> DerefMut for Canvas<ID> {
-
+impl<'a, ID: Clone + Hash> DerefMut for Canvas<ID> {
     #[inline(always)]
     fn deref_mut(&mut self) -> &mut ID2D1HwndRenderTarget {
-        unsafe{ &mut *self.render_target }
+        unsafe { &mut *self.render_target }
     }
-
 }
 
 /**
     Protected renderer method (only available in the canvas control module)
 */
-pub trait CanvasProtected<ID: Clone+Hash>  {
+pub trait CanvasProtected<ID: Clone + Hash> {
     fn get_must_recreate_target(&mut self) -> bool;
     fn set_must_recreate_target(&mut self, recreate: bool);
     fn create(h: HWND, f: *mut ID2D1Factory, r: *mut ID2D1HwndRenderTarget) -> Canvas<ID>;
@@ -267,8 +329,7 @@ pub trait CanvasProtected<ID: Clone+Hash>  {
     fn get_resource(&mut self, id: &ID) -> Result<CanvasResources, Error>;
 }
 
-impl<ID: Clone+Hash> CanvasProtected<ID> for Canvas<ID> {
-
+impl<ID: Clone + Hash> CanvasProtected<ID> for Canvas<ID> {
     fn get_must_recreate_target(&mut self) -> bool {
         self.must_recreate_target
     }
@@ -278,36 +339,35 @@ impl<ID: Clone+Hash> CanvasProtected<ID> for Canvas<ID> {
     }
 
     fn create(h: HWND, f: *mut ID2D1Factory, r: *mut ID2D1HwndRenderTarget) -> Canvas<ID> {
-         Canvas::<ID>{
+        Canvas::<ID> {
             handle: h,
             factory: f,
             render_target: r,
             must_recreate_target: false,
             resources: HashMap::with_capacity(10),
-            p: PhantomData
+            p: PhantomData,
         }
     }
 
     /// Rebuild the canvas renderer
     fn rebuild(&mut self) -> Result<(), SystemError> {
-        let result = unsafe{ build_render_target(self.handle,  &mut *self.factory) };
+        let result = unsafe { build_render_target(self.handle, &mut *self.factory) };
         match result {
             Ok(render_target) => {
                 self.render_target = render_target;
                 self.must_recreate_target = false;
                 Ok(())
             }
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
     }
 
     fn get_resource(&mut self, id: &ID) -> Result<CanvasResources, Error> {
         let id = Canvas::hash_id(id);
         if let Some(r) = self.resources.get(&id) {
-             Ok( r.clone() )
+            Ok(r.clone())
         } else {
             Err(Error::KeyNotFound)
         }
     }
-
 }

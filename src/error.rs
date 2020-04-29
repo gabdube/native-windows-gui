@@ -39,14 +39,22 @@ impl SystemError {
     fn translate(&self) -> String {
         use low::other_helper::get_system_error;
 
-        let (code, code_txt) = unsafe{ get_system_error() };
+        let (code, code_txt) = unsafe { get_system_error() };
         let tr = match self {
-            &SystemError::SystemClassCreation => format!("Failed to create a system class for a control"),
-            &SystemError::WindowCreationFail => format!("Failed to create a system window for a control"),
+            &SystemError::SystemClassCreation => {
+                format!("Failed to create a system class for a control")
+            }
+            &SystemError::WindowCreationFail => {
+                format!("Failed to create a system window for a control")
+            }
             &SystemError::UiCreation => format!("The system could not initialize the Ui"),
             &SystemError::FontCreation => format!("Failed to create a system font"),
-            &SystemError::ComInstanceCreation(ref name) => format!("Failed to create a COM instance for {}", name),
-            &SystemError::ComError(ref details) => format!("An error ocurred while executing a COM method, {}", details),
+            &SystemError::ComInstanceCreation(ref name) => {
+                format!("Failed to create a COM instance for {}", name)
+            }
+            &SystemError::ComError(ref details) => {
+                format!("An error ocurred while executing a COM method, {}", details)
+            }
         };
 
         format!("{}.\nID {:?} - {}", tr, code, code_txt)
@@ -77,12 +85,11 @@ pub enum Error {
     ResourceInUse,
     Unimplemented,
     System(SystemError),
-    UserError(String)
+    UserError(String),
 }
 
 impl Error {
     fn translate(&self) -> String {
-
         match self {
             &Error::KeyExists => format!("The same key already exists in the UI"),
             &Error::KeyNotFound => format!("The key was not found in the ui"),
@@ -99,7 +106,6 @@ impl Error {
             &Error::System(ref e) => format!("A system error was raised: {:?}", e),
             &Error::UserError(ref e) => format!("{}", e),
         }
-
     }
 }
 

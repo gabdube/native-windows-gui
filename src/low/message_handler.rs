@@ -18,17 +18,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use std::mem;
-use std::ptr;
+use std::any::Any;
 use std::hash::Hash;
 use std::marker::PhantomData;
-use std::any::Any;
+use std::mem;
+use std::ptr;
 
-use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT};
+use winapi::{HWND, LPARAM, LRESULT, UINT, WPARAM};
 
-use ui::UiInner;
-use low::other_helper::to_utf16;
 use error::{Error, SystemError};
+use low::other_helper::to_utf16;
+use ui::UiInner;
 
 /// Unique class name that identify the nwg message-only windows.
 const MESSAGE_HANDLE_CLASS_NAME: &'static str = "NWG_MESSAGE";
@@ -38,32 +38,28 @@ const MESSAGE_HANDLE_CLASS_NAME: &'static str = "NWG_MESSAGE";
 
     No automatic resources freeing, `MessageHandle.free` must be called before the struct goes out of scope.
 */
-pub struct MessageHandler<ID: Hash+Clone+'static> {
+pub struct MessageHandler<ID: Hash + Clone + 'static> {
     pub hwnd: HWND,
     pub last_error: Option<Error>,
-    pub p: PhantomData<ID>
+    pub p: PhantomData<ID>,
 }
 
-impl<ID: Hash+Clone+'static> MessageHandler<ID> {
-
+impl<ID: Hash + Clone + 'static> MessageHandler<ID> {
     /**
-        Create a new message handle. 
+        Create a new message handle.
 
         * If the window creation was successful, returns the new message handler
         * If the system was not capable to create the window, returns a `Error::System`
     */
     pub fn new() -> Result<MessageHandler<ID>, Error> {
-        let hwnd_result = unsafe{ create_message_only_window::<ID>() };
+        let hwnd_result = unsafe { create_message_only_window::<ID>() };
         match hwnd_result {
-            Ok(h) => 
-            Ok( 
-                MessageHandler::<ID>{ 
-                    hwnd: h, 
-                    last_error: None,
-                    p: PhantomData,
-                } 
-            ),
-            Err(e) => Err(Error::System(e))
+            Ok(h) => Ok(MessageHandler::<ID> {
+                hwnd: h,
+                last_error: None,
+                p: PhantomData,
+            }),
+            Err(e) => Err(Error::System(e)),
         }
     }
 
@@ -75,14 +71,21 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
           The following events will not be touched.
     */
     pub fn commit(&mut self) -> Result<(), Error> {
+        use low::defs::{COMMIT_FAILED, NWG_CUSTOM_MAX, NWG_CUSTOM_MIN};
+        use user32::{DispatchMessageW, PeekMessageW};
         use winapi::{MSG, PM_REMOVE};
-        use user32::{PeekMessageW, DispatchMessageW};
-        use low::defs::{NWG_CUSTOM_MAX, NWG_CUSTOM_MIN, COMMIT_FAILED};
 
-        let ok = unsafe{
+        let ok = unsafe {
             let mut ok = true;
             let mut msg: MSG = mem::uninitialized();
-            while PeekMessageW(&mut msg, self.hwnd, NWG_CUSTOM_MIN, NWG_CUSTOM_MAX, PM_REMOVE) != 0 {
+            while PeekMessageW(
+                &mut msg,
+                self.hwnd,
+                NWG_CUSTOM_MIN,
+                NWG_CUSTOM_MAX,
+                PM_REMOVE,
+            ) != 0
+            {
                 if DispatchMessageW(&msg) == COMMIT_FAILED {
                     ok = false;
                     break;
@@ -127,12 +130,16 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
 
         let class_name = to_utf16(MESSAGE_HANDLE_CLASS_NAME);
 
-        unsafe{ DestroyWindow(self.hwnd); }
-        unsafe{ UnregisterClassW(class_name.as_ptr(), GetModuleHandleW(ptr::null_mut())); }
+        unsafe {
+            DestroyWindow(self.hwnd);
+        }
+        unsafe {
+            UnregisterClassW(class_name.as_ptr(), GetModuleHandleW(ptr::null_mut()));
+        }
     }
 }
 
-/** 
+/**
     Proc for the nwg Ui message-only window. Basically, it dispatches async events to the inner ui.
 
     * `msg` holds the nwg command identifier
@@ -140,10 +147,21 @@ impl<ID: Hash+Clone+'static> MessageHandler<ID> {
     * `l`   holds the parameters for the messages
 */
 #[allow(unused_variables)]
-unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use user32::{DefWindowProcW};
-    use low::defs::{NWG_PACK_USER_VALUE, NWG_PACK_CONTROL, NWG_UNPACK, NWG_BIND, NWG_UNBIND, NWG_TRIGGER, NWG_PACK_RESOURCE, COMMIT_SUCCESS, COMMIT_FAILED};
-    use low::defs::{PackUserValueArgs, PackControlArgs, UnpackArgs, BindArgs, UnbindArgs, PackResourceArgs, TriggerArgs};
+unsafe extern "system" fn message_window_proc<ID: Hash + Clone + 'static>(
+    hwnd: HWND,
+    msg: UINT,
+    w: WPARAM,
+    l: LPARAM,
+) -> LRESULT {
+    use low::defs::{
+        BindArgs, PackControlArgs, PackResourceArgs, PackUserValueArgs, TriggerArgs, UnbindArgs,
+        UnpackArgs,
+    };
+    use low::defs::{
+        COMMIT_FAILED, COMMIT_SUCCESS, NWG_BIND, NWG_PACK_CONTROL, NWG_PACK_RESOURCE,
+        NWG_PACK_USER_VALUE, NWG_TRIGGER, NWG_UNBIND, NWG_UNPACK,
+    };
+    use user32::DefWindowProcW;
 
     let ui: &mut UiInner<ID> = mem::transmute(w);
     let args: *mut *mut Any = mem::transmute::<LPARAM, *mut *mut Any>(l);
@@ -157,15 +175,17 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
             } else {
                 panic!("Could not downcast command PACK_USER_VALUE args into a PackUserValueArgs struct.");
             }
-        },
+        }
         NWG_PACK_CONTROL => {
             let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<PackControlArgs<ID>>() {
                 (true, ui.pack_control(*params))
             } else {
-                panic!("Could not downcast command PACK_CONTROL args into a PackControlArgs struct.");
+                panic!(
+                    "Could not downcast command PACK_CONTROL args into a PackControlArgs struct."
+                );
             }
-        },
+        }
         NWG_PACK_RESOURCE => {
             let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<PackResourceArgs<ID>>() {
@@ -173,7 +193,7 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
             } else {
                 panic!("Could not downcast command NWG_UNBIND args into a UnbindArgs struct.");
             }
-        },
+        }
         NWG_UNPACK => {
             let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<UnpackArgs>() {
@@ -181,7 +201,7 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
             } else {
                 panic!("Could not downcast command NWG_UNPACK_CONTROL args into a inner id.");
             }
-        },
+        }
         NWG_BIND => {
             let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<BindArgs<ID>>() {
@@ -189,7 +209,7 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
             } else {
                 panic!("Could not downcast command NWG_BIND args into a BindArgs struct.");
             }
-        },
+        }
         NWG_UNBIND => {
             let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<UnbindArgs>() {
@@ -197,17 +217,17 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
             } else {
                 panic!("Could not downcast command NWG_UNBIND args into a UnbindArgs struct.");
             }
-        },
+        }
         NWG_TRIGGER => {
             let args: Box<Any> = Box::from_raw(*Box::from_raw(args));
             if let Ok(params) = args.downcast::<TriggerArgs>() {
-                let TriggerArgs{ id, event, args } = *params;
+                let TriggerArgs { id, event, args } = *params;
                 (true, ui.trigger(id, event, args))
             } else {
                 panic!("Could not downcast command NWG_UNBIND args into a UnbindArgs struct.");
             }
-        },
-        _ => (false, None)
+        }
+        _ => (false, None),
     };
 
     /*Evaluates other messages
@@ -233,21 +253,21 @@ unsafe extern "system" fn message_window_proc<ID: Hash+Clone+'static>(hwnd: HWND
     }
 }
 
-
 /**
     Create the message handler window class.
 
     * If the class creation is successful or the class already exists, returns `Ok`
     * If there was an error while creating the class, returns a `Err(SystemError::UiCreation)`
 */
-unsafe fn setup_class<ID: Hash+Clone+'static>() -> Result<(), SystemError> {
-    use low::window_helper::{SysclassParams, build_sysclass};
-    let params = SysclassParams{ 
-        class_name: MESSAGE_HANDLE_CLASS_NAME, 
+unsafe fn setup_class<ID: Hash + Clone + 'static>() -> Result<(), SystemError> {
+    use low::window_helper::{build_sysclass, SysclassParams};
+    let params = SysclassParams {
+        class_name: MESSAGE_HANDLE_CLASS_NAME,
         sysproc: Some(message_window_proc::<ID>),
-        background: Some(ptr::null_mut()), style: None
+        background: Some(ptr::null_mut()),
+        style: None,
     };
-    
+
     if let Err(_) = build_sysclass(params) {
         Err(SystemError::UiCreation)
     } else {
@@ -258,28 +278,35 @@ unsafe fn setup_class<ID: Hash+Clone+'static>() -> Result<(), SystemError> {
 /**
     Create a NWG message-only window.
 
-    * If the window creation is successful, returns `Ok(window_handle)`  
+    * If the window creation is successful, returns `Ok(window_handle)`
     * If the window creation fails, returns `Err(SystemError::UiCreation)`
 */
-unsafe fn create_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
+unsafe fn create_window<ID: Hash + Clone>() -> Result<HWND, SystemError> {
     use kernel32::GetModuleHandleW;
     use user32::CreateWindowExW;
     use winapi::HWND_MESSAGE;
 
     let hmod = GetModuleHandleW(ptr::null_mut());
-    if hmod.is_null() { return Err(SystemError::UiCreation); }
+    if hmod.is_null() {
+        return Err(SystemError::UiCreation);
+    }
 
     let class_name = to_utf16(MESSAGE_HANDLE_CLASS_NAME);
     let window_name = to_utf16("");
 
-    let handle = CreateWindowExW (
-        0, 
-        class_name.as_ptr(), window_name.as_ptr(), 
-        0, 0, 0, 0, 0,
+    let handle = CreateWindowExW(
+        0,
+        class_name.as_ptr(),
+        window_name.as_ptr(),
+        0,
+        0,
+        0,
+        0,
+        0,
         HWND_MESSAGE,
         ptr::null_mut(),
         hmod,
-        ptr::null_mut()
+        ptr::null_mut(),
     );
 
     if handle.is_null() {
@@ -292,9 +319,9 @@ unsafe fn create_window<ID: Hash+Clone>() -> Result<HWND, SystemError> {
 /**
     Create a message only window for an UI. See `setup_class` && `create_window` docs for more info.
 */
-unsafe fn create_message_only_window<ID: Hash+Clone+'static>() -> Result<HWND, SystemError> {
+unsafe fn create_message_only_window<ID: Hash + Clone + 'static>() -> Result<HWND, SystemError> {
     match setup_class::<ID>() {
         Ok(_) => create_window::<ID>(),
-        Err(e) => Err(e)
+        Err(e) => Err(e),
     }
 }

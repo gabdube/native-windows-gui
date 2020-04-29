@@ -22,29 +22,29 @@
 /// System class identifier
 pub const CANVAS_CLASS_NAME: &'static str = "NWG_BUILTIN_D2DCANVAS";
 
-use std::hash::Hash;
 use std::any::TypeId;
+use std::hash::Hash;
 use std::ptr;
 
-use winapi::{HWND, ID2D1Factory, ID2D1HwndRenderTarget};
+use winapi::{ID2D1Factory, ID2D1HwndRenderTarget, HWND};
 
-use ui::Ui;
+use super::{Canvas, CanvasProtected};
 use controls::{Control, ControlT};
 use error::{Error, SystemError};
 use events::Event;
-use super::{Canvas, CanvasProtected};
+use ui::Ui;
 
 /**
     A template that creates a canvas
 
-    Members:  
+    Members:
     • `parent`: The canvas parent.
-    • `position` : Starting posiion of the canvas after it is created  
-    • `size` : Starting size of the canvas after it is created  
-    • `visible` : If the user can see the canvas or not  
-    • `disabled` : If the canvas is enabled or not. A disabled canvas do not process events  
+    • `position` : Starting posiion of the canvas after it is created
+    • `size` : Starting size of the canvas after it is created
+    • `visible` : If the user can see the canvas or not
+    • `disabled` : If the canvas is enabled or not. A disabled canvas do not process events
 */
-pub struct CanvasT<ID: Hash+Clone> {
+pub struct CanvasT<ID: Hash + Clone> {
     pub parent: ID,
     pub position: (i32, i32),
     pub size: (u32, u32),
@@ -52,22 +52,34 @@ pub struct CanvasT<ID: Hash+Clone> {
     pub disabled: bool,
 }
 
-impl<ID: Hash+Clone+'static> ControlT<ID> for CanvasT<ID> {
-    fn resource_type_id(&self) -> TypeId { TypeId::of::<Canvas<ID>>() }
+impl<ID: Hash + Clone + 'static> ControlT<ID> for CanvasT<ID> {
+    fn resource_type_id(&self) -> TypeId {
+        TypeId::of::<Canvas<ID>>()
+    }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::KeyDown, Event::KeyUp, Event::Char, Event::MouseDown, Event::MouseUp,
-             Event::Moved, Event::Resized, Event::Paint, Event::Raw]
+        vec![
+            Event::Destroyed,
+            Event::KeyDown,
+            Event::KeyUp,
+            Event::Char,
+            Event::MouseDown,
+            Event::MouseUp,
+            Event::Moved,
+            Event::Resized,
+            Event::Paint,
+            Event::Raw,
+        ]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-       unsafe{
-            if let Err(e) = build_sysclass() { return Err(e); }
+        unsafe {
+            if let Err(e) = build_sysclass() {
+                return Err(e);
+            }
             match build_window(ui, &self) {
-                Ok((h, (f, r))) => { Ok( Box::new( 
-                    Canvas::<ID>::create(h, f, r)
-                ) as Box<Control> ) },
-                Err(e) => Err(e)
+                Ok((h, (f, r))) => Ok(Box::new(Canvas::<ID>::create(h, f, r)) as Box<Control>),
+                Err(e) => Err(e),
             }
         } // unsafe
     }
@@ -77,13 +89,13 @@ impl<ID: Hash+Clone+'static> ControlT<ID> for CanvasT<ID> {
     Private unsafe control methods
 */
 
-use winapi::{UINT, WPARAM, LPARAM, LRESULT};
+use winapi::{LPARAM, LRESULT, UINT, WPARAM};
 type RenderOut = (*mut ID2D1Factory, *mut ID2D1HwndRenderTarget);
 
 #[allow(unused_variables)]
 unsafe extern "system" fn canvas_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::{WM_CREATE, WM_CLOSE};
     use user32::{DefWindowProcW, ShowWindow};
+    use winapi::{WM_CLOSE, WM_CREATE};
 
     let handled = match msg {
         WM_CREATE => true,
@@ -91,7 +103,7 @@ unsafe extern "system" fn canvas_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
             ShowWindow(hwnd, 0);
             true
         }
-        _ => false
+        _ => false,
     };
 
     if handled {
@@ -103,16 +115,16 @@ unsafe extern "system" fn canvas_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
 
 #[inline(always)]
 unsafe fn build_sysclass() -> Result<(), Error> {
-    use low::window_helper::{SysclassParams, build_sysclass};
+    use low::window_helper::{build_sysclass, SysclassParams};
     use winapi::{CS_HREDRAW, CS_VREDRAW};
 
-    let params = SysclassParams { 
+    let params = SysclassParams {
         class_name: CANVAS_CLASS_NAME,
         sysproc: Some(canvas_sysproc),
         background: Some(ptr::null_mut()),
-        style: Some(CS_HREDRAW | CS_VREDRAW)
+        style: Some(CS_HREDRAW | CS_VREDRAW),
     };
-    
+
     if let Err(e) = build_sysclass(params) {
         Err(Error::System(e))
     } else {
@@ -121,42 +133,50 @@ unsafe fn build_sysclass() -> Result<(), Error> {
 }
 
 #[inline(always)]
-pub unsafe fn build_render_target(hwnd: HWND, factory: &mut ID2D1Factory) -> Result<*mut ID2D1HwndRenderTarget, SystemError> {
-    use winapi::{S_OK, RECT, D2D_SIZE_U, D2D1_PRESENT_OPTIONS_NONE, D2D1_PIXEL_FORMAT, D2D1_RENDER_TARGET_PROPERTIES,
-      D2D1_HWND_RENDER_TARGET_PROPERTIES, D2D1_FEATURE_LEVEL_DEFAULT, D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1_RENDER_TARGET_USAGE_NONE,
-      DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED};
-    use user32::GetClientRect;
+pub unsafe fn build_render_target(
+    hwnd: HWND,
+    factory: &mut ID2D1Factory,
+) -> Result<*mut ID2D1HwndRenderTarget, SystemError> {
     use std::mem;
+    use user32::GetClientRect;
+    use winapi::{
+        D2D1_ALPHA_MODE_PREMULTIPLIED, D2D1_FEATURE_LEVEL_DEFAULT,
+        D2D1_HWND_RENDER_TARGET_PROPERTIES, D2D1_PIXEL_FORMAT, D2D1_PRESENT_OPTIONS_NONE,
+        D2D1_RENDER_TARGET_PROPERTIES, D2D1_RENDER_TARGET_TYPE_DEFAULT,
+        D2D1_RENDER_TARGET_USAGE_NONE, D2D_SIZE_U, DXGI_FORMAT_B8G8R8A8_UNORM, RECT, S_OK,
+    };
 
     let mut rc: RECT = mem::uninitialized();
     GetClientRect(hwnd, &mut rc);
 
-    let size = D2D_SIZE_U { 
-        width: (rc.right-rc.left) as u32,
-        height: (rc.bottom-rc.top) as u32 
+    let size = D2D_SIZE_U {
+        width: (rc.right - rc.left) as u32,
+        height: (rc.bottom - rc.top) as u32,
     };
 
     let pixel_format = D2D1_PIXEL_FORMAT {
         format: DXGI_FORMAT_B8G8R8A8_UNORM,
-        alphaMode: D2D1_ALPHA_MODE_PREMULTIPLIED
+        alphaMode: D2D1_ALPHA_MODE_PREMULTIPLIED,
     };
 
     let render_props = D2D1_RENDER_TARGET_PROPERTIES {
         _type: D2D1_RENDER_TARGET_TYPE_DEFAULT,
         pixelFormat: pixel_format,
-        dpiX: 0.0, dpiY: 0.0,
+        dpiX: 0.0,
+        dpiY: 0.0,
         usage: D2D1_RENDER_TARGET_USAGE_NONE,
-        minLevel: D2D1_FEATURE_LEVEL_DEFAULT
+        minLevel: D2D1_FEATURE_LEVEL_DEFAULT,
     };
 
     let hwnd_render_props = D2D1_HWND_RENDER_TARGET_PROPERTIES {
         hwnd: hwnd,
         pixelSize: size,
-        presentOptions: D2D1_PRESENT_OPTIONS_NONE
+        presentOptions: D2D1_PRESENT_OPTIONS_NONE,
     };
 
     let mut render_target: *mut ID2D1HwndRenderTarget = ptr::null_mut();
-    if factory.CreateHwndRenderTarget(&render_props, &hwnd_render_props, &mut render_target) != S_OK {
+    if factory.CreateHwndRenderTarget(&render_props, &hwnd_render_props, &mut render_target) != S_OK
+    {
         factory.Release();
         let msg = "Could not create render target".to_string();
         Err(SystemError::ComError(msg))
@@ -167,18 +187,18 @@ pub unsafe fn build_render_target(hwnd: HWND, factory: &mut ID2D1Factory) -> Res
 
 #[inline(always)]
 unsafe fn build_renderer(hwnd: HWND) -> Result<RenderOut, SystemError> {
-    use winapi::{UuidOfID2D1Factory, D2D1_FACTORY_TYPE_SINGLE_THREADED, S_OK};
     use low::defs::D2D1CreateFactory;
-    
+    use winapi::{UuidOfID2D1Factory, D2D1_FACTORY_TYPE_SINGLE_THREADED, S_OK};
+
     // Build the D2D Factory
     let mut factory: *mut ID2D1Factory = ptr::null_mut();
     let result = D2D1CreateFactory(
         D2D1_FACTORY_TYPE_SINGLE_THREADED,
         &UuidOfID2D1Factory,
         ptr::null(),
-        &mut factory
+        &mut factory,
     );
-    
+
     if result != S_OK {
         let msg = "Could not create D2D1 factory".to_string();
         return Err(SystemError::ComError(msg));
@@ -186,47 +206,60 @@ unsafe fn build_renderer(hwnd: HWND) -> Result<RenderOut, SystemError> {
 
     // Build the render target
     match build_render_target(hwnd, &mut *factory) {
-        Ok(render_target) => Ok( (factory, render_target) ),
-        Err(e) => Err(e)
+        Ok(render_target) => Ok((factory, render_target)),
+        Err(e) => Err(e),
     }
 }
 
 #[inline(always)]
-unsafe fn build_window<ID: Hash+Clone>(ui: &Ui<ID>, t: &CanvasT<ID>) -> Result<(HWND, RenderOut), Error> {
-    use low::window_helper::{WindowParams, build_window, handle_of_window};
-    use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD};
-    use user32::DestroyWindow;   
+unsafe fn build_window<ID: Hash + Clone>(
+    ui: &Ui<ID>,
+    t: &CanvasT<ID>,
+) -> Result<(HWND, RenderOut), Error> {
+    use low::window_helper::{build_window, handle_of_window, WindowParams};
+    use user32::DestroyWindow;
+    use winapi::{DWORD, WS_CHILD, WS_DISABLED, WS_VISIBLE};
 
-    let flags: DWORD = WS_CHILD | 
-    if t.visible    { WS_VISIBLE }   else { 0 } |
-    if t.disabled   { WS_DISABLED }  else { 0 };
+    let flags: DWORD = WS_CHILD
+        | if t.visible { WS_VISIBLE } else { 0 }
+        | if t.disabled { WS_DISABLED } else { 0 };
 
     // Get the parent handle
-    let parent = match handle_of_window(ui, &t.parent, "The parent of a canvas must be a window-like control.") {
+    let parent = match handle_of_window(
+        ui,
+        &t.parent,
+        "The parent of a canvas must be a window-like control.",
+    ) {
         Ok(h) => h,
-        Err(e) => { return Err(e); }
+        Err(e) => {
+            return Err(e);
+        }
     };
 
     let params = WindowParams {
-        title:  "",
+        title: "",
         class_name: CANVAS_CLASS_NAME,
         position: t.position.clone(),
         size: t.size.clone(),
         flags: flags,
         ex_flags: None,
-        parent: parent
+        parent: parent,
     };
 
     let handle = match build_window(params) {
         Ok(h) => h,
-        Err(e) => { return Err(Error::System(e)); }
+        Err(e) => {
+            return Err(Error::System(e));
+        }
     };
 
     let renderer = match build_renderer(handle) {
         Ok(r) => r,
         Err(e) => {
             DestroyWindow(handle);
-            { return Err(Error::System(e)); }
+            {
+                return Err(Error::System(e));
+            }
         }
     };
 

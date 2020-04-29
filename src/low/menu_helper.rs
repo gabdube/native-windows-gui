@@ -17,21 +17,21 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-use std::ptr;
-use std::mem;
 use std::hash::Hash;
+use std::mem;
+use std::ptr;
 
-use winapi::{HMENU, DWORD, HBRUSH, c_int, UINT, BOOL};
+use winapi::{c_int, BOOL, DWORD, HBRUSH, HMENU, UINT};
 
-use ui::UiInner;
 use controls::AnyHandle;
+use ui::UiInner;
 
 /**
-    List the children of a menu and return a list of their IDs. The function is recursive and so 
+    List the children of a menu and return a list of their IDs. The function is recursive and so
     it list the ids for the whole menu tree.
 */
-pub unsafe fn list_menu_children<ID: Hash+Clone>(ui: &UiInner<ID>, menu: HMENU) -> Vec<u64> { 
-    use low::defs::{GetMenuItemCount, GetSubMenu, GetMenuItemID};
+pub unsafe fn list_menu_children<ID: Hash + Clone>(ui: &UiInner<ID>, menu: HMENU) -> Vec<u64> {
+    use low::defs::{GetMenuItemCount, GetMenuItemID, GetSubMenu};
 
     let mut children: Vec<u64> = Vec::new();
     let children_count = GetMenuItemCount(menu);
@@ -41,20 +41,23 @@ pub unsafe fn list_menu_children<ID: Hash+Clone>(ui: &UiInner<ID>, menu: HMENU) 
         if sub_menu.is_null() {
             // Get a menu item ID
             let handle = AnyHandle::HMENU_ITEM(menu, GetMenuItemID(menu, i));
-            let id = ui.inner_id_from_handle(&handle) .expect("Could not match menu handle to menu control");
-            children.push( id );
+            let id = ui
+                .inner_id_from_handle(&handle)
+                .expect("Could not match menu handle to menu control");
+            children.push(id);
         } else {
             // Get the menu ID
             let handle = AnyHandle::HMENU(sub_menu);
-            let id = ui.inner_id_from_handle(&handle).expect("Could not match menu handle to menu control");
-            children.push( id );
-            children.append( &mut list_menu_children(ui, sub_menu) );
+            let id = ui
+                .inner_id_from_handle(&handle)
+                .expect("Could not match menu handle to menu control");
+            children.push(id);
+            children.append(&mut list_menu_children(ui, sub_menu));
         }
     }
 
     children
 }
-
 
 /**
     Return the parent handle of a menu.
@@ -65,11 +68,17 @@ unsafe fn resolve_menu_parent(parent: &AnyHandle) -> HMENU {
     match parent {
         &AnyHandle::HWND(parent_h) => {
             let menubar = GetMenu(parent_h);
-            if menubar.is_null() { panic!("Tried to resolve a menu parent, but the parent window do not have a menubar.") }
+            if menubar.is_null() {
+                panic!(
+                    "Tried to resolve a menu parent, but the parent window do not have a menubar."
+                )
+            }
             menubar
-        },
+        }
         &AnyHandle::HMENU(parent_h) => parent_h,
-        _ => { unreachable!(); /* A menu can only be added to another menu or a window */ }
+        _ => {
+            unreachable!(); /* A menu can only be added to another menu or a window */
+        }
     }
 }
 
@@ -87,8 +96,11 @@ pub unsafe fn menu_index_in_parent(h: HMENU, parent: &AnyHandle) -> UINT {
 
     for i in 0..children_count {
         sub_menu = GetSubMenu(parent_h, i as c_int);
-        if sub_menu.is_null() { continue; }
-        else if sub_menu == h { return i as UINT; }
+        if sub_menu.is_null() {
+            continue;
+        } else if sub_menu == h {
+            return i as UINT;
+        }
     }
 
     panic!("Menu/MenuItem not found in parent!")
@@ -98,8 +110,8 @@ pub unsafe fn menu_index_in_parent(h: HMENU, parent: &AnyHandle) -> UINT {
     Remove a submenu from its parent.
 */
 pub unsafe fn remove_menu_from_parent(h: HMENU, parent: &AnyHandle) {
-    use user32::{GetMenu, DrawMenuBar};
     use low::defs::{RemoveMenu, MF_BYPOSITION};
+    use user32::{DrawMenuBar, GetMenu};
 
     let index = menu_index_in_parent(h, parent);
 
@@ -108,11 +120,13 @@ pub unsafe fn remove_menu_from_parent(h: HMENU, parent: &AnyHandle) {
             let menubar = GetMenu(parent_h);
             RemoveMenu(menubar, index, MF_BYPOSITION);
             DrawMenuBar(parent_h);
-        },
+        }
         &AnyHandle::HMENU(parent_h) => {
             RemoveMenu(parent_h, index, MF_BYPOSITION);
         }
-        _ => { unreachable!(); /* A menu can only be added to another menu or a window */ }
+        _ => {
+            unreachable!(); /* A menu can only be added to another menu or a window */
+        }
     }
 }
 
@@ -130,7 +144,7 @@ pub unsafe fn remove_menu_item_from_parent(parent_h: HMENU, uid: UINT) {
 */
 #[inline(always)]
 pub unsafe fn use_menu_command(h: HMENU) {
-    use low::defs::{MENUINFO, MNS_NOTIFYBYPOS, MIM_STYLE, SetMenuInfo};
+    use low::defs::{SetMenuInfo, MENUINFO, MIM_STYLE, MNS_NOTIFYBYPOS};
 
     let mut info = MENUINFO {
         cbSize: mem::size_of::<MENUINFO>() as DWORD,
@@ -139,39 +153,45 @@ pub unsafe fn use_menu_command(h: HMENU) {
         cyMax: 0,
         hbrBack: mem::transmute(ptr::null_mut::<HBRUSH>()),
         dwContextHelpID: 0,
-        dwMenuData: 0
+        dwMenuData: 0,
     };
 
     SetMenuInfo(h, &mut info);
 }
-
 
 /**
     Enable or disable a menuitem at the selected position or using the selected ID. If the position is None and id is None, the last item is selected.
 */
 #[inline(always)]
 pub unsafe fn enable_menuitem(h: HMENU, pos: Option<UINT>, id: Option<UINT>, enabled: bool) {
+    use low::defs::{GetMenuItemCount, SetMenuItemInfoW, MFS_DISABLED, MFS_ENABLED, MIIM_STATE};
     use winapi::MENUITEMINFOW;
-    use low::defs::{SetMenuItemInfoW, GetMenuItemCount, MIIM_STATE, MFS_DISABLED, MFS_ENABLED};
-    
+
     let use_position = id.is_none();
     let choice = if use_position { pos } else { id };
     let value = match choice {
         Some(p) => p,
-        None => (GetMenuItemCount(h) - 1) as u32
+        None => (GetMenuItemCount(h) - 1) as u32,
     };
 
     let state = match enabled {
-         true => MFS_ENABLED,
-         false => MFS_DISABLED
+        true => MFS_ENABLED,
+        false => MFS_DISABLED,
     };
 
-    let mut info = MENUITEMINFOW { 
+    let mut info = MENUITEMINFOW {
         cbSize: mem::size_of::<MENUITEMINFOW>() as UINT,
-        fMask: MIIM_STATE, fType: 0, fState: state,
-        wID: 0, hSubMenu: ptr::null_mut(), hbmpChecked: ptr::null_mut(),
-        hbmpUnchecked: ptr::null_mut(), dwItemData: 0, dwTypeData: ptr::null_mut(),
-        cch: 0, hbmpItem: ptr::null_mut()
+        fMask: MIIM_STATE,
+        fType: 0,
+        fState: state,
+        wID: 0,
+        hSubMenu: ptr::null_mut(),
+        hbmpChecked: ptr::null_mut(),
+        hbmpUnchecked: ptr::null_mut(),
+        dwItemData: 0,
+        dwTypeData: ptr::null_mut(),
+        cch: 0,
+        hbmpItem: ptr::null_mut(),
     };
 
     SetMenuItemInfoW(h, value, use_position as BOOL, &mut info);
@@ -192,24 +212,33 @@ pub unsafe fn enable_menu(menu: HMENU, parent: &AnyHandle, enabled: bool) {
 */
 #[inline(always)]
 pub unsafe fn is_menuitem_enabled(h: HMENU, pos: Option<UINT>, id: Option<UINT>) -> bool {
+    use low::defs::{GetMenuItemInfoW, MFS_DISABLED, MIIM_STATE};
     use winapi::MENUITEMINFOW;
-    use low::defs::{GetMenuItemInfoW, MIIM_STATE, MFS_DISABLED};
 
-    if id.is_none() && pos.is_none() { panic!("Both pos and id are None"); }
+    if id.is_none() && pos.is_none() {
+        panic!("Both pos and id are None");
+    }
 
     let use_position = id.is_none();
     let choice = if use_position { pos } else { id };
     let value = match choice {
         Some(p) => p,
-        None => unreachable!()
+        None => unreachable!(),
     };
 
-    let mut info = MENUITEMINFOW { 
+    let mut info = MENUITEMINFOW {
         cbSize: mem::size_of::<MENUITEMINFOW>() as UINT,
-        fMask: MIIM_STATE, fType: 0, fState: 0,
-        wID: 0, hSubMenu: ptr::null_mut(), hbmpChecked: ptr::null_mut(),
-        hbmpUnchecked: ptr::null_mut(), dwItemData: 0, dwTypeData: ptr::null_mut(),
-        cch: 0, hbmpItem: ptr::null_mut()
+        fMask: MIIM_STATE,
+        fType: 0,
+        fState: 0,
+        wID: 0,
+        hSubMenu: ptr::null_mut(),
+        hbmpChecked: ptr::null_mut(),
+        hbmpUnchecked: ptr::null_mut(),
+        dwItemData: 0,
+        dwTypeData: ptr::null_mut(),
+        cch: 0,
+        hbmpItem: ptr::null_mut(),
     };
 
     GetMenuItemInfoW(h, value, use_position as BOOL, &mut info);

@@ -20,17 +20,17 @@
 
 use std::time::Duration;
 
-use ui::Ui;
 use defs::MouseButton;
+use ui::Ui;
 
 /**
 The function signature for the event callback
 
-Arguments:  
-  • 1: A reference to the Ui  
-  • 2: A reference to the ID of the control  
-  • 3: A reference to the event type that was called  
-  • 4: A reference to the arguments passed with the controls  
+Arguments:
+  • 1: A reference to the Ui
+  • 2: A reference to the ID of the control
+  • 3: A reference to the event type that was called
+  • 4: A reference to the arguments passed with the controls
 */
 pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
 
@@ -39,7 +39,6 @@ pub type EventCallback<ID> = Fn(&Ui<ID>, &ID, &Event, &EventArgs) -> ();
 */
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Event {
-
     // NWG special events
     Destroyed,
 
@@ -66,7 +65,7 @@ pub enum Event {
     Focus,
     Tick,
     Triggered,
-    DateChanged
+    DateChanged,
 }
 
 /**
@@ -75,11 +74,11 @@ pub enum Event {
 pub enum EventArgs {
     Key(u32),
     Char(char),
-    MouseClick{btn: MouseButton, pos: (i32, i32)},
+    MouseClick { btn: MouseButton, pos: (i32, i32) },
     Focus(bool),
     Tick(Duration),
     Position(i32, i32),
     Size(u32, u32),
     Raw(u32, usize, usize), // MSG, WPARAM, LPARAM
-    None
+    None,
 }

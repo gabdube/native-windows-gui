@@ -17,37 +17,37 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-use std::hash::Hash;
 use std::any::TypeId;
 use std::fmt::Display;
+use std::hash::Hash;
 use std::mem;
 
 use user32::SendMessageW;
-use winapi::{HWND, HFONT, WPARAM};
+use winapi::{HFONT, HWND, WPARAM};
 
-use ui::Ui;
-use controls::{Control, ControlT, ControlType, AnyHandle};
+use controls::{AnyHandle, Control, ControlT, ControlType};
 use error::Error;
 use events::Event;
-use low::other_helper::{to_utf16, from_utf16};
+use low::other_helper::{from_utf16, to_utf16};
+use ui::Ui;
 
 /**
     Template that creates a combobox control
 
-    Available events:  
-    Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+    Available events:
+    Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw
 
-    Members:  
-    • `collection`: Item collection of the combobox. The item type must implement `Display`  
-    • `position`: The start position of the combobox  
-    • `size`: The start size of the combobox  
-    • `visible`: If the combobox should be visible to the user  
-    • `disabled`: If the user can or can't use the combobox   
-    • `parent`: The combobox parent  
-    • `font`: The combobox font. If None, use the system default  
+    Members:
+    • `collection`: Item collection of the combobox. The item type must implement `Display`
+    • `position`: The start position of the combobox
+    • `size`: The start size of the combobox
+    • `visible`: If the combobox should be visible to the user
+    • `disabled`: If the user can or can't use the combobox
+    • `parent`: The combobox parent
+    • `font`: The combobox font. If None, use the system default
 */
 #[derive(Clone)]
-pub struct ComboBoxT<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> {
+pub struct ComboBoxT<D: Clone + Display + 'static, ID: Hash + Clone, S: Clone + Into<String>> {
     pub collection: Vec<D>,
     pub position: (i32, i32),
     pub size: (u32, u32),
@@ -58,36 +58,63 @@ pub struct ComboBoxT<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<Str
     pub font: Option<ID>,
 }
 
-impl<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> ControlT<ID> for ComboBoxT<D, ID, S> {
-    fn resource_type_id(&self) -> TypeId { TypeId::of::<ComboBox<D>>() }
+impl<D: Clone + Display + 'static, ID: Hash + Clone, S: Clone + Into<String>> ControlT<ID>
+    for ComboBoxT<D, ID, S>
+{
+    fn resource_type_id(&self) -> TypeId {
+        TypeId::of::<ComboBox<D>>()
+    }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::SelectionChanged, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]
+        vec![
+            Event::Destroyed,
+            Event::SelectionChanged,
+            Event::DoubleClick,
+            Event::Focus,
+            Event::Moved,
+            Event::Resized,
+            Event::Raw,
+        ]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
         use low::defs::{CBS_DROPDOWNLIST, CBS_HASSTRINGS, CB_ADDSTRING};
-        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD};
+        use low::window_helper::{
+            build_window, handle_of_font, handle_of_window, set_window_font, WindowParams,
+        };
+        use winapi::{DWORD, WS_CHILD, WS_DISABLED, WS_VISIBLE};
 
-        let flags: DWORD = WS_CHILD | CBS_HASSTRINGS | CBS_DROPDOWNLIST |
-        if self.visible      { WS_VISIBLE }      else { 0 } |
-        if self.disabled     { WS_DISABLED }     else { 0 };
+        let flags: DWORD = WS_CHILD
+            | CBS_HASSTRINGS
+            | CBS_DROPDOWNLIST
+            | if self.visible { WS_VISIBLE } else { 0 }
+            | if self.disabled { WS_DISABLED } else { 0 };
 
         // Get the parent handle
-        let parent = match handle_of_window(ui, &self.parent, "The parent of a combobox must be a window-like control.") {
+        let parent = match handle_of_window(
+            ui,
+            &self.parent,
+            "The parent of a combobox must be a window-like control.",
+        ) {
             Ok(h) => h,
-            Err(e) => { return Err(e); }
+            Err(e) => {
+                return Err(e);
+            }
         };
 
         // Get the font handle (if any)
         let font_handle: Option<HFONT> = match self.font.as_ref() {
-            Some(font_id) => 
-                match handle_of_font(ui, &font_id, "The font of a combobox must be a font resource.") {
-                    Ok(h) => Some(h),
-                    Err(e) => { return Err(e); }
-                },
-            None => None
+            Some(font_id) => match handle_of_font(
+                ui,
+                &font_id,
+                "The font of a combobox must be a font resource.",
+            ) {
+                Ok(h) => Some(h),
+                Err(e) => {
+                    return Err(e);
+                }
+            },
+            None => None,
         };
 
         let params = WindowParams {
@@ -97,35 +124,41 @@ impl<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> ControlT<I
             size: self.size.clone(),
             flags: flags,
             ex_flags: Some(0),
-            parent: parent
+            parent: parent,
         };
 
-        match unsafe{ build_window(params) } {
+        match unsafe { build_window(params) } {
             Ok(h) => {
-                unsafe{ 
+                unsafe {
                     // Set font
-                    set_window_font(h, font_handle, true); 
+                    set_window_font(h, font_handle, true);
 
                     // Set placeholder
                     match self.placeholder.as_ref() {
-                        Some(p) => { set_placeholder(h, p.clone()); },
+                        Some(p) => {
+                            set_placeholder(h, p.clone());
+                        }
                         _ => {}
                     }
 
                     // Init collection
-                    let collection: Vec<D> = self.collection.iter().map(
-                        |s|{  
+                    let collection: Vec<D> = self
+                        .collection
+                        .iter()
+                        .map(|s| {
                             let text = to_utf16(format!("{}", s).as_str());
                             SendMessageW(h, CB_ADDSTRING, 0, mem::transmute(text.as_ptr()));
-                            s.clone() 
-                        } 
-                    ).collect();
+                            s.clone()
+                        })
+                        .collect();
 
-
-                    Ok( Box::new(ComboBox{handle: h, collection: collection}) )
+                    Ok(Box::new(ComboBox {
+                        handle: h,
+                        collection: collection,
+                    }))
                 }
-            },
-            Err(e) => Err(Error::System(e))
+            }
+            Err(e) => Err(Error::System(e)),
         }
     }
 }
@@ -133,32 +166,41 @@ impl<D: Clone+Display+'static, ID: Hash+Clone, S: Clone+Into<String>> ControlT<I
 /**
     A combobox control
 */
-pub struct ComboBox<D: Clone+Display> {
+pub struct ComboBox<D: Clone + Display> {
     handle: HWND,
-    collection: Vec<D>
+    collection: Vec<D>,
 }
 
-impl<D: Clone+Display> ComboBox<D> {
-
+impl<D: Clone + Display> ComboBox<D> {
     /// Return the number of items in the inner collection
-    pub fn len(&self) -> usize { self.collection.len() }
+    pub fn len(&self) -> usize {
+        self.collection.len()
+    }
 
     /// Return the inner collection of the combobox
-    pub fn collection(&self) -> &Vec<D> { &self.collection }
+    pub fn collection(&self) -> &Vec<D> {
+        &self.collection
+    }
 
     /// Return the inner collection of the combobox, mutable.
     /// If the inner collection is changed, `combobox.sync` must be called to show the changes in the combobox
-    pub fn collection_mut(&mut self) -> &mut Vec<D> { &mut self.collection }
+    pub fn collection_mut(&mut self) -> &mut Vec<D> {
+        &mut self.collection
+    }
 
     /// Reload the content of the combobox
     pub fn sync(&self) {
-        use low::defs::{CB_RESETCONTENT, CB_ADDSTRING};
+        use low::defs::{CB_ADDSTRING, CB_RESETCONTENT};
 
-        unsafe{ SendMessageW(self.handle, CB_RESETCONTENT, 0, 0); }
+        unsafe {
+            SendMessageW(self.handle, CB_RESETCONTENT, 0, 0);
+        }
 
         for i in self.collection.iter() {
             let text = to_utf16(format!("{}", i).as_str());
-            unsafe{ SendMessageW(self.handle, CB_ADDSTRING, 0, mem::transmute(text.as_ptr())); }
+            unsafe {
+                SendMessageW(self.handle, CB_ADDSTRING, 0, mem::transmute(text.as_ptr()));
+            }
         }
     }
 
@@ -167,7 +209,9 @@ impl<D: Clone+Display> ComboBox<D> {
         use low::defs::CB_ADDSTRING;
 
         let text = to_utf16(format!("{}", item).as_str());
-        unsafe{ SendMessageW(self.handle, CB_ADDSTRING, 0, mem::transmute(text.as_ptr())); }
+        unsafe {
+            SendMessageW(self.handle, CB_ADDSTRING, 0, mem::transmute(text.as_ptr()));
+        }
 
         self.collection.push(item);
     }
@@ -176,7 +220,9 @@ impl<D: Clone+Display> ComboBox<D> {
     /// `Panics` if index is out of bounds.
     pub fn remove(&mut self, index: usize) -> D {
         use low::defs::CB_DELETESTRING;
-        unsafe{ SendMessageW(self.handle, CB_DELETESTRING, index as WPARAM, 0); }
+        unsafe {
+            SendMessageW(self.handle, CB_DELETESTRING, index as WPARAM, 0);
+        }
         self.collection.remove(index)
     }
 
@@ -186,7 +232,14 @@ impl<D: Clone+Display> ComboBox<D> {
         use low::defs::CB_INSERTSTRING;
 
         let text = to_utf16(format!("{}", item).as_str());
-        unsafe{ SendMessageW(self.handle, CB_INSERTSTRING, index as WPARAM, mem::transmute(text.as_ptr())); }
+        unsafe {
+            SendMessageW(
+                self.handle,
+                CB_INSERTSTRING,
+                index as WPARAM,
+                mem::transmute(text.as_ptr()),
+            );
+        }
 
         self.collection.insert(index, item);
     }
@@ -198,8 +251,19 @@ impl<D: Clone+Display> ComboBox<D> {
         use low::defs::{CB_FINDSTRING, CB_FINDSTRINGEXACT};
 
         let text = to_utf16(text);
-        let msg = if full_match { CB_FINDSTRINGEXACT } else { CB_FINDSTRING };
-        let index = unsafe{ SendMessageW(self.handle, msg, -1isize as WPARAM, mem::transmute(text.as_ptr()) ) };
+        let msg = if full_match {
+            CB_FINDSTRINGEXACT
+        } else {
+            CB_FINDSTRING
+        };
+        let index = unsafe {
+            SendMessageW(
+                self.handle,
+                msg,
+                -1isize as WPARAM,
+                mem::transmute(text.as_ptr()),
+            )
+        };
 
         if index == -1 {
             None
@@ -213,39 +277,53 @@ impl<D: Clone+Display> ComboBox<D> {
     pub fn get_selected_index(&self) -> Option<usize> {
         use low::defs::CB_GETCURSEL;
 
-        let index = unsafe{ SendMessageW(self.handle, CB_GETCURSEL, 0, 0) };
-        if index == -1 { None } 
-        else { Some(index as usize) }
+        let index = unsafe { SendMessageW(self.handle, CB_GETCURSEL, 0, 0) };
+        if index == -1 {
+            None
+        } else {
+            Some(index as usize)
+        }
     }
 
     /// Return the currently selected element text. Returns `""` if no item is selected.
     pub fn get_selected_text(&self) -> String {
-        unsafe{ ::low::window_helper::get_window_text(self.handle) }
+        unsafe { ::low::window_helper::get_window_text(self.handle) }
     }
 
     /// Set the selected index in a combobox.  
     /// If `index` is `usize::max_value`, remove the selected index from the combobox
     pub fn set_selected_index(&self, index: usize) {
         use low::defs::CB_SETCURSEL;
-        unsafe{ SendMessageW(self.handle, CB_SETCURSEL, index as WPARAM, 0); }
+        unsafe {
+            SendMessageW(self.handle, CB_SETCURSEL, index as WPARAM, 0);
+        }
     }
 
     /// Return the item text at the provided index. Returns None if the index is not valid.
     pub fn get_string(&self, index: usize) -> Option<String> {
         use low::defs::{CB_GETLBTEXT, CB_GETLBTEXTLEN};
 
-        let length = unsafe{ SendMessageW(self.handle, CB_GETLBTEXTLEN, index as WPARAM, 0) };
-        if length == -1 { return None; }
+        let length = unsafe { SendMessageW(self.handle, CB_GETLBTEXTLEN, index as WPARAM, 0) };
+        if length == -1 {
+            return None;
+        }
 
-        let length = (length+1) as usize;
+        let length = (length + 1) as usize;
         let mut buffer: Vec<u16> = Vec::with_capacity(length);
         unsafe {
             buffer.set_len(length);
-            let err = SendMessageW(self.handle, CB_GETLBTEXT, index as WPARAM, mem::transmute( buffer.as_mut_ptr() ));
-            if err == -1 { return None; }
+            let err = SendMessageW(
+                self.handle,
+                CB_GETLBTEXT,
+                index as WPARAM,
+                mem::transmute(buffer.as_mut_ptr()),
+            );
+            if err == -1 {
+                return None;
+            }
         }
 
-       Some( from_utf16(&buffer[..]) )
+        Some(from_utf16(&buffer[..]))
     }
 
     /// Set a new placeholder for the combobox. To remove the current placeholder, send `""`  
@@ -277,45 +355,70 @@ impl<D: Clone+Display> ComboBox<D> {
     /// Return true if the combobox dropdown is visible
     pub fn get_dropped_state(&self) -> bool {
         use low::defs::CB_GETDROPPEDSTATE;
-        unsafe{ SendMessageW(self.handle, CB_GETDROPPEDSTATE, 0, 0) != 0 }
+        unsafe { SendMessageW(self.handle, CB_GETDROPPEDSTATE, 0, 0) != 0 }
     }
 
     /// Show or hide the control dropdown
     pub fn set_dropped_state(&self, dropped: bool) {
         use low::defs::CB_SHOWDROPDOWN;
-        unsafe{ SendMessageW(self.handle, CB_SHOWDROPDOWN, dropped as WPARAM, 0); }
+        unsafe {
+            SendMessageW(self.handle, CB_SHOWDROPDOWN, dropped as WPARAM, 0);
+        }
     }
 
     /// Remove every item in the inner collection and in the combobox
     pub fn clear(&mut self) {
         use low::defs::CB_RESETCONTENT;
-        unsafe{ SendMessageW(self.handle, CB_RESETCONTENT, 0, 0) };
+        unsafe { SendMessageW(self.handle, CB_RESETCONTENT, 0, 0) };
         self.collection.clear();
     }
 
-    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
-    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
-    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
-    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
-    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
-    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, true); } }
-    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
-    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+    pub fn get_visibility(&self) -> bool {
+        unsafe { ::low::window_helper::get_window_visibility(self.handle) }
+    }
+    pub fn set_visibility(&self, visible: bool) {
+        unsafe {
+            ::low::window_helper::set_window_visibility(self.handle, visible);
+        }
+    }
+    pub fn get_position(&self) -> (i32, i32) {
+        unsafe { ::low::window_helper::get_window_position(self.handle) }
+    }
+    pub fn set_position(&self, x: i32, y: i32) {
+        unsafe {
+            ::low::window_helper::set_window_position(self.handle, x, y);
+        }
+    }
+    pub fn get_size(&self) -> (u32, u32) {
+        unsafe { ::low::window_helper::get_window_size(self.handle) }
+    }
+    pub fn set_size(&self, w: u32, h: u32) {
+        unsafe {
+            ::low::window_helper::set_window_size(self.handle, w, h, true);
+        }
+    }
+    pub fn get_enabled(&self) -> bool {
+        unsafe { ::low::window_helper::get_window_enabled(self.handle) }
+    }
+    pub fn set_enabled(&self, e: bool) {
+        unsafe {
+            ::low::window_helper::set_window_enabled(self.handle, e);
+        }
+    }
 }
-    
 
-impl<D: Clone+Display> Control for ComboBox<D> {
+impl<D: Clone + Display> Control for ComboBox<D> {
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
     }
 
-    fn control_type(&self) -> ControlType { 
-        ControlType::ComboBox 
+    fn control_type(&self) -> ControlType {
+        ControlType::ComboBox
     }
 
     fn free(&mut self) {
         use user32::DestroyWindow;
-        unsafe{ DestroyWindow(self.handle) };
+        unsafe { DestroyWindow(self.handle) };
     }
 }
 
@@ -325,5 +428,7 @@ impl<D: Clone+Display> Control for ComboBox<D> {
 fn set_placeholder<S: Into<String>>(handle: HWND, placeholder: S) {
     use low::defs::CB_SETCUEBANNER;
     let text = to_utf16(placeholder.into().as_str());
-    unsafe{ SendMessageW(handle, CB_SETCUEBANNER, 0, mem::transmute(text.as_ptr()) ); }
+    unsafe {
+        SendMessageW(handle, CB_SETCUEBANNER, 0, mem::transmute(text.as_ptr()));
+    }
 }

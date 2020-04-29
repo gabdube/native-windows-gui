@@ -18,47 +18,47 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-pub mod window;
-pub mod menu;
 pub mod button;
-pub mod textinput;
-pub mod textbox;
+pub mod canvas;
 pub mod checkbox;
-pub mod radiobutton;
-pub mod label;
-pub mod listbox;
 pub mod combobox;
-pub mod groupbox;
-pub mod progress_bar;
 pub mod datepicker;
 pub mod file_dialog;
+pub mod groupbox;
+pub mod label;
+pub mod listbox;
+pub mod menu;
+pub mod progress_bar;
+pub mod radiobutton;
+pub mod textbox;
+pub mod textinput;
 pub mod timer;
-pub mod canvas;
+pub mod window;
 
 use std::any::TypeId;
 use std::hash::Hash;
 
-use winapi::{HWND, HMENU, UINT, HFONT};
+use winapi::{HFONT, HMENU, HWND, UINT};
 
-pub use controls::window::{WindowT, Window};
-pub use controls::menu::{MenuT, Menu, MenuItemT, MenuItem, SeparatorT, Separator};
-pub use controls::button::{ButtonT, Button};
-pub use controls::textinput::{TextInputT, TextInput};
-pub use controls::textbox::{TextBoxT, TextBox};
-pub use controls::checkbox::{CheckBoxT, CheckBox};
-pub use controls::radiobutton::{RadioButtonT, RadioButton};
-pub use controls::label::{LabelT, Label};
-pub use controls::listbox::{ListBoxT, ListBox};
-pub use controls::combobox::{ComboBoxT, ComboBox};
-pub use controls::groupbox::{GroupBoxT, GroupBox};
-pub use controls::progress_bar::{ProgressBarT, ProgressBar};
-pub use controls::file_dialog::{FileDialogT, FileDialog};
-pub use controls::timer::{TimerT, Timer};
-pub use controls::canvas::{CanvasT, Canvas, CanvasRenderer};
-pub use controls::datepicker::{DatePickerT, DatePicker};
-use ui::Ui;
-use events::Event;
+pub use controls::button::{Button, ButtonT};
+pub use controls::canvas::{Canvas, CanvasRenderer, CanvasT};
+pub use controls::checkbox::{CheckBox, CheckBoxT};
+pub use controls::combobox::{ComboBox, ComboBoxT};
+pub use controls::datepicker::{DatePicker, DatePickerT};
+pub use controls::file_dialog::{FileDialog, FileDialogT};
+pub use controls::groupbox::{GroupBox, GroupBoxT};
+pub use controls::label::{Label, LabelT};
+pub use controls::listbox::{ListBox, ListBoxT};
+pub use controls::menu::{Menu, MenuItem, MenuItemT, MenuT, Separator, SeparatorT};
+pub use controls::progress_bar::{ProgressBar, ProgressBarT};
+pub use controls::radiobutton::{RadioButton, RadioButtonT};
+pub use controls::textbox::{TextBox, TextBoxT};
+pub use controls::textinput::{TextInput, TextInputT};
+pub use controls::timer::{Timer, TimerT};
+pub use controls::window::{Window, WindowT};
 use error::Error;
+use events::Event;
+use ui::Ui;
 
 /**
     A type that expose the different underlying handle into one type
@@ -70,7 +70,7 @@ pub enum AnyHandle {
     HMENU(HMENU),
     HMENU_ITEM(HMENU, UINT),
     HFONT(HFONT),
-    Custom(TypeId, usize)
+    Custom(TypeId, usize),
 }
 
 /**
@@ -98,14 +98,13 @@ pub enum ControlType {
     DatePicker,
     FileDialog,
     Canvas,
-    Undefined  // Control is not a common control
+    Undefined, // Control is not a common control
 }
 
 /**
     Structures implementing this trait can be used by a Ui to build a Control
 */
-pub trait ControlT<ID: Clone+Hash> {
-
+pub trait ControlT<ID: Clone + Hash> {
     /**
         Should return the TypeId of the generated control. For example a `WindowT` struct returns the TypeId of a `Window` struct.
     */
@@ -119,14 +118,15 @@ pub trait ControlT<ID: Clone+Hash> {
     /**
         Should return the events supported by the control.
     */
-    fn events(&self) -> Vec<Event> { Vec::new() }
+    fn events(&self) -> Vec<Event> {
+        Vec::new()
+    }
 }
 
 /**
     Structures implementing this trait are controls that can be stored in a Ui
 */
 pub trait Control {
-
     /**
         Should return the underlying handle to the object
     */
@@ -135,11 +135,12 @@ pub trait Control {
     /**
         Should return the type of the control. For custom controls, the return value should be `Undefined` (the default).
     */
-    fn control_type(&self) -> ControlType { ControlType::Undefined }
+    fn control_type(&self) -> ControlType {
+        ControlType::Undefined
+    }
 
     /**
         If specified, should free any ressource allocated in the template `build` function. This includes functions like `DestroyWindow`.
     */
     fn free(&mut self) {}
-
 }

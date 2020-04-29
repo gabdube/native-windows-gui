@@ -2,10 +2,11 @@
     Simple example on how to use a nwg canvas.
 */
 
-#[macro_use] extern crate native_windows_gui as nwg;
+#[macro_use]
+extern crate native_windows_gui as nwg;
 
-use nwg::{Event, EventArgs, Ui, fatal_message, dispatch_events};
 use nwg::constants as nwgc;
+use nwg::{dispatch_events, fatal_message, Event, EventArgs, Ui};
 
 #[derive(Debug, Clone, Hash)]
 pub enum CanvasId {
@@ -19,7 +20,7 @@ pub enum CanvasId {
 
     // Canvas resources
     SolidBrush(u8),
-    DashedPen(u8)
+    DashedPen(u8),
 }
 
 use CanvasId::*;
@@ -37,7 +38,7 @@ nwg_template!(
             // Get the renderer and clear the last scene
             let mut renderer = canvas.renderer().unwrap();
             renderer.clear(0.3, 0.3, 0.6, 1.0);
-            
+
             // Drawing setup
             let (w, h) = renderer.get_render_size();
             renderer.set_transform( &[[1.0, 0.0], [0.0, 1.0], [w/2.0, h/2.0]] );
@@ -74,9 +75,15 @@ nwg_template!(
 fn setup_canvas_resources(app: &Ui<CanvasId>) {
     let mut canvas = nwg_get_mut!(app; (Canvas, nwg::Canvas<CanvasId>));
 
-    let b1 = nwgc::SolidBrush{color:(0.0, 0.7, 1.0, 1.0)};
-    let b2 = nwgc::SolidBrush{color:(0.0, 1.0, 0.5, 1.0)};
-    let b3 = nwgc::SolidBrush{color:(1.0, 1.0, 0.0, 1.0)};
+    let b1 = nwgc::SolidBrush {
+        color: (0.0, 0.7, 1.0, 1.0),
+    };
+    let b2 = nwgc::SolidBrush {
+        color: (0.0, 1.0, 0.5, 1.0),
+    };
+    let b3 = nwgc::SolidBrush {
+        color: (1.0, 1.0, 0.0, 1.0),
+    };
     let p1 = nwgc::Pen {
         start_cap: nwgc::CapStyle::Round,
         end_cap: nwgc::CapStyle::Round,
@@ -84,21 +91,33 @@ fn setup_canvas_resources(app: &Ui<CanvasId>) {
         line_join: nwgc::LineJoin::Round,
         miter_limit: 0.0,
         dash_style: nwgc::DashStyle::Dash,
-        dash_offset: 5.0
+        dash_offset: 5.0,
     };
 
-    canvas.create_solid_brush(&SolidBrush(0), &b1).expect("Failed to create brush 1");
-    canvas.create_solid_brush(&SolidBrush(1), &b2).expect("Failed to create brush 2");
-    canvas.create_solid_brush(&SolidBrush(2), &b3).expect("Failed to create brush 3");
-    canvas.create_pen(&DashedPen(0), &p1).expect("Failed to create pen");
+    canvas
+        .create_solid_brush(&SolidBrush(0), &b1)
+        .expect("Failed to create brush 1");
+    canvas
+        .create_solid_brush(&SolidBrush(1), &b2)
+        .expect("Failed to create brush 2");
+    canvas
+        .create_solid_brush(&SolidBrush(2), &b3)
+        .expect("Failed to create brush 3");
+    canvas
+        .create_pen(&DashedPen(0), &p1)
+        .expect("Failed to create pen");
 }
 
 fn main() {
     let app: Ui<CanvasId>;
 
     match Ui::new() {
-        Ok(_app) => { app = _app;  },
-        Err(e) => { fatal_message("Fatal Error", &format!("{:?}", e) ); }
+        Ok(_app) => {
+            app = _app;
+        }
+        Err(e) => {
+            fatal_message("Fatal Error", &format!("{:?}", e));
+        }
     }
 
     if let Err(e) = setup_ui(&app) {

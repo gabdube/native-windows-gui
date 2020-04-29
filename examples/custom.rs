@@ -12,15 +12,18 @@
 */
 extern crate user32;
 extern crate winapi;
-#[macro_use] extern crate native_windows_gui as nwg;
+#[macro_use]
+extern crate native_windows_gui as nwg;
 
 use std::any::TypeId;
 use std::hash::Hash;
 
-use nwg::custom::{Control, ControlT, AnyHandle, SysclassParams, build_sysclass, WindowParams, build_window};
-use nwg::{Error, Event, Ui, simple_message, fatal_message, dispatch_events};
+use nwg::custom::{
+    build_sysclass, build_window, AnyHandle, Control, ControlT, SysclassParams, WindowParams,
+};
+use nwg::{dispatch_events, fatal_message, simple_message, Error, Event, Ui};
 
-use winapi::{HWND, UINT, WPARAM, LPARAM, LRESULT};
+use winapi::{HWND, LPARAM, LRESULT, UINT, WPARAM};
 
 // The control template. Aka the configuration object that is sent to an UI.
 pub struct MyCustomWindowT;
@@ -28,15 +31,15 @@ pub struct MyCustomWindowT;
 // The actual control. The object that is saved and managed in NWG.
 // A reference to this object is returned when nwg_get is used
 pub struct MyCustomWindow {
-    handle: HWND
+    handle: HWND,
 }
 
-impl<ID: Hash+Clone> ControlT<ID> for MyCustomWindowT {
-    fn resource_type_id(&self) -> TypeId { 
+impl<ID: Hash + Clone> ControlT<ID> for MyCustomWindowT {
+    fn resource_type_id(&self) -> TypeId {
         // This method must return the TypeID of the associated control
         // Used internally by NWG
-        
-        TypeId::of::<MyCustomWindow>() 
+
+        TypeId::of::<MyCustomWindow>()
     }
 
     fn events(&self) -> Vec<Event> {
@@ -47,29 +50,29 @@ impl<ID: Hash+Clone> ControlT<ID> for MyCustomWindowT {
 
     #[allow(unused_variables)]
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        use winapi::{WS_HSCROLL, WS_VISIBLE, WS_VSCROLL, WS_OVERLAPPEDWINDOW};
+        use winapi::{WS_HSCROLL, WS_OVERLAPPEDWINDOW, WS_VISIBLE, WS_VSCROLL};
 
         // This method must create the low level control and return it as a Box<Control>
         // NWG offers both build_sysclass and build_window in order to facilitate the low level window creation
         // If the method returns an error, Ui::commit will return it.
-        
-        unsafe{
-            let cls_params = SysclassParams { 
-                class_name: "MyCustomWindowClass",      // The unique identifier of the window class
-                sysproc: Some(custom_window_sysproc),   // The low level window procedure of the window
-                background: None,                       // The background color of the window (use the default system color)
-                style: None                             // The style class (use defaults)
+
+        unsafe {
+            let cls_params = SysclassParams {
+                class_name: "MyCustomWindowClass", // The unique identifier of the window class
+                sysproc: Some(custom_window_sysproc), // The low level window procedure of the window
+                background: None, // The background color of the window (use the default system color)
+                style: None,      // The style class (use defaults)
             };
 
-            let style =  WS_HSCROLL | WS_VISIBLE | WS_VSCROLL | WS_OVERLAPPEDWINDOW;
+            let style = WS_HSCROLL | WS_VISIBLE | WS_VSCROLL | WS_OVERLAPPEDWINDOW;
             let params = WindowParams {
-                title: "My custom window",              // The window title
-                class_name: "MyCustomWindowClass",      // The window class
-                position: (200, 200),                   // The window starting position
-                size: (500, 500),                       // The window starting size
-                flags: style,                           // The window style
-                ex_flags: None,                         // The window extended flags
-                parent: ::std::ptr::null_mut()          // The parent (don't forget to include WS_CHILD in flags if there is one)
+                title: "My custom window",         // The window title
+                class_name: "MyCustomWindowClass", // The window class
+                position: (200, 200),              // The window starting position
+                size: (500, 500),                  // The window starting size
+                flags: style,                      // The window style
+                ex_flags: None,                    // The window extended flags
+                parent: ::std::ptr::null_mut(), // The parent (don't forget to include WS_CHILD in flags if there is one)
             };
 
             // Try to create the custom window class, return an error if it fails
@@ -79,14 +82,11 @@ impl<ID: Hash+Clone> ControlT<ID> for MyCustomWindowT {
 
             // Try to create the window, return an error if it fails
             match build_window(params) {
-                Ok(h) => {
-                    Ok(Box::new(MyCustomWindow{handle: h}) as Box<Control>)
-                },
-                Err(e) => Err(Error::System(e))
+                Ok(h) => Ok(Box::new(MyCustomWindow { handle: h }) as Box<Control>),
+                Err(e) => Err(Error::System(e)),
             }
         } // unsafe
     }
-
 }
 
 impl Control for MyCustomWindow {
@@ -102,15 +102,20 @@ impl Control for MyCustomWindow {
         // This is called by the UI when the control is removed
 
         use user32::DestroyWindow;
-        unsafe{ DestroyWindow(self.handle) };
+        unsafe { DestroyWindow(self.handle) };
     }
 }
 
 // The custom window proc
 #[allow(unused_variables)]
-unsafe extern "system" fn custom_window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
-    use winapi::{WM_CREATE, WM_CLOSE};
+unsafe extern "system" fn custom_window_sysproc(
+    hwnd: HWND,
+    msg: UINT,
+    w: WPARAM,
+    l: LPARAM,
+) -> LRESULT {
     use user32::{DefWindowProcW, PostQuitMessage, ShowWindow};
+    use winapi::{WM_CLOSE, WM_CREATE};
 
     let handled = match msg {
         WM_CREATE => true,
@@ -119,7 +124,7 @@ unsafe extern "system" fn custom_window_sysproc(hwnd: HWND, msg: UINT, w: WPARAM
             PostQuitMessage(0);
             true
         }
-        _ => false
+        _ => false,
     };
 
     if handled {
@@ -133,21 +138,33 @@ fn main() {
     let app: Ui<&'static str>;
 
     match Ui::new() {
-        Ok(_app) => { app = _app; },
-        Err(e) => { fatal_message("Fatal Error", &format!("{:?}", e) ); }
+        Ok(_app) => {
+            app = _app;
+        }
+        Err(e) => {
+            fatal_message("Fatal Error", &format!("{:?}", e));
+        }
     }
 
     // Add our custom window to the UI
     app.pack_control(&"MyCustomWindow", MyCustomWindowT);
 
     // Add a chidlren
-    app.pack_control(&"AButton", nwg_button!(parent="MyCustomWindow"; text="Test"; position=(10,10); size=(480, 480)) );
+    app.pack_control(
+        &"AButton",
+        nwg_button!(parent="MyCustomWindow"; text="Test"; position=(10,10); size=(480, 480)),
+    );
 
     // Bind an event
-    app.bind(&"MyCustomWindow", &"ExitNWG", Event::Closed, |_,_,_,_| {
-        simple_message("Hello", "Goodbye!");
-        nwg::exit();
-    });
+    app.bind(
+        &"MyCustomWindow",
+        &"ExitNWG",
+        Event::Closed,
+        |_, _, _, _| {
+            simple_message("Hello", "Goodbye!");
+            nwg::exit();
+        },
+    );
 
     dispatch_events();
 }

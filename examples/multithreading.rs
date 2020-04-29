@@ -2,9 +2,10 @@
     A simple example demonstrating multithreading. Two simple ui and allow the user to pause the thread.
 */
 
-#[macro_use] extern crate native_windows_gui as nwg;
+#[macro_use]
+extern crate native_windows_gui as nwg;
 
-use nwg::{Event, Ui, fatal_message, dispatch_events};
+use nwg::{dispatch_events, fatal_message, Event, Ui};
 use std::thread;
 use std::time::Duration;
 
@@ -16,7 +17,7 @@ pub enum MultiThreadingId {
     SleepButton,
 
     // Events
-    Sleep
+    Sleep,
 }
 
 use MultiThreadingId::*;
@@ -53,8 +54,12 @@ fn main() {
     // Create the main window on the current thread
     let app: Ui<MultiThreadingId>;
     match Ui::new() {
-        Ok(_app) => { app = _app; },
-        Err(e) => { fatal_message("Fatal Error", &format!("{:?}", e) ); }
+        Ok(_app) => {
+            app = _app;
+        }
+        Err(e) => {
+            fatal_message("Fatal Error", &format!("{:?}", e));
+        }
     }
 
     if let Err(e) = setup_test_window(&app) {
@@ -62,11 +67,15 @@ fn main() {
     }
 
     // Create another ui on a new thread
-    let t = thread::spawn(||{
+    let t = thread::spawn(|| {
         let app2: Ui<MultiThreadingId>;
         match Ui::new() {
-            Ok(_app2) => { app2 = _app2; },
-            Err(e) => { fatal_message("Fatal Error", &format!("{:?}", e) ); }
+            Ok(_app2) => {
+                app2 = _app2;
+            }
+            Err(e) => {
+                fatal_message("Fatal Error", &format!("{:?}", e));
+            }
         }
 
         if let Err(e) = setup_sleep_window(&app2) {
@@ -75,7 +84,7 @@ fn main() {
 
         dispatch_events();
     });
-    
+
     // Wait for both event loop to finish
     dispatch_events();
     t.join().unwrap();

@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use winapi::{c_int, DWORD, CW_USEDEFAULT};
+use winapi::{c_int, CW_USEDEFAULT, DWORD};
 
 pub use winapi::SYSTEMTIME;
 
@@ -29,7 +29,7 @@ pub use winapi::SYSTEMTIME;
 pub enum CheckState {
     Checked,
     Unchecked,
-    Indeterminate // Tristate only
+    Indeterminate, // Tristate only
 }
 
 /**
@@ -38,7 +38,7 @@ pub enum CheckState {
 pub enum MouseButton {
     Left,
     Right,
-    Middle
+    Middle,
 }
 
 /**
@@ -48,7 +48,7 @@ pub enum MouseButton {
 pub enum HTextAlign {
     Left,
     Center,
-    Right
+    Right,
 }
 
 /**
@@ -58,7 +58,7 @@ pub enum HTextAlign {
 pub enum VTextAlign {
     Top,
     Center,
-    Bottom
+    Bottom,
 }
 
 /**
@@ -84,11 +84,11 @@ pub enum MessageIcons {
     Info,
     Question,
     Error,
-    None
+    None,
 }
 
 /**
-    Return value of `message`. Define the button that the user clicked. If the user 
+    Return value of `message`. Define the button that the user clicked. If the user
     cancelled the message box by clicking on X button of the window, `MessageChoice::Cancel` is returned.
 */
 #[derive(Clone, PartialEq, Debug)]
@@ -101,7 +101,7 @@ pub enum MessageChoice {
     Ok,
     Retry,
     TryAgain,
-    Yes
+    Yes,
 }
 
 /**
@@ -111,33 +111,33 @@ pub enum MessageChoice {
 pub struct PickerDate {
     pub year: u16,
     pub month: u16,
-    pub day: u16
+    pub day: u16,
 }
 
 /**
-    A structure that defines how a messagebox should look and behave. 
+    A structure that defines how a messagebox should look and behave.
 
-    Members:  
-    * `title`: The title of the message box  
-    * `content`: The message of the message box  
-    * `buttons`: The button of the message box  
-    * `icons`: The message box icon  
+    Members:
+    * `title`: The title of the message box
+    * `content`: The message of the message box
+    * `buttons`: The button of the message box
+    * `icons`: The message box icon
 */
 #[derive(Clone, PartialEq, Debug)]
 pub struct MessageParams<'a> {
     pub title: &'a str,
     pub content: &'a str,
     pub buttons: MessageButtons,
-    pub icons: MessageIcons
+    pub icons: MessageIcons,
 }
 
 /**
     A enum that dictates how a file dialog should behave
 
-    Members:  
-    * `Open`: User can select a file that is not a directory  
-    * `OpenDirectory`: User can select a directory  
-    * `Save`: User select the name of a file. If it already exists, a confirmation message will be raised  
+    Members:
+    * `Open`: User can select a file that is not a directory
+    * `OpenDirectory`: User can select a directory
+    * `Save`: User select the name of a file. If it already exists, a confirmation message will be raised
 */
 #[derive(Clone, PartialEq, Debug)]
 pub enum FileDialogAction {
@@ -149,10 +149,10 @@ pub enum FileDialogAction {
 /**
     Define the state of a progress bar
 
-    Members:  
+    Members:
     * `Normal`: Default state of a progress bar  (in progress)
-    * `Paused`: Paused  
-    * `Error`: Error   
+    * `Paused`: Paused
+    * `Error`: Error
 */
 #[derive(Clone, PartialEq, Debug)]
 pub enum ProgressBarState {
@@ -169,7 +169,7 @@ pub struct Rectangle {
     pub left: f32,
     pub top: f32,
     pub right: f32,
-    pub bottom: f32
+    pub bottom: f32,
 }
 
 /**
@@ -184,12 +184,12 @@ pub struct Ellipse {
 /**
     A brush using a single solid color. Used when painting in a canvas
 
-    Members:  
+    Members:
     • `color`: The brush color (red, green, blue, alpha)
 */
 #[derive(Clone)]
 pub struct SolidBrush {
-    pub color: (f32, f32, f32, f32)
+    pub color: (f32, f32, f32, f32),
 }
 
 /**
@@ -200,7 +200,7 @@ pub enum CapStyle {
     Flat = 0,
     Square = 1,
     Round = 2,
-    Triangle = 3
+    Triangle = 3,
 }
 
 /**
@@ -211,7 +211,7 @@ pub enum LineJoin {
     Miter = 0,
     Bevel = 1,
     Round = 2,
-    MiterOrBevel = 3
+    MiterOrBevel = 3,
 }
 
 /**
@@ -228,15 +228,15 @@ pub enum DashStyle {
 
 /**
     Describe how lines should be painted. Used when painting in a canvas
-    
-    Members:  
-    • `start_cap`: The cap applied to the start of all the open figures in a stroked geometry. 
+
+    Members:
+    • `start_cap`: The cap applied to the start of all the open figures in a stroked geometry.
     • `end_cap`: The cap applied to the end of all the open figures in a stroked geometry.
     • `dash_cap`: The shape at either end of each dash segment.
-    • `line_join`: A value that describes how segments are joined. This value is ignored for a vertex if the segment flags specify that the segment should have a smooth join. 
-    • `miter_limit`: The limit of the thickness of the join on a mitered corner. This value is always treated as though it is greater than or equal to 1.0f. 
-    • `dash_style`: A value that specifies whether the stroke has a dash pattern and, if so, the dash style. 
-    • `dash_offset`: A value that specifies an offset in the dash sequence. A positive dash offset value shifts the dash pattern, in units of stroke width,  
+    • `line_join`: A value that describes how segments are joined. This value is ignored for a vertex if the segment flags specify that the segment should have a smooth join.
+    • `miter_limit`: The limit of the thickness of the join on a mitered corner. This value is always treated as though it is greater than or equal to 1.0f.
+    • `dash_style`: A value that specifies whether the stroke has a dash pattern and, if so, the dash style.
+    • `dash_offset`: A value that specifies an offset in the dash sequence. A positive dash offset value shifts the dash pattern, in units of stroke width,
        toward the start of the stroked geometry. A negative dash offset value shifts the dash pattern, in units of stroke width, toward the end of the stroked geometry.
 */
 #[derive(Clone, Debug)]
@@ -249,7 +249,6 @@ pub struct Pen {
     pub dash_style: DashStyle,
     pub dash_offset: f32,
 }
-
 
 // Special window position constants
 pub const DEFAULT_POSITION: c_int = CW_USEDEFAULT;
@@ -278,7 +277,7 @@ pub const FONT_DECO_STRIKEOUT: DWORD = 0x04;
 
 pub mod keys {
     //! Windows virtual key code
-    
+
     pub const BACK: u32 = 0x08;
     pub const TAB: u32 = 0x09;
     pub const CLEAR: u32 = 0x0C;

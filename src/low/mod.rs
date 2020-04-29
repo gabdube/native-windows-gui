@@ -19,10 +19,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-pub mod defs;
 pub mod clsid;
+pub mod defs;
 pub mod events;
-pub mod message_handler;
 pub mod menu_helper;
-pub mod window_helper;
+pub mod message_handler;
 pub mod other_helper;
+pub mod window_helper;

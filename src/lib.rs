@@ -19,18 +19,18 @@
 */
 #![cfg(windows)]
 
-extern crate winapi;
-extern crate user32;
-extern crate kernel32;
 extern crate comctl32;
 extern crate gdi32;
+extern crate kernel32;
 extern crate ole32;
+extern crate user32;
+extern crate winapi;
 
-mod low;
+mod controls;
 mod defs;
 mod error;
 mod events;
-mod controls;
+mod low;
 mod resources;
 mod ui;
 
@@ -40,28 +40,33 @@ pub mod custom {
     /*!
         Custom control creation resources
     */
-    pub use controls::{ControlT, Control, AnyHandle};
-    pub use resources::{ResourceT, Resource};
-    pub use low::window_helper::{build_window, build_sysclass, SysclassParams, WindowParams, set_window_long, get_window_long,
-    get_window_text, set_window_text, get_window_visibility, set_window_visibility, get_window_position, set_window_position,
-    get_window_size, set_window_size, get_window_enabled, set_window_enabled};
-
+    pub use controls::{AnyHandle, Control, ControlT};
+    pub use low::window_helper::{
+        build_sysclass, build_window, get_window_enabled, get_window_long, get_window_position,
+        get_window_size, get_window_text, get_window_visibility, set_window_enabled,
+        set_window_long, set_window_position, set_window_size, set_window_text,
+        set_window_visibility, SysclassParams, WindowParams,
+    };
+    pub use resources::{Resource, ResourceT};
 }
 
 pub mod constants {
     /*!
         Controls constants
     */
-    pub use defs::*;
     pub use controls::ControlType;
+    pub use defs::*;
 }
 
+pub use controls::{
+    Button, ButtonT, Canvas, CanvasRenderer, CanvasT, CheckBox, CheckBoxT, ComboBox, ComboBoxT,
+    DatePicker, DatePickerT, FileDialog, FileDialogT, GroupBox, GroupBoxT, Label, LabelT, ListBox,
+    ListBoxT, Menu, MenuItem, MenuItemT, MenuT, ProgressBar, ProgressBarT, RadioButton,
+    RadioButtonT, Separator, SeparatorT, TextBox, TextBoxT, TextInput, TextInputT, Timer, TimerT,
+    Window, WindowT,
+};
 pub use error::{Error, SystemError};
-pub use events::{EventCallback, Event, EventArgs};
-pub use low::other_helper::{message, simple_message, fatal_message, error_message};
-pub use controls::{WindowT, Window, MenuT, Menu, MenuItemT, MenuItem, ButtonT, Button, ListBoxT, ListBox, CheckBoxT, CheckBox,
- RadioButtonT, RadioButton, TimerT, Timer, LabelT, Label, ComboBoxT, ComboBox, SeparatorT, Separator, TextInputT, TextInput,
- FileDialogT, FileDialog, CanvasT, Canvas, CanvasRenderer, TextBoxT, TextBox, GroupBoxT, GroupBox, ProgressBarT, ProgressBar,
- DatePickerT, DatePicker};
-pub use resources::{FontT, Font};
-pub use ui::{Ui, dispatch_events, exit};
+pub use events::{Event, EventArgs, EventCallback};
+pub use low::other_helper::{error_message, fatal_message, message, simple_message};
+pub use resources::{Font, FontT};
+pub use ui::{dispatch_events, exit, Ui};

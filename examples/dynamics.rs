@@ -1,14 +1,14 @@
 #![allow(non_upper_case_globals)]
 /**
-    Simple example on how to create controls on the fly. 
+    Simple example on how to create controls on the fly.
     The example shows a dialog that add dynamically add buttons in the main window.
 */
 
+#[macro_use]
+extern crate native_windows_gui as nwg;
 
-#[macro_use] extern crate native_windows_gui as nwg;
-
-use nwg::{Event, Ui, simple_message, fatal_message, dispatch_events};
 use nwg::constants::HTextAlign;
+use nwg::{dispatch_events, fatal_message, simple_message, Event, Ui};
 
 // Identifiers for static controls/resources/values
 #[derive(Debug, Clone, Hash)]
@@ -35,7 +35,7 @@ pub enum UiId {
 
     // Events
     AddCallback,
-    ClearCallback
+    ClearCallback,
 }
 
 use UiId::*;
@@ -72,8 +72,8 @@ nwg_template!(
             let width_offset = if new_id % 2 == 0 { 5 } else { 200 };
             let t = nwg::ButtonT {
                 text: text.get_text(),
-                position: (width_offset, height_offset), size: (195, 30), 
-                visible: true, disabled: false, 
+                position: (width_offset, height_offset), size: (195, 30),
+                visible: true, disabled: false,
                 parent:  MainWindow, font: Some(TextFont)
             };
             ui.pack_control(&next_control_id, t);
@@ -122,8 +122,12 @@ fn main() {
     let app: Ui<UiId>;
 
     match Ui::new() {
-        Ok(_app) => { app = _app; },
-        Err(e) => { fatal_message("Fatal Error", &format!("{:?}", e) ); }
+        Ok(_app) => {
+            app = _app;
+        }
+        Err(e) => {
+            fatal_message("Fatal Error", &format!("{:?}", e));
+        }
     }
 
     if let Err(e) = setup_ui(&app) {

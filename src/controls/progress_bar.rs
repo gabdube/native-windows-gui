@@ -18,39 +18,39 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use std::hash::Hash;
 use std::any::TypeId;
+use std::hash::Hash;
 use std::mem;
 
-use winapi::HWND;
 use user32::SendMessageW;
+use winapi::HWND;
 
-use ui::Ui;
-use controls::{Control, ControlT, ControlType, AnyHandle};
+use controls::{AnyHandle, Control, ControlT, ControlType};
+use defs::ProgressBarState;
 use error::Error;
 use events::Event;
-use defs::ProgressBarState;
+use ui::Ui;
 
 /**
     A template that creates a progress bar
 
-    Events:  
-    Event::Destroyed, Event::Moved, Event::Resized, Event::Raw  
+    Events:
+    Event::Destroyed, Event::Moved, Event::Resized, Event::Raw
 
-    Members:  
-    • `position`: The start position of the progressbar  
-    • `size`: The start size of the progressbar  
-    • `visible`: If the progressbar should be visible to the user  
-    • `disabled`: If the user can or can't click on the progressbar  
-    • `range`: The minimum and the maximum value of the progress bar  
-    • `position`: The starting position of the progress bar  
-    • `step`: Amount of value to add when `step` is called  
+    Members:
+    • `position`: The start position of the progressbar
+    • `size`: The start size of the progressbar
+    • `visible`: If the progressbar should be visible to the user
+    • `disabled`: If the user can or can't click on the progressbar
+    • `range`: The minimum and the maximum value of the progress bar
+    • `position`: The starting position of the progress bar
+    • `step`: Amount of value to add when `step` is called
     • `state`: The state of the progress bar.
     • `vertical`: If the progress bar should be vertical instead of horizontal
-    • `parent`: The progressbar parent  
+    • `parent`: The progressbar parent
 */
 #[derive(Clone)]
-pub struct ProgressBarT<ID: Hash+Clone> {
+pub struct ProgressBarT<ID: Hash + Clone> {
     pub position: (i32, i32),
     pub size: (u32, u32),
     pub visible: bool,
@@ -63,31 +63,39 @@ pub struct ProgressBarT<ID: Hash+Clone> {
     pub parent: ID,
 }
 
-impl<ID: Hash+Clone> ControlT<ID> for ProgressBarT<ID> {
-    fn resource_type_id(&self) -> TypeId { TypeId::of::<ProgressBar>() }
+impl<ID: Hash + Clone> ControlT<ID> for ProgressBarT<ID> {
+    fn resource_type_id(&self) -> TypeId {
+        TypeId::of::<ProgressBar>()
+    }
 
     fn events(&self) -> Vec<Event> {
         vec![Event::Destroyed, Event::Moved, Event::Resized, Event::Raw]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        use low::window_helper::{WindowParams, build_window, handle_of_window};
-        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, PBS_VERTICAL};
+        use low::window_helper::{build_window, handle_of_window, WindowParams};
+        use winapi::{DWORD, PBS_VERTICAL, WS_CHILD, WS_DISABLED, WS_VISIBLE};
 
         if self.range.1 <= self.range.0 {
             let msg = "The progress bar range maximum value must be greater than the minimum value";
             return Err(Error::UserError(msg.to_string()));
         }
 
-        let flags: DWORD = WS_CHILD | 
-        if self.visible  { WS_VISIBLE }   else { 0 } |
-        if self.disabled { WS_DISABLED }  else { 0 } |
-        if self.vertical { PBS_VERTICAL } else { 0 } ;
+        let flags: DWORD = WS_CHILD
+            | if self.visible { WS_VISIBLE } else { 0 }
+            | if self.disabled { WS_DISABLED } else { 0 }
+            | if self.vertical { PBS_VERTICAL } else { 0 };
 
         // Get the parent handle
-        let parent = match handle_of_window(ui, &self.parent, "The parent of a progress bar must be a window-like control.") {
+        let parent = match handle_of_window(
+            ui,
+            &self.parent,
+            "The parent of a progress bar must be a window-like control.",
+        ) {
             Ok(h) => h,
-            Err(e) => { return Err(e); }
+            Err(e) => {
+                return Err(e);
+            }
         };
 
         let params = WindowParams {
@@ -97,20 +105,20 @@ impl<ID: Hash+Clone> ControlT<ID> for ProgressBarT<ID> {
             size: self.size.clone(),
             flags: flags,
             ex_flags: Some(0),
-            parent: parent
+            parent: parent,
         };
 
-        match unsafe{ build_window(params) } {
+        match unsafe { build_window(params) } {
             Ok(h) => {
-                unsafe{ 
+                unsafe {
                     set_range(h, self.range.0, self.range.1);
-                    set_step(h, self.step); 
+                    set_step(h, self.step);
                     set_value(h, self.value);
                     set_state(h, &self.state);
                 }
-                Ok( Box::new(ProgressBar{handle: h}) )
-            },
-            Err(e) => Err(Error::System(e))
+                Ok(Box::new(ProgressBar { handle: h }))
+            }
+            Err(e) => Err(Error::System(e)),
         }
     }
 }
@@ -119,16 +127,17 @@ impl<ID: Hash+Clone> ControlT<ID> for ProgressBarT<ID> {
     A standard progress bar
 */
 pub struct ProgressBar {
-    handle: HWND
+    handle: HWND,
 }
 
 impl ProgressBar {
-
     /// Return the current range of the progress bar
     pub fn get_range(&self) -> (u32, u32) {
         use winapi::{PBM_GETRANGE, PBRANGE};
-        let mut range = PBRANGE{iLow: 0, iHigh: 0};
-        unsafe{ SendMessageW(self.handle, PBM_GETRANGE, 0, mem::transmute(&mut range) ); }
+        let mut range = PBRANGE { iLow: 0, iHigh: 0 };
+        unsafe {
+            SendMessageW(self.handle, PBM_GETRANGE, 0, mem::transmute(&mut range));
+        }
 
         (range.iLow as u32, range.iHigh as u32)
     }
@@ -142,14 +151,16 @@ impl ProgressBar {
             let msg = "The progress bar range maximum value must be greater than the minimum value";
             return Err(Error::UserError(msg.to_string()));
         }
-        unsafe{ set_range(self.handle, min, max); }
+        unsafe {
+            set_range(self.handle, min, max);
+        }
         Ok(())
     }
 
     /// Return the current step of the progress bar
     pub fn get_step(&self) -> u32 {
         use winapi::PBM_GETSTEP;
-        unsafe{ SendMessageW(self.handle, PBM_GETSTEP, 0, 0) as u32 }
+        unsafe { SendMessageW(self.handle, PBM_GETSTEP, 0, 0) as u32 }
     }
 
     /**
@@ -157,42 +168,50 @@ impl ProgressBar {
         is increased by the value defined by step.
     */
     pub fn set_step(&self, step: u32) {
-        unsafe{ set_step(self.handle, step); }
+        unsafe {
+            set_step(self.handle, step);
+        }
     }
 
     /// Return the current value of the progress bar
     pub fn get_value(&self) -> u32 {
         use winapi::PBM_GETPOS;
-        unsafe{ SendMessageW(self.handle, PBM_GETPOS, 0, 0) as u32 }
+        unsafe { SendMessageW(self.handle, PBM_GETPOS, 0, 0) as u32 }
     }
 
     /// Set the progress bar value
     pub fn set_value(&self, val: u32) {
-        unsafe{ set_value(self.handle, val); }
+        unsafe {
+            set_value(self.handle, val);
+        }
     }
 
     /// Get the progress bar state
     pub fn get_state(&self) -> ProgressBarState {
         use winapi::{PBM_GETSTATE, PBST_ERROR, PBST_PAUSED};
-        match unsafe{ SendMessageW(self.handle, PBM_GETSTATE, 0, 0) as i32 } {
+        match unsafe { SendMessageW(self.handle, PBM_GETSTATE, 0, 0) as i32 } {
             PBST_ERROR => ProgressBarState::Error,
             PBST_PAUSED => ProgressBarState::Paused,
-            _ => ProgressBarState::Normal
+            _ => ProgressBarState::Normal,
         }
     }
 
     /// Set the progress bar state
     pub fn set_state(&self, state: ProgressBarState) {
-        unsafe{ set_state(self.handle, &state); }
+        unsafe {
+            set_state(self.handle, &state);
+        }
     }
 
-    /* 
+    /*
         Add the step value to the progress bar value.
         Once the value reach the maximum value of the progress bar, the value is reverted back to the minimum value.
     */
     pub fn step(&self) {
         use winapi::PBM_STEPIT;
-        unsafe{ SendMessageW(self.handle, PBM_STEPIT, 0, 0); }
+        unsafe {
+            SendMessageW(self.handle, PBM_STEPIT, 0, 0);
+        }
     }
 
     /**
@@ -200,41 +219,65 @@ impl ProgressBar {
     */
     pub fn advance(&self, amount: u32) {
         use winapi::{PBM_DELTAPOS, WPARAM};
-        unsafe{ SendMessageW(self.handle, PBM_DELTAPOS, amount as WPARAM, 0); }
+        unsafe {
+            SendMessageW(self.handle, PBM_DELTAPOS, amount as WPARAM, 0);
+        }
     }
 
-    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
-    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
-    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
-    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
-    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
-    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, false); } }
-    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
-    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+    pub fn get_visibility(&self) -> bool {
+        unsafe { ::low::window_helper::get_window_visibility(self.handle) }
+    }
+    pub fn set_visibility(&self, visible: bool) {
+        unsafe {
+            ::low::window_helper::set_window_visibility(self.handle, visible);
+        }
+    }
+    pub fn get_position(&self) -> (i32, i32) {
+        unsafe { ::low::window_helper::get_window_position(self.handle) }
+    }
+    pub fn set_position(&self, x: i32, y: i32) {
+        unsafe {
+            ::low::window_helper::set_window_position(self.handle, x, y);
+        }
+    }
+    pub fn get_size(&self) -> (u32, u32) {
+        unsafe { ::low::window_helper::get_window_size(self.handle) }
+    }
+    pub fn set_size(&self, w: u32, h: u32) {
+        unsafe {
+            ::low::window_helper::set_window_size(self.handle, w, h, false);
+        }
+    }
+    pub fn get_enabled(&self) -> bool {
+        unsafe { ::low::window_helper::get_window_enabled(self.handle) }
+    }
+    pub fn set_enabled(&self, e: bool) {
+        unsafe {
+            ::low::window_helper::set_window_enabled(self.handle, e);
+        }
+    }
 }
 
 impl Control for ProgressBar {
-
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
     }
 
-    fn control_type(&self) -> ControlType { 
-        ControlType::ProgressBar 
+    fn control_type(&self) -> ControlType {
+        ControlType::ProgressBar
     }
 
     fn free(&mut self) {
         use user32::DestroyWindow;
-        unsafe{ DestroyWindow(self.handle) };
+        unsafe { DestroyWindow(self.handle) };
     }
-
 }
 
 // Private functions
 
 #[inline(always)]
 unsafe fn set_range(handle: HWND, min: u32, max: u32) {
-    use winapi::{PBM_SETRANGE32, WPARAM, LPARAM};
+    use winapi::{LPARAM, PBM_SETRANGE32, WPARAM};
     SendMessageW(handle, PBM_SETRANGE32, min as WPARAM, max as LPARAM);
 }
 
@@ -252,7 +295,7 @@ unsafe fn set_value(handle: HWND, val: u32) {
 
 #[inline(always)]
 unsafe fn set_state(handle: HWND, state: &ProgressBarState) {
-    use winapi::{PBM_SETSTATE, WPARAM, PBST_NORMAL, PBST_ERROR, PBST_PAUSED};
+    use winapi::{PBM_SETSTATE, PBST_ERROR, PBST_NORMAL, PBST_PAUSED, WPARAM};
     let state = match state {
         &ProgressBarState::Normal => PBST_NORMAL,
         &ProgressBarState::Paused => PBST_PAUSED,

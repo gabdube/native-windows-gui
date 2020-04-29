@@ -2,10 +2,13 @@
     Example that show every control implemented in NWG
 */
 
-#[macro_use] extern crate native_windows_gui as nwg;
+#[macro_use]
+extern crate native_windows_gui as nwg;
 
-use nwg::{Ui, Event, EventArgs, dispatch_events, exit as nwg_exit};
-use nwg::constants::{FONT_WEIGHT_BLACK, FONT_DECO_ITALIC, CheckState, FileDialogAction, HTextAlign, PickerDate};
+use nwg::constants::{
+    CheckState, FileDialogAction, HTextAlign, PickerDate, FONT_DECO_ITALIC, FONT_WEIGHT_BLACK,
+};
+use nwg::{dispatch_events, exit as nwg_exit, Event, EventArgs, Ui};
 
 nwg_template!(
     head: setup_ui<&'static str>,
@@ -78,7 +81,7 @@ nwg_template!(
 
         ("Timer", "UpdateLabel", Event::Tick, |app,_,_,args|{
             let label = nwg_get!(app; ("TimerLabel", nwg::Label));
-            let elapsed = match args { 
+            let elapsed = match args {
                 &EventArgs::Tick(ref d) => d,
                 _ => unreachable!()
             };
@@ -110,7 +113,7 @@ nwg_template!(
 
 pub fn main() {
     let app: Ui<&'static str> = Ui::new().expect("Failed to initialize the Ui");
-    
+
     // Pack the control in the application
     if let Err(e) = setup_ui(&app) {
         panic!("Commit failed: {:?}", e);

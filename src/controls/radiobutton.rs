@@ -18,37 +18,37 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use std::hash::Hash;
 use std::any::TypeId;
+use std::hash::Hash;
 
-use winapi::{HWND, HFONT};
 use user32::SendMessageW;
+use winapi::{HFONT, HWND};
 
-use ui::Ui;
-use controls::{Control, ControlT, ControlType, AnyHandle};
+use controls::{AnyHandle, Control, ControlT, ControlType};
+use defs::CheckState;
 use error::Error;
 use events::Event;
-use defs::CheckState;
+use ui::Ui;
 
 /**
     A template that creates a standard radio button
 
-    Events:  
-    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw  
+    Events:
+    Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw
 
-    Members:  
-    • `text`: The text of the radio button  
-    • `position`: The start position of the radio button  
-    • `size`: The start size of the radio button  
-    • `visible`: If the radio button should be visible to the user32  
-    • `disabled`: If the user can or can't click on the radio button  
-    • `parent`: The radio button parent  
-    • `checkstate`: The starting checkstate  
-    • `tristate`: If the radio button should have three states  
-    • `font`: The radio button font. If None, use the system default  
+    Members:
+    • `text`: The text of the radio button
+    • `position`: The start position of the radio button
+    • `size`: The start size of the radio button
+    • `visible`: If the radio button should be visible to the user32
+    • `disabled`: If the user can or can't click on the radio button
+    • `parent`: The radio button parent
+    • `checkstate`: The starting checkstate
+    • `tristate`: If the radio button should have three states
+    • `font`: The radio button font. If None, use the system default
 */
 #[derive(Clone)]
-pub struct RadioButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
+pub struct RadioButtonT<S: Clone + Into<String>, ID: Hash + Clone> {
     pub text: S,
     pub position: (i32, i32),
     pub size: (u32, u32),
@@ -59,35 +59,63 @@ pub struct RadioButtonT<S: Clone+Into<String>, ID: Hash+Clone> {
     pub font: Option<ID>,
 }
 
-impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for RadioButtonT<S, ID> {
-    fn resource_type_id(&self) -> TypeId { TypeId::of::<RadioButton>() }
+impl<S: Clone + Into<String>, ID: Hash + Clone> ControlT<ID> for RadioButtonT<S, ID> {
+    fn resource_type_id(&self) -> TypeId {
+        TypeId::of::<RadioButton>()
+    }
 
     fn events(&self) -> Vec<Event> {
-        vec![Event::Destroyed, Event::Click, Event::DoubleClick, Event::Focus, Event::Moved, Event::Resized, Event::Raw]
+        vec![
+            Event::Destroyed,
+            Event::Click,
+            Event::DoubleClick,
+            Event::Focus,
+            Event::Moved,
+            Event::Resized,
+            Event::Raw,
+        ]
     }
 
     fn build(&self, ui: &Ui<ID>) -> Result<Box<Control>, Error> {
-        use low::window_helper::{WindowParams, build_window, set_window_font, handle_of_window, handle_of_font};
-        use winapi::{DWORD, WS_VISIBLE, WS_DISABLED, WS_CHILD, BS_NOTIFY, BS_AUTORADIOBUTTON, BS_TEXT};
+        use low::window_helper::{
+            build_window, handle_of_font, handle_of_window, set_window_font, WindowParams,
+        };
+        use winapi::{
+            BS_AUTORADIOBUTTON, BS_NOTIFY, BS_TEXT, DWORD, WS_CHILD, WS_DISABLED, WS_VISIBLE,
+        };
 
-        let flags: DWORD = WS_CHILD | BS_NOTIFY | BS_TEXT | BS_AUTORADIOBUTTON |
-        if self.visible    { WS_VISIBLE }   else { 0 } |
-        if self.disabled   { WS_DISABLED }  else { 0 } ;
+        let flags: DWORD = WS_CHILD
+            | BS_NOTIFY
+            | BS_TEXT
+            | BS_AUTORADIOBUTTON
+            | if self.visible { WS_VISIBLE } else { 0 }
+            | if self.disabled { WS_DISABLED } else { 0 };
 
         // Get the parent handle
-        let parent = match handle_of_window(ui, &self.parent, "The parent of a checkbox must be a window-like control.") {
+        let parent = match handle_of_window(
+            ui,
+            &self.parent,
+            "The parent of a checkbox must be a window-like control.",
+        ) {
             Ok(h) => h,
-            Err(e) => { return Err(e); }
+            Err(e) => {
+                return Err(e);
+            }
         };
 
         // Get the font handle (if any)
         let font_handle: Option<HFONT> = match self.font.as_ref() {
-            Some(font_id) => 
-                match handle_of_font(ui, &font_id, "The font of a checkbox must be a font resource.") {
-                    Ok(h) => Some(h),
-                    Err(e) => { return Err(e); }
-                },
-            None => None
+            Some(font_id) => match handle_of_font(
+                ui,
+                &font_id,
+                "The font of a checkbox must be a font resource.",
+            ) {
+                Ok(h) => Some(h),
+                Err(e) => {
+                    return Err(e);
+                }
+            },
+            None => None,
         };
 
         let params = WindowParams {
@@ -97,18 +125,18 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for RadioButtonT<S, ID>
             size: self.size.clone(),
             flags: flags,
             ex_flags: Some(0),
-            parent: parent
+            parent: parent,
         };
 
-        match unsafe{ build_window(params) } {
+        match unsafe { build_window(params) } {
             Ok(h) => {
-                unsafe{ 
-                    set_window_font(h, font_handle, true); 
+                unsafe {
+                    set_window_font(h, font_handle, true);
                     set_checkstate(h, &self.checkstate);
                 }
-                Ok( Box::new(RadioButton{handle: h}) )
-            },
-            Err(e) => Err(Error::System(e))
+                Ok(Box::new(RadioButton { handle: h }))
+            }
+            Err(e) => Err(Error::System(e)),
         }
     }
 }
@@ -117,19 +145,18 @@ impl<S: Clone+Into<String>, ID: Hash+Clone> ControlT<ID> for RadioButtonT<S, ID>
     A standard radio button
 */
 pub struct RadioButton {
-    handle: HWND
+    handle: HWND,
 }
 
 impl RadioButton {
-
     /**
         Get the checkstate of the radio button
     */
     pub fn get_checkstate(&self) -> CheckState {
         use low::defs::{BM_GETCHECK, BST_CHECKED};
-        match unsafe{ SendMessageW(self.handle, BM_GETCHECK, 0 , 0) as u32 } {
+        match unsafe { SendMessageW(self.handle, BM_GETCHECK, 0, 0) as u32 } {
             BST_CHECKED => CheckState::Checked,
-            _ => CheckState::Unchecked
+            _ => CheckState::Unchecked,
         }
     }
 
@@ -138,37 +165,71 @@ impl RadioButton {
         If one is passed, it is evaluated as checked.
     */
     pub fn set_checkstate(&self, check: CheckState) {
-        let check = if check == CheckState::Indeterminate { CheckState::Checked } else { check }; 
-        unsafe{ set_checkstate(self.handle, &check); }
+        let check = if check == CheckState::Indeterminate {
+            CheckState::Checked
+        } else {
+            check
+        };
+        unsafe {
+            set_checkstate(self.handle, &check);
+        }
     }
 
-    pub fn get_text(&self) -> String { unsafe{ ::low::window_helper::get_window_text(self.handle) } }
-    pub fn set_text<'a>(&self, text: &'a str) { unsafe{ ::low::window_helper::set_window_text(self.handle, text); } }
-    pub fn get_visibility(&self) -> bool { unsafe{ ::low::window_helper::get_window_visibility(self.handle) } }
-    pub fn set_visibility(&self, visible: bool) { unsafe{ ::low::window_helper::set_window_visibility(self.handle, visible); }}
-    pub fn get_position(&self) -> (i32, i32) { unsafe{ ::low::window_helper::get_window_position(self.handle) } }
-    pub fn set_position(&self, x: i32, y: i32) { unsafe{ ::low::window_helper::set_window_position(self.handle, x, y); }}
-    pub fn get_size(&self) -> (u32, u32) { unsafe{ ::low::window_helper::get_window_size(self.handle) } }
-    pub fn set_size(&self, w: u32, h: u32) { unsafe{ ::low::window_helper::set_window_size(self.handle, w, h, false); } }
-    pub fn get_enabled(&self) -> bool { unsafe{ ::low::window_helper::get_window_enabled(self.handle) } }
-    pub fn set_enabled(&self, e:bool) { unsafe{ ::low::window_helper::set_window_enabled(self.handle, e); } }
+    pub fn get_text(&self) -> String {
+        unsafe { ::low::window_helper::get_window_text(self.handle) }
+    }
+    pub fn set_text<'a>(&self, text: &'a str) {
+        unsafe {
+            ::low::window_helper::set_window_text(self.handle, text);
+        }
+    }
+    pub fn get_visibility(&self) -> bool {
+        unsafe { ::low::window_helper::get_window_visibility(self.handle) }
+    }
+    pub fn set_visibility(&self, visible: bool) {
+        unsafe {
+            ::low::window_helper::set_window_visibility(self.handle, visible);
+        }
+    }
+    pub fn get_position(&self) -> (i32, i32) {
+        unsafe { ::low::window_helper::get_window_position(self.handle) }
+    }
+    pub fn set_position(&self, x: i32, y: i32) {
+        unsafe {
+            ::low::window_helper::set_window_position(self.handle, x, y);
+        }
+    }
+    pub fn get_size(&self) -> (u32, u32) {
+        unsafe { ::low::window_helper::get_window_size(self.handle) }
+    }
+    pub fn set_size(&self, w: u32, h: u32) {
+        unsafe {
+            ::low::window_helper::set_window_size(self.handle, w, h, false);
+        }
+    }
+    pub fn get_enabled(&self) -> bool {
+        unsafe { ::low::window_helper::get_window_enabled(self.handle) }
+    }
+    pub fn set_enabled(&self, e: bool) {
+        unsafe {
+            ::low::window_helper::set_window_enabled(self.handle, e);
+        }
+    }
 }
 
 impl Control for RadioButton {
-
     fn handle(&self) -> AnyHandle {
         AnyHandle::HWND(self.handle)
     }
 
-    fn control_type(&self) -> ControlType { 
-        ControlType::RadioButton 
+    fn control_type(&self) -> ControlType {
+        ControlType::RadioButton
     }
 
     fn free(&mut self) {
         use user32::DestroyWindow;
-        unsafe{ DestroyWindow(self.handle) };
+        unsafe { DestroyWindow(self.handle) };
     }
-
 }
 
 /// Private checkbox methods
@@ -181,7 +242,7 @@ unsafe fn set_checkstate(handle: HWND, check: &CheckState) {
     let check_state = match check {
         &CheckState::Checked => BST_CHECKED,
         &CheckState::Indeterminate => BST_INDETERMINATE,
-        &CheckState::Unchecked => BST_UNCHECKED
+        &CheckState::Unchecked => BST_UNCHECKED,
     };
     SendMessageW(handle, BM_SETCHECK, check_state as WPARAM, 0);
 }
