@@ -1,7 +1,8 @@
 use winapi::shared::minwindef::HINSTANCE;
+use winapi::um::winuser::{LoadImageW, LR_DEFAULTSIZE};
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::NwgError;
-use super::Icon;
+use super::{Icon, Bitmap};
 use std::{ptr, slice};
 
 /**
@@ -63,13 +64,13 @@ impl EmbedResource {
         }
     }
 
-    /// Load an icon from the rc file. Returns `None` if `id` does not map to a string.
+    /// Load an icon from the rc file. Returns `None` if `id` does not map to a icon.
     /// For more feature, use the `Icon::builder` with the `embed` parameter.
-    pub fn icon(&self, id: u32) -> Option<Icon> {
-        use winapi::um::winuser::{LoadImageW, IMAGE_ICON, LR_DEFAULTSIZE};
+    pub fn icon(&self, id: usize) -> Option<Icon> {
+        use winapi::um::winuser::IMAGE_ICON;
 
         unsafe {
-            let id_rc = (id as usize) as _;
+            let id_rc = id as _;
             let icon = LoadImageW(self.hinst, id_rc, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
             if icon.is_null() {
                 None
@@ -77,6 +78,33 @@ impl EmbedResource {
                 Some(Icon { handle: icon as _, owned: true } )
             }
         }
+    }
+
+    /// Load an icon identified by a string in a resource file. Returns `None` if `id` does not map to a icon.
+    pub fn icon_str(&self, id: &str) -> Option<Icon> {
+        let name = to_utf16(id);
+        self.icon(name.as_ptr() as usize)
+    }
+
+    /// Load a bitmap file from the rc file. Returns `None` if `id` does not map to a bitmap.
+    pub fn bitmap(&self, id: usize) -> Option<Bitmap> {
+        use winapi::um::winuser::IMAGE_BITMAP;
+
+        unsafe {
+            let id_rc = id as _;
+            let icon = LoadImageW(self.hinst, id_rc, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE);
+            if icon.is_null() {
+                None
+            } else {
+                Some(Bitmap { handle: icon as _, owned: true } )
+            }
+        }
+    }
+
+    /// Load a bitmap file from the rc file. Returns `None` if `id` does not map to a bitmap.
+    pub fn bitmap_str(&self, id: &str) -> Option<Bitmap> {
+        let name = to_utf16(id);
+        self.bitmap(name.as_ptr() as usize)
     }
 
 }

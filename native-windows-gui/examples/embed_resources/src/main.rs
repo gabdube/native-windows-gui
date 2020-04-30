@@ -15,7 +15,7 @@ use nwg::NativeUi;
 
 #[derive(Default, NwgUi)]
 pub struct EmbedApp {
-    #[nwg_control(size: (300, 115), position: (300, 300), flags: "WINDOW|VISIBLE")]
+    #[nwg_control(size: (300, 145), position: (300, 300), flags: "WINDOW|VISIBLE")]
     #[nwg_events( OnWindowClose: [EmbedApp::say_goodbye], OnInit: [EmbedApp::init] )]
     window: nwg::Window,
 
@@ -24,6 +24,9 @@ pub struct EmbedApp {
 
     #[nwg_control(size: (280, 25), position: (10, 10))]
     name_edit: nwg::TextInput,
+
+    #[nwg_control(position: (130, 110), size: (35, 35))]
+    embed_bitmap: nwg::ImageFrame,
 
     #[nwg_control(size: (280, 60), position: (10, 40))]
     #[nwg_events( OnButtonClick: [EmbedApp::say_hello] )]
@@ -36,9 +39,11 @@ impl EmbedApp {
         let em = &self.embed;
         self.name_edit.set_text(&em.string(0).unwrap());
         self.hello_button.set_text(&em.string(1).unwrap());
-        self.window.set_text(&em.string(2).unwrap());
 
-        self.window.set_icon(em.icon(1000).as_ref());
+        self.window.set_text(&em.string(2).unwrap());
+        self.window.set_icon(em.icon_str("TEST").as_ref());
+
+        self.embed_bitmap.set_bitmap(em.bitmap_str("BALL").as_ref());
     }
 
     fn say_hello(&self) {
