@@ -25,7 +25,7 @@ pub fn is_bitmap(handle: HBITMAP) -> bool {
 }
 
 pub unsafe fn build_font(
-    size: u32,
+    size: i32,
     weight: u32,
     style: [bool; 3],
     family_name: Option<&str>,

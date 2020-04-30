@@ -96,12 +96,13 @@ impl Default for Font {
 Builds a font struct
 
 Parameters:
-    - size: Size of the font
+    - size: Size of the font. The font mapper transforms this value into device units and matches it against the cell height of the available fonts. 
+    - size_absolute:  Size of the font. The font mapper transforms this value into device units and matches its absolute value against the character height of the available fonts. 
     - weight: Weight of the font. A value betweem 0 and 1000. 0 use the system default, 100 is very thin, 1000 is very bold.
     - family: Family name of the font (ex: Arial). Can be None to use the system default.
 */
 pub struct FontBuilder<'a> {
-    size: u32,
+    size: Option<i32>,
     weight: u32,
     family: Option<&'a str>
 }
@@ -110,14 +111,19 @@ impl<'a> FontBuilder<'a> {
 
     pub fn new() -> FontBuilder<'a> {
         FontBuilder {
-            size: 16,
+            size: None,
             weight: 0,
             family: None,
         }
     }
 
     pub fn size(mut self, size: u32) -> FontBuilder<'a> {
-        self.size = size;
+        self.size = Some(size as i32);
+        self
+    }
+
+    pub fn size_absolute(mut self, size: u32) -> FontBuilder<'a> {
+        self.size = Some(-(size as i32));
         self
     }
 
@@ -132,8 +138,10 @@ impl<'a> FontBuilder<'a> {
     }
 
     pub fn build(self, font: &mut Font) -> Result<(), NwgError> {
+        
+
         font.handle = unsafe { rh::build_font(
-            self.size,
+            self.size.unwrap_or(0),
             self.weight,
             [false, false, false],
             self.family
