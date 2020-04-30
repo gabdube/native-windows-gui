@@ -201,6 +201,12 @@ impl<'a> StatusBarBuilder<'a> {
             .parent(Some(parent))
             .build()?;
 
+        if self.font.is_some() {
+            out.set_font(self.font);
+        } else {
+            out.set_font(Font::global_default().as_ref());
+        }
+
         out.set_text(0, self.text);
         out.hook_parent_resize();
 

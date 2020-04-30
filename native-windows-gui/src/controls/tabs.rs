@@ -380,6 +380,8 @@ impl<'a> TabsContainerBuilder<'a> {
 
         if self.font.is_some() {
             out.set_font(self.font);
+        } else {
+            out.set_font(Font::global_default().as_ref());
         }
 
         // Image list

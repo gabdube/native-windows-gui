@@ -506,6 +506,8 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
 
         if self.font.is_some() {
             out.set_font(self.font);
+        } else {
+            out.set_font(Font::global_default().as_ref());
         }
 
         if self.collection.is_some() {

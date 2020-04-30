@@ -422,6 +422,12 @@ impl<'a> NumberSelectBuilder<'a> {
             out.btn_up.set_font(self.font);
             out.btn_down.set_font(self.font);
             out.edit.set_font(self.font);
+        } else {
+            let font = Font::global_default();
+            let font_ref = font.as_ref();
+            out.btn_up.set_font(font_ref);
+            out.btn_down.set_font(font_ref);
+            out.edit.set_font(font_ref);
         }
 
         let handler_data = out.data.clone();

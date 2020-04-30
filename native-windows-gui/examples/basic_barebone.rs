@@ -12,6 +12,7 @@ use std::rc::Rc;
 
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
+    nwg::Font::set_global_family("Segoe UI").expect("Failed to set default font");
 
     let mut window = Default::default();
     let mut name_edit = Default::default();

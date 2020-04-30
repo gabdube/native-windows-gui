@@ -1,5 +1,9 @@
 #[macro_use]
 extern crate bitflags;
+
+#[macro_use]
+extern crate lazy_static;
+
 extern crate winapi;
 pub extern crate stretch;
 

@@ -480,6 +480,8 @@ impl<'a> TreeViewBuilder<'a> {
 
         if self.font.is_some() {
             out.set_font(self.font);
+        } else {
+            out.set_font(Font::global_default().as_ref());
         }
 
         if self.image_list.is_some() {

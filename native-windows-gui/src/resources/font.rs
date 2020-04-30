@@ -1,7 +1,17 @@
 use winapi::shared::windef::HFONT;
 use crate::win32::resources_helper as rh;
-use crate::{NwgError};
+use crate::NwgError;
 use std::ptr;
+
+use std::sync::Mutex;
+
+
+lazy_static! {
+/// Default font to use when creating controls. Set using `Font::set_default` && get using `Dont::default()`
+    static ref DEFAULT_FONT: Mutex<Option<Font>> = {
+        Mutex::new(None)
+    };
+}
 
 
 /** 
@@ -73,13 +83,41 @@ fn build_font() -> nwg::Font {
 */
 #[derive(PartialEq, Eq, Debug)]
 pub struct Font {
-    pub(crate) handle: HFONT
+    pub handle: HFONT
 }
 
 impl Font {
 
     pub fn builder<'a>() -> FontBuilder<'a> {
         FontBuilder::new() 
+    }
+
+    /// Set the default (application global!) font that will be used when creating controls and return the old one
+    pub fn set_global_default(font: Option<Font>) -> Option<Font> {
+        let mut global_font = DEFAULT_FONT.lock().unwrap();
+        let old = global_font.take();
+        *global_font = font;
+        old
+    }
+
+    /// Set the default (application global!) font that will be used when creating controls
+    /// This is a shortcut over `Font::set_global_default`
+    pub fn set_global_family(family: &str) -> Result<Option<Font>, NwgError> {
+        let mut font = Font::default();
+
+        Font::builder()
+            .family(family)
+            .build(&mut font)?;
+
+        Ok(Font::set_global_default(Some(font)))
+    }
+
+    /// Return the default font that was previously set using `Font::set_default`
+    pub fn global_default() -> Option<Font> {
+        DEFAULT_FONT.lock()
+            .unwrap()
+            .as_ref()
+            .map(|f| Font { handle: f.handle } )
     }
 
 }
@@ -152,3 +190,5 @@ impl<'a> FontBuilder<'a> {
 
 }
 
+unsafe impl Send for Font {}
+unsafe impl Sync for Font {}

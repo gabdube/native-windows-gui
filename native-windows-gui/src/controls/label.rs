@@ -435,6 +435,8 @@ impl<'a> LabelBuilder<'a> {
 
         if self.font.is_some() {
             out.set_font(self.font);
+        } else {
+            out.set_font(Font::global_default().as_ref());
         }
 
         out.hook_non_client_size(self.background_color, self.v_align);

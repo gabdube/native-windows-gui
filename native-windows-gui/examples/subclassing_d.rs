@@ -10,6 +10,7 @@ extern crate native_windows_derive as nwd;
 
 use nwd::NwgUi;
 use nwg::NativeUi;
+use nwg::stretch::style::FlexDirection;
 
 type UserButton = nwg::Button;
 
@@ -70,7 +71,7 @@ pub struct SubclassApp {
     #[nwg_events( OnWindowClose: [SubclassApp::exit] )]
     window: nwg::Window,
 
-    #[nwg_layout(parent: window)]
+    #[nwg_layout(parent: window, flex_direction: FlexDirection::Column)]
     layout: nwg::FlexboxLayout,
 
     #[nwg_control(text: "Simple button")]
@@ -102,7 +103,7 @@ impl SubclassApp {
     }
 
     fn button_click2(&self) {
-        nwg::simple_message("User type button", "Hey, I'm a button with a use type def!");
+        nwg::simple_message("User type button", "Hey, I'm a button with a user type def!");
     }
 
     fn button_click3(&self, button: &CustomButton) {
@@ -117,6 +118,7 @@ impl SubclassApp {
 
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
+    nwg::Font::set_global_family("Segoe UI").expect("Failed to set default font");
 
     let _app = SubclassApp::build_ui(Default::default()).expect("Failed to build UI");
 

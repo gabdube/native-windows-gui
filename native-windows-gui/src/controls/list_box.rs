@@ -610,6 +610,8 @@ impl<'a, D: Display+Default> ListBoxBuilder<'a, D> {
 
         if self.font.is_some() {
             out.set_font(self.font);
+        } else {
+            out.set_font(Font::global_default().as_ref());
         }
 
         if let Some(col) = self.collection {

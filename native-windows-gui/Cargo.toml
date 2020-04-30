@@ -13,9 +13,11 @@ winapi = { version = "0.3", features = [
   "errhandlingapi", "winerror", "commctrl", "sysinfoapi", "shobjidl", "combaseapi",
   "commdlg", "d2d1", "objbase", "dwrite", "winnls", "shellapi", "wincodec"] }
 
+lazy_static = "1.4.0"
 bitflags = { version = "1.1.0" }
 stretch = "0.3.2"
 muldiv = { version = "0.2", optional = true }
+
 
 [dev-dependencies]
 native-windows-derive = { path = "../native-windows-derive/" }
