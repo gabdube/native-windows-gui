@@ -21,6 +21,8 @@ If you've managed to read though this introduction, you should know that my twit
 is [#gdube_dev](https://twitter.com/gdube_dev) and you can support this project with [*GitHub Sponsors*](https://github.com/sponsors/gabdube).
 Any support, moral or monetary, is greatly appreciated.
 
+**NWG will not compile on the GNU toolchain**.
+
 ## Installation
 
 To use NWG in your project add it to cargo.toml:
