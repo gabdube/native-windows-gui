@@ -7,6 +7,7 @@ mod radio_button;
 mod text_input;
 mod label;
 mod image_frame;
+mod tab_nav;
 
 #[cfg(feature = "textbox")]
 mod text_box;
@@ -79,6 +80,7 @@ pub use radio_button::{RadioButton, RadioButtonState, RadioButtonFlags};
 pub use text_input::{TextInput, TextInputFlags};
 pub use label::{Label, LabelFlags};
 pub use image_frame::{ImageFrame, ImageFrameFlags};
+pub use tab_nav::TabNavigation;
 
 #[cfg(feature = "textbox")]
 pub use text_box::{TextBox, TextBoxFlags};

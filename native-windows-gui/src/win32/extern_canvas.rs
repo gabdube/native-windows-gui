@@ -4,8 +4,8 @@
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND};
 use super::window::build_sysclass;
-use crate::{NwgError};
-use std::{ptr};
+use crate::NwgError;
+use std::ptr;
 
 pub const EXT_CANVAS_CLASS_ID: &'static str = "NWG_EXTERN_CANVAS";
 
@@ -29,7 +29,7 @@ pub fn create_extern_canvas_classes() -> Result<(), NwgError>  {
 
 unsafe extern "system" fn extern_canvas_proc(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM) -> LRESULT {
     use winapi::um::winuser::{WM_CREATE, WM_ERASEBKGND};
-    use winapi::um::winuser::{DefWindowProcW};
+    use winapi::um::winuser::DefWindowProcW;
 
     let handled = match msg {
         WM_CREATE => Some(0),
