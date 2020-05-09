@@ -74,7 +74,7 @@ pub struct SubclassApp {
     #[nwg_layout(parent: window, flex_direction: FlexDirection::Column)]
     layout: nwg::FlexboxLayout,
 
-    #[nwg_control(text: "Simple button")]
+    #[nwg_control(text: "Simple button", focus: true)]
     #[nwg_layout_item(layout: layout, cell: 0)]
     #[nwg_events( OnButtonClick: [SubclassApp::button_click1] )]
     button1: nwg::Button,

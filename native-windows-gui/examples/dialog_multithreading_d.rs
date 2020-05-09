@@ -26,7 +26,7 @@ pub struct ThreadingDialog {
     #[nwg_events( OnButtonClick: [ThreadingDialog::choose(SELF, CTRL)] )]
     choice_yes: nwg::Button,
 
-    #[nwg_control(text: "NO", position: (160, 10), size: (130, 95))]
+    #[nwg_control(text: "NO", position: (160, 10), size: (130, 95), focus: true)]
     #[nwg_events( OnButtonClick: [ThreadingDialog::choose(SELF, CTRL)] )]
     choice_no: nwg::Button,
 }
@@ -67,7 +67,7 @@ pub struct ThreadingApp {
     #[nwg_control(size: (280, 25), position: (10, 10), readonly: true)]
     name_edit: nwg::TextInput,
 
-    #[nwg_control(text: "Open Dialog", size: (280, 60), position: (10, 40))]
+    #[nwg_control(text: "Open Dialog", size: (280, 60), position: (10, 40), focus: true)]
     #[nwg_events( OnButtonClick: [ThreadingApp::open_dialog] )]
     button: nwg::Button,
 }
@@ -104,6 +104,7 @@ impl ThreadingApp {
         match data.take() {
             Some(handle) => {
                 self.name_edit.set_text(&handle.join().unwrap());
+                self.button.set_focus();
             },
             None => {}
         }

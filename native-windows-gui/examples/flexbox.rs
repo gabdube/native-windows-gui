@@ -52,6 +52,7 @@ mod flexbox_app_ui {
             nwg::Button::builder()
                 .text("Btn 1")
                 .parent(&data.window)
+                .focus(true)
                 .build(&mut data.button1)?;
 
             nwg::Button::builder()

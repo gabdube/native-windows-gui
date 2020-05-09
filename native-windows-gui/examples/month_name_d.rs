@@ -25,7 +25,7 @@ pub struct CalendarNames {
     #[nwg_layout_item(layout: layout, col: 0, row: 0)]
     locale_label: nwg::Label,
 
-    #[nwg_control]
+    #[nwg_control(focus: true)]
     #[nwg_layout_item(layout: layout, col: 1, row: 0, col_span: 2)]
     locale_input: nwg::TextInput,
 

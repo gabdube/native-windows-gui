@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
     LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT
@@ -30,10 +30,12 @@ bitflags! {
         * SIMPLE_LIST: Each item appears as a small icon with a label to the right of it. Items are arranged in columns and the user cannot drag them to an arbitrary location.
         * DETAILED_LIST: The leftmost column is always left justified and contains the small icon and label. Subsequent columns contain subitems as specified by the application. Each column has a header, unless you also specify the NO_HEADER flag.
         * TILE_LIST: Each item appears as a full-sized icon with a label of one or more lines beside it.
+        * TAB_STOP: The control can be selected using tab navigation
     */
     pub struct ListViewFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const TAB_STOP = WS_TABSTOP;
 
         // Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
         const NO_HEADER = LVS_NOCOLUMNHEADER;
@@ -130,9 +132,18 @@ List-view controls provide several ways to arrange and display items and are muc
 
 Requires the `list-view` feature. 
 
-Windows is Shit:
-- The win32 header controls leaks megabytes of memory per seconds because it is shit, like this OS. As such, NO_HEADER is always ON.
+Builder parameters:
+    * `parent`:     **Required.** The list view parent container.
+    * `size`:       The list view size.
+    * `position`:   The list view position.
+    * `flags`:      A combination of the ListViewFlags values.
+    * `style`:      One of the value of `ListViewStyle`
+    * `item_count`: Number of item to preallocate
+    * `focus`:      The control receive focus after being created
 
+
+Windows is Shit:
+- The win32 header controls leaks megabytes of memory per seconds because it is shit. As such, NO_HEADER is always ON.
 
 */
 #[derive(Default)]
@@ -147,6 +158,7 @@ impl ListView {
         ListViewBuilder {
             size: (300, 300),
             position: (0, 0),
+            focus: false,
             flags: None,
             style: ListViewStyle::Simple,
             parent: None,
@@ -373,7 +385,7 @@ impl ListView {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE
+        WS_VISIBLE | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
@@ -399,6 +411,7 @@ impl Drop for ListView {
 pub struct ListViewBuilder {
     size: (i32, i32),
     position: (i32, i32),
+    focus: bool,
     flags: Option<ListViewFlags>,
     style: ListViewStyle,
     item_count: u32,
@@ -437,6 +450,11 @@ impl ListViewBuilder {
         self
     }
 
+    pub fn focus(mut self, focus: bool) -> ListViewBuilder {
+        self.focus = focus;
+        self
+    }
+
     pub fn build(self, out: &mut ListView) -> Result<(), NwgError> {
         let mut flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
         flags |= self.style.bits();
@@ -458,6 +476,10 @@ impl ListViewBuilder {
 
         if self.item_count > 0 {
             out.set_item_count(self.item_count);
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
         Ok(())

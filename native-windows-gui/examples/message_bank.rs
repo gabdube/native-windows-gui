@@ -95,6 +95,12 @@ mod message_bank_ui {
                 .title("My message bank")
                 .build(&mut data.window)?;
 
+            nwg::TextInput::builder()
+                .text("Hello World!")
+                .focus(true)
+                .parent(&data.window)
+                .build(&mut data.message_content)?;
+
             nwg::Button::builder()
                 .text("Save")
                 .parent(&data.window)
@@ -104,11 +110,6 @@ mod message_bank_ui {
                 .text("Title")
                 .parent(&data.window)
                 .build(&mut data.message_title)?;
-
-            nwg::TextInput::builder()
-                .text("Hello World!")
-                .parent(&data.window)
-                .build(&mut data.message_content)?;
 
             // Wrap-up
             let ui = Rc::new(MessageBankUi {

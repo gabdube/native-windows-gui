@@ -7,9 +7,9 @@ use winapi::ctypes::c_int;
 use std::{ptr, mem};
 
 
-pub const NOTICE_MESSAGE: UINT = WM_USER;
-pub const NWG_INIT: UINT = WM_USER + 1;
-pub const NWG_TRAY: UINT = WM_USER + 2;
+pub const NOTICE_MESSAGE: UINT = WM_USER+100;
+pub const NWG_INIT: UINT = WM_USER + 101;
+pub const NWG_TRAY: UINT = WM_USER + 102;
 
 
 /// Haha you maybe though that destroying windows would be easy right? WRONG.

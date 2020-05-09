@@ -30,6 +30,7 @@ fn main() {
         .size((280, 25))
         .position((10, 10))
         .text("Heisenberg")
+        .focus(true)
         .parent(&window)
         .build(&mut name_edit)
         .unwrap();

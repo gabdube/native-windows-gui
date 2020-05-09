@@ -128,6 +128,7 @@ mod partial_demo_ui {
 
             nwg::ListBox::builder()
                 .collection(vec!["People", "Animals", "Food"])
+                .focus(true)
                 .parent(&data.window)
                 .build(&mut data.menu)?;
 

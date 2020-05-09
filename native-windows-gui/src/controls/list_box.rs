@@ -1,6 +1,6 @@
 use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::{WPARAM, LPARAM};
-use winapi::um::winuser::{LBS_MULTIPLESEL, LBS_NOSEL, WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{LBS_MULTIPLESEL, LBS_NOSEL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::{Font, NwgError};
@@ -23,6 +23,7 @@ bitflags! {
         * DISABLED: The listbox cannot be interacted with by the user. It also has a grayed out look.
         * MULTI_SELECT: It is possible for the user to select more than 1 item at a time
         * NO_SELECT: It is impossible for the user to select the listbox items
+        * TAB_STOP: The control can be selected using tab navigation
     */
     pub struct ListBoxFlags: u32 {
         const NONE = 0;
@@ -30,6 +31,7 @@ bitflags! {
         const DISABLED = WS_DISABLED;
         const MULTI_SELECT = LBS_MULTIPLESEL;
         const NO_SELECT = LBS_NOSEL;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -43,6 +45,7 @@ Requires the `list-box` feature.
   * `size`:            The listbox size.
   * `position`:        The listbox position.
   * `enabled`:         If the listbox can be used by the user. It also has a grayed out look if disabled.
+  * `focus`:           The control receive focus after being created
   * `flags`:           A combination of the ListBoxFlags values.
   * `font`:            The font used for the listbox text
   * `collection`:      The default collections of the listbox
@@ -82,6 +85,7 @@ impl<D: Display+Default> ListBox<D> {
             size: (100, 300),
             position: (0, 0),
             enabled: true,
+            focus: false,
             flags: None,
             font: None,
             collection: None,
@@ -508,7 +512,7 @@ impl<D: Display+Default> ListBox<D> {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE
+        WS_VISIBLE | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
@@ -536,6 +540,7 @@ pub struct ListBoxBuilder<'a, D: Display+Default> {
     size: (i32, i32),
     position: (i32, i32),
     enabled: bool,
+    focus: bool,
     flags: Option<ListBoxFlags>,
     font: Option<&'a Font>,
     collection: Option<Vec<D>>,
@@ -591,6 +596,11 @@ impl<'a, D: Display+Default> ListBoxBuilder<'a, D> {
         self
     }
 
+    pub fn focus(mut self, focus: bool) -> ListBoxBuilder<'a, D> {
+        self.focus = focus;
+        self
+    }
+
     pub fn build(self, out: &mut ListBox<D>) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
@@ -624,6 +634,10 @@ impl<'a, D: Display+Default> ListBoxBuilder<'a, D> {
             }
         } else {
             out.set_selection(self.selected_index);
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
 

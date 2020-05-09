@@ -157,8 +157,12 @@ mod calculator_ui {
                 .parent(&data.window)
                 .build(&mut data.input)?;
 
-            nwg::Button::builder().text("0").parent(&data.window).build(&mut data.btn0)?;
-            nwg::Button::builder().text("1").parent(&data.window).build(&mut data.btn1)?;
+            nwg::Button::builder()
+                .text("1")
+                .parent(&data.window)
+                .focus(true)
+                .build(&mut data.btn1)?;
+           
             nwg::Button::builder().text("2").parent(&data.window).build(&mut data.btn2)?;
             nwg::Button::builder().text("3").parent(&data.window).build(&mut data.btn3)?;
             nwg::Button::builder().text("4").parent(&data.window).build(&mut data.btn4)?;
@@ -167,14 +171,16 @@ mod calculator_ui {
             nwg::Button::builder().text("7").parent(&data.window).build(&mut data.btn7)?;
             nwg::Button::builder().text("8").parent(&data.window).build(&mut data.btn8)?;
             nwg::Button::builder().text("9").parent(&data.window).build(&mut data.btn9)?;
-
+            nwg::Button::builder().text("0").parent(&data.window).build(&mut data.btn0)?;
+            
             nwg::Button::builder().text("+").parent(&data.window).build(&mut data.btn_plus)?;
             nwg::Button::builder().text("-").parent(&data.window).build(&mut data.btn_minus)?;
             nwg::Button::builder().text("*").parent(&data.window).build(&mut data.btn_mult)?;
             nwg::Button::builder().text("/").parent(&data.window).build(&mut data.btn_divide)?;
-            nwg::Button::builder().text("=").parent(&data.window).build(&mut data.btn_process)?;
             nwg::Button::builder().text("Clear").parent(&data.window).build(&mut data.btn_clear)?;
-
+            nwg::Button::builder().text("=").parent(&data.window).build(&mut data.btn_process)?;
+            
+            
             // Wrap-up
             let ui = Rc::new(CalculatorUi {
                 inner: data,

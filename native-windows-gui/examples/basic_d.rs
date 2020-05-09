@@ -17,7 +17,7 @@ pub struct BasicApp {
     #[nwg_events( OnWindowClose: [BasicApp::say_goodbye] )]
     window: nwg::Window,
 
-    #[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10))]
+    #[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10), focus: true)]
     name_edit: nwg::TextInput,
 
     #[nwg_control(text: "Say my name", size: (280, 60), position: (10, 40))]

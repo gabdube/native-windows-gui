@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_DISABLED, BS_ICON, BS_BITMAP, BS_NOTIFY, WS_VISIBLE, WS_CHILD};
+use winapi::um::winuser::{WS_DISABLED, BS_ICON, BS_BITMAP, BS_NOTIFY, WS_VISIBLE, WS_TABSTOP, WS_CHILD};
 use crate::win32::window_helper as wh;
 use crate::win32::resources_helper as rh;
 use crate::{NwgError, Font, Bitmap, Icon};
@@ -18,6 +18,7 @@ bitflags! {
         * BITMAP:   The button will display a bitmap image with no text. Must have a bitmap or else it will only show text.
         * ICON:     The button will display a icon image with no text. Must have a icon or else it will only show text.
         * NOTIFY:   Enable the `OnButtonDoubleClick` event
+        * TAB_STOP: The control can be selected using tab navigation
     */
     pub struct ButtonFlags: u32 {
         const NONE = 0;
@@ -26,6 +27,7 @@ bitflags! {
         const ICON = BS_ICON;
         const BITMAP = BS_BITMAP;
         const NOTIFY = BS_NOTIFY;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -45,6 +47,7 @@ Button is not behind any features.
   * `font`:     The font used for the button text
   * `bitmap`:   A bitmap to display next to the button text. If this value is set, icon is ignored.
   * `icon`:     An icon to display next to the button text
+  * `focus`:    The control receive focus after being created
 
 **Control events:**
   * `OnButtonClick`: When the button is clicked once by the user
@@ -82,7 +85,8 @@ impl Button {
             font: None,
             parent: None,
             bitmap: None,
-            icon: None
+            icon: None,
+            focus: false
         }
     }
 
@@ -259,7 +263,7 @@ impl Button {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE | BS_NOTIFY
+        WS_VISIBLE | WS_TABSTOP | BS_NOTIFY
     }
 
     /// Winapi flags required by the control
@@ -284,7 +288,8 @@ pub struct ButtonBuilder<'a> {
     font: Option<&'a Font>,
     bitmap: Option<&'a Bitmap>,
     icon: Option<&'a Icon>,
-    parent: Option<ControlHandle>
+    parent: Option<ControlHandle>,
+    focus: bool,
 }
 
 impl<'a> ButtonBuilder<'a> {
@@ -329,6 +334,11 @@ impl<'a> ButtonBuilder<'a> {
         self
     }
 
+    pub fn focus(mut self, focus: bool) -> ButtonBuilder<'a> {
+        self.focus = focus;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ButtonBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -364,6 +374,10 @@ impl<'a> ButtonBuilder<'a> {
             out.set_bitmap(self.bitmap);
         } else if self.icon.is_some() {
             out.set_icon(self.icon);
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
         Ok(())

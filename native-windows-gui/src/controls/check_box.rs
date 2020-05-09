@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_AUTOCHECKBOX, BS_AUTO3STATE, BS_PUSHLIKE};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, BS_AUTOCHECKBOX, BS_AUTO3STATE, BS_PUSHLIKE, WS_TABSTOP};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError, RawEventHandler};
 use super::{ControlBase, ControlHandle};
@@ -17,6 +17,7 @@ bitflags! {
         * DISABLED: The checkbox cannot be interacted with by the user. It also has a grayed out look.
         * TRISTATE: The checkbox will have a 3rd state
         * PUSHLIKE: The checkbox will look like a regular button
+        * TAB_STOP: The control can be selected using tab navigation
     */
     pub struct CheckBoxFlags: u32 {
         const NONE = 0;
@@ -24,6 +25,7 @@ bitflags! {
         const DISABLED = WS_DISABLED;
         const TRISTATE = BS_AUTO3STATE;
         const PUSHLIKE = BS_PUSHLIKE;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -53,6 +55,7 @@ CheckBox is not behind any features.
   * `font`:             The font used for the checkbox text
   * `background_color`: The background color of the checkbox. Defaults to the default window background (light gray)
   * `check_state`:      The default check state
+  * `focus`:            The control receive focus after being created
 
 **Control events:**
   * `OnButtonClick`: When the checkbox is clicked once by the user
@@ -87,11 +90,12 @@ impl CheckBox {
             size: (100, 25),
             position: (0, 0),
             enabled: true,
+            focus: false,
             background_color: None,
             check_state: CheckBoxState::Unchecked,
             flags: None,
             font: None,
-            parent: None
+            parent: None,
         }
     }
 
@@ -265,14 +269,14 @@ impl CheckBox {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE
+        WS_VISIBLE | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
         use winapi::um::winuser::{BS_NOTIFY, WS_CHILD};
 
-        BS_NOTIFY | WS_CHILD 
+        BS_NOTIFY | WS_CHILD
     }
 
     /// Change the checkbox background color.
@@ -325,6 +329,7 @@ pub struct CheckBoxBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     enabled: bool,
+    focus: bool,
     background_color: Option<[u8; 3]>,
     check_state: CheckBoxState,
     flags: Option<CheckBoxFlags>,
@@ -356,6 +361,11 @@ impl<'a> CheckBoxBuilder<'a> {
 
     pub fn enabled(mut self, e: bool) -> CheckBoxBuilder<'a> {
         self.enabled = e;
+        self
+    }
+
+    pub fn focus(mut self, focus: bool) -> CheckBoxBuilder<'a> {
+        self.focus = focus;
         self
     }
 
@@ -410,6 +420,10 @@ impl<'a> CheckBoxBuilder<'a> {
 
         if self.background_color.is_some() {
             out.hook_background_color(self.background_color.unwrap());
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
         out.set_check_state(self.check_state);

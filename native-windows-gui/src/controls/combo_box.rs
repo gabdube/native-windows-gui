@@ -1,6 +1,6 @@
 use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::{LPARAM, WPARAM};
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError};
@@ -20,11 +20,13 @@ bitflags! {
         * NONE:     No flags. Equivalent to a invisible combobox.
         * VISIBLE:  The combobox is immediatly visible after creation
         * DISABLED: The combobox cannot be interacted with by the user. It also has a grayed out look.
+        * TAB_STOP: The control can be selected using tab navigation
     */
     pub struct ComboBoxFlags: u32 {
         const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -43,6 +45,7 @@ Requires the `combobox` feature.
   * `font`:           The font used for the combobox text
   * `collection`:     The default collection of the combobox
   * `selected_index`: The default selected index. None means no values are selected.  
+  * `focus`:          The control receive focus after being created
 
 **Control events:**
   * `OnComboBoxClosed`: When the combobox dropdown is closed
@@ -79,6 +82,7 @@ impl<D: Display+Default> ComboBox<D> {
             size: (100, 25),
             position: (0, 0),
             enabled: true,
+            focus: false,
             flags: None,
             font: None,
             collection: None,
@@ -411,7 +415,7 @@ impl<D: Display+Default> ComboBox<D> {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        ::winapi::um::winuser::WS_VISIBLE
+        WS_VISIBLE | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
@@ -438,6 +442,7 @@ pub struct ComboBoxBuilder<'a, D: Display+Default> {
     size: (i32, i32),
     position: (i32, i32),
     enabled: bool,
+    focus: bool,
     flags: Option<ComboBoxFlags>,
     font: Option<&'a Font>,
     collection: Option<Vec<D>>,
@@ -487,6 +492,12 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
         self
     }
 
+    pub fn focus(mut self, focus: bool) -> ComboBoxBuilder<'a, D> {
+        self.focus = focus;
+        self
+    }
+
+
     pub fn build(self, out: &mut ComboBox<D>) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
@@ -519,6 +530,10 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
         }
 
         out.set_enabled(self.enabled);
+
+        if self.focus {
+            out.set_focus();
+        }
 
         Ok(())
     }

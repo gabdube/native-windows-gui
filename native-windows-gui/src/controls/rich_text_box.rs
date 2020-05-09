@@ -1,5 +1,5 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
-use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
@@ -10,11 +10,21 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: RichTextBox handle is not HWND
 
 
 bitflags! {
+    /**
+        The rich text box flags
+
+        * VSCROLL:  The rich text box has a vertical scrollbar
+        * HSCROLL:  The rich text box has a horizontal scrollbar
+        * VISIBLE:  The rich text box is immediatly visible after creation
+        * DISABLED: The rich text box cannot be interacted with by the user. It also has a grayed out look.
+        * TAB_STOP: The rich text box can be selected using tab navigation
+    */
     pub struct RichTextBoxFlags: u32 {
         const VSCROLL = ES_AUTOVSCROLL;
         const HSCROLL = ES_AUTOHSCROLL;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -44,6 +54,7 @@ impl RichTextBox {
             flags: None,
             limit: 0,
             readonly: false,
+            focus: false,
             font: None,
             parent: None
         }
@@ -268,7 +279,7 @@ impl RichTextBox {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL
+        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
@@ -292,6 +303,7 @@ pub struct RichTextBoxBuilder<'a> {
     flags: Option<RichTextBoxFlags>,
     limit: usize,
     readonly: bool,
+    focus: bool,
     font: Option<&'a Font>,
     parent: Option<ControlHandle>
 }
@@ -333,6 +345,11 @@ impl<'a> RichTextBoxBuilder<'a> {
         self
     }
 
+    pub fn focus(mut self, focus: bool) -> RichTextBoxBuilder<'a> {
+        self.focus = focus;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> RichTextBoxBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -368,6 +385,10 @@ impl<'a> RichTextBoxBuilder<'a> {
             out.set_font(self.font);
         } else {
             out.set_font(Font::global_default().as_ref());
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
         Ok(())

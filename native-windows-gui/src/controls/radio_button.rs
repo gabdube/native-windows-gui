@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_GROUP};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_GROUP, WS_TABSTOP};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
@@ -8,11 +8,18 @@ const NOT_BOUND: &'static str = "RadioButton is not yet bound to a winapi object
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: RadioButton handle is not HWND!";
 
 bitflags! {
+    /**
+        The radio button flags
+
+        * VISIBLE:  The radio button is immediatly visible after creation
+        * DISABLED: The radio button cannot be interacted with by the user. It also has a grayed out look.
+        * TAB_STOP: The radio button can be selected using tab navigation
+        * GROUP:    Creates a new radio button group
+    */
     pub struct RadioButtonFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
-
-        /// If a radio button has this style, it creates a new radio button group
+        const TAB_STOP = WS_TABSTOP;
         const GROUP = WS_GROUP;
     }
 }
@@ -107,6 +114,7 @@ impl RadioButton {
             text: "A radio button",
             size: (100, 25),
             position: (0, 0),
+            focus: false,
             background_color: None,
             check_state: RadioButtonState::Unchecked,
             flags: None,
@@ -314,6 +322,7 @@ pub struct RadioButtonBuilder<'a> {
     text: &'a str,
     size: (i32, i32),
     position: (i32, i32),
+    focus: bool,
     background_color: Option<[u8; 3]>,
     check_state: RadioButtonState,
     flags: Option<RadioButtonFlags>,
@@ -340,6 +349,11 @@ impl<'a> RadioButtonBuilder<'a> {
 
     pub fn position(mut self, pos: (i32, i32)) -> RadioButtonBuilder<'a> {
         self.position = pos;
+        self
+    }
+
+    pub fn focus(mut self, focus: bool) -> RadioButtonBuilder<'a> {
+        self.focus = focus;
         self
     }
 
@@ -389,6 +403,10 @@ impl<'a> RadioButtonBuilder<'a> {
 
         if self.background_color.is_some() {
             out.hook_background_color(self.background_color.unwrap());
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
         out.set_check_state(self.check_state);

@@ -1,5 +1,5 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
-use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
@@ -10,11 +10,22 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: TextBox handle is not HWND!";
 
 
 bitflags! {
+
+    /**
+        The text box flags
+
+        * VSCROLL:  The text box has a vertical scrollbar
+        * HSCROLL:  The text box has a horizontal scrollbar
+        * VISIBLE:  The text box is immediatly visible after creation
+        * DISABLED: The text box cannot be interacted with by the user. It also has a grayed out look.
+        * TAB_STOP: The text box can be selected using tab navigation
+    */
     pub struct TextBoxFlags: u32 {
         const VSCROLL = ES_AUTOVSCROLL;
         const HSCROLL = ES_AUTOHSCROLL;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -36,6 +47,7 @@ Note: Use `\r\n` to input a new line not just `\n`.
   * `font`:     The font used for the text box text
   * `limit`:    The maximum number of character that can be inserted in the control
   * `readonly`: If the textbox should allow user input or not
+  * `focus`:    The control receive focus after being created
 
 **Control events:**
   * `OnTextInput`: When a TextBox value is changed
@@ -68,6 +80,7 @@ impl TextBox {
             flags: None,
             limit: 0,
             readonly: false,
+            focus: false,
             font: None,
             parent: None
         }
@@ -292,7 +305,7 @@ impl TextBox {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL
+        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
@@ -316,6 +329,7 @@ pub struct TextBoxBuilder<'a> {
     flags: Option<TextBoxFlags>,
     limit: usize,
     readonly: bool,
+    focus: bool,
     font: Option<&'a Font>,
     parent: Option<ControlHandle>
 }
@@ -349,6 +363,11 @@ impl<'a> TextBoxBuilder<'a> {
 
     pub fn readonly(mut self, read: bool) -> TextBoxBuilder<'a> {
         self.readonly = read;
+        self
+    }
+
+    pub fn focus(mut self, focus: bool) -> TextBoxBuilder<'a> {
+        self.focus = focus;
         self
     }
 
@@ -386,6 +405,10 @@ impl<'a> TextBoxBuilder<'a> {
 
         if self.readonly {
             out.set_readonly(self.readonly);
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
         if self.font.is_some() {

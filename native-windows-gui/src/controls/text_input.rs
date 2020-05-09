@@ -2,7 +2,7 @@
  	An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
 */
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM};
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, ES_AUTOHSCROLL};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, WS_TABSTOP, ES_AUTOHSCROLL};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError, HTextAlign, RawEventHandler};
 use super::{ControlBase, ControlHandle};
@@ -15,11 +15,22 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: TextInput handle is not HWND!"
 
 
 bitflags! {
+    /**
+        The text input flags
+
+        * VISIBLE:     The text input is immediatly visible after creation
+        * DISABLED:    The text input cannot be interacted with by the user. It also has a grayed out look.
+        * NUMBER:      The text input only accepts number
+        * AUTO_SCROLL: The text input automatically scrolls text to the right by 10 characters when the user types a character 
+                       at the end of the line. When the user presses the ENTER key, the control scrolls all text back to position zero.
+        * TAB_STOP:    The text input can be selected using tab navigation
+    */
     pub struct TextInputFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const NUMBER = ES_NUMBER;
         const AUTO_SCROLL = ES_AUTOHSCROLL;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -42,6 +53,7 @@ TextInput is not behind any features.
   * `password`:         The password character. If set to None, the textinput is a regular control.
   * `align`:            The alignment of the text in the text input
   * `background_color`: The color of the textinput top and bottom padding. This is not the white background under the text.
+  * `focus`:            The control receive focus after being created
 
 **Control events:**
   * `OnTextInput`: When a TextInput value is changed
@@ -77,9 +89,10 @@ impl TextInput {
             password: None,
             align: HTextAlign::Left,
             readonly: false,
+            focus: false,
             font: None,
             parent: None,
-            background_color: None
+            background_color: None,
         }
     }
 
@@ -332,7 +345,7 @@ impl TextInput {
     pub fn forced_flags(&self) -> u32 {
         use winapi::um::winuser::{WS_BORDER, WS_CHILD};
         
-        WS_BORDER | ES_AUTOHSCROLL | WS_CHILD
+        WS_BORDER | WS_TABSTOP | ES_AUTOHSCROLL | WS_CHILD
     }
 
     /// Center the text vertically. Can't believe that must be manually hacked in.
@@ -462,6 +475,7 @@ pub struct TextInputBuilder<'a> {
     font: Option<&'a Font>,
     parent: Option<ControlHandle>,
     background_color: Option<[u8; 3]>,
+    focus: bool,
 }
 
 impl<'a> TextInputBuilder<'a> {
@@ -516,6 +530,11 @@ impl<'a> TextInputBuilder<'a> {
         self
     }
 
+    pub fn focus(mut self, focus: bool) -> TextInputBuilder<'a> {
+        self.focus = focus;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TextInputBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -563,6 +582,10 @@ impl<'a> TextInputBuilder<'a> {
 
         if self.readonly {
             out.set_readonly(self.readonly);
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
         if self.font.is_some() {

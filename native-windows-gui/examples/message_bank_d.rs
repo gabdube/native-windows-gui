@@ -2,7 +2,7 @@
     An application that saves messages into buttons. 
     Demonstrate the dynamic functions of NWG.
 
-    `cargo run --example message_bank`
+    `cargo run --example message_bank_d`
 */
 
 extern crate native_windows_gui as nwg;
@@ -23,7 +23,7 @@ pub struct MessageBank {
     #[nwg_layout(parent: window, max_row: Some(6), spacing: 3)]
     layout: nwg::GridLayout,
 
-    #[nwg_control(text: "Save")]
+    #[nwg_control(text: "Save", focus: true)]
     #[nwg_layout_item(layout: layout, col: 0, row: 0)]
     #[nwg_events( OnButtonClick: [MessageBank::add_message] )]
     add_message_btn: nwg::Button,

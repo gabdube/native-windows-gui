@@ -49,6 +49,7 @@ mod test_control_panel_ui {
 
             Button::builder()
                 .text("Control tests")
+                .focus(true)
                 .parent(&data.window)
                 .build(&mut data.controls_test_button)?;
 

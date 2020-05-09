@@ -1,5 +1,5 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
-use winapi::um::winuser::WS_VISIBLE;
+use winapi::um::winuser::{WS_VISIBLE, WS_TABSTOP};
 use winapi::um::commctrl::{TBS_AUTOTICKS, TBS_VERT, TBS_HORZ, TBS_TOP, TBS_BOTTOM, TBS_LEFT, TBS_RIGHT, TBS_NOTICKS, TBS_ENABLESELRANGE};
 use crate::win32::window_helper as wh;
 use crate::{NwgError, RawEventHandler};
@@ -13,6 +13,9 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: TrackBar handle is not HWND!";
 
 
 bitflags! {
+    /**
+        The track bar  flags
+    */
     pub struct TrackBarFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const AUTO_TICK = TBS_AUTOTICKS;
@@ -24,6 +27,7 @@ bitflags! {
         const TICK_RIGHT = TBS_RIGHT;
         const NO_TICK = TBS_NOTICKS;
         const RANGE = TBS_ENABLESELRANGE;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -37,7 +41,7 @@ Requires the `trackbar` feature.
   * `parent`:           **Required.** The trackbar parent container.
   * `size`:             The trackbar size.
   * `position`:         The trackbar position.
-  * `enabled`:          If the trackbar can be used by the user. It also has a grayed out look if disabled.
+  * `focus`:            The control receive focus after being created
   * `flags`:            A combination of the TrackBarFlags values.
   * `range`:            The value range of the trackbar
   * `selected_range`:   The selected value range of the trackbar. Used with `TrackBarFlags::RANGE`
@@ -75,6 +79,7 @@ impl TrackBar {
         TrackBarBuilder {
             size: (100, 20),
             position: (0, 0),
+            focus: false,
             range: None,
             selected_range: None,
             pos: None,
@@ -253,6 +258,20 @@ impl TrackBar {
         unsafe { wh::set_window_position(handle, x, y) }
     }
 
+    /// Return true if the control currently has the keyboard focus
+    pub fn focus(&self) -> bool {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::get_focus(handle) }
+    }
+
+    /// Set the keyboard focus on the track bar
+    pub fn set_focus(&self) {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_focus(handle); }
+    }
+
     /// Winapi class name used during control creation
     pub fn class_name(&self) -> &'static str {
         winapi::um::commctrl::TRACKBAR_CLASS
@@ -260,7 +279,7 @@ impl TrackBar {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE | TBS_AUTOTICKS
+        WS_VISIBLE | TBS_AUTOTICKS | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
@@ -319,6 +338,7 @@ impl Drop for TrackBar {
 pub struct TrackBarBuilder {
     size: (i32, i32),
     position: (i32, i32),
+    focus: bool,
     range: Option<Range<usize>>,
     selected_range: Option<Range<usize>>,
     pos: Option<usize>,
@@ -341,6 +361,11 @@ impl TrackBarBuilder {
 
     pub fn position(mut self, pos: (i32, i32)) -> TrackBarBuilder {
         self.position = pos;
+        self
+    }
+
+    pub fn focus(mut self, focus: bool) -> TrackBarBuilder {
+        self.focus = focus;
         self
     }
 
@@ -391,6 +416,10 @@ impl TrackBarBuilder {
             out.hook_background_color(self.background_color.unwrap());
         }
     
+        if self.focus {
+            out.set_focus();
+        }
+
         Ok(())
     }
 

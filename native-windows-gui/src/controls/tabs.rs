@@ -1,7 +1,7 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM, BOOL};
 use winapi::shared::windef::HWND;
 use winapi::um::winnt::LPWSTR;
-use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_COMPOSITED};
+use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_COMPOSITED, WS_EX_CONTROLPARENT};
 use crate::win32::{base_helper::to_utf16, window_helper as wh};
 use crate::{NwgError, Font, RawEventHandler, ImageList, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
@@ -370,7 +370,7 @@ impl<'a> TabsContainerBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
-            .ex_flags(WS_EX_COMPOSITED)
+            .ex_flags(WS_EX_COMPOSITED | WS_EX_CONTROLPARENT)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))
@@ -649,6 +649,7 @@ impl<'a> TabBuilder<'a> {
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
+            .ex_flags(WS_EX_CONTROLPARENT)
             .flags(out.flags())
             .text(self.text)
             .parent(Some(parent))

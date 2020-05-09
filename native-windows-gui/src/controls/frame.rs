@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_BORDER, WS_CHILD, WS_CLIPCHILDREN};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_BORDER, WS_CHILD, WS_CLIPCHILDREN, WS_EX_CONTROLPARENT};
 use crate::win32::window_helper as wh;
 use crate::{NwgError};
 use super::{ControlBase, ControlHandle};
@@ -14,7 +14,7 @@ bitflags! {
         * NONE:     No flags. Equivalent to a invisible frame without borders.
         * VISIBLE:  The frame is immediatly visible after creation
         * DISABLED: The frame chidlren cannot be interacted with by the user.
-        * BORDER: The frame has a thin black border
+        * BORDER:   The frame has a thin black border
     */
     pub struct FrameFlags: u32 {
         const NONE = 0;
@@ -197,6 +197,7 @@ impl FrameBuilder {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(WS_EX_CONTROLPARENT)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

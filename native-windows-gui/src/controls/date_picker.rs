@@ -1,4 +1,4 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::to_utf16;
 use crate::{Font, NwgError};
@@ -16,10 +16,12 @@ bitflags! {
         * NONE:     No flags. Equivalent to a invisible date picker.
         * VISIBLE:  The date picker is immediatly visible after creation
         * DISABLED: The date picker cannot be interacted with by the user. It also has a grayed out look.
+        * TAB_STOP: The control can be selected using tab navigation
     */
     pub struct DatePickerFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -52,6 +54,7 @@ Requires the `datetime-picker` feature.
   * `date`:     The default date as a `DatePickerValue` value
   * `format`:   The format of the date. See the `set_format` method.
   * `range`:    The accepted range of dates. The value is inclusive.
+  * `focus`:    The control receive focus after being created
 
 **Control events:**
   * `OnDatePickerClosed`: When the datepicker dropdown is closed
@@ -89,6 +92,7 @@ impl DatePicker {
         DatePickerBuilder {
             size: (100, 25),
             position: (0, 0),
+            focus: false,
             flags: None,
             font: None,
             parent: None,
@@ -368,7 +372,7 @@ impl DatePicker {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        ::winapi::um::winuser::WS_VISIBLE
+        WS_VISIBLE | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
@@ -392,6 +396,7 @@ pub struct DatePickerBuilder<'a> {
     position: (i32, i32),
     flags: Option<DatePickerFlags>,
     font: Option<&'a Font>,
+    focus: bool,
     parent: Option<ControlHandle>,
     date: Option<DatePickerValue>,
     format: Option<&'a str>,
@@ -440,6 +445,11 @@ impl<'a> DatePickerBuilder<'a> {
         self
     }
 
+    pub fn focus(mut self, focus: bool) -> DatePickerBuilder<'a> {
+        self.focus = focus;
+        self
+    }
+
     pub fn build(self, out: &mut DatePicker) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
@@ -473,6 +483,10 @@ impl<'a> DatePickerBuilder<'a> {
 
         if self.format.is_some() {
             out.set_format(self.format);
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
         Ok(())

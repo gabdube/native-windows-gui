@@ -59,6 +59,7 @@ mod basic_app_ui {
                 .position((10, 10))
                 .text("Heisenberg")
                 .parent(&data.window)
+                .focus(true)
                 .build(&mut data.name_edit)?;
 
             nwg::Button::builder()

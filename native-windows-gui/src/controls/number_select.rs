@@ -1,10 +1,10 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP, WS_EX_CONTROLPARENT};
 use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::win32::window_helper as wh;
 use crate::{NwgError, Font, RawEventHandler, bind_raw_event_handler, unbind_raw_event_handler};
-use super::{ControlBase, ControlHandle, TextInput, Button, ButtonFlags};
+use super::{ControlBase, ControlHandle, TextInput, Button, ButtonFlags, TextInputFlags};
 
 const NOT_BOUND: &'static str = "UpDown is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: UpDown handle is not HWND!";
@@ -17,11 +17,13 @@ bitflags! {
         * NONE:     No flags. Equivalent to a invisible blank NumberSelect.
         * VISIBLE:  The NumberSelect is immediatly visible after creation
         * DISABLED: The NumberSelect cannot be interacted with by the user. It also has a grayed out look.
+        * TAB_STOP: The control can be selected using tab navigation. 
     */
     pub struct NumberSelectFlags: u32 {
         const NONE = 0;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -372,6 +374,11 @@ impl<'a> NumberSelectBuilder<'a> {
 
     pub fn build(self, out: &mut NumberSelect) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        let (btn_flags, text_flags) = if flags & WS_TABSTOP == WS_TABSTOP {
+            (ButtonFlags::VISIBLE | ButtonFlags::TAB_STOP, TextInputFlags::VISIBLE | TextInputFlags::TAB_STOP)
+        } else {
+            (ButtonFlags::VISIBLE, TextInputFlags::VISIBLE)
+        };
 
         let parent = match self.parent {
             Some(p) => Ok(p),
@@ -390,6 +397,7 @@ impl<'a> NumberSelectBuilder<'a> {
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
+            .ex_flags(WS_EX_CONTROLPARENT)
             .flags(flags)
             .size(self.size)
             .position(self.position)
@@ -400,6 +408,7 @@ impl<'a> NumberSelectBuilder<'a> {
             .text(&self.data.formatted_value())
             .size((w-19, h))
             .parent(&out.handle)
+            .flags(text_flags)
             .build(&mut out.edit)?;
 
         Button::builder()
@@ -407,7 +416,7 @@ impl<'a> NumberSelectBuilder<'a> {
             .size((20, h/2+1))
             .position((w-20, -1))
             .parent(&out.handle)
-            .flags(ButtonFlags::VISIBLE)
+            .flags(btn_flags)
             .build(&mut out.btn_up)?;
 
         Button::builder()
@@ -415,7 +424,7 @@ impl<'a> NumberSelectBuilder<'a> {
             .size((20, h/2+1))
             .position((w-20, (h/2)-1))
             .parent(&out.handle)
-            .flags(ButtonFlags::VISIBLE)    
+            .flags(btn_flags)    
             .build(&mut out.btn_down)?;
 
         if self.font.is_some() {

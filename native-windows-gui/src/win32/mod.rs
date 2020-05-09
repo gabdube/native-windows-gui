@@ -27,19 +27,22 @@ use std::{mem, ptr};
 use crate::errors::NwgError;
 
 
+use winapi::um::winuser::{IsDialogMessageW, GetAncestor, TranslateMessage, DispatchMessageW, GA_ROOT};
 
 /**
     Dispatch system events in the current thread. This method will pause the thread until there are events to process.
 */
 pub fn dispatch_thread_events() {
     use winapi::um::winuser::MSG;
-    use winapi::um::winuser::{GetMessageW, TranslateMessage, DispatchMessageW};
+    use winapi::um::winuser::GetMessageW;
 
     unsafe {
         let mut msg: MSG = mem::zeroed();
         while GetMessageW(&mut msg, ptr::null_mut(), 0, 0) != 0 {
-            TranslateMessage(&msg); 
-            DispatchMessageW(&msg); 
+            if IsDialogMessageW(GetAncestor(msg.hwnd, GA_ROOT), &mut msg) == 0 {
+                TranslateMessage(&msg); 
+                DispatchMessageW(&msg); 
+            }
         }
     }
 }
@@ -53,15 +56,17 @@ pub fn dispatch_thread_events_with_callback<F>(mut cb: F)
     where F: FnMut() -> () + 'static
 {
     use winapi::um::winuser::MSG;
-    use winapi::um::winuser::{PeekMessageW, TranslateMessage, DispatchMessageW, PM_REMOVE, WM_QUIT};
+    use winapi::um::winuser::{PeekMessageW, PM_REMOVE, WM_QUIT};
 
     unsafe {
         let mut msg: MSG = mem::zeroed();
         while msg.message != WM_QUIT {
             let has_message = PeekMessageW(&mut msg, ptr::null_mut(), 0, 0, PM_REMOVE) != 0;
             if has_message {
-                TranslateMessage(&msg); 
-                DispatchMessageW(&msg); 
+                if IsDialogMessageW(GetAncestor(msg.hwnd, GA_ROOT), &mut msg) == 0 {
+                    TranslateMessage(&msg); 
+                    DispatchMessageW(&msg); 
+                }
             }
 
             cb();

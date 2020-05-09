@@ -32,7 +32,7 @@ pub struct ImageDecoderApp {
     #[nwg_resource(title: "Open File", action: nwg::FileDialogAction::Open, filters: "Png(*.png)|Jpeg(*.jpg;*.jpeg)|DDS(*.dds)|TIFF(*.tiff)|BMP(*.bmp)|Any (*.*)")]
     dialog: nwg::FileDialog,
 
-    #[nwg_control(text: "Open")]
+    #[nwg_control(text: "Open", focus: true)]
     #[nwg_layout_item(layout: main_layout, col: 0, row: 0)]
     #[nwg_events(OnButtonClick: [ImageDecoderApp::open_file])]
     open_btn: nwg::Button,

@@ -34,12 +34,7 @@ pub struct Calculator {
     #[nwg_layout_item(layout: grid, col: 0, row: 0, col_span: 5)]
     input: nwg::TextInput,
 
-    #[nwg_control(text: "0")] 
-    #[nwg_layout_item(layout: grid, col: 0, row: 4, col_span: 3)]
-    #[nwg_events( OnButtonClick: [Calculator::number(SELF, CTRL)] )]
-    btn0: nwg::Button,
-
-    #[nwg_control(text: "1")] 
+    #[nwg_control(text: "1", focus: true)] 
     #[nwg_layout_item(layout: grid, col: 0, row: 1)]
     #[nwg_events( OnButtonClick: [Calculator::number(SELF, CTRL)] )]
     btn1: nwg::Button,
@@ -84,6 +79,11 @@ pub struct Calculator {
     #[nwg_events( OnButtonClick: [Calculator::number(SELF, CTRL)] )]
     btn9: nwg::Button,
 
+    #[nwg_control(text: "0")] 
+    #[nwg_layout_item(layout: grid, col: 0, row: 4, col_span: 3)]
+    #[nwg_events( OnButtonClick: [Calculator::number(SELF, CTRL)] )]
+    btn0: nwg::Button,
+
     #[nwg_control(text: "+")] 
     #[nwg_layout_item(layout: grid, col: 3, row: 1)]
     #[nwg_events( OnButtonClick: [Calculator::number(SELF, CTRL)] )]
@@ -104,15 +104,15 @@ pub struct Calculator {
     #[nwg_events( OnButtonClick: [Calculator::number(SELF, CTRL)] )]
     btn_divide: nwg::Button,
 
-    #[nwg_control(text: "=")] 
-    #[nwg_layout_item(layout: grid, col: 3, row: 4, col_span: 2)]
-    #[nwg_events( OnButtonClick: [Calculator::compute] )]
-    btn_process: nwg::Button,
-
     #[nwg_control(text: "Clear")]
     #[nwg_layout_item(layout: grid, col: 3, row: 3, col_span: 2)]
     #[nwg_events( OnButtonClick: [Calculator::clear] )]
     btn_clear: nwg::Button,
+
+    #[nwg_control(text: "=")] 
+    #[nwg_layout_item(layout: grid, col: 3, row: 4, col_span: 2)]
+    #[nwg_events( OnButtonClick: [Calculator::compute] )]
+    btn_process: nwg::Button,
 }
 
 impl Calculator {

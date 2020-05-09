@@ -3,7 +3,7 @@ A tree-view control is a window that displays a hierarchical list of items
 */
 
 use winapi::shared::minwindef::{WPARAM, LPARAM};
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{HIMAGELIST, HTREEITEM};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16};
@@ -16,9 +16,17 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: TreeView handle is not HWND!";
 
 
 bitflags! {
+    /**
+        The tree view flags
+
+        * VISIBLE:  The tree view is immediatly visible after creation
+        * DISABLED: The tree view cannot be interacted with by the user. It also has a grayed out look.
+        * TAB_STOP: The tree view can be selected using tab navigation
+    */
     pub struct TreeViewFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
+        const TAB_STOP = WS_TABSTOP;
     }
 }
 
@@ -73,6 +81,7 @@ impl TreeView {
             size: (100, 200),
             position: (0, 0),
             enabled: true,
+            focus: false,
             flags: None,
             font: None,
             parent: None,
@@ -417,6 +426,7 @@ pub struct TreeViewBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     enabled: bool,
+    focus: bool,
     flags: Option<TreeViewFlags>,
     font: Option<&'a Font>,
     parent: Option<ControlHandle>,
@@ -443,6 +453,11 @@ impl<'a> TreeViewBuilder<'a> {
 
     pub fn enabled(mut self, e: bool) -> TreeViewBuilder<'a> {
         self.enabled = e;
+        self
+    }
+
+    pub fn focus(mut self, focus: bool) -> TreeViewBuilder<'a> {
+        self.focus = focus;
         self
     }
 
@@ -486,6 +501,10 @@ impl<'a> TreeViewBuilder<'a> {
 
         if self.image_list.is_some() {
             out.set_image_list(self.image_list);
+        }
+
+        if self.focus {
+            out.set_focus();
         }
 
         out.set_enabled(self.enabled);
