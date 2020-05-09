@@ -807,6 +807,10 @@ mod partial_controls_test_ui {
                     if &handle == &self.window {
                         init_tree(self, );
                     },
+                E::OnWindowClose => 
+                    if &handle == &self.window {
+                        self.panel.set_visible(false);
+                    },
                 E::OnButtonClick =>
                     if &handle == &self.run_window_test {
                         run_window_tests(self, evt);
