@@ -30,6 +30,8 @@ pub use win32::{
  },
  message_box::{MessageButtons, MessageIcons, MessageChoice, MessageParams, message, fatal_message, error_message, simple_message}};
 
+pub(crate) use win32::window::bind_raw_event_handler_inner;
+
 #[allow(deprecated)]
 pub use win32::high_dpi::{set_dpi_awareness, scale_factor, dpi};
 

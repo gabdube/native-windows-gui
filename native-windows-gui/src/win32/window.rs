@@ -235,41 +235,12 @@ pub fn unbind_event_handler(handler: &EventHandler)
     }
 }
 
-/**
-
-Set a window subclass the uses the `process_raw_events` function of NWG.
-The subclass is only applied to the control itself and NOT the children.
-
-When assigning multiple callback to the same control, a different `id` must be specified for each call
-or otherwise, the old callback will be replaced by the new one. See `Label::hook_background_color` for example.
-
-If the event handler is already bound, this function will panic. If that's a possibility, use 
-the `has_raw_handler` method first.
-
-```rust
-use native_windows_gui as nwg;
-
-fn bind_raw_handler(window: &nwg::Window) -> nwg::RawEventHandler {
-    const WM_MOVE: u32 = 3287542; // Not the actual value, but who cares?
-    let handler_id = 2045;
-
-    nwg::bind_raw_event_handler(&window.handle, handler_id, move |_hwnd, msg, _w, _l| {
-        if msg == WM_MOVE {
-            println!("MOVING!");
-        }
-        None
-    })
-}
-
-```
-*/
-pub fn bind_raw_event_handler<F>(handle: &ControlHandle, handler_id: UINT_PTR, f: F) -> RawEventHandler
+pub(crate) fn bind_raw_event_handler_inner<F>(handle: &ControlHandle, handler_id: UINT_PTR, f: F) -> Result<RawEventHandler, NwgError>
     where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
 {
     use winapi::um::commctrl::{GetWindowSubclass, SetWindowSubclass};
 
-    // IDS below 0XFFFF are reserved for normal events binding
-    let handler_id = handler_id + 0xFFFF;
+    let handler_id = handler_id;
     let subclass_proc: SUBCLASSPROC = Some(process_raw_events);
     
     let handle = match handle {
@@ -278,7 +249,7 @@ pub fn bind_raw_event_handler<F>(handle: &ControlHandle, handler_id: UINT_PTR, f
             let mut tmp_value = 0;
             let result = GetWindowSubclass(h, subclass_proc, handler_id, &mut tmp_value);
             if result != 0 {
-                panic!("There is already a raw event handler bound with the handler ID {}", handler_id);
+                return Err(NwgError::events_binding(format!("Events id {} is already present on this", handler_id)))
             }
 
             // Bind the callback
@@ -292,12 +263,56 @@ pub fn bind_raw_event_handler<F>(handle: &ControlHandle, handler_id: UINT_PTR, f
         htype => panic!("Cannot bind control with an handle of type {:?}.", htype)
     };
 
-    RawEventHandler {
+    Ok(RawEventHandler {
         handle,
         subclass_proc,
         handler_id
-    }
+    })
 }
+
+/**
+
+Set a window subclass the uses the `process_raw_events` function of NWG.
+The subclass is only applied to the control itself and NOT the children.
+
+When assigning multiple callback to the same control, a different `id` must be specified for each call
+or otherwise, the old callback will be replaced by the new one. See `Label::hook_background_color` for example.
+
+Error:
+- If the event handler with the same ID is already bound, this function will return an Error. The `has_raw_handler` method can be used to check this.
+
+Panic:
+- If the `handle` parameter is not a window-like control
+- If the `handler_id` parameter is <= 0xFFFF
+
+
+```rust
+use native_windows_gui as nwg;
+
+fn bind_raw_handler(window: &nwg::Window) -> nwg::RawEventHandler {
+    const WM_MOVE: u32 = 3287542; // Not the actual value, but who cares?
+    let handler_id = 0x10000;     // handler ids equal or smaller than 0xFFFF are reserved by NWG
+
+    nwg::bind_raw_event_handler(&window.handle, handler_id, move |_hwnd, msg, _w, _l| {
+        if msg == WM_MOVE {
+            println!("MOVING!");
+        }
+        None
+    })
+}
+
+```
+*/
+pub fn bind_raw_event_handler<F>(handle: &ControlHandle, handler_id: UINT_PTR, f: F) -> Result<RawEventHandler, NwgError>
+where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
+{
+    if handler_id < 0xFFFF {
+        panic!("handler_id <= 0xFFFF are reserved by NWG");
+    }
+
+    bind_raw_event_handler_inner(handle, handler_id, f)
+}
+
 
 /** 
     Check if a raw handler with the specified handler_id is currently bound on the control.

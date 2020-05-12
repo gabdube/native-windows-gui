@@ -350,7 +350,7 @@ impl TextInput {
 
     /// Center the text vertically. Can't believe that must be manually hacked in.
     fn hook_non_client_size(&self, bg: Option<[u8; 3]>) {
-        use crate::bind_raw_event_handler;
+        use crate::bind_raw_event_handler_inner;
         use winapi::shared::windef::{HGDIOBJ, RECT, HBRUSH, POINT};
         use winapi::um::winuser::{WM_NCCALCSIZE, WM_NCPAINT, WM_SIZE, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW,};
         use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
@@ -368,7 +368,7 @@ impl TextInput {
 
         unsafe {
 
-        let handler = bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, w, l| {
+        let handler = bind_raw_event_handler_inner(&self.handle, 0, move |hwnd, msg, w, l| {
             match msg {
                 WM_NCCALCSIZE  => {
                     if w == 0 { return None }
@@ -443,7 +443,7 @@ impl TextInput {
             None
         });
 
-        *self.handler0.borrow_mut() = Some(handler);
+        *self.handler0.borrow_mut() = Some(handler.unwrap());
 
         }
     }

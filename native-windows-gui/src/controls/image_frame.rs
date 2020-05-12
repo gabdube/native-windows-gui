@@ -193,7 +193,7 @@ impl ImageFrame {
     /// Change the label background color to transparent.
     /// Change the checkbox background color.
     fn hook_background_color(&self, c: [u8; 3]) {
-        use crate::bind_raw_event_handler;
+        use crate::bind_raw_event_handler_inner;
         use winapi::um::winuser::{WM_CTLCOLORSTATIC};
         use winapi::shared::{basetsd::UINT_PTR, windef::{HWND}, minwindef::LRESULT};
         use winapi::um::wingdi::{CreateSolidBrush, RGB};
@@ -204,7 +204,7 @@ impl ImageFrame {
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
         let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
         
-        let handler = bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+        let handler = bind_raw_event_handler_inner(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
             match msg {
                 WM_CTLCOLORSTATIC => {
                     let child = l as HWND;
@@ -218,7 +218,7 @@ impl ImageFrame {
             None
         });
 
-        *self.handler0.borrow_mut() = Some(handler);
+        *self.handler0.borrow_mut() = Some(handler.unwrap());
     }
 
 }

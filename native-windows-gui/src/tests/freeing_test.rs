@@ -50,7 +50,7 @@ impl FreeingTest {
             data.raw_callback_id += 1;
 
             let message = MessageBoxOnDrop{};
-            let handler = bind_raw_event_handler(&self.custom_bind_button.handle, data.raw_callback_id, move |_hwnd, msg, _w, _l| {
+            let handler = bind_raw_event_handler_inner(&self.custom_bind_button.handle, data.raw_callback_id, move |_hwnd, msg, _w, _l| {
                 if msg == WM_LBUTTONUP {
                     &message;
                     simple_message("Raw handler", &"Hello from raw dynamic handler");
@@ -60,7 +60,7 @@ impl FreeingTest {
 
             assert!(has_raw_handler(&self.custom_bind_button.handle, data.raw_callback_id));
 
-            data.raw_handler = Some(handler);
+            data.raw_handler = Some(handler.unwrap());
         }
     }
 

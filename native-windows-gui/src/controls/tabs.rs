@@ -245,7 +245,7 @@ impl TabsContainer {
 
     /// The tab widget lacks basic functionalities on it's own. This fix it. 
     fn hook_tabs(&self) {
-        use crate::bind_raw_event_handler;
+        use crate::bind_raw_event_handler_inner;
         use winapi::shared::minwindef::{HIWORD, LOWORD};
         use winapi::um::winuser::{NMHDR, WM_SIZE, WM_NOTIFY};
         use winapi::um::commctrl::{TCM_GETCURSEL, TCN_SELCHANGE};
@@ -257,7 +257,7 @@ impl TabsContainer {
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
 
-        let handler0 = bind_raw_event_handler(&parent_handle, handle as usize, move |_hwnd, msg, _w, l| { unsafe {
+        let handler0 = bind_raw_event_handler_inner(&parent_handle, handle as usize, move |_hwnd, msg, _w, l| { unsafe {
             match msg {
                 WM_NOTIFY => {
                     let nmhdr: &NMHDR = mem::transmute(l);
@@ -274,7 +274,7 @@ impl TabsContainer {
             None
         } });
 
-        let handler1 = bind_raw_event_handler(&self.handle, handle as usize, move |hwnd, msg, _w, l| { unsafe {
+        let handler1 = bind_raw_event_handler_inner(&self.handle, handle as usize, move |hwnd, msg, _w, l| { unsafe {
             match msg {
                 WM_SIZE => {
                     let size = l as u32;
@@ -296,8 +296,8 @@ impl TabsContainer {
             None
         } } );
 
-        *self.handler0.borrow_mut() = Some(handler0);
-        *self.handler1.borrow_mut() = Some(handler1);
+        *self.handler0.borrow_mut() = Some(handler0.unwrap());
+        *self.handler1.borrow_mut() = Some(handler1.unwrap());
     }
 }
 

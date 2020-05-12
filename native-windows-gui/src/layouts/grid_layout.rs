@@ -1,5 +1,5 @@
 use crate::controls::{ControlHandle};
-use crate::win32::window::bind_raw_event_handler;
+use crate::win32::window::bind_raw_event_handler_inner;
 use crate::win32::window_helper as wh;
 use winapi::shared::windef::{HWND};
 use std::rc::Rc;
@@ -519,7 +519,7 @@ impl GridLayoutBuilder {
 
         /// Keep generating ids so that multiple layouts can be applied to the same parent
         static mut BOX_LAYOUT_ID: usize = 0x8FFF; 
-        bind_raw_event_handler(&base_handle, unsafe { BOX_LAYOUT_ID += 1; BOX_LAYOUT_ID }, cb);
+        bind_raw_event_handler_inner(&base_handle, unsafe { BOX_LAYOUT_ID += 1; BOX_LAYOUT_ID }, cb).unwrap();
     }
 
 }

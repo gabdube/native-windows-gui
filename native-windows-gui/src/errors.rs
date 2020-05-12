@@ -5,17 +5,20 @@
 pub enum NwgError {
     Unknown,
     
-    /// Fatal error that may happen when calling low level winapi functionalities
+    /// Fatal error raised when calling low level winapi functionalities
     InitializationError(String),
 
-    /// Error that may happen when creating a control.
+    /// Error raised when creating a control.
     ControlCreationError(String),
 
-    /// Error that may happen when creating a menu.
+    /// Error raised when creating a menu.
     MenuCreationError(String),
 
-    /// Error that may happen when creating a resource.
+    /// Error raised when creating a resource.
     ResourceCreationError(String),
+
+    /// Error raised when an event handler could not be bound
+    EventsBinding(String),
 
     /// Error raised by the FileDialog object
     #[cfg(feature = "file-dialog")]
@@ -25,7 +28,7 @@ pub enum NwgError {
     #[cfg(feature = "image-decoder")]
     ImageDecoderError(i32, String),
 
-    /// Error raised by on of the locale functions
+    /// Error raised by one of the locale functions
     #[cfg(feature = "winnls")]
     BadLocale(String),
 }
@@ -46,6 +49,10 @@ impl NwgError {
 
     pub fn resource_create<S: Into<String>>(e: S) -> NwgError {
         NwgError::ResourceCreationError(e.into())
+    }
+
+    pub fn events_binding<S: Into<String>>(e: S) -> NwgError {
+        NwgError::EventsBinding(e.into())
     }
 
     #[cfg(feature = "file-dialog")]

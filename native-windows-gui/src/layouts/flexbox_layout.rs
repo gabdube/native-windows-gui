@@ -1,6 +1,6 @@
 use crate::controls::ControlHandle;
 use crate::win32::window_helper as wh;
-use crate::win32::window::{RawEventHandler, unbind_raw_event_handler, bind_raw_event_handler};
+use crate::win32::window::{RawEventHandler, unbind_raw_event_handler, bind_raw_event_handler_inner};
 use winapi::shared::windef::HWND;
 use std::{ptr, rc::Rc, cell::{RefCell, RefMut, Ref} };
 
@@ -530,7 +530,7 @@ impl FlexboxLayoutBuilder {
 
         {
             let mut layout_inner = layout.inner.borrow_mut();
-            layout_inner.handler = Some(bind_raw_event_handler(&base_handle, handler_id, cb));
+            layout_inner.handler = Some(bind_raw_event_handler_inner(&base_handle, handler_id, cb).unwrap());
         }
     }
 }

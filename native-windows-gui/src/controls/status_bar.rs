@@ -136,13 +136,13 @@ impl StatusBar {
     /// manually sent by the parent window to trigger the resize action.
     pub fn hook_parent_resize(&self) {
         use winapi::um::winuser::WM_SIZE;
-        use crate::bind_raw_event_handler;
+        use crate::bind_raw_event_handler_inner;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
-        let handler = bind_raw_event_handler(&parent_handle, handle as usize, move |_hwnd, msg, _w, _l| {
+        let handler = bind_raw_event_handler_inner(&parent_handle, handle as usize, move |_hwnd, msg, _w, _l| {
             if msg == WM_SIZE {
                 wh::send_message(handle, WM_SIZE, 0, 0);
             }
@@ -150,7 +150,7 @@ impl StatusBar {
             None
         });
 
-        *self.handler0.borrow_mut() = Some(handler);
+        *self.handler0.borrow_mut() = Some(handler.unwrap());
     }
 
 }

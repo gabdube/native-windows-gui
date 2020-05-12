@@ -209,7 +209,7 @@ impl Label {
 
     /// Center the text vertically.
     fn hook_non_client_size(&self, bg: Option<[u8; 3]>, v_align: VTextAlign) {
-        use crate::bind_raw_event_handler;
+        use crate::bind_raw_event_handler_inner;
         use winapi::shared::windef::{HWND, HGDIOBJ, RECT, HBRUSH, POINT};
         use winapi::shared::{basetsd::UINT_PTR, minwindef::LRESULT};
         use winapi::um::winuser::{WM_CTLCOLORSTATIC, WM_NCCALCSIZE, WM_NCPAINT, WM_SIZE, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW};
@@ -237,7 +237,7 @@ impl Label {
         unsafe {
 
         if bg.is_some() {
-            let handler0 = bind_raw_event_handler(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
+            let handler0 = bind_raw_event_handler_inner(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
                 match msg {
                     WM_CTLCOLORSTATIC => {
                         let child = l as HWND;
@@ -251,10 +251,10 @@ impl Label {
                 None
             });
 
-            *self.handler0.borrow_mut() = Some(handler0);
+            *self.handler0.borrow_mut() = Some(handler0.unwrap());
         }
 
-        let handler1 = bind_raw_event_handler(&self.handle, 0, move |hwnd, msg, w, l| {
+        let handler1 = bind_raw_event_handler_inner(&self.handle, 0, move |hwnd, msg, w, l| {
             match msg {
                 WM_NCCALCSIZE  => {
                     if w == 0 { return None }
@@ -329,7 +329,7 @@ impl Label {
             None
         });
 
-        *self.handler1.borrow_mut() = Some(handler1);
+        *self.handler1.borrow_mut() = Some(handler1.unwrap());
 
         }
     }

@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::win32::window_helper as wh;
-use crate::{NwgError, Font, RawEventHandler, bind_raw_event_handler, unbind_raw_event_handler};
+use crate::{NwgError, Font, RawEventHandler, bind_raw_event_handler_inner, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle, TextInput, Button, ButtonFlags, TextInputFlags};
 
 const NOT_BOUND: &'static str = "UpDown is not yet bound to a winapi object";
@@ -444,7 +444,7 @@ impl<'a> NumberSelectBuilder<'a> {
         let minus_button = out.btn_down.handle.clone();
         let text_handle = out.edit.handle.clone();
 
-        let handler = bind_raw_event_handler(&out.handle, 0x4545, move |_hwnd, msg, w, l| {
+        let handler = bind_raw_event_handler_inner(&out.handle, 0x4545, move |_hwnd, msg, w, l| {
             use winapi::shared::windef::HWND;
             use winapi::um::winuser::{WM_COMMAND, BN_CLICKED};
             use winapi::shared::minwindef::HIWORD;
@@ -475,7 +475,7 @@ impl<'a> NumberSelectBuilder<'a> {
             None
         });
 
-        out.handler = Some(handler);
+        out.handler = Some(handler.unwrap());
 
         Ok(())
     }
