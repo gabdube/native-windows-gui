@@ -68,6 +68,9 @@ mod extern_canvas;
 #[cfg(feature = "frame")]
 mod frame;
 
+#[cfg(feature = "scroll-bar")]
+mod scroll_bar;
+
 mod handle_from_control;
 
 pub use control_handle::ControlHandle;
@@ -142,5 +145,8 @@ pub use extern_canvas::{ExternCanvas, ExternCanvasBuilder, ExternCanvasFlags};
 
 #[cfg(feature = "frame")]
 pub use frame::{Frame, FrameBuilder, FrameFlags};
+
+#[cfg(feature = "scroll-bar")]
+pub use scroll_bar::{ScrollBar, ScrollBarBuilder, ScrollBarFlags};
 
 pub use handle_from_control::*;

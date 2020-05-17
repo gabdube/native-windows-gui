@@ -96,6 +96,7 @@ pub struct ControlsTest {
     test_button_checkbox: CheckBox,
     test_number_select: NumberSelect,
     test_rich: RichTextBox,
+    test_scroll: ScrollBar,
 
     // Third Tab
     test_open_file_button: Button,
@@ -491,6 +492,19 @@ mod partial_controls_test_ui {
                 .size((200, 200))
                 .parent(&data.basics_control_tab2)
                 .build(&mut data.test_rich)?;
+
+            ScrollBar::builder()
+                .position((220,140))
+                .size((20, 200))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_scroll)?;
+
+            ScrollBar::builder()
+                .position((160, 110))
+                .size((100, 20))
+                .flags(ScrollBarFlags::VISIBLE | ScrollBarFlags::HORIZONTAL)
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_scroll)?;
 
             //
             // Dialogs
