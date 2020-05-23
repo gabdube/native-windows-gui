@@ -17,7 +17,8 @@ pub struct FlexboxLayoutChild {
 pub enum LayoutChild {
     Init(Parameters),
     Grid(GridLayoutChild),
-    Flexbox(FlexboxLayoutChild)
+    Flexbox(FlexboxLayoutChild),
+    Invalid(String)
 }
 
 impl LayoutChild {

@@ -162,6 +162,13 @@ NWG use the MIT license
 ### With native windows derive
 
 ```rust
+#![windows_subsystem = "windows"]
+/*!
+    A very simple application that show your name in a message box.
+    Unlike `basic_d`, this example use layout to position the controls in the window
+*/
+
+
 extern crate native_windows_gui as nwg;
 extern crate native_windows_derive as nwd;
 
@@ -175,10 +182,15 @@ pub struct BasicApp {
     #[nwg_events( OnWindowClose: [BasicApp::say_goodbye] )]
     window: nwg::Window,
 
-    #[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10))]
+    #[nwg_layout(parent: window, spacing: 1)]
+    grid: nwg::GridLayout,
+
+    #[nwg_control(text: "Heisenberg", focus: true)]
+    #[nwg_layout_item(layout: grid, row: 0, col: 0)]
     name_edit: nwg::TextInput,
 
-    #[nwg_control(text: "Say my name", size: (280, 60), position: (10, 40))]
+    #[nwg_control(text: "Say my name")]
+    #[nwg_layout_item(layout: grid, col: 0, row: 1, row_span: 2)]
     #[nwg_events( OnButtonClick: [BasicApp::say_hello] )]
     hello_button: nwg::Button
 }
@@ -188,7 +200,7 @@ impl BasicApp {
     fn say_hello(&self) {
         nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
     }
-
+    
     fn say_goodbye(&self) {
         nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
         nwg::stop_thread_dispatch();
@@ -198,6 +210,7 @@ impl BasicApp {
 
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
+    nwg::Font::set_global_family("Segoe UI").expect("Failed to set default font");
 
     let _app = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
 
@@ -209,10 +222,9 @@ fn main() {
 
 ```rust
 #![windows_subsystem = "windows"]
-
 /*!
     A very simple application that show your name in a message box.
-    See `basic_d` for the derive version
+    Uses layouts to position the controls in the window
 */
 
 extern crate native_windows_gui as nwg;
@@ -222,6 +234,7 @@ use nwg::NativeUi;
 #[derive(Default)]
 pub struct BasicApp {
     window: nwg::Window,
+    layout: nwg::GridLayout,
     name_edit: nwg::TextInput,
     hello_button: nwg::Button
 }
@@ -267,15 +280,12 @@ mod basic_app_ui {
                 .build(&mut data.window)?;
 
             nwg::TextInput::builder()
-                .size((280, 25))
-                .position((10, 10))
                 .text("Heisenberg")
                 .parent(&data.window)
+                .focus(true)
                 .build(&mut data.name_edit)?;
 
             nwg::Button::builder()
-                .size((280, 60))
-                .position((10, 40))
                 .text("Say my name")
                 .parent(&data.window)
                 .build(&mut data.hello_button)?;
@@ -304,6 +314,13 @@ mod basic_app_ui {
 
            *ui.default_handler.borrow_mut() = Some(nwg::full_bind_event_handler(&ui.window.handle, handle_events));
 
+           nwg::GridLayout::builder()
+            .parent(&ui.window)
+            .spacing(1)
+            .child(0, 0, &ui.name_edit)
+            .child_item(nwg::GridLayoutItem::new(&ui.hello_button, 0, 1, 1, 2))
+            .build(&ui.layout);
+
             return Ok(ui);
         }
     }
@@ -329,6 +346,7 @@ mod basic_app_ui {
 
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
+    nwg::Font::set_global_family("Segoe UI").expect("Failed to set default font");
 
     let ui = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
     nwg::dispatch_thread_events();

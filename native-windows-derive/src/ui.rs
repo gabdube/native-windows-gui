@@ -366,7 +366,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                 let c = &self.0;
                 let id = &c.id;
 
-                let item_tk = match c.layout {
+                let item_tk = match &c.layout {
                     Some(LayoutChild::Grid( GridLayoutChild {col, row, col_span, row_span} )) => 
                         quote! { 
                             child_item(GridLayoutItem::new(&ui.#id, #col, #row, #col_span, #row_span))
@@ -375,7 +375,8 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                         quote! { 
                             child(&ui.#id)
                         },
-                    Some(_) => panic!("Unprocessed layout item"),
+                    Some(LayoutChild::Invalid ( name )) => panic!("Bad layout item for field {}, have you specified the `layout` parameter?", name),
+                    Some(_) => panic!("Uninitialized layout item. This means the derive macro skipped a layout_item field and should NEVER happens"),
                     None => panic!("Unfiltered layout item")
                 };
 
