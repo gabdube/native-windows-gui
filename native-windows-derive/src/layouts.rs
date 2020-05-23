@@ -15,18 +15,27 @@ pub struct FlexboxLayoutChild {
 
 
 pub enum LayoutChild {
-    Init(Parameters),
+    Init { field_name: String, params: Parameters },
     Grid(GridLayoutChild),
     Flexbox(FlexboxLayoutChild),
-    Invalid(String)
 }
 
 impl LayoutChild {
 
     pub fn prepare(field: &syn::Field) -> Option<LayoutChild> {
+        let field_name = field.ident.as_ref().map(|i| i.to_string())
+            .unwrap_or("Unnamed".to_string());
+
+        let map_attr = |attr: &syn::Attribute| {
+            LayoutChild::Init {
+                field_name,
+                params: syn::parse2(attr.tokens.clone()).unwrap()
+            }
+        };
+        
         field.attrs.iter()
             .find(|attr| attr.path.get_ident().map(|id| id == "nwg_layout_item").unwrap_or(false) )
-            .map(|attr| LayoutChild::Init( syn::parse2(attr.tokens.clone()).unwrap() ))
+            .map(map_attr)
     }
 
     pub fn parse(&mut self, parent_type: &syn::Ident) {
@@ -44,7 +53,7 @@ impl LayoutChild {
         let [mut col, mut row, mut col_span, mut row_span] = [0, 0, 1, 1];
 
         match self {
-            LayoutChild::Init(p) => for p in p.params.iter() {
+            LayoutChild::Init{ params: p, .. } => for p in p.params.iter() {
                 let attr_name = p.ident.to_string();
                 match &attr_name as &str {
                     // Grid layout
@@ -69,7 +78,7 @@ impl LayoutChild {
 
     pub fn parent_matches(&self, parent: &syn::Ident) -> bool {
         match self {
-            LayoutChild::Init(p) => p.params
+            LayoutChild::Init{ params: p, .. } => p.params
                 .iter()
                 .filter(|p| p.ident == "layout")
                 .any(|p| match &p.e {

@@ -375,8 +375,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                         quote! { 
                             child(&ui.#id)
                         },
-                    Some(LayoutChild::Invalid ( name )) => panic!("Bad layout item for field {}, have you specified the `layout` parameter?", name),
-                    Some(_) => panic!("Uninitialized layout item. This means the derive macro skipped a layout_item field and should NEVER happens"),
+                    Some(LayoutChild::Init{ field_name, .. }) => panic!("Unmatched layout item for field \"{}\", Did you forget the `layout` parameter?", field_name),
                     None => panic!("Unfiltered layout item")
                 };
 
