@@ -62,6 +62,166 @@ fn parse_ui_data(d: &DeriveInput) -> Option<&syn::DataStruct> {
     }
 } 
 
+/**
+
+The `NwgUi` macro implements the native-windows-gui `NativeUi` trait on the selected struct
+
+For a detailed documentation of this macro see the documentation "native-windows-docs/nwd_basics.html"
+
+
+# Usage
+
+```rust
+use native_windows_gui as nwg;
+
+#[derive(NwgUi, Default)]
+pub struct BasicApp {
+    #[nwg_control(title: "Window")]
+    #[nwg_events( OnWindowClose: [nwg::stop_thread_dispatch()] )]
+    window: nwg::Window,
+
+    #[nwg_resource(family: "Arial")]
+    font: nwg::Font,
+
+    #[nwg_layout(parent: window)]
+    my_layout: nwg::GridLayout,
+
+    #[nwg_control(text: "Button")]
+    #[nwg_layout_item(layout: my_layout, col: 0, row: 0)]
+    button: nwg::Button,
+}
+
+// ...
+
+let my_ui = BasicAppUi::build_ui(Default::default()).unwrap();
+```
+
+The macro creates a new struct named `[StructName]Ui` in a submodule named `[struct_name]_ui`.
+
+The trait `NativeUi` is implemented on this struct and the boilerplate code is generated for every field tagged by attributes.
+Fields without attributes, even `nwg` types, are left untouched.
+
+Finally, the derive macro also creates a default event handler that will live through the ui struct lifetime. 
+
+
+# Attributes usage
+
+Actual UI creation works by tagging the struct fields with the some attributes
+
+## Controls
+
+Use the `nwg_control` attribute to instance a control from a struct field:
+
+```
+nwg_control(builder_field: builder_value,*)
+```
+
+This syntax is basically a compressed version of the nwg control builders. The control attribute
+also has built-in helpers: auto parent detection and compressed flags syntax (see the docs for this).
+
+```
+#[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10))]
+name_edit: nwg::TextInput,
+
+// is the same as 
+
+nwg::TextInput::builder()
+    .text("Heisenberg")
+    .size((280, 25))
+    .position((10, 10))
+    .build(&mut data.text_edit);
+```
+
+## Resources
+
+Use the `nwg_resource` to generate a resource from a struct field. It works the exact same way as `nwg_controls`. 
+Resources are always instanced before the controls.
+
+## Events
+
+Use the `nwg_events` attribute to add events to the default event handler. Events can only be applied to a field that
+was tagged with `nwg_control`.
+
+```
+nwg_events( EVENT_TYPE: [CALLBACK(ARGS),*] )
+```
+
+where:
+ - **EVENT_TYPE** is any value of the Event enum.
+ - **CALLBACK** is the function that will be called when the event is triggered.
+ - **ARGS** specifies the parameters of the callback (optional).
+
+## Events arguments
+
+By default, native windows derive assumes the callback is a method of the Ui structure. So for example, 
+`TestApp::callback1` assumes the method has the following signature `callback1(&self)`.
+
+That's very limiting. For example, if the same callback is used by two different controls, there's no way to differenciate them. In order to fix this, NWD lets you define the callbacks parameters using those identifiers:
+
+ - **SELF**: Sends the ui struct `&UiStruct`. If there are no parameters, this is the default.
+ - **RC_SELF**: Sends the rc ui struct `&Rc<UiStruct>`. Useful for binding dynamic events
+ - **CTRL**: Sends the control that triggered the event. Ex: `&Button`
+ - **HANDLE**: Sends the handle of the control. `&ControlHandle`
+ - **EVT**: Sends the event that was triggered. `&Event`
+ - **EVT_DATA**: Sends the data of the event that was triggered. `&EventData`
+
+It's also possible to not use any parameters, ex: `TestApp::callback1()`. 
+
+Different event types:
+
+```
+struct TestApp {
+    #[nwg_control]
+    #[nwg_events(
+        OnButtonClick: [TestApp::callback1, TestApp::callback2],
+        OnMouseMove: [TestApp::callback3(SELF, CTRL)],
+        OnButtonDoubleClick: [callback, another_callback()]
+    )]
+    button: nwg::Button
+}
+
+fn callback(me: &TestApp) {}
+fn another_callback() {}
+
+impl TestApp {
+    fn callback1(&self) { }
+    fn callback2(&self) { }
+    fn callback3(&self, ctrl: &nwg::Button) { }
+}
+```
+
+## Layouts
+
+Use the `nwg_layout` attribute to instance a layout from a struct field and `nwg_layout_item` to associate a control to a layout.
+
+Under the hood, both these attribute work the same way as `nwg_control`. `nwg_layout` uses the builder attribute for a the layout struct and
+`nwg_layout_item` uses the parameters of the item type of the parent (ex: `GridLayoutItem` for `GridLayout`).
+
+NWD cannot guess the parent of layout items.
+
+## Partials
+
+Use the `nwg_partial` attribute to instance a partial from a struct field:
+
+If parts of your UI is another struct that implements the `PartialUi` trait, it can be easily included in your base UI using `nwg_partial`.
+The attribute accepts an optional parameter "parent" to pass a parent control to the partial initializer. Unlike the parent in `nwg_controls`,
+it must be explicitly defined.
+
+nwg_partial works by calling `PartialUi::build_partial` after initializing the controls of the base UI, calling `PartialUi::process_event` in the default event handler,
+and binds the default handler to the handles returned by `PartialUi::handles`
+
+Also see `NwgPartial` for the macro to generate a nwg partial.
+
+```
+struct Ui {
+    window: nwg::Window,
+
+    #[nwg_partial(parent: window)]
+    partial: MyPartial
+}
+```
+
+*/
 #[proc_macro_derive(NwgUi, attributes(nwg_control, nwg_resource, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
 pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     let base = parse_macro_input!(input as DeriveInput);
@@ -131,6 +291,42 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     pm::TokenStream::from(derive_ui)
 }
 
+
+/**
+The `NwgPartial` macro implements the native-windows-gui `PartialUi` trait on the selected struct
+
+**Events are not yet implemented in partials !**
+
+`NwgPartial` accepts the same attributes as `NwgUi`. See the docs of the `NwgUi` trait for detailed usage. There are some particularities though:
+
+ - Partials cannot be used by independently. They must be included in a UI that implements `NwgUi`. 
+ - Partials do not require a top level window. If no window is defined, the partial will require a parent value passed from the `nwg_partial` attribute
+ - It's possible to derive both `NwgUi` and `NwgPartial` from the same struct as long as the partial do not need a parent.
+ - Partials can contains other partials
+
+```
+#[derive(Default, NwgPartial)]
+pub struct MyPartial {
+  partial_data: u32,
+
+  #[nwg_control]
+  button: nwg::Button
+}
+
+#[derive(Default, NwgUi)]
+pub struct MyApp {
+   app_data: u32,
+
+   #[nwg_control]
+   #[nwg_events( OnInit: [hello], OnWindowClose: [nwg::stop_thread_dispatch()] )]
+   window: nwg::Window,
+
+   #[nwg_partial(parent: window)]
+   partial: MyPartial
+}
+```
+
+*/
 #[proc_macro_derive(NwgPartial, attributes(nwg_control, nwg_resource, nwg_events, nwg_layout, nwg_layout_item, nwg_partial))]
 pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
     let base = parse_macro_input!(input as DeriveInput);
