@@ -366,7 +366,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                 let c = &self.0;
                 let id = &c.id;
 
-                let item_tk = match c.layout {
+                let item_tk = match &c.layout {
                     Some(LayoutChild::Grid( GridLayoutChild {col, row, col_span, row_span} )) => 
                         quote! { 
                             child_item(GridLayoutItem::new(&ui.#id, #col, #row, #col_span, #row_span))
@@ -375,7 +375,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                         quote! { 
                             child(&ui.#id)
                         },
-                    Some(_) => panic!("Unprocessed layout item"),
+                    Some(LayoutChild::Init{ field_name, .. }) => panic!("Unmatched layout item for field \"{}\", Did you forget the `layout` parameter?", field_name),
                     None => panic!("Unfiltered layout item")
                 };
 
