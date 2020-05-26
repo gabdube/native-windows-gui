@@ -1,7 +1,8 @@
 use winapi::um::winuser::{WS_DISABLED, WS_VISIBLE, WS_TABSTOP, WS_CHILD, SBS_HORZ, SBS_VERT};
 use crate::win32::window_helper as wh;
-use crate::NwgError;
+use crate::{NwgError, RawEventHandler};
 use super::{ControlBase, ControlHandle};
+use std::{mem, cell::RefCell, ops::Range};
 
 const NOT_BOUND: &'static str = "Scroll bar is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Scroll bar handle is not HWND!";
@@ -33,10 +34,36 @@ A window can display a data object, such as a document or a bitmap, that is larg
 
 Requires the `scroll-bar` feature. 
 
+**Builder parameters:**
+  * `parent`:           **Required.** The scroll bar parent container.
+  * `size`:             The scroll bar size.
+  * `position`:         The scroll bar position.
+  * `focus`:            The control receive focus after being created
+  * `flags`:            A combination of the ScrollBarFlags values.
+  * `range`:            The value range of the scroll bar
+  * `pos`:              The current value of the scroll bar
+
+
+**Control events:**
+  * `OnVerticalScroll`: When the value of a scrollbar with the VERTICAL flags is changed
+  * `OnHorizontalScroll`: When the value of a scrollbar with the HORIZONTAL flags is changed
+  * `MousePress(_)`: Generic mouse press events on the button
+  * `OnMouseMove`: Generic mouse mouse event
+
+```rust
+use native_windows_gui as nwg;
+fn build_scrollbar(button: &mut nwg::ScrollBar, window: &nwg::Window) {
+    nwg::ScrollBar::builder()
+        .range(Some(0..100))
+        .pos(Some(10))
+        .parent(window)
+        .build(button);
+}
 */
-#[derive(Default, Eq, PartialEq)]
+#[derive(Default)]
 pub struct ScrollBar {
-    pub handle: ControlHandle
+    pub handle: ControlHandle,
+    handler0: RefCell<Option<RawEventHandler>>,
 }
 
 impl ScrollBar {
@@ -48,8 +75,62 @@ impl ScrollBar {
             enabled: true,
             flags: None,
             parent: None,
-            focus: false
+            focus: false,
+            range: None,
+            pos: None
         }
+    }
+
+    /// Retrieves the current logical position of the slider in a scrollbar.
+    /// The logical positions are the integer values in the scrollbar's range of minimum to maximum slider positions. 
+    pub fn pos(&self) -> usize {
+        use winapi::um::winuser::SBM_GETPOS;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, SBM_GETPOS, 0, 0) as usize
+    }
+
+    /// Sets the current logical position of the slider in a scrollbar. If the value is out of range he value is rounded up or down to the nearest valid value..
+    pub fn set_pos(&self, p: usize) {
+        use winapi::um::winuser::SBM_SETPOS;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, SBM_SETPOS, p, 1);
+    }
+
+    /// Returns the range of value the scrollbar can have
+    pub fn range(&self) -> Range<usize> {
+        use winapi::um::winuser::SBM_GETRANGE;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let mut min: u32 = 0;
+        let mut max: u32 = 0;
+
+        wh::send_message(handle, SBM_GETRANGE, 
+            &mut min as *mut u32 as _,
+            &mut max as *mut u32 as _
+        );
+
+        (min as usize)..(max as usize)
+    }
+
+    /// Sets the range of value the scrollbar can have
+    pub fn set_range(&self, range: Range<usize>) {
+        use winapi::um::winuser::SBM_SETRANGE;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, SBM_SETRANGE, 
+            range.start as _, 
+            range.end as _,
+        );
     }
 
     /// Returns true if the control currently has the keyboard focus
@@ -138,6 +219,50 @@ impl ScrollBar {
         WS_CHILD
     }
 
+    /// Scrollbar are useless on their own. We need to hook them and handle ALL the message ourself. yay windows...
+    unsafe fn hook_scrollbar_controls(&self) {
+        use crate::bind_raw_event_handler_inner;
+        use winapi::um::winuser::{WM_HSCROLL, WM_VSCROLL, SIF_ALL, SB_VERT, SB_HORZ, SCROLLINFO, GetScrollInfo};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
+
+        let handler = bind_raw_event_handler_inner(&parent_handle, handle as _, move |_hwnd, msg, _w, _l| {
+            let mut si: SCROLLINFO = mem::zeroed();
+            match msg {
+                WM_HSCROLL => {
+                    si.cbSize = mem::size_of::<SCROLLINFO>() as u32;
+                    si.fMask  = SIF_ALL;
+                    GetScrollInfo(handle, SB_HORZ as i32, &mut si);
+                },
+                WM_VSCROLL => {
+                    si.cbSize = mem::size_of::<SCROLLINFO>() as u32;
+                    si.fMask  = SIF_ALL;
+                    GetScrollInfo(handle, SB_VERT as i32, &mut si);
+                },
+                _ => {}
+            }
+
+            None
+        });
+
+        *self.handler0.borrow_mut() = Some(handler.unwrap());
+    }
+
+}
+
+impl Drop for ScrollBar {
+    fn drop(&mut self) {
+        use crate::unbind_raw_event_handler;
+        
+        let handler = self.handler0.borrow();
+        if let Some(h) = handler.as_ref() {
+            unbind_raw_event_handler(h);
+        }
+    
+        self.handle.destroy();
+    }
 }
 
 pub struct ScrollBarBuilder {
@@ -147,6 +272,8 @@ pub struct ScrollBarBuilder {
     flags: Option<ScrollBarFlags>,
     parent: Option<ControlHandle>,
     focus: bool,
+    range: Option<Range<usize>>,
+    pos: Option<usize>,
 }
 
 impl ScrollBarBuilder {
@@ -176,6 +303,16 @@ impl ScrollBarBuilder {
         self
     }
 
+    pub fn range(mut self, range: Option<Range<usize>>) -> ScrollBarBuilder {
+        self.range = range;
+        self
+    }
+
+    pub fn pos(mut self, pos: Option<usize>) -> ScrollBarBuilder {
+        self.pos = pos;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ScrollBarBuilder {
         self.parent = Some(p.into());
         self
@@ -200,12 +337,30 @@ impl ScrollBarBuilder {
 
         out.set_enabled(self.enabled);
 
+        if let Some(range) = self.range {
+            out.set_range(range);
+        }
+
+        if let Some(pos) = self.pos {
+            out.set_pos(pos);
+        }
+
         if self.focus {
             out.set_focus();
+        }
+
+        unsafe {
+            out.hook_scrollbar_controls();
         }
 
         Ok(())
     }
 
 
+}
+
+impl PartialEq for ScrollBar {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
 }

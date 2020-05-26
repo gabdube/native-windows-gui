@@ -57,12 +57,12 @@ Requires the `trackbar` feature.
 
 ```rust
 use native_windows_gui as nwg;
-fn build_trackbar(button: &mut nwg::TrackBar, window: &nwg::Window, font: &nwg::Font) {
+fn build_trackbar(track: &mut nwg::TrackBar, window: &nwg::Window) {
     nwg::TrackBar::builder()
         .range(Some(0..100))
         .pos(Some(10))
         .parent(window)
-        .build(button);
+        .build(track);
 }
 ```
 
