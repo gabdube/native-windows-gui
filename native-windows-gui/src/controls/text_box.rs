@@ -53,6 +53,7 @@ Note: Use `\r\n` to input a new line not just `\n`.
   * `OnTextInput`: When a TextBox value is changed
   * `MousePress(_)`: Generic mouse press events on the button
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 ```rust
 use native_windows_gui as nwg;

@@ -59,6 +59,7 @@ TextInput is not behind any features.
   * `OnTextInput`: When a TextInput value is changed
   * `MousePress(_)`: Generic mouse press events on the button
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 ```rust
 use native_windows_gui as nwg;

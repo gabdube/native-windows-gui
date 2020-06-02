@@ -47,6 +47,7 @@ Label is not behind any features.
   * `OnLabelDoubleClick`: When the user double click a label
   * `MousePress(_)`: Generic mouse press events on the label
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 ```rust
 use native_windows_gui as nwg;

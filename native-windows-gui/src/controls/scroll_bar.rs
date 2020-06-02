@@ -48,10 +48,12 @@ Requires the `scroll-bar` feature.
   * `OnVerticalScroll`: When the value of a scrollbar with the VERTICAL flags is changed
   * `OnHorizontalScroll`: When the value of a scrollbar with the HORIZONTAL flags is changed
   * `MousePress(_)`: Generic mouse press events on the button
-  * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseMove`: Generic mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 ```rust
 use native_windows_gui as nwg;
+
 fn build_scrollbar(button: &mut nwg::ScrollBar, window: &nwg::Window) {
     nwg::ScrollBar::builder()
         .range(Some(0..100))
@@ -59,6 +61,7 @@ fn build_scrollbar(button: &mut nwg::ScrollBar, window: &nwg::Window) {
         .parent(window)
         .build(button);
 }
+```
 */
 #[derive(Default)]
 pub struct ScrollBar {

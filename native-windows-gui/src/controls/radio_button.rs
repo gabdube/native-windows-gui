@@ -55,6 +55,7 @@ Note: Internally, radio buttons are `Button` and as such, they trigger the same 
   * `OnButtonDoubleClick`: When the adio button is clicked twice rapidly by the user
   * `MousePress(_)`: Generic mouse press events on the adio button
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 
 ```rust

@@ -67,6 +67,16 @@ pub struct TreeItem {
 
 /**
 A tree-view control is a window that displays a hierarchical list of items
+
+**Builder parameters:**
+    TODO
+
+**Control events:**
+  * `MousePress(_)`: Generic mouse press events on the button
+  * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
+  * TODO
+
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct TreeView {

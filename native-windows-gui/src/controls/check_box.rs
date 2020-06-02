@@ -62,6 +62,7 @@ CheckBox is not behind any features.
   * `OnButtonDoubleClick`: When the checkbox is clicked twice rapidly by the user
   * `MousePress(_)`: Generic mouse press events on the checkbox
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 
 ```rust

@@ -53,6 +53,7 @@ Requires the `combobox` feature.
   * `OnComboxBoxSelection`: When a new value in a combobox is choosen
   * `MousePress(_)`: Generic mouse press events on the checkbox
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 
 ```rust

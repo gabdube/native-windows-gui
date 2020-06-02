@@ -62,6 +62,7 @@ Requires the `datetime-picker` feature.
   * `OnDatePickerChanged`: When a new value in a datepicker is choosen
   * `MousePress(_)`: Generic mouse press events on the checkbox
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 ```rust
 use native_windows_gui as nwg;
