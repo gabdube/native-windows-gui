@@ -67,6 +67,25 @@ pub struct TreeItem {
 
 /**
 A tree-view control is a window that displays a hierarchical list of items
+
+Requires the `tree-view` feature
+
+**Builder parameters:**
+  * `parent`:     **Required.** The tree-view parent container.
+  * `position`:   The treeview position.
+  * `enabled`:    If the treeview can be used by the user. It also has a grayed out look if disabled.
+  * `focus`:      The control receive focus after being created
+  * `flags`:      A combination of the `TreeViewFlags` values.
+  * `font`:       The font used for the treeview text
+  * `parent`:     The treeview parent container.
+  * `image_list`: Image list containing the icon to use in the tree-view
+
+**Control events:**
+  * `MousePress(_)`: Generic mouse press events on the tree view
+  * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
+  * TODO
+
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct TreeView {

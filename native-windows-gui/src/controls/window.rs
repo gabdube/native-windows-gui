@@ -66,6 +66,16 @@ bitflags! {
 
 /**
     A basic top level window. At least one top level window is required to make a NWG application.
+
+    **Builder parameters:**
+      * TODO
+
+    **Control events:**
+      * `MousePress(_)`: Generic mouse press events on the button
+      * `OnMouseMove`: Generic mouse mouse event
+      * `OnMouseWheel`: Generic mouse wheel event
+      * TODO
+
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct Window {

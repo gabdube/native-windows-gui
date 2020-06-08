@@ -77,7 +77,7 @@ A layout that lays out widgets in a grid
 NWG layouts use interior mutability to manage their controls.
 
 A GridLayouts has the following properties:
-* margins - The top, right, bottom, left margins of the layout - (default: [5, 5, 5, 5])
+* margin - The top, right, bottom, left margins of the layout - (default: [5, 5, 5, 5])
 * spacing - The spacing between children controls - (default: 5)
 * min_size - The minimum size of the layout - (default: [0, 0])
 * max_size - The maximum size of the layout - (default: [u32::max_value(), u32::max_value()])

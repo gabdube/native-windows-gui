@@ -57,6 +57,7 @@ Requires the `list-box` feature.
   * `OnListBoxDoubleClick`: When a listbox item is clicked twice rapidly
   * `MousePress(_)`: Generic mouse press events on the listbox
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 ```rust
 use native_windows_gui as nwg;

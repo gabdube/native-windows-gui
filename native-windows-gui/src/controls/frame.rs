@@ -35,6 +35,7 @@ Requires the `frame` feature.
   * `position`: The frame position.
   * `enabled`:  If the frame children can be used by the user.
   * `flags`:    A combination of the FrameFlags values.
+  * `OnMouseWheel`: Generic mouse wheel event
 
 **Control events:**
   * `MousePress(_)`: Generic mouse press events on the button

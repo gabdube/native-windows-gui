@@ -38,6 +38,15 @@ A rich text box is almost a superset of the normal textbox. Unlike text box, ric
 See: https://docs.microsoft.com/en-us/windows/win32/controls/about-rich-edit-controls#rich-edit-version-41
 
 Note: Use `\r\n` to input a new line not just `\n`.
+
+**Builder parameters:**
+  * TODO
+
+**Control events:**
+  * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
+  * TODO
+
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct RichTextBox {

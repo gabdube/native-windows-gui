@@ -21,6 +21,7 @@ Requires the `status-bar` feature.
 **Control events:**
   * `MousePress(_)`: Generic mouse press events on the status bar
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 ```rust
 use native_windows_gui as nwg;

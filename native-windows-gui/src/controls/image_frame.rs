@@ -35,6 +35,7 @@ ImageFrame is not behind any features.
   * `OnImageFrameDoubleClick`: When the image frame is clicked twice rapidly by the user
   * `MousePress(_)`: Generic mouse press events on the button
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 ```rust
 use native_windows_gui as nwg;
