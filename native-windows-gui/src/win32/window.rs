@@ -661,6 +661,10 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
                 _ => callback(Event::OnResize, NO_DATA, base_handle)
             }
         },
+        WM_PAINT => {
+            let data = EventData::OnPaint(PaintData { hwnd } );
+            callback(Event::OnPaint, data, base_handle)
+        },
         WM_CHAR => callback(Event::OnChar, EventData::OnChar(char::from_u32(w as u32).unwrap_or('?')), base_handle),
         WM_EXITSIZEMOVE => callback(Event::OnResizeEnd, NO_DATA, base_handle),
         WM_ENTERSIZEMOVE => callback(Event::OnResizeBegin, NO_DATA, base_handle),
@@ -673,7 +677,6 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
         WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
         WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
-        WM_PAINT => callback(Event::OnPaint, NO_DATA, base_handle),
         NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Notice(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {

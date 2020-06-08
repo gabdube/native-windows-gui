@@ -54,6 +54,7 @@ cargo test everything --features "all"  # For the test suite
 cargo run --example basic
 cargo run --example calculator
 cargo run --example message_bank
+cargo run --example basic_drawing_d
 cargo run --example partials --features "listbox frame combobox"
 cargo run --example system_tray --features "tray-notification message-window menu cursor"
 cargo run --example dialog_multithreading_d --features "notice"

@@ -25,6 +25,9 @@
 # Tray notification
 ![tray notification](tray_notification_.png)
 
+# Drawing GDI
+![basic drawing](basic_drawing.png)
+
 # Extern canvas OpenGL
 ![extern canvas](opengl_canvas.png)
 

@@ -23,7 +23,7 @@ pub enum Event {
 
     /// Generic mouse move event that can be sent to most window controls
     OnMouseMove,
-
+    
     /// Generic window event when the user right click a window
     OnContextMenu,
 
@@ -177,11 +177,23 @@ pub enum EventData {
     OnChar(char),
 
     /// The windows key code inputted by a user. See the `nwg::keys` module
-    OnKeyPress(u32)
+    OnKeyPress(u32),
+
+    /// Hold resources that will most likely be used during painting. 
+    OnPaint(PaintData)
 }
 
 impl EventData {
 
+    /// Unwraps event data into a `&PaintData`. Panics if it's not the right type.
+    pub fn on_paint(&self) -> &PaintData {
+        match self {
+            EventData::OnPaint(p) => p,
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
+    /// Unwraps event data into a `&ToolTipTextData`. Panics if it's not the right type.
     pub fn on_tooltip_text(&self) -> &ToolTipTextData {
         match self {
             EventData::OnTooltipText(d) => d,
@@ -196,6 +208,8 @@ impl EventData {
 //
 
 use winapi::um::commctrl::NMTTDISPINFOW;
+use winapi::um::winuser::{PAINTSTRUCT, BeginPaint, EndPaint};
+use winapi::shared::windef::HWND;
 use std::fmt;
 
 /// A wrapper structure that set the tooltip text on a `OnTooltipText` callback
@@ -279,3 +293,30 @@ impl fmt::Debug for WindowCloseData {
         write!(f, "WindowCloseData({})", self.closing())
     }
 }
+
+
+#[derive(Debug)]
+pub struct PaintData {
+    pub(crate) hwnd: HWND
+}
+
+impl PaintData {
+
+    /// Wrapper over BeginPaint
+    pub fn begin_paint(&self) -> PAINTSTRUCT {
+        unsafe {
+            let mut paint: PAINTSTRUCT = ::std::mem::zeroed();
+            BeginPaint(self.hwnd, &mut paint);
+            paint
+        }
+    }
+
+    /// Wrapper over EndPaint
+    pub fn end_paint(&self, p: &PAINTSTRUCT) {
+        unsafe {
+            EndPaint(self.hwnd, p);
+        }
+    }
+
+}
+
