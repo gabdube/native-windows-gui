@@ -61,6 +61,7 @@ cargo run --example dialog_multithreading_d --features "notice"
 cargo run --example image_decoder_d --features "image-decoder file-dialog"
 cargo run --example month_name_d --features "winnls textbox"
 cargo run --example splash_screen_d --features "image-decoder"
+cargo run --example drop_files_d --features "textbox"
 
 cd examples/opengl_canvas
 cargo run
@@ -120,6 +121,8 @@ This is the main project git. It is separated in multiple sections
 - Simple layout configurations
   - FlexboxLayout
   - GridLayout
+- Drag and drop
+  - Drop files from the desktop to a window
 - The most common dialog boxes
   - File dialog (save, open, open folder)
   - Font dialog

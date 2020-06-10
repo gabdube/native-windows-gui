@@ -57,7 +57,7 @@ impl Drop for ClipboardData {
 
 
 /**
-A global object that wraps the system clipbord. It can be used to set or get the system cliboard content.
+A global object that wraps the system clipboard. It can be used to set or get the system cliboard content.
 
 It's important to keep in mind that there is no way to validate data sent through the clipboard API, as such this wrapper
 is still mostly unsafe and you must validate the data when reading.

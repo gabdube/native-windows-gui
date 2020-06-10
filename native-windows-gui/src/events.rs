@@ -74,6 +74,9 @@ pub enum Event {
     /// When a bar like control value is changed.
     OnHorizontalScroll,
 
+    /// When a file is dropped into a a control
+    OnFileDrop,
+
     /// When a button is clicked. Similar to a MouseUp event, but only for button control
     OnButtonClick,
 
@@ -188,7 +191,10 @@ pub enum EventData {
 
     /// The delta value of a mouse wheel event. A positive value indicates that the wheel was rotated to the right; 
     /// a negative value indicates that the wheel was rotated to the left.
-    OnMouseWheel(i32)
+    OnMouseWheel(i32),
+
+    /// The path to a file that was dropping in the application
+    OnFileDrop(DropFiles)
 }
 
 impl EventData {
@@ -209,6 +215,14 @@ impl EventData {
         }
     }
 
+    /// Unwraps event data into a `&DragData`. Panics if it's not the right type.
+    pub fn on_file_drop(&self) -> &DropFiles {
+        match self {
+            EventData::OnFileDrop(d) => d,
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
 }
 
 //
@@ -217,6 +231,7 @@ impl EventData {
 
 use winapi::um::commctrl::NMTTDISPINFOW;
 use winapi::um::winuser::{PAINTSTRUCT, BeginPaint, EndPaint};
+use winapi::um::shellapi::{HDROP, DragFinish};
 use winapi::shared::windef::HWND;
 use std::fmt;
 
@@ -303,6 +318,7 @@ impl fmt::Debug for WindowCloseData {
 }
 
 
+/// Opaque type over a paint event data
 #[derive(Debug)]
 pub struct PaintData {
     pub(crate) hwnd: HWND
@@ -328,3 +344,76 @@ impl PaintData {
 
 }
 
+
+/// Opaque type over one or more dragged files.
+pub struct DropFiles {
+    pub(crate) drop: HDROP,
+}
+
+impl DropFiles {
+
+    /// Retrieves the position of the mouse pointer at the time a file was dropped during a drag-and-drop operation.
+    /// The coordinates are local to the control. Ex: (0, 0) is the top left corner of the control.
+    pub fn point(&self) -> [i32; 2] {
+        use winapi::um::shellapi::DragQueryPoint;
+        use winapi::shared::windef::POINT;
+
+        unsafe {
+            let mut pt = POINT { x: 0, y: 0 };
+            DragQueryPoint(self.drop, &mut pt);
+            [pt.x, pt.y]
+        }
+    }
+
+    /// Return the nuber of files dropped 
+    pub fn len(&self) -> usize {
+        use winapi::um::shellapi::DragQueryFileW;
+        use std::ptr;
+
+        unsafe {
+            DragQueryFileW(self.drop, 0xFFFFFFFF, ptr::null_mut(), 0) as usize
+        }
+    }
+
+    /// Return the files path dropped into the app
+    pub fn files(&self) -> Vec<String> {
+        use winapi::um::shellapi::DragQueryFileW;
+        use crate::win32::base_helper::from_utf16;
+        use std::ptr;
+
+        let len = self.len();
+        let mut files = Vec::with_capacity(len);
+        unsafe {
+            for i in 0..len {
+                // Need to add a +1 here for some reason
+                let buffer_size = (DragQueryFileW(self.drop, i as _, ptr::null_mut(), 0) + 1) as usize;
+
+                let mut buffer: Vec<u16> = Vec::with_capacity(buffer_size);
+                buffer.set_len(buffer_size);
+
+                DragQueryFileW(self.drop, i as _, buffer.as_mut_ptr(), buffer_size as _);
+
+                files.push(from_utf16(&buffer));
+            }
+        }
+
+        files
+    }
+
+}
+
+impl fmt::Debug for DropFiles {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "DragData {{ point: {:?}, files: {:?} }}", self.point(), self.files())
+    }
+}
+
+impl Drop for DropFiles {
+
+    fn drop(&mut self) {
+        if !self.drop.is_null() {
+            unsafe { DragFinish(self.drop) }
+        }
+    }
+
+}
