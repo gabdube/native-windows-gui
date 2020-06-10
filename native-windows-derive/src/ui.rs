@@ -4,7 +4,11 @@ use crate::events::ControlEvents;
 use crate::shared::Parameters;
 
 const TOP_LEVEL: &'static [&'static str] = &[
-    "Window", "CanvasWindow", "TabsContainer", "Tab", "MessageWindow", "ExternCanvas"
+    "Window", "MessageWindow", "ExternCanvas"
+];
+
+const AUTO_PARENT: &'static [&'static str] = &[
+    "Window", "TabsContainer", "Tab", "MessageWindow", "ExternCanvas"
 ];
 
 
@@ -599,7 +603,7 @@ impl<'a> NwgUi<'a> {
                 // Rewind the controls set the parent to the nearest control that supports children
                 let parent = controls[0..i]
                     .iter().rev()
-                    .find(|i| TOP_LEVEL.iter().any(|top| i.ty == top) );
+                    .find(|i| AUTO_PARENT.iter().any(|top| i.ty == top) );
             
                 if let Some(parent) = parent {
                     let parent_id = Some(parent.id.to_string());

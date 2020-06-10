@@ -3,9 +3,15 @@ use winapi::shared::windef::HWND;
 use winapi::um::winnt::LPWSTR;
 use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_COMPOSITED, WS_EX_CONTROLPARENT};
 use crate::win32::{base_helper::to_utf16, window_helper as wh};
-use crate::{NwgError, Font, RawEventHandler, ImageList, unbind_raw_event_handler};
+use crate::{NwgError, Font, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
-use std::{ptr, mem, cell::RefCell};
+use std::{mem, cell::RefCell};
+
+#[cfg(feature="image-list")]
+use crate::ImageList;
+
+#[cfg(feature="image-list")]
+use std::ptr;
 
 const NOT_BOUND: &'static str = "TabsContainer/Tab is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: TabsContainer/Tab handle is not HWND!";
@@ -21,6 +27,9 @@ bitflags! {
 /**
 A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
 that indicates what the button does when the user selects it.
+
+Requires the `tabs` feature
+
 */
 #[derive(Default)]
 pub struct TabsContainer {

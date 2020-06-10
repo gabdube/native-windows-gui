@@ -343,7 +343,7 @@ pub fn unbind_raw_event_handler(handler: &RawEventHandler)
         let mut callback_value: UINT_PTR = 0;
         let result = GetWindowSubclass(handle, subclass_proc, handler_id, &mut callback_value);
         if result == 0 {
-            panic!("Parent of hander with handler id {} was either freed or is already unbound", handler_id);
+            panic!("Parent of handler with handler id {} was either freed or is already unbound", handler_id);
         }
 
         let callback_wrapper_ptr = callback_value as *mut *mut RawCallback;

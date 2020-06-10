@@ -178,15 +178,6 @@ use super::{TreeView};
 #[cfg(feature = "tree-view")]
 handles!(TreeView);
 
-#[cfg(feature = "canvas")]
-use super::{CanvasWindow, Canvas};
-
-#[cfg(feature = "canvas")]
-handles!(CanvasWindow);
-
-#[cfg(feature = "canvas")]
-handles!(Canvas);
-
 #[cfg(feature = "tray-notification")]
 use super::{TrayNotification};
 
