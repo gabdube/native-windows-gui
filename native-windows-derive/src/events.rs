@@ -304,7 +304,7 @@ fn map_event_enum(ident: &syn::Ident) -> syn::Pat {
     let evt = ident.to_string();
     let pat = match &evt as &str {
         "MousePressLeftUp" | "MousePressLeftDown" | "MousePressRightUp" | "MousePressRightDown" => {
-            format!("Event::MousePress(MousePressEvent::{})", evt)
+            format!("Event::OnMousePress(MousePressEvent::{})", evt)
         },
         "OnMousePress" => "Event::OnMousePress(_)".into(),
         _ => format!("Event::{}", evt)

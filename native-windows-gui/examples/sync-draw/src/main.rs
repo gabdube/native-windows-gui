@@ -131,8 +131,8 @@ impl SyncDraw {
         let mut data = self.data.borrow_mut();
 
         match evt {
-            E::MousePress(MousePressLeftDown) => { data.drawing = true; },
-            E::MousePress(MousePressLeftUp) => { data.drawing = false; },
+            E::OnMousePress(MousePressLeftDown) => { data.drawing = true; },
+            E::OnMousePress(MousePressLeftUp) => { data.drawing = false; },
             _ => unreachable!()
         }
     }
