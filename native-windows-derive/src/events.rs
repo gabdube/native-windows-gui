@@ -306,6 +306,7 @@ fn map_event_enum(ident: &syn::Ident) -> syn::Pat {
         "MousePressLeftUp" | "MousePressLeftDown" | "MousePressRightUp" | "MousePressRightDown" => {
             format!("Event::MousePress(MousePressEvent::{})", evt)
         },
+        "OnMousePress" => "Event::OnMousePress(_)".into(),
         _ => format!("Event::{}", evt)
     };
 

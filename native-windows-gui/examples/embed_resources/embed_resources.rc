@@ -5,6 +5,8 @@ TEST ICON "../../test_rc/cog.ico"
 
 BALL BITMAP "../../test_rc/ball.bmp";
 
+ICE CURSOR "../../test_rc/ice.cur"
+
 STRINGTABLE
 {
     0, "Enter your name here"

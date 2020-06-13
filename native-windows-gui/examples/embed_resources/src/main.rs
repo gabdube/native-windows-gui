@@ -22,6 +22,10 @@ pub struct EmbedApp {
     #[nwg_resource]
     embed: nwg::EmbedResource,
 
+    /// It's possible to load embed resources automatically
+    #[nwg_resource(source_embed: Some(&data.embed), source_embed_str: Some("ICE"))]
+    ice_cursor: nwg::Cursor,
+
     #[nwg_control(size: (280, 25), position: (10, 10))]
     name_edit: nwg::TextInput,
 
@@ -29,7 +33,7 @@ pub struct EmbedApp {
     embed_bitmap: nwg::ImageFrame,
 
     #[nwg_control(size: (280, 60), position: (10, 40))]
-    #[nwg_events( OnButtonClick: [EmbedApp::say_hello] )]
+    #[nwg_events( OnButtonClick: [EmbedApp::say_hello], OnMouseMove: [EmbedApp::set_cursor], OnMousePress: [EmbedApp::set_cursor] )]
     hello_button: nwg::Button
 }
 
@@ -49,11 +53,16 @@ impl EmbedApp {
     fn say_hello(&self) {
         nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
     }
+
+    fn set_cursor(&self) {
+        nwg::GlobalCursor::set(&self.ice_cursor);
+    }
     
     fn say_goodbye(&self) {
         nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
         nwg::stop_thread_dispatch();
     }
+    
 
 }
 

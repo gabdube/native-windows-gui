@@ -53,6 +53,9 @@ impl Icon {
             #[cfg(feature = "embed-resource")]
             source_embed_id: 0,
 
+            #[cfg(feature = "embed-resource")]
+            source_embed_str: None,
+
             size: None,
             strict: false
         }
@@ -69,7 +72,10 @@ pub struct IconBuilder<'a> {
     source_embed: Option<&'a EmbedResource>,
 
     #[cfg(feature = "embed-resource")]
-    source_embed_id: u32,
+    source_embed_id: usize,
+
+    #[cfg(feature = "embed-resource")]
+    source_embed_str: Option<&'a str>,
 
     size: Option<(u32, u32)>,
     strict: bool,
@@ -99,8 +105,14 @@ impl<'a> IconBuilder<'a> {
     }
 
     #[cfg(feature = "embed-resource")]
-    pub fn source_embed_id(mut self, id: u32) -> IconBuilder<'a> {
+    pub fn source_embed_id(mut self, id: usize) -> IconBuilder<'a> {
         self.source_embed_id = id;
+        self
+    }
+
+    #[cfg(feature = "embed-resource")]
+    pub fn source_embed_str(mut self, id: Option<&'a str>) -> IconBuilder<'a> {
+        self.source_embed_str = id;
         self
     }
 
@@ -115,34 +127,35 @@ impl<'a> IconBuilder<'a> {
     }
 
     pub fn build(self, b: &mut Icon) -> Result<(), NwgError> {
-        use winapi::shared::ntdef::HANDLE;
-
-        let handle;
-        
         if let Some(src) = self.source_text {
-            handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_ICON) };
+            let handle = unsafe { rh::build_image(src, self.size, self.strict, IMAGE_ICON)? };
+            *b = Icon { handle, owned: true };
         } else if let Some(src) = self.source_system {
-            handle = unsafe { rh::build_oem_image(OemImage::Icon(src), self.size) };
+            let handle = unsafe { rh::build_oem_image(OemImage::Icon(src), self.size)? };
+            *b = Icon { handle, owned: true };
         } else {
-
             #[cfg(feature = "embed-resource")]
-            fn build_embed(builder: IconBuilder) -> Result<HANDLE, NwgError> {
-                if builder.source_embed.is_some() {
-                    unsafe { rh::build_embed(builder.source_embed.unwrap(), builder.source_embed_id, builder.size, builder.strict, IMAGE_ICON) }
-                } else {
-                    Err(NwgError::resource_create("No source provided for Icon"))
+            fn build_embed(builder: IconBuilder) -> Result<Icon, NwgError> {
+                match builder.source_embed {
+                    Some(embed) => {
+                        match builder.source_embed_str {
+                            Some(src) => embed.icon_str(src)
+                                .ok_or_else(|| NwgError::resource_create(format!("No icon in embed resource identified by {}", src))),
+                            None => embed.icon(builder.source_embed_id)
+                                .ok_or_else(|| NwgError::resource_create(format!("No icon in embed resource identified by {}", builder.source_embed_id)))
+                        }
+                    },
+                    None => Err(NwgError::resource_create("No source provided for Icon"))
                 }
             }
 
             #[cfg(not(feature = "embed-resource"))]
-            fn build_embed(_builder: IconBuilder) -> Result<HANDLE, NwgError> {
+            fn build_embed(_builder: IconBuilder) -> Result<Icon, NwgError> {
                 Err(NwgError::resource_create("No source provided for Icon"))
             }
 
-            handle = build_embed(self);
+            *b = build_embed(self)?;
         }
-
-        *b = Icon { handle: handle?, owned: true };
     
         Ok(())
     }

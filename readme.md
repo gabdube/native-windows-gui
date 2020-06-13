@@ -163,7 +163,7 @@ This is the list of remaining task to complete for the 1.0 release. Created `202
 * ☐ Load font from files
 * ☐ Finishing the `OnKeyPress` event
 * ☐ Add the tree-view events 
-* ☐ Add cursor in embed resources
+* ☑️ Add cursor in embed resources
 * ☐ Implement `std::Error` for `NwgError`
 
 ## License
@@ -383,3 +383,4 @@ For the icons used in the test suite (and only there):
 - **cat.jpg** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
 - **weird_cat.png** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
 - **list_0.png**, **list_1.png**, **list_2.png**, **list_3.png** are made by [Smashicons](https://smashicons.com/) from [www.flaticon.com](https://www.flaticon.com/)
+- **ice.cur** is made by nrox653 from [rw-designer](http://www.rw-designer.com/cursor-set/icepackpro)

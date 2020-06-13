@@ -2,7 +2,7 @@ use winapi::shared::minwindef::HINSTANCE;
 use winapi::um::winuser::{LoadImageW, LR_DEFAULTSIZE};
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::NwgError;
-use super::{Icon, Bitmap};
+use super::{Icon, Bitmap, Cursor};
 use std::{ptr, slice};
 
 /**
@@ -105,6 +105,27 @@ impl EmbedResource {
     pub fn bitmap_str(&self, id: &str) -> Option<Bitmap> {
         let name = to_utf16(id);
         self.bitmap(name.as_ptr() as usize)
+    }
+
+    /// Load a cursor file from the rc file. Returns `None` if `id` does not map to a cursor.
+    pub fn cursor(&self, id: usize) -> Option<Cursor> {
+        use winapi::um::winuser::IMAGE_CURSOR;
+
+        unsafe {
+            let id_rc = id as _;
+            let cursor = LoadImageW(self.hinst, id_rc, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE);
+            if cursor.is_null() {
+                None
+            } else {
+                Some(Cursor { handle: cursor as _, owned: true } )
+            }
+        }
+    }
+
+    /// Load a cursor file from the rc file. Returns `None` if `id` does not map to a cursor.
+    pub fn cursor_str(&self, id: &str) -> Option<Cursor> {
+        let name = to_utf16(id);
+        self.cursor(name.as_ptr() as usize)
     }
 
 }

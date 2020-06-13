@@ -14,7 +14,7 @@ use nwg::NativeUi;
 
 #[derive(Default, NwgUi)]
 pub struct SplashScreen {
-    #[nwg_control(size: (500, 215), position: (700, 300), flags: "POPUP|VISIBLE", ex_flags: WindowExFlags::TOPMOST)]
+    #[nwg_control(size: (500, 215), position: (700, 300), flags: "POPUP|VISIBLE", topmost: true)]
     window: nwg::Window,
 
     #[nwg_resource(source_file: Some("./test_rc/splash.png"))]

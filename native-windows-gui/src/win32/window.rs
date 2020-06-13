@@ -646,13 +646,13 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
                 NIN_BALLOONHIDE => callback(Event::OnTrayNotificationHide, NO_DATA, handle),
                 NIN_BALLOONTIMEOUT => callback(Event::OnTrayNotificationTimeout, NO_DATA, handle),
                 NIN_BALLOONUSERCLICK => callback(Event::OnTrayNotificationUserClose, NO_DATA, handle),
-                WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  handle), 
-                WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, handle), 
+                WM_LBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  handle), 
+                WM_LBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressLeftDown), NO_DATA, handle), 
                 WM_RBUTTONUP => {
-                    callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, handle);
+                    callback(Event::OnMousePress(MousePressEvent::MousePressRightUp), NO_DATA, handle);
                     callback(Event::OnContextMenu, NO_DATA, handle);
                 }, 
-                WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, handle),
+                WM_RBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressRightDown), NO_DATA, handle),
                 WM_MOUSEMOVE => callback(Event::OnMouseMove, NO_DATA, handle),
                 _ => {}
             }
@@ -680,10 +680,10 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_HSCROLL => callback(Event::OnHorizontalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
         WM_VSCROLL => callback(Event::OnVerticalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
         WM_MOUSEMOVE => callback(Event::OnMouseMove, NO_DATA, base_handle), 
-        WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  base_handle), 
-        WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
-        WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
-        WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
+        WM_LBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  base_handle), 
+        WM_LBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
+        WM_RBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
+        WM_RBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
         NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Notice(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {
