@@ -163,7 +163,7 @@ This is the list of remaining task to complete for the 1.0 release. Created `202
 * ☐ Load font from files
 * ☐ Finishing the `OnKeyPress` event
 * ☐ Add the tree-view events 
-* ☑️ Add cursor in embed resources
+* 🗹 Add cursor in embed resources
 * ☐ Implement `std::Error` for `NwgError`
 
 ## License
