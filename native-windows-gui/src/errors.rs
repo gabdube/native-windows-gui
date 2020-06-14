@@ -99,7 +99,7 @@ impl fmt::Display for NwgError {
             FileDialogError(reason) => write!(f, "File dialog actions failed: {:?}", reason),
 
             #[cfg(feature = "image-decoder")]
-            ImageDecoderError(reason) => write!(f, "Image decoder failed: {:?}", reason),
+            ImageDecoderError(_id, reason) => write!(f, "Image decoder failed: {:?}", reason),
 
             #[cfg(feature = "winnls")]
             BadLocale(reason) => write!(f, "Windows locale functions failed: {:?}", reason),

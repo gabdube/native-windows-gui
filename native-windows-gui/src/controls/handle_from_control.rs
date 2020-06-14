@@ -167,64 +167,71 @@ use super::{DatePicker};
 handles!(DatePicker);
 
 #[cfg(feature = "progress-bar")]
-use super::{ProgressBar};
+use super::ProgressBar;
 
 #[cfg(feature = "progress-bar")]
 handles!(ProgressBar);
 
 #[cfg(feature = "tree-view")]
-use super::{TreeView};
+use super::TreeView;
 
 #[cfg(feature = "tree-view")]
 handles!(TreeView);
 
 #[cfg(feature = "tray-notification")]
-use super::{TrayNotification};
+use super::TrayNotification;
 
 #[cfg(feature = "tray-notification")]
 handles!(TrayNotification);
 
 #[cfg(feature = "message-window")]
-use super::{MessageWindow};
+use super::MessageWindow;
 
 #[cfg(feature = "message-window")]
 handles!(MessageWindow);
 
 #[cfg(feature = "timer")]
-use super::{Timer};
+use super::Timer;
 
 #[cfg(feature = "timer")]
 handles!(Timer);
 
 #[cfg(feature = "notice")]
-use super::{Notice};
+use super::Notice;
 
 #[cfg(feature = "notice")]
 handles!(Notice);
 
 #[cfg(feature = "list-view")]
-use super::{ListView};
+use super::ListView;
 
 #[cfg(feature = "list-view")]
 handles!(ListView);
 
 #[cfg(feature = "extern-canvas")]
-use super::{ExternCanvas};
+use super::ExternCanvas;
 
 #[cfg(feature = "extern-canvas")]
 handles!(ExternCanvas);
 
 
 #[cfg(feature = "frame")]
-use super::{Frame};
+use super::Frame;
 
 #[cfg(feature = "frame")]
 handles!(Frame);
 
 
 #[cfg(feature = "rich-textbox")]
-use super::{RichTextBox};
+use super::RichTextBox;
 
 #[cfg(feature = "rich-textbox")]
 handles!(RichTextBox);
+
+#[cfg(feature = "scroll-bar")]
+use super::ScrollBar;
+
+#[cfg(feature = "scroll-bar")]
+handles!(ScrollBar);
+
 
