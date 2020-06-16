@@ -184,7 +184,7 @@ pub enum EventData {
     OnChar(char),
 
     /// The windows key code inputted by a user. See the `nwg::keys` module
-    OnKeyPress(u32),
+    OnKey(u32),
 
     /// Hold resources that will most likely be used during painting. 
     OnPaint(PaintData),
@@ -222,6 +222,15 @@ impl EventData {
             d => panic!("Wrong data type: {:?}", d)
         }
     }
+
+    /// Unwraps event data into the virtual key code for `OnKeyPress` and `OnKeyRelease`
+    pub fn on_key(&self) -> u32 {
+        match self {
+            EventData::OnKey(key) => *key,
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
 
 }
 

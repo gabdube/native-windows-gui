@@ -161,7 +161,7 @@ This is the list of remaining task to complete for the 1.0 release. Created `202
 * ☐ Implement events in the derive partials
 * ☐ Cleanup resources in derive partial
 * ☐ Load font from files
-* ☐ Finishing the `OnKeyPress` event
+* 🗹 Finishing the `OnKeyPress` event
 * ☐ Add the tree-view events 
 * 🗹 Add cursor in embed resources
 * 🗹 Implement `std::Error` for `NwgError`

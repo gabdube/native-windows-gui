@@ -576,7 +576,14 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
 
     match msg {
         WM_KEYDOWN | WM_KEYUP => {
+            let evt = match msg == WM_KEYDOWN { 
+                true => Event::OnKeyPress,
+                false => Event::OnKeyRelease
+            };
 
+            let keycode = w as u32;
+            let data = EventData::OnKey(keycode);
+            callback(evt, data, base_handle);
         },
         WM_NOTIFY => {
             let code = {
