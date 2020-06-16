@@ -86,7 +86,7 @@ pub fn get_window_font(handle: HWND) -> HFONT {
 
 /// Set the font of a window
 pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: bool) {
-    use winapi::um::winuser::{WM_SETFONT};
+    use winapi::um::winuser::WM_SETFONT;
     use winapi::um::winuser::SendMessageW;
 
     let font_handle = font_handle.unwrap_or(ptr::null_mut());

@@ -1,5 +1,6 @@
 use winapi::shared::windef::HFONT;
 use crate::win32::resources_helper as rh;
+use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::NwgError;
 use std::ptr;
 
@@ -118,6 +119,68 @@ impl Font {
             .unwrap()
             .as_ref()
             .map(|f| Font { handle: f.handle } )
+    }
+
+    /// Add a font to the system font table. Don't forget to call `Font::remove_font(path)` once your done.
+    /// Returns `false` if the font could not be added. Windows won't tell you why though. 
+    ///
+    /// Other info:
+    /// - The value of `path` can be a `ttf` or a `otf` font. 
+    /// - Adding the same font multiple time increase the internal refcount
+    /// - Use `Font::families()` to return the available system font families
+    ///
+    pub fn add_font(path: &str) -> bool {
+        use winapi::um::wingdi::AddFontResourceW;
+
+        unsafe {
+            let path = to_utf16(path);
+            AddFontResourceW(path.as_ptr()) > 0
+        }
+    }
+
+    /// Remove a font that was previously added by `Font::add_font`
+    pub fn remove_font(path: &str) {
+        use winapi::um::wingdi::RemoveFontResourceW;
+
+        unsafe {
+            let path = to_utf16(path);
+            RemoveFontResourceW(path.as_ptr());
+        }
+    }
+
+    /// Returns all the font families loaded on the OS. 
+    /// Probably pretty slow, so cache the value if possible
+    pub fn families() -> Vec<String> {
+        use winapi::um::wingdi::{LOGFONTW, TEXTMETRICW, DEFAULT_CHARSET, EnumFontFamiliesExW};
+        use winapi::um::winuser::GetDC;
+        use winapi::shared::minwindef::{DWORD, LPARAM};
+        use std::mem;
+        
+        let mut families = Vec::with_capacity(16);
+
+        unsafe extern "system" fn callback(font_ptr: *const LOGFONTW, _txt: *const TEXTMETRICW, _font_type: DWORD, lparam: LPARAM) -> i32 {
+            let families_ptr = lparam as *mut Vec<String>;
+            let families = &mut *families_ptr;
+
+            let font = &*font_ptr;
+            let family_text = from_utf16(&font.lfFaceName);
+            if !families.iter().any(|f| f == &family_text) {
+                families.push(family_text);
+            }
+
+            1
+        }
+
+        unsafe {
+            let hdc = GetDC(ptr::null_mut());
+            let mut font: LOGFONTW = mem::zeroed();
+            font.lfCharSet = DEFAULT_CHARSET as u8;
+
+            EnumFontFamiliesExW(hdc, &mut font, Some(callback), (&mut families as *mut Vec<String>) as _, 0);
+        }
+
+        families.shrink_to_fit();
+        families
     }
 
 }

@@ -155,12 +155,13 @@ it will most likely be added.
 
 ## 1.0 release checklist
 
-This is the list of remaining task to complete for the 1.0 release. Created `2020-06-13`
+This is the list of remaining task to complete for the 1.0 release. Created `2020-06-13`, updated `2020-06-16`
 
 * ☐ Finish up the `ListView` controls
 * ☐ Implement events in the derive partials
 * ☐ Cleanup resources in derive partial
-* ☐ Load font from files
+* 🗹 Load font from files
+* 🗹 Load font from memory
 * 🗹 Finishing the `OnKeyPress` event
 * ☐ Add the tree-view events 
 * 🗹 Add cursor in embed resources
