@@ -22,7 +22,7 @@ mod image_list;
 #[cfg(feature = "embed-resource")]
 mod embed;
 
-pub use font::{Font, FontInfo, FontBuilder};
+pub use font::{Font, MemFont, FontInfo, FontBuilder};
 pub use system_images::*;
 pub use icon::{Icon, IconBuilder};
 pub use cursor::{Cursor, CursorBuilder};

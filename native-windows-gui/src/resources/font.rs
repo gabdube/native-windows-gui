@@ -17,7 +17,6 @@ lazy_static! {
 
 pub struct MemFont(pub HANDLE);
 
-
 /** 
 Represent a font parameters. Returned by the font dialog when the user selected a font.
 Can also be used to create a Font resource using `Font::from_info`
