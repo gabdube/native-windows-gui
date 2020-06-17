@@ -1,4 +1,5 @@
 use winapi::shared::windef::HFONT;
+use winapi::um::winnt::HANDLE;
 use crate::win32::resources_helper as rh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::NwgError;
@@ -13,6 +14,8 @@ lazy_static! {
         Mutex::new(None)
     };
 }
+
+pub struct MemFont(pub HANDLE);
 
 
 /** 
@@ -121,14 +124,15 @@ impl Font {
             .map(|f| Font { handle: f.handle } )
     }
 
-    /// Add a font to the system font table. Don't forget to call `Font::remove_font(path)` once your done.
-    /// Returns `false` if the font could not be added. Windows won't tell you why though. 
-    ///
-    /// Other info:
-    /// - The value of `path` can be a `ttf` or a `otf` font. 
-    /// - Adding the same font multiple time increase the internal refcount
-    /// - Use `Font::families()` to return the available system font families
-    ///
+    /** 
+        Add a font to the system font table. Don't forget to call `Font::remove_font(path)` once your done.
+        Returns `false` if the font could not be added. Windows won't tell you why though. 
+
+        Other info:
+        - The value of `path` can be a `ttf` or a `otf` font. 
+        - Adding the same font multiple time increase the internal refcount
+        - Use `Font::families()` to return the available system font families
+    */
     pub fn add_font(path: &str) -> bool {
         use winapi::um::wingdi::AddFontResourceW;
 
@@ -145,6 +149,40 @@ impl Font {
         unsafe {
             let path = to_utf16(path);
             RemoveFontResourceW(path.as_ptr());
+        }
+    }
+
+    /**
+        Add a font resource from a binary source. Returns a memory font handle if the font was loaded succesfully.
+        Send the handle to `remove_memory_font` at the end of your program to free the font from memory.
+    */
+    pub fn add_memory_font(bin: &mut [u8]) -> Result<MemFont, ()> {
+        use winapi::um::wingdi::AddFontMemResourceEx;
+
+        let bin_len = bin.len();
+        let mut num_fonts = 0;
+        let handle = unsafe {
+            AddFontMemResourceEx(
+                bin.as_mut_ptr() as _,
+                bin_len as _,
+                ptr::null_mut(),
+                &mut num_fonts,
+            )
+        };
+
+        if num_fonts > 0 {
+            Ok(MemFont(handle))
+        } else {
+            Err(())
+        }
+    }
+
+    /// Remove a font that was previously added by `Font::add_memory_font`
+    pub fn remove_memory_font(font: MemFont) {
+        use winapi::um::wingdi::RemoveFontMemResourceEx;
+
+        unsafe {
+            RemoveFontMemResourceEx(font.0);
         }
     }
 
@@ -255,3 +293,6 @@ impl<'a> FontBuilder<'a> {
 
 unsafe impl Send for Font {}
 unsafe impl Sync for Font {}
+
+unsafe impl Send for MemFont {}
+unsafe impl Sync for MemFont {}
