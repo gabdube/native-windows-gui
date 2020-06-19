@@ -3,3 +3,4 @@
 **/examples/test.rs
 Cargo.lock
 code
+native-windows-docs/tmp.*
