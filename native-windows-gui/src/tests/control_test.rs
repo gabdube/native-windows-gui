@@ -115,6 +115,7 @@ pub struct ControlsTest {
     test_tree_add: Button,
     test_tree_remove: Button,
 
+    // Fifth Tab
     test_list_view: ListView,
 
     // Tooltip
@@ -250,6 +251,7 @@ mod partial_controls_test_ui {
                 .icon(Some(&data.window_icon))
                 .build(&mut data.window)?;
 
+            
             TrayNotification::builder()
                 .parent(&data.window)
                 .icon(Some(&data.window_icon))
@@ -444,6 +446,7 @@ mod partial_controls_test_ui {
                 .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_track2)?;
+            
 
             //
             // Control tab 2

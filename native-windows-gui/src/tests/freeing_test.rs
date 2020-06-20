@@ -36,6 +36,14 @@ pub struct FreeingTest {
 
 impl FreeingTest {
 
+    pub fn destroy(&self) {
+        let mut data = self.data.borrow_mut();
+        if data.raw_handler_bound {
+            data.raw_handler_bound = false;
+            unbind_raw_event_handler(&data.raw_handler.take().unwrap());
+        }
+    }
+
     fn bind_raw_handler(&self) {
         let mut data = self.data.borrow_mut();
         if data.raw_handler_bound {

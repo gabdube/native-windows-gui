@@ -1,4 +1,5 @@
 use crate::*;
+use std::cell::RefCell;
 
 mod control_test;
 use control_test::*;
@@ -34,7 +35,8 @@ mod test_control_panel_ui {
     use std::ops::Deref;
 
     pub struct TestControlPanelUi {
-        inner: TestControlPanel
+        inner: TestControlPanel,
+        default_handler: RefCell<Vec<EventHandler>>
     }
 
     impl NativeUi<TestControlPanel, Rc<TestControlPanelUi>> for TestControlPanel {
@@ -71,7 +73,7 @@ mod test_control_panel_ui {
             FreeingTest::build_partial(&mut data.freeing_tests, Some(&data.window))?;
 
             // Wrap-up
-            let ui = Rc::new(TestControlPanelUi { inner: data });
+            let ui = Rc::new(TestControlPanelUi { inner: data, default_handler: Default::default() });
 
             // Events
             let mut window_handles = vec![&ui.window.handle];
@@ -108,7 +110,9 @@ mod test_control_panel_ui {
                     }
                 };
 
-                full_bind_event_handler(handle, handle_events);
+                let handler = full_bind_event_handler(handle, handle_events);
+
+                ui.default_handler.borrow_mut().push(handler);
             }
 
             // Layouts
@@ -122,6 +126,20 @@ mod test_control_panel_ui {
 
             Ok(ui)
         }
+    }
+
+    impl TestControlPanelUi {
+
+        pub fn destroy(&self) {
+            self.freeing_tests.destroy();
+
+            let mut handlers = self.default_handler.borrow_mut();
+            let handlers_count = handlers.len();
+            for handler in handlers.drain(0..handlers_count) {
+                unbind_event_handler(&handler);
+            }
+        }
+
     }
 
     impl Deref for TestControlPanelUi {
@@ -178,4 +196,6 @@ fn everything() {
     app.window.set_focus();
 
     dispatch_thread_events();
+
+    app.destroy();
 }
