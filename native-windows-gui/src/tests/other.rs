@@ -5,7 +5,7 @@ use std::cell::RefCell;
 pub struct OtherTests {
     window: Window,
     layout: FlexboxLayout,
-    test_combobox: Button,
+    test: Button,
 }
 
 mod other_tests_ui {
@@ -31,10 +31,10 @@ mod other_tests_ui {
                 .build(&mut data.window)?;
 
             Button::builder()
-                .text("Combobox")
+                .text("Test")
                 .focus(true)
                 .parent(&data.window)
-                .build(&mut data.test_combobox)?;
+                .build(&mut data.test)?;
             
             let ui = Rc::new(OtherTestsUi { inner: data, default_handler: Default::default() });
 
@@ -42,6 +42,10 @@ mod other_tests_ui {
             let evt_ui = ui.clone();
             let handle_events = move |evt, _evt_data, handle| {
                 match evt {
+                    E::OnButtonClick => 
+                        if &handle == &evt_ui.test {
+                            test_stuff(&evt_ui);
+                        },
                     E::OnWindowClose => 
                         if &handle == &evt_ui.window {
                             stop_thread_dispatch();
@@ -55,7 +59,7 @@ mod other_tests_ui {
             FlexboxLayout::builder()
                 .parent(&ui.window)
                 .flex_direction(stretch::style::FlexDirection::Column)
-                .child(&ui.test_combobox)
+                .child(&ui.test)
                 .build(&ui.layout);
             
             Ok(ui)
@@ -79,15 +83,21 @@ mod other_tests_ui {
             &self.inner
         }
     }
+
+}
+
+fn test_stuff(_t: &OtherTests) {
+
 }
 
 
-
+/// Just some scaffolding if I ever want to add new specific tests
 #[test]
-fn heap_corruption() {
+#[allow(unused)]
+fn other_tests() {
     init().expect("Failed to init Native Windows GUI");
     
     let app = OtherTests::build_ui(Default::default()).expect("Failed to build UI");
-    dispatch_thread_events();
+    //dispatch_thread_events();
     app.destroy();
 }
