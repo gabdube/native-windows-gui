@@ -111,10 +111,14 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 
+        <h3>Data management</h3>
+
+        There is no preferred way to manage the reference to dynamically created controls. Just use what's best for your application. For example,
+        storing buttons into a <code>RefCell<Vec<nwg::Button>></code> is completely fine.
+
         <h3>Dynamic freeing</h3>
 
-        Controls resources are freed at drop time. This means that you should store the control somewhere in your app otherwise the base 
-        handle will be freed just after being created.
+        Controls resources are always freed at drop time. If you don't store the control somewhere, it will be freed just after being created.
 
         <h3>Example</h3>
 

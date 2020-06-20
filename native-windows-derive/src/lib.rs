@@ -117,7 +117,7 @@ nwg_control(builder_field: builder_value,*)
 ```
 
 This syntax is basically a compressed version of the nwg control builders. The control attribute
-also has built-in helpers: auto parent detection and compressed flags syntax (see the docs for this).
+also has built-in helpers: auto parent detection and compressed flags syntax (see the docs for more info on these features).
 
 ```
 #[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10))]

@@ -75,7 +75,7 @@ mod handle_from_control;
 
 pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase, HwndBuilder, TimerBuilder as BaseTimerBuilder, OtherBuilder};
-pub use window::{Window, WindowFlags, WindowExFlags};
+pub use window::{Window, WindowFlags};
 pub use button::{Button, ButtonFlags, ButtonBuilder};
 pub use check_box::{CheckBox, CheckBoxState, CheckBoxFlags};
 pub use radio_button::{RadioButton, RadioButtonState, RadioButtonFlags};

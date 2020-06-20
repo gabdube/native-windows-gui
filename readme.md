@@ -54,13 +54,14 @@ cargo test everything --features "all"  # For the test suite
 cargo run --example basic
 cargo run --example calculator
 cargo run --example message_bank
-cargo run --example basic_drawing_d
+cargo run --example image_decoder_d --features "extern-canvas"
 cargo run --example partials --features "listbox frame combobox"
 cargo run --example system_tray --features "tray-notification message-window menu cursor"
 cargo run --example dialog_multithreading_d --features "notice"
 cargo run --example image_decoder_d --features "image-decoder file-dialog"
 cargo run --example month_name_d --features "winnls textbox"
 cargo run --example splash_screen_d --features "image-decoder"
+cargo run --example drop_files_d --features "textbox"
 
 cd examples/opengl_canvas
 cargo run
@@ -120,6 +121,8 @@ This is the main project git. It is separated in multiple sections
 - Simple layout configurations
   - FlexboxLayout
   - GridLayout
+- Drag and drop
+  - Drop files from the desktop to a window
 - The most common dialog boxes
   - File dialog (save, open, open folder)
   - Font dialog
@@ -149,6 +152,20 @@ The development of this library is considered "done". By that, I mean that
 there won't by any change to the API. Issues can be raised if a bug is found or
 if some area in the documentation are unclear. If I overlooked a very important feature,
 it will most likely be added.
+
+## 1.0 release checklist
+
+This is the list of remaining task to complete for the 1.0 release. Created `2020-06-13`, updated `2020-06-16`
+
+* ☐ Finish up the `ListView` controls
+* ☐ Implement events in the derive partials
+* ☐ Cleanup resources in derive partial
+* 🗹 Load font from files
+* 🗹 Load font from memory
+* 🗹 Finishing the `OnKeyPress` event
+* ☐ Add the tree-view events 
+* 🗹 Add cursor in embed resources
+* 🗹 Implement `std::Error` for `NwgError`
 
 ## License
 
@@ -367,3 +384,4 @@ For the icons used in the test suite (and only there):
 - **cat.jpg** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
 - **weird_cat.png** is made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/)
 - **list_0.png**, **list_1.png**, **list_2.png**, **list_3.png** are made by [Smashicons](https://smashicons.com/) from [www.flaticon.com](https://www.flaticon.com/)
+- **ice.cur** is made by nrox653 from [rw-designer](http://www.rw-designer.com/cursor-set/icepackpro)

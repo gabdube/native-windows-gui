@@ -1,9 +1,92 @@
-use winapi::shared::minwindef::HINSTANCE;
-use winapi::um::winuser::{LoadImageW, LR_DEFAULTSIZE};
+use winapi::shared::minwindef::{HINSTANCE, HRSRC, HGLOBAL};
+use winapi::um::winuser::{LoadImageW, LR_DEFAULTSIZE,};
+use winapi::ctypes::c_void;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::NwgError;
-use super::{Icon, Bitmap};
+use super::{Icon, Bitmap, Cursor};
 use std::{ptr, slice};
+
+
+/// Raw resource type that can be stored into an embedded resource.
+#[derive(Copy, Clone, Debug)]
+pub enum RawResourceType {
+    Cursor,
+    Bitmap,
+    Icon,
+    Menu,
+    Dialog,
+    String,
+    FontDir,
+    Font,
+    Accelerator,
+    RawData,
+    MessageTable,
+    Version,
+    DlgInclude,
+    PlugPlay,
+    Vxd,
+    AnimatedCursor,
+    AnimatedIcon,
+    Html,
+    Manifest,
+    Other(&'static str)
+}
+
+/**
+    Represents a raw handle to a embed resource. Manipulating raw resources is inherently unsafe.
+    `RawResources` are loaded using `EmbedResource::raw` and `EmbedResource::raw_str`
+
+    In order to access the raw resource data use `as_mut_ptr()` or `as_mut_slice()` and cast the pointer to your data type.
+*/
+pub struct RawResource {
+    module: HINSTANCE,
+    handle: HRSRC,
+    data_handle: HGLOBAL,
+    ty: RawResourceType,
+}
+
+impl RawResource {
+
+    /// Returns the system handle for the resource
+    pub fn handle(&self) -> HRSRC {
+        self.handle
+    }
+
+    /// Returns the system handle for the resource data
+    pub fn data_handle(&self) -> HGLOBAL {
+        self.data_handle
+    }
+
+    /// Returns the resource type set during texture loading
+    pub fn resource_type(&self) -> RawResourceType {
+        self.ty
+    }
+
+    /// Returns the size in bytes of the resource
+    pub fn len(&self) -> usize {
+        use winapi::um::libloaderapi::SizeofResource;
+
+        unsafe {
+            SizeofResource(self.module, self.handle) as usize
+        }
+    }
+
+    /// Return a const pointer to the resource.
+    pub unsafe fn as_mut_ptr(&mut self) -> *mut c_void {
+        self.lock()
+    }
+
+    /// Return the resource data as a byte slice. This is equivalent to using `slice::from_raw_parts_mut`
+    pub unsafe fn as_mut_slice(&self) -> &mut [u8] {
+        std::slice::from_raw_parts_mut(self.lock() as *mut u8, self.len())
+    }
+
+    fn lock(&self) -> *mut c_void {
+        use winapi::um::libloaderapi::LockResource;
+        unsafe { LockResource(self.data_handle) }
+    }
+
+}
 
 /**
 EmbedResource represent an embed resource file (".rc") inside on the executable module.
@@ -105,6 +188,82 @@ impl EmbedResource {
     pub fn bitmap_str(&self, id: &str) -> Option<Bitmap> {
         let name = to_utf16(id);
         self.bitmap(name.as_ptr() as usize)
+    }
+
+    /// Load a cursor file from the rc file. Returns `None` if `id` does not map to a cursor.
+    pub fn cursor(&self, id: usize) -> Option<Cursor> {
+        use winapi::um::winuser::IMAGE_CURSOR;
+
+        unsafe {
+            let id_rc = id as _;
+            let cursor = LoadImageW(self.hinst, id_rc, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE);
+            if cursor.is_null() {
+                None
+            } else {
+                Some(Cursor { handle: cursor as _, owned: true } )
+            }
+        }
+    }
+
+    /// Load a cursor file from the rc file. Returns `None` if `id` does not map to a cursor.
+    pub fn cursor_str(&self, id: &str) -> Option<Cursor> {
+        let name = to_utf16(id);
+        self.cursor(name.as_ptr() as usize)
+    }
+
+    /// Return a wrapper over the data of an embed resource. Return `None` `id` does not map to a resource.
+    pub fn raw(&self, id: usize, ty: RawResourceType) -> Option<RawResource> {
+        use winapi::um::libloaderapi::{FindResourceW, LoadResource};
+        use RawResourceType::*;
+
+        unsafe {
+            let data_u16;
+            let ty_value = match ty {
+                Cursor => 1,
+                Bitmap => 2,
+                Icon => 3,
+                Menu => 4,
+                Dialog => 5,
+                String => 6,
+                FontDir => 7,
+                Font => 8,
+                Accelerator => 9,
+                RawData => 10,
+                MessageTable => 11,
+                Version => 16,
+                DlgInclude => 17,
+                PlugPlay => 19,
+                Vxd => 20,
+                AnimatedCursor => 21,
+                AnimatedIcon => 22,
+                Html => 23,
+                Manifest => 24,
+                Other(value) => {
+                    data_u16 = Some(to_utf16(value));
+                    data_u16.as_ref().map(|v| v.as_ptr() as usize).unwrap()
+                }
+            };
+
+            let handle = FindResourceW(self.hinst as _, id as _, ty_value as _);
+            if handle.is_null() {
+                return None;
+            }
+
+            let data_handle = LoadResource(self.hinst as _, handle);
+
+            Some(RawResource {
+                module: self.hinst,
+                handle,
+                data_handle,
+                ty
+            })
+        }
+    }
+
+    /// Return a wrapper over the data of an embed resource. Return `None` `id` does not map to a resource.
+    pub fn raw_str(&self, id: &str, ty: RawResourceType) ->  Option<RawResource> {
+        let name = to_utf16(id);
+        self.raw(name.as_ptr() as usize, ty)
     }
 
 }

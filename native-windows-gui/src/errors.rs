@@ -1,3 +1,6 @@
+use std::fmt;
+use std::error::Error;
+
 /**
     Error enums used in the native window gui crate
 */
@@ -79,3 +82,30 @@ impl NwgError {
     }
 
 }
+
+impl fmt::Display for NwgError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use NwgError::*;
+
+        match self {
+            Unknown => write!(f, "Unknown error. This should never happen"),
+            InitializationError(reason) => write!(f, "Failed to initialize NWG: {:?}", reason),
+            ControlCreationError(reason) => write!(f, "Failed to create a control: {:?}", reason),
+            MenuCreationError(reason) => write!(f, "Failed to create a menu: {:?}", reason),
+            ResourceCreationError(reason) => write!(f, "Failed to create a resource: {:?}", reason),
+            EventsBinding(reason) => write!(f, "Failed to bind events: {:?}", reason),
+            
+            #[cfg(feature = "file-dialog")]
+            FileDialogError(reason) => write!(f, "File dialog actions failed: {:?}", reason),
+
+            #[cfg(feature = "image-decoder")]
+            ImageDecoderError(_id, reason) => write!(f, "Image decoder failed: {:?}", reason),
+
+            #[cfg(feature = "winnls")]
+            BadLocale(reason) => write!(f, "Windows locale functions failed: {:?}", reason),
+        }
+        
+    }
+}
+
+impl Error for NwgError {}

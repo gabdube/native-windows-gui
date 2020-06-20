@@ -41,8 +41,7 @@ pub struct DrawingApp {
     #[nwg_control(parent: Some(&data.window), position: (10, 10), size: (280, 280))]
     #[nwg_events( 
         OnPaint: [DrawingApp::paint(SELF, EVT_DATA)], 
-        MousePressLeftUp: [DrawingApp::events(SELF, EVT)],
-        MousePressLeftDown: [DrawingApp::events(SELF, EVT)]
+        OnMousePress: [DrawingApp::events(SELF, EVT)],
     )]
     canvas: nwg::ExternCanvas,
 
@@ -70,8 +69,8 @@ impl DrawingApp {
         use nwg::MousePressEvent as M;
 
         match evt {
-            E::MousePress(M::MousePressLeftUp) => { self.clicked.set(false); },
-            E::MousePress(M::MousePressLeftDown) => { self.clicked.set(true); },
+            E::OnMousePress(M::MousePressLeftUp) => { self.clicked.set(false); },
+            E::OnMousePress(M::MousePressLeftDown) => { self.clicked.set(true); },
             _ => {},
         }
 

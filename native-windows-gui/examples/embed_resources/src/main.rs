@@ -11,6 +11,7 @@ extern crate native_windows_derive as nwd;
 
 use nwd::NwgUi;
 use nwg::NativeUi;
+use std::cell::RefCell;
 
 
 #[derive(Default, NwgUi)]
@@ -22,6 +23,10 @@ pub struct EmbedApp {
     #[nwg_resource]
     embed: nwg::EmbedResource,
 
+    /// It's possible to load embed resources automatically
+    #[nwg_resource(source_embed: Some(&data.embed), source_embed_str: Some("ICE"))]
+    ice_cursor: nwg::Cursor,
+
     #[nwg_control(size: (280, 25), position: (10, 10))]
     name_edit: nwg::TextInput,
 
@@ -29,8 +34,10 @@ pub struct EmbedApp {
     embed_bitmap: nwg::ImageFrame,
 
     #[nwg_control(size: (280, 60), position: (10, 40))]
-    #[nwg_events( OnButtonClick: [EmbedApp::say_hello] )]
-    hello_button: nwg::Button
+    #[nwg_events( OnButtonClick: [EmbedApp::say_hello], OnMouseMove: [EmbedApp::set_cursor], OnMousePress: [EmbedApp::set_cursor] )]
+    hello_button: nwg::Button,
+
+    mem_font: RefCell<Option<nwg::MemFont>>,
 }
 
 impl EmbedApp {
@@ -44,16 +51,42 @@ impl EmbedApp {
         self.window.set_icon(em.icon_str("TEST").as_ref());
 
         self.embed_bitmap.set_bitmap(em.bitmap_str("BALL").as_ref());
+
+        // Load a custom font from embed resource
+        let mem_font = unsafe {
+            let rc = self.embed.raw_str("INDIE", nwg::RawResourceType::Other("FONTFILE")).unwrap();
+            nwg::Font::add_memory_font(rc.as_mut_slice()).unwrap()
+        };
+
+        let mut font = Default::default();
+        nwg::Font::builder()
+            .family("Indie Flower")
+            .size(30)
+            .build(&mut font)
+            .expect("Failed to build font");
+        self.hello_button.set_font(Some(&font));
+
+        *self.mem_font.borrow_mut() = Some(mem_font);
     }
 
     fn say_hello(&self) {
         nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
     }
+
+    fn set_cursor(&self) {
+        nwg::GlobalCursor::set(&self.ice_cursor);
+    }
     
     fn say_goodbye(&self) {
         nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
         nwg::stop_thread_dispatch();
+
+        let mut font = self.mem_font.borrow_mut();
+        if let Some(font) = font.take() {
+            nwg::Font::remove_memory_font(font);
+        }
     }
+    
 
 }
 

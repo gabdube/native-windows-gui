@@ -46,35 +46,38 @@ bitflags! {
     }
 }
 
-bitflags! {
-
-    /**
-        The extended window flags. 
-
-        Example: `WindowFlags::DRAG_AND_DROP | WindowFlags::TOPMOST`
-
-        Window flags:
-        * DRAG_AND_DROP: The window accepts drag-drop files.
-        * TOPMOST: The window should be placed above all non-topmost windows and should stay above them, even when the window is deactivated.
-    */
-    pub struct WindowExFlags: u32 {
-        const NONE = 0;
-        const TOPMOST = WS_EX_TOPMOST;
-        const ACCEPTFILES = WS_EX_ACCEPTFILES;
-    }
-}
 
 /**
     A basic top level window. At least one top level window is required to make a NWG application.
 
+    Windows can be heavily customized using the window flags. If your application don't need a visible window
+    (ex: a system tray app), use `MessageWindow` instead.
+
     **Builder parameters:**
-      * TODO
+      * `flags`: The window flags. See `WindowFlags`
+      * `title`: The text in the window title bar
+      * `size`: The default size of the window
+      * `position`: The default position of the window in the desktop
+      * `icon`: The window icon
+      * `accept_file`: If the window should accept files by drag & drop
+      * `topmost`: If the window should always be on top of other system window
+      * `parent`: Logical parent of the window, unlike children controls, this is NOT required.
 
     **Control events:**
+      * `OnInit`: The window was created
       * `MousePress(_)`: Generic mouse press events on the button
       * `OnMouseMove`: Generic mouse mouse event
       * `OnMouseWheel`: Generic mouse wheel event
-      * TODO
+      * `OnPaint`: Generic on paint event
+      * `OnKeyPress`: Generic key press
+      * `OnKeyRelease`: Generic ket release
+      * `OnResize`: When the window is resized
+      * `OnResizeBegin`: Just before the window begins being resized by the user
+      * `OnResizeEnd`: Just after the user stops resizing the window
+      * `OnWindowMaximize`: When the window is maximized
+      * `OnWindowMinimize`: When the window is minimized
+      * `OnMove`: When the window is moved by the user
+      * `OnFileDrop`: When a file is dropped in the window (only raised if accept_file is set)
 
 */
 #[derive(Default, PartialEq, Eq)]
@@ -89,8 +92,9 @@ impl Window {
             title: "New Window",
             size: (500, 500),
             position: (300, 300),
+            accept_files: false,
+            topmost: false,
             flags: None,
-            ex_flags: None,
             icon: None,
             parent: None
         }
@@ -258,8 +262,9 @@ pub struct WindowBuilder<'a> {
     title: &'a str,
     size: (i32, i32),
     position: (i32, i32),
+    accept_files: bool,
+    topmost: bool,
     flags: Option<WindowFlags>,
-    ex_flags: Option<WindowExFlags>,
     icon: Option<&'a Icon>,
     parent: Option<ControlHandle>
 }
@@ -268,11 +273,6 @@ impl<'a> WindowBuilder<'a> {
 
     pub fn flags(mut self, flags: WindowFlags) -> WindowBuilder<'a> {
         self.flags = Some(flags);
-        self
-    }
-
-    pub fn ex_flags(mut self, flags: WindowExFlags) -> WindowBuilder<'a> {
-        self.ex_flags = Some(flags);
         self
     }
 
@@ -296,6 +296,16 @@ impl<'a> WindowBuilder<'a> {
         self
     }
 
+    pub fn accept_files(mut self, accept_files: bool) ->  WindowBuilder<'a> {
+        self.accept_files = accept_files;
+        self
+    }
+
+    pub fn topmost(mut self, topmost: bool) ->  WindowBuilder<'a> {
+        self.topmost = topmost;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: Option<C>) -> WindowBuilder<'a> {
         self.parent = p.map(|p2| p2.into());
         self
@@ -304,7 +314,9 @@ impl<'a> WindowBuilder<'a> {
     pub fn build(self, out: &mut Window) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
-        let ex_flags = self.ex_flags.unwrap_or(WindowExFlags::NONE).bits() | WS_EX_COMPOSITED;
+        let mut ex_flags = WS_EX_COMPOSITED;
+        if self.topmost { ex_flags |= WS_EX_TOPMOST; }
+        if self.accept_files { ex_flags |= WS_EX_ACCEPTFILES; }
 
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())

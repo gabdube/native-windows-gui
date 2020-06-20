@@ -4,6 +4,8 @@ use crate::win32::resources_helper as rh;
 use crate::{OemBitmap, OemImage, NwgError};
 use std::ptr;
 
+#[cfg(feature = "embed-resource")]
+use super::EmbedResource;
 
 /** 
 A wrapper over a bitmap file (*.bmp)
@@ -55,6 +57,16 @@ impl Bitmap {
             source_text: None,
             source_bin: None,
             source_system: None,
+
+            #[cfg(feature = "embed-resource")]
+            source_embed: None,
+
+            #[cfg(feature = "embed-resource")]
+            source_embed_id: 0,
+
+            #[cfg(feature = "embed-resource")]
+            source_embed_str: None,
+
             size: None,
             strict: false
         }
@@ -66,6 +78,16 @@ pub struct BitmapBuilder<'a> {
     source_text: Option<&'a str>,
     source_bin: Option<&'a [u8]>,
     source_system: Option<OemBitmap>,
+
+    #[cfg(feature = "embed-resource")]
+    source_embed: Option<&'a EmbedResource>,
+
+    #[cfg(feature = "embed-resource")]
+    source_embed_id: usize,
+
+    #[cfg(feature = "embed-resource")]
+    source_embed_str: Option<&'a str>,
+    
     size: Option<(u32, u32)>,
     strict: bool,
 }
@@ -87,6 +109,24 @@ impl<'a> BitmapBuilder<'a> {
         self
     }
 
+    #[cfg(feature = "embed-resource")]
+    pub fn source_embed(mut self, em: Option<&'a EmbedResource>) -> BitmapBuilder<'a> {
+        self.source_embed = em;
+        self
+    }
+
+    #[cfg(feature = "embed-resource")]
+    pub fn source_embed_id(mut self, id: usize) -> BitmapBuilder<'a> {
+        self.source_embed_id = id;
+        self
+    }
+
+    #[cfg(feature = "embed-resource")]
+    pub fn source_embed_str(mut self, id: Option<&'a str>) -> BitmapBuilder<'a> {
+        self.source_embed_str = id;
+        self
+    }
+
     pub fn size(mut self, s: Option<(u32, u32)>) -> BitmapBuilder<'a> {
         self.size = s;
         self
@@ -98,27 +138,47 @@ impl<'a> BitmapBuilder<'a> {
     }
 
     pub fn build(self, b: &mut Bitmap) -> Result<(), NwgError> {
-        let handle;
-        
         if let Some(src) = self.source_text {
-            handle = unsafe { 
+            let handle = unsafe { 
                 #[cfg(feature="image-decoder")]
                 let handle = rh::build_image_decoder(src, self.size, self.strict, IMAGE_BITMAP);
 
                 #[cfg(not(feature="image-decoder"))]
                 let handle = rh::build_image(src, self.size, self.strict, IMAGE_BITMAP);
 
-                handle
+                handle?
             };
-        } else if let Some(src) = self.source_system {
-            handle = unsafe { rh::build_oem_image(OemImage::Bitmap(src), self.size) };
-        } else if let Some(src) = self.source_bin { 
-            handle = unsafe { rh::bitmap_from_memory(src) };
-        } else {
-            return Err(NwgError::resource_create("No source provided for Bitmap"));
-        }
 
-        *b = Bitmap { handle: handle?, owned: true };
+            *b = Bitmap { handle, owned: true };
+        } else if let Some(src) = self.source_system {
+            let handle = unsafe { rh::build_oem_image(OemImage::Bitmap(src), self.size)? };
+            *b = Bitmap { handle, owned: true };
+        } else if let Some(src) = self.source_bin { 
+            let handle = unsafe { rh::bitmap_from_memory(src)? };
+            *b = Bitmap { handle, owned: true };
+        } else {
+            #[cfg(feature = "embed-resource")]
+            fn build_embed(builder: BitmapBuilder) -> Result<Bitmap, NwgError> {
+                match builder.source_embed {
+                    Some(embed) => {
+                        match builder.source_embed_str {
+                            Some(src) => embed.bitmap_str(src)
+                                .ok_or_else(|| NwgError::resource_create(format!("No bitmap in embed resource identified by {}", src))),
+                            None => embed.bitmap(builder.source_embed_id)
+                                .ok_or_else(|| NwgError::resource_create(format!("No bitmap in embed resource identified by {}", builder.source_embed_id)))
+                        }
+                    },
+                    None => Err(NwgError::resource_create("No source provided for Bitmap"))
+                }
+            }
+
+            #[cfg(not(feature = "embed-resource"))]
+            fn build_embed(_builder: BitmapBuilder) -> Result<Bitmap, NwgError> {
+                Err(NwgError::resource_create("No source provided for Bitmap"))
+            }
+
+            *b = build_embed(self)?;
+        }
     
         Ok(())
     }

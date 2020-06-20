@@ -343,7 +343,7 @@ pub fn unbind_raw_event_handler(handler: &RawEventHandler)
         let mut callback_value: UINT_PTR = 0;
         let result = GetWindowSubclass(handle, subclass_proc, handler_id, &mut callback_value);
         if result == 0 {
-            panic!("Parent of hander with handler id {} was either freed or is already unbound", handler_id);
+            panic!("Parent of handler with handler id {} was either freed or is already unbound", handler_id);
         }
 
         let callback_wrapper_ptr = callback_value as *mut *mut RawCallback;
@@ -565,7 +565,7 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID, GetSubMenu};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
       WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP, WM_MENUSELECT, WM_EXITSIZEMOVE,
-      WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED, WM_KEYDOWN, WM_KEYUP, WM_CHAR, WM_MOUSEWHEEL, GET_WHEEL_DELTA_WPARAM};
+      WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED, WM_KEYDOWN, WM_KEYUP, WM_CHAR, WM_MOUSEWHEEL, WM_DROPFILES, GET_WHEEL_DELTA_WPARAM};
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
@@ -576,7 +576,14 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
 
     match msg {
         WM_KEYDOWN | WM_KEYUP => {
+            let evt = match msg == WM_KEYDOWN { 
+                true => Event::OnKeyPress,
+                false => Event::OnKeyRelease
+            };
 
+            let keycode = w as u32;
+            let data = EventData::OnKey(keycode);
+            callback(evt, data, base_handle);
         },
         WM_NOTIFY => {
             let code = {
@@ -646,13 +653,13 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
                 NIN_BALLOONHIDE => callback(Event::OnTrayNotificationHide, NO_DATA, handle),
                 NIN_BALLOONTIMEOUT => callback(Event::OnTrayNotificationTimeout, NO_DATA, handle),
                 NIN_BALLOONUSERCLICK => callback(Event::OnTrayNotificationUserClose, NO_DATA, handle),
-                WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  handle), 
-                WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, handle), 
+                WM_LBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  handle), 
+                WM_LBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressLeftDown), NO_DATA, handle), 
                 WM_RBUTTONUP => {
-                    callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, handle);
+                    callback(Event::OnMousePress(MousePressEvent::MousePressRightUp), NO_DATA, handle);
                     callback(Event::OnContextMenu, NO_DATA, handle);
                 }, 
-                WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, handle),
+                WM_RBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressRightDown), NO_DATA, handle),
                 WM_MOUSEMOVE => callback(Event::OnMouseMove, NO_DATA, handle),
                 _ => {}
             }
@@ -668,6 +675,10 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
             let data = EventData::OnPaint(PaintData { hwnd } );
             callback(Event::OnPaint, data, base_handle)
         },
+        WM_DROPFILES => {
+            let data = EventData::OnFileDrop(DropFiles { drop: w as _ });
+            callback(Event::OnFileDrop, data, base_handle)
+        },
         WM_CHAR => callback(Event::OnChar, EventData::OnChar(char::from_u32(w as u32).unwrap_or('?')), base_handle),
         WM_EXITSIZEMOVE => callback(Event::OnResizeEnd, NO_DATA, base_handle),
         WM_ENTERSIZEMOVE => callback(Event::OnResizeBegin, NO_DATA, base_handle),
@@ -676,10 +687,10 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_HSCROLL => callback(Event::OnHorizontalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
         WM_VSCROLL => callback(Event::OnVerticalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
         WM_MOUSEMOVE => callback(Event::OnMouseMove, NO_DATA, base_handle), 
-        WM_LBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  base_handle), 
-        WM_LBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
-        WM_RBUTTONUP => callback(Event::MousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
-        WM_RBUTTONDOWN => callback(Event::MousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
+        WM_LBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  base_handle), 
+        WM_LBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
+        WM_RBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
+        WM_RBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
         NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Notice(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {

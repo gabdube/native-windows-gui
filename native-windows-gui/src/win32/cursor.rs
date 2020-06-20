@@ -5,10 +5,12 @@ use crate::controls::ControlHandle;
     A global object that wraps the system cursor.
     This object must not be instanced. The methods should be used this way:
 
-```rust
-use native_windows_gui as nwg;
-let (x,y) = nwg::GlobalCursor::position();
-```
+    Requires the `cursor` feature.
+
+    ```rust
+    use native_windows_gui as nwg;
+    let (x,y) = nwg::GlobalCursor::position();
+    ```
 */
 pub struct GlobalCursor;
 
