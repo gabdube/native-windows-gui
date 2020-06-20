@@ -9,6 +9,8 @@ use thread_test::*;
 mod freeing_test;
 use freeing_test::*;
 
+mod other;
+
 
 #[derive(Default)]
 pub struct TestControlPanel {
