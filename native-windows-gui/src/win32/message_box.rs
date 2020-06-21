@@ -146,8 +146,8 @@ pub fn fatal_message<'a>(title: &'a str, content: &'a str) -> ! {
 */
 pub fn error_message<'a>(title: &'a str, content: &'a str) -> MessageChoice {
     let params = MessageParams {
-        title: title,
-        content: content,
+        title,
+        content,
         buttons: MessageButtons::Ok,
         icons: MessageIcons::Error
     };
@@ -164,8 +164,8 @@ pub fn error_message<'a>(title: &'a str, content: &'a str) -> MessageChoice {
 */
 pub fn simple_message<'a>(title: &'a str, content: &'a str) -> MessageChoice {
     let params = MessageParams {
-        title: title,
-        content: content,
+        title,
+        content,
         buttons: MessageButtons::Ok,
         icons: MessageIcons::Info
     };
