@@ -225,7 +225,7 @@ impl<D: Display+Default> ListBox<D> {
         if index == LB_ERR { None }
         else {
             let index = index as usize;
-            let length = wh::send_message(handle, LB_GETTEXTLEN, index, 0) as usize;
+            let length = (wh::send_message(handle, LB_GETTEXTLEN, index, 0) as usize) + 1;  // +1 for the terminating null character
             let mut buffer: Vec<WCHAR> = Vec::with_capacity(length);
             unsafe { 
                 buffer.set_len(length); 

@@ -312,7 +312,7 @@ impl Drop for RadioButton {
     fn drop(&mut self) {
         let handler = self.handler0.borrow();
         if let Some(h) = handler.as_ref() {
-            unbind_raw_event_handler(h);
+            drop(unbind_raw_event_handler(h));
         }
 
         self.handle.destroy();

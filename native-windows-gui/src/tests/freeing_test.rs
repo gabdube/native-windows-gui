@@ -36,12 +36,23 @@ pub struct FreeingTest {
 
 impl FreeingTest {
 
+    pub fn destroy(&self) {
+        let mut data = self.data.borrow_mut();
+        if data.raw_handler_bound {
+            data.raw_handler_bound = false;
+            drop(unbind_raw_event_handler(&data.raw_handler.take().unwrap()));
+        }
+    }
+
     fn bind_raw_handler(&self) {
         let mut data = self.data.borrow_mut();
         if data.raw_handler_bound {
             self.bind_handler_btn.set_text("Bind raw handler");
             data.raw_handler_bound = false;
-            unbind_raw_event_handler(&data.raw_handler.take().unwrap());
+            
+            if let Err(_) = unbind_raw_event_handler(&data.raw_handler.take().unwrap()) {
+                error_message("Error", "Failed to free event handler");
+            }
             
             assert!(has_raw_handler(&self.custom_bind_button.handle, data.raw_callback_id) == false);
         } else {

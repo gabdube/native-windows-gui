@@ -331,7 +331,7 @@ pub fn has_raw_handler(handle: &ControlHandle, handler_id: UINT_PTR) -> bool {
     Remove the raw event handler from the associated window.
     Calling unbind twice or trying to unbind an handler after destroying its parent will cause the function to panic.
 */
-pub fn unbind_raw_event_handler(handler: &RawEventHandler)
+pub fn unbind_raw_event_handler(handler: &RawEventHandler) -> Result<(), NwgError>
 {
     use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
 
@@ -343,7 +343,12 @@ pub fn unbind_raw_event_handler(handler: &RawEventHandler)
         let mut callback_value: UINT_PTR = 0;
         let result = GetWindowSubclass(handle, subclass_proc, handler_id, &mut callback_value);
         if result == 0 {
-            panic!("Parent of handler with handler id {} was either freed or is already unbound", handler_id);
+            let err = format!(concat!(
+                "Could not fetch raw event handler #{:?}.",
+                "this can happen if the control ({:?}) was freed or",
+                "this raw event handler was already freed"
+            ), handler_id, handle);
+            return Err(NwgError::EventsBinding(err));
         }
 
         let callback_wrapper_ptr = callback_value as *mut *mut RawCallback;
@@ -352,6 +357,7 @@ pub fn unbind_raw_event_handler(handler: &RawEventHandler)
         mem::drop(callback);
 
         RemoveWindowSubclass(handle, subclass_proc, handler_id);
+        Ok(())
     }
 }
 

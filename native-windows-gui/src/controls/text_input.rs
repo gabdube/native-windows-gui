@@ -217,7 +217,7 @@ impl TextInput {
         wh::send_message(handle, EM_SETSEL as u32, r.start as usize, r.end as isize);
     }
 
-    /// Return the length of the user input in the control. This is better than test.len() as it
+    /// Return the length of the user input in the control. This is better than `input.text().len()` as it
     /// does not allocate a string in memory
     pub fn len(&self) -> u32 {
         use winapi::um::winuser::EM_LINELENGTH;
@@ -457,7 +457,7 @@ impl Drop for TextInput {
         
         let handler = self.handler0.borrow();
         if let Some(h) = handler.as_ref() {
-            unbind_raw_event_handler(h);
+            drop(unbind_raw_event_handler(h));
         }
         
         self.handle.destroy();

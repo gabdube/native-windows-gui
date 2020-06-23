@@ -502,7 +502,7 @@ impl FlexboxLayoutBuilder {
         {
             let mut layout_inner = layout.inner.borrow_mut();
             if layout_inner.handler.is_some() {
-                unbind_raw_event_handler(layout_inner.handler.as_ref().unwrap());
+                drop(unbind_raw_event_handler(layout_inner.handler.as_ref().unwrap()));
             }
             
             *layout_inner = self.layout;        

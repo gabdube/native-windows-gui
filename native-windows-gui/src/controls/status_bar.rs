@@ -87,14 +87,14 @@ impl StatusBar {
     /// Return the text in one of the region of the status bar
     pub fn text<'a>(&self, index: u8) -> String {
         use winapi::um::commctrl::{SB_GETTEXTLENGTHW, SB_GETTEXTW};
-        use winapi::shared::minwindef::{LOWORD};
+        use winapi::shared::minwindef::LOWORD;
         use crate::win32::base_helper::from_utf16;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         
         let result = wh::send_message(handle, SB_GETTEXTLENGTHW, index as WPARAM, 0);
-        let text_length = LOWORD(result as u32) as usize;
+        let text_length = (LOWORD(result as u32) as usize) + 1; // +1 for the terminating null character
 
         let mut buffer: Vec<u16> = Vec::with_capacity(text_length);
         unsafe { buffer.set_len(text_length); }
@@ -106,7 +106,7 @@ impl StatusBar {
 
     /// Set the text in one of the region of the status bar
     pub fn set_text<'a>(&self, index: u8, text: &'a str) {
-        use winapi::um::commctrl::{SB_SETTEXTW};
+        use winapi::um::commctrl::SB_SETTEXTW;
         use crate::win32::base_helper::to_utf16;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -160,7 +160,7 @@ impl Drop for StatusBar {
     fn drop(&mut self) {
         let handler = self.handler0.borrow();
         if let Some(h) = handler.as_ref() {
-            unbind_raw_event_handler(h);
+            drop(unbind_raw_event_handler(h));
         }
         self.handle.destroy();
     }

@@ -167,7 +167,7 @@ impl<D: Display+Default> ComboBox<D> {
         if index == CB_ERR { None }
         else {
             let index = index as usize;
-            let length = wh::send_message(handle, CB_GETLBTEXTLEN, index, 0) as usize;
+            let length = (wh::send_message(handle, CB_GETLBTEXTLEN, index, 0) as usize) + 1; // +1 for the null character
             let mut buffer: Vec<WCHAR> = Vec::with_capacity(length);
             unsafe { 
                 buffer.set_len(length); 

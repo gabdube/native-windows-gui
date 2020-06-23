@@ -248,7 +248,7 @@ impl Drop for NumberSelect {
 
     fn drop(&mut self) {
         if let Some(h) = self.handler.as_ref() {
-            unbind_raw_event_handler(h);
+            drop(unbind_raw_event_handler(h));
         }
 
         self.handle.destroy();
@@ -388,7 +388,7 @@ impl<'a> NumberSelectBuilder<'a> {
         let (w, h) = self.size;
 
         if out.handler.is_some() {
-            unbind_raw_event_handler(out.handler.as_ref().unwrap());
+            unbind_raw_event_handler(out.handler.as_ref().unwrap())?;
         }
 
         *out = NumberSelect::default();
