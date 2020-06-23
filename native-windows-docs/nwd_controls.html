@@ -128,8 +128,8 @@
 
         <h3>Parent detection</h3>
 
-        In most circumstances, most of the controls in a UI will have the same parent; the window. Because nobody wants to copy and paste "<code>parent: window</code>"
-        on each children controls, the derive macro can guess the parent by looking up the fields defined before the control in the ui struct. Derive will choose the first
+        In most circumstances, the controls in a UI will have the same parent; the window. Because nobody wants to copy and paste "<code>parent: window</code>"
+        on each children controls, the derive macro can guess the parent by looking up the fields defined before the control in the UI struct. Derive will choose the first
         control marked with <code>nwg_control</code> that supports children.
         <br><br>
 

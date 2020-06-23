@@ -96,6 +96,11 @@
         As such there are a certain kind of applications that cannot be developed with NWG (at least for now).
         <br/><br/>
 
+        <h3>Win32</h3>
+
+        NWG use Win32 under the hood. Win32 is a very old API and it only supports Windows PC. Also Win32 does not support touch/pen inputs.
+        <br><br>
+
         <h3>Fancy looking applications</h3>
 
         NWG will probably never reach the level of customization a HTML/CSS application can provide. There's a few reason for that.
@@ -105,7 +110,7 @@
         <br><br>
 
         NWG does not have a drawing API. Originally, NWG would have a built-in canvas control that wrapped Direct2D, but the implementation was removed
-        from the library because it was too bulky and because it was not possible to finish it before the january 2020 deadline (heh).
+        from the library because it would take too much time to implement.
         <br><br>
 
         Transparency is not supported. NWG controls with transparency flickers ALOT. It's almost a health hazard for people with epilepsy.

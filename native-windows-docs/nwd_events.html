@@ -94,12 +94,12 @@
 
         <h1 class="title">Native Windows Derive: Events</h1>
 
-        After defining the controls, it's time to bind the events. Every events defined in a Ui struct is regrouped in
+        After defining the controls, it's time to bind the events. Every events defined in a Ui struct will be regrouped in
         a single event hook.
 
         <h3>Events base</h3>
 
-        Defining events works by defining the events type and then, associate one or more callback to it.<br><br>
+        Events are bound to control using the <code>nwg_events</code> attribute. It takes a list of event type and event callbacks.<br><br>
 
         Template: <br>
         <code>nwg_events( EVENT_TYPE: [CALLBACK(ARGS),*] )</code><br><br>

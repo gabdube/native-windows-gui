@@ -115,6 +115,29 @@
         <br/><br/>
         Unlike controls, resources cannot have a parent nor can they trigger events.<br/><br/>
 
+        <h3>Self referencing</h3>
+
+        NWD will always initialize the resources before the controls. This means that it is possible to load resources and use them in a control using
+        only the NWD attributes.<br/><br/>
+
+        By appending the following format: <code>data.{field}</code>, it's possible to use the resources in the controls. As an example, here's how to
+        load and display an image using only NWD.
+
+<div class="highlight"><pre style="width:auto"><span></span><span class="cp">#[derive(Default, NwgUi)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">ImageDisplay</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_resource(source_file: Some(</span><span class="s">&quot;dog.bmp&quot;</span><span class="cp">))]</span><span class="w"></span>
+<span class="w">    </span><span class="n">dog</span>: <span class="nc">nwg</span>::<span class="n">Bitmap</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(size: (300, 300))]</span><span class="w"></span>
+<span class="w">    </span><span class="n">window</span>: <span class="nc">nwg</span>::<span class="n">Window</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(bitmap: Some(&amp;data.dog), size: (300, 300))]</span><span class="w"></span>
+<span class="w">    </span><span class="n">frame</span>: <span class="nc">nwg</span>::<span class="n">ImageFrame</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+        <br/><br/>
         <br/><br/>
 
     </div>
