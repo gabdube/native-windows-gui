@@ -817,7 +817,7 @@ fn tree_data(m: u32, notif_raw: *const NMHDR) -> EventData {
 }
 
 #[cfg(not(feature="tree-view"))]
-fn tree_data(_m: u32) -> EventData {
+fn tree_data(_m: u32, _notif_raw: *const NMHDR) -> EventData {
     // If tree-view is not enabled, the data type won't be available so we return NO_DATA
     NO_DATA
 }
