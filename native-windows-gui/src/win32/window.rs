@@ -779,12 +779,49 @@ fn tabs_commands(m: u32) -> Event {
 }
 
 fn track_commands(m: u32) -> Event {
-    use winapi::um::commctrl::{NM_RELEASEDCAPTURE};
+    use winapi::um::commctrl::NM_RELEASEDCAPTURE;
+
     match m {
         NM_RELEASEDCAPTURE => Event::TrackBarUpdated,
         _ => Event::Unknown
     }
 }
+
+fn tree_commands(m: u32) -> Event {
+    use winapi::um::commctrl::{NM_CLICK, NM_DBLCLK, NM_KILLFOCUS, NM_RCLICK, NM_SETFOCUS,
+        TVN_DELETEITEMW, };
+
+    match m {
+        NM_CLICK => Event::OnTreeViewClick,
+        NM_DBLCLK  => Event::OnTreeViewDoubleClick,
+        NM_KILLFOCUS => Event::OnTreeFocusLost,
+        NM_SETFOCUS => Event::OnTreeFocus,
+        NM_RCLICK => Event::OnTreeViewRightClick,
+        TVN_DELETEITEMW => Event::OnTreeDelete,
+        _ => Event::Unknown
+    }
+}
+
+#[cfg(feature="tree-view")]
+fn tree_data(m: u32, notif_raw: *const NMHDR) -> EventData {
+    use winapi::um::commctrl::{TVN_DELETEITEMW, NMTREEVIEWW};
+
+    match m {
+        TVN_DELETEITEMW => {
+            let data = unsafe { &*(notif_raw as *const NMTREEVIEWW) };
+            let item = crate::TreeItem { handle: data.itemOld.hItem };
+            EventData::OnTreeDelete(item)
+        },
+        _ => NO_DATA
+    }
+}
+
+#[cfg(not(feature="tree-view"))]
+fn tree_data(_m: u32) -> EventData {
+    // If tree-view is not enabled, the data type won't be available so we return NO_DATA
+    NO_DATA
+}
+
 
 unsafe fn static_commands(handle: HWND, m: u16) -> Event {
     use winapi::um::winuser::{STN_CLICKED, STN_DBLCLK, STM_GETIMAGE, IMAGE_BITMAP};
@@ -825,23 +862,26 @@ unsafe fn handle_tooltip_callback<'a>(notif: *mut NMTTDISPINFOW, callback: &Call
     callback(Event::OnTooltipText, data, handle);
 }
 
-unsafe fn handle_default_notify_callback<'a>(notif: *const NMHDR, callback: &Callback){
+unsafe fn handle_default_notify_callback<'a>(notif_raw: *const NMHDR, callback: &Callback){
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;
     use winapi::um::winnt::WCHAR;
-    use winapi::um::winuser::{GetClassNameW};
+    use winapi::um::winuser::GetClassNameW;
 
-    let notif = &*notif;
+    let notif = &*notif_raw;
     let handle = ControlHandle::Hwnd(notif.hwndFrom);
 
     let mut class_name_raw: [WCHAR; 100] = mem::zeroed();
     let count = GetClassNameW(notif.hwndFrom, class_name_raw.as_mut_ptr(), 100) as usize;
     let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
 
+    let code = notif.code;
+
     match &class_name as &str {
-        "SysDateTimePick32" => callback(datetimepick_commands(notif.code), NO_DATA, handle),
-        "SysTabControl32" => callback(tabs_commands(notif.code), NO_DATA, handle),
-        "msctls_trackbar32" => callback(track_commands(notif.code), NO_DATA, handle),
+        "SysDateTimePick32" => callback(datetimepick_commands(code), NO_DATA, handle),
+        "SysTabControl32" => callback(tabs_commands(code), NO_DATA, handle),
+        "msctls_trackbar32" => callback(track_commands(code), NO_DATA, handle),
+        winapi::um::commctrl::WC_TREEVIEW => callback(tree_commands(code), tree_data(code, notif_raw), handle),
         _ => {}
     }
 }

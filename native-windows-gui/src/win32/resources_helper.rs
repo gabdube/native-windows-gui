@@ -445,7 +445,7 @@ unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<String, NwgError>
         return Err(NwgError::file_dialog("Failed to get file name"));
     }
 
-    let text = from_wide_ptr(item_path);
+    let text = from_wide_ptr(item_path, None);
 
     CoTaskMemFree(mem::transmute(item_path));
 

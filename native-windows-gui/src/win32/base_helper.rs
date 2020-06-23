@@ -31,15 +31,22 @@ pub fn from_utf16(s: &[u16]) -> String {
     Read a string from a wide char pointer. Undefined behaviour if [ptr] is not null terminated.
 */
 #[cfg(any(feature = "file-dialog", feature = "winnls"))]
-pub unsafe fn from_wide_ptr(ptr: *mut u16) -> String {
+pub unsafe fn from_wide_ptr(ptr: *mut u16, length: Option<usize>) -> String {
     use std::slice::from_raw_parts;
 
-    let mut length: isize = 0;
-    while *&*ptr.offset(length) != 0 {
-        length += 1;
-    }
+    let length = match length {
+        Some(v) => v,
+        None => {
+            let mut length: isize = 0;
+            while *&*ptr.offset(length) != 0 {
+                length += 1;
+            }
 
-    let array: &[u16] = from_raw_parts(ptr, length as usize);
+            length as usize
+        }
+    };
+
+    let array: &[u16] = from_raw_parts(ptr, length);
     from_utf16(array)
 }
 

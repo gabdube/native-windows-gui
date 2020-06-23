@@ -6,7 +6,7 @@ use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{HIMAGELIST, HTREEITEM};
 use crate::win32::window_helper as wh;
-use crate::win32::base_helper::{to_utf16};
+use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::{Font, ImageList, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
@@ -61,6 +61,7 @@ pub enum ExpandState {
 }
 
 /// A reference to an item in a TreeView
+#[derive(Debug)]
 pub struct TreeItem {
     pub handle: HTREEITEM
 }
@@ -84,7 +85,11 @@ Requires the `tree-view` feature
   * `MousePress(_)`: Generic mouse press events on the tree view
   * `OnMouseMove`: Generic mouse mouse event
   * `OnMouseWheel`: Generic mouse wheel event
-  * TODO
+  * `OnTreeViewClick`: When the user has clicked the left mouse button within the control.
+  * `OnTreeViewDoubleClick`: When the user has clicked the left mouse button within the control twice rapidly.
+  * `OnTreeViewRightClick`: When the user has clicked the right mouse button within the control.
+  * `OnTreeFocusLost`: When the control has lost the input focus
+  * `OnTreeFocus`: When the control has acquired the input focus
 
 */
 #[derive(Default, PartialEq, Eq)]
@@ -238,7 +243,7 @@ impl TreeView {
     }
 
     /// Selects the specified tree-view item and scrolls the item into view.
-    pub fn select_item(&self, item: TreeItem) {
+    pub fn select_item(&self, item: &TreeItem) {
         use winapi::um::commctrl::{TVITEMW, TVM_SETITEMW, TVIS_SELECTED, TVIF_STATE};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -258,6 +263,39 @@ impl TreeView {
         };
 
         wh::send_message(handle, TVM_SETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
+    }
+
+    /// Returns the text of the selected item. Return None if the item is not in the tree view.
+    /// The returned text value cannot be bigger than 260 characters
+    pub fn item_text(&self, item: &TreeItem) -> Option<String> {
+        use winapi::um::commctrl::{TVM_GETITEMW, TVITEMW, TVIF_TEXT};
+        const BUFFER_MAX: usize = 260;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
+
+        let mut text_buffer = Vec::with_capacity(BUFFER_MAX);
+        unsafe { text_buffer.set_len(BUFFER_MAX); }
+
+        let mut item = TVITEMW {
+            mask: TVIF_TEXT,
+            hItem: item.handle,
+            state: 0,
+            stateMask: 0,
+            pszText: text_buffer.as_mut_ptr(),
+            cchTextMax: BUFFER_MAX as _,
+            iImage: 0,
+            iSelectedImage: 0,
+            cChildren: 0,
+            lParam: 0
+        };
+
+        let result = wh::send_message(handle, TVM_GETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
+        if result == 0 {
+            return None;
+        }
+
+        Some(from_utf16(&text_buffer))
     }
 
     /// Expands or collapses the list of child items associated with the specified parent item, if any. 
