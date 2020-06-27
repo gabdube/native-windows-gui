@@ -159,8 +159,11 @@ pub enum Event {
     /// When the control has acquired the input focus
     OnTreeFocus,
 
-    /// When an item is removed from the treeview. The item being deleted is passed in `EventData::OnTreeDelete`
-    OnTreeDelete,
+    /// When an item is removed from the treeview. The item being deleted is passed in `EventData::OnTreeItemDelete`
+    OnTreeItemDelete,
+
+    /// When an item is expanded
+    OnTreeItemExpanded,
 
     /// When a TrayNotification info popup (not the tooltip) is shown 
     OnTrayNotificationShow,
@@ -216,7 +219,11 @@ pub enum EventData {
 
     /// The handle to the item being deleted. The item is still valid.
     #[cfg(feature="tree-view")]
-    OnTreeDelete(crate::TreeItem)
+    OnTreeItemDelete(crate::TreeItem),
+
+    /// The handle to the item being deleted. The item is still valid.
+    #[cfg(feature="tree-view")]
+    OnTreeItemUpdate{ item: crate::TreeItem, action: crate::TreeItemAction }
 }
 
 impl EventData {
@@ -255,9 +262,18 @@ impl EventData {
 
     /// nwraps event data into the removed tree item
     #[cfg(feature="tree-view")]
-    pub fn on_tree_delete(&self) -> &crate::TreeItem {
+    pub fn on_tree_item_delete(&self) -> &crate::TreeItem {
         match self {
-            EventData::OnTreeDelete(item) => item,
+            EventData::OnTreeItemDelete(item) => item,
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
+    /// nwraps event data into the removed tree item
+    #[cfg(feature="tree-view")]
+    pub fn on_tree_item_update(&self) -> (&crate::TreeItem, crate::TreeItemAction) {
+        match self {
+            EventData::OnTreeItemUpdate { item, action } => (item, *action),
             d => panic!("Wrong data type: {:?}", d)
         }
     }

@@ -789,7 +789,7 @@ fn track_commands(m: u32) -> Event {
 
 fn tree_commands(m: u32) -> Event {
     use winapi::um::commctrl::{NM_CLICK, NM_DBLCLK, NM_KILLFOCUS, NM_RCLICK, NM_SETFOCUS,
-        TVN_DELETEITEMW, };
+        TVN_DELETEITEMW, TVN_ITEMEXPANDINGW};
 
     match m {
         NM_CLICK => Event::OnTreeViewClick,
@@ -797,20 +797,40 @@ fn tree_commands(m: u32) -> Event {
         NM_KILLFOCUS => Event::OnTreeFocusLost,
         NM_SETFOCUS => Event::OnTreeFocus,
         NM_RCLICK => Event::OnTreeViewRightClick,
-        TVN_DELETEITEMW => Event::OnTreeDelete,
+        TVN_DELETEITEMW => Event::OnTreeItemDelete,
+        TVN_ITEMEXPANDINGW => Event::OnTreeItemExpanded,
         _ => Event::Unknown
     }
 }
 
 #[cfg(feature="tree-view")]
 fn tree_data(m: u32, notif_raw: *const NMHDR) -> EventData {
-    use winapi::um::commctrl::{TVN_DELETEITEMW, NMTREEVIEWW};
+    use crate::{TreeItem, TreeItemAction, ExpandState};
+    use winapi::um::commctrl::{TVN_DELETEITEMW, TVN_ITEMEXPANDINGW, NMTREEVIEWW, 
+        TVE_COLLAPSE, TVE_EXPAND, TVE_COLLAPSERESET, TVE_EXPANDPARTIAL, TVE_TOGGLE};
+        
 
     match m {
         TVN_DELETEITEMW => {
             let data = unsafe { &*(notif_raw as *const NMTREEVIEWW) };
-            let item = crate::TreeItem { handle: data.itemOld.hItem };
-            EventData::OnTreeDelete(item)
+            let item = TreeItem { handle: data.itemOld.hItem };
+            EventData::OnTreeItemDelete(item)
+        },
+        TVN_ITEMEXPANDINGW => {
+            let data = unsafe { &*(notif_raw as *const NMTREEVIEWW) };
+            let item = TreeItem { handle: data.itemOld.hItem };
+
+            let state = match data.action as usize {
+                TVE_COLLAPSE => ExpandState::Collapse,
+                TVE_COLLAPSERESET => ExpandState::CollapseReset,
+                TVE_EXPAND => ExpandState::Expand,
+                TVE_EXPANDPARTIAL => ExpandState::ExpandPartial,
+                TVE_TOGGLE => ExpandState::Toggle,
+                _ => ExpandState::Toggle
+            };
+
+            let action = TreeItemAction::Expand(state);
+            EventData::OnTreeItemUpdate { item, action }
         },
         _ => NO_DATA
     }

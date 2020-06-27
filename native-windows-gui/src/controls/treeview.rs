@@ -60,6 +60,13 @@ pub enum ExpandState {
     Toggle
 }
 
+
+/// An action that can be applied to a tree item. Used in events
+#[derive(Copy, Clone, Debug)]
+pub enum TreeItemAction {
+    Expand(ExpandState)
+}
+
 /// A reference to an item in a TreeView
 #[derive(Debug)]
 pub struct TreeItem {
@@ -90,7 +97,7 @@ Requires the `tree-view` feature
   * `OnTreeViewRightClick`: When the user has clicked the right mouse button within the control.
   * `OnTreeFocusLost`: When the control has lost the input focus
   * `OnTreeFocus`: When the control has acquired the input focus
-  * `OnTreeDelete`: Just before an item is deleted. Also sent for all the children.
+  * `OnTreeItemDelete`: Just before an item is deleted. Also sent for all the children.
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct TreeView {
@@ -267,7 +274,7 @@ impl TreeView {
 
     /// Returns the text of the selected item. Return None if the item is not in the tree view.
     /// The returned text value cannot be bigger than 260 characters
-    pub fn item_text(&self, item: &TreeItem) -> Option<String> {
+    pub fn item_text(&self, tree_item: &TreeItem) -> Option<String> {
         use winapi::um::commctrl::{TVM_GETITEMW, TVITEMW, TVIF_TEXT};
         const BUFFER_MAX: usize = 260;
 
@@ -277,9 +284,9 @@ impl TreeView {
         let mut text_buffer = Vec::with_capacity(BUFFER_MAX);
         unsafe { text_buffer.set_len(BUFFER_MAX); }
 
-        let mut item: TVITEMW = mem::zeroed();
+        let mut item: TVITEMW = unsafe { mem::zeroed() };
         item.mask = TVIF_TEXT;
-        item.hItem = item.handle;
+        item.hItem = tree_item.handle;
         item.pszText = text_buffer.as_mut_ptr();
         item.cchTextMax = BUFFER_MAX as _;
         
@@ -292,13 +299,14 @@ impl TreeView {
     }
 
     /// Returns `true` if the tree view item has children. Returns `None` if the item is not in the tree view.
-    pub fn item_has_children(&self, item: &TreeItem) -> Option<bool> {
+    pub fn item_has_children(&self, tree_item: &TreeItem) -> Option<bool> {
         use winapi::um::commctrl::{TVM_GETITEMW, TVITEMW, TVIF_CHILDREN};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE); 
 
-        let mut item: TVITEMW = mem::zeroed();
+        let mut item: TVITEMW = unsafe { mem::zeroed() };
+        item.hItem = tree_item.handle;
         item.mask = TVIF_CHILDREN;
         
         let result = wh::send_message(handle, TVM_GETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
