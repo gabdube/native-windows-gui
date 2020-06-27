@@ -90,7 +90,7 @@ Requires the `tree-view` feature
   * `OnTreeViewRightClick`: When the user has clicked the right mouse button within the control.
   * `OnTreeFocusLost`: When the control has lost the input focus
   * `OnTreeFocus`: When the control has acquired the input focus
-
+  * `OnTreeDelete`: Just before an item is deleted. Also sent for all the children.
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct TreeView {
@@ -277,25 +277,36 @@ impl TreeView {
         let mut text_buffer = Vec::with_capacity(BUFFER_MAX);
         unsafe { text_buffer.set_len(BUFFER_MAX); }
 
-        let mut item = TVITEMW {
-            mask: TVIF_TEXT,
-            hItem: item.handle,
-            state: 0,
-            stateMask: 0,
-            pszText: text_buffer.as_mut_ptr(),
-            cchTextMax: BUFFER_MAX as _,
-            iImage: 0,
-            iSelectedImage: 0,
-            cChildren: 0,
-            lParam: 0
-        };
-
+        let mut item: TVITEMW = mem::zeroed();
+        item.mask = TVIF_TEXT;
+        item.hItem = item.handle;
+        item.pszText = text_buffer.as_mut_ptr();
+        item.cchTextMax = BUFFER_MAX as _;
+        
         let result = wh::send_message(handle, TVM_GETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
         if result == 0 {
             return None;
         }
 
         Some(from_utf16(&text_buffer))
+    }
+
+    /// Returns `true` if the tree view item has children. Returns `None` if the item is not in the tree view.
+    pub fn item_has_children(&self, item: &TreeItem) -> Option<bool> {
+        use winapi::um::commctrl::{TVM_GETITEMW, TVITEMW, TVIF_CHILDREN};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
+
+        let mut item: TVITEMW = mem::zeroed();
+        item.mask = TVIF_CHILDREN;
+        
+        let result = wh::send_message(handle, TVM_GETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
+        if result == 0 {
+            return None;
+        }
+
+        Some(item.cChildren != 0)
     }
 
     /// Expands or collapses the list of child items associated with the specified parent item, if any. 
