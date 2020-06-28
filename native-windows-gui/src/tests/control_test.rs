@@ -903,9 +903,6 @@ mod partial_controls_test_ui {
                         print_char(_evt_data);
                     }
                 },
-                E::OnTreeItemChanged => {
-                    println!("{:?}", _evt_data);
-                },
                 _ => {}
             }
         }
@@ -927,6 +924,10 @@ fn init_tree(app: &ControlsTest) {
     let view = tree.insert_item("A tree View", Some(&item), TreeInsert::First);
     tree.insert_item("AHHHHHHH", Some(&view), TreeInsert::First);
     tree.insert_item("Items", Some(&item), TreeInsert::First);
+
+    let other = tree.insert_item("Another root children", Some(&item), TreeInsert::Last);
+    tree.insert_item("Banana", Some(&other), TreeInsert::First);
+    tree.insert_item("Pinapple", Some(&other), TreeInsert::First);
 }
 
 fn show_pop_menu(app: &ControlsTest, _evt: Event) {

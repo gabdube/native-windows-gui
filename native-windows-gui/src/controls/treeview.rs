@@ -304,6 +304,24 @@ impl TreeView {
         wh::send_message(handle, TVM_SETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
     }
 
+    /// Creates an iterator over the tree view items
+    #[cfg(feature="tree-view-iterator")]
+    pub fn iter<'a>(&'a self) -> crate::TreeViewIterator<'a> {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        self.handle.hwnd().expect(BAD_HANDLE);
+
+        crate::TreeViewIterator::new(self, ptr::null_mut())
+    }
+
+    /// Creates an iterator over the children of an item. This does not include the item itself.
+    #[cfg(feature="tree-view-iterator")]
+    pub fn iter_item<'a>(&'a self, item: &TreeItem) -> crate::TreeViewIterator<'a> {
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        self.handle.hwnd().expect(BAD_HANDLE);
+
+        crate::TreeViewIterator::new(self, item.handle)
+    }
+
     /// Returns the text of the selected item. Return None if the item is not in the tree view.
     /// The returned text value cannot be bigger than 260 characters
     pub fn item_text(&self, tree_item: &TreeItem) -> Option<String> {

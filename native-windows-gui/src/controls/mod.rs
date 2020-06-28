@@ -50,6 +50,9 @@ mod tabs;
 #[cfg(feature = "tree-view")]
 mod treeview;
 
+#[cfg(all(feature = "tree-view-iterator", feature = "tree-view") )]
+mod treeview_iterator;
+
 #[cfg(feature = "tray-notification")]
 mod tray_notification;
 
@@ -127,6 +130,9 @@ pub use tabs::{TabsContainer, Tab, TabsContainerFlags, TabsContainerBuilder, Tab
 
 #[cfg(feature = "tree-view")]
 pub use treeview::{TreeView, TreeViewBuilder, TreeItem, TreeInsert, TreeItemAction, ExpandState, TreeItemState, TreeViewFlags};
+
+#[cfg(all(feature = "tree-view-iterator", feature = "tree-view") )]
+pub use treeview_iterator::TreeViewIterator;
 
 #[cfg(feature = "tray-notification")]
 pub use tray_notification::{TrayNotificationFlags, TrayNotification, TrayNotificationBuilder};
