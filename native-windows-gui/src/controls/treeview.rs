@@ -203,17 +203,27 @@ impl TreeView {
     /// Return the root item of the tree view if one is present.
     /// If there is no root in the tree, returns `None`.
     pub fn root(&self) -> Option<TreeItem> {
-        use winapi::um::commctrl::{TVM_GETNEXTITEM, TVGN_ROOT};
+        use winapi::um::commctrl::TVGN_ROOT;
+        next_treeview_item(&self.handle, TVGN_ROOT, ptr::null_mut())
+    }
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+    /// Returns the first child of an item or `None` if the item has no child or if it's not part of the tree view 
+    /// To iterate over all the children, use `TTreeView.iter_item(&parent_item)`
+    pub fn first_child(&self, item: &TreeItem) ->  Option<TreeItem> {
+        use winapi::um::commctrl::TVGN_CHILD;
+        next_treeview_item(&self.handle, TVGN_CHILD, item.handle)
+    }
 
-        let handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_ROOT, 0) as HTREEITEM;
-        if handle.is_null() {
-            None
-        } else {
-            Some(TreeItem { handle })
-        }
+    /// Return the next sibling in the tree or `None` if the item has no more sibling or if it's not part of the tree view 
+    pub fn next_sibling(&self, item: &TreeItem) ->  Option<TreeItem> {
+        use winapi::um::commctrl::TVGN_NEXT;
+        next_treeview_item(&self.handle, TVGN_NEXT, item.handle)
+    }
+
+    /// Return the previous sibling in the tree or `None` if the item has no more sibling or if it's not part of the tree view
+    pub fn previous_sibling(&self, item: &TreeItem) ->  Option<TreeItem> {
+        use winapi::um::commctrl::TVGN_PREVIOUS;
+        next_treeview_item(&self.handle, TVGN_PREVIOUS, item.handle)
     }
 
     /// Return the currently selected item.
@@ -568,6 +578,8 @@ impl Drop for TreeView {
     }
 }
 
+
+/// Builder for a TreeView
 pub struct TreeViewBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
@@ -668,3 +680,18 @@ impl PartialEq for TreeItem {
 }
 
 impl Eq for TreeItem {}
+
+
+fn next_treeview_item(handle: &ControlHandle, action: usize, item: HTREEITEM) -> Option<TreeItem> {
+    use winapi::um::commctrl::TVM_GETNEXTITEM;
+
+    if handle.blank() { panic!(NOT_BOUND); }
+    let handle = handle.hwnd().expect(BAD_HANDLE);
+
+    let handle = wh::send_message(handle, TVM_GETNEXTITEM, action as _, item as _) as HTREEITEM;
+    if handle.is_null() {
+        None
+    } else {
+        Some(TreeItem { handle })
+    }
+}

@@ -2,7 +2,6 @@ use winapi::shared::windef::HWND;
 use winapi::um::commctrl::{HTREEITEM, TVGN_ROOT, TVGN_CHILD, TVGN_NEXT, TVGN_PARENT};
 use crate::{TreeView, TreeItem};
 use crate::win32::window_helper as wh;
-use std::ptr;
 
 
 #[derive(Copy, Clone)]
