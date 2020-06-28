@@ -162,8 +162,14 @@ pub enum Event {
     /// When an item is removed from the treeview. The item being deleted is passed in `EventData::OnTreeItemDelete`
     OnTreeItemDelete,
 
-    /// When an item is expanded
+    /// When an item is expanded. Generates a `EventData::OnTreeItemDelete`
     OnTreeItemExpanded,
+
+    /// When the state of a tree item is changed.
+    OnTreeItemChanged,
+
+    /// When the selected tree item is changed.
+    OnTreeItemSelectionChanged,
 
     /// When a TrayNotification info popup (not the tooltip) is shown 
     OnTrayNotificationShow,
@@ -221,9 +227,14 @@ pub enum EventData {
     #[cfg(feature="tree-view")]
     OnTreeItemDelete(crate::TreeItem),
 
-    /// The handle to the item being deleted. The item is still valid.
+    /// The handle to the item being changed.
     #[cfg(feature="tree-view")]
-    OnTreeItemUpdate{ item: crate::TreeItem, action: crate::TreeItemAction }
+    OnTreeItemUpdate{ item: crate::TreeItem, action: crate::TreeItemAction },
+
+    /// The handles the the old item and the new item.
+    #[cfg(feature="tree-view")]
+    OnTreeItemSelectionChanged{ old: crate::TreeItem, new: crate::TreeItem },
+
 }
 
 impl EventData {
@@ -260,7 +271,7 @@ impl EventData {
         }
     }
 
-    /// nwraps event data into the removed tree item
+    /// uwraps event data into the removed tree item
     #[cfg(feature="tree-view")]
     pub fn on_tree_item_delete(&self) -> &crate::TreeItem {
         match self {
@@ -269,11 +280,20 @@ impl EventData {
         }
     }
 
-    /// nwraps event data into the removed tree item
+    /// uwraps event data into the update tree view item and the action
     #[cfg(feature="tree-view")]
     pub fn on_tree_item_update(&self) -> (&crate::TreeItem, crate::TreeItemAction) {
         match self {
             EventData::OnTreeItemUpdate { item, action } => (item, *action),
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
+    /// nwraps event data into the removed tree item
+    #[cfg(feature="tree-view")]
+    pub fn on_tree_item_selection_changed(&self) -> (&crate::TreeItem, &crate::TreeItem) {
+        match self {
+            EventData::OnTreeItemSelectionChanged { old, new } => (old, new),
             d => panic!("Wrong data type: {:?}", d)
         }
     }

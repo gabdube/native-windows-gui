@@ -4,7 +4,7 @@ A tree-view control is a window that displays a hierarchical list of items
 
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
-use winapi::um::commctrl::{HIMAGELIST, HTREEITEM};
+use winapi::um::commctrl::{HIMAGELIST, HTREEITEM, TVIS_EXPANDED, TVIS_SELECTED};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::{Font, ImageList, NwgError};
@@ -29,6 +29,21 @@ bitflags! {
         const TAB_STOP = WS_TABSTOP;
     }
 }
+
+bitflags! {
+    /**
+        A tree item state
+
+        * SELECTED:  The tree view is immediatly visible after creation
+        * DISABLED: The tree view cannot be interacted with by the user. It also has a grayed out look.
+        * TAB_STOP: The tree view can be selected using tab navigation
+    */
+    pub struct TreeItemState: u32 {
+        const SELECTED = TVIS_SELECTED;
+        const EXPANDED = TVIS_EXPANDED;
+    }
+}
+
 
 /// Select the position of a new item that is about to be inserted in a TreeView
 #[derive(Copy, Clone, Debug)]
@@ -64,13 +79,27 @@ pub enum ExpandState {
 /// An action that can be applied to a tree item. Used in events
 #[derive(Copy, Clone, Debug)]
 pub enum TreeItemAction {
-    Expand(ExpandState)
+    /// An unexpected value was passed to NWG
+    Unknown,
+
+    /// A tree item was expanded or collapsed. 
+    Expand(ExpandState),
+
+    /// The state of the item was changed
+    State { old: TreeItemState, new: TreeItemState }
 }
 
 /// A reference to an item in a TreeView
 #[derive(Debug)]
 pub struct TreeItem {
     pub handle: HTREEITEM
+}
+
+impl TreeItem {
+    /// Checks if the inner handle is null
+    pub fn is_null(&self) -> bool {
+        self.handle.is_null()
+    }
 }
 
 /**
@@ -98,6 +127,9 @@ Requires the `tree-view` feature
   * `OnTreeFocusLost`: When the control has lost the input focus
   * `OnTreeFocus`: When the control has acquired the input focus
   * `OnTreeItemDelete`: Just before an item is deleted. Also sent for all the children.
+  * `OnTreeItemExpanded`: After an item was expanded or collapsed. Sends a `EventData::OnTreeItemUpdate`.
+  * `OnTreeItemChanged`: After the state of an item was changed. Sends a `EventData::OnTreeItemUpdate`.
+  * `OnTreeItemSelectionChanged`: After the current selection was changed. Sends a `EventData::OnTreeItemChanged`.
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct TreeView {
@@ -251,7 +283,7 @@ impl TreeView {
 
     /// Selects the specified tree-view item and scrolls the item into view.
     pub fn select_item(&self, item: &TreeItem) {
-        use winapi::um::commctrl::{TVITEMW, TVM_SETITEMW, TVIS_SELECTED, TVIF_STATE};
+        use winapi::um::commctrl::{TVITEMW, TVM_SETITEMW, TVIF_STATE};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE); 
@@ -275,7 +307,7 @@ impl TreeView {
     /// Returns the text of the selected item. Return None if the item is not in the tree view.
     /// The returned text value cannot be bigger than 260 characters
     pub fn item_text(&self, tree_item: &TreeItem) -> Option<String> {
-        use winapi::um::commctrl::{TVM_GETITEMW, TVITEMW, TVIF_TEXT};
+        use winapi::um::commctrl::{TVM_GETITEMW, TVITEMW, TVIF_TEXT, TVIF_HANDLE};
         const BUFFER_MAX: usize = 260;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -285,7 +317,7 @@ impl TreeView {
         unsafe { text_buffer.set_len(BUFFER_MAX); }
 
         let mut item: TVITEMW = unsafe { mem::zeroed() };
-        item.mask = TVIF_TEXT;
+        item.mask = TVIF_TEXT | TVIF_HANDLE;
         item.hItem = tree_item.handle;
         item.pszText = text_buffer.as_mut_ptr();
         item.cchTextMax = BUFFER_MAX as _;
@@ -300,14 +332,14 @@ impl TreeView {
 
     /// Returns `true` if the tree view item has children. Returns `None` if the item is not in the tree view.
     pub fn item_has_children(&self, tree_item: &TreeItem) -> Option<bool> {
-        use winapi::um::commctrl::{TVM_GETITEMW, TVITEMW, TVIF_CHILDREN};
+        use winapi::um::commctrl::{TVM_GETITEMW, TVITEMW, TVIF_CHILDREN, TVIF_HANDLE};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE); 
 
         let mut item: TVITEMW = unsafe { mem::zeroed() };
         item.hItem = tree_item.handle;
-        item.mask = TVIF_CHILDREN;
+        item.mask = TVIF_CHILDREN | TVIF_HANDLE;
         
         let result = wh::send_message(handle, TVM_GETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
         if result == 0 {
@@ -315,6 +347,26 @@ impl TreeView {
         }
 
         Some(item.cChildren != 0)
+    }
+
+    /// Returns the item state in the tree view or `None` if the item is not in the tree view
+    pub fn item_state(&self, tree_item: &TreeItem) -> Option<TreeItemState> {
+        use winapi::um::commctrl::{TVM_GETITEMW, TVITEMW, TVIF_STATE, TVIF_HANDLE};
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
+
+        let mut item: TVITEMW = unsafe { mem::zeroed() };
+        item.hItem = tree_item.handle;
+        item.mask = TVIF_STATE | TVIF_HANDLE;
+        item.stateMask = 0xFF;
+        
+        let result = wh::send_message(handle, TVM_GETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
+        if result == 0 {
+            return None;
+        }
+
+        Some(TreeItemState::from_bits_truncate(item.state))
     }
 
     /// Expands or collapses the list of child items associated with the specified parent item, if any. 

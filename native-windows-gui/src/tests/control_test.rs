@@ -903,9 +903,8 @@ mod partial_controls_test_ui {
                         print_char(_evt_data);
                     }
                 },
-                E::OnTreeItemExpanded => {
-                    let (_item, update) = _evt_data.on_tree_item_update();
-                    println!("{:?}", update);
+                E::OnTreeItemChanged => {
+                    println!("{:?}", _evt_data);
                 },
                 _ => {}
             }

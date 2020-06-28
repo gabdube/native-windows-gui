@@ -789,7 +789,7 @@ fn track_commands(m: u32) -> Event {
 
 fn tree_commands(m: u32) -> Event {
     use winapi::um::commctrl::{NM_CLICK, NM_DBLCLK, NM_KILLFOCUS, NM_RCLICK, NM_SETFOCUS,
-        TVN_DELETEITEMW, TVN_ITEMEXPANDINGW};
+        TVN_DELETEITEMW, TVN_ITEMEXPANDEDW, TVN_SELCHANGEDW, TVN_ITEMCHANGEDW };
 
     match m {
         NM_CLICK => Event::OnTreeViewClick,
@@ -798,16 +798,18 @@ fn tree_commands(m: u32) -> Event {
         NM_SETFOCUS => Event::OnTreeFocus,
         NM_RCLICK => Event::OnTreeViewRightClick,
         TVN_DELETEITEMW => Event::OnTreeItemDelete,
-        TVN_ITEMEXPANDINGW => Event::OnTreeItemExpanded,
+        TVN_ITEMEXPANDEDW => Event::OnTreeItemExpanded,
+        TVN_SELCHANGEDW => Event::OnTreeItemSelectionChanged,
+        TVN_ITEMCHANGEDW => Event::OnTreeItemChanged,
         _ => Event::Unknown
     }
 }
 
 #[cfg(feature="tree-view")]
 fn tree_data(m: u32, notif_raw: *const NMHDR) -> EventData {
-    use crate::{TreeItem, TreeItemAction, ExpandState};
-    use winapi::um::commctrl::{TVN_DELETEITEMW, TVN_ITEMEXPANDINGW, NMTREEVIEWW, 
-        TVE_COLLAPSE, TVE_EXPAND, TVE_COLLAPSERESET, TVE_EXPANDPARTIAL, TVE_TOGGLE};
+    use crate::{TreeItem, TreeItemAction, ExpandState, TreeItemState};
+    use winapi::um::commctrl::{TVN_DELETEITEMW, TVN_ITEMEXPANDEDW, NMTREEVIEWW, 
+        TVE_COLLAPSE, TVE_EXPAND, TVN_SELCHANGEDW, TVN_ITEMCHANGEDW, NMTVITEMCHANGE};
         
 
     match m {
@@ -816,20 +818,31 @@ fn tree_data(m: u32, notif_raw: *const NMHDR) -> EventData {
             let item = TreeItem { handle: data.itemOld.hItem };
             EventData::OnTreeItemDelete(item)
         },
-        TVN_ITEMEXPANDINGW => {
+        TVN_ITEMEXPANDEDW => {
             let data = unsafe { &*(notif_raw as *const NMTREEVIEWW) };
-            let item = TreeItem { handle: data.itemOld.hItem };
+            let item = TreeItem { handle: data.itemNew.hItem };
 
-            let state = match data.action as usize {
-                TVE_COLLAPSE => ExpandState::Collapse,
-                TVE_COLLAPSERESET => ExpandState::CollapseReset,
-                TVE_EXPAND => ExpandState::Expand,
-                TVE_EXPANDPARTIAL => ExpandState::ExpandPartial,
-                TVE_TOGGLE => ExpandState::Toggle,
-                _ => ExpandState::Toggle
+            let action = match data.action as usize {
+                TVE_COLLAPSE => TreeItemAction::Expand(ExpandState::Collapse),
+                TVE_EXPAND => TreeItemAction::Expand(ExpandState::Expand),
+                _ => TreeItemAction::Unknown // Other values shoudn't be raised by this event
             };
 
-            let action = TreeItemAction::Expand(state);
+            EventData::OnTreeItemUpdate { item, action }
+        },
+        TVN_SELCHANGEDW => {
+            let data = unsafe { &*(notif_raw as *const NMTREEVIEWW) };
+            let new = TreeItem { handle: data.itemNew.hItem };
+            let old = TreeItem { handle: data.itemOld.hItem };
+            EventData::OnTreeItemSelectionChanged { old, new }
+        },
+        TVN_ITEMCHANGEDW => {
+            let data = unsafe { &*(notif_raw as *const NMTVITEMCHANGE) };
+            let item = TreeItem { handle: data.hItem };
+            let action = TreeItemAction::State { 
+                new: TreeItemState::from_bits_truncate(data.uStateNew),
+                old: TreeItemState::from_bits_truncate(data.uStateOld)
+            };
             EventData::OnTreeItemUpdate { item, action }
         },
         _ => NO_DATA

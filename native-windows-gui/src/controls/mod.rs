@@ -126,7 +126,7 @@ pub use progress_bar::{ProgressBar, ProgressBarState, ProgressBarFlags, Progress
 pub use tabs::{TabsContainer, Tab, TabsContainerFlags, TabsContainerBuilder, TabBuilder};
 
 #[cfg(feature = "tree-view")]
-pub use treeview::{TreeView, TreeViewBuilder, TreeItem, TreeInsert, TreeItemAction, ExpandState};
+pub use treeview::{TreeView, TreeViewBuilder, TreeItem, TreeInsert, TreeItemAction, ExpandState, TreeItemState, TreeViewFlags};
 
 #[cfg(feature = "tray-notification")]
 pub use tray_notification::{TrayNotificationFlags, TrayNotification, TrayNotificationBuilder};
