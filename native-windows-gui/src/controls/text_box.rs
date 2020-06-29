@@ -1,5 +1,5 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
-use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
+use winapi::um::winuser::{WS_VSCROLL, WS_HSCROLL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
@@ -21,8 +21,8 @@ bitflags! {
         * TAB_STOP: The text box can be selected using tab navigation
     */
     pub struct TextBoxFlags: u32 {
-        const VSCROLL = ES_AUTOVSCROLL;
-        const HSCROLL = ES_AUTOHSCROLL;
+        const VSCROLL = WS_VSCROLL;
+        const HSCROLL = WS_HSCROLL;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const TAB_STOP = WS_TABSTOP;
@@ -306,7 +306,7 @@ impl TextBox {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_TABSTOP
+        WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
