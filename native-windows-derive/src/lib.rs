@@ -251,8 +251,8 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
                 inner: #struct_name
             }
 
-            impl NativeUi<#struct_name, Rc<#ui_struct_name>> for #struct_name {
-                fn build_ui(mut data: #struct_name) -> Result<Rc<#ui_struct_name>, NwgError> {
+            impl NativeUi<Rc<#ui_struct_name>> for #struct_name {
+                fn build_ui(mut data: Self) -> Result<Rc<#ui_struct_name>, NwgError> {
                     #resources
                     #controls
                     #partials
@@ -348,10 +348,10 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
             use native_windows_gui::*;
             use super::*;
         
-            impl PartialUi<#struct_name> for #struct_name {
+            impl PartialUi for #struct_name {
 
                 #[allow(unused)]
-                fn build_partial<W: Into<ControlHandle>>(data: &mut #struct_name, _parent: Option<W>) -> Result<(), NwgError> {
+                fn build_partial<W: Into<ControlHandle>>(data: &mut Self, _parent: Option<W>) -> Result<(), NwgError> {
                     let parent = _parent.map(|p| p.into());
                     let parent_ref = parent.as_ref();
                     

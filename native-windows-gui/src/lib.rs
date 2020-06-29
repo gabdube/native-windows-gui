@@ -56,31 +56,57 @@ mod winnls;
 #[cfg(feature = "winnls")]
 pub use winnls::*;
 
-
 /**
-    PartialUi is a trait that can be implemented over a GUI structure that can be reused.
+    A structure that implements this trait is considered a GUI structure. The structure will hold GUI components and possibly user data.
+
+    A structure that implements `PartialUi` must be part of another UI structure and cannot be used at it is. It will most likely used
+    as a struct member of another struct that implements `NativeUi`.
+
 
     The goal of `NativeUi` and `PartialUi` is to provide a common way to define NWG applications.
     Native-windows-derive can automatically implements this trait.
 
     For an example on how to implement this trait, see the **Small application layout** section in the NWG documentation.
 */
-pub trait PartialUi<D> {
-    fn build_partial<W: Into<ControlHandle>>(d: &mut D, parent: Option<W>) -> Result<(), NwgError>;
+pub trait PartialUi {
+    /**
+        Should initializes the GUI components. Similar to `NativeUi::build_ui` except it doesn't handle events binding.
+
+        Parameters:
+          - `data`: A reference to the struct data from the parent struct
+          - `parent`: An optional reference to the parent UI control. If this is defined, ui controls of the partial should be children of this value.
+    */
+    fn build_partial<W: Into<ControlHandle>>(data: &mut Self, parent: Option<W>) -> Result<(), NwgError>;
+
+    /**
+        Should process the events of the partial. This method will probably be called from an event handler bound in the parent GUI structure.
+    */
     fn process_event(&self, _evt: Event, _evt_data: &EventData, _handle: ControlHandle) {}
+
+    /**
+        Should return the handles of the top level parent controls (such as Windows). Those handle should be used to bind
+        the default events handler.
+    */
     fn handles<'a>(&'a self) -> Vec<&'a ControlHandle> { vec![] }
 }
 
 /**
-    NativeUi is a trait that can be implemented over a GUI structure.
+    A structure that implements this trait is considered a GUI structure. The structure will hold GUI components and possibly user data. 
 
     The goal of `NativeUi` and `PartialUi` is to provide a common way to define NWG applications.
     Native-windows-derive can automatically implements this trait.
 
     For an example on how to implement this trait, see the **Small application layout** section in the NWG documentation.
 */
-pub trait NativeUi<D, UI> {
-    fn build_ui(d: D) -> Result<UI, NwgError>;
+pub trait NativeUi<UI> {
+
+    /**
+        A constructor for the structure. It should initializes the GUI components and bind GUI events.
+
+        Parameters:
+          - `inital_state`: should contain the initial user data. `NativeUi` assumes this data will be wrapped in another type (`UI`).
+    */
+    fn build_ui(inital_state: Self) -> Result<UI, NwgError>;
 }
 
 
