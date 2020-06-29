@@ -139,7 +139,7 @@ mod calculator_ui {
         default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<Calculator, Rc<CalculatorUi>> for Calculator {
+    impl nwg::NativeUi<Rc<CalculatorUi>> for Calculator {
         fn build_ui(mut data: Calculator) -> Result<Rc<CalculatorUi>, nwg::NwgError> {
             use nwg::Event as E;
             

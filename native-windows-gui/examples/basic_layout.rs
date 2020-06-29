@@ -43,7 +43,7 @@ mod basic_app_ui {
         default_handler: RefCell<Option<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<BasicApp, Rc<BasicAppUi>> for BasicApp {
+    impl nwg::NativeUi<Rc<BasicAppUi>> for BasicApp {
         fn build_ui(mut data: BasicApp) -> Result<Rc<BasicAppUi>, nwg::NwgError> {
             use nwg::Event as E;
             

@@ -56,7 +56,7 @@ mod system_tray_ui {
         default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<SystemTray, Rc<SystemTrayUi>> for SystemTray {
+    impl nwg::NativeUi<Rc<SystemTrayUi>> for SystemTray {
         fn build_ui(mut data: SystemTray) -> Result<Rc<SystemTrayUi>, nwg::NwgError> {
             use nwg::Event as E;
 

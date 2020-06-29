@@ -80,6 +80,12 @@ pub trait PartialUi {
 
     /**
         Should process the events of the partial. This method will probably be called from an event handler bound in the parent GUI structure.
+
+        Parameters:
+          - `base`: A reference to the parent struct data 
+          - `evt`: The event raised
+          - `evt_data`: The data of the event raised
+          - `handle`: Handle of the control that raised the event
     */
     fn process_event(&self, _evt: Event, _evt_data: &EventData, _handle: ControlHandle) {}
 

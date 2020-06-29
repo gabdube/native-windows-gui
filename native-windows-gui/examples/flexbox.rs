@@ -38,7 +38,7 @@ mod flexbox_app_ui {
         default_handler: RefCell<Option<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<FlexBoxApp, Rc<FlexBoxAppUi>> for FlexBoxApp {
+    impl nwg::NativeUi<Rc<FlexBoxAppUi>> for FlexBoxApp {
         fn build_ui(mut data: FlexBoxApp) -> Result<Rc<FlexBoxAppUi>, nwg::NwgError> {
             use nwg::Event as E;
             

@@ -83,7 +83,7 @@ mod message_bank_ui {
         default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<MessageBank, Rc<MessageBankUi>> for MessageBank {
+    impl nwg::NativeUi<Rc<MessageBankUi>> for MessageBank {
         fn build_ui(mut data: MessageBank) -> Result<Rc<MessageBankUi>, nwg::NwgError> {
             use nwg::Event as E;
             

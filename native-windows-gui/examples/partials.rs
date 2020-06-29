@@ -115,7 +115,7 @@ mod partial_demo_ui {
         default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<PartialDemo, Rc<PartialDemoUi>> for PartialDemo {
+    impl nwg::NativeUi<Rc<PartialDemoUi>> for PartialDemo {
         fn build_ui(mut data: PartialDemo) -> Result<Rc<PartialDemoUi>, nwg::NwgError> {
             use nwg::Event as E;
             
@@ -228,7 +228,7 @@ mod partial_people_ui {
     use self::nwg::{PartialUi, NwgError, ControlHandle};
     use super::*;
     
-    impl PartialUi<PeopleUi> for PeopleUi {
+    impl PartialUi for PeopleUi {
 
         fn build_partial<W: Into<ControlHandle>>(data: &mut PeopleUi, parent: Option<W>) -> Result<(), NwgError> {
             let parent = parent.unwrap().into();
@@ -296,7 +296,7 @@ mod partial_animal_ui {
     use self::nwg::{PartialUi, NwgError, ControlHandle};
     use super::*;
 
-    impl PartialUi<AnimalUi> for AnimalUi {
+    impl PartialUi for AnimalUi {
 
         fn build_partial<W: Into<ControlHandle>>(data: &mut AnimalUi, parent: Option<W>) -> Result<(), NwgError> {
             let parent = parent.unwrap().into();
@@ -365,7 +365,7 @@ mod partial_food_ui {
     use self::nwg::{PartialUi, NwgError, ControlHandle};
     use super::*;
 
-    impl PartialUi<FoodUi> for FoodUi {
+    impl PartialUi for FoodUi {
         fn build_partial<W: Into<ControlHandle>>(data: &mut FoodUi, parent: Option<W>) -> Result<(), NwgError> {
             let parent = parent.unwrap().into();
 
