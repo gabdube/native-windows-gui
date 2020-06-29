@@ -41,6 +41,7 @@ impl MessageBank {
         let (x, y) = (blen % 6, blen / 6);
         self.layout.add_child(x, y+1, &new_button);
 
+        // You can share controls handle with events handlers
         let new_button_handle = new_button.handle;
         let handler = nwg::bind_event_handler(&new_button.handle, &self.window.handle, move |evt, _evt_data, handle| {
             match evt {
@@ -79,12 +80,12 @@ mod message_bank_ui {
     use std::ops::Deref;
 
     pub struct MessageBankUi {
-        inner: MessageBank,
+        inner: Rc<MessageBank>,
         default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<Rc<MessageBankUi>> for MessageBank {
-        fn build_ui(mut data: MessageBank) -> Result<Rc<MessageBankUi>, nwg::NwgError> {
+    impl nwg::NativeUi<MessageBankUi> for MessageBank {
+        fn build_ui(mut data: MessageBank) -> Result<MessageBankUi, nwg::NwgError> {
             use nwg::Event as E;
             
             // Controls
@@ -112,25 +113,27 @@ mod message_bank_ui {
                 .build(&mut data.message_title)?;
 
             // Wrap-up
-            let ui = Rc::new(MessageBankUi {
-                inner: data,
+            let ui = MessageBankUi {
+                inner: Rc::new(data),
                 default_handler: Default::default(),
-            });
+            };
 
             // Events
             let window_handles = [&ui.window.handle];
 
             for handle in window_handles.iter() {
-                let evt_ui = ui.clone();
+                let evt_ui = Rc::downgrade(&ui.inner);
                 let handle_events = move |evt, _evt_data, handle| {
-                    match evt {
-                        E::OnButtonClick => {
-                            if &handle == &evt_ui.add_message_btn { MessageBank::add_message(&evt_ui.inner); }
-                        },
-                        E::OnWindowClose => {
-                            if &handle == &evt_ui.window { MessageBank::exit(&evt_ui.inner); }
-                        },
-                        _ => {}
+                    if let Some(evt_ui) = evt_ui.upgrade() {
+                        match evt {
+                            E::OnButtonClick => {
+                                if &handle == &evt_ui.add_message_btn { MessageBank::add_message(&evt_ui); }
+                            },
+                            E::OnWindowClose => {
+                                if &handle == &evt_ui.window { MessageBank::exit(&evt_ui); }
+                            },
+                            _ => {}
+                        }
                     }
                 };
 
@@ -152,9 +155,9 @@ mod message_bank_ui {
         }
     }
 
-    impl MessageBankUi {
+    impl Drop for MessageBankUi {
         /// To make sure that everything is freed without issues, the default handler must be unbound.
-        pub fn destroy(&self) {
+        fn drop(&mut self) {
             let mut handlers = self.default_handler.borrow_mut();
             for handler in handlers.drain(0..) {
                 nwg::unbind_event_handler(&handler);
@@ -178,7 +181,6 @@ fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
     nwg::Font::set_global_family("Segoe UI").expect("Failed to set default font");
 
-    let ui = MessageBank::build_ui(Default::default()).expect("Failed to build UI");
+    let _ui = MessageBank::build_ui(Default::default()).expect("Failed to build UI");
     nwg::dispatch_thread_events();
-    ui.destroy();
 }

@@ -112,7 +112,7 @@ mod partial_freeing_test_ui {
     use super::*;
     use crate::{PartialUi, NwgError, ControlHandle};
 
-    impl PartialUi<FreeingTest> for FreeingTest {
+    impl PartialUi for FreeingTest {
 
         fn build_partial<W: Into<ControlHandle>>(data: &mut FreeingTest, _parent: Option<W>) -> Result<(), NwgError> {
             

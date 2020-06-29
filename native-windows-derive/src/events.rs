@@ -87,10 +87,9 @@ impl ControlEvents {
 
     pub fn with_capacity(cap: usize) -> ControlEvents {
         let mut cache = HashMap::with_capacity(4);
-        cache.insert(0, syn::parse_str("&evt_ui.inner").unwrap());
+        cache.insert(0, syn::parse_str("&evt_ui").unwrap());
         cache.insert(2, syn::parse_str("&_handle").unwrap());
         cache.insert(3, syn::parse_str("_evt").unwrap());
-        cache.insert(4, syn::parse_str("&_evt_data").unwrap());
         cache.insert(4, syn::parse_str("&_evt_data").unwrap());
 
         ControlEvents {
@@ -161,15 +160,17 @@ impl ToTokens for ControlEvents {
         let events_tk = quote! {
             let window_handles: &[&ControlHandle] = &[#(&ui.#handles.handle),*];
             for handle in window_handles.iter() {
-                let evt_ui = ui.clone();
+                let evt_ui = Rc::downgrade(&inner);
                 let handle_events = move |_evt, _evt_data, _handle| {
-                    match _evt { 
-                        #( #pats => #callbacks ),*
-                        _ => {}
+                    if let Some(evt_ui) = evt_ui.upgrade() {
+                        match _evt { 
+                            #( #pats => #callbacks ),*
+                            _ => {}
+                        }
                     }
                 };
                 
-                full_bind_event_handler(handle, handle_events);
+                ui.default_handlers.borrow_mut().push(full_bind_event_handler(handle, handle_events));
             }
         };
 
@@ -278,11 +279,11 @@ fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, T
         return p;
     }
 
-    let values = ["SELF", "CTRL", "HANDLE", "EVT", "EVT_DATA", "RC_SELF"];
+    let values = ["SELF", "CTRL", "HANDLE", "EVT", "EVT_DATA", "EVT_UI"];
     for a in args.as_ref().unwrap().iter() {
         let pos = values.iter().position(|v| &a == &v );
         match pos {
-            Some(0) => { p.push(cache[&0].clone()); },
+            Some(0) | Some(5) => { p.push(cache[&0].clone()); },
             Some(1) => { 
                 let param = format!("&evt_ui.{}", member);
                 p.push(syn::parse_str(&param).unwrap());
@@ -290,7 +291,6 @@ fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, T
             Some(2) => { p.push(cache[&2].clone()); },
             Some(3) => { p.push(cache[&3].clone()); },
             Some(4) => { p.push(cache[&4].clone()); },
-            Some(5) => { p.push(cache[&5].clone()); },
             Some(_) => { unreachable!(); }
             None => panic!("Unknown callback argument: {}. Should be one of those values: {:?}", a, values)
         }

@@ -15,12 +15,12 @@ mod other_tests_ui {
     use std::ops::Deref;
 
     pub struct OtherTestsUi {
-        inner: OtherTests,
+        inner: Rc<OtherTests>,
         default_handler: RefCell<Option<EventHandler>>
     }
 
-    impl NativeUi<OtherTests, Rc<OtherTestsUi>> for OtherTests {
-        fn build_ui(mut data: OtherTests) -> Result<Rc<OtherTestsUi>, NwgError> {
+    impl NativeUi<OtherTestsUi> for OtherTests {
+        fn build_ui(mut data: OtherTests) -> Result<OtherTestsUi, NwgError> {
             use crate::Event as E;
 
             // Controls
@@ -36,21 +36,23 @@ mod other_tests_ui {
                 .parent(&data.window)
                 .build(&mut data.test)?;
             
-            let ui = Rc::new(OtherTestsUi { inner: data, default_handler: Default::default() });
+            let ui = OtherTestsUi { inner: Rc::new(data), default_handler: Default::default() };
 
             // Events
-            let evt_ui = ui.clone();
+            let evt_ui = Rc::downgrade(&ui.inner);
             let handle_events = move |evt, _evt_data, handle| {
-                match evt {
-                    E::OnButtonClick => 
-                        if &handle == &evt_ui.test {
-                            test_stuff(&evt_ui);
-                        },
-                    E::OnWindowClose => 
-                        if &handle == &evt_ui.window {
-                            stop_thread_dispatch();
-                        },
-                    _ => {}
+                if let Some(evt_ui) = evt_ui.upgrade() {
+                    match evt {
+                        E::OnButtonClick => 
+                            if &handle == &evt_ui.test {
+                                test_stuff(&evt_ui);
+                            },
+                        E::OnWindowClose => 
+                            if &handle == &evt_ui.window {
+                                stop_thread_dispatch();
+                            },
+                        _ => {}
+                    }
                 }
             };
 
@@ -66,9 +68,9 @@ mod other_tests_ui {
         }
     }
 
-    impl OtherTestsUi {
+    impl Drop for OtherTestsUi {
         /// To make sure that everything is freed without issues, the default handler must be unbound.
-        pub fn destroy(&self) {
+        fn drop(&mut self) {
             let handler = self.default_handler.borrow();
             if handler.is_some() {
                 unbind_event_handler(handler.as_ref().unwrap());
@@ -96,8 +98,6 @@ fn test_stuff(_t: &OtherTests) {
 #[allow(unused)]
 fn other_tests() {
     init().expect("Failed to init Native Windows GUI");
-    
-    let app = OtherTests::build_ui(Default::default()).expect("Failed to build UI");
+    let _app = OtherTests::build_ui(Default::default()).expect("Failed to build UI");
     //dispatch_thread_events();
-    app.destroy();
 }

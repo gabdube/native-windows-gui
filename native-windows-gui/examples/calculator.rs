@@ -135,12 +135,12 @@ mod calculator_ui {
     use std::ops::Deref;
 
     pub struct CalculatorUi {
-        inner: Calculator,
+        inner: Rc<Calculator>,
         default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<Rc<CalculatorUi>> for Calculator {
-        fn build_ui(mut data: Calculator) -> Result<Rc<CalculatorUi>, nwg::NwgError> {
+    impl nwg::NativeUi<CalculatorUi> for Calculator {
+        fn build_ui(mut data: Calculator) -> Result<CalculatorUi, nwg::NwgError> {
             use nwg::Event as E;
             
             // Controls
@@ -182,42 +182,44 @@ mod calculator_ui {
             
             
             // Wrap-up
-            let ui = Rc::new(CalculatorUi {
-                inner: data,
+            let ui = CalculatorUi {
+                inner: Rc::new(data),
                 default_handler: Default::default()
-            });
+            };
 
             // Events
             let window_handles = [&ui.window.handle];
             for handle in window_handles.iter() {
-                let evt_ui = ui.clone();
+                let evt_ui = Rc::downgrade(&ui.inner);
                 let handle_events = move |evt, _evt_data, handle| {
-                    match evt {
-                        E::OnButtonClick =>
-                            if      &handle == &evt_ui.btn0 { Calculator::number(&evt_ui.inner, &evt_ui.btn0); }
-                            else if &handle == &evt_ui.btn1 { Calculator::number(&evt_ui.inner, &evt_ui.btn1); }
-                            else if &handle == &evt_ui.btn2 { Calculator::number(&evt_ui.inner, &evt_ui.btn2); }
-                            else if &handle == &evt_ui.btn3 { Calculator::number(&evt_ui.inner, &evt_ui.btn3); }
-                            else if &handle == &evt_ui.btn4 { Calculator::number(&evt_ui.inner, &evt_ui.btn4); }
-                            else if &handle == &evt_ui.btn5 { Calculator::number(&evt_ui.inner, &evt_ui.btn5); }
-                            else if &handle == &evt_ui.btn6 { Calculator::number(&evt_ui.inner, &evt_ui.btn6); }
-                            else if &handle == &evt_ui.btn7 { Calculator::number(&evt_ui.inner, &evt_ui.btn7); }
-                            else if &handle == &evt_ui.btn8 { Calculator::number(&evt_ui.inner, &evt_ui.btn8); }
-                            else if &handle == &evt_ui.btn9 { Calculator::number(&evt_ui.inner, &evt_ui.btn9); }
-
-                            else if &handle == &evt_ui.btn_plus { Calculator::number(&evt_ui.inner, &evt_ui.btn_plus); }
-                            else if &handle == &evt_ui.btn_minus { Calculator::number(&evt_ui.inner, &evt_ui.btn_minus); }
-                            else if &handle == &evt_ui.btn_mult { Calculator::number(&evt_ui.inner, &evt_ui.btn_mult); }
-                            else if &handle == &evt_ui.btn_divide { Calculator::number(&evt_ui.inner, &evt_ui.btn_divide); }
-
-                            else if &handle == &evt_ui.btn_clear { Calculator::clear(&evt_ui.inner); }
-
-                            else if &handle == &evt_ui.btn_process { Calculator::compute(&evt_ui.inner); }
-                        E::OnWindowClose => 
-                            if &handle == &evt_ui.window {
-                                Calculator::exit(&evt_ui.inner);
-                            },
-                        _ => {}
+                    if let Some(evt_ui) = evt_ui.upgrade() {
+                        match evt {
+                            E::OnButtonClick =>
+                                if      &handle == &evt_ui.btn0 { Calculator::number(&evt_ui, &evt_ui.btn0); }
+                                else if &handle == &evt_ui.btn1 { Calculator::number(&evt_ui, &evt_ui.btn1); }
+                                else if &handle == &evt_ui.btn2 { Calculator::number(&evt_ui, &evt_ui.btn2); }
+                                else if &handle == &evt_ui.btn3 { Calculator::number(&evt_ui, &evt_ui.btn3); }
+                                else if &handle == &evt_ui.btn4 { Calculator::number(&evt_ui, &evt_ui.btn4); }
+                                else if &handle == &evt_ui.btn5 { Calculator::number(&evt_ui, &evt_ui.btn5); }
+                                else if &handle == &evt_ui.btn6 { Calculator::number(&evt_ui, &evt_ui.btn6); }
+                                else if &handle == &evt_ui.btn7 { Calculator::number(&evt_ui, &evt_ui.btn7); }
+                                else if &handle == &evt_ui.btn8 { Calculator::number(&evt_ui, &evt_ui.btn8); }
+                                else if &handle == &evt_ui.btn9 { Calculator::number(&evt_ui, &evt_ui.btn9); }
+    
+                                else if &handle == &evt_ui.btn_plus { Calculator::number(&evt_ui, &evt_ui.btn_plus); }
+                                else if &handle == &evt_ui.btn_minus { Calculator::number(&evt_ui, &evt_ui.btn_minus); }
+                                else if &handle == &evt_ui.btn_mult { Calculator::number(&evt_ui, &evt_ui.btn_mult); }
+                                else if &handle == &evt_ui.btn_divide { Calculator::number(&evt_ui, &evt_ui.btn_divide); }
+    
+                                else if &handle == &evt_ui.btn_clear { Calculator::clear(&evt_ui); }
+    
+                                else if &handle == &evt_ui.btn_process { Calculator::compute(&evt_ui); }
+                            E::OnWindowClose => 
+                                if &handle == &evt_ui.window {
+                                    Calculator::exit(&evt_ui);
+                                },
+                            _ => {}
+                        }
                     }
                 };
 
@@ -254,9 +256,9 @@ mod calculator_ui {
         }
     }
 
-    impl CalculatorUi {
+    impl Drop for CalculatorUi {
         /// To make sure that everything is freed without issues, the default handler must be unbound.
-        pub fn destroy(&self) {
+        fn drop(&mut self) {
             let mut handlers = self.default_handler.borrow_mut();
             for handler in handlers.drain(0..) {
                 nwg::unbind_event_handler(&handler);
@@ -280,7 +282,6 @@ fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
     nwg::Font::set_global_family("Segoe UI").expect("Failed to set default font");
 
-    let app = Calculator::build_ui(Default::default()).expect("Failed to build UI");
+    let _app = Calculator::build_ui(Default::default()).expect("Failed to build UI");
     nwg::dispatch_thread_events();
-    app.destroy();
 }

@@ -66,7 +66,7 @@ mod partial_canvas_test_ui {
     use crate::{PartialUi, NwgError, ControlHandle};
     use stretch::style::*;
 
-    impl PartialUi<ThreadTest> for ThreadTest {
+    impl PartialUi for ThreadTest {
 
         fn build_partial<W: Into<ControlHandle>>(data: &mut ThreadTest, _parent: Option<W>) -> Result<(), NwgError> {
             

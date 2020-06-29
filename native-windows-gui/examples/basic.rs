@@ -38,12 +38,12 @@ mod basic_app_ui {
     use std::ops::Deref;
 
     pub struct BasicAppUi {
-        inner: BasicApp,
+        inner: Rc<BasicApp>,
         default_handler: RefCell<Option<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<Rc<BasicAppUi>> for BasicApp {
-        fn build_ui(mut data: BasicApp) -> Result<Rc<BasicAppUi>, nwg::NwgError> {
+    impl nwg::NativeUi<BasicAppUi> for BasicApp {
+        fn build_ui(mut data: BasicApp) -> Result<BasicAppUi, nwg::NwgError> {
             use nwg::Event as E;
             
             // Controls
@@ -70,24 +70,26 @@ mod basic_app_ui {
                 .build(&mut data.hello_button)?;
 
             // Wrap-up
-            let ui = Rc::new(BasicAppUi {
-                inner: data,
+            let ui = BasicAppUi {
+                inner: Rc::new(data),
                 default_handler: Default::default(),
-            });
+            };
 
             // Events
-            let evt_ui = ui.clone();
+            let evt_ui = Rc::downgrade(&ui.inner);
             let handle_events = move |evt, _evt_data, handle| {
-                match evt {
-                    E::OnButtonClick => 
-                        if &handle == &evt_ui.hello_button {
-                            BasicApp::say_hello(&evt_ui.inner);
-                        },
-                    E::OnWindowClose => 
-                        if &handle == &evt_ui.window {
-                            BasicApp::say_goodbye(&evt_ui.inner);
-                        },
-                    _ => {}
+                if let Some(ui) = evt_ui.upgrade() {
+                    match evt {
+                        E::OnButtonClick => 
+                            if &handle == &ui.hello_button {
+                                BasicApp::say_hello(&ui);
+                            },
+                        E::OnWindowClose => 
+                            if &handle == &ui.window {
+                                BasicApp::say_goodbye(&ui);
+                            },
+                        _ => {}
+                    }
                 }
             };
 
@@ -97,9 +99,9 @@ mod basic_app_ui {
         }
     }
 
-    impl BasicAppUi {
+    impl Drop for BasicAppUi {
         /// To make sure that everything is freed without issues, the default handler must be unbound.
-        pub fn destroy(&self) {
+        fn drop(&mut self) {
             let handler = self.default_handler.borrow();
             if handler.is_some() {
                 nwg::unbind_event_handler(handler.as_ref().unwrap());
@@ -119,8 +121,6 @@ mod basic_app_ui {
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
     nwg::Font::set_global_family("Segoe UI").expect("Failed to set default font");
-
-    let ui = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
+    let _ui = BasicApp::build_ui(Default::default()).expect("Failed to build UI");
     nwg::dispatch_thread_events();
-    ui.destroy();
 }

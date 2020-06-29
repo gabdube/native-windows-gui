@@ -62,7 +62,6 @@ pub use winnls::*;
     A structure that implements `PartialUi` must be part of another UI structure and cannot be used at it is. It will most likely used
     as a struct member of another struct that implements `NativeUi`.
 
-
     The goal of `NativeUi` and `PartialUi` is to provide a common way to define NWG applications.
     Native-windows-derive can automatically implements this trait.
 

@@ -158,7 +158,7 @@ mod partial_controls_test_ui {
     use super::*;
     use crate::{PartialUi, NwgError, ControlHandle};
 
-    impl PartialUi<ControlsTest> for ControlsTest {
+    impl PartialUi for ControlsTest {
 
         fn build_partial<W: Into<ControlHandle>>(data: &mut ControlsTest, _parent: Option<W>) -> Result<(), NwgError> {
             

@@ -244,20 +244,23 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
             use native_windows_gui::*;
             use super::*;
             use std::ops::Deref;
+            use std::cell::RefCell;
             use std::rc::Rc;
             use std::fmt;
 
             pub struct #ui_struct_name {
-                inner: #struct_name
+                inner: Rc<#struct_name>,
+                default_handlers: RefCell<Vec<EventHandler>>
             }
 
-            impl NativeUi<Rc<#ui_struct_name>> for #struct_name {
-                fn build_ui(mut data: Self) -> Result<Rc<#ui_struct_name>, NwgError> {
+            impl NativeUi<#ui_struct_name> for #struct_name {
+                fn build_ui(mut data: Self) -> Result<#ui_struct_name, NwgError> {
                     #resources
                     #controls
                     #partials
 
-                    let ui = Rc::new(#ui_struct_name { inner: data });
+                    let inner = Rc::new(data);
+                    let ui = #ui_struct_name { inner: inner.clone(), default_handlers: Default::default() };
 
                     #events
                     #layouts
@@ -266,9 +269,13 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
                 }
             }
 
-            impl #ui_struct_name {
-                pub fn destroy(&self) {
-                    
+            impl Drop for #ui_struct_name {
+                /// To make sure that everything is freed without issues, the default handler must be unbound.
+                fn drop(&mut self) {
+                    let mut handlers = self.default_handlers.borrow_mut();
+                    for handler in handlers.drain(0..) {
+                        nwg::unbind_event_handler(&handler);
+                    }
                 }
             }
 

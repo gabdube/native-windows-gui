@@ -52,12 +52,12 @@ mod system_tray_ui {
     use std::ops::Deref;
 
     pub struct SystemTrayUi {
-        inner: SystemTray,
+        inner: Rc<SystemTray>,
         default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<Rc<SystemTrayUi>> for SystemTray {
-        fn build_ui(mut data: SystemTray) -> Result<Rc<SystemTrayUi>, nwg::NwgError> {
+    impl nwg::NativeUi<SystemTrayUi> for SystemTray {
+        fn build_ui(mut data: SystemTray) -> Result<SystemTrayUi, nwg::NwgError> {
             use nwg::Event as E;
 
             // Resources
@@ -96,28 +96,30 @@ mod system_tray_ui {
                 .build(&mut data.tray_item3)?;
 
             // Wrap-up
-            let ui = Rc::new(SystemTrayUi {
-                inner: data,
+            let ui = SystemTrayUi {
+                inner: Rc::new(data),
                 default_handler: Default::default(),
-            });
+            };
 
             // Events
-            let evt_ui = ui.clone();
+            let evt_ui = Rc::downgrade(&ui.inner);
             let handle_events = move |evt, _evt_data, handle| {
-                match evt {
-                    E::OnContextMenu => 
-                        if &handle == &evt_ui.tray {
-                            SystemTray::show_menu(&evt_ui.inner);
-                        }
-                    E::OnMenuItemSelected => 
-                        if &handle == &evt_ui.tray_item1 {
-                            SystemTray::hello1(&evt_ui.inner);
-                        } else if &handle == &evt_ui.tray_item2 {
-                            SystemTray::hello2(&evt_ui.inner);
-                        } else if &handle == &evt_ui.tray_item3 {
-                            SystemTray::exit(&evt_ui.inner);
-                        },
-                    _ => {}
+                if let Some(evt_ui) = evt_ui.upgrade() {
+                    match evt {
+                        E::OnContextMenu => 
+                            if &handle == &evt_ui.tray {
+                                SystemTray::show_menu(&evt_ui);
+                            }
+                        E::OnMenuItemSelected => 
+                            if &handle == &evt_ui.tray_item1 {
+                                SystemTray::hello1(&evt_ui);
+                            } else if &handle == &evt_ui.tray_item2 {
+                                SystemTray::hello2(&evt_ui);
+                            } else if &handle == &evt_ui.tray_item3 {
+                                SystemTray::exit(&evt_ui);
+                            },
+                        _ => {}
+                    }
                 }
             };
 
@@ -129,9 +131,9 @@ mod system_tray_ui {
         }
     }
 
-    impl SystemTrayUi {
+    impl Drop for SystemTrayUi {
         /// To make sure that everything is freed without issues, the default handler must be unbound.
-        pub fn destroy(&self) {
+        fn drop(&mut self) {
             let mut handlers = self.default_handler.borrow_mut();
             for handler in handlers.drain(0..) {
                 nwg::unbind_event_handler(&handler);
@@ -152,8 +154,6 @@ mod system_tray_ui {
 
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
-
-    let ui = SystemTray::build_ui(Default::default()).expect("Failed to build UI");
+    let _ui = SystemTray::build_ui(Default::default()).expect("Failed to build UI");
     nwg::dispatch_thread_events();
-    ui.destroy();
 }

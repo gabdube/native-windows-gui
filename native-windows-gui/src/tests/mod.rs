@@ -35,12 +35,12 @@ mod test_control_panel_ui {
     use std::ops::Deref;
 
     pub struct TestControlPanelUi {
-        inner: TestControlPanel,
+        inner: Rc<TestControlPanel>,
         default_handler: RefCell<Vec<EventHandler>>
     }
 
-    impl NativeUi<TestControlPanel, Rc<TestControlPanelUi>> for TestControlPanel {
-        fn build_ui(mut data: TestControlPanel) -> Result<Rc<TestControlPanelUi>, NwgError> {
+    impl NativeUi<TestControlPanelUi> for TestControlPanel {
+        fn build_ui(mut data: TestControlPanel) -> Result<TestControlPanelUi, NwgError> {
             use crate::Event as E;
 
             // Controls
@@ -73,7 +73,10 @@ mod test_control_panel_ui {
             FreeingTest::build_partial(&mut data.freeing_tests, Some(&data.window))?;
 
             // Wrap-up
-            let ui = Rc::new(TestControlPanelUi { inner: data, default_handler: Default::default() });
+            let ui = TestControlPanelUi { 
+                inner: Rc::new(data),
+                default_handler: Default::default()
+            };
 
             // Events
             let mut window_handles = vec![&ui.window.handle];
@@ -82,31 +85,32 @@ mod test_control_panel_ui {
             window_handles.append(&mut ui.freeing_tests.handles());
 
             for handle in window_handles.iter() {
-                let evt_ui = ui.clone();
+                let evt_ui = Rc::downgrade(&ui.inner);
                 let handle_events = move |evt, evt_data, handle| {
+                    if let Some(evt_ui) = evt_ui.upgrade() {
+                        evt_ui.controls_tests.process_event(evt, &evt_data, handle);
+                        evt_ui.thread_tests.process_event(evt, &evt_data, handle);
+                        evt_ui.freeing_tests.process_event(evt, &evt_data, handle);
 
-                    evt_ui.controls_tests.process_event(evt, &evt_data, handle);
-                    evt_ui.thread_tests.process_event(evt, &evt_data, handle);
-                    evt_ui.freeing_tests.process_event(evt, &evt_data, handle);
-
-                    match evt {
-                        E::OnButtonClick =>
-                            if &handle == &evt_ui.controls_test_button {
-                                show_control_test(&evt_ui.inner);
-                            } else if &handle == &evt_ui.thread_test_button {
-                                show_thread_test(&evt_ui.inner);
-                            } else if &handle == &evt_ui.free_test_button {
-                                show_freeing_test(&evt_ui.inner);
-                            },
-                        E::OnInit => 
-                            if handle == evt_ui.window.handle {
-                                show(&evt_ui.inner);
-                            },
-                        E::OnWindowClose => 
-                            if handle == evt_ui.window.handle {
-                                close();
-                            },
-                        _ => {}
+                        match evt {
+                            E::OnButtonClick =>
+                                if &handle == &evt_ui.controls_test_button {
+                                    show_control_test(&evt_ui);
+                                } else if &handle == &evt_ui.thread_test_button {
+                                    show_thread_test(&evt_ui);
+                                } else if &handle == &evt_ui.free_test_button {
+                                    show_freeing_test(&evt_ui);
+                                },
+                            E::OnInit => 
+                                if handle == evt_ui.window.handle {
+                                    show(&evt_ui);
+                                },
+                            E::OnWindowClose => 
+                                if handle == evt_ui.window.handle {
+                                    close();
+                                },
+                            _ => {}
+                        }
                     }
                 };
 
@@ -128,9 +132,9 @@ mod test_control_panel_ui {
         }
     }
 
-    impl TestControlPanelUi {
+    impl Drop for TestControlPanelUi {
 
-        pub fn destroy(&self) {
+        fn drop(&mut self) {
             self.freeing_tests.destroy();
 
             let mut handlers = self.default_handler.borrow_mut();
@@ -196,6 +200,4 @@ fn everything() {
     app.window.set_focus();
 
     dispatch_thread_events();
-
-    app.destroy();
 }

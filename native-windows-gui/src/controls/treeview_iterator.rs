@@ -21,7 +21,7 @@ enum NextAction {
 use native_windows_gui as nwg;
 fn iter_tree_view(tree: &mut nwg::TreeView) {
     for item in tree.iter() {
-        println!("{:?}", tree.item_text(item));
+        println!("{:?}", tree.item_text(&item));
     }
 }
 ```

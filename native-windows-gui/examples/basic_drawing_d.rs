@@ -1,7 +1,7 @@
 /*!
     Small custom control example using GDI. NWG has no drawing API, so raw winapi must be used.
 
-    Requires the following features: `cargo run --example image_decoder_d --features "extern-canvas"`
+    Requires the following features: `cargo run --example basic_drawing_d --features "extern-canvas"`
 */
 
 extern crate native_windows_gui as nwg;
