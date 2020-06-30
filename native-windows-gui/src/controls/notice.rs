@@ -59,6 +59,15 @@ impl Notice {
         }
     }
 
+    /// A shortcut over the builder API for the notice object
+    pub fn create<C: Into<ControlHandle>>(parent: C) -> Result<Notice, NwgError> {
+        let mut notice = Self::default();
+        Self::builder()
+            .parent(parent)
+            .build(&mut notice)?;
+
+        Ok(notice)
+    }
 
     /// Checks if the notice is still usable. A notice becomes unusable when the parent window is destroyed.
     /// This will also return false if the notice is not initialized.

@@ -99,6 +99,9 @@
         any kind of special methods.</b>
         <br/><br/>
 
+        Partials are <b>self-contained</b>. That means they shouldn't have access to their parent structure data.
+        <br/><br/>
+
         Partials are fully supported by <b>native-windows-derive</b>. See the <a href="nwd_partial.html">derive section</a> to learn how to use partial derive.
         <br/><br/>
 
@@ -130,20 +133,7 @@
 
         <h3>Implementing partials into NativeUi</h3>
 
-        A partial ui <b>must</b> be part of another UI. In other words, this means that the partial struct must be a member of the base UI struct that also implements
-        the NativeUi trait.<br><br>
-
-        Starting right into the <code>build_ui</code> function, after the initialization of the controls, the partial ui should be initialized using
-        the <code>build_partial</code> method.<br><br>
-
-        Then, before the default events binding, the <code>handles</code> method should be called in order to add the partial window handle to the callback.
-        <br><br>
-
-        Finally, in the event handler, the <code>process_event</code> should be called in order to dispatch the base events to the partial.<br><br>
-
-        And there you go. PartialUi is implemented in your base UI.<br><br>
-
-        In code:<br>
+        First, lets look at a simple partial demo: <br>
 
 <div class="highlight"><pre><span></span><span class="cp">#[derive(Default)]</span><span class="w"></span>
 <span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">PartialDemo</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -199,6 +189,23 @@
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+
+        <br>
+        A partial ui <b>must</b> be part of another UI. In other words, this means that the partial struct must be a member of the base UI struct that also implements
+        the NativeUi trait.<br><br>
+
+        Starting right into the <code>build_ui</code> function, after the initialization of the controls, the partial ui should be initialized using
+        the <code>build_partial</code> method.<br><br>
+
+        Then, before the default events binding, the <code>handles</code> method should be called in order to add the partial window handle to the callback.
+        <br><br>
+
+        Finally, in the event handler, the <code>process_event</code> should be called in order to dispatch the base events to the partial.<br><br>
+
+        And there you go. PartialUi is implemented in your base UI.<br><br>
+
+        In code:<br>
+
 
         <h3>Examples</h3>
 

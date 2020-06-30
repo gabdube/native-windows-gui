@@ -174,7 +174,7 @@
     <b>Native-windows-gui</b> uses structures to represent a UI interface. Controls are represent as members. It's that simple.<br><br>
     
     Each control is a thin wrapper over a window handle (HWND). For more complex controls (such as listboxes), the control may contains extra data.
-    Controls implements the <code>Default</code> trait. Controls returned by default functions are considered <b>uninitialized</b>. Calling their methods
+    All controls implements the <code>Default</code> trait. Default-built controls are considered <b>uninitialized</b>. Calling their methods
     will cause the program to panic.<br><br>
 
     Ui actions (displaying a message box in this case) should be implemented as structure methods. That is in no way a hard rule though.
@@ -190,7 +190,7 @@
     parameters are available.<br><br>
 
     In this example, <b>absolute positioning</b> is used. Ex: <code>position: (300, 300)</code>. This is ok for this example because the window
-    cannot be resized, but NWG also supports layouts.<br><br>
+    cannot be resized, but NWG also supports layouts. <br><br>
 
     <code>nwg_events</code> specifies the events that the control responds to. It take an array of <code>EVENT_NAME: [callbacks]</code>. Note that
     this is only the default way to dispatch events. <b>nwg_events</b> can be further customized to match all your callback needs. Again, check
@@ -205,12 +205,14 @@
     In such case, the only thing left to do is to panic. Note that some helper functions (such as <code>nwg::simple_message</code>) can still be called.<br><br>
 
     The next thing to do is to initialize your application. As mentionned in the previous step, this means instantiating your struct.
-    <b>native-windows-derive</b> implements the <code>NativeUi</code> trait for you, which in turns creates the <code>build_ui</code> function.
-    The <code>build_ui</code> function takes a single argument: the initial state of your application. Because this application is very simple, there's
-    no user state to initialize, so we just pass <code>Default::default</code> at let native-windows-derive do its magic.<br><br>
+    <b>native-windows-derive</b> implements the <code>NativeUi</code> trait, which gives you the <code>build_ui</code> function.
+    The <code>build_ui</code> function takes a single argument: the initial state of your application (aka your UI struct default state).
+    Because this application is very simple, there's no user state to initialize, so we just pass <code>Default::default</code> at 
+    let native-windows-derive do its magic.<br><br>
 
     Finally, the only thing left is to start listening for events on the thread. This is done by calling <code> nwg::dispatch_thread_events()</code>.
-    This function will block the thread until <code>nwg::stop_thread_dispatch()</code> is called.<br><br>
+    This function will block the thread until <code>nwg::stop_thread_dispatch()</code> is called. 99% of the time, <code>stop_thread_dispatch</code>
+    will be called a <code>OnWindowClose</code> event<br><br>
 
     Now lets looks a the inner workings of NWG in the next section...
         
@@ -258,12 +260,12 @@
 <span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">ops</span>::<span class="n">Deref</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">BasicAppUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">inner</span>: <span class="nc">BasicApp</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">inner</span>: <span class="nc">Rc</span><span class="o">&lt;</span><span class="n">BasicApp</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
 <span class="w">        </span><span class="n">default_handler</span>: <span class="nc">RefCell</span><span class="o">&lt;</span><span class="nb">Option</span><span class="o">&lt;</span><span class="n">nwg</span>::<span class="n">EventHandler</span><span class="o">&gt;&gt;</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NativeUi</span><span class="o">&lt;</span><span class="n">BasicApp</span><span class="p">,</span><span class="w"> </span><span class="n">Rc</span><span class="o">&lt;</span><span class="n">BasicAppUi</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">BasicApp</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="k">fn</span> <span class="nf">build_ui</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span>: <span class="nc">BasicApp</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Rc</span><span class="o">&lt;</span><span class="n">BasicAppUi</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NwgError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NativeUi</span><span class="o">&lt;</span><span class="n">BasicAppUi</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">BasicApp</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">fn</span> <span class="nf">build_ui</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span>: <span class="nc">BasicApp</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="n">BasicAppUi</span><span class="p">,</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">NwgError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="k">use</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">Event</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">E</span><span class="p">;</span><span class="w"></span>
 <span class="w">            </span>
 <span class="w">            </span><span class="c1">// Controls</span>
@@ -279,6 +281,7 @@
 <span class="w">                </span><span class="p">.</span><span class="n">position</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">))</span><span class="w"></span>
 <span class="w">                </span><span class="p">.</span><span class="n">text</span><span class="p">(</span><span class="s">&quot;Heisenberg&quot;</span><span class="p">)</span><span class="w"></span>
 <span class="w">                </span><span class="p">.</span><span class="n">parent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">data</span><span class="p">.</span><span class="n">window</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="p">.</span><span class="n">focus</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w"></span>
 <span class="w">                </span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">name_edit</span><span class="p">)</span><span class="o">?</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">            </span><span class="n">nwg</span>::<span class="n">Button</span>::<span class="n">builder</span><span class="p">()</span><span class="w"></span>
@@ -289,24 +292,26 @@
 <span class="w">                </span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">hello_button</span><span class="p">)</span><span class="o">?</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">            </span><span class="c1">// Wrap-up</span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">BasicAppUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="n">inner</span>: <span class="nc">data</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicAppUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">inner</span>: <span class="nc">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">data</span><span class="p">),</span><span class="w"></span>
 <span class="w">                </span><span class="n">default_handler</span>: <span class="nb">Default</span>::<span class="n">default</span><span class="p">(),</span><span class="w"></span>
-<span class="w">            </span><span class="p">});</span><span class="w"></span>
+<span class="w">            </span><span class="p">};</span><span class="w"></span>
 
 <span class="w">            </span><span class="c1">// Events</span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">evt_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">evt_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">downgrade</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ui</span><span class="p">.</span><span class="n">inner</span><span class="p">);</span><span class="w"></span>
 <span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">handle_events</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">_evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                    </span><span class="n">E</span>::<span class="n">OnButtonClick</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span>
-<span class="w">                        </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">hello_button</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                            </span><span class="n">BasicApp</span>::<span class="n">say_hello</span><span class="p">(</span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">inner</span><span class="p">);</span><span class="w"></span>
-<span class="w">                        </span><span class="p">},</span><span class="w"></span>
-<span class="w">                    </span><span class="n">E</span>::<span class="n">OnWindowClose</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span>
-<span class="w">                        </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                            </span><span class="n">BasicApp</span>::<span class="n">say_goodbye</span><span class="p">(</span><span class="o">&amp;</span><span class="n">evt_ui</span><span class="p">.</span><span class="n">inner</span><span class="p">);</span><span class="w"></span>
-<span class="w">                        </span><span class="p">},</span><span class="w"></span>
-<span class="w">                    </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">upgrade</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                        </span><span class="n">E</span>::<span class="n">OnButtonClick</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span>
+<span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ui</span><span class="p">.</span><span class="n">hello_button</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                                </span><span class="n">BasicApp</span>::<span class="n">say_hello</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ui</span><span class="p">);</span><span class="w"></span>
+<span class="w">                            </span><span class="p">},</span><span class="w"></span>
+<span class="w">                        </span><span class="n">E</span>::<span class="n">OnWindowClose</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span>
+<span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ui</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                                </span><span class="n">BasicApp</span>::<span class="n">say_goodbye</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ui</span><span class="p">);</span><span class="w"></span>
+<span class="w">                            </span><span class="p">},</span><span class="w"></span>
+<span class="w">                        </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">                    </span><span class="p">}</span><span class="w"></span>
 <span class="w">                </span><span class="p">}</span><span class="w"></span>
 <span class="w">            </span><span class="p">};</span><span class="w"></span>
 
@@ -316,9 +321,9 @@
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-<span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="n">BasicAppUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="nb">Drop</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">BasicAppUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="sd">/// To make sure that everything is freed without issues, the default handler must be unbound.</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">destroy</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">fn</span> <span class="nf">drop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">handler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">default_handler</span><span class="p">.</span><span class="n">borrow</span><span class="p">();</span><span class="w"></span>
 <span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">handler</span><span class="p">.</span><span class="n">is_some</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">                </span><span class="n">nwg</span>::<span class="n">unbind_event_handler</span><span class="p">(</span><span class="n">handler</span><span class="p">.</span><span class="n">as_ref</span><span class="p">().</span><span class="n">unwrap</span><span class="p">());</span><span class="w"></span>
@@ -337,12 +342,12 @@
 
 <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">nwg</span>::<span class="n">init</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to init Native Windows GUI&quot;</span><span class="p">);</span><span class="w"></span>
-
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicApp</span>::<span class="n">build_ui</span><span class="p">(</span><span class="nb">Default</span>::<span class="n">default</span><span class="p">()).</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to build UI&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">nwg</span>::<span class="n">Font</span>::<span class="n">set_global_family</span><span class="p">(</span><span class="s">&quot;Segoe UI&quot;</span><span class="p">).</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to set default font&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicApp</span>::<span class="n">build_ui</span><span class="p">(</span><span class="nb">Default</span>::<span class="n">default</span><span class="p">()).</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to build UI&quot;</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="n">nwg</span>::<span class="n">dispatch_thread_events</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="n">ui</span><span class="p">.</span><span class="n">destroy</span><span class="p">();</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+<br>
         
 
 <h1 id="impl-tutorial" class="section-header"><a href="#info-nwg-2">The implementation in details</a></h1>
@@ -394,7 +399,8 @@ This is exactly what <code>full_bind_event_handler</code> do (with lots, lots of
 Every time an event is raised by the parent or it's children, the callback will be called. Behind the scene, NWG will carefully parse the raw winapi parameters
 and return three simple values: an event <code>Event</code>, it's data (if any) <code>EventData</code>, and the sender window handle <code>ControlHandle</code>.<br><br>
 
-You can see that there are no way to fetch our application data from these parameters. That's why the application (now behind a RC) <b>is cloned and passed to the closure</b>.<br><br>
+You can see that there are no way to fetch our application data from these parameters. That's why the application data (now behind a RC) 
+<b>is cloned and passed to the closure</b>. A <code>WeakRef</code> is used here so that <code>Drop</code> can be called.<br><br>
 
 Inside the callback, the developer needs to do three things:
 <ul>
@@ -405,17 +411,14 @@ Inside the callback, the developer needs to do three things:
 
 Note that <code>full_bind_event_handler</code> applies to the parent and <b>all its children</b>. This means you only need to bind handlers on <b>TOP LEVEL window</b>.
 
-Lastly, the handler returned by <code>full_bind_event_handler</code> is saved in the wrapper struct.
+Lastly, the handler returned by <code>full_bind_event_handler</code> is saved in the wrapper struct under <code>default_handler</code>.
 
 <h3>Freeing</h3>
 
-Now the application data is referenced in two different places: in the structure and in the handler. To make sure that the application data is dropped correctly
-at the end of the program, the reference in the handler MUST be manually freed.<br><br>
+Events handlers are not automatically unbound on drop. it must be done using <code>nwg::unbind_event_handler(&handler)</code><br><br>
 
-This is done using <code>nwg::unbind_event_handler(&handler)</code>.<br><br>
-
-If the ui module, a <code>destroy</code> method is implemented in the ui wrapper <code>BasicAppUi</code>. This method unbinds the handler, which then frees the
-application data reference. <code>destroy</code> is then called at the end of the application.
+Because we use a <code>WeakRef</code> in our event handler, the ui struct only has 1 strong refcount. This way we can unbind the event handler in
+the drop method.
 
 <br><br>
 And that is all for events handling. Thankfully, <b>native-windows-derive</b> handles all of this for us!

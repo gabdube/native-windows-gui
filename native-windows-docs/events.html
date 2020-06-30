@@ -144,23 +144,27 @@
 
         The other one will hook the events of a control and its parent. Why the control and the parent?
         <b>Because the common controls of WINAPI sends their events to their parent.</b> This method of hooking
-        is usually used when a callback is added dynamically. More on that <a href="dynamic_event.html">in the dynamic events section</a>.
+        is usually used when a callback is added dynamically. More on that <a href="dynamic_event.html">in the dynamic events section</a>.<br><br>
 
-<div class="highlight"><pre style="width: auto;"><span></span><span class="kd">let</span><span class="w"> </span><span class="n">events_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ui</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w"></span>
+        It is a VERY good idea to use a <code>WeakRef</code> to share data with an event handler to be sure that the shared value won't be leaked if
+        someone forgets to unbind the event handler.<br>
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="kd">let</span><span class="w"> </span><span class="n">evt_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">downgrade</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ui</span><span class="p">.</span><span class="n">inner</span><span class="p">);</span><span class="w"></span>
 <span class="kd">let</span><span class="w"> </span><span class="n">handle_events</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">nwg</span>::<span class="n">Event</span>::<span class="n">OnWindowClose</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">events_ui</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="n">nwg</span>::<span class="n">stop_thread_dispatch</span><span class="p">();</span><span class="w"></span>
-<span class="w">            </span><span class="p">}</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">events_ui</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">upgrade</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">nwg</span>::<span class="n">Event</span>::<span class="n">OnWindowClose</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">events_ui</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">nwg</span>::<span class="n">stop_thread_dispatch</span><span class="p">();</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="p">};</span><span class="w"></span>
 
 <span class="n">nwg</span>::<span class="n">full_bind_event_handler</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">handle_events</span><span class="p">);</span><span class="w"></span>
 </pre></div>
-
 
         <h3>Callback parameters</h3>
 
