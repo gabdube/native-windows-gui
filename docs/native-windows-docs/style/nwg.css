@@ -1,0 +1,13 @@
+input[id^="spoiler"] + label.arrow::before { content: "▼"; }
+input[id^="spoiler"]:checked + label.arrow::before  { content: "▲"; }
+label.arrow { cursor: pointer; }
+input[id^="spoiler"]{ display: none; }
+input[id^="spoiler"] + label + .spoiler { margin: 5px 0; opacity: 0; height: 0; overflow: hidden; }
+input[id^="spoiler"]:checked + label + .spoiler { opacity: 1; height: auto; }
+
+code { background-color: #E5E5E5; border-radius: 2px; padding: 0 3px; }
+
+.highlight { overflow-x: auto; }
+.highlight > pre { width: max-content; margin: 0; margin-top: 10px;}
+
+h4 { font-size: 17px; }

@@ -1,0 +1,28 @@
+pub struct HeavyCompute {
+    window: nwg::Window,
+    notice: nwg::Notice,
+    compute: RefCell<Option<thread::JoinHandle<u64>>>,
+}
+
+// ... NativeUi implementation ... 
+
+/// `Event::OnWindowInit` callback
+fn on_init(app: &HeavyCompute) {
+    let sender = app.notice.sender();
+    *self.compute.borrow_mut() = Some(thread::spawn(move || {
+        thread::sleep(Duration::new(5, 0));
+        sender.notice();
+        1+1
+    }));
+}
+
+/// `Event::OnNotice` callback
+fn on_notice(app: &HeavyCompute) {
+    let mut data = app.compute.borrow_mut();
+    match data.take() {
+        Some(data) => {
+            println!("THE ANSWER IS {:?}!", data);
+        },
+        None => {}
+    }
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>NWG guide - Small application layout</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+
+</head>
+<body class="rustdoc">
+<!--[if lte IE 8]>
+<div class="warning">
+    This old browser is unsupported and will most likely display funky
+    things.
+</div>
+<![endif]-->
+
+<!-- NAV BEGIN -->
+<div id="nav">
+    <button id="toggle-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+</div>
+
+    
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='index.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
+    <li><a href="localization.html"><b>4.4.</b> Internationalization </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_resources.html"><b>6.2.</b> Resources </a></li>
+    <li><a href="nwd_events.html"><b>6.3.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.4.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.5.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
+    </ul>
+</li>
+
+</ul>
+</div>
+<!-- NAV END -->
+
+<div id='page-wrapper'>
+    <div id='page'>
+
+        <h1 class="title">NWG: Small application layout</h1>
+
+        This section will go in details on how to origanize a small NWG application.
+        <br><br>
+        An application can be considered small when it has one interface and less than 10 controls. For example,
+        all NWG examples are classified as small applications while the test suite is not.
+        <br/><br/>
+
+        Note that you don't <b>really</b> have to follow the whole "NativeUi" setup for very small applications, for example see 
+        <a href="https://github.com/gabdube/native-windows-gui/blob/1.0-prerelease/native-windows-gui/examples/basic_barebone.rs">the barebone example</a>.
+        <br/><br/>
+
+        <h3>Overview</h3>
+        
+        <ol>
+            <li>Define a struct that will hold your non-gui application data</li>
+            <li>Define another struct that will hold the GUI data</li>
+            <li>Add your application struct to the GUI struct members behind a Refcell</li>
+            <li>Define the gui functions by <code>impl</code> the GUI struct</li>
+            <li>Implement <code>NativeUi</code> for the GUI struct (manually or with NWD)</li>
+            <li>In the main funtion, initialize the application struct and the GUI struct</li>
+            <li>Call <code>build_ui</code> with the initialized data</li>
+            <li>Start processing events</li>
+        </ol>
+        <br/>
+
+        <h3>Defining the structs</h3>
+
+        Assuming your application has data that must be stored.
+        <br/><br/>
+
+        Next, it's time to define the UI struct. 
+        <br/><br/>
+
+        <h3>Implementing NativeUI</h3>
+
+        Assuming you're not using native-windows-derive, you will have to manually implement the NativeUi trait.
+        <br/><br/>
+
+        <h3>Initializing</h3>
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="n">nwg</span>::<span class="n">init</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to init Native Windows GUI&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">data</span>: <span class="nc">RefCell</span><span class="o">&lt;</span><span class="n">MyData</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Initializing... */</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">app</span>: <span class="nc">MyApp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MyApp</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="p">..</span><span class="nb">Default</span>::<span class="n">default</span><span class="p">()</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MyApp</span>::<span class="n">build_ui</span><span class="p">(</span><span class="n">app</span><span class="p">).</span><span class="n">expect</span><span class="p">(</span><span class="s">&quot;Failed to build UI&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="n">nwg</span>::<span class="n">dispatch_thread_events</span><span class="p">();</span><span class="w"></span>
+</pre></div>
+            
+    <br>
+    Once everything is done, there's only initialization that's left to do. As this point everything is straightforward so...<br><br>
+    
+    1. Call the <code>init</code> function of nwg.<br><br>
+
+    2. Initialize the data struct and the Ui struct.<br><br>
+
+    3. Call the <code>build_ui</code> method defined by <code>NativeUi</code>.<br><br>
+
+    4. As the final touch, call <code>dispatch_thread_events</code> to dispatch the events to the application
+            
+
+    <br><br>
+    <br><br>
+
+    </div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>

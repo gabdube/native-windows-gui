@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Distributing</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+
+
+</head>
+<body class="rustdoc">
+<!--[if lte IE 8]>
+<div class="warning">
+    This old browser is unsupported and will most likely display funky
+    things.
+</div>
+<![endif]-->
+
+<!-- NAV BEGIN -->
+<div id="nav">
+    <button id="toggle-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+</div>
+
+    
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='index.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
+    <li><a href="localization.html"><b>4.4.</b> Internationalization </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_resources.html"><b>6.2.</b> Resources </a></li>
+    <li><a href="nwd_events.html"><b>6.3.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.4.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.5.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
+    </ul>
+</li>
+
+</ul>
+</div>
+<!-- NAV END -->
+
+<div id='page-wrapper'>
+    <div id='page'>
+
+        <h1 class="title">Native Windows GUI: Distributing</h1>
+        <p>Here's two things you should really keep in mind distributing NWG binaries</p>
+
+        <br>
+
+        <h3>Disable the console</h3>
+
+        By default Rust binary will show a console. Include <br><br>
+        
+        <code>#![windows_subsystem = "windows"]</code>
+
+        <br><br>
+        At the top of your program to disable it.
+
+        <br><br>
+
+        <h3>Include MSVC dependencies</h3>
+
+        Assuming you are using the <b>MSVC</b> toolchain (you should), the rust binary won't include the CRT dependencies (see <a href="https://github.com/rust-lang/rfcs/blob/master/text/1721-crt-static.md">link</a>). This will may stop 
+        your binary from running on other computer. To fix this, create a file called <code>.cargo\config</code> in your projects root directory with the following contents:<br><br>
+
+<div class="highlight"><pre style="width:auto;"><span></span><span class="k">[target.x86_64-pc-windows-msvc]</span>
+<span class="n">rustflags</span> <span class="o">=</span> <span class="k">[&quot;-Ctarget-feature=+crt-static&quot;]</span>
+<span class="k">[target.i686-pc-windows-msvc]</span>
+<span class="n">rustflags</span> <span class="o">=</span> <span class="k">[&quot;-Ctarget-feature=+crt-static&quot;]</span>
+</pre></div>
+            
+
+        <br><br><br>
+    </div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>
