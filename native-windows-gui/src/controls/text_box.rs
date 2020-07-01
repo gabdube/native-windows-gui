@@ -1,5 +1,5 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
-use winapi::um::winuser::{WS_VSCROLL, WS_HSCROLL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
+use winapi::um::winuser::{WS_VSCROLL, WS_HSCROLL, ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
@@ -23,6 +23,8 @@ bitflags! {
     pub struct TextBoxFlags: u32 {
         const VSCROLL = WS_VSCROLL;
         const HSCROLL = WS_HSCROLL;
+        const AUTOHSCROLL = ES_AUTOHSCROLL;
+        const AUTOVSCROLL = ES_AUTOVSCROLL;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const TAB_STOP = WS_TABSTOP;
@@ -306,7 +308,7 @@ impl TextBox {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+        WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_TABSTOP
     }
 
     /// Winapi flags required by the control
