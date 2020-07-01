@@ -5,6 +5,8 @@ extern crate bitflags;
 extern crate lazy_static;
 
 extern crate winapi;
+
+#[cfg(feature="flexbox")]
 pub extern crate stretch;
 
 #[cfg(feature="all")]
