@@ -15,7 +15,7 @@ winapi = { version = "0.3", features = [
 
 lazy_static = "1.4.0"
 bitflags = { version = "1.1.0" }
-stretch = "0.3.2"
+stretch = { version = "0.3.2", optional = true }
 muldiv = { version = "0.2", optional = true }
 
 
@@ -60,11 +60,12 @@ no-styling = []
 embed-resource = []
 scroll-bar = []
 tree-view-iterator = []
+flexbox = ["stretch"]
 high-dpi = ["muldiv"]
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "cursor", "image-decoder",
        "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "number-select", "clipboard", "menu", 
        "trackbar", "extern-canvas", "frame", "tooltip", "status-bar", "winnls", "textbox", "rich-textbox", "image-list", "embed-resource", "scroll-bar",
-       "tree-view-iterator"]
+       "tree-view-iterator", "flexbox"]
 
 [package.metadata.docs.rs]
 features = [ "all" ]

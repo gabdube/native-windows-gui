@@ -1,7 +1,7 @@
 use winapi::shared::minwindef::{UINT, LPARAM, WPARAM};
+use winapi::um::winnt::WCHAR;
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
-//use crate::Font;
 use crate::{Icon, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
@@ -28,7 +28,20 @@ some other UI element. The tooltip appears near the pointer and disappears when 
 clicks a mouse button, moves the pointer away from the tool, or simply waits for a few seconds.
 
 A tooltip can be applied to multiple controls, each with their own custom text.
-This is done/undone using the `register`/`unregister` functions.
+This is done/undone using the `register`/`unregister` functions. So do not think
+as Tooltip as a standalone toolip, but more like a manager.
+
+Tooltip requires the `tooltip` features
+
+Example:
+
+```rust
+use native_windows_gui as nwg;
+fn add_tooltip(button: &nwg::Button, tooltips: &nwg::Tooltip) {
+    tooltips.register(button, "This is a button!");
+}
+```
+
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct Tooltip {
@@ -86,7 +99,6 @@ impl Tooltip {
     /// to pass the buffer size. The default buffer size is 200 characters.
     pub fn text(&self, owner: &ControlHandle, buffer_size: Option<usize>) -> String {
         use winapi::um::commctrl::{TTM_GETTEXTW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS};
-        use winapi::um::winnt::{LPSTR, WCHAR};
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -108,7 +120,7 @@ impl Tooltip {
             uId: owner_handle as UINT_PTR,
             rect: RECT { left: 0, top: 0, right: 0, bottom: 0 },
             hinst: ptr::null_mut(),
-            lpszText: text.as_mut_ptr() as LPSTR,
+            lpszText: text.as_mut_ptr(),
             lParam: 0,
             lpReserved: ptr::null_mut()
         };
@@ -120,9 +132,9 @@ impl Tooltip {
     }
 
     /// Change the text of a previously registered control
+    /// Use the `register` function is associate a control with this tooltip
     pub fn set_text<'a>(&self, owner: &ControlHandle, text: &'a str) {
         use winapi::um::commctrl::{TTM_UPDATETIPTEXTW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS};
-        use winapi::um::winnt::LPSTR;
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -141,7 +153,7 @@ impl Tooltip {
             uId: owner_handle as UINT_PTR,
             rect: RECT { left: 0, top: 0, right: 0, bottom: 0 },
             hinst: ptr::null_mut(),
-            lpszText: text.as_mut_ptr() as LPSTR,
+            lpszText: text.as_mut_ptr(),
             lParam: 0,
             lpReserved: ptr::null_mut()
         };
@@ -246,7 +258,6 @@ impl Tooltip {
     /// `owner` must be a window control.
     pub fn register<'a, W: Into<ControlHandle>>(&self, owner: W, text: &'a str) {
         use winapi::um::commctrl::{TTM_ADDTOOLW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS};
-        use winapi::um::winnt::LPSTR;
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -267,7 +278,7 @@ impl Tooltip {
             uId: owner_handle as UINT_PTR,
             rect: RECT { left: 0, top: 0, right: 0, bottom: 0 },
             hinst: ptr::null_mut(),
-            lpszText: text.as_mut_ptr() as LPSTR,
+            lpszText: text.as_mut_ptr(),
             lParam: 0,
             lpReserved: ptr::null_mut()
         };
@@ -281,7 +292,6 @@ impl Tooltip {
     /// When the user trigger the tooltip, the application receives a `OnTooltipText` event
     pub fn register_callback<W: Into<ControlHandle>>(&self, owner: W) {
         use winapi::um::commctrl::{TTM_ADDTOOLW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS, LPSTR_TEXTCALLBACKW};
-        use winapi::um::winnt::LPSTR;
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -300,7 +310,7 @@ impl Tooltip {
             uId: owner_handle as UINT_PTR,
             rect: RECT { left: 0, top: 0, right: 0, bottom: 0 },
             hinst: ptr::null_mut(),
-            lpszText: LPSTR_TEXTCALLBACKW as LPSTR,
+            lpszText: LPSTR_TEXTCALLBACKW,
             lParam: 0,
             lpReserved: ptr::null_mut()
         };

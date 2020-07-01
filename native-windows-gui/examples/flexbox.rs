@@ -1,5 +1,7 @@
 /*!
     A very simple application that show how to use a flexbox layout.
+
+    Requires the following features: `cargo run --example flexbox --features "flexbox"`
 */
 
 extern crate native_windows_gui as nwg;
