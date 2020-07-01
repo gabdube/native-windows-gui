@@ -23,8 +23,8 @@ bitflags! {
     pub struct TextBoxFlags: u32 {
         const VSCROLL = WS_VSCROLL;
         const HSCROLL = WS_HSCROLL;
-        const AUTOHSCROLL = ES_AUTOHSCROLL;
         const AUTOVSCROLL = ES_AUTOVSCROLL;
+        const AUTOHSCROLL = ES_AUTOHSCROLL;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const TAB_STOP = WS_TABSTOP;
