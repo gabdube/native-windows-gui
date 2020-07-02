@@ -37,7 +37,7 @@ impl PartialDemo {
 
         use nwg::stretch::{geometry::Size, style::{Style, Dimension as D}};
         let mut style = Style::default();
-        style.size = Size { width: D::Percent(0.7), height: D::Auto };
+        style.size = Size { width: D::Percent(1.0), height: D::Auto };
 
         match self.menu.selection() {
             None | Some(0) => {
@@ -56,6 +56,10 @@ impl PartialDemo {
         }
     }
 
+    fn save(&self) {
+        nwg::simple_message("Saved!", "Data saved!");
+    }
+
     fn exit(&self) {
         nwg::stop_thread_dispatch();
     }
@@ -64,6 +68,7 @@ impl PartialDemo {
 #[derive(Default)]
 pub struct PeopleUi {
     layout: nwg::GridLayout,
+    layout2: nwg::GridLayout,
 
     label1: nwg::Label,
     label2: nwg::Label,
@@ -72,11 +77,14 @@ pub struct PeopleUi {
     name_input: nwg::TextInput,
     age_input: nwg::TextInput,
     job_input: nwg::TextInput,
+
+    save_btn: nwg::Button,
 }
 
 #[derive(Default)]
 pub struct AnimalUi {
     layout: nwg::GridLayout,
+    layout2: nwg::GridLayout,
 
     label1: nwg::Label,
     label2: nwg::Label,
@@ -84,18 +92,23 @@ pub struct AnimalUi {
 
     name_input: nwg::TextInput,
     race_input: nwg::ComboBox<&'static str>,
-    is_soft_input: nwg::CheckBox
+    is_soft_input: nwg::CheckBox,
+
+    save_btn: nwg::Button,
 }
 
 #[derive(Default)]
 pub struct FoodUi {
     layout: nwg::GridLayout,
+    layout2: nwg::GridLayout,
 
     label1: nwg::Label,
     label2: nwg::Label,
 
     name_input: nwg::TextInput,
     tasty_input: nwg::CheckBox,
+
+    save_btn: nwg::Button,
 }
 
 
@@ -179,6 +192,10 @@ mod partial_demo_ui {
                             if &handle == &evt_ui.window {
                                 PartialDemo::exit(&evt_ui.inner);
                             },
+                        E::OnButtonClick => 
+                            if &handle == &evt_ui.people_ui.save_btn || &handle == &evt_ui.animal_ui.save_btn ||&handle == &evt_ui.food_ui.save_btn  {
+                                PartialDemo::save(&evt_ui.inner);
+                            },
                         _ => {}
                     }
                 };
@@ -196,8 +213,8 @@ mod partial_demo_ui {
                 .child(&ui.menu)
                     .child_size(Size { width: D::Percent(0.3), height: D::Auto })
                 .child(&ui.frame1)
-                    .child_size(Size { width: D::Percent(0.7), height: D::Auto })
-                .build(&ui.layout);
+                    .child_size(Size { width: D::Percent(1.0), height: D::Auto })
+                .build(&ui.layout)?;
             
             return Ok(ui);
         }
@@ -267,6 +284,11 @@ mod partial_people_ui {
                 .parent(&parent)
                 .build(&mut data.job_input)?;
 
+            nwg::Button::builder()
+                .text("Save")
+                .parent(&parent)
+                .build(&mut data.save_btn)?;
+
             nwg::GridLayout::builder()
                 .parent(&parent)
                 .max_size([1000, 150])
@@ -277,7 +299,15 @@ mod partial_people_ui {
                 .child(1, 0, &data.name_input)
                 .child(1, 1, &data.age_input)
                 .child(1, 2, &data.job_input)
-                .build(&data.layout);
+                .build(&data.layout)?;
+
+            nwg::GridLayout::builder()
+                .min_size([100, 200])
+                .max_column(Some(2))
+                .max_row(Some(6))
+                .child(1, 5, &data.save_btn)
+                .parent(&parent)
+                .build(&data.layout2)?;
 
             Ok(())
         }
@@ -336,6 +366,11 @@ mod partial_animal_ui {
                 .parent(&parent)
                 .build(&mut data.is_soft_input)?;
 
+            nwg::Button::builder()
+                .text("Save")
+                .parent(&parent)
+                .build(&mut data.save_btn)?;
+
             nwg::GridLayout::builder()
                 .parent(&parent)
                 .max_size([1000, 150])
@@ -346,7 +381,15 @@ mod partial_animal_ui {
                 .child(1, 0, &data.name_input)
                 .child(1, 1, &data.race_input)
                 .child(1, 2, &data.is_soft_input)
-                .build(&data.layout);
+                .build(&data.layout)?;
+
+            nwg::GridLayout::builder()
+                .min_size([100, 200])
+                .max_column(Some(2))
+                .max_row(Some(6))
+                .child(1, 5, &data.save_btn)
+                .parent(&parent)
+                .build(&data.layout2)?;
 
             Ok(())
         }
@@ -392,6 +435,11 @@ mod partial_food_ui {
                 .parent(&parent)
                 .build(&mut data.tasty_input)?;
 
+            nwg::Button::builder()
+                .text("Save")
+                .parent(&parent)
+                .build(&mut data.save_btn)?;
+
             nwg::GridLayout::builder()
                 .parent(&parent)
                 .max_size([1000, 90])
@@ -400,7 +448,15 @@ mod partial_food_ui {
                 .child(0, 1, &data.label2)
                 .child(1, 0, &data.name_input)
                 .child(1, 1, &data.tasty_input)
-                .build(&data.layout);
+                .build(&data.layout)?;
+
+            nwg::GridLayout::builder()
+                .min_size([100, 200])
+                .max_column(Some(2))
+                .max_row(Some(6))
+                .child(1, 5, &data.save_btn)
+                .parent(&parent)
+                .build(&data.layout2)?;
 
             Ok(())
         }

@@ -250,7 +250,7 @@ mod calculator_ui {
                 .child_item(nwg::GridLayoutItem::new(&ui.btn_clear, 3, 3, 2, 1))
                 .child_item(nwg::GridLayoutItem::new(&ui.btn_process, 3, 4, 2, 1))
                 .child_item(nwg::GridLayoutItem::new(&ui.btn0, 0, 4, 3, 1))
-                .build(&ui.layout);
+                .build(&ui.layout)?;
             
             return Ok(ui);
         }

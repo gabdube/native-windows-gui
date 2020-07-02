@@ -1,6 +1,7 @@
-use crate::controls::{ControlHandle};
+use crate::controls::ControlHandle;
 use crate::win32::window::bind_raw_event_handler_inner;
 use crate::win32::window_helper as wh;
+use crate::NwgError;
 use winapi::shared::windef::{HWND};
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -484,12 +485,25 @@ impl GridLayoutBuilder {
 
     /// Build the layout object and bind the callback.
     /// Children must only contains window object otherwise this method will panic.
-    pub fn build(self, layout: &GridLayout) {
+    pub fn build(self, layout: &GridLayout) -> Result<(), NwgError> {
         use winapi::um::winuser::WM_SIZE;
         use winapi::shared::minwindef::{HIWORD, LOWORD};
 
         if self.layout.base.is_null() {
-            panic!("Gridlayout does not have a parent.")
+            return Err(NwgError::layout_create("Gridlayout does not have a parent."));
+        }
+
+        // Checks if the layouts cell or row are outside max_column or max_row
+        if let Some(max_row) = self.layout.row_count {
+            if let Some(item) = self.layout.children.iter().find(|c| c.row >= max_row) {
+                return Err(NwgError::layout_create(format!("A layout item row is bigger or equal than the max number of row. {} >= {}", item.row, max_row)));
+            }
+        }
+
+        if let Some(max_column) = self.layout.column_count {
+            if let Some(item) = self.layout.children.iter().find(|c| c.col >= max_column) {
+                return Err(NwgError::layout_create(format!("A layout item column is bigger or equal than the max number of column. {} >= {}", item.col, max_column)));
+            }
         }
         
         let (w, h) = unsafe { wh::get_window_size(self.layout.base) };
@@ -520,6 +534,8 @@ impl GridLayoutBuilder {
         /// Keep generating ids so that multiple layouts can be applied to the same parent
         static mut BOX_LAYOUT_ID: usize = 0x8FFF; 
         bind_raw_event_handler_inner(&base_handle, unsafe { BOX_LAYOUT_ID += 1; BOX_LAYOUT_ID }, cb).unwrap();
+
+        Ok(())
     }
 
 }

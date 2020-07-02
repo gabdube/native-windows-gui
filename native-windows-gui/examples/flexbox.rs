@@ -114,7 +114,7 @@ mod flexbox_app_ui {
                     .child_margin(MARGIN)
                     .child_flex_grow(2.0)
                     .child_size(Size { width: D::Auto, height: D::Auto })
-                .build(&ui.layout);
+                .build(&ui.layout)?;
 
             return Ok(ui);
         }

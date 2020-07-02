@@ -151,7 +151,7 @@ mod partial_freeing_test_ui {
                 .child(1, 0, &data.custom_bind_button)
                 .child(0, 1, &data.bind_handler_btn2)
                 .child(1, 1, &data.custom_bind_button2)
-                .build(&data.layout);
+                .build(&data.layout)?;
 
             Ok(())
         }

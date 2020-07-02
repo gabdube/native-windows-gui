@@ -149,7 +149,7 @@ mod message_bank_ui {
               .child(0, 0, &ui.add_message_btn)
               .child_item(nwg::GridLayoutItem::new(&ui.message_title, 1, 0, 2, 1))
               .child_item(nwg::GridLayoutItem::new(&ui.message_content, 3, 0, 3, 1))
-              .build(&ui.layout);
+              .build(&ui.layout)?;
             
             return Ok(ui);
         }

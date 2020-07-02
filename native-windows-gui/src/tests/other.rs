@@ -62,7 +62,7 @@ mod other_tests_ui {
                 .parent(&ui.window)
                 .flex_direction(stretch::style::FlexDirection::Column)
                 .child(&ui.test)
-                .build(&ui.layout);
+                .build(&ui.layout)?;
             
             Ok(ui)
         }

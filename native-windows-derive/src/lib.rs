@@ -371,6 +371,7 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
                 }
 
                 fn process_event<'a>(&self, _evt: Event, _evt_data: &EventData, _handle: ControlHandle) {
+                    
                 }
 
                 fn handles(&self) -> Vec<&ControlHandle> {

@@ -20,6 +20,9 @@ pub enum NwgError {
     /// Error raised when creating a resource.
     ResourceCreationError(String),
 
+    /// Error raised when the creation of a layout failed
+    LayoutCreationError(String),
+
     /// Error raised when an event handler could not be bound
     EventsBinding(String),
 
@@ -52,6 +55,10 @@ impl NwgError {
 
     pub fn resource_create<S: Into<String>>(e: S) -> NwgError {
         NwgError::ResourceCreationError(e.into())
+    }
+
+    pub fn layout_create<S: Into<String>>(e: S) -> NwgError {
+        NwgError::LayoutCreationError(e.into())
     }
 
     pub fn events_binding<S: Into<String>>(e: S) -> NwgError {
@@ -93,6 +100,7 @@ impl fmt::Display for NwgError {
             ControlCreationError(reason) => write!(f, "Failed to create a control: {:?}", reason),
             MenuCreationError(reason) => write!(f, "Failed to create a menu: {:?}", reason),
             ResourceCreationError(reason) => write!(f, "Failed to create a resource: {:?}", reason),
+            LayoutCreationError(reason) => write!(f, "Failed to create a layout: {:?}", reason),
             EventsBinding(reason) => write!(f, "Failed to bind events: {:?}", reason),
             
             #[cfg(feature = "file-dialog")]

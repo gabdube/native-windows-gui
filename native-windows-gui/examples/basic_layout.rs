@@ -98,7 +98,7 @@ mod basic_app_ui {
             .spacing(1)
             .child(0, 0, &ui.name_edit)
             .child_item(nwg::GridLayoutItem::new(&ui.hello_button, 0, 1, 1, 2))
-            .build(&ui.layout);
+            .build(&ui.layout)?;
 
             return Ok(ui);
         }

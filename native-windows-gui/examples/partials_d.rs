@@ -27,15 +27,13 @@ pub struct PartialDemo {
     menu: nwg::ListBox<&'static str>,
 
     #[nwg_control]
-    #[nwg_layout_item(layout: layout, cell: 1, cell_span: 3)]
+    #[nwg_layout_item(layout: layout)]
     frame1: nwg::Frame,
 
-    #[nwg_control]
-    #[nwg_layout_item(layout: layout, cell: 1, cell_span: 3)]
+    #[nwg_control(flags: "BORDER")]
     frame2: nwg::Frame,
 
-    #[nwg_control]
-    #[nwg_layout_item(layout: layout, cell: 1, cell_span: 3)]
+    #[nwg_control(flags: "BORDER")]
     frame3: nwg::Frame,
 
     #[nwg_partial(parent: frame1)]
@@ -55,10 +53,28 @@ impl PartialDemo {
         self.frame2.set_visible(false);
         self.frame3.set_visible(false);
 
+        let layout = &self.layout;
+        if layout.has_child(&self.frame1) { layout.remove_child(&self.frame1); }
+        if layout.has_child(&self.frame2) { layout.remove_child(&self.frame2); }
+        if layout.has_child(&self.frame3) { layout.remove_child(&self.frame3); }
+
+        use nwg::stretch::{geometry::Size, style::{Style, Dimension as D}};
+        let mut style = Style::default();
+        style.size = Size { width: D::Percent(1.0), height: D::Auto };
+
         match self.menu.selection() {
-            None | Some(0) => self.frame1.set_visible(true),
-            Some(1) => self.frame2.set_visible(true),
-            Some(2) => self.frame3.set_visible(true),
+            None | Some(0) => {
+                layout.add_child(&self.frame1, style).unwrap();
+                self.frame1.set_visible(true);
+            },
+            Some(1) => {
+                layout.add_child(&self.frame2, style).unwrap();
+                self.frame2.set_visible(true);
+            },
+            Some(2) => {
+                layout.add_child(&self.frame3, style).unwrap();
+                self.frame3.set_visible(true);
+            },
             Some(_) => unreachable!()
         }
     }

@@ -765,7 +765,7 @@ mod partial_controls_test_ui {
             FlexboxLayout::builder()
                 .parent(&data.window)
                 .child(&data.controls_holder)
-                .build(&data.tab_container_layout);
+                .build(&data.tab_container_layout)?;
 
             GridLayout::builder()
                 .parent(&data.panel)
@@ -786,7 +786,7 @@ mod partial_controls_test_ui {
                 .child(0, 6, &data.run_tooltip_test)
                 .child(1, 6, &data.run_status_test)
                 .child(0, 7, &data.run_tray_test)
-                .build(&data.panel_layout);
+                .build(&data.panel_layout)?;
             
             GridLayout::builder()
                 .parent(&data.dialog_tab)
@@ -800,7 +800,7 @@ mod partial_controls_test_ui {
                 .child_item(GridLayoutItem::new(&data.test_color_output, 1, 2, 2, 1))
                 .child(0, 3, &data.test_select_font_button)
                 .child_item(GridLayoutItem::new(&data.test_font_output, 1, 3, 2, 1))
-                .build(&data.dialog_tab_layout);
+                .build(&data.dialog_tab_layout)?;
             
             GridLayout::builder()
                 .parent(&data.tree_tab)
@@ -809,13 +809,13 @@ mod partial_controls_test_ui {
                 .child(1, 0, &data.test_tree_input)
                 .child(1, 1, &data.test_tree_add)
                 .child(1, 2, &data.test_tree_remove)
-                .build(&data.tree_tab_layout);
+                .build(&data.tree_tab_layout)?;
 
             GridLayout::builder()
                 .parent(&data.list_view_tab)
                 .min_size([400, 220])
                 .child_item(GridLayoutItem::new(&data.test_list_view, 0, 0, 1, 7))
-                .build(&data.list_view_tab_layout);
+                .build(&data.list_view_tab_layout)?;
 
             Ok(())
         }

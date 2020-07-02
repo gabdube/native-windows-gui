@@ -404,7 +404,7 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                     #ty::builder()
                         #(.#names(#values))*
                         #(.#children)*
-                        .build(&ui.#id);
+                        .build(&ui.#id)?;
                 };
                 layout_tk.to_tokens(tokens);
             }

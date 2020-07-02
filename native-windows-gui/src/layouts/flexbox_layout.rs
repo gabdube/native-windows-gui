@@ -1,6 +1,7 @@
 use crate::controls::ControlHandle;
 use crate::win32::window_helper as wh;
 use crate::win32::window::{RawEventHandler, unbind_raw_event_handler, bind_raw_event_handler_inner};
+use crate::NwgError;
 use winapi::shared::windef::HWND;
 use std::{ptr, rc::Rc, cell::{RefCell, RefMut, Ref} };
 
@@ -458,10 +459,14 @@ impl FlexboxLayoutBuilder {
 
     /// Build the layout object and bind the callback.
     /// Children must only contains window object otherwise this method will panic.
-    pub fn build(mut self, layout: &FlexboxLayout) {
+    pub fn build(mut self, layout: &FlexboxLayout) -> Result<(), NwgError> {
         use winapi::um::winuser::WM_SIZE;
         use winapi::shared::minwindef::{HIWORD, LOWORD};
         use FlexboxLayoutChild as Child;
+
+        if self.layout.base.is_null() {
+            return Err(NwgError::layout_create("Flexboxlayout does not have a parent."));
+        }
 
         let (w, h) = unsafe { wh::get_window_size(self.layout.base) };
         let base_handle = ControlHandle::Hwnd(self.layout.base);
@@ -534,6 +539,8 @@ impl FlexboxLayoutBuilder {
             let mut layout_inner = layout.inner.borrow_mut();
             layout_inner.handler = Some(bind_raw_event_handler_inner(&base_handle, handler_id, cb).unwrap());
         }
+
+        Ok(())
     }
 }
 

@@ -126,7 +126,7 @@ mod test_control_panel_ui {
                 .child(&ui.controls_test_button)
                 .child(&ui.thread_test_button)
                 .child(&ui.free_test_button)
-                .build(&ui.layout);
+                .build(&ui.layout)?;
 
             Ok(ui)
         }

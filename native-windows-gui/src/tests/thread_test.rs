@@ -126,7 +126,7 @@ mod partial_canvas_test_ui {
                 .child(&data.timer_stop_btn)
                 .child(&data.sleep_btn)
                 .child(&data.thread_sleep_btn)
-                .build(&data.layout);
+                .build(&data.layout)?;
 
             Ok(())
         }
