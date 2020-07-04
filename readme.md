@@ -155,10 +155,11 @@ it will most likely be added.
 
 ## 1.0 release checklist
 
-This is the list of remaining task to complete for the 1.0 release. Created `2020-06-13`, updated `2020-07-01`
+This is the list of remaining task to complete for the 1.0 release. Created `2020-06-13`, updated `2020-07-04`
 
 * ☐ Finish up the `ListView` controls
 * ☐ Add support for FlexBoxLayout in native window derive
+* ☐ Add "sub-events" to catch partial events from their parent
 * 🗹 Implement events in the derive partials
 * 🗹 Cleanup resources in derive partial
 * 🗹 Cleanup in main derive

@@ -37,12 +37,15 @@ pub struct PartialDemo {
     frame3: nwg::Frame,
 
     #[nwg_partial(parent: frame1)]
+    #[nwg_events( (save_btn, OnButtonClick): [PartialDemo::save] )]
     people_ui: PeopleUi,
 
     #[nwg_partial(parent: frame2)]
+    #[nwg_events( (save_btn, OnButtonClick): [PartialDemo::save] )]
     animal_ui: AnimalUi,
 
     #[nwg_partial(parent: frame3)]
+    #[nwg_events( (save_btn, OnButtonClick): [PartialDemo::save] )]
     food_ui: FoodUi,
 }
 

@@ -1,6 +1,5 @@
 use proc_macro2 as pm2;
 use syn;
-use syn::token;
 use syn::punctuated::Punctuated;
 use syn::parse::{Parse, ParseStream};
 use quote::{ToTokens};
@@ -31,23 +30,43 @@ impl Parse for CallbackFunction {
     }
 }
 
-/// A single pair of CALLBACK_EVENT_ID: [CALLBACK_FUNCTIONS,]
+/// A single pair of (path, CALLBACK_EVENT_ID): [CALLBACK_FUNCTIONS,]
 #[allow(unused)]
 struct CallbackDef {
+    field_name: Option<syn::Expr>,
     callback_id: syn::Ident,
-    sep: Token![:],
-    bracket_token: token::Bracket,
     callbacks: Punctuated<CallbackFunction, Token![,]>
 }
 
 impl Parse for CallbackDef {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
+    fn parse(mut input: ParseStream) -> syn::Result<Self> {
         let content;
+        
+        /// Try to parse the optional `(path, CALLBACK_EVENT_ID)` syntax
+        fn parse_callback_name(input: &mut ParseStream) -> Result<(Option<syn::Expr>, syn::Ident), syn::Error> {
+            let event_content;
+            let _paren_token = parenthesized!(event_content in input);
+
+            let field_name: syn::Expr = event_content.parse()?;
+            let _comma: Token![,] = event_content.parse()?;
+            let callback_id = event_content.parse()?;
+
+            Ok((Some(field_name), callback_id))
+        }
+
+        let (field_name, callback_id) = match parse_callback_name(&mut input) {
+            Ok(v) => v,
+            Err(_) => {
+                (None, input.parse()?)
+            }
+        };
+
+        let _sep: Token![:] =  input.parse()?;
+        let _bracket_token = bracketed!(content in input);
 
         Ok(CallbackDef {
-            callback_id: input.parse()?,
-            sep: input.parse()?,
-            bracket_token: bracketed!(content in input),
+            field_name,
+            callback_id,
             callbacks: content.parse_terminated(CallbackFunction::parse)?
         })
     }
@@ -71,7 +90,7 @@ impl Parse for CallbackDefinitions {
 /// Parsed callbacks for a event type
 #[derive(Debug)]
 struct EventCallback {
-    member: syn::Ident,
+    member: syn::Expr,
     path: syn::Path,
     args: Punctuated<syn::Expr, Token![,]>
 }
@@ -115,7 +134,6 @@ impl ControlEvents {
     }
 
     pub fn add_partial(&mut self, id: &syn::Ident) {
-
         self.partials_callbacks.push(quote! {
             evt_ui.#id.process_event(_evt, &_evt_data, _handle);
         })
@@ -144,7 +162,7 @@ impl ControlEvents {
 
             for cb_fn in callback_def.callbacks.iter() {
                 let callback = EventCallback {
-                    member: member.clone(),
+                    member: Self::parse_member(&callback_def.field_name, &member),
                     path: cb_fn.path.clone(),
                     args: map_callback_args(&member, &cb_fn.args, &self.callback_args_cache)
                 };
@@ -152,6 +170,15 @@ impl ControlEvents {
                 evt_callbacks.push(callback);
             }
         }
+    }
+
+    fn parse_member(base: &Option<syn::Expr>, id: &syn::Ident) -> syn::Expr {
+        let tokens = match base {
+            Some(b) => quote! { evt_ui.#id.#b },
+            None => quote! {  evt_ui.#id }
+        };
+
+        syn::parse2(tokens).expect("Failed to generate event match code")
     }
 
 }
@@ -222,18 +249,18 @@ impl<'a> ToTokens for EventCallbackCol<'a> {
                 let member = &cb[0].member;
                 let path = &cb[0].path;
                 let args = &cb[0].args;
-                quote!{ if &_handle == &evt_ui.#member { #path(#args) } }
+                quote!{ if &_handle == &#member { #path(#args) } }
             }
             _ => {
                 
                 // Group callbacks by members
-                let mut members_callbacks: HashMap<&syn::Ident, Vec<(&syn::Path, &Args)>> = HashMap::new();
+                let mut members_callbacks: HashMap<&syn::Expr, Vec<(&syn::Path, &Args)>> = HashMap::new();
                 for c in cb.iter() {
                     let mc = members_callbacks.entry(&c.member).or_insert(Vec::new());
                     mc.push((&c.path, &c.args));
                 }
 
-                let members: Vec<&&syn::Ident> = members_callbacks.keys().collect();
+                let members: Vec<&&syn::Expr> = members_callbacks.keys().collect();
                 let values: Vec<PathArgs> = members_callbacks.values().map(|c| PathArgs(c) ).collect();
 
                 let member0 = members[0];
@@ -242,8 +269,8 @@ impl<'a> ToTokens for EventCallbackCol<'a> {
                 let values = &values[1..];
 
                 quote!{
-                    if &_handle == &evt_ui.#member0 { #value0 }
-                    #(else if &_handle == &evt_ui.#members { #values })*
+                    if &_handle == &#member0 { #value0 }
+                    #(else if &_handle == &#members { #values })*
                 }
             }
         };

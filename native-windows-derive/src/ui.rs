@@ -562,6 +562,7 @@ impl<'a> NwgUi<'a> {
                 };
 
                 events.add_partial(&partial.id);
+                events.parse(field);
 
                 partials.push(partial);
             }

@@ -302,8 +302,6 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
 /**
 The `NwgPartial` macro implements the native-windows-gui `PartialUi` trait on the selected struct
 
-**Events are not yet implemented in partials !**
-
 `NwgPartial` accepts the same attributes as `NwgUi`. See the docs of the `NwgUi` trait for detailed usage. There are some particularities though:
 
  - Partials cannot be used by independently. They must be included in a UI that implements `NwgUi`. 
