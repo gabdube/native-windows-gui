@@ -2,6 +2,7 @@ use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 
 
+#[derive(Debug)]
 pub struct Param {
     pub ident: syn::Ident,
     pub sep: Token![:],
@@ -18,6 +19,7 @@ impl Parse for Param {
     }
 }
 
+#[derive(Debug)]
 pub struct Parameters {
     pub params: Punctuated<Param, Token![,]>
 }

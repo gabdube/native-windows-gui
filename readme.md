@@ -158,7 +158,8 @@ it will most likely be added.
 This is the list of remaining task to complete for the 1.0 release. Created `2020-06-13`, updated `2020-07-01`
 
 * ☐ Finish up the `ListView` controls
-* ☐ Implement events in the derive partials
+* ☐ Add support for FlexBoxLayout in native window derive
+* 🗹 Implement events in the derive partials
 * 🗹 Cleanup resources in derive partial
 * 🗹 Cleanup in main derive
 * 🗹 Load font from files

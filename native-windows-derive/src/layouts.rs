@@ -1,7 +1,7 @@
 use crate::shared::Parameters;
 
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct GridLayoutChild {
     pub col: u32,
     pub row: u32,
@@ -9,11 +9,12 @@ pub struct GridLayoutChild {
     pub row_span: u32
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct FlexboxLayoutChild {
 }
 
 
+#[derive(Debug)]
 pub enum LayoutChild {
     Init { field_name: String, params: Parameters },
     Grid(GridLayoutChild),
@@ -88,7 +89,10 @@ impl LayoutChild {
                             .unwrap_or(false),
                     _ => false
                 } ),
-            _ => panic!("parent_matches called on non-init values")
+            _ => {
+                false
+                //panic!("Tried to match control to layout, but `parent_matches` was called on {:?}. It should be an `LayoutChild::Init` value", v)
+            }
         }
     }
 

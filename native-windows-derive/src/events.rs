@@ -78,14 +78,16 @@ struct EventCallback {
 
 /// Wrapper over a basic event dispatcher
 pub struct ControlEvents {
+    partial: bool,
     handles: Vec<syn::Ident>,
     callbacks: HashMap<syn::Pat, Vec<EventCallback>>,
+    partials_callbacks: Vec<pm2::TokenStream>,
     callback_args_cache: HashMap<usize, syn::Expr>,
 }
 
 impl ControlEvents {
 
-    pub fn with_capacity(cap: usize) -> ControlEvents {
+    pub fn with_capacity(partial: bool, cap: usize) -> ControlEvents {
         let mut cache = HashMap::with_capacity(4);
         cache.insert(0, syn::parse_str("&evt_ui").unwrap());
         cache.insert(2, syn::parse_str("&_handle").unwrap());
@@ -93,8 +95,10 @@ impl ControlEvents {
         cache.insert(4, syn::parse_str("&_evt_data").unwrap());
 
         ControlEvents {
+            partial,
             handles: Vec::with_capacity(1),
             callbacks: HashMap::with_capacity(cap),
+            partials_callbacks: Vec::with_capacity(6),
             callback_args_cache: cache
         }
     }
@@ -108,6 +112,13 @@ impl ControlEvents {
         if top_level_window(field) {
             self.handles.push(member.clone());
         }
+    }
+
+    pub fn add_partial(&mut self, id: &syn::Ident) {
+
+        self.partials_callbacks.push(quote! {
+            evt_ui.#id.process_event(_evt, &_evt_data, _handle);
+        })
     }
 
     pub fn parse(&mut self, field: &syn::Field) {
@@ -151,26 +162,43 @@ impl ToTokens for ControlEvents {
         let handles = &self.handles;
 
         let mut pats: Vec<&syn::Pat> = Vec::with_capacity(self.callbacks.len());
+        let partial_callbacks = &self.partials_callbacks;
         let mut callbacks = Vec::with_capacity(self.callbacks.len());
         for (pat, cb) in self.callbacks.iter() {
             pats.push(pat);
             callbacks.push(EventCallbackCol(cb));
         }
 
-        let events_tk = quote! {
-            let window_handles: &[&ControlHandle] = &[#(&ui.#handles.handle),*];
-            for handle in window_handles.iter() {
-                let evt_ui = Rc::downgrade(&inner);
-                let handle_events = move |_evt, _evt_data, _handle| {
-                    if let Some(evt_ui) = evt_ui.upgrade() {
-                        match _evt { 
-                            #( #pats => #callbacks ),*
-                            _ => {}
+        let events_tk = if self.partial {
+            // There's no need to bind events handler in a partials
+            quote! {
+                let evt_ui = self;
+
+                #( #partial_callbacks );*
+
+                match _evt { 
+                    #( #pats => #callbacks ),*
+                    _ => {}
+                }
+            }
+        } else {
+            quote! {
+                let window_handles: &[&ControlHandle] = &[#(&ui.#handles.handle),*];
+                for handle in window_handles.iter() {
+                    let evt_ui = Rc::downgrade(&inner);
+                    let handle_events = move |_evt, _evt_data, _handle| {
+
+                        if let Some(evt_ui) = evt_ui.upgrade() {
+                            #( #partial_callbacks );*
+                            match _evt { 
+                                #( #pats => #callbacks ),*
+                                _ => {}
+                            }
                         }
-                    }
-                };
-                
-                ui.default_handlers.borrow_mut().push(full_bind_event_handler(handle, handle_events));
+                    };
+                    
+                    ui.default_handlers.borrow_mut().push(full_bind_event_handler(handle, handle_events));
+                }
             }
         };
 

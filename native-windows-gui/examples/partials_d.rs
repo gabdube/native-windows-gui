@@ -2,7 +2,7 @@
     An application that load different interfaces using the partial feature.
     Partials can be used to split large GUI application into smaller bits.
 
-    Requires the following features: `cargo run --example partials_d --features "listbox frame combobox"`
+    Requires the following features: `cargo run --example partials_d --features "listbox frame combobox flexbox"`
 */
 
 extern crate native_windows_gui as nwg;
@@ -79,6 +79,10 @@ impl PartialDemo {
         }
     }
 
+    fn save(&self) {
+        nwg::simple_message("Saved!", "Data saved!");
+    }
+
     fn exit(&self) {
         nwg::stop_thread_dispatch();
     }
@@ -89,6 +93,9 @@ pub struct PeopleUi {
 
     #[nwg_layout(max_size: [1000, 150], min_size: [100, 120])]
     layout: nwg::GridLayout,
+
+    #[nwg_layout(min_size: [100, 200], max_column: Some(2), max_row: Some(6))]
+    layout2: nwg::GridLayout,
 
     #[nwg_control(text: "Name:", h_align: HTextAlign::Right)]
     #[nwg_layout_item(layout: layout, col: 0, row: 0)]
@@ -104,6 +111,7 @@ pub struct PeopleUi {
 
     #[nwg_control(text: "John Doe")]
     #[nwg_layout_item(layout: layout, col: 1, row: 0)]
+    #[nwg_events(OnChar: [print_char(EVT_DATA)])]
     name_input: nwg::TextInput,
 
     #[nwg_control(text: "75", flags: "NUMBER|VISIBLE")]
@@ -113,12 +121,19 @@ pub struct PeopleUi {
     #[nwg_control(text: "Programmer")]
     #[nwg_layout_item(layout: layout, col: 1, row: 2)]
     job_input: nwg::TextInput,
+
+    #[nwg_control(text: "Save")]
+    #[nwg_layout_item(layout: layout2, col: 1, row: 5)]
+    save_btn: nwg::Button,
 }
 
 #[derive(Default, NwgPartial)]
 pub struct AnimalUi {
     #[nwg_layout(max_size: [1000, 150], min_size: [100, 120])]
     layout: nwg::GridLayout,
+
+    #[nwg_layout(min_size: [100, 200], max_column: Some(2), max_row: Some(6))]
+    layout2: nwg::GridLayout,
 
     #[nwg_control(text: "Name:", h_align: HTextAlign::Right)]
     #[nwg_layout_item(layout: layout, col: 0, row: 0)]
@@ -134,6 +149,7 @@ pub struct AnimalUi {
 
     #[nwg_control(text: "Mittens")]
     #[nwg_layout_item(layout: layout, col: 1, row: 0)]
+    #[nwg_events(OnChar: [print_char(EVT_DATA)])]
     name_input: nwg::TextInput,
 
     #[nwg_control(collection: vec!["Cat", "Dog", "Pidgeon", "Monkey"], selected_index: Some(0))]
@@ -142,7 +158,11 @@ pub struct AnimalUi {
 
     #[nwg_control(text: "", check_state: CheckBoxState::Checked)]
     #[nwg_layout_item(layout: layout, col: 1, row: 2)]
-    is_soft_input: nwg::CheckBox
+    is_soft_input: nwg::CheckBox,
+
+    #[nwg_control(text: "Save")]
+    #[nwg_layout_item(layout: layout2, col: 1, row: 5)]
+    save_btn: nwg::Button,
 }
 
 #[derive(Default, NwgPartial)]
@@ -150,6 +170,9 @@ pub struct FoodUi {
     
     #[nwg_layout(max_size: [1000, 90], min_size: [100, 80])]
     layout: nwg::GridLayout,
+
+    #[nwg_layout(min_size: [100, 200], max_column: Some(2), max_row: Some(6))]
+    layout2: nwg::GridLayout,
 
     #[nwg_control(text: "Name:", h_align: HTextAlign::Right)]
     #[nwg_layout_item(layout: layout, col: 0, row: 0)]
@@ -161,11 +184,21 @@ pub struct FoodUi {
 
     #[nwg_control(text: "Banana")]
     #[nwg_layout_item(layout: layout, col: 1, row: 0)]
+    #[nwg_events(OnChar: [print_char(EVT_DATA)])]
     name_input: nwg::TextInput,
 
     #[nwg_control(text: "", check_state: CheckBoxState::Checked)]
     #[nwg_layout_item(layout: layout, col: 1, row: 1)]
     tasty_input: nwg::CheckBox,
+
+    #[nwg_control(text: "Save")]
+    #[nwg_layout_item(layout: layout2, col: 1, row: 5)]
+    save_btn: nwg::Button,
+}
+
+
+fn print_char(data: &nwg::EventData) {
+    println!("{:?}", data.on_char());
 }
 
 fn main() {

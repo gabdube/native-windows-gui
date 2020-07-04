@@ -158,6 +158,7 @@ impl<'a> NwgResource<'a> {
 
 }
 
+#[derive(Debug)]
 struct NwgLayout<'a> {
     id: &'a syn::Ident,
     ty: &'a syn::Ident,
@@ -497,7 +498,7 @@ impl<'a> NwgUi<'a> {
         let mut resources = Vec::with_capacity(named_fields.len());
         let mut layouts = Vec::with_capacity(named_fields.len());
         let mut partials = Vec::with_capacity(named_fields.len());
-        let mut events = ControlEvents::with_capacity(named_fields.len());
+        let mut events = ControlEvents::with_capacity(partial, named_fields.len());
 
         let partial_parent_expr: syn::Expr = syn::parse_str("parent_ref.unwrap()").unwrap();
         let parent_ident = syn::Ident::new("parent", pm2::Span::call_site());
@@ -560,12 +561,15 @@ impl<'a> NwgUi<'a> {
                     parent: NwgPartial::parse_parent(field),
                 };
 
+                events.add_partial(&partial.id);
+
                 partials.push(partial);
             }
         }
 
         // Parent stuff
         for i in 0..(layouts.len()) {
+            // Add the parent value of the layout object if it was not already defined
             let has_attr_parent = layouts[i].names.iter().any(|n| n == "parent");
             if has_attr_parent {
                 layouts[i].expand_parent();
@@ -582,6 +586,7 @@ impl<'a> NwgUi<'a> {
             for control in controls.iter_mut() {
                 if let Some(child_layout) = control.layout.as_mut() {
                     let layout = &layouts[i];
+
                     if child_layout.parent_matches(&layout.id) {
                         child_layout.parse(&layout.ty);
                         control.layout_index = i;

@@ -247,6 +247,14 @@ impl EventData {
         }
     }
 
+    /// Unwraps event data into a `char`. Panics if it's not the right type.
+    pub fn on_char(&self) -> char {
+        match self {
+            EventData::OnChar(c) => *c,
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
     /// Unwraps event data into a `&ToolTipTextData`. Panics if it's not the right type.
     pub fn on_tooltip_text(&self) -> &ToolTipTextData {
         match self {

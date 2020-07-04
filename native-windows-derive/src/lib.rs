@@ -348,7 +348,7 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
     let controls = ui.controls();
     let resources = ui.resources();
     let layouts = ui.layouts();
-    //let events = ui.events();
+    let events = ui.events();
 
     let partial_ui = quote! {
         mod #partial_name {
@@ -371,7 +371,7 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
                 }
 
                 fn process_event<'a>(&self, _evt: Event, _evt_data: &EventData, _handle: ControlHandle) {
-                    
+                    #events
                 }
 
                 fn handles(&self) -> Vec<&ControlHandle> {
