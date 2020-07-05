@@ -4,3 +4,4 @@
 Cargo.lock
 code
 native-windows-docs/tmp.*
+.vs
