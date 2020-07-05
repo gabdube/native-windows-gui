@@ -7,6 +7,8 @@
     <title>Native Windows GUI guide - Derive partial</title>
 
     <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
 
 
 </head>
@@ -91,7 +93,80 @@
     <div id='page'>
 
         <h1 class="title">Native Windows Derive: Partials</h1>
-        <br/><br/>
+
+        Native-windows-derive fully supports partials UI. It works the same way as <code>NwgUi</code>.<br>
+        <br/>
+
+        <h3>Deriving a Partial</h3>
+
+        Deriving a partial from a structure is done using the <code>NwgPartial</code> derive:
+<div class="highlight"><pre style="width: auto;"><span></span><span class="cp">#[derive(NwgPartial)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">MyPartial</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_layout(max_size: [1000, 150]</span><span class="p">,</span><span class="w"> </span><span class="n">min_size</span>: <span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">])]</span><span class="w"></span>
+<span class="w">    </span><span class="n">layout</span>: <span class="nc">nwg</span>::<span class="n">GridLayout</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(text: </span><span class="s">&quot;Name:&quot;</span><span class="cp">, h_align: HTextAlign::Right)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_layout_item(layout: layout, col: 0, row: 0)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_events(OnLabelClick: [MyPartial::test]</span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">label1</span>: <span class="nc">nwg</span>::<span class="n">Label</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+            
+
+    <br>
+
+    NwgPartials accepts the same tag as <code>NwgUi</code>: nwg_control, nwg_resource, nwg_events, nwg_layout, nwg_layout_item, and nwg_partial.
+            
+    <br><br>
+
+    <h3>Adding a partial to another UI</h3>
+
+    If a partial is added as a field in another UI struct, it must be tagged using <code>nwg_partial</code>. Optionally, a <code>parent</code>
+    parameter can be passed to send the partial <code>parent</code>.
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="cp">#[derive(NwgUi)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">MyUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
+<span class="w">    </span><span class="n">frame</span>: <span class="nc">nwg</span>::<span class="n">Frame</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_partial(parent: frame1)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">partial</span>: <span class="nc">MyPartial</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+        <br>
+
+    <h3>Hooking events in partial from their parent</h3>
+
+    Partials are self contained, this means that it's impossible to propagate an event "up" to the parent. To fix this, the <code>nwg_events</code> 
+    tag can accepts a struct field name, allowing you to catch an event raised in a partial from the parent.
+    
+    <br><br>
+
+    This works by extending the <code>nwg_events</code> this way:<br>
+
+    <code>nwg_events((FIELD_NAME, EVENT): [CALLBACK_LIST,])</code><br><br>
+
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="cp">#[derive(NwgUi)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">MyUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
+<span class="w">    </span><span class="n">frame</span>: <span class="nc">nwg</span>::<span class="n">Frame</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_partial(parent: frame1)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_events((button, OnButtonClick): [MyUi::save]</span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">partial</span>: <span class="nc">MyPartial</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="cp">#[derive(NwgPartial)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">MyPartial</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
+<span class="w">    </span><span class="n">button</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+        
+
+    <br><br>
 
     </div>
 </div>

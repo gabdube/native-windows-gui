@@ -159,7 +159,7 @@ This is the list of remaining task to complete for the 1.0 release. Created `202
 
 * ☐ Finish up the `ListView` controls
 * ☐ Add support for FlexBoxLayout in native window derive
-* ☐ Add "sub-events" to catch partial events from their parent
+* 🗹 Add "sub-events" to catch partial events from their parent
 * 🗹 Implement events in the derive partials
 * 🗹 Cleanup resources in derive partial
 * 🗹 Cleanup in main derive

@@ -30,7 +30,7 @@ impl Parse for CallbackFunction {
     }
 }
 
-/// A single pair of (path, CALLBACK_EVENT_ID): [CALLBACK_FUNCTIONS,]
+/// A single pair of (PATH, CALLBACK_EVENT_ID): [CALLBACK_FUNCTIONS,]
 #[allow(unused)]
 struct CallbackDef {
     field_name: Option<syn::Expr>,
@@ -42,7 +42,7 @@ impl Parse for CallbackDef {
     fn parse(mut input: ParseStream) -> syn::Result<Self> {
         let content;
         
-        /// Try to parse the optional `(path, CALLBACK_EVENT_ID)` syntax
+        /// Try to parse the optional `(PATH, CALLBACK_EVENT_ID)` syntax
         fn parse_callback_name(input: &mut ParseStream) -> Result<(Option<syn::Expr>, syn::Ident), syn::Error> {
             let event_content;
             let _paren_token = parenthesized!(event_content in input);
