@@ -93,7 +93,9 @@
 
         <h1 class="title">Native Windows Derive: Layouts</h1>
 
-        The next step in the native windows derive journey are the layouts.
+        The next step in the native windows derive journey are the layouts. NWG has two layouts: 
+        <code>GridLayout</code> and <code>FlexboxLayout</code>. Because both of those layouts have slight
+        differences, the derive layouts has small differences.
         <br/><br/>
 
         <h3>Layout</h3>
@@ -105,6 +107,7 @@
         <br><br>
 
         Unlike controls, NWD wont guess the parent of the layout. This might be changed in the future in a minor release.
+        This is the same of both layout types.
 
         <br/><br/>
 
@@ -117,11 +120,15 @@
         <br><br>
 
         In this case <code>item_field: item_value</code> are the attributes of a <code>LayoutItem</code>. For example <code>GridLayoutItem</code>.
-        Also, just like <code>nwg_layout</code>, the layout parameter cannot be guessed by NWD.
-
-        <h3>Examples</h3>
+        The <code>layout</code> parameter <b>cannot</b> be guessed by NWD.
         
-<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Calculator</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+        <br><br>
+
+        <h3>Grid Layout Item</h3>
+
+        Gridlayout is a default layout in NWG. The macro uses the grid layout item fields directly.
+        
+<div class="highlight"><pre style="width: auto;"><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Calculator</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="cp">#[nwg_layout(parent: window, spacing: 2, min_size: [150, 140]</span><span class="p">)]</span><span class="w"></span>
 <span class="w">    </span><span class="n">grid</span>: <span class="nc">nwg</span>::<span class="n">GridLayout</span><span class="p">,</span><span class="w"></span>
 
@@ -129,8 +136,53 @@
 <span class="w">    </span><span class="cp">#[nwg_layout_item(layout: grid, col: 0, row: 0, col_span: 5)]</span><span class="w"></span>
 <span class="w">    </span><span class="n">input</span>: <span class="nc">nwg</span>::<span class="n">TextInput</span><span class="p">,</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
+</pre></div><br>
+
+        <h3>Flexbox Layout Item</h3>
+
+        Flexbox is hidden behind the feature "flexbox" because it uses <b>stretch</b> as a dependency. Flexbox layout
+        values are alot more verbose than gridlayout.
+
+        <br><br>
+
+        A flexbox macro usually use a <code>child_*</code> syntax to define the layout item parameters. The derive macro removes
+        the "child" prefix.<br><br>
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="k">use</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">stretch</span>::<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">geometry</span>::<span class="p">{</span><span class="n">Size</span><span class="p">,</span><span class="w"> </span><span class="n">Rect</span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="n">style</span>::<span class="p">{</span><span class="n">Dimension</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">FlexDirection</span><span class="p">,</span><span class="w"> </span><span class="n">AlignSelf</span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="k">const</span><span class="w"> </span><span class="n">FIFTY_PC</span>: <span class="nc">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">D</span>::<span class="n">Percent</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">PT_10</span>: <span class="nc">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">D</span>::<span class="n">Points</span><span class="p">(</span><span class="mf">10.0</span><span class="p">);</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">PADDING</span>: <span class="nc">Rect</span><span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rect</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">start</span>: <span class="nc">PT_10</span><span class="p">,</span><span class="w"> </span><span class="n">end</span>: <span class="nc">PT_10</span><span class="p">,</span><span class="w"> </span><span class="n">top</span>: <span class="nc">PT_10</span><span class="p">,</span><span class="w"> </span><span class="n">bottom</span>: <span class="nc">PT_10</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+
+
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">FlexBoxApp</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control(size: (500, 300), position: (300, 300), title: </span><span class="s">&quot;Flexbox example&quot;</span><span class="cp">)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_events( OnWindowClose: [nwg::stop_thread_dispatch()]</span><span class="w"> </span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">window</span>: <span class="nc">nwg</span>::<span class="n">Window</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_layout(parent: window, flex_direction: FlexDirection::Row)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">layout</span>: <span class="nc">nwg</span>::<span class="n">FlexboxLayout</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(text: </span><span class="s">&quot;Btn 1&quot;</span><span class="cp">)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_layout_item(layout: layout,</span>
+<span class="cp">        margin: MARGIN,</span>
+<span class="cp">        max_size: Size { width: D::Points(200.0), height: D::Undefined },</span>
+<span class="cp">        size: Size { width: FIFTY_PC, height: D::Auto }</span>
+<span class="cp">    )]</span><span class="w"></span>
+<span class="w">    </span><span class="n">button1</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 
+            
+
+
+        <br><br>
+        <h3>Examples</h3>
         <ul>
             <li><a href="https://github.com/gabdube/native-windows-gui/blob/1.0-prerelease/native-windows-gui/examples/calculator.rs">Calculator</a> ( <a href="https://github.com/gabdube/native-windows-gui/blob/1.0-prerelease/native-windows-gui/examples/calculator_d.rs">derive version</a> ) shows how to use a grid layout.</li>
             <li><a href="https://github.com/gabdube/native-windows-gui/blob/1.0-prerelease/native-windows-gui/examples/message_bank.rs">Message bank</a> ( <a href="https://github.com/gabdube/native-windows-gui/blob/1.0-prerelease/native-windows-gui/examples/message_bank_d.rs">derive version</a> ) shows how to update a grid layout dynamically.</li>
