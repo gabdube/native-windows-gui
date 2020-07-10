@@ -9,8 +9,10 @@ pub struct GridLayoutChild {
     pub row_span: u32
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct FlexboxLayoutChild {
+    pub param_names: Vec<syn::Ident>,
+    pub param_values: Vec<syn::Expr>,
 }
 
 
@@ -40,38 +42,10 @@ impl LayoutChild {
     }
 
     pub fn parse(&mut self, parent_type: &syn::Ident) {
-        let int_value = |expr: &syn::Expr| -> u32 {
-            match expr {
-                syn::Expr::Lit(lit) => 
-                    match &lit.lit {
-                        syn::Lit::Int(i) => { i.base10_parse().unwrap() },
-                        _ => panic!("Layout item members must be int literal.")
-                    },
-                _ => panic!("Layout item members must be int literal.")
-            }
-        };
-
-        let [mut col, mut row, mut col_span, mut row_span] = [0, 0, 1, 1];
-
-        match self {
-            LayoutChild::Init{ params: p, .. } => for p in p.params.iter() {
-                let attr_name = p.ident.to_string();
-                match &attr_name as &str {
-                    // Grid layout
-                    "col" => { col = int_value(&p.e) },
-                    "row" => { row = int_value(&p.e) },
-                    "col_span" => { col_span = int_value(&p.e) },
-                    "row_span" => { row_span = int_value(&p.e) },
-                    _ => {}
-                }
-            },
-            _ => panic!("Called parse on a non-Init child layout")
-        };
-
         if parent_type == "GridLayout" {
-            *self = LayoutChild::Grid( GridLayoutChild { col, col_span, row, row_span } );
+            *self = Self::parse_grid_layout_params(self);
         } else if parent_type == "FlexboxLayout" {
-            *self = LayoutChild::Flexbox( FlexboxLayoutChild { } );
+            *self = Self::parse_flexbox_layout_params(self);
         } else {
             panic!("Unknown parent type: {:?}", parent_type);
         }
@@ -93,6 +67,57 @@ impl LayoutChild {
                 false
                 //panic!("Tried to match control to layout, but `parent_matches` was called on {:?}. It should be an `LayoutChild::Init` value", v)
             }
+        }
+    }
+
+    fn parse_grid_layout_params(child: &mut LayoutChild) -> LayoutChild {
+        let [mut col, mut row, mut col_span, mut row_span] = [0, 0, 1, 1];
+
+        match child {
+            LayoutChild::Init{ params: p, .. } => for p in p.params.iter() {
+                let attr_name = p.ident.to_string();
+                match &attr_name as &str {
+                    "col" => { col = Self::int_value(&p.e) },
+                    "row" => { row = Self::int_value(&p.e) },
+                    "col_span" => { col_span = Self::int_value(&p.e) },
+                    "row_span" => { row_span = Self::int_value(&p.e) },
+                    _ => {}
+                }
+            },
+            _ => panic!("Called parse on a non-Init child layout")
+        };
+
+        LayoutChild::Grid( GridLayoutChild { col, col_span, row, row_span } )
+    }
+
+    fn parse_flexbox_layout_params(child: &mut LayoutChild) -> LayoutChild {
+        let mut param_names = Vec::with_capacity(4);
+        let mut param_values = Vec::with_capacity(4);
+
+        match child {
+            LayoutChild::Init{ params: p, .. } => for p in p.params.iter() {
+                if &p.ident == "layout" {
+                    continue;
+                }
+
+                let child_name = format!("child_{}", &p.ident);
+                param_names.push(syn::Ident::new(&child_name, p.ident.span()));
+                param_values.push(p.e.clone());
+            }
+            _ => panic!("Called parse on a non-Init child layout")
+        }
+
+        LayoutChild::Flexbox( FlexboxLayoutChild { param_names, param_values } )
+    }
+
+    fn int_value(expr: &syn::Expr) -> u32 {
+        match expr {
+            syn::Expr::Lit(lit) => 
+                match &lit.lit {
+                    syn::Lit::Int(i) => { i.base10_parse().unwrap() },
+                    _ => panic!("Layout item members must be int literal.")
+                },
+            _ => panic!("Layout item members must be int literal.")
         }
     }
 

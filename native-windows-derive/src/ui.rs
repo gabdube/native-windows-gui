@@ -376,9 +376,10 @@ impl<'a> ToTokens for NwgUiLayouts<'a> {
                         quote! { 
                             child_item(GridLayoutItem::new(&ui.#id, #col, #row, #col_span, #row_span))
                         },
-                    Some(LayoutChild::Flexbox( FlexboxLayoutChild {} )) => 
+                    Some(LayoutChild::Flexbox( FlexboxLayoutChild { param_names, param_values } )) => 
                         quote! { 
                             child(&ui.#id)
+                            #(.#param_names(#param_values))*
                         },
                     Some(LayoutChild::Init{ field_name, .. }) => panic!("Unmatched layout item for field \"{}\", Did you forget the `layout` parameter?", field_name),
                     None => panic!("Unfiltered layout item")
