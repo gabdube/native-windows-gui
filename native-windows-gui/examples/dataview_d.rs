@@ -24,7 +24,7 @@ pub struct DataViewApp {
     #[nwg_layout(parent: window)]
     layout: nwg::GridLayout,
 
-    #[nwg_control(item_count: 10, list_style: nwg::ListViewStyle::Detailed, size: (500, 350))]
+    #[nwg_control(item_count: 10, ex_flags: nwg::ListViewExFlags::GRID, list_style: nwg::ListViewStyle::Detailed, size: (500, 350))]
     #[nwg_layout_item(layout: layout, col: 0, col_span: 4, row: 0, row_span: 6)]
     data_view: nwg::ListView,
 
@@ -32,7 +32,7 @@ pub struct DataViewApp {
     #[nwg_layout_item(layout: layout, col: 4, row: 0)]
     label: nwg::Label,
 
-    #[nwg_control(collection: vec!["Simple", "Details", "Icon", "Icon small"], selected_index: Some(0), font: Some(&data.arial))]
+    #[nwg_control(collection: vec!["Simple", "Details", "Icon", "Icon small"], selected_index: Some(1), font: Some(&data.arial))]
     #[nwg_layout_item(layout: layout, col: 4, row: 1)]
     #[nwg_events( OnComboxBoxSelection: [DataViewApp::update_view] )]
     view_style: nwg::ComboBox<&'static str>
@@ -46,10 +46,30 @@ impl DataViewApp {
         dv.insert_column("Name");
         dv.insert_column("Genus");
 
+        // Passing a str to this method will automatically push the item at the end of the list in the first column
         dv.insert_item("Cat");
-        dv.insert_item("Dog");
-        dv.insert_item("Moose");
+        dv.insert_item(nwg::InsertListViewItem { 
+            index: Some(0),
+            column_index: 1,
+            text: "Felis".into()
+        });
+
+        dv.insert_item(nwg::InsertListViewItem {
+            index: Some(1),
+            column_index: 0,
+            text: "Moose".into(),
+        });
+
+        dv.insert_item(nwg::InsertListViewItem {
+            index: Some(1),
+            column_index: 1,
+            text: "Alces".into(),
+        });
+
+        //dv.insert_items_row(&["Dog" ,"Canis"]);
+
         dv.insert_items(&["Duck", "Horse", "Boomalope"]);
+        //dv.insert_items_at_column(1, &["Anas", "Equus", "???"]);
     }
 
     fn update_view(&self) {

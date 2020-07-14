@@ -1,7 +1,7 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
-    LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT
+    LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT, LVS_EX_GRIDLINES, LVS_EX_BORDERSELECT,
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
@@ -18,19 +18,10 @@ bitflags! {
     /**
         The list view flags:
 
-        * NONE:     Default list view. Equivalent to an invisible detailed list
         * VISIBLE:  The list view is immediatly visible after creation
         * DISABLED: The list view cannot be interacted with by the user. It also has a grayed out look. The user can drag the items to any location in the list-view window.
-        * NO_HEADER: The list do not have a header.
-
-        List view type (only one of those flags should be set):
-
-        * ICON_LIST: A list where each item appears as a full-sized icon with a label below it. The user can drag the items to any location in the list-view window.
-        * SMALL_ICON_LIST: A list where each item appears as a small icon with the label to the right of it
-        * SIMPLE_LIST: Each item appears as a small icon with a label to the right of it. Items are arranged in columns and the user cannot drag them to an arbitrary location.
-        * DETAILED_LIST: The leftmost column is always left justified and contains the small icon and label. Subsequent columns contain subitems as specified by the application. Each column has a header, unless you also specify the NO_HEADER flag.
-        * TILE_LIST: Each item appears as a full-sized icon with a label of one or more lines beside it.
         * TAB_STOP: The control can be selected using tab navigation
+        * NO_HEADER: Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
     */
     pub struct ListViewFlags: u32 {
         const VISIBLE = WS_VISIBLE;
@@ -39,6 +30,21 @@ bitflags! {
 
         // Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
         const NO_HEADER = LVS_NOCOLUMNHEADER;
+    }
+}
+
+bitflags! {
+    /**
+        The list view extended flags (to use with ListViewBuilder::ex_flags):
+
+        * NONE:          Do not use any extended styles
+        * GRID:          The list view has a grid. Only if the list view is in report mode.
+        * BORDER_SELECT: Only highlight the border instead of the full item
+    */
+    pub struct ListViewExFlags: u32 {
+        const NONE = 0;
+        const GRID = LVS_EX_GRIDLINES;
+        const BORDER_SELECT = LVS_EX_BORDERSELECT;
     }
 }
 
@@ -121,6 +127,9 @@ pub struct InsertListViewItem {
     /// If None and `insert_item` is used, the item is added at the end of the list
     pub index: Option<i32>,
 
+    /// Index of the column
+    pub column_index: i32,
+
     /// Text of the item to insert
     pub text: String
 }
@@ -160,6 +169,7 @@ impl ListView {
             position: (0, 0),
             focus: false,
             flags: None,
+            ex_flags: None,
             style: ListViewStyle::Simple,
             parent: None,
             item_count: 0
@@ -201,25 +211,59 @@ impl ListView {
         );
     }
 
-    /// Insert a new item into the list view
+    /// Delete a column in a list view. Removing the column at index 0 is only available if ComCtl32.dll is version 6 or later.
+    pub fn delete_column(&self, column_index: usize) {
+        use winapi::um::commctrl::LVM_DELETECOLUMN;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, LVM_DELETECOLUMN , column_index as _, 0);
+    }
+
+    /// Insert a new item into the list view at the first column
     pub fn insert_item<I: Into<InsertListViewItem>>(&self, insert: I) {
-        use winapi::um::commctrl::LVM_INSERTITEMW;
+        use winapi::um::commctrl::{LVM_INSERTITEMW, LVM_SETITEMW};
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let insert = insert.into();
 
+        let row_insert = insert.index.unwrap_or(i32::max_value());
+        let column_insert = insert.column_index;
+        if column_insert > 0 && !self.has_item(row_insert as _) {
+            self.insert_item(InsertListViewItem { index: Some(row_insert), column_index: 0, text: "".to_string() });
+        }
+
         let mask = LVIF_TEXT;
         let mut text = to_utf16(&insert.text);
 
         let mut item: LVITEMW = unsafe { mem::zeroed() };
         item.mask = mask;
-        item.iItem = insert.index.unwrap_or(i32::max_value());
+        item.iItem = row_insert;
+        item.iSubItem = column_insert;
         item.pszText = text.as_mut_ptr();
         item.cchTextMax = insert.text.len() as i32;
 
-        wh::send_message(handle, LVM_INSERTITEMW , 0, &item as *const LVITEMW as _);
+        if column_insert == 0 {
+            wh::send_message(handle, LVM_INSERTITEMW , 0, &mut item as *mut LVITEMW as _);
+        } else {
+            wh::send_message(handle, LVM_SETITEMW , 0, &mut item as *mut LVITEMW as _);
+        }
+    }
+
+    /// Returns `true` if an item exists at the selected index or `false` otherwise.
+    pub fn has_item(&self, index: usize) -> bool {
+        use winapi::um::commctrl::LVM_GETITEMW;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let mut item: LVITEMW = unsafe { mem::zeroed() };
+        item.iItem = index as _;
+
+        wh::send_message(handle, LVM_GETITEMW , 0, &mut item as *mut LVITEMW as _) == 1
     }
 
     /// Insert multiple items into the control. Basically a loop over `insert_item`.
@@ -413,6 +457,7 @@ pub struct ListViewBuilder {
     position: (i32, i32),
     focus: bool,
     flags: Option<ListViewFlags>,
+    ex_flags: Option<ListViewExFlags>,
     style: ListViewStyle,
     item_count: u32,
     parent: Option<ControlHandle>
@@ -427,6 +472,11 @@ impl ListViewBuilder {
 
     pub fn flags(mut self, flags: ListViewFlags) -> ListViewBuilder {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: ListViewExFlags) -> ListViewBuilder {
+        self.ex_flags = Some(flags);
         self
     }
 
@@ -482,6 +532,13 @@ impl ListViewBuilder {
             out.set_focus();
         }
 
+        if let Some(flags) = self.ex_flags {
+            use winapi::um::commctrl::LVM_SETEXTENDEDLISTVIEWSTYLE;
+
+            let flags = flags.bits();
+            wh::send_message(out.handle.hwnd().unwrap(), LVM_SETEXTENDEDLISTVIEWSTYLE, flags as _, flags as _);
+        }
+
         Ok(())
     }
 
@@ -491,6 +548,7 @@ impl<'a> From<&'a str> for InsertListViewItem {
     fn from(i: &'a str) -> Self {
         InsertListViewItem {
             index: None,
+            column_index: 0,
             text: i.to_string()
         }
     }
@@ -500,6 +558,7 @@ impl From<String> for InsertListViewItem {
     fn from(i: String) -> Self {
         InsertListViewItem {
             index: None,
+            column_index: 0,
             text: i
         }
     }
