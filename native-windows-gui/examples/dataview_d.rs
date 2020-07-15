@@ -15,16 +15,18 @@ use nwg::NativeUi;
 #[derive(Default, NwgUi)]
 pub struct DataViewApp {
     #[nwg_control(size: (500, 350), position: (300, 300), title: "DataView - Animals list")]
-    #[nwg_events( OnWindowClose: [DataViewApp::exit], OnInit: [DataViewApp::load_data] )]
+    #[nwg_events( OnWindowClose: [DataViewApp::exit], OnInit: [DataViewApp::load_data], MousePressLeftDown: [DataViewApp::test] )]
     window: nwg::Window,
-
+    
     #[nwg_resource(family: "Arial", size: 19)]
     arial: nwg::Font,
 
     #[nwg_layout(parent: window)]
     layout: nwg::GridLayout,
 
-    #[nwg_control(item_count: 10, ex_flags: nwg::ListViewExFlags::GRID, list_style: nwg::ListViewStyle::Detailed, size: (500, 350))]
+    #[nwg_control(item_count: 10, size: (500, 350), list_style: nwg::ListViewStyle::Detailed,
+        ex_flags: nwg::ListViewExFlags::GRID | nwg::ListViewExFlags::FULL_ROW_SELECT, 
+    )]
     #[nwg_layout_item(layout: layout, col: 0, col_span: 4, row: 0, row_span: 6)]
     data_view: nwg::ListView,
 
@@ -54,22 +56,28 @@ impl DataViewApp {
             text: "Felis".into()
         });
 
+        // To insert a new row, use the index 0.
         dv.insert_item(nwg::InsertListViewItem {
-            index: Some(1),
+            index: Some(0),
             column_index: 0,
             text: "Moose".into(),
         });
 
         dv.insert_item(nwg::InsertListViewItem {
-            index: Some(1),
+            index: Some(0),
             column_index: 1,
             text: "Alces".into(),
         });
 
-        //dv.insert_items_row(&["Dog" ,"Canis"]);
+        // Insert multiple item on a single row. 
+        dv.insert_items_row(None, &["Dog", "Canis"]);
 
+        // Insert many item at one
         dv.insert_items(&["Duck", "Horse", "Boomalope"]);
-        //dv.insert_items_at_column(1, &["Anas", "Equus", "???"]);
+        dv.insert_items(&[
+            nwg::InsertListViewItem { index: Some(3), column_index: 1, text: "Anas".into() },
+            nwg::InsertListViewItem { index: Some(4), column_index: 1, text: "Equus".into() },
+        ]);
     }
 
     fn update_view(&self) {
@@ -84,6 +92,12 @@ impl DataViewApp {
         };
 
         view.set_list_style(style);
+    }
+
+    fn test(&self) {
+        let dv = &self.data_view;
+
+        dv.set_text_color(100, 100, 200);
     }
 
     fn exit(&self) {

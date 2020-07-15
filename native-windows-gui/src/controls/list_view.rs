@@ -2,10 +2,11 @@ use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
     LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT, LVS_EX_GRIDLINES, LVS_EX_BORDERSELECT,
+    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
-use crate::win32::base_helper::to_utf16;
+use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::{NwgError, RawEventHandler, unbind_raw_event_handler};
 use std::{mem, cell::RefCell};
 
@@ -22,11 +23,14 @@ bitflags! {
         * DISABLED: The list view cannot be interacted with by the user. It also has a grayed out look. The user can drag the items to any location in the list-view window.
         * TAB_STOP: The control can be selected using tab navigation
         * NO_HEADER: Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
+        * SINGLE_SELECTION: Only one item can be selected
     */
     pub struct ListViewFlags: u32 {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const TAB_STOP = WS_TABSTOP;
+
+        const SINGLE_SELECTION = LVS_SINGLESEL;
 
         // Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
         const NO_HEADER = LVS_NOCOLUMNHEADER;
@@ -37,14 +41,18 @@ bitflags! {
     /**
         The list view extended flags (to use with ListViewBuilder::ex_flags):
 
-        * NONE:          Do not use any extended styles
-        * GRID:          The list view has a grid. Only if the list view is in report mode.
-        * BORDER_SELECT: Only highlight the border instead of the full item
+        * NONE:  Do not use any extended styles
+        * GRID:  The list view has a grid. Only if the list view is in report mode.
+        * BORDER_SELECT: Only highlight the border instead of the full item. COMMCTRL version 4.71 or later
+        * AUTO_COLUMN_SIZE: Automatically resize to column
+        * FULL_ROW_SELECT: When an item is selected, the item and all its subitems are highlighted. Only in detailed view 
     */
     pub struct ListViewExFlags: u32 {
         const NONE = 0;
         const GRID = LVS_EX_GRIDLINES;
         const BORDER_SELECT = LVS_EX_BORDERSELECT;
+        const AUTO_COLUMN_SIZE = LVS_EX_AUTOSIZECOLUMNS;
+        const FULL_ROW_SELECT = LVS_EX_FULLROWSELECT;
     }
 }
 
@@ -104,6 +112,7 @@ impl ListViewStyle {
     }
 }
 
+#[derive(Default, Clone, Debug)]
 /// Represents a column in a detailed list view
 pub struct InsertListViewColumn {
     /// Index of the column
@@ -119,9 +128,17 @@ pub struct InsertListViewColumn {
     pub text: String
 }
 
+/// The data of a list view column
+#[derive(Default, Clone, Debug)]
+pub struct ListViewColumn {
+    pub fmt: i32,
+    pub width: i32,
+    pub text: String,
+}
+
 
 /// Represents a list view item parameters
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct InsertListViewItem {
     /// Index of the item to be inserted
     /// If None and `insert_item` is used, the item is added at the end of the list
@@ -176,7 +193,70 @@ impl ListView {
         }
     }
 
-    /// Insert a column in the report. Column are only used with the Detailed list view style.
+    /// Sets the text color of the list view
+    pub fn set_text_color(&self, r: u8, g: u8, b: u8) {
+        use winapi::um::commctrl::LVM_SETTEXTCOLOR;
+        use winapi::um::wingdi::RGB;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let color = RGB(r, g, b);
+
+        wh::send_message(handle, LVM_SETTEXTCOLOR, 0, color as _);
+
+        self.invalidate();
+    }
+
+    /// Returns the current text color
+    pub fn text_color(&self) -> [u8; 3] {
+        use winapi::um::commctrl::LVM_GETTEXTCOLOR;
+        use winapi::um::wingdi::{GetRValue, GetGValue, GetBValue};
+        
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let col = wh::send_message(handle, LVM_GETTEXTCOLOR, 0, 0) as u32;
+
+        [
+            GetRValue(col),
+            GetGValue(col),
+            GetBValue(col),
+        ]
+    }
+
+    /// Returns the index of the selected column. Only available if Comclt32.dll version is >= 6.0.
+    pub fn selected_column(&self) -> usize {
+        use winapi::um::commctrl::LVM_GETSELECTEDCOLUMN;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, LVM_GETSELECTEDCOLUMN, 0, 0) as usize
+    }
+
+    /// Sets the selected column. Only available if Comclt32.dll version is >= 6.0.
+    pub fn set_selected_column(&self, index: usize) {
+        use winapi::um::commctrl::LVM_SETSELECTEDCOLUMN;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, LVM_SETSELECTEDCOLUMN, index as _, 0);
+    }
+
+    /// Returns the number of selected items
+    pub fn selected_count(&self) -> usize {
+        use winapi::um::commctrl::LVM_GETSELECTEDCOUNT;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, LVM_GETSELECTEDCOUNT, 0, 0) as usize
+    }
+
+    /// Inserts a column in the report. Column are only used with the Detailed list view style.
     pub fn insert_column<I: Into<InsertListViewColumn>>(&self, insert: I) {
         use winapi::um::commctrl::LVM_INSERTCOLUMNW;
 
@@ -190,13 +270,14 @@ impl ListView {
 
         let insert = insert.into();
 
-        let mut mask = LVCF_TEXT;
+        let mut mask = LVCF_TEXT | LVCF_WIDTH;
         let mut text = to_utf16(&insert.text);
 
-        if insert.width.is_some() { mask |= LVCF_WIDTH; }
+        if insert.fmt.is_some() { mask |= LVCF_FMT; }
 
         let mut item: LVCOLUMNW = unsafe { mem::zeroed() };
         item.mask = mask;
+        item.fmt = insert.fmt.unwrap_or(0);
         item.cx = insert.width.unwrap_or(100);
         item.pszText = text.as_mut_ptr();
         item.cchTextMax = insert.text.len() as i32;
@@ -211,7 +292,72 @@ impl ListView {
         );
     }
 
-    /// Delete a column in a list view. Removing the column at index 0 is only available if ComCtl32.dll is version 6 or later.
+    /// Checks if there is a column at the selected index
+    pub fn has_column(&self, index: usize) -> bool {
+        use winapi::um::commctrl::LVM_GETCOLUMNW;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let mut col: LVCOLUMNW = unsafe { mem::zeroed() };
+
+        wh::send_message(handle, LVM_GETCOLUMNW, index as _, &mut col as *mut LVCOLUMNW as _) != 0
+    }
+
+    /// Returns the information of a column.
+    /// Because there's no way to fetch the actual text length, it's up to you to set the maximum buffer size
+    pub fn column(&self, index: usize, text_buffer_size: i32) -> Option<ListViewColumn> {
+        use winapi::um::commctrl::LVM_GETCOLUMNW;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        let mut text_buffer: Vec<u16> = Vec::with_capacity(text_buffer_size as _);
+        unsafe { text_buffer.set_len(text_buffer_size as _); }
+
+        let mut col: LVCOLUMNW = unsafe { mem::zeroed() };
+        col.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
+        col.pszText = text_buffer.as_mut_ptr();
+        col.cchTextMax = text_buffer_size;
+
+        match wh::send_message(handle, LVM_GETCOLUMNW, index as _, &mut col as *mut LVCOLUMNW as _) == 0 {
+            true => None,
+            false => Some(ListViewColumn {
+                fmt: col.fmt,
+                width: col.cx,
+                text: from_utf16(&text_buffer),
+            })
+        }
+    }
+
+    /// Sets the information of a column. Does nothing if there is no column at the selected index
+    pub fn set_column<I: Into<InsertListViewColumn>>(&self, index: usize, column: I) {
+        use winapi::um::commctrl::LVM_SETCOLUMNW;
+
+        if !self.has_column(index) {
+            return;
+        }
+
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let insert = column.into();
+
+        let mut mask = LVCF_TEXT;
+        let mut text = to_utf16(&insert.text);
+
+        if insert.width.is_some() { mask |= LVCF_WIDTH; }
+        if insert.fmt.is_some() { mask |= LVCF_FMT; }
+
+        let mut item: LVCOLUMNW = unsafe { mem::zeroed() };
+        item.mask = mask;
+        item.fmt = insert.fmt.unwrap_or(0);
+        item.cx = insert.width.unwrap_or(0);
+        item.pszText = text.as_mut_ptr();
+        item.cchTextMax = insert.text.len() as i32;
+
+        wh::send_message(handle, LVM_SETCOLUMNW, index as _, &mut item as *mut LVCOLUMNW as _);
+    }
+
+    /// Deletes a column in a list view. Removing the column at index 0 is only available if ComCtl32.dll is version 6 or later.
     pub fn delete_column(&self, column_index: usize) {
         use winapi::um::commctrl::LVM_DELETECOLUMN;
 
@@ -221,7 +367,7 @@ impl ListView {
         wh::send_message(handle, LVM_DELETECOLUMN , column_index as _, 0);
     }
 
-    /// Insert a new item into the list view at the first column
+    /// Inserts a new item into the list view
     pub fn insert_item<I: Into<InsertListViewItem>>(&self, insert: I) {
         use winapi::um::commctrl::{LVM_INSERTITEMW, LVM_SETITEMW};
 
@@ -232,7 +378,7 @@ impl ListView {
 
         let row_insert = insert.index.unwrap_or(i32::max_value());
         let column_insert = insert.column_index;
-        if column_insert > 0 && !self.has_item(row_insert as _) {
+        if column_insert > 0 && !self.has_item(row_insert as _, 0) {
             self.insert_item(InsertListViewItem { index: Some(row_insert), column_index: 0, text: "".to_string() });
         }
 
@@ -253,27 +399,56 @@ impl ListView {
         }
     }
 
+    /// Checks if the item at the selected row is visible
+    pub fn item_is_visible(&self, index: usize) -> bool {
+        use winapi::um::commctrl::LVM_ISITEMVISIBLE;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, LVM_ISITEMVISIBLE , index as _, 0) == 1
+    }
+
     /// Returns `true` if an item exists at the selected index or `false` otherwise.
-    pub fn has_item(&self, index: usize) -> bool {
+    pub fn has_item(&self, row_index: usize, column_index: usize) -> bool {
         use winapi::um::commctrl::LVM_GETITEMW;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let mut item: LVITEMW = unsafe { mem::zeroed() };
-        item.iItem = index as _;
+        item.iItem = row_index as _;
+        item.iSubItem = column_index as _;
 
         wh::send_message(handle, LVM_GETITEMW , 0, &mut item as *mut LVITEMW as _) == 1
     }
 
-    /// Insert multiple items into the control. Basically a loop over `insert_item`.
-    pub fn insert_items<I: Copy+Into<InsertListViewItem>>(&self, insert: &[I]) {
-        for &i in insert {
-            self.insert_item(i);
+    /// Inserts multiple items into the control. Basically a loop over `insert_item`.
+    pub fn insert_items<I: Clone+Into<InsertListViewItem>>(&self, insert: &[I]) {
+        for i in insert.iter() {
+            self.insert_item(i.clone());
         }
     }
 
-    /// Return the current style of the list view
+    /// Insert multiple item at the selected row or at the end of the list if `None` was used.
+    /// This method overrides the `index` and the `column_index` of the items.
+    /// Useful when inserting strings into a single row. Ex: `list.insert_items_row(None, &["Hello", "World"]);`
+    pub fn insert_items_row<I: Clone+Into<InsertListViewItem>>(&self, row_index: Option<i32>, insert: &[I]) {
+        let mut column_index = 0;
+        let row_index = row_index.or(Some(self.column_len() as _));
+        
+        for i in insert.iter() {
+            let mut item: InsertListViewItem = i.clone().into();
+            item.index = row_index;
+            item.column_index = column_index;
+
+            self.insert_item(item);
+
+            column_index += 1;
+        }
+    }
+
+    /// Returns the current style of the list view
     pub fn list_style(&self) -> ListViewStyle {
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -339,6 +514,20 @@ impl ListView {
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         wh::send_message(handle, WM_SETREDRAW, enabled as _, 0);
+    }
+
+
+    // Common methods
+
+    /// Invalidate the whole drawing region.
+    pub fn invalidate(&self) {
+        use winapi::um::winuser::InvalidateRect;
+        use std::ptr;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        unsafe { InvalidateRect(handle, ptr::null(), 1); }
     }
 
     /// Removes all item from the listview
@@ -533,8 +722,6 @@ impl ListViewBuilder {
         }
 
         if let Some(flags) = self.ex_flags {
-            use winapi::um::commctrl::LVM_SETEXTENDEDLISTVIEWSTYLE;
-
             let flags = flags.bits();
             wh::send_message(out.handle.hwnd().unwrap(), LVM_SETEXTENDEDLISTVIEWSTYLE, flags as _, flags as _);
         }
