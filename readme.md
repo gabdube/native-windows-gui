@@ -159,6 +159,7 @@ This is the list of remaining task to complete for the 1.0 release. Created `202
 
 * ☐ Make a video tutorial on how to build a small CRUD app (probably after 1.0 release)
 * ☐ Finish up the `ListView` controls
+* 🗹 Add Marquee for progress bar
 * 🗹 Add support for FlexBoxLayout in native window derive
 * 🗹 Add "sub-events" to catch partial events from their parent
 * 🗹 Implement events in the derive partials
@@ -174,10 +175,6 @@ This is the list of remaining task to complete for the 1.0 release. Created `202
 ## License
 
 NWG use the MIT license
-
-## Contributors
-
-* yakov-bakhmatov (https://github.com/yakov-bakhmatov)
 
 ## Code example
 

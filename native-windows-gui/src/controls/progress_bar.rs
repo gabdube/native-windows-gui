@@ -4,7 +4,7 @@ that indicates what the button does when the user selects it.
 */
 
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
-use winapi::um::commctrl::{PBS_VERTICAL};
+use winapi::um::commctrl::{PBS_MARQUEE, PBS_VERTICAL};
 use crate::win32::window_helper as wh;
 use crate::NwgError;
 use super::{ControlHandle, ControlBase};
@@ -19,6 +19,7 @@ bitflags! {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const VERTICAL = PBS_VERTICAL;
+        const MARQUEE = PBS_MARQUEE;
     }
 }
 
@@ -36,15 +37,17 @@ A progress bar is a window that an application can use to indicate the progress 
 Requires the `progress-bar` feature. 
 
 **Builder parameters:**
-  * `parent`:   **Required.** The progress bar parent container.
-  * `size`:     The progress bar size.
-  * `position`: The progress bar position.
-  * `state`:    The initial state of the progress bar.
-  * `step`:     The value in which the progress bar value increase when `advance` is used.
-  * `pos`:      The initial value of the progress bar.
-  * `range`:    The minimum and maximum value in the progress bar.
-  * `enabled`:  If the progress bar is enabled. 
-  * `flags`:    A combination of the ProgressBarFlags values.
+  * `parent`:         **Required.** The progress bar parent container.
+  * `size`:           The progress bar size.
+  * `position`:       The progress bar position.
+  * `state`:          The initial state of the progress bar.
+  * `step`:           The value in which the progress bar value increase when `advance` is used.
+  * `pos`:            The initial value of the progress bar.
+  * `range`:          The minimum and maximum value in the progress bar.
+  * `enabled`:        If the progress bar is enabled. 
+  * `flags`:          A combination of the ProgressBarFlags values.
+  * `marquee`:        Enable of disable the marquee animation (only used with the MARQUEE flags)
+  * `marquee_update`: The update interval of the marquee mode
 
 **Control events:**
   * `MousePress(_)`: Generic mouse press events on the progress bar
@@ -80,6 +83,8 @@ impl ProgressBar {
             step: 1,
             pos: 0,
             range: 0..100,
+            marquee_enable: false,
+            marquee_update: 0,
             parent: None
         }
     }
@@ -204,6 +209,17 @@ impl ProgressBar {
         wh::send_message(handle, PBM_SETRANGE32, range.start as WPARAM, range.end as LPARAM);
     }
 
+    /// Set the progress bar marquee mode
+    pub fn set_marquee(&self, enable: bool, update_interval: u32) {
+        use winapi::shared::minwindef::{LPARAM, WPARAM};
+        use winapi::um::commctrl::PBM_SETMARQUEE;
+
+        if self.handle.blank() { panic!(NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+
+        wh::send_message(handle, PBM_SETMARQUEE, enable as WPARAM, update_interval as LPARAM);
+    }
+
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
         if self.handle.blank() { panic!(NOT_BOUND); }
@@ -308,6 +324,8 @@ pub struct ProgressBarBuilder {
     step: u32,
     pos: u32,
     range: Range<u32>,
+    marquee_enable: bool,
+    marquee_update: u32,
     parent: Option<ControlHandle>
 }
 
@@ -348,6 +366,16 @@ impl ProgressBarBuilder {
         self
     }
 
+    pub fn marquee(mut self, enable: bool) -> ProgressBarBuilder {
+        self.marquee_enable = enable;
+        self
+    }
+
+    pub fn marquee_update(mut self, update_interval: u32) -> ProgressBarBuilder {
+        self.marquee_update = update_interval;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> ProgressBarBuilder {
         self.parent = Some(p.into());
         self
@@ -374,6 +402,7 @@ impl ProgressBarBuilder {
         out.set_step(self.step);
         out.set_pos(self.pos);
         out.set_range(self.range);
+        out.set_marquee(self.marquee_enable, self.marquee_update);
 
         Ok(())
     }

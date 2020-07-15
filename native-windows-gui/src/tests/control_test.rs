@@ -424,11 +424,13 @@ mod partial_controls_test_ui {
                 .build(&mut data.test_progress1)?;
 
             ProgressBar::builder()
-                .flags(ProgressBarFlags::VISIBLE | ProgressBarFlags::VERTICAL)
+                .flags(ProgressBarFlags::VISIBLE | ProgressBarFlags::VERTICAL | ProgressBarFlags::MARQUEE)
                 .position((340, 220))
                 .size((30, 110))
                 .range(0..100)
                 .pos(50)
+                .marquee(false)
+                .marquee_update(0)
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_progress2)?;
 

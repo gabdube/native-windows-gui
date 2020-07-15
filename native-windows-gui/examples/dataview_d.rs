@@ -97,7 +97,7 @@ impl DataViewApp {
     fn test(&self) {
         let dv = &self.data_view;
 
-        dv.set_text_color(100, 100, 200);
+        dv.set_text_color(120, 120, 120);
     }
 
     fn exit(&self) {
