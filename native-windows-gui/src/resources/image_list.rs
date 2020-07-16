@@ -196,6 +196,12 @@ impl Default for ImageList {
 
 }
 
+impl PartialEq for ImageList {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}
+
 pub struct ImageListBuilder {
     size: (i32, i32),
     initial: i32,

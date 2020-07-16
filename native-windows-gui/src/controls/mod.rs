@@ -143,6 +143,9 @@ pub use message_window::{MessageWindow, MessageWindowBuilder};
 #[cfg(feature = "list-view")]
 pub use list_view::{ListView, ListViewStyle, ListViewBuilder, ListViewFlags, ListViewExFlags, InsertListViewItem, InsertListViewColumn};
 
+#[cfg(all(feature="list-view", feature="image-list"))]
+pub use list_view::ListViewImageListType;
+
 #[cfg(feature = "number-select")]
 pub use number_select::{NumberSelect, NumberSelectBuilder, NumberSelectFlags};
 

@@ -22,7 +22,7 @@ pub struct PartialDemo {
     layout: nwg::FlexboxLayout,
 
     #[nwg_control(collection: vec!["People", "Animals", "Food"])]
-    #[nwg_layout_item(layout: layout, cell: 0)]
+    #[nwg_layout_item(layout: layout)]
     #[nwg_events( OnListBoxSelect: [PartialDemo::change_interface] )]
     menu: nwg::ListBox<&'static str>,
 
