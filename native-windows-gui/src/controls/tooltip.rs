@@ -1,7 +1,7 @@
 use winapi::shared::minwindef::{UINT, LPARAM, WPARAM};
 use winapi::um::winnt::WCHAR;
 use crate::win32::window_helper as wh;
-use crate::win32::base_helper::{to_utf16, from_utf16};
+use crate::win32::base_helper::{check_hwnd, to_utf16, from_utf16};
 use crate::{Icon, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
@@ -101,8 +101,7 @@ impl Tooltip {
         use winapi::um::commctrl::{TTM_GETTEXTW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS};
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let owner_handle = {
             if owner.blank() { panic!(NOT_BOUND); }
@@ -137,8 +136,7 @@ impl Tooltip {
         use winapi::um::commctrl::{TTM_UPDATETIPTEXTW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS};
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut text = to_utf16(text);
         let owner_handle = {
@@ -166,11 +164,8 @@ impl Tooltip {
     pub fn set_decoration<'a>(&self, title: &'a str, ico: &Icon) {
         use winapi::um::commctrl::{TTM_SETTITLEW};
         
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let title = to_utf16(title);
-
         wh::send_message(handle, TTM_SETTITLEW, ico.handle as WPARAM, title.as_ptr() as LPARAM);
     }
 
@@ -179,8 +174,7 @@ impl Tooltip {
         use winapi::um::commctrl::{TTM_SETTITLEW};
         use winapi::um::commctrl::{TTI_NONE, TTI_INFO, TTI_WARNING, TTI_ERROR, TTI_INFO_LARGE, TTI_WARNING_LARGE, TTI_ERROR_LARGE};
         
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let bitmap_handle = match icon {
             TooltipIcon::None => TTI_NONE,
@@ -201,9 +195,7 @@ impl Tooltip {
     pub fn hide(&self) {
         use winapi::um::commctrl::{TTM_POP};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TTM_POP, 0, 0);
     }
 
@@ -211,9 +203,7 @@ impl Tooltip {
     pub fn count(&self) -> usize {
         use winapi::um::commctrl::{TTM_GETTOOLCOUNT};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TTM_GETTOOLCOUNT, 0, 0) as usize
     }
 
@@ -222,9 +212,7 @@ impl Tooltip {
     pub fn set_delay_time(&self, delay: Option<u16>) {
         use winapi::um::commctrl::{TTDT_INITIAL, TTM_SETDELAYTIME};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let value = match delay {
             Some(d) => d & 0xFFFF,
             None => u16::max_value() & 0xFFFF,
@@ -237,10 +225,8 @@ impl Tooltip {
     pub fn delay_time(&self) -> u16 {
         use winapi::um::commctrl::{TTDT_INITIAL, TTM_GETDELAYTIME};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-       wh::send_message(handle, TTM_GETDELAYTIME, TTDT_INITIAL as WPARAM, 0) as u16
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, TTM_GETDELAYTIME, TTDT_INITIAL as WPARAM, 0) as u16
     }
 
     /// Enable or disable the control
@@ -248,10 +234,8 @@ impl Tooltip {
     pub fn set_enabled(&self, v: bool) {
         use winapi::um::commctrl::TTM_ACTIVATE;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-       wh::send_message(handle, TTM_ACTIVATE, v as WPARAM, 0);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, TTM_ACTIVATE, v as WPARAM, 0);
     }
 
     /// Register the tooltip under a control.
@@ -260,8 +244,7 @@ impl Tooltip {
         use winapi::um::commctrl::{TTM_ADDTOOLW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS};
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let owner = owner.into();
 
@@ -294,8 +277,7 @@ impl Tooltip {
         use winapi::um::commctrl::{TTM_ADDTOOLW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS, LPSTR_TEXTCALLBACKW};
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let owner = owner.into();
         let owner_handle = {
@@ -324,9 +306,7 @@ impl Tooltip {
         use winapi::um::commctrl::{TTM_DELTOOLW, TTTOOLINFOW, TTF_IDISHWND, TTF_SUBCLASS};
         use winapi::shared::{basetsd::UINT_PTR, windef::RECT};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let owner = owner.into();
 
         let owner_handle = {

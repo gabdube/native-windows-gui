@@ -1,6 +1,6 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use crate::win32::window_helper as wh;
-use crate::win32::base_helper::to_utf16;
+use crate::win32::base_helper::{to_utf16, check_hwnd};
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
 
@@ -136,8 +136,7 @@ impl DatePicker {
         use winapi::um::commctrl::DTM_SETFORMATW;
         use winapi::shared::minwindef::LPARAM;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let (_format, format_ptr) = if format.is_some() {
             let f = to_utf16(format.unwrap());
@@ -159,8 +158,7 @@ impl DatePicker {
     pub fn checked(&self) -> bool {
         use winapi::um::winuser::STATE_SYSTEM_CHECKED;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let info = unsafe{ get_dtp_info(handle) };
 
@@ -173,10 +171,7 @@ impl DatePicker {
     /// Close the calendar popup if it is open. Note that there is no way to force the calendar to drop down
     pub fn close_calendar(&self) {
         use winapi::um::commctrl::DTM_CLOSEMONTHCAL;
-
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, DTM_CLOSEMONTHCAL, 0, 0);
     }
 
@@ -190,8 +185,7 @@ impl DatePicker {
         use winapi::um::minwinbase::SYSTEMTIME;
         use std::mem;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut syst: SYSTEMTIME = unsafe{ mem::zeroed() };
 
@@ -215,8 +209,7 @@ impl DatePicker {
         use winapi::shared::minwindef::{WPARAM, LPARAM};
         use winapi::um::minwinbase::SYSTEMTIME;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         match date {
             Some(date) => {
@@ -242,8 +235,7 @@ impl DatePicker {
         use winapi::shared::minwindef::{LPARAM};
         use std::mem;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut tr: [SYSTEMTIME; 2] = unsafe { mem::zeroed() };
 
@@ -263,8 +255,7 @@ impl DatePicker {
         use winapi::um::minwinbase::SYSTEMTIME;
         use winapi::shared::minwindef::{LPARAM};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let values = [
             SYSTEMTIME { wYear: r[0].year , wMonth: r[0].month, wDayOfWeek: 0, wDay: r[0].day, wHour: 0, wMinute: 0, wSecond: 0, wMilliseconds: 0 },
@@ -276,9 +267,7 @@ impl DatePicker {
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let font_handle = wh::get_window_font(handle);
         if font_handle.is_null() {
             None
@@ -289,79 +278,68 @@ impl DatePicker {
 
     /// Sets the font of the control
     pub fn set_font(&self, font: Option<&Font>) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
     }
 
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_focus(handle) }
     }
 
     /// Sets the keyboard focus on the button.
     pub fn set_focus(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_focus(handle); }
     }
 
     /// Return true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_enabled(handle) }
     }
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
     /// Return true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
     /// Return the size of the date picker in the parent window
     pub fn size(&self) -> (u32, u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Set the size of the date picker in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
     /// Return the position of the date picker in the parent window
     pub fn position(&self) -> (i32, i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
     /// Set the position of the date picker in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 

@@ -1,7 +1,7 @@
 use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::{LPARAM, WPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
-use crate::win32::base_helper::{to_utf16, from_utf16};
+use crate::win32::base_helper::{check_hwnd, to_utf16, from_utf16};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError};
 use super::{ControlHandle, ControlBase};
@@ -97,8 +97,7 @@ impl<D: Display+Default> ComboBox<D> {
     pub fn remove(&self, index: usize) -> D {
         use winapi::um::winuser::CB_DELETESTRING;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         wh::send_message(handle, CB_DELETESTRING, index as WPARAM, 0);
 
@@ -111,8 +110,7 @@ impl<D: Display+Default> ComboBox<D> {
     pub fn sort(&self) {
         use winapi::um::winuser::{CB_ADDSTRING};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         self.clear_inner(handle);
 
@@ -132,11 +130,9 @@ impl<D: Display+Default> ComboBox<D> {
 
     /// Show or hide the dropdown of the combox
     pub fn dropdown(&self, v: bool) {
-        use winapi::um::winuser::{CB_SHOWDROPDOWN};
-        
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        use winapi::um::winuser::CB_SHOWDROPDOWN;
+    
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, CB_SHOWDROPDOWN, v as usize, 0);
     }
 
@@ -144,8 +140,7 @@ impl<D: Display+Default> ComboBox<D> {
     pub fn selection(&self) -> Option<usize> {
         use winapi::um::winuser::{CB_GETCURSEL, CB_ERR};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let index = wh::send_message(handle, CB_GETCURSEL, 0, 0);
 
@@ -159,8 +154,7 @@ impl<D: Display+Default> ComboBox<D> {
         use winapi::um::winuser::{CB_GETCURSEL, CB_GETLBTEXTLEN, CB_GETLBTEXT, CB_ERR};
         use winapi::shared::ntdef::WCHAR;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let index = wh::send_message(handle, CB_GETCURSEL, 0, 0);
 
@@ -184,8 +178,7 @@ impl<D: Display+Default> ComboBox<D> {
     pub fn set_selection(&self, index: Option<usize>) {
         use winapi::um::winuser::CB_SETCURSEL;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let index = index.unwrap_or(-1isize as usize);
         wh::send_message(handle, CB_SETCURSEL, index, 0);
@@ -197,8 +190,7 @@ impl<D: Display+Default> ComboBox<D> {
     pub fn set_selection_string(&self, value: &str) -> Option<usize> {
         use winapi::um::winuser::{CB_SELECTSTRING, CB_ERR};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         
         let os_string = to_utf16(value);
 
@@ -214,8 +206,7 @@ impl<D: Display+Default> ComboBox<D> {
     pub fn push(&self, item: D) {
         use winapi::um::winuser::CB_ADDSTRING;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let display = format!("{}", item);
         let display_os = to_utf16(&display);
@@ -232,8 +223,7 @@ impl<D: Display+Default> ComboBox<D> {
     pub fn insert(&self, index: usize, item: D) {
         use winapi::um::winuser::CB_INSERTSTRING;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let display = format!("{}", item);
         let display_os = to_utf16(&display);
@@ -253,8 +243,7 @@ impl<D: Display+Default> ComboBox<D> {
     pub fn sync(&self) {
         use winapi::um::winuser::CB_ADDSTRING;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         self.clear_inner(handle);
 
@@ -270,8 +259,7 @@ impl<D: Display+Default> ComboBox<D> {
     pub fn set_collection(&self, mut col: Vec<D>) -> Vec<D> {
         use winapi::um::winuser::CB_ADDSTRING;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         self.clear_inner(handle);
 
@@ -290,13 +278,8 @@ impl<D: Display+Default> ComboBox<D> {
     /// Return the number of items in the control. NOT the inner rust collection
     pub fn len(&self) -> usize {
         use winapi::um::winuser::CB_GETCOUNT;
-
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let count = wh::send_message(handle, CB_GETCOUNT, 0, 0);
-
-        count as usize
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, CB_GETCOUNT, 0, 0) as usize
     }
 
     //
@@ -305,8 +288,7 @@ impl<D: Display+Default> ComboBox<D> {
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let font_handle = wh::get_window_font(handle);
         if font_handle.is_null() {
@@ -318,80 +300,69 @@ impl<D: Display+Default> ComboBox<D> {
 
     /// Set the font of the control
     pub fn set_font(&self, font: Option<&Font>) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
     }
 
     
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_focus(handle) }
     }
 
     /// Set the keyboard focus on the button.
     pub fn set_focus(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_focus(handle); }
     }
 
     /// Return true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_enabled(handle) }
     }
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
     /// Return true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
     /// Return the size of the button in the parent window
     pub fn size(&self) -> (u32, u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Set the size of the button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
     /// Return the position of the button in the parent window
     pub fn position(&self) -> (i32, i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
     /// Set the position of the button in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 

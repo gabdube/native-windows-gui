@@ -6,7 +6,7 @@ use winapi::um::commctrl::{
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
-use crate::win32::base_helper::{to_utf16, from_utf16};
+use crate::win32::base_helper::{to_utf16, from_utf16, check_hwnd};
 use crate::{NwgError, RawEventHandler, unbind_raw_event_handler};
 use std::{mem, cell::RefCell};
 
@@ -243,8 +243,7 @@ impl ListView {
         use winapi::um::commctrl::LVM_SETIMAGELIST;
         use std::ptr;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let list_handle = list.map(|l| l.handle).unwrap_or(ptr::null_mut());
         wh::send_message(handle, LVM_SETIMAGELIST, list_type.to_raw() as _, list_handle as _);
@@ -258,8 +257,7 @@ impl ListView {
     pub fn image_list(&self, list_type: ListViewImageListType) -> Option<ImageList> {
         use winapi::um::commctrl::LVM_GETIMAGELIST;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         match wh::send_message(handle, LVM_GETIMAGELIST, list_type.to_raw() as _, 0) {
             0 => None,
@@ -276,8 +274,7 @@ impl ListView {
         use winapi::um::commctrl::LVM_SETTEXTCOLOR;
         use winapi::um::wingdi::RGB;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let color = RGB(r, g, b);
 
@@ -290,11 +287,8 @@ impl ListView {
     pub fn text_color(&self) -> [u8; 3] {
         use winapi::um::commctrl::LVM_GETTEXTCOLOR;
         use winapi::um::wingdi::{GetRValue, GetGValue, GetBValue};
-        
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let col = wh::send_message(handle, LVM_GETTEXTCOLOR, 0, 0) as u32;
 
         [
@@ -308,9 +302,7 @@ impl ListView {
     pub fn selected_column(&self) -> usize {
         use winapi::um::commctrl::LVM_GETSELECTEDCOLUMN;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LVM_GETSELECTEDCOLUMN, 0, 0) as usize
     }
 
@@ -318,9 +310,7 @@ impl ListView {
     pub fn set_selected_column(&self, index: usize) {
         use winapi::um::commctrl::LVM_SETSELECTEDCOLUMN;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LVM_SETSELECTEDCOLUMN, index as _, 0);
     }
 
@@ -328,9 +318,7 @@ impl ListView {
     pub fn selected_count(&self) -> usize {
         use winapi::um::commctrl::LVM_GETSELECTEDCOUNT;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LVM_GETSELECTEDCOUNT, 0, 0) as usize
     }
 
@@ -338,8 +326,7 @@ impl ListView {
     pub fn insert_column<I: Into<InsertListViewColumn>>(&self, insert: I) {
         use winapi::um::commctrl::LVM_INSERTCOLUMNW;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         match self.list_style() {
             ListViewStyle::Detailed => {},
@@ -376,8 +363,7 @@ impl ListView {
     pub fn has_column(&self, index: usize) -> bool {
         use winapi::um::commctrl::LVM_GETCOLUMNW;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut col: LVCOLUMNW = unsafe { mem::zeroed() };
 
@@ -389,8 +375,7 @@ impl ListView {
     pub fn column(&self, index: usize, text_buffer_size: i32) -> Option<ListViewColumn> {
         use winapi::um::commctrl::LVM_GETCOLUMNW;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut text_buffer: Vec<u16> = Vec::with_capacity(text_buffer_size as _);
         unsafe { text_buffer.set_len(text_buffer_size as _); }
@@ -418,7 +403,7 @@ impl ListView {
             return;
         }
 
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let insert = column.into();
 
         let use_text = insert.text.is_some();
@@ -450,9 +435,7 @@ impl ListView {
     pub fn remove_column(&self, column_index: usize) {
         use winapi::um::commctrl::LVM_DELETECOLUMN;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LVM_DELETECOLUMN , column_index as _, 0);
     }
 
@@ -460,9 +443,7 @@ impl ListView {
     pub fn insert_item<I: Into<InsertListViewItem>>(&self, insert: I) {
         use winapi::um::commctrl::{LVM_INSERTITEMW, LVM_SETITEMW};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let insert = insert.into();
 
         let row_insert = insert.index.unwrap_or(i32::max_value());
@@ -502,9 +483,7 @@ impl ListView {
     pub fn item_is_visible(&self, index: usize) -> bool {
         use winapi::um::commctrl::LVM_ISITEMVISIBLE;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LVM_ISITEMVISIBLE , index as _, 0) == 1
     }
 
@@ -512,8 +491,7 @@ impl ListView {
     pub fn has_item(&self, row_index: usize, column_index: usize) -> bool {
         use winapi::um::commctrl::LVM_GETITEMW;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut item: LVITEMW = unsafe { mem::zeroed() };
         item.iItem = row_index as _;
@@ -531,7 +509,7 @@ impl ListView {
             return;
         }
 
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let insert = data.into();
 
         let mut mask = check_image_mask(&insert);
@@ -564,9 +542,7 @@ impl ListView {
     pub fn remove_item(&self, row_index: usize) -> bool {
         use winapi::um::commctrl::LVM_DELETEITEM;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LVM_DELETEITEM , row_index as _, 0) == 1
     }
 
@@ -597,18 +573,13 @@ impl ListView {
 
     /// Returns the current style of the list view
     pub fn list_style(&self) -> ListViewStyle {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let style = wh::get_style(handle);
-        
-        ListViewStyle::from_bits(style)
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        ListViewStyle::from_bits(wh::get_style(handle))
     }
 
     /// Sets the list view style of the control
     pub fn set_list_style(&self, style: ListViewStyle) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut old_style = wh::get_style(handle);
         old_style = old_style & !0b11;
@@ -619,10 +590,7 @@ impl ListView {
     /// Returns the number of items in the list view
     pub fn len(&self) -> usize {
         use winapi::um::commctrl::LVM_GETITEMCOUNT;
-
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LVM_GETITEMCOUNT , 0, 0) as usize
     }
 
@@ -630,8 +598,7 @@ impl ListView {
     pub fn column_len(&self) -> usize {
         use winapi::um::commctrl::LVM_GETCOLUMNWIDTH ;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut count = 0;
         while wh::send_message(handle, LVM_GETCOLUMNWIDTH, count, 0) != 0 {
@@ -646,9 +613,7 @@ impl ListView {
     pub fn set_item_count(&self, n: u32) {
         use winapi::um::commctrl::LVM_SETITEMCOUNT;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LVM_SETITEMCOUNT, n as _, 0);
     }
 
@@ -657,9 +622,7 @@ impl ListView {
     pub fn set_redraw(&self, enabled: bool) {
         use winapi::um::winuser::WM_SETREDRAW;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, WM_SETREDRAW, enabled as _, 0);
     }
 
@@ -671,9 +634,7 @@ impl ListView {
         use winapi::um::winuser::InvalidateRect;
         use std::ptr;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { InvalidateRect(handle, ptr::null(), 1); }
     }
 
@@ -681,80 +642,68 @@ impl ListView {
     pub fn clear(&self) {
         use winapi::um::commctrl::LVM_DELETEALLITEMS;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LVM_DELETEALLITEMS, 0, 0);
     }
 
     /// Returns true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_focus(handle) }
     }
 
     /// Sets the keyboard focus on the button
     pub fn set_focus(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_focus(handle); }
     }
 
     /// Returns true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_enabled(handle) }
     }
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
     /// Returns true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
     /// Returns the size of the button in the parent window
     pub fn size(&self) -> (u32, u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Sets the size of the button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, true) }
     }
 
     /// Returns the position of the button in the parent window
     pub fn position(&self) -> (i32, i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
     /// Sets the position of the button in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 

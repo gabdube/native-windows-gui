@@ -1,5 +1,6 @@
 use winapi::um::winuser::{WS_DISABLED, WS_VISIBLE, WS_TABSTOP, WS_CHILD, SBS_HORZ, SBS_VERT};
 use crate::win32::window_helper as wh;
+use crate::win32::base_helper::check_hwnd;
 use crate::{NwgError, RawEventHandler};
 use super::{ControlBase, ControlHandle};
 use std::{mem, cell::RefCell, ops::Range};
@@ -90,9 +91,7 @@ impl ScrollBar {
     pub fn pos(&self) -> usize {
         use winapi::um::winuser::SBM_GETPOS;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, SBM_GETPOS, 0, 0) as usize
     }
 
@@ -100,9 +99,7 @@ impl ScrollBar {
     pub fn set_pos(&self, p: usize) {
         use winapi::um::winuser::SBM_SETPOS;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, SBM_SETPOS, p, 1);
     }
 
@@ -110,8 +107,7 @@ impl ScrollBar {
     pub fn range(&self) -> Range<usize> {
         use winapi::um::winuser::SBM_GETRANGE;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut min: u32 = 0;
         let mut max: u32 = 0;
@@ -128,9 +124,7 @@ impl ScrollBar {
     pub fn set_range(&self, range: Range<usize>) {
         use winapi::um::winuser::SBM_SETRANGE;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, SBM_SETRANGE, 
             range.start as _, 
             range.end as _,
@@ -139,72 +133,62 @@ impl ScrollBar {
 
     /// Returns true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_focus(handle) }
     }
 
     /// Sets the keyboard focus on the button.
     pub fn set_focus(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_focus(handle); }
     }
 
     /// Returns true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_enabled(handle) }
     }
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
     /// Returns true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
     /// Returns the size of the button in the parent window
     pub fn size(&self) -> (u32, u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Sets the size of the button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
     /// Returns the position of the button in the parent window
     pub fn position(&self) -> (i32, i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
     /// Sets the position of the button in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 

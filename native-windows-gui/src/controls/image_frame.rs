@@ -1,6 +1,9 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
-use crate::win32::window_helper as wh;
-use crate::win32::resources_helper as rh;
+use crate::win32::{
+    base_helper::check_hwnd,  
+    window_helper as wh,
+    resources_helper as rh
+};
 use super::{ControlBase, ControlHandle};
 use crate::{Bitmap, Icon, NwgError, RawEventHandler, unbind_raw_event_handler};
 use std::cell::RefCell;
@@ -72,8 +75,7 @@ impl ImageFrame {
         use winapi::um::winuser::{STM_SETIMAGE, IMAGE_BITMAP};
         use winapi::shared::minwindef::{WPARAM, LPARAM};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
         wh::send_message(handle, STM_SETIMAGE, IMAGE_BITMAP as WPARAM, image_handle);
@@ -85,8 +87,7 @@ impl ImageFrame {
         use winapi::um::winuser::{STM_SETIMAGE, IMAGE_ICON};
         use winapi::shared::minwindef::{WPARAM, LPARAM};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
         wh::send_message(handle, STM_SETIMAGE, IMAGE_ICON as WPARAM, image_handle);
@@ -101,9 +102,7 @@ impl ImageFrame {
         use winapi::shared::windef::HBITMAP;
         use winapi::um::winnt::HANDLE;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let bitmap_handle = wh::send_message(handle, STM_GETIMAGE, IMAGE_BITMAP as WPARAM, 0);
         let icon_handle = wh::send_message(handle, STM_GETIMAGE, IMAGE_ICON as WPARAM, 0);
 
@@ -119,58 +118,50 @@ impl ImageFrame {
 
     /// Return true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_enabled(handle) }
     }
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
     /// Return true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
     /// Return the size of the image frame in the parent window
     pub fn size(&self) -> (u32, u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Set the size of the image frame in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
     /// Return the position of the image frame in the parent window
     pub fn position(&self) -> (i32, i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
     /// Set the position of the image frame in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 

@@ -2,7 +2,7 @@ use winapi::shared::minwindef::{WPARAM, LPARAM, BOOL};
 use winapi::shared::windef::HWND;
 use winapi::um::winnt::LPWSTR;
 use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_COMPOSITED, WS_EX_CONTROLPARENT};
-use crate::win32::{base_helper::to_utf16, window_helper as wh};
+use crate::win32::{base_helper::{to_utf16, check_hwnd}, window_helper as wh};
 use crate::{NwgError, Font, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
 use std::{mem, cell::RefCell};
@@ -58,9 +58,7 @@ impl TabsContainer {
     pub fn selected_tab(&self) -> usize {
         use winapi::um::commctrl::{TCM_GETCURSEL};
         
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TCM_GETCURSEL, 0, 0) as usize
     }
 
@@ -68,9 +66,7 @@ impl TabsContainer {
     pub fn set_selected_tab(&self, index: usize) {
         use winapi::um::commctrl::TCM_SETCURSEL;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TCM_SETCURSEL, index as WPARAM, 0);
 
         // Update the visible state of the tabs (this is not done automatically)
@@ -86,9 +82,7 @@ impl TabsContainer {
     pub fn tab_count(&self) -> usize {
         use winapi::um::commctrl::TCM_GETITEMCOUNT;
             
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TCM_GETITEMCOUNT, 0, 0) as usize
     }
 
@@ -101,9 +95,7 @@ impl TabsContainer {
     pub fn set_image_list(&self, list: Option<&ImageList>) {
         use winapi::um::commctrl::TCM_SETIMAGELIST;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let list_handle = match list {
             None => 0,
             Some(list) => list.handle as _
@@ -122,10 +114,8 @@ impl TabsContainer {
     pub fn image_list(&self) -> Option<ImageList> {
         use winapi::um::commctrl::TCM_GETIMAGELIST;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let handle = wh::send_message(handle, TCM_GETIMAGELIST, 0, 0);
+        let control_handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let handle = wh::send_message(control_handle, TCM_GETIMAGELIST, 0, 0);
         match handle == 0 {
             true => None,
             false => Some(ImageList {
@@ -141,80 +131,68 @@ impl TabsContainer {
 
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_focus(handle) }
     }
 
     /// Set the keyboard focus on the button.
     pub fn set_focus(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_focus(handle); }
     }
 
     /// Return true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_enabled(handle) }
     }
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
     /// Return true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
     /// Return the size of the tabs container in the parent window
     pub fn size(&self) -> (u32, u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Set the size of the tabs container in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
     /// Return the position of the tabs container in the parent window
     pub fn position(&self) -> (i32, i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
     /// Set the position of the tabs container in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let font_handle = wh::get_window_font(handle);
         if font_handle.is_null() {
             None
@@ -225,8 +203,7 @@ impl TabsContainer {
 
     /// Set the font of the control
     pub fn set_font(&self, font: Option<&Font>) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
     }
 

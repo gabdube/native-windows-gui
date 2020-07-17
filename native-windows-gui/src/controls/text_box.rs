@@ -56,6 +56,8 @@ Note: Use `\r\n` to input a new line not just `\n`.
   * `MousePress(_)`: Generic mouse press events on the button
   * `OnMouseMove`: Generic mouse mouse event
   * `OnMouseWheel`: Generic mouse wheel event
+  * `OnKeyPress`:    Generic key press event
+  * `OnKeyRelease`:  Generic key release event
 
 ```rust
 use native_windows_gui as nwg;

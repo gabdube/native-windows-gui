@@ -1,5 +1,6 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use crate::win32::window_helper as wh;
+use crate::win32::base_helper::check_hwnd;
 use crate::{Font, NwgError, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlHandle, ControlBase};
 use std::cell::RefCell;
@@ -57,18 +58,14 @@ impl StatusBar {
         use winapi::um::commctrl::SB_SETMINHEIGHT;
         use winapi::um::winuser::WM_SIZE;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, SB_SETMINHEIGHT, height as WPARAM, 0); 
         wh::send_message(handle, WM_SIZE, 0, 0);  // redraw the statusbar
     }
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let font_handle = wh::get_window_font(handle);
         if font_handle.is_null() {
             None
@@ -79,8 +76,7 @@ impl StatusBar {
 
     /// Set the font of the control
     pub fn set_font(&self, font: Option<&Font>) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
     }
 
@@ -90,9 +86,7 @@ impl StatusBar {
         use winapi::shared::minwindef::LOWORD;
         use crate::win32::base_helper::from_utf16;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let result = wh::send_message(handle, SB_GETTEXTLENGTHW, index as WPARAM, 0);
         let text_length = (LOWORD(result as u32) as usize) + 1; // +1 for the terminating null character
 
@@ -109,9 +103,7 @@ impl StatusBar {
         use winapi::um::commctrl::SB_SETTEXTW;
         use crate::win32::base_helper::to_utf16;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let text = to_utf16(text);
         wh::send_message(handle, SB_SETTEXTW, index as WPARAM, text.as_ptr() as LPARAM);
     }

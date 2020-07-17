@@ -1,7 +1,7 @@
 /*!
     Example on how to use custom types directly with native windows derive
 
-    `cargo run --example subclassing_d`
+    `cargo run --example subclassing_d --features "flexbox"`
 */
 
 
@@ -75,22 +75,22 @@ pub struct SubclassApp {
     layout: nwg::FlexboxLayout,
 
     #[nwg_control(text: "Simple button", focus: true)]
-    #[nwg_layout_item(layout: layout, cell: 0)]
+    #[nwg_layout_item(layout: layout)]
     #[nwg_events( OnButtonClick: [SubclassApp::button_click1] )]
     button1: nwg::Button,
 
     #[nwg_control(text: "User type button")]
-    #[nwg_layout_item(layout: layout, cell: 1)]
+    #[nwg_layout_item(layout: layout)]
     #[nwg_events( OnButtonClick: [SubclassApp::button_click2] )]
     button2: UserButton,
 
     #[nwg_control(ty: Button, text: "Subclassed button")]
-    #[nwg_layout_item(layout: layout, cell: 2)]
+    #[nwg_layout_item(layout: layout)]
     #[nwg_events( OnButtonClick: [SubclassApp::button_click3(SELF, CTRL)] )]
     button3: CustomButton,
 
     #[nwg_control(data: 100)]
-    #[nwg_layout_item(layout: layout, cell: 3)]
+    #[nwg_layout_item(layout: layout)]
     #[nwg_events( OnButtonClick: [SubclassApp::button_click3(SELF, CTRL)] )]
     button4: CustomButton,
 }

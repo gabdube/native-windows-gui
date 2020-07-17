@@ -2,7 +2,7 @@ use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{LBS_MULTIPLESEL, LBS_NOSEL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use crate::win32::window_helper as wh;
-use crate::win32::base_helper::{to_utf16, from_utf16};
+use crate::win32::base_helper::{to_utf16, from_utf16, check_hwnd};
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::cell::{Ref, RefMut, RefCell};
@@ -100,9 +100,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn push(&self, item: D) {
         use winapi::um::winuser::LB_ADDSTRING;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let display = format!("{}", item);
         let display_os = to_utf16(&display);
 
@@ -120,9 +118,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn insert(&self, index: usize, item: D) {
         use winapi::um::winuser::LB_INSERTSTRING;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let display = format!("{}", item);
         let display_os = to_utf16(&display);
 
@@ -144,9 +140,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn remove(&self, index: usize) -> D {
         use winapi::um::winuser::LB_DELETESTRING;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LB_DELETESTRING, index as WPARAM, 0);
 
         let mut col_ref = self.collection.borrow_mut();
@@ -158,9 +152,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn selection(&self) -> Option<usize> {
         use winapi::um::winuser::{LB_GETCURSEL, LB_ERR};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let index = wh::send_message(handle, LB_GETCURSEL , 0, 0);
 
         if index == LB_ERR { None }
@@ -172,9 +164,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn multi_selection_len(&self) -> usize {
         use winapi::um::winuser::{LB_GETSELCOUNT, LB_ERR};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         match wh::send_message(handle, LB_GETSELCOUNT, 0, 0) {
             LB_ERR => 0,
             value => value as usize
@@ -186,9 +176,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn multi_selection(&self) -> Vec<usize> {
         use winapi::um::winuser::{LB_GETSELCOUNT, LB_GETSELITEMS, LB_ERR};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let select_count = match wh::send_message(handle, LB_GETSELCOUNT, 0, 0) {
             LB_ERR => usize::max_value(),
             value => value as usize
@@ -217,9 +205,7 @@ impl<D: Display+Default> ListBox<D> {
         use winapi::um::winuser::{LB_GETCURSEL, LB_GETTEXTLEN, LB_GETTEXT, LB_ERR};
         use winapi::shared::ntdef::WCHAR;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let index = wh::send_message(handle, LB_GETCURSEL, 0, 0);
 
         if index == LB_ERR { None }
@@ -242,9 +228,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn set_selection(&self, index: Option<usize>) {
         use winapi::um::winuser::LB_SETCURSEL;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let index = index.unwrap_or(-1isize as usize);
         wh::send_message(handle, LB_SETCURSEL, index, 0);
     }
@@ -252,32 +236,28 @@ impl<D: Display+Default> ListBox<D> {
     /// Select the item as index `index` in a multi item list box
     pub fn multi_add_selection(&self, index: usize) {
         use winapi::um::winuser::LB_SETSEL;
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LB_SETSEL, 1, index as LPARAM);
     }
 
     /// Unselect the item as index `index` in a multi item list box
     pub fn multi_remove_selection(&self, index: usize) {
         use winapi::um::winuser::LB_SETSEL;
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LB_SETSEL, 0, index as LPARAM);
     }
 
     /// Unselect every item in the list box
     pub fn unselect_all(&self) {
         use winapi::um::winuser::LB_SETSEL;
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LB_SETSEL, 0, -1);
     }
 
     /// Select every item in the list box
     pub fn select_all(&self) {
         use winapi::um::winuser::LB_SETSEL;
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LB_SETSEL, 1, -1);
     }
 
@@ -285,9 +265,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn multi_select_range(&self, range: Range<usize>) {
         use winapi::um::winuser::LB_SELITEMRANGEEX;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let start = range.start as WPARAM;
         let end = range.end as LPARAM;
         wh::send_message(handle, LB_SELITEMRANGEEX, start, end);
@@ -297,9 +275,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn multi_unselect_range(&self, range: Range<usize>) {
         use winapi::um::winuser::LB_SELITEMRANGEEX;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let start = range.start as LPARAM;
         let end = range.end as WPARAM;
         wh::send_message(handle, LB_SELITEMRANGEEX, end, start);
@@ -311,9 +287,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn set_selection_string(&self, value: &str) -> Option<usize> {
         use winapi::um::winuser::{LB_SELECTSTRING, LB_ERR};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-        
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let os_string = to_utf16(value);
 
         unsafe {
@@ -331,9 +305,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn selected(&self, index: usize) -> bool {
         use winapi::um::winuser::LB_GETSEL;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, LB_GETSEL, index as WPARAM, 0) > 0
     }
 
@@ -342,8 +314,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn sync(&self) {
         use winapi::um::winuser::{LB_ADDSTRING, LB_INITSTORAGE};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         self.clear_inner(handle);
 
@@ -364,8 +335,7 @@ impl<D: Display+Default> ListBox<D> {
     pub fn set_collection(&self, mut col: Vec<D>) -> Vec<D> {
         use winapi::um::winuser::LB_ADDSTRING;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         self.clear_inner(handle);
 
@@ -387,13 +357,8 @@ impl<D: Display+Default> ListBox<D> {
     /// Return the number of items in the control. NOT the inner rust collection
     pub fn len(&self) -> usize {
         use winapi::um::winuser::LB_GETCOUNT;
-
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let count = wh::send_message(handle, LB_GETCOUNT, 0, 0);
-
-        count as usize
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, LB_GETCOUNT, 0, 0) as usize
     }
 
 
@@ -403,8 +368,7 @@ impl<D: Display+Default> ListBox<D> {
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let font_handle = wh::get_window_font(handle);
         if font_handle.is_null() {
@@ -416,79 +380,68 @@ impl<D: Display+Default> ListBox<D> {
 
     /// Set the font of the control
     pub fn set_font(&self, font: Option<&Font>) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
     }
 
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_focus(handle) }
     }
 
     /// Set the keyboard focus on the button.
     pub fn set_focus(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_focus(handle); }
     }
 
     /// Return true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_enabled(handle) }
     }
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
     /// Return true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
     /// Return the size of the button in the parent window
     pub fn size(&self) -> (u32, u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Set the size of the button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
     /// Return the position of the button in the parent window
     pub fn position(&self) -> (i32, i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
     /// Set the position of the button in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 

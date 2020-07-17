@@ -6,7 +6,7 @@ use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{HIMAGELIST, HTREEITEM, TVIS_EXPANDED, TVIS_SELECTED, TVITEMW};
 use crate::win32::window_helper as wh;
-use crate::win32::base_helper::{to_utf16, from_utf16};
+use crate::win32::base_helper::{check_hwnd, to_utf16, from_utf16};
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
@@ -160,9 +160,7 @@ impl TreeView {
     pub fn set_image_list(&self, list: Option<&ImageList>) {
         use winapi::um::commctrl::{TVM_SETIMAGELIST, TVSIL_NORMAL};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let list_handle = list.map(|l| l.handle).unwrap_or(ptr::null_mut());
 
         wh::send_message(handle, TVM_SETIMAGELIST, TVSIL_NORMAL, list_handle as _);
@@ -174,9 +172,7 @@ impl TreeView {
     pub fn image_list(&self) -> Option<ImageList> {
         use winapi::um::commctrl::{TVM_GETIMAGELIST, TVSIL_NORMAL};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let handle = wh::send_message(handle, TVM_GETIMAGELIST, TVSIL_NORMAL, 0) as HIMAGELIST;
         if handle.is_null() {
             None
@@ -192,9 +188,7 @@ impl TreeView {
     pub fn set_item_image(&self, item: &TreeItem, index: i32, on_select: bool) {
         use winapi::um::commctrl::{TVM_SETITEMW, TVIF_IMAGE, TVIF_SELECTEDIMAGE};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let mut tree_item = blank_item();
         tree_item.hItem = item.handle;
 
@@ -218,9 +212,7 @@ impl TreeView {
     pub fn item_image(&self, item: &TreeItem, on_select: bool) -> i32 {
         use winapi::um::commctrl::{TVM_GETITEMW, TVIF_IMAGE, TVIF_SELECTEDIMAGE};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let mut tree_item = blank_item();
         tree_item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE;
         tree_item.hItem = item.handle;
@@ -239,9 +231,7 @@ impl TreeView {
         use winapi::um::commctrl::TVM_SETTEXTCOLOR;
         use winapi::um::wingdi::RGB;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let color = RGB(r, g, b);
 
         wh::send_message(handle, TVM_SETTEXTCOLOR, 0, color as _);
@@ -254,8 +244,7 @@ impl TreeView {
         use winapi::um::commctrl::TVM_GETTEXTCOLOR;
         use winapi::um::wingdi::{GetRValue, GetGValue, GetBValue};
         
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let col = wh::send_message(handle, TVM_GETTEXTCOLOR, 0, 0) as u32;
 
@@ -270,9 +259,7 @@ impl TreeView {
     pub fn indent(&self) -> u32 {
         use winapi::um::commctrl::TVM_GETINDENT;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TVM_GETINDENT, 0, 0) as u32
     }
 
@@ -280,9 +267,7 @@ impl TreeView {
     pub fn set_indent(&self, indent: u32) {
         use winapi::um::commctrl::TVM_SETINDENT;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TVM_SETINDENT, indent as _, 0);
     }
 
@@ -317,14 +302,12 @@ impl TreeView {
     pub fn selected_item(&self) -> Option<TreeItem> {
         use winapi::um::commctrl::{TVM_GETNEXTITEM, TVGN_CARET};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
-        let handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_CARET, 0) as HTREEITEM;
-        if handle.is_null() {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let tree_handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_CARET, 0) as HTREEITEM;
+        if tree_handle.is_null() {
             None
         } else {
-            Some(TreeItem { handle })
+            Some(TreeItem { handle: tree_handle })
         }
     }
 
@@ -334,8 +317,7 @@ impl TreeView {
         use winapi::um::commctrl::TVINSERTSTRUCTW_u;
         use winapi::um::winnt::LPWSTR;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let insert = match position {
             TreeInsert::First => TVI_FIRST,
@@ -371,9 +353,7 @@ impl TreeView {
     pub fn remove_item(&self, item: &TreeItem) {
         use winapi::um::commctrl::{TVM_DELETEITEM};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TVM_DELETEITEM, 0, item.handle as LPARAM);
     }
 
@@ -381,9 +361,7 @@ impl TreeView {
     pub fn select_item(&self, item: &TreeItem) {
         use winapi::um::commctrl::{TVM_SETITEMW, TVIF_STATE};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let mut tree_item = blank_item();
         tree_item.mask = TVIF_STATE;
         tree_item.hItem = item.handle;
@@ -396,18 +374,14 @@ impl TreeView {
     /// Creates an iterator over the tree view items
     #[cfg(feature="tree-view-iterator")]
     pub fn iter<'a>(&'a self) -> crate::TreeViewIterator<'a> {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        self.handle.hwnd().expect(BAD_HANDLE);
-
+        check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         crate::TreeViewIterator::new(self, ptr::null_mut())
     }
 
     /// Creates an iterator over the children of an item. This does not include the item itself.
     #[cfg(feature="tree-view-iterator")]
     pub fn iter_item<'a>(&'a self, item: &TreeItem) -> crate::TreeViewIterator<'a> {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        self.handle.hwnd().expect(BAD_HANDLE);
-
+        check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         crate::TreeViewIterator::new(self, item.handle)
     }
 
@@ -417,8 +391,7 @@ impl TreeView {
         use winapi::um::commctrl::{TVM_GETITEMW, TVIF_TEXT, TVIF_HANDLE};
         const BUFFER_MAX: usize = 260;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut text_buffer = Vec::with_capacity(BUFFER_MAX);
         unsafe { text_buffer.set_len(BUFFER_MAX); }
@@ -441,8 +414,7 @@ impl TreeView {
     pub fn item_has_children(&self, tree_item: &TreeItem) -> Option<bool> {
         use winapi::um::commctrl::{TVM_GETITEMW, TVIF_CHILDREN, TVIF_HANDLE};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut item: TVITEMW = blank_item();
         item.hItem = tree_item.handle;
@@ -460,8 +432,7 @@ impl TreeView {
     pub fn item_state(&self, tree_item: &TreeItem) -> Option<TreeItemState> {
         use winapi::um::commctrl::{TVM_GETITEMW, TVIF_STATE, TVIF_HANDLE};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE); 
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let mut item: TVITEMW = unsafe { mem::zeroed() };
         item.hItem = tree_item.handle;
@@ -480,8 +451,7 @@ impl TreeView {
     pub fn set_expand_state(&self, item: &TreeItem, state: ExpandState) {
         use winapi::um::commctrl::{TVM_EXPAND, TVE_COLLAPSE, TVE_COLLAPSERESET, TVE_EXPAND, TVE_EXPANDPARTIAL, TVE_TOGGLE};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let state = match state {
             ExpandState::Collapse => TVE_COLLAPSE,
@@ -498,9 +468,7 @@ impl TreeView {
     pub fn ensure_visible(&self, item: &TreeItem) {
         use winapi::um::commctrl::{TVM_ENSUREVISIBLE};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TVM_ENSUREVISIBLE, 0, item.handle as LPARAM);
     }
 
@@ -508,9 +476,7 @@ impl TreeView {
     pub fn clear(&self) {
         use winapi::um::commctrl::{TVM_DELETEITEM, TVI_ROOT};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TVM_DELETEITEM, 0, TVI_ROOT  as LPARAM);
     }
 
@@ -518,9 +484,7 @@ impl TreeView {
     pub fn len(&self) -> usize {
         use winapi::um::commctrl::TVM_GETCOUNT;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TVM_GETCOUNT, 0, 0) as usize
     }
 
@@ -528,9 +492,7 @@ impl TreeView {
     pub fn visible_len(&self) -> usize {
         use winapi::um::commctrl::TVM_GETVISIBLECOUNT;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TVM_GETVISIBLECOUNT, 0, 0) as usize
     }
 
@@ -543,17 +505,14 @@ impl TreeView {
     pub fn invalidate(&self) {
         use winapi::um::winuser::InvalidateRect;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { InvalidateRect(handle, ptr::null(), 1); }
     }
 
 
     /// Return the font of the control
     pub fn font(&self) -> Option<Font> {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let font_handle = wh::get_window_font(handle);
         if font_handle.is_null() {
@@ -565,79 +524,68 @@ impl TreeView {
 
     /// Set the font of the control
     pub fn set_font(&self, font: Option<&Font>) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
     }
 
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_focus(handle) }
     }
 
     /// Set the keyboard focus on the button.
     pub fn set_focus(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_focus(handle); }
     }
 
     /// Return true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_enabled(handle) }
     }
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
     /// Return true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
     /// Return the size of the button in the parent window
     pub fn size(&self) -> (u32, u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Set the size of the button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
     /// Return the position of the button in the parent window
     pub fn position(&self) -> (i32, i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
     /// Set the position of the button in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 

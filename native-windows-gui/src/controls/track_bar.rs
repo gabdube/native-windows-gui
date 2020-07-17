@@ -2,6 +2,7 @@ use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_TABSTOP};
 use winapi::um::commctrl::{TBS_AUTOTICKS, TBS_VERT, TBS_HORZ, TBS_TOP, TBS_BOTTOM, TBS_LEFT, TBS_RIGHT, TBS_NOTICKS, TBS_ENABLESELRANGE};
 use crate::win32::window_helper as wh;
+use crate::win32::base_helper::check_hwnd;
 use crate::{NwgError, RawEventHandler};
 use super::{ControlBase, ControlHandle};
 use std::cell::RefCell;
@@ -95,9 +96,7 @@ impl TrackBar {
     pub fn pos(&self) -> usize {
         use winapi::um::commctrl::TBM_GETPOS;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TBM_GETPOS, 0, 0) as usize
     }
 
@@ -105,9 +104,7 @@ impl TrackBar {
     pub fn set_pos(&self, p: usize) {
         use winapi::um::commctrl::TBM_SETPOSNOTIFY;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TBM_SETPOSNOTIFY, 1, p as LPARAM);
     }
 
@@ -116,8 +113,7 @@ impl TrackBar {
     pub fn selection_range_pos(&self) -> Range<usize> {
         use winapi::um::commctrl::{TBM_GETSELEND, TBM_GETSELSTART};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let end = wh::send_message(handle, TBM_GETSELEND, 0, 0) as usize;
         let start = wh::send_message(handle, TBM_GETSELSTART, 0, 0) as usize;
@@ -130,8 +126,7 @@ impl TrackBar {
     pub fn set_selection_range_pos(&self, value: Range<usize>) {
         use winapi::um::commctrl::{TBM_SETSELEND, TBM_SETSELSTART};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         wh::send_message(handle, TBM_SETSELEND, 0, value.end as LPARAM);
         wh::send_message(handle, TBM_SETSELSTART, 1, value.start as LPARAM);
@@ -141,9 +136,7 @@ impl TrackBar {
     pub fn range_min(&self) -> usize {
         use winapi::um::commctrl::TBM_GETRANGEMIN;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TBM_GETRANGEMIN, 0, 0) as usize
     }
 
@@ -151,9 +144,7 @@ impl TrackBar {
     pub fn set_range_min(&self, min: usize) {
         use winapi::um::commctrl::TBM_SETRANGEMIN;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TBM_SETRANGEMIN, 1, min as LPARAM);
     }
 
@@ -161,9 +152,7 @@ impl TrackBar {
     pub fn range_max(&self) -> usize {
         use winapi::um::commctrl::TBM_GETRANGEMAX;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TBM_GETRANGEMAX, 0, 0) as usize
     }
 
@@ -171,9 +160,7 @@ impl TrackBar {
     pub fn set_range_max(&self, max: usize) {
         use winapi::um::commctrl::TBM_SETRANGEMAX;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TBM_SETRANGEMAX, 1, max as LPARAM);
     }
 
@@ -181,9 +168,7 @@ impl TrackBar {
     pub fn tics_len(&self) -> usize {
         use winapi::um::commctrl::TBM_GETNUMTICS;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TBM_GETNUMTICS, 0, 0) as usize
     }
 
@@ -192,9 +177,7 @@ impl TrackBar {
     pub fn tic_value(&self, index: usize) -> usize {
         use winapi::um::commctrl::TBM_GETTIC;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, TBM_GETTIC, index as WPARAM, 0) as usize
     }
 
@@ -204,72 +187,62 @@ impl TrackBar {
 
     /// Return true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_enabled(handle) }
     }
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_enabled(handle, v) }
     }
 
     /// Return true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
 
     /// Return the size of the button in the parent window
     pub fn size(&self) -> (u32, u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Set the size of the button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_size(handle, x, y, false) }
     }
 
     /// Return the position of the button in the parent window
     pub fn position(&self) -> (i32, i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_window_position(handle) }
     }
 
     /// Set the position of the button in the parent window
     pub fn set_position(&self, x: i32, y: i32) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_position(handle, x, y) }
     }
 
     /// Return true if the control currently has the keyboard focus
     pub fn focus(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::get_focus(handle) }
     }
 
     /// Set the keyboard focus on the track bar
     pub fn set_focus(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_focus(handle); }
     }
 
