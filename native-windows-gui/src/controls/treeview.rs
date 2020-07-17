@@ -650,7 +650,7 @@ impl TreeView {
     pub fn flags(&self) -> u32 {
         use winapi::um::commctrl::{TVS_HASBUTTONS, TVS_LINESATROOT, TVS_HASLINES};
 
-        WS_VISIBLE | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES
+        WS_VISIBLE | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES | WS_TABSTOP
     }
 
     /// Winapi flags required by the control

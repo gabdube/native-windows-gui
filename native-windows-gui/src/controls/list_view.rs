@@ -241,12 +241,13 @@ impl ListView {
     #[cfg(feature="image-list")]
     pub fn set_image_list(&self, list: Option<&ImageList>, list_type: ListViewImageListType) {
         use winapi::um::commctrl::LVM_SETIMAGELIST;
+        use std::ptr;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let list_handle = list.map(|l| l.handle).unwrap_or(ptr::null_mut());
-        wh::send_message(handle, LVM_SETIMAGELIST, list_type.to_raw() as _, list.handle as _);
+        wh::send_message(handle, LVM_SETIMAGELIST, list_type.to_raw() as _, list_handle as _);
         
         self.invalidate();
     }

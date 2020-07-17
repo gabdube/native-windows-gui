@@ -24,7 +24,7 @@ pub struct TreeViewApp {
     #[nwg_layout(parent: window)]
     layout: nwg::GridLayout,
 
-    #[nwg_control]
+    #[nwg_control(focus: true)]
     #[nwg_layout_item(layout: layout, col: 0, col_span: 3, row: 0, row_span: 6)]
     tree_view: nwg::TreeView,
 

@@ -160,7 +160,8 @@ This is the list of remaining task to complete for the 1.0 release. Created `202
 * ☐ Make a video tutorial on how to build a small CRUD app (probably after 1.0 release)
 * ☐ Fix the image list transparency issue (probably after 1.0 release)
 * ☐ Finish up the `ListView` controls
-* 🗹 Finalize image list to `TreeView` controls
+* ☐ Add a check to see if the window handle is still valid and refractor the handle check
+* 🗹 Finalize image list in `TreeView` controls
 * 🗹 Add Marquee for progress bar
 * 🗹 Add support for FlexBoxLayout in native window derive
 * 🗹 Add "sub-events" to catch partial events from their parent

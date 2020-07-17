@@ -1,8 +1,23 @@
-use std::{ptr};
+use std::ptr;
+use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::DWORD;
+use crate::ControlHandle;
 
 pub const CUSTOM_ID_BEGIN: u32 = 10000;
 
+
+pub fn check_hwnd(handle: &ControlHandle, not_bound: &str, bad_handle: &str) -> HWND {
+    use winapi::um::winuser::IsWindow;
+
+    if handle.blank() { panic!("{}", not_bound); }
+    match handle.hwnd() {
+        Some(hwnd) => match unsafe { IsWindow(hwnd) } {
+            0 => { panic!("The window handle is no longer valid. This usually means the control was freed by the OS"); },
+            _ => hwnd
+        },
+        None => { panic!("{}", bad_handle); }
+    }
+}
 
 pub fn to_utf16<'a>(s: &'a str) -> Vec<u16> {
     use std::ffi::OsStr;
