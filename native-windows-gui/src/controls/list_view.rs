@@ -2,7 +2,7 @@ use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
     LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT, LVS_EX_GRIDLINES, LVS_EX_BORDERSELECT,
-    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT, LVIF_IMAGE
+    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
@@ -12,6 +12,9 @@ use std::{mem, cell::RefCell};
 
 #[cfg(feature="image-list")]
 use crate::ImageList;
+
+#[cfg(feature="image-list")]
+use winapi::um::commctrl::LVIF_IMAGE;
 
 const NOT_BOUND: &'static str = "ListView is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: ListView handle is not HWND!";
@@ -236,13 +239,15 @@ impl ListView {
     /// Sets the image list of the listview
     /// A listview can accept different kinds of image list. See `ListViewImageListType`
     #[cfg(feature="image-list")]
-    pub fn set_image_list(&self, list: &ImageList, list_type: ListViewImageListType) {
+    pub fn set_image_list(&self, list: Option<&ImageList>, list_type: ListViewImageListType) {
         use winapi::um::commctrl::LVM_SETIMAGELIST;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
+        let list_handle = list.map(|l| l.handle).unwrap_or(ptr::null_mut());
         wh::send_message(handle, LVM_SETIMAGELIST, list_type.to_raw() as _, list.handle as _);
+        
         self.invalidate();
     }
 

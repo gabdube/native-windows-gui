@@ -60,8 +60,8 @@ impl DataViewApp {
         icons_small.add_icon_from_filename("./test_rc/love.ico").unwrap();
 
         // Setting up the listview data
-        dv.set_image_list(icons, nwg::ListViewImageListType::Normal);
-        dv.set_image_list(icons_small, nwg::ListViewImageListType::Small);
+        dv.set_image_list(Some(icons), nwg::ListViewImageListType::Normal);
+        dv.set_image_list(Some(icons_small), nwg::ListViewImageListType::Small);
 
         dv.insert_column("Name");
         dv.insert_column("Genus");
