@@ -346,6 +346,8 @@ impl TreeView {
         let ptr = &new_item as *const TVINSERTSTRUCTW;
         let handle = wh::send_message(handle, TVM_INSERTITEMW, 0, ptr as LPARAM) as HTREEITEM;
 
+        self.invalidate();
+
         TreeItem { handle }
     }
 

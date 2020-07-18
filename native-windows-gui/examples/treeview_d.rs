@@ -26,6 +26,17 @@ pub struct TreeViewApp {
 
     #[nwg_control(focus: true)]
     #[nwg_layout_item(layout: layout, col: 0, col_span: 3, row: 0, row_span: 6)]
+    #[nwg_events(
+        OnTreeViewClick: [TreeViewApp::log_events(SELF, EVT)],
+        OnTreeViewDoubleClick: [TreeViewApp::log_events(SELF, EVT)],
+        OnTreeViewRightClick: [TreeViewApp::log_events(SELF, EVT)],
+        OnTreeFocusLost: [TreeViewApp::log_events(SELF, EVT)],
+        OnTreeFocus: [TreeViewApp::log_events(SELF, EVT)],
+        OnTreeItemDelete: [TreeViewApp::log_events(SELF, EVT)],
+        OnTreeItemExpanded: [TreeViewApp::log_events(SELF, EVT)],
+        OnTreeItemChanged: [TreeViewApp::log_events(SELF, EVT)],
+        OnTreeItemSelectionChanged: [TreeViewApp::log_events(SELF, EVT)],
+    )]
     tree_view: nwg::TreeView,
 
     #[nwg_control(flags: "VISIBLE")]
@@ -45,10 +56,12 @@ pub struct TreeViewApp {
 
     #[nwg_control(parent: control_frame, text: "Add")]
     #[nwg_layout_item(layout: control_layout, col: 0, row: 2)]
+    #[nwg_events(OnButtonClick: [TreeViewApp::button_actions(SELF, CTRL)])]
     add_btn: nwg::Button,
 
     #[nwg_control(parent: control_frame, text: "Del")]
     #[nwg_layout_item(layout: control_layout, col: 1, row: 2)]
+    #[nwg_events(OnButtonClick: [TreeViewApp::button_actions(SELF, CTRL)])]
     remove_btn: nwg::Button,
 
     #[nwg_control(text: "Events:")]
@@ -91,6 +104,28 @@ impl TreeViewApp {
             tv.set_expand_state(&item, nwg::ExpandState::Expand);
             tv.set_item_image(&item, 1, true);
         }
+    }
+
+    fn button_actions(&self, btn: &nwg::Button) {
+        let tv = &self.tree_view;
+
+        if btn == &self.add_btn {
+            let text = self.new_item.text();
+            let item = match tv.selected_item() {
+                Some(i) => { tv.insert_item(&text, Some(&i), nwg::TreeInsert::Last) },
+                None => { tv.insert_item(&text, None, nwg::TreeInsert::Root) }
+            };
+
+            tv.set_item_image(&item, 1, true);
+        } else if btn == &self.remove_btn {
+            if let Some(item) = tv.selected_item() {
+                tv.remove_item(&item);
+            }
+        }
+    }
+
+    fn log_events(&self, evt: nwg::Event) {
+        self.events_log.insert(0, format!("{:?}", evt));
     }
 
     fn exit(&self) {

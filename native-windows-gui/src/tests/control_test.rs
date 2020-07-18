@@ -412,6 +412,7 @@ mod partial_controls_test_ui {
 
             TextBox::builder()
                 .text("Multi\r\nLine\r\nText")
+                .flags(TextBoxFlags::VISIBLE | TextBoxFlags::AUTOVSCROLL | TextBoxFlags::AUTOHSCROLL | TextBoxFlags::TAB_STOP)
                 .position((290, 40))
                 .size((150, 100))
                 .parent(&data.basics_control_tab)
@@ -538,6 +539,7 @@ mod partial_controls_test_ui {
 
             TextBox::builder()
                 .parent(&data.dialog_tab)
+                .flags(TextBoxFlags::VISIBLE | TextBoxFlags::AUTOVSCROLL | TextBoxFlags::AUTOHSCROLL | TextBoxFlags::TAB_STOP)
                 .build(&mut data.file_dialog_result)?;
 
             Button::builder()
