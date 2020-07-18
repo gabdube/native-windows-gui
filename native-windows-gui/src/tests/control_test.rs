@@ -592,6 +592,8 @@ mod partial_controls_test_ui {
             //
             ListView::builder()
                 .parent(&data.list_view_tab)
+                .ex_flags(ListViewExFlags::GRID | ListViewExFlags::FULL_ROW_SELECT)
+                .list_style(ListViewStyle::Detailed)
                 .build(&mut data.test_list_view)?;
 
 
@@ -830,7 +832,8 @@ mod partial_controls_test_ui {
             match evt {
                 E::OnInit => 
                     if &handle == &self.window {
-                        init_tree(self, );
+                        init_tree(self);
+                        init_list_view(self);
                     },
                 E::OnWindowClose => 
                     if &handle == &self.window {
@@ -932,6 +935,28 @@ fn init_tree(app: &ControlsTest) {
     let other = tree.insert_item("Another root children", Some(&item), TreeInsert::Last);
     tree.insert_item("Banana", Some(&other), TreeInsert::First);
     tree.insert_item("Pinapple", Some(&other), TreeInsert::First);
+}
+
+fn init_list_view(app: &ControlsTest) {
+    let list = &app.test_list_view;
+
+    // Columns are invisible, but they still need to be defined.
+    for &column in &["Name", "Price", "Quantity"] {
+        list.insert_column(column);
+    }
+
+    let data: &[&[&str]] = &[
+        &["Name", "Price (USD $)", "Quantity"],
+        &["Banana", "10.0", "1000"],
+        &["Apple", "2.0", "345"],
+        &["Kiwi", "5.0", "194"],
+        &["Oranges", "5.0", "15"],
+        &["Lettuce", "1.0", "257"],
+    ];
+
+    for d in data {
+        list.insert_items_row(None, d);
+    }
 }
 
 fn show_pop_menu(app: &ControlsTest, _evt: Event) {

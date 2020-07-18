@@ -206,8 +206,10 @@ Builder parameters:
     * `size`:       The list view size.
     * `position`:   The list view position.
     * `flags`:      A combination of the ListViewFlags values.
+    * `ex_flags`:   A combination of the ListViewExFlags values.
     * `style`:      One of the value of `ListViewStyle`
     * `item_count`: Number of item to preallocate
+    * `list_style`: The default style of the listview
     * `focus`:      The control receive focus after being created
 
 
@@ -558,7 +560,7 @@ impl ListView {
     /// Useful when inserting strings into a single row. Ex: `list.insert_items_row(None, &["Hello", "World"]);`
     pub fn insert_items_row<I: Clone+Into<InsertListViewItem>>(&self, row_index: Option<i32>, insert: &[I]) {
         let mut column_index = 0;
-        let row_index = row_index.or(Some(self.column_len() as _));
+        let row_index = row_index.or(Some(self.len() as _));
         
         for i in insert.iter() {
             let mut item: InsertListViewItem = i.clone().into();
