@@ -1,6 +1,6 @@
 [package]
 name = "native-windows-derive"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["gdube <gdube.475@gmail.com>"]
 edition = "2018"
 
