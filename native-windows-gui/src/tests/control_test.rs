@@ -768,8 +768,12 @@ mod partial_controls_test_ui {
             //
             // Layout
             //
+
+            use stretch::style::Dimension as D;
+            use stretch::geometry::Rect;
             FlexboxLayout::builder()
                 .parent(&data.window)
+                .border(Rect { start: D::Points(2.0), end: D::Points(2.0), top: D::Points(2.0), bottom: D::Points(20.0) } )
                 .child(&data.controls_holder)
                 .build(&data.tab_container_layout)?;
 
