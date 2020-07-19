@@ -30,7 +30,7 @@ To use NWG in your project add it to cargo.toml:
 
 ```toml
 [dependencies]
-native-windows-gui = "1.0.0"
+native-windows-gui = "1.0.1"
 native-windows-derive = "1.0.0" # Optional. Only if the derive macro is used.
 ```
 

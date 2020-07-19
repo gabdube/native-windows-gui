@@ -1,6 +1,6 @@
 [package]
 name = "native-windows-gui"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["gdube <gdube.475@gmail.com>"]
 edition = "2018"
 
@@ -74,5 +74,7 @@ all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progres
        "tree-view-iterator", "flexbox"]
 
 [package.metadata.docs.rs]
+# This also sets the default target to `x86_64-pc-windows-msvc`
 features = [ "all" ]
 all-features = false
+targets = ["x86_64-pc-windows-msvc"]
