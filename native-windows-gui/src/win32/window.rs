@@ -805,6 +805,22 @@ fn tree_commands(m: u32) -> Event {
     }
 }
 
+fn list_view_commands(m: u32) -> Event {
+    use winapi::um::commctrl::{NM_KILLFOCUS, NM_SETFOCUS, LVN_DELETEALLITEMS,
+        LVN_DELETEITEM, LVN_INSERTITEM, LVN_ITEMACTIVATE, LVN_ITEMCHANGED};
+
+    match m {
+        LVN_DELETEALLITEMS => Event::OnListViewClear,
+        LVN_DELETEITEM => Event::OnListViewItemRemoved,
+        LVN_INSERTITEM => Event::OnListViewItemInsert,
+        LVN_ITEMACTIVATE => Event::OnListViewItemActivated,
+        LVN_ITEMCHANGED => Event::OnListViewItemChanged,
+        NM_KILLFOCUS => Event::OnListViewFocusLost,
+        NM_SETFOCUS => Event::OnListViewFocus,
+        _ => Event::Unknown
+    }
+}
+
 #[cfg(feature="tree-view")]
 fn tree_data(m: u32, notif_raw: *const NMHDR) -> EventData {
     use crate::{TreeItem, TreeItemAction, ExpandState, TreeItemState};
@@ -852,6 +868,51 @@ fn tree_data(m: u32, notif_raw: *const NMHDR) -> EventData {
 #[cfg(not(feature="tree-view"))]
 fn tree_data(_m: u32, _notif_raw: *const NMHDR) -> EventData {
     // If tree-view is not enabled, the data type won't be available so we return NO_DATA
+    NO_DATA
+}
+
+#[cfg(feature="list-view")]
+fn list_view_data(m: u32, notif_raw: *const NMHDR) -> EventData {
+    use winapi::um::commctrl::{NMLISTVIEW, LVN_DELETEITEM, LVN_ITEMACTIVATE,
+        LVN_INSERTITEM, LVN_ITEMCHANGED, LVIS_SELECTED};
+
+    match m {
+        LVN_DELETEITEM => {
+            let data: &NMLISTVIEW = unsafe { &*(notif_raw as *const NMLISTVIEW) };
+            EventData::OnListViewItemIndex { 
+                row_index: data.iItem as _,
+                column_index: data.iSubItem as _
+            }
+        },
+        LVN_ITEMACTIVATE => {
+            let data: &NMLISTVIEW = unsafe { &*(notif_raw as *const NMLISTVIEW) };
+            EventData::OnListViewItemIndex { 
+                row_index: data.iItem as _,
+                column_index: data.iSubItem as _
+            }
+        },
+        LVN_INSERTITEM => {
+            let data: &NMLISTVIEW = unsafe { &*(notif_raw as *const NMLISTVIEW) };
+            EventData::OnListViewItemIndex { 
+                row_index: data.iItem as _,
+                column_index: data.iSubItem as _
+            }
+        },
+        LVN_ITEMCHANGED => {
+            let data: &NMLISTVIEW = unsafe { &*(notif_raw as *const NMLISTVIEW) };
+            EventData::OnListViewItemChanged { 
+                row_index: data.iItem as _,
+                column_index: data.iSubItem as _,
+                selected: data.uNewState & LVIS_SELECTED == LVIS_SELECTED
+            }
+        },
+        _ => NO_DATA
+    }
+}
+
+#[cfg(not(feature="list-view"))]
+fn list_view_data(_m: u32, _notif_raw: *const NMHDR) -> EventData {
+    // If list-view is not enabled, the data type won't be available so we return NO_DATA
     NO_DATA
 }
 
@@ -915,6 +976,7 @@ unsafe fn handle_default_notify_callback<'a>(notif_raw: *const NMHDR, callback: 
         "SysTabControl32" => callback(tabs_commands(code), NO_DATA, handle),
         "msctls_trackbar32" => callback(track_commands(code), NO_DATA, handle),
         winapi::um::commctrl::WC_TREEVIEW => callback(tree_commands(code), tree_data(code, notif_raw), handle),
+        winapi::um::commctrl::WC_LISTVIEW => callback(list_view_commands(code), list_view_data(code, notif_raw), handle),
         _ => {}
     }
 }

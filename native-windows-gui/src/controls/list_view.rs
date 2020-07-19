@@ -2,7 +2,7 @@ use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
     LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT, LVS_EX_GRIDLINES, LVS_EX_BORDERSELECT,
-    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT
+    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT, LVIF_IMAGE
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
@@ -13,8 +13,6 @@ use std::{mem, cell::RefCell};
 #[cfg(feature="image-list")]
 use crate::ImageList;
 
-#[cfg(feature="image-list")]
-use winapi::um::commctrl::LVIF_IMAGE;
 
 const NOT_BOUND: &'static str = "ListView is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: ListView handle is not HWND!";
@@ -195,10 +193,14 @@ pub struct InsertListViewItem {
 }
 
 /// The data of a list view item
+#[derive(Default, Clone, Debug)]
 pub struct ListViewItem {
     pub row_index: i32,
     pub column_index: i32,
     pub text: String,
+
+    /// If the item is currently selected
+    pub selected: bool,
 
     #[cfg(feature="image-list")]
     pub image: i32,
@@ -569,8 +571,30 @@ impl ListView {
     }
 
     /// Returns data of an item in the list view. Returns `None` if there is no data at the selected index
-    pub fn item(&self, row_index: usize, column_index: usize) -> Option<ListViewItem> {
-        None
+    /// Because there is no way to fetch the actual text size, `text_buffer_size` must be set manually
+    pub fn item(&self, row_index: usize, column_index: usize, text_buffer_size: usize) -> Option<ListViewItem> {
+        use winapi::um::commctrl::{LVM_GETITEMW, LVIF_STATE, LVIS_SELECTED};
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        let mut item: LVITEMW = unsafe { mem::zeroed() };
+        item.iItem = row_index as _;
+        item.iSubItem = column_index as _;
+        item.mask = LVIF_IMAGE | LVIF_TEXT | LVIF_STATE;
+        item.stateMask = LVIS_SELECTED;
+
+        let mut text_buffer: Vec<u16> = Vec::with_capacity(text_buffer_size);
+        unsafe { text_buffer.set_len(text_buffer_size); }
+        item.pszText = text_buffer.as_mut_ptr();
+        item.cchTextMax = text_buffer_size as _;
+
+
+        let found = wh::send_message(handle, LVM_GETITEMW , 0, &mut item as *mut LVITEMW as _) == 1;
+        if !found {
+            return None;
+        }
+
+        Some ( build_list_view_image(row_index, column_index, item.state, &text_buffer, item.iImage)  )
     }
 
     /// Updates the item at the selected position
@@ -963,20 +987,45 @@ impl From<String> for InsertListViewColumn {
 
  // Feature check
 
- #[cfg(feature="image-list")]
- fn check_image_mask(i: &InsertListViewItem) -> u32 {
-     if i.image.is_some() { 
-         LVIF_IMAGE
-     } else {
-         0
-     }
- }
+#[cfg(feature="image-list")]
+fn check_image_mask(i: &InsertListViewItem) -> u32 {
+    if i.image.is_some() { 
+        LVIF_IMAGE
+    } else {
+        0
+    }
+}
 
- #[cfg(feature="image-list")]
- fn check_image(i: &InsertListViewItem) -> i32 { i.image.unwrap_or(0) }
+#[cfg(feature="image-list")]
+fn check_image(i: &InsertListViewItem) -> i32 { i.image.unwrap_or(0) }
 
- #[cfg(not(feature="image-list"))]
- fn check_image_mask(_i: &InsertListViewItem) -> u32 { 0 }
+#[cfg(not(feature="image-list"))]
+fn check_image_mask(_i: &InsertListViewItem) -> u32 { 0 }
 
- #[cfg(not(feature="image-list"))]
- fn check_image(_i: &InsertListViewItem) -> i32 { 0 }
+#[cfg(not(feature="image-list"))]
+fn check_image(_i: &InsertListViewItem) -> i32 { 0 }
+
+#[cfg(feature="image-list")]
+fn build_list_view_image(row_index: usize, column_index: usize, state: u32, text_buffer: &[u16], image: i32) -> ListViewItem {
+    use winapi::um::commctrl::LVIS_SELECTED;
+    
+    ListViewItem {
+        row_index: row_index as _,
+        column_index: column_index as _,
+        text: from_utf16(&text_buffer),
+        selected: state & LVIS_SELECTED == LVIS_SELECTED,
+        image
+    }
+}
+
+#[cfg(not(feature="image-list"))]
+fn build_list_view_image(row_index: usize, column_index: usize, state: u32, text_buffer: &[u16], _image: i32) -> ListViewItem {
+    use winapi::um::commctrl::LVIS_SELECTED;
+
+    ListViewItem {
+        row_index: row_index as _,
+        column_index: column_index as _,
+        text: from_utf16(&text_buffer),
+        selected: state & LVIS_SELECTED == LVIS_SELECTED,
+    }
+}

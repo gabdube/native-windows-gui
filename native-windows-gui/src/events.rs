@@ -171,6 +171,34 @@ pub enum Event {
     /// When the selected tree item is changed.
     OnTreeItemSelectionChanged,
 
+    /// When all the items in a list view are destroyed
+    /// Do not add, delete, or rearrange items in the list view while processing this notification code.
+    OnListViewClear,
+
+    /// When an item is about to be removed from the list view
+    /// Do not add, delete, or rearrange items in the list view while processing this notification code.
+    /// Generates a `EventData::ListViewItemIndex`
+    OnListViewItemRemoved,
+
+    /// When a new item is inserted in the list view
+    /// This is only triggered when an ietm is added to a new ROW
+    OnListViewItemInsert,
+
+    /// When an item in the list view is activated by the user
+    /// An item is activated when the user click it twice
+    /// Generates a `EventData::ListViewItemIndex`
+    OnListViewItemActivated,
+
+    /// When an item is selected/unselected in the listview
+    /// See `EventData::OnListViewItemChanged` to differentiate the two
+    OnListViewItemChanged,
+
+    /// When the control has acquired the input focus
+    OnListViewFocus,
+
+    /// When the control has lost the input focus
+    OnListViewFocusLost,
+
     /// When a TrayNotification info popup (not the tooltip) is shown 
     OnTrayNotificationShow,
 
@@ -220,7 +248,7 @@ pub enum EventData {
     /// a negative value indicates that the wheel was rotated to the left.
     OnMouseWheel(i32),
 
-    /// The path to a file that was dropping in the application
+    /// The path to one or more files that were dropped in the application
     OnFileDrop(DropFiles),
 
     /// The handle to the item being deleted. The item is still valid.
@@ -235,6 +263,13 @@ pub enum EventData {
     #[cfg(feature="tree-view")]
     OnTreeItemSelectionChanged{ old: crate::TreeItem, new: crate::TreeItem },
 
+    /// Row index and column index of the list view item that raised the event
+    #[cfg(feature="list-view")]
+    OnListViewItemIndex { row_index: usize, column_index: usize },
+
+    /// Row index, column index, and selected state of the list view item that raised the event
+    #[cfg(feature="list-view")]
+    OnListViewItemChanged { row_index: usize, column_index: usize, selected: bool },
 }
 
 impl EventData {
@@ -297,11 +332,29 @@ impl EventData {
         }
     }
 
-    /// nwraps event data into the removed tree item
+    /// unwraps event data into the removed tree item
     #[cfg(feature="tree-view")]
     pub fn on_tree_item_selection_changed(&self) -> (&crate::TreeItem, &crate::TreeItem) {
         match self {
             EventData::OnTreeItemSelectionChanged { old, new } => (old, new),
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
+    /// unwraps event data into the indices of a list view index (row_index, column_index)
+    #[cfg(feature="list-view")]
+    pub fn on_list_view_item_index(&self) -> (usize, usize) {
+        match self {
+            &EventData::OnListViewItemIndex { row_index, column_index } => (row_index, column_index),
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
+    /// unwraps event data into the indices of a list view index (row_index, column_index, selected)
+    #[cfg(feature="list-view")]
+    pub fn on_list_view_item_changed(&self) -> (usize, usize, bool) {
+        match self {
+            &EventData::OnListViewItemChanged { row_index, column_index, selected} => (row_index, column_index, selected),
             d => panic!("Wrong data type: {:?}", d)
         }
     }

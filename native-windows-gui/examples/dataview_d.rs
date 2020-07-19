@@ -15,7 +15,7 @@ use nwg::NativeUi;
 #[derive(Default, NwgUi)]
 pub struct DataViewApp {
     #[nwg_control(size: (500, 350), position: (300, 300), title: "DataView - Animals list")]
-    #[nwg_events( OnWindowClose: [DataViewApp::exit], OnInit: [DataViewApp::load_data], MousePressLeftDown: [DataViewApp::test] )]
+    #[nwg_events( OnWindowClose: [DataViewApp::exit], OnInit: [DataViewApp::load_data])]
     window: nwg::Window,
     
     #[nwg_resource(family: "Arial", size: 19)]
@@ -116,9 +116,6 @@ impl DataViewApp {
         };
 
         self.data_view.set_list_style(style);
-    }
-
-    fn test(&self) {
     }
 
     fn exit(&self) {

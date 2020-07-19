@@ -430,7 +430,7 @@ mod partial_controls_test_ui {
                 .size((30, 110))
                 .range(0..100)
                 .pos(50)
-                .marquee(false)
+                .marquee(true)
                 .marquee_update(0)
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_progress2)?;
