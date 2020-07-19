@@ -2,12 +2,12 @@
 
 # Basic
 ![basic example windows](windows-basic.png)
-![basic example linux](linux-basic.png)
 
 # Interactive tests
-![tests windows](windows-tests-base.png)
-![tests windows](windows-tests-tree.png)
-![tests linux](linux-tests-base.png)
+![demo1](demo1.png)
+![demo2](demo2.png)
+![demo3](demo3.png)
+![demo4](demo4.png)
 
 # Calculator
 ![calc windows](windows-calc.png)
@@ -23,7 +23,9 @@
 ![partials 2](partials2.png)
 
 # List view
-![List view](dataview.PNG)
+![list view 1](list_view1.png)
+![list view 1](list_view2.png)
+![list view 1](list_view3.png)
 
 # Tray notification
 ![tray notification](tray_notification_.png)

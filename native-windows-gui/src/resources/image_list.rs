@@ -1,4 +1,4 @@
-use winapi::um::commctrl::HIMAGELIST;
+use winapi::um::commctrl::{HIMAGELIST, ImageList_AddMasked};
 use winapi::shared::windef::{HICON, HBITMAP};
 use crate::{Bitmap, Icon, NwgError};
 use std::ptr;
@@ -10,7 +10,7 @@ const NOT_BOUND: &'static str = "ImageList is not yet bound to a winapi object";
 An image list is a collection of images of the same size, each of which can be referred to by its index.
 Image lists are used in controls such as tabs container and tree view in order to add icon next to the items.
 
-There are two kinds of image list in Winapi: nonmasked and masked. This is a wrapper over the nonmasked type.
+There are two kinds of image list in Winapi: masked. This is a wrapper over the masked type.
 
 Image list and the method that use them in controls are behind the "image-list" feature. 
 
@@ -79,12 +79,10 @@ impl ImageList {
 
     /// Adds a new bitmap to the image list. Returns the index to the image. Panics if the bitmap was not initialized
     pub fn add_bitmap(&self, bitmap: &Bitmap) -> i32 {
-        use winapi::um::commctrl::ImageList_Add;
-
         if self.handle.is_null() { panic!(NOT_BOUND); }
         if bitmap.handle.is_null() { panic!("Bitmap was not initialized"); }
 
-        unsafe { ImageList_Add(self.handle, bitmap.handle as HBITMAP, ptr::null_mut()) }
+        unsafe { ImageList_AddMasked(self.handle, bitmap.handle as HBITMAP, 0) }
     }
 
     /**
@@ -92,8 +90,6 @@ impl ImageList {
         Returns the index to the image or an error if the image could not be loaded
     */
     pub fn add_bitmap_from_filename(&self, filename: &str) -> Result<i32, NwgError> {
-        use winapi::um::commctrl::ImageList_Add;
-
         if self.handle.is_null() { panic!(NOT_BOUND); }
 
         let (w, h) = self.size();
@@ -104,17 +100,30 @@ impl ImageList {
             .strict(true)
             .build(&mut bitmap)?;
 
-        unsafe { Ok(ImageList_Add(self.handle, bitmap.handle as HBITMAP, ptr::null_mut())) }
+        unsafe { Ok(ImageList_AddMasked(self.handle, bitmap.handle as HBITMAP, 0)) }
     }
 
     /// Adds a new icon to the image list. Returns the index to the image. Panics if the icon was not initialized
     pub fn add_icon(&self, icon: &Icon) -> i32 {
-        use winapi::um::commctrl::ImageList_AddIcon;
-        
+        use winapi::um::winuser::{GetIconInfo, ICONINFO};
+        use winapi::um::wingdi::DeleteObject;
+
         if self.handle.is_null() { panic!(NOT_BOUND); }
         if icon.handle.is_null() { panic!("Icon was not initialized"); }
-        
-        unsafe { ImageList_AddIcon(self.handle, icon.handle as HICON) }
+
+        // Extract the bitmap from the icon
+        // Can't use `ImageList_AddIcon` because it doesn't always guess the mask
+        unsafe {
+            let mut info: ICONINFO = ::std::mem::zeroed();
+            GetIconInfo(icon.handle as _, &mut info);
+            
+            let i = ImageList_AddMasked(self.handle, info.hbmColor, 0);
+
+            DeleteObject(info.hbmMask as _);
+            DeleteObject(info.hbmColor as _);
+
+            i
+        }
     }
 
     /**
@@ -122,8 +131,6 @@ impl ImageList {
         Returns the index to the image or an error if the image could not be loaded
     */
     pub fn add_icon_from_filename(&self, filename: &str) -> Result<i32, NwgError> {
-        use winapi::um::commctrl::ImageList_AddIcon;
-
         if self.handle.is_null() { panic!(NOT_BOUND); }
 
         let (w, h) = self.size();
@@ -134,7 +141,7 @@ impl ImageList {
             .strict(true)
             .build(&mut icon)?;
 
-        unsafe { Ok(ImageList_AddIcon(self.handle, icon.handle as HICON)) }
+        Ok(self.add_icon(&icon))
     }
 
     /**
@@ -226,11 +233,11 @@ impl ImageListBuilder {
     }
 
     pub fn build(self, list: &mut ImageList) -> Result<(), NwgError> {
-        use winapi::um::commctrl::{ImageList_Create, ILC_COLOR32};
+        use winapi::um::commctrl::{ImageList_Create, ILC_COLOR32, ILC_MASK};
 
         unsafe {
             let (w, h) = self.size;
-            let handle = ImageList_Create(w, h, ILC_COLOR32, self.initial, self.grow);
+            let handle = ImageList_Create(w, h, ILC_COLOR32 | ILC_MASK, self.initial, self.grow);
             if handle.is_null() {
                 return Err(NwgError::resource_create("Failed to create image list"));
             }

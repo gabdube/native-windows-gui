@@ -251,8 +251,8 @@ impl TabsContainer {
         let parent_handle = ControlHandle::Hwnd(parent_handle_raw);
        
         let blank_paint = ManualPaint { old_size: (0, 0), force_redraw: true };
-        let mut size_check1 = Rc::new(RefCell::new(blank_paint));
-        let mut size_check2 = size_check1.clone();
+        let size_check1 = Rc::new(RefCell::new(blank_paint));
+        let size_check2 = size_check1.clone();
 
         let handler0 = bind_raw_event_handler_inner(&parent_handle, handle as usize, move |_hwnd, msg, _w, l| { unsafe {
             match msg {

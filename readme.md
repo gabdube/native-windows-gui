@@ -153,28 +153,6 @@ there won't by any change to the API. Issues can be raised if a bug is found or
 if some area in the documentation are unclear. If I overlooked a very important feature,
 it will most likely be added.
 
-## 1.0 release checklist
-
-This is the list of remaining task to complete for the 1.0 release. Created `2020-06-13`, updated `2020-07-17`
-
-* ☐ Make a video tutorial on how to build a small CRUD app (probably after 1.0 release)
-* ☐ Fix the image list transparency issue (probably after 1.0 release)
-* ☐ Finish up the `ListView` controls
-* 🗹 Add a check to see if the window handle is still valid and refractor the handle check
-* 🗹 Finalize image list in `TreeView` controls
-* 🗹 Add Marquee for progress bar
-* 🗹 Add support for FlexBoxLayout in native window derive
-* 🗹 Add "sub-events" to catch partial events from their parent
-* 🗹 Implement events in the derive partials
-* 🗹 Cleanup resources in derive partial
-* 🗹 Cleanup in main derive
-* 🗹 Load font from files
-* 🗹 Load font from memory
-* 🗹 Finishing the `OnKeyPress` event
-* 🗹 Add the tree-view events 
-* 🗹 Add cursor in embed resources
-* 🗹 Implement `std::Error` for `NwgError`
-
 ## License
 
 NWG use the MIT license
