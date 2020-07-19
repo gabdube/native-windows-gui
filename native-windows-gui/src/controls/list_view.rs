@@ -570,7 +570,7 @@ impl ListView {
 
     /// Returns data of an item in the list view. Returns `None` if there is no data at the selected index
     pub fn item(&self, row_index: usize, column_index: usize) -> Option<ListViewItem> {
-
+        None
     }
 
     /// Updates the item at the selected position
