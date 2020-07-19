@@ -22,6 +22,9 @@
 ![partials 1](partials1.png)
 ![partials 2](partials2.png)
 
+# List view
+![List view](dataview.PNG)
+
 # Tray notification
 ![tray notification](tray_notification_.png)
 
