@@ -1,6 +1,5 @@
 /*!
-    A very simple application that show your name in a message box.
-    Unlike `basic_d`, this example use layout to position the controls in the window
+    An application that load new fonts from file
 */
 
 

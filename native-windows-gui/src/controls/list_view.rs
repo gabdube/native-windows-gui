@@ -194,6 +194,15 @@ pub struct InsertListViewItem {
     pub image: Option<i32>
 }
 
+/// The data of a list view item
+pub struct ListViewItem {
+    pub row_index: i32,
+    pub column_index: i32,
+    pub text: String,
+
+    #[cfg(feature="image-list")]
+    pub image: i32,
+}
 
 /**
 A list-view control is a window that displays a collection of items.
@@ -212,6 +221,12 @@ Builder parameters:
     * `list_style`: The default style of the listview
     * `focus`:      The control receive focus after being created
 
+**Control events:**
+  * `MousePress(_)`: Generic mouse press events on the tree view
+  * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
+  * `OnKeyPress`:    Generic key press event
+  * `OnKeyRelease`:  Generic key release event
 
 Windows is Shit:
 - The win32 header controls leaks megabytes of memory per seconds because it is shit. As such, NO_HEADER is always ON.
@@ -269,7 +284,6 @@ impl ListView {
             })
         }
     }
-
 
     /// Sets the text color of the list view
     pub fn set_text_color(&self, r: u8, g: u8, b: u8) {
@@ -441,6 +455,58 @@ impl ListView {
         wh::send_message(handle, LVM_DELETECOLUMN , column_index as _, 0);
     }
 
+    /// Select or unselect an item at `row_index`. Does nothing if the index is out of bounds.
+    pub fn select_item(&self, row_index: usize, selected: bool) {
+        use winapi::um::commctrl::{LVM_SETITEMW, LVIF_STATE, LVIS_SELECTED};
+
+        if !self.has_item(row_index, 0) {
+            return;
+        }
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        let mut item: LVITEMW = unsafe { mem::zeroed() };
+        item.iItem = row_index as _;
+        item.mask = LVIF_STATE;
+        item.state = match selected { true => LVIS_SELECTED, false => 0 };
+        item.stateMask = LVIS_SELECTED;
+
+        wh::send_message(handle, LVM_SETITEMW , 0, &mut item as *mut LVITEMW as _);
+    }
+
+    /// Returns the index of the first selected item.
+    /// If there's more than one item selected, use `selected_items`
+    pub fn selected_item(&self) -> Option<usize> {
+        use winapi::um::commctrl::{LVM_GETNEXTITEMINDEX, LVNI_SELECTED, LVITEMINDEX};
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let mut index = None;
+
+        let mut i_data = LVITEMINDEX { iItem: -1, iGroup: -1 };
+
+        if wh::send_message(handle, LVM_GETNEXTITEMINDEX, &mut i_data as *mut LVITEMINDEX as _, LVNI_SELECTED) != 0 {
+            index = Some(i_data.iItem as usize);
+        }
+
+        index
+    }
+
+    /// Returns the indices of every selected items.
+    pub fn selected_items(&self) -> Vec<usize> {
+        use winapi::um::commctrl::{LVM_GETNEXTITEMINDEX, LVNI_SELECTED, LVITEMINDEX};
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let mut indices = Vec::with_capacity(self.len());
+
+        let mut i_data = LVITEMINDEX { iItem: -1, iGroup: -1 };
+        
+        while wh::send_message(handle, LVM_GETNEXTITEMINDEX, &mut i_data as *mut LVITEMINDEX as _, LVNI_SELECTED) != 0 {
+            indices.push(i_data.iItem as usize);
+        }
+
+        indices
+    }
+
     /// Inserts a new item into the list view
     pub fn insert_item<I: Into<InsertListViewItem>>(&self, insert: I) {
         use winapi::um::commctrl::{LVM_INSERTITEMW, LVM_SETITEMW};
@@ -500,6 +566,11 @@ impl ListView {
         item.iSubItem = column_index as _;
 
         wh::send_message(handle, LVM_GETITEMW , 0, &mut item as *mut LVITEMW as _) == 1
+    }
+
+    /// Returns data of an item in the list view. Returns `None` if there is no data at the selected index
+    pub fn item(&self, row_index: usize, column_index: usize) -> Option<ListViewItem> {
+
     }
 
     /// Updates the item at the selected position
@@ -598,7 +669,7 @@ impl ListView {
 
     /// Returns the number of columns in the list view
     pub fn column_len(&self) -> usize {
-        use winapi::um::commctrl::LVM_GETCOLUMNWIDTH ;
+        use winapi::um::commctrl::LVM_GETCOLUMNWIDTH;
 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
@@ -628,6 +699,19 @@ impl ListView {
         wh::send_message(handle, WM_SETREDRAW, enabled as _, 0);
     }
 
+    /// Sets the spacing between icons in list-view controls that have the ICON style.
+    /// `dx` specifies the distance, in pixels, to set between icons on the x-axis
+    /// `dy` specifies the distance, in pixels, to set between icons on the y-axis
+    pub fn set_icon_spacing(&self, dx: u16, dy: u16) {
+        use winapi::um::commctrl::LVM_SETICONSPACING;
+        use winapi::shared::minwindef::MAKELONG;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let spacing = MAKELONG(dx, dy);
+        wh::send_message(handle, LVM_SETICONSPACING, 0 as _, spacing as _);
+
+        self.invalidate();
+    }
 
     // Common methods
 
