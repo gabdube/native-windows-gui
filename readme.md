@@ -83,7 +83,7 @@ This is the main project git. It is separated in multiple sections
   - The base library. Includes an interactive test suite and plenty of examples
 - native-windows-derive
   - A procedural macro that generates GUI application from rust structure (pretty cool stuff IMO)
-- native-windows-docs
+- docs/native-windows-docs
   - A hefty documentation that goes over everything you need to know about NWG
 - [showcase](showcase)
   - Images of the examples. If you've made a NWG application and want
