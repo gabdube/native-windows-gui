@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Resources</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+
+</head>
+<body class="rustdoc">
+<!--[if lte IE 8]>
+<div class="warning">
+    This old browser is unsupported and will most likely display funky
+    things.
+</div>
+<![endif]-->
+
+<!-- NAV BEGIN -->
+<div id="nav">
+    <button id="toggle-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+</div>
+
+    
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='index.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
+    <li><a href="localization.html"><b>4.4.</b> Internationalization </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_resources.html"><b>6.2.</b> Resources </a></li>
+    <li><a href="nwd_events.html"><b>6.3.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.4.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.5.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
+    </ul>
+</li>
+
+</ul>
+</div>
+<!-- NAV END -->
+
+<div id='page-wrapper'>
+    <div id='page'>
+
+
+        <h1 class="title">Native Windows GUI: Raw handles</h1>
+
+        Native windows controls handle are public and always accessible using the field <code>handle</code>.
+        <br><br>
+        For example, here's the definition of <code>ControlHandle</code> and the Window control:
+            
+<div class="highlight"><pre>
+<span></span><span class="cp">#[derive(Default)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">handle</span>: <span class="nc">ControlHandle</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span></span><span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">ControlHandle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">NoHandle</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">Hwnd</span><span class="p">(</span><span class="n">HWND</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// (Parent menu / Menu). </span>
+<span class="w">    </span><span class="sd">/// Parent menu must be there as WINAPI does not have any function to fetch the parent</span>
+<span class="w">    </span><span class="n">Menu</span><span class="p">(</span><span class="n">HMENU</span><span class="p">,</span><span class="w"> </span><span class="n">HMENU</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// (Parent window / Menu). </span>
+<span class="w">    </span><span class="n">PopMenu</span><span class="p">(</span><span class="n">HWND</span><span class="p">,</span><span class="w"> </span><span class="n">HMENU</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// (Parent menu / Unique ID). </span>
+<span class="w">    </span><span class="n">MenuItem</span><span class="p">(</span><span class="n">HMENU</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Notice control</span>
+<span class="w">    </span><span class="n">Notice</span><span class="p">(</span><span class="n">HWND</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// Timer control</span>
+<span class="w">    </span><span class="n">Timer</span><span class="p">(</span><span class="n">HWND</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="p">),</span><span class="w"></span>
+
+<span class="w">    </span><span class="sd">/// System tray control</span>
+<span class="w">    </span><span class="n">SystemTray</span><span class="p">(</span><span class="n">HWND</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+<br>
+
+    <h3>Unwrapping window handles</h3>
+
+    Assuming you know the handle on the control and want to directly access it's content, the ControlHandle object has those methods:
+
+    <ul>
+        <li><code>pub fn hwnd(&self) -> Option&lt;HWND&gt;</code></li>
+        <li><code>pub fn hmenu(&self) -> Option&lt;(HMENU, HMENU)&gt;</code></li>
+        <li><code>pub fn pop_hmenu(&self) -> Option&lt;(HWND, HMENU)&gt;</code></li>
+        <li><code>pub fn hmenu_item(&self) -> Option&lt;(HMENU, u32)&gt;</code></li>
+        <li><code>pub fn timer(&self) -> Option&lt;(HWND, u32)&gt;</code></li>
+        <li><code>pub fn notice(&self) -> Option&lt;(HWND, u32)&gt;</code></li>
+        <li><code>pub fn tray(&self) -> Option&lt;HWND&gt;</code></li>
+    </ul>
+
+    <h3>Wrapping external handles</h3>
+
+    Wrapping external handles should only be done on a <code>Window</code> as it only control that doesn't expose
+    window class specific functions. Wrapping external handles should be considered unsafe.
+    
+<div class="highlight"><pre style="width: auto;">
+<span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">wrap_extern_window</span><span class="p">(</span><span class="n">hwnd</span>: <span class="nc">HWND</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">nwg</span>::<span class="n">Window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">handle</span>: <span class="nc">nwg</span>::<span class="n">ControlHandle</span>::<span class="n">Hwnd</span><span class="p">(</span><span class="n">hwnd</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+
+        <br/><br/>
+
+    </div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>

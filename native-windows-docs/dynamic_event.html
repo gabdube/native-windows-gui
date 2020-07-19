@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Dynamic event</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+
+</head>
+<body class="rustdoc">
+<!--[if lte IE 8]>
+<div class="warning">
+    This old browser is unsupported and will most likely display funky
+    things.
+</div>
+<![endif]-->
+
+<!-- NAV BEGIN -->
+<div id="nav">
+    <button id="toggle-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+</div>
+
+    
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='index.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
+    <li><a href="localization.html"><b>4.4.</b> Internationalization </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_resources.html"><b>6.2.</b> Resources </a></li>
+    <li><a href="nwd_events.html"><b>6.3.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.4.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.5.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
+    </ul>
+</li>
+
+</ul>
+</div>
+<!-- NAV END -->
+
+<div id='page-wrapper'>
+    <div id='page'>
+
+        <h1 class="title">Native Windows GUI: Dynamic events</h1>
+
+        Just like controls, binding new events handler at runtime isn't very hard.
+
+        <br/><br/>
+
+        <h3>Dynamic binding</h3>
+
+        Binding event handler at runtime is done using <code>bind_event_handler</code>. <code>full_bind_event_handler</code>
+        can also be used, but it's overkill as it will bind the handler on all children too. <code>full_bind_event_handler</code> can still be used to by the events
+        of multiple new controls in one take.<br>
+
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">new_button_handle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_button</span><span class="p">.</span><span class="n">handle</span><span class="p">;</span><span class="w"></span>
+<span class="n">nwg</span>::<span class="n">bind_event_handler</span><span class="p">(</span><span class="o">&amp;</span><span class="n">new_button</span><span class="p">.</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">parent_window</span><span class="p">.</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">_evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">nwg</span>::<span class="n">Event</span>::<span class="n">OnButtonClick</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">new_button_handle</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">nwg</span>::<span class="n">simple_message</span><span class="p">(</span><span class="o">&amp;</span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">content</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">});</span><span class="w"></span>
+</pre></div>
+
+        <br> 
+
+        As mentionned in the <b>Events</b> section, <code>bind_event_handler</code> also takes the parent control handle as argument as most control sends their
+        events to the parent.
+
+        <br><br>
+
+        Another thing to keep in mind, the handler callback is not aware of the controls in the application, as such it can only send the handle.
+        In order to correctly dispatch the events, the handle of the controls must be moved to the handler callback and then the handle must be compared
+        to the one sent in the callback.<br><br>
+
+        <code>if handle == new_button_handle { ... }</code>
+
+        <br><br>
+
+        <h3>Freeing events handler</h3>
+
+        Unlike events freeing, which is done automatically when the controls go out of scope, events handler must be manually freed by calling the
+        <code>nwg::unbind_event_handler(&handler)</code> method.<br><br>
+
+        <h3>Example</h3>
+
+        <ul>
+            <li><a href="https://github.com/gabdube/native-windows-gui/blob/1.0-prerelease/native-windows-gui/examples/message_bank.rs">Message bank</a> ( <a href="https://github.com/gabdube/native-windows-gui/blob/1.0-prerelease/native-windows-gui/examples/message_bank_d.rs">derive version</a> ) shows how to dynamically add controls and events.</li>
+            </ul>
+
+        <br/><br/>
+
+    </div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Events</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+</head>
+<body class="rustdoc">
+<!--[if lte IE 8]>
+<div class="warning">
+    This old browser is unsupported and will most likely display funky
+    things.
+</div>
+<![endif]-->
+
+<!-- NAV BEGIN -->
+<div id="nav">
+    <button id="toggle-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+</div>
+
+    
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='index.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
+    <li><a href="localization.html"><b>4.4.</b> Internationalization </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_resources.html"><b>6.2.</b> Resources </a></li>
+    <li><a href="nwd_events.html"><b>6.3.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.4.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.5.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
+    </ul>
+</li>
+
+</ul>
+</div>
+<!-- NAV END -->
+
+<div id='page-wrapper'>
+    <div id='page'>
+
+        <h1 class="title">Native Windows GUI: Events</h1>
+
+        NWG handles events by hooking the system events queue. This means that, unlike other GUI toolkit,
+        events are not really bound to a control. Instead, binding events is done <b>globally</b>.<br/><br/>
+        
+        Because of the Rust borrow checker and the way events are handled internally by the windows API, any "traditional"
+        way to bind events ends up being too complicated. The two last version of NWG taught me that.<br/><br/>
+
+        This sections explains how to bind events with NWG.<br><br>
+
+        Note: to learn how to use raw events <code>HWND, WPARAM, LPARAM</code>, see <a href="low_events.html">low level events handling</a>.
+
+        <h3>Dispatching events</h3>
+
+        Before even thinking about hooking the event queue, the application must block the current thread and start listening to events.
+        This is easily done by calling <code>dispatch_thread_events</code> function.<br><br>
+
+        In order to break the event loop, a call to <code>stop_thread_dispatch</code> must be done. <b>Closing all the active windows is not enough!
+        In a case like this, the event loop will beep running in the background until the process is killed.</b><br><br>
+
+        The method <code>dispatch_thread_events</code> uses <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessage">GetMessage</a>
+        under the hood and will block the thread.<br><br>
+
+        Now, in some instances blocking the thread might not be wanted (ex: <a href="https://github.com/gabdube/native-windows-gui/blob/1.0-prerelease/native-windows-gui/examples/opengl_canvas/src/main.rs">opengl canvas</a>).
+        In such cases, it's possible to pass a callback using the <code>dispatch_thread_events_with_callback</code>. Note that this function will not block the thread!
+        It's the equivalent of using a <code>loop</code> statement.
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="k">fn</span> <span class="nf">exit</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">stop_thread_dispatch</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">// ...</span>
+<span class="n">dispatch_thread_events</span><span class="p">();</span><span class="w"></span>
+
+<span class="n">nwg</span>::<span class="n">dispatch_thread_events_with_callback</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span>
+<span class="p">});</span><span class="w"></span>
+</pre></div>
+            
+            
+
+        <h3>Hooking the event queue</h3>  
+
+        Hooking the system events queue can be done by calling one of those two functions:
+        <ul>
+            <li><code>full_bind_event_handler(control_handle, callback)</code></li>
+            <li><code>bind_event_handler(control_handle, parent_handle, callback)</code></li>
+        </ul>
+
+        The first one <b>"full"</b> will hook the events of a control and ALL its children. 
+        It's the one that will be used the most; At least once for every top level window.<br><br>
+
+        The other one will hook the events of a control and its parent. Why the control and the parent?
+        <b>Because the common controls of WINAPI sends their events to their parent.</b> This method of hooking
+        is usually used when a callback is added dynamically. More on that <a href="dynamic_event.html">in the dynamic events section</a>.<br><br>
+
+        It is a VERY good idea to use a <code>WeakRef</code> to share data with an event handler to be sure that the shared value won't be leaked if
+        someone forgets to unbind the event handler.<br>
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="kd">let</span><span class="w"> </span><span class="n">evt_ui</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">downgrade</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ui</span><span class="p">.</span><span class="n">inner</span><span class="p">);</span><span class="w"></span>
+<span class="kd">let</span><span class="w"> </span><span class="n">handle_events</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">evt</span><span class="p">,</span><span class="w"> </span><span class="n">evt_data</span><span class="p">,</span><span class="w"> </span><span class="n">handle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">events_ui</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">evt_ui</span><span class="p">.</span><span class="n">upgrade</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">evt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">nwg</span>::<span class="n">Event</span>::<span class="n">OnWindowClose</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">events_ui</span><span class="p">.</span><span class="n">window</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">nwg</span>::<span class="n">stop_thread_dispatch</span><span class="p">();</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="n">nwg</span>::<span class="n">full_bind_event_handler</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">handle_events</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+
+        <h3>Callback parameters</h3>
+
+        Th event handler parse the raw winapi parameters into 3 values:
+
+        <ul>
+            <li>The <a href="#">Event</a></li>
+            <li>The <a href="#">EventData</a></li>
+            <li>The <a href="#">Handle</a></li>
+        </ul>
+
+        <code>Event</code> is an enum. Every event that can be raised by a NWG application is listed under it.
+        Some events, such as <code>MousePress(MousePressEvent)</code> also takes a sub-enum.<br><br>
+
+        <code>EventData</code> is also an enum. Most NWG events don't use data (<code>EventData::NoData</code>), this is because the raw data
+        that comes with winapi events are often limited to the size of 2 <code>usize</code>. For example, instead of passing the width and height
+        on a <code>Event::OnResize</code>, it's better to call <code>control.size()</code> in the callback.
+        
+        <br><br>
+
+        <code>Handle</code> is the handle of the control. The events callback is not aware of the control in the application, as such
+        it can only send the handle. To fix this, NWG supports comparison of control vs handle
+        <br><br><code>&handle == &events_ui.window</code><br><br>
+        As such it's up to the developer to check which controller sent the event.
+
+        <br><br>
+        
+        <h3>EventHandler</h3>
+
+        All event hooking funtions return a <code>EventHandler</code> object. This object is an opaque handle over the event hook and all the hooked controls.
+        Ignoring this value means that the callback and all its data will be leaked! In smaller appplication, it's perfectly fine to just ignore it, 
+        but in large, long-running applications it's better to free the handler when it is no longer needed. This is done with: <br><br>
+
+        <code>nwg::unbind_event_handler(&handler)</code>
+
+        <br><br>
+
+        Events handler are not freed automatically when they go out of scope!
+        
+        <br><br><br><br>
+
+    </div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>

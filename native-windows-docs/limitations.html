@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Limitations</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+
+
+</head>
+<body class="rustdoc">
+<!--[if lte IE 8]>
+<div class="warning">
+    This old browser is unsupported and will most likely display funky
+    things.
+</div>
+<![endif]-->
+
+<!-- NAV BEGIN -->
+<div id="nav">
+    <button id="toggle-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+</div>
+
+    
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='index.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
+    <li><a href="localization.html"><b>4.4.</b> Internationalization </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_resources.html"><b>6.2.</b> Resources </a></li>
+    <li><a href="nwd_events.html"><b>6.3.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.4.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.5.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
+    </ul>
+</li>
+
+</ul>
+</div>
+<!-- NAV END -->
+
+<div id='page-wrapper'>
+    <div id='page'>
+
+        <h1 class="title">Native Windows GUI: Limitations </h1>
+
+        Even though NWG wraps a very large amount of Windows functionalities, it is still a very old API.
+        As such there are a certain kind of applications that cannot be developed with NWG (at least for now).
+        <br/><br/>
+
+        <h3>Win32</h3>
+
+        NWG use Win32 under the hood. Win32 is a very old API and it only supports Windows PC. Also Win32 does not support touch/pen inputs.
+        <br><br>
+
+        <h3>Fancy looking applications</h3>
+
+        NWG will probably never reach the level of customization a HTML/CSS application can provide. There's a few reason for that.
+        <br><br>
+
+        NWG controls cannot be customized. There is a theme API, but the documentation in very sparse, and it probably wont be implemented in NWG core.
+        <br><br>
+
+        NWG does not have a drawing API. Originally, NWG would have a built-in canvas control that wrapped Direct2D, but the implementation was removed
+        from the library because it would take too much time to implement.
+        <br><br>
+
+        Transparency is not supported. NWG controls with transparency flickers ALOT. It's almost a health hazard for people with epilepsy.
+        One way to get rid of this flaw is to outright remove transparency between controls.
+        <br><br>
+
+        NWG has limited animation capabilities. Animations are handled by using timers, and they are far from optimal to use. Also, it's impossible to
+        create animations without a drawing API. The canvas control should fix his issue.
+        <br><br>
+
+        NWG has limited support for resource types. NWG can load fonts and the most common images format, but it lacks the ability to play music and videos.
+        Those features will never be in the core. They should be implemented as external libraries.
+        <br><br>
+
+        NWG do not come with plotting controls or any kind of 3D api. Those will have to be implemented after canvas.
+
+        <br><br>
+
+        <h3>Data efficiency</h3>
+
+        The way NWG collection controls allocate data is very inefficient. NWG both allocate space to hold the rust specific data and the visible string value of the control.
+        This means that if your application must log hundread of thousand of items, it will have a hard time.
+
+        <br><br>
+
+        This can be fixed by implementing <code>OWNDER_DATA</code> over the controls, but this will take alot of efforts and it will be implemented as 
+        an external library.
+
+        <br><br>
+        <br><br>
+
+    </div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>

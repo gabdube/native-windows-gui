@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Derive partial</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+
+
+</head>
+<body class="rustdoc">
+<!--[if lte IE 8]>
+<div class="warning">
+    This old browser is unsupported and will most likely display funky
+    things.
+</div>
+<![endif]-->
+
+<!-- NAV BEGIN -->
+<div id="nav">
+    <button id="toggle-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+</div>
+
+    
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='index.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
+    <li><a href="localization.html"><b>4.4.</b> Internationalization </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_resources.html"><b>6.2.</b> Resources </a></li>
+    <li><a href="nwd_events.html"><b>6.3.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.4.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.5.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
+    </ul>
+</li>
+
+</ul>
+</div>
+<!-- NAV END -->
+
+<div id='page-wrapper'>
+    <div id='page'>
+
+        <h1 class="title">Native Windows Derive: Partials</h1>
+
+        Native-windows-derive fully supports partials UI. It works the same way as <code>NwgUi</code>.<br>
+        <br/>
+
+        <h3>Deriving a Partial</h3>
+
+        Deriving a partial from a structure is done using the <code>NwgPartial</code> derive:
+<div class="highlight"><pre style="width: auto;"><span></span><span class="cp">#[derive(NwgPartial)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">MyPartial</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_layout(max_size: [1000, 150]</span><span class="p">,</span><span class="w"> </span><span class="n">min_size</span>: <span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">])]</span><span class="w"></span>
+<span class="w">    </span><span class="n">layout</span>: <span class="nc">nwg</span>::<span class="n">GridLayout</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_control(text: </span><span class="s">&quot;Name:&quot;</span><span class="cp">, h_align: HTextAlign::Right)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_layout_item(layout: layout, col: 0, row: 0)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_events(OnLabelClick: [MyPartial::test]</span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">label1</span>: <span class="nc">nwg</span>::<span class="n">Label</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+            
+
+    <br>
+
+    NwgPartials accepts the same tag as <code>NwgUi</code>: nwg_control, nwg_resource, nwg_events, nwg_layout, nwg_layout_item, and nwg_partial.
+            
+    <br><br>
+
+    <h3>Adding a partial to another UI</h3>
+
+    If a partial is added as a field in another UI struct, it must be tagged using <code>nwg_partial</code>. Optionally, a <code>parent</code>
+    parameter can be passed to send the partial <code>parent</code>.
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="cp">#[derive(NwgUi)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">MyUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
+<span class="w">    </span><span class="n">frame</span>: <span class="nc">nwg</span>::<span class="n">Frame</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_partial(parent: frame)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">partial</span>: <span class="nc">MyPartial</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+
+        <br>
+
+    <h3>Hooking events in partial from their parent</h3>
+
+    Partials are self contained, this means that it's impossible to propagate an event "up" to the parent. To fix this, the <code>nwg_events</code> 
+    tag can accepts a struct field name, allowing you to catch an event raised in a partial from the parent.
+    
+    <br><br>
+
+    This works by extending the <code>nwg_events</code> this way:<br>
+
+    <code>nwg_events((FIELD_NAME, EVENT): [CALLBACK_LIST,])</code><br><br>
+
+
+<div class="highlight"><pre style="width: auto;"><span></span><span class="cp">#[derive(NwgUi)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">MyUi</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
+<span class="w">    </span><span class="n">frame</span>: <span class="nc">nwg</span>::<span class="n">Frame</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="cp">#[nwg_partial(parent: frame)]</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_events((button, OnButtonClick): [MyUi::save]</span><span class="p">)]</span><span class="w"></span>
+<span class="w">    </span><span class="n">partial</span>: <span class="nc">MyPartial</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="cp">#[derive(NwgPartial)]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">MyPartial</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cp">#[nwg_control]</span><span class="w"></span>
+<span class="w">    </span><span class="n">button</span>: <span class="nc">nwg</span>::<span class="n">Button</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+        
+
+    <br><br>
+
+    </div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>
