@@ -12,6 +12,9 @@
 # Calculator
 ![calc windows](windows-calc.png)
 
+# Custom fonts
+![calc windows](custom_font.png)
+
 # Dialogs
 ![file dialog](file_dialog.png)
 ![color dialog](color_dialog.png)

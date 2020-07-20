@@ -2,7 +2,7 @@
     An application that load different interfaces using the partial feature.
     Partials can be used to split large GUI application into smaller bits.
 
-    Requires the following features: `cargo run --example partials --features "listbox frame combobox"`
+    Requires the following features: `cargo run --example partials --features "listbox frame combobox flexbox"`
 */
 
 extern crate native_windows_gui as nwg;

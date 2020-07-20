@@ -194,6 +194,7 @@ fn everything() {
     }
 
     init().expect("Failed to init Native Windows GUI");
+    Font::set_global_family("Segoe UI").expect("Failed to set default font");
     
     let app = TestControlPanel::build_ui(Default::default()).expect("Failed to build UI");
 

@@ -245,7 +245,7 @@ mod partial_controls_test_ui {
 
             Window::builder()
                 .flags(WindowFlags::MAIN_WINDOW)
-                .size((480, 430))
+                .size((480, 450))
                 .position((100, 100))
                 .title("Controls")
                 .icon(Some(&data.window_icon))
@@ -339,13 +339,13 @@ mod partial_controls_test_ui {
             Label::builder()
                 .text("A label\r\nSecond line")
                 .position((10, 200))
-                .size((130, 30))
+                .size((130, 50))
                 .background_color(Some([255, 255, 255]))
                 .parent(&data.basics_control_tab)
                 .build(&mut data.test_label)?;
 
             ListBox::builder()
-                .position((10, 240))
+                .position((10, 260))
                 .size((130, 100))
                 .parent(&data.basics_control_tab)
                 .collection(vec!["Red", "White", "Green", "Yellow"])
