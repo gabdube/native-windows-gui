@@ -38,6 +38,7 @@ pub struct ControlsTest {
     popcorn_small: Bitmap,
     ball: Bitmap,
     arial_font: Font,
+    segoe_font: Font,
     wait_cursor: Cursor,
     tabs_image_list: ImageList,
     
@@ -238,6 +239,11 @@ mod partial_controls_test_ui {
                 .size(20)
                 .family("Arial")
                 .build(&mut data.arial_font)?;
+
+            Font::builder()
+                .size(16)
+                .family("Segoe UI")
+                .build(&mut data.segoe_font)?;
 
             //
             //  Controls holder
@@ -498,6 +504,7 @@ mod partial_controls_test_ui {
                 .position((10, 140))
                 .size((200, 200))
                 .parent(&data.basics_control_tab2)
+                .font(Some(&data.segoe_font))
                 .build(&mut data.test_rich)?;
 
             ScrollBar::builder()
