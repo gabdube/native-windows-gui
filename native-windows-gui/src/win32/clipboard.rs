@@ -107,7 +107,7 @@ fn write_custom_data(window: &nwg::Window) {
 
     nwg::Clipboard::close();
 }
-    
+
 fn read_custom_data(window: &nwg::Window) -> Option<Hello> {
     unsafe {
         nwg::Clipboard::open(window);
@@ -142,7 +142,7 @@ pub struct Clipboard;
 
 impl Clipboard {
 
-    /** 
+    /**
         Fill the clipboard with the selected text.
         The data use the `ClipboardFormat::UnicodeText` format.
 
@@ -169,19 +169,19 @@ impl Clipboard {
         let mut data = None;
 
         Clipboard::open(handle);
-        
+
         unsafe {
             if Clipboard::has_format(UnicodeText) {
                 let handle = Clipboard::data_handle(UnicodeText).unwrap();
                 data = from_wide_ptr(handle.cast());
-                handle.release(); 
+                handle.release();
             } else if Clipboard::has_format(Text) {
                 let handle = Clipboard::data_handle(Text).unwrap();
                 data = from_ptr(handle.cast());
                 handle.release();
             }
         }
-        
+
         Clipboard::close();
 
         data
@@ -200,13 +200,13 @@ impl Clipboard {
         }
     }
 
-    /** 
+    /**
         Opens the clipboard for examination and prevents other applications from modifying the clipboard content.
         Another call to `close` should be made as soon as the application is done with the clipboard.
-        
+
         Parameters:
             handle: A window control that will be identified as the current "owner" of the clipboard
-    
+
         This function will panic if the control is not HWND based.
     */
     pub fn open<C: Into<ControlHandle>>(handle: C) {
@@ -217,7 +217,7 @@ impl Clipboard {
 
     /**
         Places data on the clipboard in a specified clipboard format.
-    
+
         This method is unsafe because there is no way to ensure that data is valid.
         If possible, it is recommended to use a higher level function such as `set_data_text` instead.
 
@@ -241,7 +241,7 @@ impl Clipboard {
         ptr::copy_nonoverlapping(data, GlobalLock(alloc) as *mut D, count);
         GlobalUnlock(alloc);
 
-        SetClipboardData(fmt, alloc as HANDLE);    
+        SetClipboardData(fmt, alloc as HANDLE);
     }
 
     /**
@@ -262,7 +262,7 @@ impl Clipboard {
             if format == selected_format {
                 found = true;
                 break;
-            } 
+            }
         }
 
         found
@@ -280,7 +280,7 @@ impl Clipboard {
         use winapi::um::winuser::GetClipboardData;
         use winapi::um::winbase::{GlobalLock, GlobalUnlock};
         use std::{ptr, mem};
-        
+
         let fmt = fmt.into_raw();
         let handle = GetClipboardData(fmt);
         if handle.is_null() {
@@ -315,7 +315,7 @@ impl Clipboard {
     }
 
     /**
-        A window can place more than one clipboard object on the clipboard, each representing the same information in a different clipboard format. 
+        A window can place more than one clipboard object on the clipboard, each representing the same information in a different clipboard format.
         Retrieves the number of different data formats currently on the clipboard.
     */
     pub fn count_clipboard_formats() -> u32 {
@@ -345,7 +345,7 @@ impl Clipboard {
         Return the handle of the window that owns the clipboard
     */
     pub fn ownder() -> ControlHandle {
-        let handle = unsafe { ::winapi::um::winuser::GetClipboardOwner() }; 
+        let handle = unsafe { ::winapi::um::winuser::GetClipboardOwner() };
         ControlHandle::Hwnd(handle)
     }
 
@@ -363,7 +363,7 @@ unsafe fn from_wide_ptr(ptr: *const u16) -> Option<String> {
     }
 
     let array: &[u16] = from_raw_parts(ptr, length as usize);
-    
+
     OsString::from_wide(&array)
         .into_string()
         .ok()
