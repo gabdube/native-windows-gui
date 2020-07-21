@@ -149,11 +149,40 @@ impl Clipboard {
         This is a high level function that handles `open` and `close`
     */
     pub fn set_data_text<'a, C: Into<ControlHandle>>(handle: C, text: &'a str) {
+        use winapi::um::winuser::SetClipboardData;
+        use winapi::um::stringapiset::MultiByteToWideChar;
+        use winapi::um::winnls::CP_UTF8;
+        use winapi::shared::basetsd::SIZE_T;
+        use winapi::um::winbase::{GlobalAlloc, GlobalLock, GlobalFree, GlobalUnlock, GMEM_MOVEABLE};
+        use core::{mem, ptr};
+
+        let size = unsafe {
+            MultiByteToWideChar(CP_UTF8, 0, text.as_ptr() as *const _, text.len() as _, ptr::null_mut(), 0)
+        };
+
+        if size == 0 {
+            return;
+        }
+
+        let alloc_size = (mem::size_of::<u16>() * (size as usize + 1)) as SIZE_T;
+        let alloc = unsafe { GlobalAlloc(GMEM_MOVEABLE, alloc_size) };
+
+        unsafe {
+            let locked_ptr = GlobalLock(alloc) as *mut u16;
+            assert!(!locked_ptr.is_null());
+            MultiByteToWideChar(CP_UTF8, 0, text.as_ptr() as *const _, text.len() as _, locked_ptr, size);
+            ptr::write(locked_ptr.offset(size as isize), 0);
+            GlobalUnlock(alloc);
+        }
+
         Clipboard::open(handle);
         Clipboard::empty();
 
-        let text = to_utf16(text);
-        unsafe { Clipboard::set_data(ClipboardFormat::UnicodeText, text.as_ptr(), text.len()) };
+        unsafe {
+            if SetClipboardData(CF_UNICODETEXT, alloc as _).is_null() {
+                GlobalFree(alloc);
+            }
+        }
 
         Clipboard::close();
     }
