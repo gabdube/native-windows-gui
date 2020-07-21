@@ -15,9 +15,9 @@ keywords = ["gui", "ui", "windows"]
 
 [dependencies]
 winapi = { version = "0.3", features = [
-  "winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi", 
+  "winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi",
   "errhandlingapi", "winerror", "commctrl", "sysinfoapi", "shobjidl", "combaseapi",
-  "commdlg", "d2d1", "objbase", "dwrite", "winnls", "shellapi", "wincodec"] }
+  "commdlg", "d2d1", "objbase", "dwrite", "winnls", "shellapi", "wincodec", "stringapiset"] }
 
 lazy_static = "1.4.0"
 bitflags = { version = "1.1.0" }
@@ -69,7 +69,7 @@ tree-view-iterator = []
 flexbox = ["stretch"]
 high-dpi = ["muldiv"]
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "cursor", "image-decoder",
-       "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "number-select", "clipboard", "menu", 
+       "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "number-select", "clipboard", "menu",
        "trackbar", "extern-canvas", "frame", "tooltip", "status-bar", "winnls", "textbox", "rich-textbox", "image-list", "embed-resource", "scroll-bar",
        "tree-view-iterator", "flexbox"]
 
