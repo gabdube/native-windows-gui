@@ -247,12 +247,12 @@ mod extern_canvas_ui {
     use std::ops::Deref;
 
     pub struct ExternCanvasUi {
-        inner: ExternCanvas,
+        inner: Rc<ExternCanvas>,
         default_handler: RefCell<Vec<nwg::EventHandler>>
     }
 
-    impl nwg::NativeUi<ExternCanvas, Rc<ExternCanvasUi>> for ExternCanvas {
-        fn build_ui(mut data: ExternCanvas) -> Result<Rc<ExternCanvasUi>, nwg::NwgError> {
+    impl nwg::NativeUi<ExternCanvasUi> for ExternCanvas {
+        fn build_ui(mut data: ExternCanvas) -> Result<ExternCanvasUi, nwg::NwgError> {
             use nwg::Event as E;
             
             // Resources
@@ -282,41 +282,43 @@ mod extern_canvas_ui {
                 .build(&mut data.choose_color_btn2)?;
 
             // Wrap-up
-            let ui = Rc::new(ExternCanvasUi {
-                inner: data,
+            let ui = ExternCanvasUi {
+                inner: Rc::new(data),
                 default_handler: RefCell::default(),
-            });
+            };
 
             // Events
             let window_handles = [&ui.window.handle];
 
             for handle in window_handles.iter() {
-                let evt_ui = ui.clone();
+                let evt_ui = Rc::downgrade(&ui.inner);
                 let handle_events = move |evt, _evt_data, handle| {
-                    match evt {
-                        E::OnResize => {
-                            if &handle == &evt_ui.canvas {
-                                ExternCanvas::resize_canvas(&evt_ui.inner);
-                            }
-                        },
-                        E::OnButtonClick => {
-                            if &handle == &evt_ui.choose_color_btn1 {
-                                ExternCanvas::select_bg_color(&evt_ui.inner);
-                            } else if &handle == &evt_ui.choose_color_btn2 {
-                                ExternCanvas::select_tri_color(&evt_ui.inner);
-                            }
-                        },
-                        E::OnWindowClose => {
-                            if &handle == &evt_ui.window {
-                                ExternCanvas::exit(&evt_ui.inner);
-                            }
-                        },
-                        E::OnInit => {
-                            if &handle == &evt_ui.window {
-                                ExternCanvas::show(&evt_ui.inner);
-                            }
-                        },
-                        _ => {}
+                    if let Some(evt_ui) = evt_ui.upgrade() {
+                        match evt {
+                            E::OnResize => {
+                                if &handle == &evt_ui.canvas {
+                                    ExternCanvas::resize_canvas(&evt_ui);
+                                }
+                            },
+                            E::OnButtonClick => {
+                                if &handle == &evt_ui.choose_color_btn1 {
+                                    ExternCanvas::select_bg_color(&evt_ui);
+                                } else if &handle == &evt_ui.choose_color_btn2 {
+                                    ExternCanvas::select_tri_color(&evt_ui);
+                                }
+                            },
+                            E::OnWindowClose => {
+                                if &handle == &evt_ui.window {
+                                    ExternCanvas::exit(&evt_ui);
+                                }
+                            },
+                            E::OnInit => {
+                                if &handle == &evt_ui.window {
+                                    ExternCanvas::show(&evt_ui);
+                                }
+                            },
+                            _ => {}
+                        }
                     }
                 };
 
@@ -333,15 +335,15 @@ mod extern_canvas_ui {
                 .child_item(nwg::GridLayoutItem::new(&ui.canvas, 0, 0, 3, 8))
                 .child(3, 0, &ui.choose_color_btn1)
                 .child(3, 1, &ui.choose_color_btn2)
-                .build(&ui.layout);
+                .build(&ui.layout)?;
             
             return Ok(ui);
         }
     }
 
-    impl ExternCanvasUi {
+    impl Drop for ExternCanvasUi {
         /// To make sure that everything is freed without issues, the default handler must be unbound.
-        pub fn destroy(&self) {
+        fn drop(&mut self) {
             let mut handlers = self.default_handler.borrow_mut();
             for handler in handlers.drain(0..) {
                 nwg::unbind_event_handler(&handler);
@@ -360,9 +362,6 @@ mod extern_canvas_ui {
 }
 
 pub fn main() {
-    unsafe {
-        nwg::set_dpi_awareness();
-    };
     nwg::init().expect("Failed to init Native Windows GUI");
 
     let app = ExternCanvas::build_ui(Default::default()).expect("Failed to build UI");
@@ -373,12 +372,9 @@ pub fn main() {
 
     // Here we use the `with_callback` version of dispatch_thread_events
     // Internally the callback will be executed almost as fast as `loop { callback() }`
-    let callback_app = app.clone();
     nwg::dispatch_thread_events_with_callback(move || {
-        callback_app.canvas.render();
+        app.canvas.render();
     });
-
-    app.destroy();
 }
 
 
