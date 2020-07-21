@@ -354,6 +354,11 @@ impl<D: Display+Default> ListBox<D> {
         col
     }
 
+    /// Clears the control and free the underlying collection. Same as `set_collection(Vec::new())`
+    pub fn clear(&self) {
+        self.set_collection(Vec::new());
+    }
+
     /// Return the number of items in the control. NOT the inner rust collection
     pub fn len(&self) -> usize {
         use winapi::um::winuser::LB_GETCOUNT;
