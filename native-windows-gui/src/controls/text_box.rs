@@ -315,9 +315,9 @@ impl TextBox {
 
     /// Winapi flags required by the control
     pub fn forced_flags(&self) -> u32 {
-        use winapi::um::winuser::{WS_BORDER, WS_CHILD, ES_MULTILINE};
+        use winapi::um::winuser::{WS_BORDER, WS_CHILD, ES_MULTILINE, ES_WANTRETURN};
         
-        WS_BORDER | WS_CHILD | ES_MULTILINE
+        WS_BORDER | WS_CHILD | ES_MULTILINE | ES_WANTRETURN
     }
 
 }
