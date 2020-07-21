@@ -32,6 +32,10 @@ pub struct ClipboardCustom {
     #[nwg_control(popup: true)]
     listbox_menu: nwg::Menu,
 
+    #[nwg_control(parent: listbox_menu, text: "Paste Items")]
+    #[nwg_events(OnMenuItemSelected: [ClipboardCustom::paste_items])]
+    listbox_menu_paste: nwg::MenuItem,
+
     #[nwg_control(parent: listbox_menu, text: "Copy Items")]
     #[nwg_events(OnMenuItemSelected: [ClipboardCustom::copy_items])]
     listbox_menu_copy: nwg::MenuItem,
@@ -44,7 +48,7 @@ impl ClipboardCustom {
         self.listbox_menu.popup(x, y)
     }
 
-    fn copy_items(&self) {
+    fn paste_items(&self) {
         self.listbox.clear();
 
         if let Some(text) = nwg::Clipboard::data_text(&self.window) {
@@ -52,6 +56,17 @@ impl ClipboardCustom {
                 self.listbox.push(line.into());
             }
         }
+    }
+
+    fn copy_items(&self) {
+        let mut copy_data = String::with_capacity(30);
+        let col = self.listbox.collection();
+        for item in col.iter() {
+            copy_data.push_str(&item);
+            copy_data.push_str("\r\n");
+        }
+
+        nwg::Clipboard::set_data_text(&self.window, &copy_data);
     }
 
 }
