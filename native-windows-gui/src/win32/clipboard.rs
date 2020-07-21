@@ -230,7 +230,7 @@ impl Clipboard {
     */
     pub unsafe fn set_data<D: Copy>(fmt: ClipboardFormat, data: *const D, count: usize) {
         use winapi::um::winuser::SetClipboardData;
-        use winapi::um::winbase::{GlobalAlloc, GlobalLock, GlobalUnlock, GMEM_MOVEABLE};
+        use winapi::um::winbase::{GlobalAlloc, GlobalLock, GlobalFree, GlobalUnlock, GMEM_MOVEABLE};
         use winapi::shared::basetsd::SIZE_T;
         use std::{mem, ptr};
 
@@ -241,31 +241,19 @@ impl Clipboard {
         ptr::copy_nonoverlapping(data, GlobalLock(alloc) as *mut D, count);
         GlobalUnlock(alloc);
 
-        SetClipboardData(fmt, alloc as HANDLE);
+        if SetClipboardData(fmt, alloc as HANDLE).is_null() {
+            GlobalFree(alloc);
+        }
     }
 
     /**
         Check if the selected format is available in the clipboard.
-        The clipboard must be open when calling this function.
     */
     pub fn has_format(fmt: ClipboardFormat) -> bool {
-        use winapi::um::winuser::EnumClipboardFormats;
+        use winapi::um::winuser::IsClipboardFormatAvailable;
 
         let selected_format = fmt.into_raw();
-        let mut format = 0;
-        let next_format = unsafe {
-            |fmt: &mut u32| { let f = EnumClipboardFormats(*fmt); *fmt = f; f }
-        };
-
-        let mut found = false;
-        while next_format(&mut format) != 0 {
-            if format == selected_format {
-                found = true;
-                break;
-            }
-        }
-
-        found
+        unsafe { IsClipboardFormatAvailable(selected_format) != 0 }
     }
 
     /**
