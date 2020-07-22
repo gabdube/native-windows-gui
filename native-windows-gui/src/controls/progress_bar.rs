@@ -206,24 +206,24 @@ impl ProgressBar {
     pub fn add_flags(&self, styles: ProgressBarFlags) {
         use winapi::um::winuser::GWL_STYLE;
 
-        let styles = styles.bits() as usize;
+        let styles = styles.bits() as u32;
 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let active_styles = wh::get_style(handle);
         
-        wh::set_window_long(handle, GWL_STYLE, active_styles | styles);
+        wh::set_style(handle, active_styles | styles);
     }
 
     /// Removes flags from the progress bar.
     pub fn remove_flags(&self, styles: ProgressBarFlags) {
         use winapi::um::winuser::GWL_STYLE;
 
-        let styles = styles.bits() as usize;
+        let styles = styles.bits() as u32;
 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
-        let active_styles = wh::get_window_long(handle, GWL_STYLE) as usize;
+        let active_styles = wh::get_style(handle);
 
-        wh::set_window_long(handle, GWL_STYLE, active_styles & !styles);
+        wh::set_style(handle, active_styles & !styles);
     }
 
     /// Return true if the control currently has the keyboard focus
