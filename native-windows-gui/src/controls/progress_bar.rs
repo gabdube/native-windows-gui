@@ -204,8 +204,6 @@ impl ProgressBar {
 
     /// Updates the flags of the progress bar.
     pub fn add_flags(&self, styles: ProgressBarFlags) {
-        use winapi::um::winuser::GWL_STYLE;
-
         let styles = styles.bits() as u32;
 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
@@ -216,8 +214,6 @@ impl ProgressBar {
 
     /// Removes flags from the progress bar.
     pub fn remove_flags(&self, styles: ProgressBarFlags) {
-        use winapi::um::winuser::GWL_STYLE;
-
         let styles = styles.bits() as u32;
 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
