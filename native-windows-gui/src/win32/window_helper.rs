@@ -120,7 +120,7 @@ pub fn get_style(handle: HWND) -> UINT {
     get_window_long(handle, GWL_STYLE) as UINT
 }
 
-#[cfg(feature="list-view")]
+#[cfg(any(feature = "list-view", feature = "progress-bar"))]
 pub fn set_style(handle: HWND, style: u32) {
     use ::winapi::um::winuser::GWL_STYLE;
     set_window_long(handle, GWL_STYLE, style as usize);
