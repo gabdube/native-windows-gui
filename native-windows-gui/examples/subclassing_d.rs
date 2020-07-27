@@ -99,15 +99,15 @@ pub struct SubclassApp {
 impl SubclassApp {
 
     fn button_click1(&self) {
-        nwg::simple_message("Simple button", "Hey, I'm a simple button!");
+        nwg::modal_info_message(&self.window, "Simple button", "Hey, I'm a simple button!");
     }
 
     fn button_click2(&self) {
-        nwg::simple_message("User type button", "Hey, I'm a button with a user type def!");
+        nwg::modal_info_message(&self.window, "User type button", "Hey, I'm a button with a user type def!");
     }
 
     fn button_click3(&self, button: &CustomButton) {
-        nwg::simple_message("Custom button", &format!("Hey, I'm a button with custom data! The data is {}!", button.data) );
+        nwg::modal_info_message(&self.window, "Custom button", &format!("Hey, I'm a button with custom data! The data is {}!", button.data) );
     }
 
     fn exit(&self) {

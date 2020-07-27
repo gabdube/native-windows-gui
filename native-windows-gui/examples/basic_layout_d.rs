@@ -33,11 +33,11 @@ pub struct BasicApp {
 impl BasicApp {
 
     fn say_hello(&self) {
-        nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
+        nwg::modal_info_message(&self.window, "Hello", &format!("Hello {}", self.name_edit.text()));
     }
     
     fn say_goodbye(&self) {
-        nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
+        nwg::modal_info_message(&self.window, "Goodbye", &format!("Goodbye {}", self.name_edit.text()));
         nwg::stop_thread_dispatch();
     }
 

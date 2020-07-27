@@ -30,7 +30,8 @@ pub use win32::{
      full_bind_event_handler, bind_event_handler, unbind_event_handler,
      bind_raw_event_handler, has_raw_handler, unbind_raw_event_handler
  },
- message_box::{MessageButtons, MessageIcons, MessageChoice, MessageParams, message, fatal_message, error_message, simple_message}};
+ message_box::*
+};
 
 pub(crate) use win32::window::bind_raw_event_handler_inner;
 

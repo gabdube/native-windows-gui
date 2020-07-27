@@ -108,7 +108,11 @@
         <h3>Message box</h3>
 
         In a GUI application, there's no console to display error messages to the end user. In cases like this, a message box is used.<br>
-        NWG wraps the winapi message box function with the <code>message</code> function.
+        NWG wraps the winapi message box function with the <code>message</code> or the <code>modal_message</code> function.
+        <br>
+
+        The modal variant takes a parent window parameter. The parent window is disabled during the message box duration.
+
 
 <div class="highlight"><pre style="width:auto;"><span></span><span class="k">use</span><span class="w"> </span><span class="n">native_windows_gui</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">nwg</span><span class="p">;</span><span class="w"></span>
 
@@ -122,12 +126,18 @@
 <span class="n">assert</span><span class="o">!</span><span class="p">(</span><span class="n">nwg</span>::<span class="n">message</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">nwg</span>::<span class="n">MessageChoice</span>::<span class="nb">Ok</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 
-        This function might be a little to verbose for most use case, that's why NWG implements three simple interfaces:
+        <br>
+
+        This function might be a little to verbose for most use case, that's why NWG implements six simple interfaces (3 modal and 3 without):
 
         <ul>
             <li><code>fatal_message</code>: a message box with an error icon. This function panics</li>
             <li><code>error_message</code>: a message box with an error icon.</li>
             <li><code>simple_message</code>: a message box with an information icon.</li>
+
+            <li><code>modal_fatal_message</code>: a message box with an error icon. This function panics</li>
+            <li><code>modal_error_message</code>: a message box with an error icon.</li>
+            <li><code>modal_info_message</code>: a message box with an information icon.</li>
         </ul>
 
 <div class="highlight"><pre style="width:auto;"><span></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">fatal_message</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="p">(</span><span class="n">title</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="kt">str</span><span class="p">,</span><span class="w"> </span><span class="n">content</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="kt">str</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>

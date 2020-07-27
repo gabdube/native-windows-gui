@@ -83,7 +83,7 @@ This is the main project git. It is separated in multiple sections
   - The base library. Includes an interactive test suite and plenty of examples
 - native-windows-derive
   - A procedural macro that generates GUI application from rust structure (pretty cool stuff IMO)
-- docs/native-windows-docs
+- docs/native-windows-docs [read it online](https://gabdube.github.io/native-windows-gui/native-windows-docs/index.html)
   - A hefty documentation that goes over everything you need to know about NWG
 - [showcase](showcase)
   - Images of the examples. If you've made a NWG application and want
@@ -198,11 +198,11 @@ pub struct BasicApp {
 impl BasicApp {
 
     fn say_hello(&self) {
-        nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
+        nwg::modal_info_message(&self.window, "Hello", &format!("Hello {}", self.name_edit.text()));
     }
     
     fn say_goodbye(&self) {
-        nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
+        nwg::modal_info_message(&self.window, "Goodbye", &format!("Goodbye {}", self.name_edit.text()));
         nwg::stop_thread_dispatch();
     }
 
@@ -240,11 +240,11 @@ pub struct BasicApp {
 impl BasicApp {
 
     fn say_hello(&self) {
-        nwg::simple_message("Hello", &format!("Hello {}", self.name_edit.text()));
+        nwg::modal_info_message(&self.window, "Hello", &format!("Hello {}", self.name_edit.text()));
     }
     
     fn say_goodbye(&self) {
-        nwg::simple_message("Goodbye", &format!("Goodbye {}", self.name_edit.text()));
+        nwg::modal_info_message(&self.window, "Goodbye", &format!("Goodbye {}", self.name_edit.text()));
         nwg::stop_thread_dispatch();
     }
 

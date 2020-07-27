@@ -26,7 +26,7 @@ impl SystemTray {
     }
 
     fn hello1(&self) {
-        nwg::simple_message("Hello", "Hello World!");
+        nwg::modal_info_message(&self.window, "Hello", "Hello World!");
     }
     
     fn hello2(&self) {
