@@ -75,6 +75,22 @@ cd ../examples/embed_resources
 cargo run
 ```
 
+### Cross-compiling from Ubuntu
+
+Requirement: MinGW compiler
+
+    sudo apt install gcc-mingw-w64-x86-64
+
+Requirement: Rust support
+
+    rustup target add x86_64-pc-windows-gnu
+
+Compiling and running basic example:
+
+    cargo build --release --target=x86_64-pc-windows-gnu
+    cargo build --release --target=x86_64-pc-windows-gnu --example basic
+    wine target/x86_64-pc-windows-gnu/release/examples/basic.exe
+
 ## Project structure
 
 This is the main project git. It is separated in multiple sections
