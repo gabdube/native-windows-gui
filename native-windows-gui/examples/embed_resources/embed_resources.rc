@@ -3,7 +3,7 @@
 MAINICON ICON "../../test_rc/love.ico"
 TEST ICON "../../test_rc/cog.ico"
 
-BALL BITMAP "../../test_rc/ball.bmp";
+BALL BITMAP "../../test_rc/ball.bmp"
 
 ICE CURSOR "../../test_rc/ice.cur"
 
