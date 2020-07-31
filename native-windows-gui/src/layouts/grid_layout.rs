@@ -126,7 +126,7 @@ impl GridLayout {
         This is a simplified interface over `add_child_item`
         
         Panic:
-        - If the layout was not yet initialized
+        - If the layout is not initialized
         - If the control is not window-like (HWND handle)
     */
     pub fn add_child<W: Into<ControlHandle>>(&self, col: u32, row: u32, c: W) {
@@ -146,7 +146,7 @@ impl GridLayout {
     Add a children control to the grid layout. 
     
     Panic:
-        - If the layout was not yet initialized
+        - If the layout is not initialized
         - If the control is not window-like (HWND handle)
     */
     pub fn add_child_item(&self, i: GridLayoutItem) {
@@ -171,9 +171,10 @@ impl GridLayout {
         Remove the children control in the layout. See also `remove_child_by_pos`.
         Note that the child control won't be hidden after being removed from the control.
 
+        This method won't do anything if there is no control at the specified position.
+
         Panic:
-        - If the layout was not yet initialized
-        - If the control is not in the layout (see `has_child`)
+        - If the layout is not initialized
     */
     pub fn remove_child<W: Into<ControlHandle>>(&self, c: W) {
         let base = {
@@ -186,7 +187,7 @@ impl GridLayout {
             let index = inner.children.iter().position(|item| item.control == handle);
             match index {
                 Some(i) => { inner.children.remove(i); },
-                None => { panic!("Control is not in the layout"); }
+                None => { return; }
             }
             
             inner.base
@@ -204,9 +205,9 @@ impl GridLayout {
         This method won't do anything if there is no control at the specified position.
 
         Panic:
-        - If the layout was not yet initialized
+        - If the layout is not initialized
     */
-    pub fn remove_child_by_pos<W: Into<ControlHandle>>(&self, col: u32, row: u32) {
+    pub fn remove_child_by_pos(&self, col: u32, row: u32) {
         let base = {
             let mut inner = self.inner.borrow_mut();
             if inner.base.is_null() {
@@ -227,12 +228,86 @@ impl GridLayout {
         self.update_layout(w as u32, h as u32);
     }
 
+
+    /**
+        Move the selected control to a new position in the grid layout. The old position
+        becomes empty (as if `remove_child` was called). However it won't remove the control
+        at the new position if there is one. 
+
+        This method won't do anything if there is no control at the specified position.
+
+        Panic:
+        - If the layout is not initialized
+    */
+    pub fn move_child<W: Into<ControlHandle>>(&self, c: W, col: u32, row: u32) {
+        let base = {
+            let mut inner = self.inner.borrow_mut();
+            if inner.base.is_null() {
+                panic!("GridLayout is not initialized");
+            }
+
+            let handle = c.into().hwnd().expect("Control must be window-like (HWND handle)");
+            let index = inner.children.iter().position(|item| item.control == handle);
+            match index {
+                Some(i) => { 
+                    let mut child = inner.children.remove(i);
+                    child.col = col;
+                    child.row = row;
+                    inner.children.push(child);
+                }
+                None => { return; }
+            }
+            
+            inner.base
+        };
+        
+
+        let (w, h) = unsafe { wh::get_window_size(base) };
+        self.update_layout(w as u32, h as u32);
+    }
+
+    /**
+        Move the selected control to a new position in the grid layout. The old position
+        becomes empty (as if `remove_child` was called). However it won't remove the control
+        at the new position if there is one. 
+
+        This method won't do anything if there is no control at the specified position.
+
+        Panic:
+        - If the layout is not initialized
+    */
+    pub fn move_child_by_pos<W: Into<ControlHandle>>(&self, col: u32, row: u32, new_col: u32, new_row: u32) {
+        let base = {
+            let mut inner = self.inner.borrow_mut();
+            if inner.base.is_null() {
+                panic!("GridLayout is not initialized");
+            }
+
+            let index = inner.children.iter().position(|item| item.col == col && item.row == row);
+            match index {
+                Some(i) => { 
+                    let mut child = inner.children.remove(i); 
+                    child.col = new_col;
+                    child.row = new_row;
+                    inner.children.push(child);
+                },
+                None => {}
+            }
+            
+            inner.base
+        };
+        
+
+        let (w, h) = unsafe { wh::get_window_size(base) };
+        self.update_layout(w as u32, h as u32);
+    }
+
     /**
         Check if a window control is a children of the layout
 
         Panic:
-        - If the layout was not yet initialized
-        - If the control is not in the layout (see `has_child`)
+        - If the layout is not initialized
+        - If the child is not a window-like control
     */
     pub fn has_child<W: Into<ControlHandle>>(&self, c: W) -> bool {
         let inner = self.inner.borrow();
