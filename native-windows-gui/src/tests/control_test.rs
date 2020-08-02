@@ -241,7 +241,7 @@ mod partial_controls_test_ui {
                 .build(&mut data.arial_font)?;
 
             Font::builder()
-                .size(16)
+                .size(23)
                 .family("Segoe UI")
                 .build(&mut data.segoe_font)?;
 

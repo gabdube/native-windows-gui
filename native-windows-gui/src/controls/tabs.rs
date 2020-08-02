@@ -285,17 +285,40 @@ impl TabsContainer {
                     *size_check2.borrow_mut() = ManualPaint { old_size: size, force_redraw: false };
                 },
                 WM_SIZE => {
+                    use winapi::shared::windef::{RECT, HGDIOBJ};
+                    use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, DT_CALCRECT, DT_LEFT};
+                    use winapi::um::wingdi::SelectObject;
+
                     let size = l as u32;
                     let width = LOWORD(size) as i32;
                     let height = HIWORD(size) as i32;
                     let (w, h) = crate::win32::high_dpi::physical_to_logical(width, height);
 
-                    let mut data = (hwnd, w as u32, h as u32);
+                    let mut data = ResizeDirectChildrenParams {
+                        parent: hwnd,
+                        width: w as u32,
+                        height: h as u32,
+                        tab_offset_y: 0
+                    };
+
+                    // Get the height of the tabs
+                    let font_handle = wh::get_window_font(hwnd);
+                    let mut r: RECT = mem::zeroed();
+                    let dc = GetDC(hwnd);
+                    let old = SelectObject(dc, font_handle as HGDIOBJ);
+                    let calc: [u16;2] = [75, 121];
+                    DrawTextW(dc, calc.as_ptr(), 2, &mut r, DT_CALCRECT | DT_LEFT);
+                    SelectObject(dc, old);
+                    ReleaseDC(hwnd, dc);
+
+                    // Fix the width/height of the tabs
+                    const BORDER_SIZE: u32 = 11;
+                    let tab_height = r.bottom as u32 + BORDER_SIZE;
+                    if data.width > BORDER_SIZE { data.width -= BORDER_SIZE; }
+                    if data.height > tab_height { data.height -= tab_height + BORDER_SIZE; }
+                    data.tab_offset_y = tab_height;
                     
-                    if data.1 > 11 { data.1 -= 11; }
-                    if data.2 > 30 { data.2 -= 30; }
-                    
-                    let data_ptr = &data as *const (HWND, u32, u32);
+                    let data_ptr = &data as *const ResizeDirectChildrenParams;
                     EnumChildWindows(hwnd, Some(resize_direct_children), mem::transmute(data_ptr));
                 },
                 _ => {}
@@ -357,6 +380,11 @@ impl<'a> TabsContainerBuilder<'a> {
 
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> TabsContainerBuilder<'a> {
         self.parent = Some(p.into());
+        self
+    }
+
+    pub fn font(mut self, font: Option<&'a Font>) -> TabsContainerBuilder<'a> {
+        self.font = font;
         self
     }
 
@@ -684,10 +712,20 @@ impl<'a> TabBuilder<'a> {
 }
 
 
+struct ResizeDirectChildrenParams {
+    parent: HWND,
+    width: u32,
+    height: u32,
+    tab_offset_y: u32
+}
+
 unsafe extern "system" fn resize_direct_children(handle: HWND, params: LPARAM) -> BOOL {
-    let &(parent, w, h): &(HWND, u32, u32) = mem::transmute(params);
-    if wh::get_window_parent(handle) == parent {
-        wh::set_window_size(handle, w, h, false);
+    let params: &ResizeDirectChildrenParams = &*(params as *const ResizeDirectChildrenParams);
+    if wh::get_window_parent(handle) == params.parent {
+        wh::set_window_size(handle, params.width, params.height, false);
+
+        let (x, _y) = wh::get_window_position(handle);
+        wh::set_window_position(handle, x, params.tab_offset_y as i32);
     }
 
     1
