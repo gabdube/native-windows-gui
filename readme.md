@@ -41,6 +41,17 @@ extern crate native_windows_gui as nwg;
 extern crate native_windows_derive as nwd;  // Optional. Only if the derive macro is used.
 ```
 
+### Rust 2018 aliasing
+
+You can skip the `extern crate` define in your source code by adding the following code in `Cargo.toml`
+Note that procedural macros still require a `extern crate` definition, so this wont work with `native-windows-derive`
+
+```toml
+[dependencies]
+nwg = {version = "^1.0.1", package = "native-windows-gui"}
+```
+
+
 ## Trying it out
 
 See it for yourself. NWG has plenty of example and a fully interactive test suite. The only thing you need to do is:
@@ -172,16 +183,6 @@ it will most likely be added.
 ## License
 
 NWG use the MIT license
-
-## Rust 2018 aliasing
-
-You can skip the `extern crate` define in your source code by adding the following code in `Cargo.toml`
-Note that procedural macros still require a `extern crate` definition, so this wont work with `native-windows-derive`
-
-```toml
-[dependencies]
-nwg = {version = "^1.0.1", package = "native-windows-gui"}
-```
 
 ## Code example
 
