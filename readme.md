@@ -173,6 +173,16 @@ it will most likely be added.
 
 NWG use the MIT license
 
+## Rust 2018 aliasing
+
+You can skip the `extern crate` define in your source code by adding the following code in `Cargo.toml`
+Note that procedural macros still require a `extern crate` definition, so this wont work with `native-windows-derive`
+
+```toml
+[dependencies]
+nwg = {version = "^1.0.1", package = "native-windows-gui"}
+```
+
 ## Code example
 
 ### With native windows derive

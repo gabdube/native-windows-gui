@@ -1,6 +1,5 @@
 /*!
-    A very simple application that show your name in a message box.
-    See `basic` for the version without the derive macro
+    Shows how to add controls dynamically into a flexbox layout
 */
 
 
