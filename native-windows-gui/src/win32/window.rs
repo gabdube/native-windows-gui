@@ -564,14 +564,15 @@ unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l:
 unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
     use std::os::windows::ffi::OsStringExt;
     use std::ffi::OsString;
-    use std::{char};
+    use std::char;
     use crate::events::*;
 
     use winapi::um::commctrl::{DefSubclassProc, TTN_GETDISPINFOW};
     use winapi::um::winuser::{GetClassNameW, GetMenuItemID, GetSubMenu};
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
       WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP, WM_MENUSELECT, WM_EXITSIZEMOVE,
-      WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED, WM_KEYDOWN, WM_KEYUP, WM_CHAR, WM_MOUSEWHEEL, WM_DROPFILES, GET_WHEEL_DELTA_WPARAM};
+      WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED, WM_KEYDOWN, WM_KEYUP, WM_CHAR, WM_MOUSEWHEEL, WM_DROPFILES, GET_WHEEL_DELTA_WPARAM,
+      WM_GETMINMAXINFO};
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
@@ -684,6 +685,10 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_DROPFILES => {
             let data = EventData::OnFileDrop(DropFiles { drop: w as _ });
             callback(Event::OnFileDrop, data, base_handle)
+        },
+        WM_GETMINMAXINFO => {
+            let data = EventData::OnMinMaxInfo(MinMaxInfo { inner: l as _ });
+            callback(Event::OnMinMaxInfo, data, base_handle)
         },
         WM_CHAR => callback(Event::OnChar, EventData::OnChar(char::from_u32(w as u32).unwrap_or('?')), base_handle),
         WM_EXITSIZEMOVE => callback(Event::OnResizeEnd, NO_DATA, base_handle),

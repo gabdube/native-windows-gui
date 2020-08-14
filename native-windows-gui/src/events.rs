@@ -45,6 +45,10 @@ pub enum Event {
 
     /// When a key is pressed on a keyboard.Use EventData::OnKey to check which key.
     OnKeyRelease,
+
+    /// Sent to a window when the size or position of the window is about to change. 
+    /// An application can use the event data `EventData::OnMinMaxInfo` to override the minimum or maximum size.
+    OnMinMaxInfo,
     
     /// When a control is resized by the user. 
     /// This is typically applied to top level windows but it also applies to children when layouts are used.
@@ -231,6 +235,10 @@ pub enum EventData {
     /// Sets if the window should be closed after the event
     OnWindowClose(WindowCloseData),
 
+    /// Contains the default maximized position and dimensions, and the default minimum and maximum tracking sizes. 
+    /// An application can override the defaults by setting the members of this event.
+    OnMinMaxInfo(MinMaxInfo),
+
     /// Sets the text of a tooltip.
     /// The method `on_tooltip_text` should be used to access the inner data
     OnTooltipText(ToolTipTextData),
@@ -278,6 +286,14 @@ impl EventData {
     pub fn on_paint(&self) -> &PaintData {
         match self {
             EventData::OnPaint(p) => p,
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+
+    /// Unwraps event data into a `&MinMaxInfo`. Panics if it's not the right type.
+    pub fn on_min_max(&self) -> &MinMaxInfo {
+        match self {
+            EventData::OnMinMaxInfo(i) => i,
             d => panic!("Wrong data type: {:?}", d)
         }
     }
@@ -366,9 +382,9 @@ impl EventData {
 //
 
 use winapi::um::commctrl::NMTTDISPINFOW;
-use winapi::um::winuser::{PAINTSTRUCT, BeginPaint, EndPaint};
+use winapi::um::winuser::{PAINTSTRUCT, MINMAXINFO, BeginPaint, EndPaint};
 use winapi::um::shellapi::{HDROP, DragFinish};
-use winapi::shared::windef::HWND;
+use winapi::shared::windef::{HWND, POINT};
 use std::fmt;
 
 /// A wrapper structure that set the tooltip text on a `OnTooltipText` callback
@@ -492,7 +508,6 @@ impl DropFiles {
     /// The coordinates are local to the control. Ex: (0, 0) is the top left corner of the control.
     pub fn point(&self) -> [i32; 2] {
         use winapi::um::shellapi::DragQueryPoint;
-        use winapi::shared::windef::POINT;
 
         unsafe {
             let mut pt = POINT { x: 0, y: 0 };
@@ -553,3 +568,69 @@ impl Drop for DropFiles {
     }
 
 }
+
+
+pub struct MinMaxInfo {
+    pub(crate) inner: *mut MINMAXINFO,
+}
+
+impl MinMaxInfo {
+
+    /// The maximized width and the maximized height of the window. For top-level windows, this value is based on the width of the primary monitor.
+    pub fn set_maximized_size(&self, width: i32, height: i32) {
+        let info = unsafe { &mut *self.inner };
+        info.ptMaxSize = POINT { x: width as _, y: height as _ };
+    }
+
+    /// Returns the maximized width and the maximized height of the window. For top-level windows, this value is based on the width of the primary monitor.
+    pub fn maximized_size(&self) -> [i32; 2] {
+        let info = unsafe { &mut *self.inner };
+        [info.ptMaxSize.x, info.ptMaxSize.y]
+    }
+
+    /// Sets the position of the left side of the maximized window and the position of the top of the maximized window. For top-level windows, this value is based on the position of the primary monitor.
+    pub fn set_maximized_pos(&self, x: i32, y: i32) {
+        let info = unsafe { &mut *self.inner };
+        info.ptMaxPosition = POINT { x: x as _, y: y as _ };
+    }
+
+    /// Returns the position of the left side of the maximized window and the position of the top of the maximized window. For top-level windows, this value is based on the position of the primary monitor.
+    pub fn maximized_pos(&self) -> [i32; 2] {
+        let info = unsafe { &mut *self.inner };
+        [info.ptMaxPosition.x, info.ptMaxPosition.y]
+    }
+
+    /// Sets the maximum size of the window
+    pub fn set_max_size(&self, width: i32, height: i32) {
+        let info = unsafe { &mut *self.inner };
+        info.ptMaxTrackSize = POINT { x: width as _, y: height as _ };
+    }
+
+    /// Returns the maximum size of the window
+    pub fn max_size(&self) -> [i32; 2] {
+        let info = unsafe { &mut *self.inner };
+        [info.ptMaxTrackSize.x, info.ptMaxTrackSize.y]
+    }
+
+    /// Sets the maximum size of the window
+    pub fn set_min_size(&self, width: i32, height: i32) {
+        let info = unsafe { &mut *self.inner };
+        info.ptMinTrackSize = POINT { x: width as _, y: height as _ };
+    }
+
+    /// Returns the minimum size of the window
+    pub fn min_size(&self) -> [i32; 2] {
+        let info = unsafe { &mut *self.inner };
+        [info.ptMinTrackSize.x, info.ptMinTrackSize.y]
+    }
+}
+
+impl fmt::Debug for MinMaxInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, 
+            "MinMaxInfo {{ maximized_size: {:?}, maximized_pos: {:?}, max_size: {:?}, min_size: {:?} }}",
+            self.maximized_size(), self.maximized_pos(), self.max_size(), self.min_size() 
+        )
+    }
+}
+

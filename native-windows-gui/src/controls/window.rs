@@ -79,6 +79,7 @@ bitflags! {
       * `OnWindowMinimize`: When the window is minimized
       * `OnMove`: When the window is moved by the user
       * `OnFileDrop`: When a file is dropped in the window (only raised if accept_file is set)
+      * `OnMinMaxInfo`: When the size or position of the window is about to change and the size of the windows must be restricted
 
 */
 #[derive(Default, PartialEq, Eq)]
