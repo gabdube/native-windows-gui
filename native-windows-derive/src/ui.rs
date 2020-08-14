@@ -24,7 +24,8 @@ struct NwgControl<'a> {
     names: Vec<syn::Ident>,
     values: Vec<syn::Expr>,
 
-    weight: u32,
+    // First value if the parent order, second value is the insert order
+    weight: [u16; 2],
 }
 
 impl<'a> NwgControl<'a> {
@@ -505,7 +506,7 @@ impl<'a> NwgUi<'a> {
         let parent_ident = syn::Ident::new("parent", pm2::Span::call_site());
 
         // First pass: parse controls, layouts, and events
-        for field in named_fields {
+        for (field_pos, field) in named_fields.iter().enumerate() {
             if NwgControl::valid(field) {
                 let id = field.ident.as_ref().unwrap();
                 let ty = NwgControl::parse_type(field);
@@ -519,7 +520,7 @@ impl<'a> NwgUi<'a> {
                     layout_index: 0,
                     names,
                     values,
-                    weight: 0,
+                    weight: [0, field_pos as u16],
                 };
 
                 events.add_top_level_handle(field);
@@ -628,19 +629,19 @@ impl<'a> NwgUi<'a> {
         }
 
         // Parent Weight
-        fn compute_weight(controls: &[NwgControl], index: usize, weight: &mut u32) {
+        fn compute_weight(controls: &[NwgControl], index: usize, weight: &mut [u16;2]) {
             match &controls[index].parent_id {
                 Some(p) => 
                     if let Some(parent_index) = controls.iter().position(|c| &c.id == &p) {
                         compute_weight(controls, parent_index, weight);
-                        *weight += 1;
+                        weight[0] += 1;
                     },
                 None => {}
             }
         };
 
         for i in 0..(controls.len()) {
-            let mut weight = 0;
+            let mut weight = controls[i].weight;
             compute_weight(&controls, i, &mut weight);
             controls[i].weight = weight;
         }
@@ -651,7 +652,15 @@ impl<'a> NwgUi<'a> {
         }
 
         // Sort by weight
-        controls.sort_unstable_by(|a, b| a.weight.cmp(&b.weight));
+        controls.sort_unstable_by(|a, b| {
+            let a = ((a.weight[0] as u32) << 16) + (a.weight[1] as u32);
+            let b = ((b.weight[0] as u32) << 16) + (b.weight[1] as u32);
+            a.cmp(&b)
+        });
+
+        for c in controls.iter() {
+            println!("{:?} {:?}", c.id, c.weight);
+        }
 
         NwgUi { controls, resources, layouts, partials, events }
     }
