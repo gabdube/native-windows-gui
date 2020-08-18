@@ -852,8 +852,7 @@ mod partial_controls_test_ui {
                     },
                 E::OnButtonClick =>
                     if &handle == &self.run_window_test {
-                        self.test_list_view.select_item(0, true);
-                        //run_window_tests(self, evt);
+                        run_window_tests(self, evt);
                     } else if &handle == &self.run_button_test {
                         run_button_tests(self, evt);
                     } else if &handle == &self.run_check_box_test {
