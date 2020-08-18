@@ -285,16 +285,22 @@ impl TreeView {
         next_treeview_item(&self.handle, TVGN_CHILD, item.handle)
     }
 
-    /// Return the next sibling in the tree or `None` if the item has no more sibling or if it's not part of the tree view 
+    /// Returns the next sibling in the tree or `None` if the item has no more sibling or if it's not part of the tree view 
     pub fn next_sibling(&self, item: &TreeItem) ->  Option<TreeItem> {
         use winapi::um::commctrl::TVGN_NEXT;
         next_treeview_item(&self.handle, TVGN_NEXT, item.handle)
     }
 
-    /// Return the previous sibling in the tree or `None` if the item has no more sibling or if it's not part of the tree view
-    pub fn previous_sibling(&self, item: &TreeItem) ->  Option<TreeItem> {
+    /// Returns the previous sibling in the tree or `None` if the item has no more sibling or if it's not part of the tree view
+    pub fn previous_sibling(&self, item: &TreeItem) -> Option<TreeItem> {
         use winapi::um::commctrl::TVGN_PREVIOUS;
         next_treeview_item(&self.handle, TVGN_PREVIOUS, item.handle)
+    }
+
+    /// Returns the parent of the item in the tree or `None` if the item is root
+    pub fn parent(&self, item: &TreeItem) -> Option<TreeItem> {
+        use winapi::um::commctrl::TVGN_PARENT;
+        next_treeview_item(&self.handle, TVGN_PARENT, item.handle)
     }
 
     /// Return the currently selected item.
