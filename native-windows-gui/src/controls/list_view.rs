@@ -2,7 +2,7 @@ use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
     LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT, LVS_EX_GRIDLINES, LVS_EX_BORDERSELECT,
-    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT, LVIF_IMAGE
+    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT, LVIF_IMAGE, LVS_SHOWSELALWAYS
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
@@ -34,6 +34,8 @@ bitflags! {
         const TAB_STOP = WS_TABSTOP;
 
         const SINGLE_SELECTION = LVS_SINGLESEL;
+
+        const ALWAYS_SHOW_SELECTION = LVS_SHOWSELALWAYS;
 
         // Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
         const NO_HEADER = LVS_NOCOLUMNHEADER;
@@ -824,7 +826,7 @@ impl ListView {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE | WS_TABSTOP
+        WS_VISIBLE | WS_TABSTOP | LVS_SHOWSELALWAYS
     }
 
     /// Winapi flags required by the control

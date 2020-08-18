@@ -1,3 +1,10 @@
+1.0.3
+
+* A few bug fixes
+* Add the ability to move controls in a grid layout
+* Added the `OnMinMaxInfo` event to handle the min/max size of a window
+* Fixed the tab header height
+
 1.0.2
 
 * Fix carriage return in multiline textbox. 100% sure it was working but heh
