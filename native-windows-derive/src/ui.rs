@@ -658,10 +658,6 @@ impl<'a> NwgUi<'a> {
             a.cmp(&b)
         });
 
-        for c in controls.iter() {
-            println!("{:?} {:?}", c.id, c.weight);
-        }
-
         NwgUi { controls, resources, layouts, partials, events }
     }
 
