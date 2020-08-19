@@ -78,28 +78,28 @@ mod handle_from_control;
 
 pub use control_handle::ControlHandle;
 pub use control_base::{ControlBase, HwndBuilder, TimerBuilder as BaseTimerBuilder, OtherBuilder};
-pub use window::{Window, WindowFlags};
-pub use button::{Button, ButtonFlags, ButtonBuilder};
-pub use check_box::{CheckBox, CheckBoxState, CheckBoxFlags};
-pub use radio_button::{RadioButton, RadioButtonState, RadioButtonFlags};
-pub use text_input::{TextInput, TextInputFlags};
-pub use label::{Label, LabelFlags};
-pub use image_frame::{ImageFrame, ImageFrameFlags};
+pub use window::{Window, WindowBuilder, WindowFlags};
+pub use button::{Button, ButtonBuilder, ButtonFlags};
+pub use check_box::{CheckBox, CheckBoxBuilder, CheckBoxState, CheckBoxFlags};
+pub use radio_button::{RadioButton, RadioButtonBuilder, RadioButtonState, RadioButtonFlags};
+pub use text_input::{TextInput, TextInputBuilder, TextInputFlags};
+pub use label::{Label, LabelBuilder, LabelFlags};
+pub use image_frame::{ImageFrame, ImageFrameBuilder, ImageFrameFlags};
 
 #[cfg(feature = "textbox")]
-pub use text_box::{TextBox, TextBoxFlags};
+pub use text_box::{TextBox, TextBoxBuilder, TextBoxFlags};
 
 #[cfg(feature = "rich-textbox")]
-pub use rich_text_box::{RichTextBox, RichTextBoxFlags};
+pub use rich_text_box::{RichTextBox, RichTextBoxBuilder, RichTextBoxFlags};
 
 #[cfg(feature = "status-bar")]
-pub use status_bar::StatusBar;
+pub use status_bar::{StatusBar, StatusBarBuilder};
 
 #[cfg(feature = "tooltip")]
-pub use tooltip::{Tooltip, TooltipIcon};
+pub use tooltip::{Tooltip, TooltipBuilder, TooltipIcon};
 
 #[cfg(feature = "trackbar")]
-pub use track_bar::{TrackBar, TrackBarFlags};
+pub use track_bar::{TrackBar, TrackBarBuilder, TrackBarFlags};
 
 #[cfg(feature = "menu")]
 pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder};
