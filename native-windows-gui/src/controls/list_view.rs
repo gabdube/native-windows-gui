@@ -215,15 +215,15 @@ List-view controls provide several ways to arrange and display items and are muc
 Requires the `list-view` feature. 
 
 Builder parameters:
-    * `parent`:     **Required.** The list view parent container.
-    * `size`:       The list view size.
-    * `position`:   The list view position.
-    * `flags`:      A combination of the ListViewFlags values.
-    * `ex_flags`:   A combination of the ListViewExFlags values.
-    * `style`:      One of the value of `ListViewStyle`
-    * `item_count`: Number of item to preallocate
-    * `list_style`: The default style of the listview
-    * `focus`:      The control receive focus after being created
+  * `parent`:     **Required.** The list view parent container.
+  * `size`:       The list view size.
+  * `position`:   The list view position.
+  * `flags`:      A combination of the ListViewFlags values.
+  * `ex_flags`:   A combination of the ListViewExFlags values.
+  * `style`:      One of the value of `ListViewStyle`
+  * `item_count`: Number of item to preallocate
+  * `list_style`: The default style of the listview
+  * `focus`:      The control receive focus after being created
 
 **Control events:**
   * `MousePress(_)`: Generic mouse press events on the tree view
