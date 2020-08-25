@@ -75,7 +75,7 @@ impl ImageDecoder {
 
         This method copies the bytes and returns a ImageSource object
     */
-    pub fn from_stream(&self, stream: &mut [u8]) -> Result<ImageSource, NwgError> {
+    pub fn from_stream(&self, stream: &[u8]) -> Result<ImageSource, NwgError> {
         if self.factory.is_null() {
             panic!("ImageDecoder is not yet bound to a winapi object");
         }

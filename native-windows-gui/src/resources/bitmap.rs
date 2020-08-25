@@ -155,9 +155,26 @@ impl<'a> BitmapBuilder<'a> {
             *b = Bitmap { handle, owned: true };
         } else if let Some(src) = self.source_bin { 
             let handle = unsafe { rh::bitmap_from_memory(src)? };
+
             *b = Bitmap { handle, owned: true };
         } else {
+            #[cfg(all(feature = "embed-resource", feature="image-decoder"))]
+            fn build_embed(builder: BitmapBuilder) -> Result<Bitmap, NwgError> {
+                match builder.source_embed {
+                    Some(embed) => {
+                        match builder.source_embed_str {
+                            Some(src) => embed.image_str(src)
+                                .ok_or_else(|| NwgError::resource_create(format!("No bitmap in embed resource identified by {}", src))),
+                            None => embed.image(builder.source_embed_id)
+                                .ok_or_else(|| NwgError::resource_create(format!("No bitmap in embed resource identified by {}", builder.source_embed_id)))
+                        }
+                    },
+                    None => Err(NwgError::resource_create("No source provided for Bitmap"))
+                }
+            }
+
             #[cfg(feature = "embed-resource")]
+            #[cfg(not(feature = "image-decoder"))]
             fn build_embed(builder: BitmapBuilder) -> Result<Bitmap, NwgError> {
                 match builder.source_embed {
                     Some(embed) => {

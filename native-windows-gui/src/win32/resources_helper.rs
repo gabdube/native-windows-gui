@@ -143,7 +143,7 @@ pub unsafe fn build_image_decoder<'a>(
 
 #[cfg(feature="image-decoder")]
 pub unsafe fn build_image_decoder_from_memory<'a>(
-    src: &'a mut [u8],
+    src: &'a [u8],
     size: Option<(u32, u32)>,
 ) -> Result<HANDLE, NwgError>
 {
@@ -206,9 +206,10 @@ pub unsafe fn build_oem_image(
 
 
 /** 
-    Create a bitmap from memory.
+    Create a bitmap from memory. Only supports bitmap. Enable the `image-decoder` to load more image type from memory
     The memory must contain the whole file (including the bitmap header).
 */
+#[cfg(not(feature="image-decoder"))]
 pub unsafe fn bitmap_from_memory(source: &[u8]) -> Result<HANDLE, NwgError> {
     use winapi::um::wingdi::{CreateCompatibleBitmap, CreateCompatibleDC, SetDIBits, BITMAPFILEHEADER, BITMAPINFO, BITMAPINFOHEADER, DIB_RGB_COLORS, BI_RGB, RGBQUAD};
     use winapi::shared::{ntdef::LONG, minwindef::DWORD};
@@ -262,6 +263,15 @@ pub unsafe fn bitmap_from_memory(source: &[u8]) -> Result<HANDLE, NwgError> {
     }
 
     return Ok(bitmap as HANDLE);
+}
+
+/** 
+    Create a bitmap from memory. The source can be any image type supported by the windows imaging component.
+    The memory must contain the whole file (including the file header).
+*/
+#[cfg(feature="image-decoder")]
+pub unsafe fn bitmap_from_memory(src: &[u8]) -> Result<HANDLE, NwgError> {
+    build_image_decoder_from_memory(src, None)
 }
 
 
