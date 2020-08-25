@@ -190,6 +190,36 @@ impl EmbedResource {
         self.bitmap(name.as_ptr() as usize)
     }
 
+    
+    #[cfg(feature="image-decoder")]
+    /// Load an image from the embed files and returns a bitmap. An image is defined this way: `IMAGE_NAME IMAGE "../path/my_image.bmp"`
+    /// This method can load any image type supported by the image decoder.
+    pub fn image(&self, id: usize) -> Option<Bitmap> {
+        use crate::win32::resources_helper as rh;
+
+        match self.raw(id, RawResourceType::Other("Image")) {
+            None => None,
+            Some(raw) => {
+                let src = unsafe { raw.as_mut_slice() };
+                let handle = unsafe { rh::build_image_decoder_from_memory(src, None) };
+                match handle {
+                    Ok(handle) => Some(Bitmap { handle, owned: true }),
+                    Err(e) => {
+                        println!("{:?}", e);
+                        None
+                    }
+                }
+            }
+        }
+    }
+
+    #[cfg(feature="image-decoder")]
+    /// Load a image using a string name. See `EmbedResource::image`
+    pub fn image_str(&self, id: &str) -> Option<Bitmap> {
+        let name = to_utf16(id);
+        self.image(name.as_ptr() as usize)
+    }
+
     /// Load a cursor file from the rc file. Returns `None` if `id` does not map to a cursor.
     pub fn cursor(&self, id: usize) -> Option<Cursor> {
         use winapi::um::winuser::IMAGE_CURSOR;

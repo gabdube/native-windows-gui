@@ -20,12 +20,12 @@ than the `interval` value. For example, when a user resize a window, Timer OnTim
 Requires the `timer` feature. 
 
 **Builder parameters:**
-    * `parent`:   **Required.** The button parent container. Should be a top level window
-    * `interval`:  The button text.
-    * `stopped`:   If the timer should start right away. By default timers starts "stopped". Be sure to include `stopped(false)` in your builder if you want the timer to start instantly.
+  * `parent`:   **Required.** The button parent container. Should be a top level window
+  * `interval`:  The timer tick interval in millisecond
+  * `stopped`:   If the timer should start right away. By default timers starts "stopped(true)". Be sure to include `stopped(false)` in your builder if you want the timer to start instantly.
 
 **Control events:**
-    * `OnTimerTick`: When the timer ticks
+  * `OnTimerTick`: When the timer ticks
 
 ```
 use native_windows_gui as nwg;

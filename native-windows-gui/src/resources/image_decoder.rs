@@ -54,7 +54,7 @@ impl ImageDecoder {
         * If there is an error during the decoding, returns a NwgError.
         * If the image decoder was not initialized, this method panics
 
-        This method returns a ImageSource object.
+        This method returns a ImageSource object
     */
     pub fn from_filename<'a>(&self, path: &'a str) -> Result<ImageSource, NwgError> {
         if self.factory.is_null() {
@@ -62,6 +62,25 @@ impl ImageDecoder {
         }
 
         let decoder = unsafe { img::create_decoder_from_file(&*self.factory, path) }?;
+
+        Ok(ImageSource { decoder })
+    }
+
+    /**
+        Build an image from a stream of data.
+        The file type can be any of the native WIC codecs (https://docs.microsoft.com/en-us/windows/win32/wic/native-wic-codecs)
+
+        * If there is an error during the decoding, returns a NwgError.
+        * If the image decoder was not initialized, this method panics
+
+        This method copies the bytes and returns a ImageSource object
+    */
+    pub fn from_stream(&self, stream: &mut [u8]) -> Result<ImageSource, NwgError> {
+        if self.factory.is_null() {
+            panic!("ImageDecoder is not yet bound to a winapi object");
+        }
+
+        let decoder = unsafe { img::create_decoder_from_stream(&*self.factory, stream) }?;
 
         Ok(ImageSource { decoder })
     }

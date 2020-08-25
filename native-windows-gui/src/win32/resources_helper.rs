@@ -141,6 +141,31 @@ pub unsafe fn build_image_decoder<'a>(
     Ok(bitmap.handle)
 }
 
+#[cfg(feature="image-decoder")]
+pub unsafe fn build_image_decoder_from_memory<'a>(
+    src: &'a mut [u8],
+    size: Option<(u32, u32)>,
+) -> Result<HANDLE, NwgError>
+{
+    use crate::ImageDecoder;
+
+    let decoder = ImageDecoder::new()?;
+
+    let mut image_frame = decoder
+        .from_stream(src)?
+        .frame(0)?;
+
+    if let Some((width, height)) = size {
+        image_frame = decoder.resize_image(&image_frame, [width, height])?;
+    }
+    
+    let mut bitmap = image_frame.as_bitmap()?;
+
+    bitmap.owned = false;
+
+    Ok(bitmap.handle)
+}
+
 pub unsafe fn build_oem_image(
     source: OemImage,
     size: Option<(u32, u32)>,
@@ -209,6 +234,7 @@ pub unsafe fn bitmap_from_memory(source: &[u8]) -> Result<HANDLE, NwgError> {
     let iheader: BITMAPINFOHEADER = ptr::read( iheader_ptr );
 
     let (w, h) = (iheader.biWidth, iheader.biHeight);
+    println!("{:?}", fheader.bfSize);
 
     let screen_dc = GetDC(ptr::null_mut());
     let hdc = CreateCompatibleDC(screen_dc);

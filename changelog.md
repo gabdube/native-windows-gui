@@ -1,3 +1,9 @@
+1.0.4
+
+* Documentation fixes
+* Get parent item in tree view
+* Load any image from embed source
+
 1.0.3
 
 * A few bug fixes

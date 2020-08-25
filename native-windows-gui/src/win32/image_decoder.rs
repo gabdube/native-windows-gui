@@ -28,7 +28,7 @@ pub unsafe fn create_image_factory() -> Result<*mut IWICImagingFactory, NwgError
 }
 
 pub unsafe fn create_decoder_from_file<'a>(fact: &IWICImagingFactory, path: &'a str) -> Result<*mut IWICBitmapDecoder, NwgError> {
-    use winapi::um::wincodec::{WICDecodeMetadataCacheOnDemand};
+    use winapi::um::wincodec::WICDecodeMetadataCacheOnDemand;
     use winapi::um::winnt::GENERIC_READ;
     use crate::win32::base_helper::to_utf16;
 
@@ -45,6 +45,36 @@ pub unsafe fn create_decoder_from_file<'a>(fact: &IWICImagingFactory, path: &'a 
 
     if result != S_OK {
         return Err(NwgError::resource_create("Failed to create a bitmap decoder"));
+    }
+
+    Ok(decoder)
+}
+
+pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, data: &mut [u8]) -> Result<*mut IWICBitmapDecoder, NwgError> {
+    use winapi::um::wincodec::WICDecodeMetadataCacheOnDemand;
+
+    let mut stream = ptr::null_mut();
+    let r = fact.CreateStream(&mut stream);
+    if r != S_OK {
+        return Err(NwgError::resource_create("Failed to create a stream for bitmap decoder"));
+    }
+
+    let r = (&*stream).InitializeFromMemory(data.as_mut_ptr(), data.len() as _);
+    if r != S_OK {
+        return Err(NwgError::resource_create("Failed to initialize stream from memory"));
+    }
+
+    let mut decoder: *mut IWICBitmapDecoder = ptr::null_mut();
+    let r = fact.CreateDecoderFromStream(
+        stream as _, 
+        ptr::null(),
+        WICDecodeMetadataCacheOnDemand,
+        (&mut decoder as *mut *mut IWICBitmapDecoder) as *mut *mut IWICBitmapDecoder
+    );
+
+    if r != S_OK {
+        println!("{:X}", r);
+        return Err(NwgError::resource_create("Failed to create decoder from stream"));
     }
 
     Ok(decoder)
