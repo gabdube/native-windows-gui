@@ -215,24 +215,33 @@ List-view controls provide several ways to arrange and display items and are muc
 Requires the `list-view` feature. 
 
 Builder parameters:
-  * `parent`:     **Required.** The list view parent container.
-  * `size`:       The list view size.
-  * `position`:   The list view position.
-  * `flags`:      A combination of the ListViewFlags values.
-  * `ex_flags`:   A combination of the ListViewExFlags values.
-  * `style`:      One of the value of `ListViewStyle`
-  * `item_count`: Number of item to preallocate
-  * `list_style`: The default style of the listview
-  * `focus`:      The control receive focus after being created
+  * `parent`:           **Required.** The list view parent container.
+  * `size`:             The list view size.
+  * `position`:         The list view position.
+  * `background_color`: The list view background color in RGB format
+  * `text_color`:       The list view text color in RGB format
+  * `flags`:            A combination of the ListViewFlags values.
+  * `ex_flags`:         A combination of the ListViewExFlags values.
+  * `style`:            One of the value of `ListViewStyle`
+  * `item_count`:       Number of item to preallocate
+  * `list_style`:       The default style of the listview
+  * `focus`:            The control receive focus after being created
 
 **Control events:**
-  * `MousePress(_)`: Generic mouse press events on the tree view
-  * `OnMouseMove`: Generic mouse mouse event
-  * `OnMouseWheel`: Generic mouse wheel event
-  * `OnKeyPress`:    Generic key press event
-  * `OnKeyRelease`:  Generic key release event
+  * `MousePress(_)`:   Generic mouse press events on the tree view
+  * `OnMouseMove`:     Generic mouse mouse event
+  * `OnMouseWheel`:    Generic mouse wheel event
+  * `OnKeyPress`:      Generic key press event
+  * `OnKeyRelease`:    Generic key release event
+  * `OnListViewClear`: When all the items in a list view are destroyed
+  * `OnListViewItemRemoved`: When an item is about to be removed from the list view
+  * `OnListViewItemInsert`: When a new item is inserted in the list view
+  * `OnListViewItemActivated`: When an item in the list view is activated by the user
+  * `OnListViewItemChanged`: When an item is selected/unselected in the listview
+  * `OnListViewFocus`: When the list view has received focus
+  * `OnListViewFocusLost`: When the list view has lost focus
 
-Windows is Shit:
+Windows:
 - The win32 header controls leaks megabytes of memory per seconds because it is shit. As such, NO_HEADER is always ON.
 
 */
@@ -248,6 +257,8 @@ impl ListView {
         ListViewBuilder {
             size: (300, 300),
             position: (0, 0),
+            background_color: None,
+            text_color: None,
             focus: false,
             flags: None,
             ex_flags: None,
@@ -310,6 +321,35 @@ impl ListView {
 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let col = wh::send_message(handle, LVM_GETTEXTCOLOR, 0, 0) as u32;
+
+        [
+            GetRValue(col),
+            GetGValue(col),
+            GetBValue(col),
+        ]
+    }
+
+    /// Sets the background color of the list view
+    pub fn set_background_color(&self, r: u8, g: u8, b: u8) {
+        use winapi::um::commctrl::LVM_SETBKCOLOR;
+        use winapi::um::wingdi::RGB;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        let color = RGB(r, g, b);
+
+        wh::send_message(handle, LVM_SETBKCOLOR, 0, color as _);
+
+        self.invalidate();
+    }
+
+    /// Returns the background color of the list view
+    pub fn background_color(&self) -> [u8; 3] {
+        use winapi::um::commctrl::LVM_GETBKCOLOR;
+        use winapi::um::wingdi::{GetRValue, GetGValue, GetBValue};
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let col = wh::send_message(handle, LVM_GETBKCOLOR, 0, 0) as u32;
 
         [
             GetRValue(col),
@@ -852,6 +892,8 @@ impl Drop for ListView {
 pub struct ListViewBuilder {
     size: (i32, i32),
     position: (i32, i32),
+    background_color: Option<[u8; 3]>,
+    text_color: Option<[u8; 3]>,
     focus: bool,
     flags: Option<ListViewFlags>,
     ex_flags: Option<ListViewExFlags>,
@@ -884,6 +926,16 @@ impl ListViewBuilder {
 
     pub fn position(mut self, position: (i32, i32)) -> ListViewBuilder {
         self.position = position;
+        self
+    }
+
+    pub fn background_color(mut self, color: [u8; 3]) -> ListViewBuilder {
+        self.background_color = Some(color);
+        self
+    }
+
+    pub fn text_color(mut self, color: [u8; 3]) -> ListViewBuilder {
+        self.text_color = Some(color);
         self
     }
 
@@ -932,6 +984,14 @@ impl ListViewBuilder {
         if let Some(flags) = self.ex_flags {
             let flags = flags.bits();
             wh::send_message(out.handle.hwnd().unwrap(), LVM_SETEXTENDEDLISTVIEWSTYLE, flags as _, flags as _);
+        }
+
+        if let Some([r, g, b]) = self.background_color {
+            out.set_background_color(r, g, b);
+        }
+
+        if let Some([r, g, b]) = self.text_color {
+            out.set_text_color(r, g, b);
         }
 
         Ok(())

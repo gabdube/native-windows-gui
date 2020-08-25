@@ -3,6 +3,7 @@
 * Documentation fixes
 * Get parent item in tree view
 * Load any image from embed source
+* Set/Get listview background color
 
 1.0.3
 

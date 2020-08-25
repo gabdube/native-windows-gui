@@ -234,7 +234,6 @@ pub unsafe fn bitmap_from_memory(source: &[u8]) -> Result<HANDLE, NwgError> {
     let iheader: BITMAPINFOHEADER = ptr::read( iheader_ptr );
 
     let (w, h) = (iheader.biWidth, iheader.biHeight);
-    println!("{:?}", fheader.bfSize);
 
     let screen_dc = GetDC(ptr::null_mut());
     let hdc = CreateCompatibleDC(screen_dc);
