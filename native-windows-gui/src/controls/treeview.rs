@@ -4,7 +4,7 @@ A tree-view control is a window that displays a hierarchical list of items
 
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
-use winapi::um::commctrl::{HIMAGELIST, HTREEITEM, TVIS_EXPANDED, TVIS_SELECTED, TVITEMW};
+use winapi::um::commctrl::{HIMAGELIST, HTREEITEM, TVIS_EXPANDED, TVIS_SELECTED, TVS_SHOWSELALWAYS, TVITEMW};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{check_hwnd, to_utf16, from_utf16};
 use crate::{Font, NwgError};
@@ -30,6 +30,7 @@ bitflags! {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const TAB_STOP = WS_TABSTOP;
+        const ALWAYS_SHOW_SELECTION = TVS_SHOWSELALWAYS;
     }
 }
 
@@ -606,7 +607,7 @@ impl TreeView {
     pub fn flags(&self) -> u32 {
         use winapi::um::commctrl::{TVS_HASBUTTONS, TVS_LINESATROOT, TVS_HASLINES};
 
-        WS_VISIBLE | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES | WS_TABSTOP
+        WS_VISIBLE | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES | WS_TABSTOP | TVS_SHOWSELALWAYS
     }
 
     /// Winapi flags required by the control

@@ -4,6 +4,7 @@
 * Get parent item in tree view
 * Load any image from embed source
 * Set/Get listview background color
+* always show selected items in listview and treeview (even if the control does not have focus)
 
 1.0.3
 
