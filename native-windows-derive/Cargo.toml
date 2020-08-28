@@ -6,6 +6,7 @@ edition = "2018"
 
 description = "A very light and simple rust GUI library"
 
+repository = "https://github.com/gabdube/native-windows-gui"
 documentation = "https://gabdube.github.io/native-windows-gui/native-windows-docs/index.html"
 
 license = "MIT"
