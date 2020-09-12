@@ -274,45 +274,6 @@ pub unsafe fn bitmap_from_memory(src: &[u8]) -> Result<HANDLE, NwgError> {
     build_image_decoder_from_memory(src, None)
 }
 
-
-/*
-    Creates an icon from memory.
-
-pub unsafe fn icon_from_embed(src: &[u8], strict: bool, size: Option<(u32, u32)>) -> Result<HANDLE, NwgError> {
-    use winapi::um::winuser::{CreateIconFromResourceEx, CreateIconFromResource, LoadImageW};
-    use winapi::um::winuser::{IDI_ERROR, IMAGE_ICON, LR_DEFAULTSIZE, LR_SHARED};
-
-    let mut icon_copy: Vec<u8> = Vec::with_capacity(src.len());
-    icon_copy.set_len(src.len());
-
-    ptr::copy_nonoverlapping::<u8>(src.as_ptr(), icon_copy.as_mut_ptr(), src.len());
-
-    let mut result = match size {
-        Some((w, h)) => {
-            let icon = CreateIconFromResourceEx(icon_copy.as_mut_ptr(), icon_copy.len() as _, 1, 0x00030000, w as _, h as _, 0);
-            match icon.is_null() {
-                true => Err(NwgError::resource_create("Failed to create icon from source")),
-                false => Ok(icon as _)
-            }
-        },
-        None => {
-            let icon = CreateIconFromResource(icon_copy.as_mut_ptr(), icon_copy.len() as _, 1, 0x00030000);
-            match icon.is_null() {
-                true => Err(NwgError::resource_create("Failed to create icon from source")),
-                false => Ok(icon as _)
-            }
-        }
-    };
-
-    if !strict && result.is_err() {
-        let dr = (IDI_ERROR as usize) as *const u16;
-        result = Ok(LoadImageW(ptr::null_mut(), dr, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE|LR_SHARED));
-    }
-
-    result
-}
-*/
-
 #[cfg(feature="image-decoder")]
 pub unsafe fn icon_from_memory(src: &[u8], strict: bool, size: Option<(u32, u32)>) -> Result<HANDLE, NwgError> {
     use winapi::um::wingdi::DeleteObject;

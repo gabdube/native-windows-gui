@@ -1,3 +1,8 @@
+1.0.5
+
+* Icon can now be loaded from memory
+* Bitmap can be converted to icons using `Bitmap::copy_as_icon`
+
 1.0.4
 
 * Documentation fixes

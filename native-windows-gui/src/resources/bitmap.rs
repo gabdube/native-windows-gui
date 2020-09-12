@@ -18,6 +18,9 @@ To display a bitmap in an application, see the `ImageFrame` control.
 By default, bitmap resources do not support transparency BUT if `image-decoder` is enabled, bitmaps can be loaded
 from any file type supported by NWG (JPEG, PNG, BMP, ICO, DDS, TIFF).
 
+Bitmaps can be converted to icons using the "copy_as_icon" function.
+
+
 **Builder parameters:**
   * `source_file`:      The source of the bitmap if it is a file.
   * `source_bin`:       The source of the bitmap if it is a binary blob. For example using `include_bytes!("my_icon.bmp")`.
@@ -72,6 +75,33 @@ impl Bitmap {
 
             size: None,
             strict: false
+        }
+    }
+
+    /**
+        Creates a new icon from the bitmap data. The bitmap must have been initialized
+    */
+    pub fn copy_as_icon(&self) -> crate::Icon {
+        use winapi::um::winuser::CreateIconIndirect;
+        use winapi::um::winuser::ICONINFO;
+
+        if self.handle.is_null() {
+            panic!("Bitmap was not initialized");
+        }
+
+        let mut icon_info = ICONINFO {
+            fIcon: 1,
+            xHotspot: 0,
+            yHotspot: 0,
+            hbmMask: self.handle as _,
+            hbmColor: self.handle as _
+        };
+
+        let icon = unsafe { CreateIconIndirect(&mut icon_info) };
+
+        crate::Icon {
+            handle: icon as _,
+            owned: true
         }
     }
 
