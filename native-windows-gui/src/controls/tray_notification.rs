@@ -366,7 +366,7 @@ impl<'a> TrayNotificationBuilder<'a> {
 
         let icon = match self.icon {
             Some(i) => i.handle as HICON,
-            None => panic!("Icon required. TODO ERR")
+            None => panic!("Tary notification requires an Icon at creation")
         };
 
         let balloon_icon = match (self.info.is_some(), self.balloon_icon) {
