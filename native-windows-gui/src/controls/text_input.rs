@@ -298,8 +298,10 @@ impl TextInput {
         unsafe { wh::set_window_text(handle, v) }
     }
 
-    /// Get the placeholder text displayed in the TextInput
-    /// when it is empty and does not have focus
+    /// Return the placeholder text displayed in the TextInput
+    /// when it is empty and does not have focus. The string returned will be
+    /// as long as the user specified, however it might be longer or shorter than
+    /// the actual placeholder text.
     pub fn placeholder_text<'a>(&self, text_length: usize) -> String { 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::get_placeholder_text(handle, text_length)
