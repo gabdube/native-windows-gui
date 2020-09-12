@@ -84,6 +84,7 @@ impl TextInput {
     pub fn builder<'a>() -> TextInputBuilder<'a> {
         TextInputBuilder {
             text: "",
+            placeholder_text: None,
             size: (100, 25),
             position: (0, 0),
             flags: None,
@@ -297,6 +298,20 @@ impl TextInput {
         unsafe { wh::set_window_text(handle, v) }
     }
 
+    /// Get the placeholder text displayed in the TextInput
+    /// when it is empty and does not have focus
+    pub fn placeholder_text<'a>(&self, text_length: usize) -> String { 
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::get_placeholder_text(handle, text_length)
+    }
+
+    /// Set the placeholder text displayed in the TextInput
+    /// when it is empty and does not have focus
+    pub fn set_placeholder_text<'a>(&self, v: Option<&'a str>) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::set_placeholder_text(handle, v.unwrap_or(""));
+    }
+
     /// Winapi class name used during control creation
     pub fn class_name(&self) -> &'static str {
         "EDIT"
@@ -431,6 +446,7 @@ impl Drop for TextInput {
 
 pub struct TextInputBuilder<'a> {
     text: &'a str,
+    placeholder_text: Option<&'a str>,
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<TextInputFlags>,
@@ -453,6 +469,11 @@ impl<'a> TextInputBuilder<'a> {
 
     pub fn text(mut self, text: &'a str) -> TextInputBuilder<'a> {
         self.text = text;
+        self
+    }
+
+    pub fn placeholder_text(mut self, placeholder_text: Option<&'a str>) -> TextInputBuilder<'a> {
+        self.placeholder_text = placeholder_text;
         self
     }
 
@@ -558,6 +579,10 @@ impl<'a> TextInputBuilder<'a> {
             out.set_font(self.font);
         } else {
             out.set_font(Font::global_default().as_ref());
+        }
+
+        if self.placeholder_text.is_some() {
+            out.set_placeholder_text(self.placeholder_text);
         }
 
         Ok(())

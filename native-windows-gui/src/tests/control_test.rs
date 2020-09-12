@@ -557,6 +557,7 @@ mod partial_controls_test_ui {
 
             TextInput::builder()
                 .parent(&data.dialog_tab)
+                .placeholder_text(Some("The color will go here"))
                 .background_color(Some([255, 255, 255]))
                 .build(&mut data.test_color_output)?;
 
@@ -568,6 +569,7 @@ mod partial_controls_test_ui {
 
             TextInput::builder()
                 .parent(&data.dialog_tab)
+                .placeholder_text(Some("The font will go here"))
                 .background_color(Some([255, 255, 255]))
                 .build(&mut data.test_font_output)?;
 
