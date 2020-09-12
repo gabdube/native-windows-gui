@@ -19,11 +19,14 @@ By default, bitmap resources do not support transparency BUT if `image-decoder` 
 from any file type supported by NWG (JPEG, PNG, BMP, ICO, DDS, TIFF).
 
 **Builder parameters:**
-  * `source_file`:   The source of the bitmap if it is a file.
-  * `source_bin`:    The source of the bitmap if it is a binary blob.
-  * `source_system`: The source of the bitmap if it is a system resource (see OemBitmap)
-  * `size`:          Optional. Resize the image to this size.
-  * `strict`:        Use a system placeholder instead of panicking if the image source do no exists.
+  * `source_file`:      The source of the bitmap if it is a file.
+  * `source_bin`:       The source of the bitmap if it is a binary blob. For example using `include_bytes!("my_icon.bmp")`.
+  * `source_system`:    The source of the bitmap if it is a system resource (see OemBitmap)
+  * `source_embed`:     The source of the bitmap if it is stored in an embedded file
+  * `source_embed_id`:  The number identifier of the icon in the embedded file
+  * `source_embed_str`: The string identifier of the icon in the embedded file
+  * `size`:             Optional. Resize the image to this size.
+  * `strict`:           Use a system placeholder instead of panicking if the image source do no exists.
 
 Example:
 

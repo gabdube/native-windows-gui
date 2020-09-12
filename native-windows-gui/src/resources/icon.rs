@@ -11,10 +11,23 @@ use super::EmbedResource;
 /**
 A wrapper over a icon file (*.ico)
 
-Note that icon object are only used as display resources (ie: it's impossible to read pixels or resized it).
-If those features are needed, see the `image-decoder` feature.
+Windows icons are a legacy thing and should only be used when winapi forces you to use them (ex: when setting a window icon).
+The `Bitmap` object of NWG not only supports transparency if "image-decoder" is enabled but it can also be create from multiple
+different sources (including ".ico" files).
 
 To display a icon in an application, see the `ImageFrame` control.
+
+Note: Loading an icon from binary source (source_bin) REQUIRES the "image-decoder" feature.
+
+**Builder parameters:**
+  * `source_file`:      The source of the icon if it is a file.
+  * `source_bin`:       The source of the icon if it is a binary blob. For example using `include_bytes!("my_icon.ico")`.
+  * `source_system`:    The source of the icon if it is a system resource (see OemIcon)
+  * `source_embed`:     The source of the icon if it is stored in an embedded file
+  * `source_embed_id`:  The number identifier of the icon in the embedded file
+  * `source_embed_str`: The string identifier of the icon in the embedded file
+  * `size`:             Optional. Resize the image to this size.
+  * `strict`:           Use a system placeholder instead of panicking if the image source do no exists.
 
 Example:
 
@@ -25,7 +38,7 @@ fn load_icon() -> nwg::Icon {
     let mut icon = nwg::Icon::default();
 
     nwg::Icon::builder()
-        .source_file(Some("Hello.cur"))
+        .source_file(Some("hello.ico"))
         .strict(true)
         .build(&mut icon);
 
@@ -132,6 +145,9 @@ impl<'a> IconBuilder<'a> {
             *b = Icon { handle, owned: true };
         } else if let Some(src) = self.source_system {
             let handle = unsafe { rh::build_oem_image(OemImage::Icon(src), self.size)? };
+            *b = Icon { handle, owned: true };
+        } else if let Some(src) = self.source_bin {
+            let handle = unsafe { rh::icon_from_memory(src, self.strict, self.size)? };
             *b = Icon { handle, owned: true };
         } else {
             #[cfg(feature = "embed-resource")]
