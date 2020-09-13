@@ -155,9 +155,9 @@ impl<'a> IconBuilder<'a> {
                 match builder.source_embed {
                     Some(embed) => {
                         match builder.source_embed_str {
-                            Some(src) => embed.icon_str(src)
+                            Some(src) => embed.icon_str(src, builder.size)
                                 .ok_or_else(|| NwgError::resource_create(format!("No icon in embed resource identified by {}", src))),
-                            None => embed.icon(builder.source_embed_id)
+                            None => embed.icon(builder.source_embed_id, builder.size)
                                 .ok_or_else(|| NwgError::resource_create(format!("No icon in embed resource identified by {}", builder.source_embed_id)))
                         }
                     },

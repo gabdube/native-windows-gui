@@ -196,9 +196,9 @@ impl<'a> BitmapBuilder<'a> {
                 match builder.source_embed {
                     Some(embed) => {
                         match builder.source_embed_str {
-                            Some(src) => embed.image_str(src)
+                            Some(src) => embed.image_str(src, builder.size)
                                 .ok_or_else(|| NwgError::resource_create(format!("No bitmap in embed resource identified by {}", src))),
-                            None => embed.image(builder.source_embed_id)
+                            None => embed.image(builder.source_embed_id, builder.size)
                                 .ok_or_else(|| NwgError::resource_create(format!("No bitmap in embed resource identified by {}", builder.source_embed_id)))
                         }
                     },
@@ -212,9 +212,9 @@ impl<'a> BitmapBuilder<'a> {
                 match builder.source_embed {
                     Some(embed) => {
                         match builder.source_embed_str {
-                            Some(src) => embed.bitmap_str(src)
+                            Some(src) => embed.bitmap_str(src, builder.size)
                                 .ok_or_else(|| NwgError::resource_create(format!("No bitmap in embed resource identified by {}", src))),
-                            None => embed.bitmap(builder.source_embed_id)
+                            None => embed.bitmap(builder.source_embed_id, builder.size)
                                 .ok_or_else(|| NwgError::resource_create(format!("No bitmap in embed resource identified by {}", builder.source_embed_id)))
                         }
                     },
