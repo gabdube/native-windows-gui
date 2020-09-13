@@ -2,6 +2,10 @@
 
 * Icon can now be loaded from memory
 * Bitmap can be converted to icons using `Bitmap::copy_as_icon`
+* Systray pop up menu now closes when you click outside of them
+* 2 new events for menus
+  * OnMenuEnter: Raised when a menu is shown on screen
+  * OnMenuExit: Raised when a menu is closed by the user. Either by selecting an item or by clicking outside of it.
 
 1.0.4
 

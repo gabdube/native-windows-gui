@@ -572,7 +572,7 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
       WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP, WM_MENUSELECT, WM_EXITSIZEMOVE,
       WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED, WM_KEYDOWN, WM_KEYUP, WM_CHAR, WM_MOUSEWHEEL, WM_DROPFILES, GET_WHEEL_DELTA_WPARAM,
-      WM_GETMINMAXINFO};
+      WM_GETMINMAXINFO, WM_ENTERMENULOOP, WM_EXITMENULOOP};
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
@@ -611,7 +611,13 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         },
         WM_INITMENUPOPUP => {
             callback(Event::OnMenuOpen, NO_DATA, ControlHandle::Menu(ptr::null_mut(), w as HMENU));
-        }
+        },
+        WM_ENTERMENULOOP => {
+            callback(Event::OnMenuEnter, NO_DATA, ControlHandle::Menu(ptr::null_mut(), w as HMENU));
+        },
+        WM_EXITMENULOOP  => {
+            callback(Event::OnMenuExit, NO_DATA, ControlHandle::Menu(ptr::null_mut(), w as HMENU));
+        },
         WM_MOUSEWHEEL => {
             callback(Event::OnMouseWheel, EventData::OnMouseWheel(GET_WHEEL_DELTA_WPARAM(w) as i32), base_handle);
         },

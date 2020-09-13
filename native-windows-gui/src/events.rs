@@ -138,6 +138,12 @@ pub enum Event {
     /// When a menu control is opened
     OnMenuOpen,
 
+    /// When the user enters the menu modal loop
+    OnMenuEnter,
+
+    /// When the user exits the menu modal loop
+    OnMenuExit,
+
     /// When a menu is hovered (either through mouse or keyboard)
     OnMenuHover,
 

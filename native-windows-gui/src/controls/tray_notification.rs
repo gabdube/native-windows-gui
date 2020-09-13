@@ -50,6 +50,7 @@ bitflags! {
 
     **Control events:**
         * `OnContextMenu`: When the user right clicks on the system tray icon
+        * `MousePressLeftUp`: When the user left click the system tray icon
         * `OnTrayNotificationShow`: When a TrayNotification info popup (not the tooltip) is shown 
         * `OnTrayNotificationHide`: When a TrayNotification info popup (not the tooltip) is hidden 
         * `OnTrayNotificationTimeout`: When a TrayNotification is closed due to a timeout

@@ -21,6 +21,8 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Menu/MenuItem handle is not HM
     **Control events:**
       - OnMenuOpen: Sent when a drop-down menu or submenu is about to become active. 
       - OnMenuHover: When the user hovers the menu
+      - OnMenuEnter: When the user enters the menu. Technically, when the user enters the menu modal loop.
+      - OnMenuExit: When the menu is closed. Technically, when the user exits the menu modal loop.
 
     **Menu Access Keys**
 
@@ -87,7 +89,7 @@ impl Menu {
 
     /// Show a popup menu as the selected position. Do nothing for menubar menu.
     pub fn popup(&self, x: i32, y: i32) {
-        use winapi::um::winuser::TrackPopupMenu;
+        use winapi::um::winuser::{TrackPopupMenu, SetForegroundWindow};
         use winapi::ctypes::c_int;
 
         if self.handle.blank() { panic!("Menu is not bound"); }
@@ -97,6 +99,7 @@ impl Menu {
         };
 
         unsafe { 
+            SetForegroundWindow(parent_handle);
             TrackPopupMenu(
                 handle,
                 0,
