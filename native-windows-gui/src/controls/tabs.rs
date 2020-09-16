@@ -315,7 +315,9 @@ impl TabsContainer {
                     const BORDER_SIZE: u32 = 11;
                     let tab_height = r.bottom as u32 + BORDER_SIZE;
                     if data.width > BORDER_SIZE { data.width -= BORDER_SIZE; }
-                    if data.height > tab_height { data.height -= tab_height + BORDER_SIZE; }
+                    if data.height > tab_height { 
+                        data.height -= (tab_height + BORDER_SIZE).min(data.height);
+                    }
                     data.tab_offset_y = tab_height;
                     
                     let data_ptr = &data as *const ResizeDirectChildrenParams;

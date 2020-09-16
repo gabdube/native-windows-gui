@@ -1,5 +1,6 @@
 1.0.5
 
+* Fixed a crasher when resizing a tab container
 * Icon can now be loaded from memory
 * Bitmap can be converted to icons using `Bitmap::copy_as_icon`
 * Systray pop up menu now closes when you click outside of them
