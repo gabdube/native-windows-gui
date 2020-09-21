@@ -1,5 +1,6 @@
 1.0.5
 
+* Added placeholder for textinput
 * Fixed a crasher when resizing a tab container
 * Icon can now be loaded from memory
 * Bitmap can be converted to icons using `Bitmap::copy_as_icon`

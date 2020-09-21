@@ -1,0 +1,9 @@
+[package]
+name = "native-windows-canvas"
+version = "0.0.1"
+authors = ["Gabriel D <gdube.475@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
