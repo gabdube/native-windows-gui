@@ -315,26 +315,3 @@ pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
 pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
     unsafe { ::winapi::um::winuser::SetWindowLongW(handle, index, v as LONG); }
 }
-
-pub fn get_placeholder_text(handle: HWND, text_length: usize) -> String {
-    use std::ffi::OsString;
-    use std::os::windows::ffi::OsStringExt;
-    use winapi::shared::ntdef::WCHAR;
-    use winapi::um::commctrl::EM_GETCUEBANNER;
-    use winapi::um::winuser::SendMessageW;
-
-    let mut placeholder_text: Vec<WCHAR> = Vec::with_capacity(text_length);
-    unsafe {
-        placeholder_text.set_len(text_length);
-        SendMessageW(handle, EM_GETCUEBANNER, placeholder_text.as_mut_ptr() as WPARAM, placeholder_text.len() as LPARAM);
-        OsString::from_wide(&placeholder_text).into_string().unwrap_or("".to_string())
-    }
-}
-
-pub fn set_placeholder_text<'a>(handle: HWND, placeholder_text: &'a str) {
-    use winapi::um::commctrl::EM_SETCUEBANNER;
-    use winapi::um::winuser::SendMessageW;
-
-    let text = to_utf16(placeholder_text);
-    unsafe { SendMessageW(handle, EM_SETCUEBANNER, 0, text.as_ptr() as LPARAM) };
-}

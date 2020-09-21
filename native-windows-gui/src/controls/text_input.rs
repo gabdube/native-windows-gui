@@ -4,7 +4,7 @@
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, WS_TABSTOP, ES_AUTOHSCROLL};
 use crate::win32::window_helper as wh; 
-use crate::win32::base_helper::check_hwnd;
+use crate::win32::base_helper::{check_hwnd, to_utf16};
 use crate::{Font, NwgError, HTextAlign, RawEventHandler};
 use super::{ControlBase, ControlHandle};
 use std::cell::RefCell;
@@ -303,15 +303,29 @@ impl TextInput {
     /// as long as the user specified, however it might be longer or shorter than
     /// the actual placeholder text.
     pub fn placeholder_text<'a>(&self, text_length: usize) -> String { 
+        use std::ffi::OsString;
+        use std::os::windows::ffi::OsStringExt;
+        use winapi::shared::ntdef::WCHAR;
+        use winapi::um::commctrl::EM_GETCUEBANNER;
+
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
-        wh::get_placeholder_text(handle, text_length)
+        let mut placeholder_text: Vec<WCHAR> = Vec::with_capacity(text_length);
+        unsafe {
+            placeholder_text.set_len(text_length);
+            wh::send_message(handle, EM_GETCUEBANNER, placeholder_text.as_mut_ptr() as WPARAM, placeholder_text.len() as LPARAM);
+            OsString::from_wide(&placeholder_text).into_string().unwrap_or("".to_string())
+        }
     }
 
     /// Set the placeholder text displayed in the TextInput
     /// when it is empty and does not have focus
     pub fn set_placeholder_text<'a>(&self, v: Option<&'a str>) {
+        use winapi::um::commctrl::EM_SETCUEBANNER;
+    
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
-        wh::set_placeholder_text(handle, v.unwrap_or(""));
+        let placeholder_text = v.unwrap_or("");
+        let text = to_utf16(placeholder_text);
+        wh::send_message(handle, EM_SETCUEBANNER, 0, text.as_ptr() as LPARAM);
     }
 
     /// Winapi class name used during control creation

@@ -1356,6 +1356,8 @@ fn run_text_tests(app: &ControlsTest, _evt: Event) {
         app.test_text_input.set_enabled(false);
         assert_eq!(app.test_text_input.enabled(), false);
 
+        app.test_text_input.set_placeholder_text(Some("Placeholder!"));
+
         app.runs.borrow_mut().text = true;
     } else {
         app.test_text_input.set_text("Hello World");
