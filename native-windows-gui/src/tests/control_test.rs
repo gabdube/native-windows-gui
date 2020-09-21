@@ -557,6 +557,7 @@ mod partial_controls_test_ui {
 
             TextInput::builder()
                 .parent(&data.dialog_tab)
+                .placeholder_text(Some("The color will go here"))
                 .background_color(Some([255, 255, 255]))
                 .build(&mut data.test_color_output)?;
 
@@ -568,6 +569,7 @@ mod partial_controls_test_ui {
 
             TextInput::builder()
                 .parent(&data.dialog_tab)
+                .placeholder_text(Some("The font will go here"))
                 .background_color(Some([255, 255, 255]))
                 .build(&mut data.test_font_output)?;
 
@@ -1353,6 +1355,8 @@ fn run_text_tests(app: &ControlsTest, _evt: Event) {
         assert_eq!(app.test_text_input.enabled(), true);
         app.test_text_input.set_enabled(false);
         assert_eq!(app.test_text_input.enabled(), false);
+
+        app.test_text_input.set_placeholder_text(Some("Placeholder!"));
 
         app.runs.borrow_mut().text = true;
     } else {

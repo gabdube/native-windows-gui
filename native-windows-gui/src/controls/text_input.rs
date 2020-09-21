@@ -4,7 +4,7 @@
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, WS_TABSTOP, ES_AUTOHSCROLL};
 use crate::win32::window_helper as wh; 
-use crate::win32::base_helper::check_hwnd;
+use crate::win32::base_helper::{check_hwnd, to_utf16};
 use crate::{Font, NwgError, HTextAlign, RawEventHandler};
 use super::{ControlBase, ControlHandle};
 use std::cell::RefCell;
@@ -84,6 +84,7 @@ impl TextInput {
     pub fn builder<'a>() -> TextInputBuilder<'a> {
         TextInputBuilder {
             text: "",
+            placeholder_text: None,
             size: (100, 25),
             position: (0, 0),
             flags: None,
@@ -297,6 +298,36 @@ impl TextInput {
         unsafe { wh::set_window_text(handle, v) }
     }
 
+    /// Return the placeholder text displayed in the TextInput
+    /// when it is empty and does not have focus. The string returned will be
+    /// as long as the user specified, however it might be longer or shorter than
+    /// the actual placeholder text.
+    pub fn placeholder_text<'a>(&self, text_length: usize) -> String { 
+        use std::ffi::OsString;
+        use std::os::windows::ffi::OsStringExt;
+        use winapi::shared::ntdef::WCHAR;
+        use winapi::um::commctrl::EM_GETCUEBANNER;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let mut placeholder_text: Vec<WCHAR> = Vec::with_capacity(text_length);
+        unsafe {
+            placeholder_text.set_len(text_length);
+            wh::send_message(handle, EM_GETCUEBANNER, placeholder_text.as_mut_ptr() as WPARAM, placeholder_text.len() as LPARAM);
+            OsString::from_wide(&placeholder_text).into_string().unwrap_or("".to_string())
+        }
+    }
+
+    /// Set the placeholder text displayed in the TextInput
+    /// when it is empty and does not have focus
+    pub fn set_placeholder_text<'a>(&self, v: Option<&'a str>) {
+        use winapi::um::commctrl::EM_SETCUEBANNER;
+    
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let placeholder_text = v.unwrap_or("");
+        let text = to_utf16(placeholder_text);
+        wh::send_message(handle, EM_SETCUEBANNER, 0, text.as_ptr() as LPARAM);
+    }
+
     /// Winapi class name used during control creation
     pub fn class_name(&self) -> &'static str {
         "EDIT"
@@ -431,6 +462,7 @@ impl Drop for TextInput {
 
 pub struct TextInputBuilder<'a> {
     text: &'a str,
+    placeholder_text: Option<&'a str>,
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<TextInputFlags>,
@@ -453,6 +485,11 @@ impl<'a> TextInputBuilder<'a> {
 
     pub fn text(mut self, text: &'a str) -> TextInputBuilder<'a> {
         self.text = text;
+        self
+    }
+
+    pub fn placeholder_text(mut self, placeholder_text: Option<&'a str>) -> TextInputBuilder<'a> {
+        self.placeholder_text = placeholder_text;
         self
     }
 
@@ -558,6 +595,10 @@ impl<'a> TextInputBuilder<'a> {
             out.set_font(self.font);
         } else {
             out.set_font(Font::global_default().as_ref());
+        }
+
+        if self.placeholder_text.is_some() {
+            out.set_placeholder_text(self.placeholder_text);
         }
 
         Ok(())
