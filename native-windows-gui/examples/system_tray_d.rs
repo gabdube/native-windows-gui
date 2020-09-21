@@ -19,7 +19,7 @@ pub struct SystemTray {
     icon: nwg::Icon,
 
     #[nwg_control(icon: Some(&data.icon), tip: Some("Hello"))]
-    #[nwg_events(OnContextMenu: [SystemTray::show_menu])]
+    #[nwg_events(MousePressLeftUp: [SystemTray::show_menu], OnContextMenu: [SystemTray::show_menu])]
     tray: nwg::TrayNotification,
 
     #[nwg_control(parent: window, popup: true)]

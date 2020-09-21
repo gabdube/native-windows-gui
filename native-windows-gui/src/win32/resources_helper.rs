@@ -274,6 +274,51 @@ pub unsafe fn bitmap_from_memory(src: &[u8]) -> Result<HANDLE, NwgError> {
     build_image_decoder_from_memory(src, None)
 }
 
+#[cfg(feature="image-decoder")]
+pub unsafe fn icon_from_memory(src: &[u8], strict: bool, size: Option<(u32, u32)>) -> Result<HANDLE, NwgError> {
+    use winapi::um::wingdi::DeleteObject;
+    use winapi::um::winuser::{LoadImageW, CreateIconIndirect};
+    use winapi::um::winuser::{ICONINFO, IDI_ERROR, IMAGE_ICON, LR_DEFAULTSIZE, LR_SHARED};
+
+    let color_bmp = build_image_decoder_from_memory(src, size);
+    if color_bmp.is_err() {
+        if strict {
+            return color_bmp;
+        } else {
+            let dr = (IDI_ERROR as usize) as *const u16;
+            return Ok(LoadImageW(ptr::null_mut(), dr, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE|LR_SHARED));
+        }
+    }
+
+    let color_bmp = color_bmp?;
+    let mut icon_info = ICONINFO {
+        fIcon: 1,
+        xHotspot: 0,
+        yHotspot: 0,
+        hbmMask: color_bmp as _,
+        hbmColor: color_bmp as _
+    };
+
+    let icon = CreateIconIndirect(&mut icon_info);
+    match icon.is_null() {
+        true => match strict {
+            true => Err(NwgError::resource_create("Failed to create icon from source")),
+            false => {
+                let dr = (IDI_ERROR as usize) as *const u16;
+                Ok(LoadImageW(ptr::null_mut(), dr, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE|LR_SHARED))
+            }
+        },
+        false => {
+            DeleteObject(color_bmp);
+            Ok(icon as _)
+        }
+    }
+}
+
+#[cfg(not(feature="image-decoder"))]
+pub unsafe fn icon_from_memory(src: &[u8], strict: bool, size: Option<(u32, u32)>) -> Result<HANDLE, NwgError> {
+    unimplemented!("Loading icons from memory require the \"image-decoder\" feature");
+}
 
 //
 // File dialog low level methods

@@ -380,6 +380,20 @@ impl TreeView {
         wh::send_message(handle, TVM_SETITEMW, 0, &mut tree_item as *mut TVITEMW as LPARAM);
     }
 
+    /// Unselects an item from the treeview
+    pub fn unselect_item(&self, item: &TreeItem) {
+        use winapi::um::commctrl::{TVM_SETITEMW, TVIF_STATE};
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let mut tree_item = blank_item();
+        tree_item.mask = TVIF_STATE;
+        tree_item.hItem = item.handle;
+        tree_item.state = 0;
+        tree_item.stateMask = TVIS_SELECTED;
+
+        wh::send_message(handle, TVM_SETITEMW, 0, &mut tree_item as *mut TVITEMW as LPARAM);
+    }
+
     /// Creates an iterator over the tree view items
     #[cfg(feature="tree-view-iterator")]
     pub fn iter<'a>(&'a self) -> crate::TreeViewIterator<'a> {

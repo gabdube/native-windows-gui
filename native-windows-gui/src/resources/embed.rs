@@ -1,5 +1,5 @@
 use winapi::shared::minwindef::{HINSTANCE, HRSRC, HGLOBAL};
-use winapi::um::winuser::{LoadImageW, LR_DEFAULTSIZE,};
+use winapi::um::winuser::{LoadImageW, LR_DEFAULTSIZE, LR_CREATEDIBSECTION};
 use winapi::ctypes::c_void;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::NwgError;
@@ -149,12 +149,16 @@ impl EmbedResource {
 
     /// Load an icon from the rc file. Returns `None` if `id` does not map to a icon.
     /// For more feature, use the `Icon::builder` with the `embed` parameter.
-    pub fn icon(&self, id: usize) -> Option<Icon> {
+    pub fn icon(&self, id: usize, size: Option<(u32, u32)>) -> Option<Icon> {
         use winapi::um::winuser::IMAGE_ICON;
 
         unsafe {
             let id_rc = id as _;
-            let icon = LoadImageW(self.hinst, id_rc, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
+            let icon = match size {
+                None => LoadImageW(self.hinst, id_rc, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE),
+                Some((w, h)) =>  LoadImageW(self.hinst, id_rc, IMAGE_ICON, w as _, h as _, 0),
+            };
+
             if icon.is_null() {
                 None
             } else {
@@ -164,44 +168,48 @@ impl EmbedResource {
     }
 
     /// Load an icon identified by a string in a resource file. Returns `None` if `id` does not map to a icon.
-    pub fn icon_str(&self, id: &str) -> Option<Icon> {
+    pub fn icon_str(&self, id: &str, size: Option<(u32, u32)>) -> Option<Icon> {
         let name = to_utf16(id);
-        self.icon(name.as_ptr() as usize)
+        self.icon(name.as_ptr() as usize, size)
     }
 
     /// Load a bitmap file from the rc file. Returns `None` if `id` does not map to a bitmap.
-    pub fn bitmap(&self, id: usize) -> Option<Bitmap> {
+    pub fn bitmap(&self, id: usize, size: Option<(u32, u32)>) -> Option<Bitmap> {
         use winapi::um::winuser::IMAGE_BITMAP;
 
         unsafe {
             let id_rc = id as _;
-            let icon = LoadImageW(self.hinst, id_rc, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE);
-            if icon.is_null() {
+            let bitmap = match size {
+                None => LoadImageW(self.hinst, id_rc, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE),
+                Some((w, h)) =>  LoadImageW(self.hinst, id_rc, IMAGE_BITMAP, w as _, h as _, LR_CREATEDIBSECTION),
+            };
+
+            if bitmap.is_null() {
                 None
             } else {
-                Some(Bitmap { handle: icon as _, owned: true } )
+                Some(Bitmap { handle: bitmap as _, owned: true } )
             }
         }
     }
 
     /// Load a bitmap file from the rc file. Returns `None` if `id` does not map to a bitmap.
-    pub fn bitmap_str(&self, id: &str) -> Option<Bitmap> {
+    pub fn bitmap_str(&self, id: &str, size: Option<(u32, u32)>) -> Option<Bitmap> {
         let name = to_utf16(id);
-        self.bitmap(name.as_ptr() as usize)
+        self.bitmap(name.as_ptr() as usize, size)
     }
 
     
     #[cfg(feature="image-decoder")]
     /// Load an image from the embed files and returns a bitmap. An image is defined this way: `IMAGE_NAME IMAGE "../path/my_image.bmp"`
     /// This method can load any image type supported by the image decoder.
-    pub fn image(&self, id: usize) -> Option<Bitmap> {
+    pub fn image(&self, id: usize, size: Option<(u32, u32)>) -> Option<Bitmap> {
         use crate::win32::resources_helper as rh;
 
         match self.raw(id, RawResourceType::Other("Image")) {
             None => None,
             Some(raw) => {
                 let src = unsafe { raw.as_mut_slice() };
-                let handle = unsafe { rh::build_image_decoder_from_memory(src, None) };
+                let handle = unsafe { rh::build_image_decoder_from_memory(src, size) };
                 match handle {
                     Ok(handle) => Some(Bitmap { handle, owned: true }),
                     Err(e) => {
@@ -215,9 +223,9 @@ impl EmbedResource {
 
     #[cfg(feature="image-decoder")]
     /// Load a image using a string name. See `EmbedResource::image`
-    pub fn image_str(&self, id: &str) -> Option<Bitmap> {
+    pub fn image_str(&self, id: &str, size: Option<(u32, u32)>) -> Option<Bitmap> {
         let name = to_utf16(id);
-        self.image(name.as_ptr() as usize)
+        self.image(name.as_ptr() as usize, size)
     }
 
     /// Load a cursor file from the rc file. Returns `None` if `id` does not map to a cursor.

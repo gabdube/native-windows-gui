@@ -1,5 +1,5 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM};
-use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
+use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP, WS_VSCROLL, WS_HSCROLL};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::check_hwnd;
 use crate::{Font, NwgError};
@@ -14,15 +14,19 @@ bitflags! {
     /**
         The rich text box flags
 
-        * VSCROLL:  The rich text box has a vertical scrollbar
-        * HSCROLL:  The rich text box has a horizontal scrollbar
+        * VSCROLL:  The text box has a vertical scrollbar
+        * HSCROLL:  The text box has a horizontal scrollbar
+        * AUTOVSCROLL:  The rich text box has a vertical scrollbar
+        * AUTOHSCROLL:  The rich text box has a horizontal scrollbar
         * VISIBLE:  The rich text box is immediatly visible after creation
         * DISABLED: The rich text box cannot be interacted with by the user. It also has a grayed out look.
         * TAB_STOP: The rich text box can be selected using tab navigation
     */
     pub struct RichTextBoxFlags: u32 {
-        const VSCROLL = ES_AUTOVSCROLL;
-        const HSCROLL = ES_AUTOHSCROLL;
+        const VSCROLL = WS_VSCROLL;
+        const HSCROLL = WS_HSCROLL;
+        const AUTOVSCROLL = ES_AUTOVSCROLL;
+        const AUTOHSCROLL = ES_AUTOHSCROLL;
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const TAB_STOP = WS_TABSTOP;
@@ -269,7 +273,7 @@ impl RichTextBox {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_TABSTOP
+        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL
     }
 
     /// Winapi flags required by the control

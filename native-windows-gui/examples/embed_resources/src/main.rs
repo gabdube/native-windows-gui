@@ -48,9 +48,9 @@ impl EmbedApp {
         self.hello_button.set_text(&em.string(1).unwrap());
 
         self.window.set_text(&em.string(2).unwrap());
-        self.window.set_icon(em.icon_str("TEST").as_ref());
+        self.window.set_icon(em.icon_str("TEST", None).as_ref());
 
-        self.embed_bitmap.set_bitmap(em.bitmap_str("BALL").as_ref());
+        self.embed_bitmap.set_bitmap(em.bitmap_str("BALL", None).as_ref());
 
         // Load a custom font from embed resource
         let mem_font = unsafe {

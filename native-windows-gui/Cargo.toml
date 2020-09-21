@@ -1,6 +1,6 @@
 [package]
 name = "native-windows-gui"
-version = "1.0.4"
+version = "1.0.5"
 authors = ["gdube <gdube.475@gmail.com>"]
 edition = "2018"
 

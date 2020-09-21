@@ -50,6 +50,7 @@ bitflags! {
 
     **Control events:**
         * `OnContextMenu`: When the user right clicks on the system tray icon
+        * `MousePressLeftUp`: When the user left click the system tray icon
         * `OnTrayNotificationShow`: When a TrayNotification info popup (not the tooltip) is shown 
         * `OnTrayNotificationHide`: When a TrayNotification info popup (not the tooltip) is hidden 
         * `OnTrayNotificationTimeout`: When a TrayNotification is closed due to a timeout
@@ -366,7 +367,7 @@ impl<'a> TrayNotificationBuilder<'a> {
 
         let icon = match self.icon {
             Some(i) => i.handle as HICON,
-            None => panic!("Icon required. TODO ERR")
+            None => panic!("Tary notification requires an Icon at creation")
         };
 
         let balloon_icon = match (self.info.is_some(), self.balloon_icon) {
