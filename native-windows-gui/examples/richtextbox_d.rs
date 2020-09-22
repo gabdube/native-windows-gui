@@ -24,7 +24,7 @@ pub struct RichText {
     #[nwg_resource(family: "Segoe UI", size: 18)]
     font: nwg::Font,
 
-    #[nwg_control(font: Some(&data.font))]
+    #[nwg_control(font: Some(&data.font), focus: true)]
     #[nwg_layout_item(layout: grid, row: 0, col: 0)]
     rich_text_box: nwg::RichTextBox
 }
@@ -34,10 +34,28 @@ impl RichText {
     fn init_text(&self) {
         let text = concat!(
             "HELLO\r\n",
-            "WORLD!"
+            "WORLD!\r\n"
         );
 
-        self.rich_text_box.set_text(text);
+        let rich = &self.rich_text_box;
+        rich.set_text(text);
+
+        rich.set_selection(0..5);
+        rich.set_char_format(&nwg::CharFormat {
+            height: Some(500),
+            text_color: Some([255, 0, 0]),
+            underline_type: Some(nwg::UnderlineType::Solid),
+            ..Default::default()
+        });
+
+        rich.set_selection(6..12);
+        rich.set_char_format(&nwg::CharFormat {
+            effets: Some(nwg::CharEffets::ITALIC | nwg::CharEffets::BOLD),
+            height: Some(500),
+            text_color: Some([0, 0, 255]),
+            font_face_name: Some("Comic Sans MS".to_string()),
+            ..Default::default()
+        });
     }
 
     fn set_resize(&self, data: &nwg::EventData) {

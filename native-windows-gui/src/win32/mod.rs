@@ -23,6 +23,9 @@ pub(crate) mod extern_canvas;
 #[cfg(feature = "image-decoder")]
 pub(crate) mod image_decoder;
 
+#[cfg(feature = "rich-textbox")]
+pub(crate) mod richedit;
+
 use std::{mem, ptr};
 use crate::errors::NwgError;
 

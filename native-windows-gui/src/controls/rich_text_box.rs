@@ -2,6 +2,7 @@ use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{ES_AUTOVSCROLL, ES_AUTOHSCROLL, WS_VISIBLE, WS_DISABLED, WS_TABSTOP, WS_VSCROLL, WS_HSCROLL};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::check_hwnd;
+use crate::win32::richedit as rich;
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::ops::Range;
@@ -33,6 +34,59 @@ bitflags! {
     }
 }
 
+bitflags! {
+    /**
+        The effets that can be applied to the text of a rich edit control
+
+        * BOLD:      Characters are bold.
+        * ITALIC:    Characters are italic. 
+        * STRIKEOUT: Characters are struck. 
+        * UNDERLINE: Characters are underlined. 
+        * AUTOCOLOR: Characters use the default system color
+    */
+    pub struct CharEffets: u32 {
+        const BOLD = 0x0001;
+        const ITALIC = 0x0002;
+        const UNDERLINE = 0x0004;
+        const STRIKEOUT = 0x0008;
+        const AUTOCOLOR = 0x40000000;
+    }
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone, Debug)]
+pub enum UnderlineType {
+    None,
+    Solid,
+    Dash,
+    DashDot,
+    DashDotDot,
+    Dotted,
+    DoubleSolid,
+    Wave,
+}
+
+/// Contains information about character formatting in a rich edit contro
+#[derive(Clone, Debug, Default)]
+pub struct CharFormat {
+    /// Character effects
+    pub effets: Option<CharEffets>,
+
+    /// Character height, in twips (1/1440 of an inch or 1/20 of a printer's point).
+    pub height: Option<i32>,
+
+    /// Character offset, in twips, from the baseline. If the value of this member is positive, the character is a superscript; if it is negative, the character is a subscript.
+    pub y_offset: Option<i32>,
+
+    /// Text color. This member is ignored if the AUTOCOLOR character effect is specified. 
+    pub text_color: Option<[u8; 3]>,
+
+    /// The font family name
+    pub font_face_name: Option<String>,
+
+    /// Text underline type. Does not work with effects
+    pub underline_type: Option<UnderlineType>,
+}
 
 /**
 An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
@@ -82,6 +136,12 @@ impl RichTextBox {
             font: None,
             parent: None
         }
+    }
+
+    /// Sets the char format of the currently selected text
+    pub fn set_char_format(&self, fmt: &CharFormat) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        rich::set_char_format(handle, fmt);
     }
 
     /// Return the font of the control
