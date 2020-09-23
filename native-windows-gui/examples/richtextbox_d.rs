@@ -43,9 +43,15 @@ impl RichText {
             // 203..411
             "In Imperial Russia, most political jokes were of the polite variety that circulated in educated society. Few of the political jokes of the time are recorded, but some were printed in a 1904 German anthology.\r\n",
 
-            "Soviet Union\r\n",  // 411..423
+            // 411..660
+            "A man was reported to have said: \"Nikolay is a moron!\" and was arrested by a policeman. \"No, sir, I meant not our respected Emperor, but another Nikolay!\" - \"Don't try to trick me: if you say \"moron\", you are obviously referring to our tsar!\r\n",
 
-            // 423..658
+            // 660..861
+            "A respected merchant, Sevenassov (Semizhopov in the original Russian), wants to change his surname, and asks the Tsar for permission. The Tsar gives his decision in writing: \"Permitted to subtract two asses\"\r\n",
+
+            // 861..873
+            "Soviet Union\r\n", 
+
             "Every nation enjoys political jokes, but in the Soviet Union telling political jokes could be regarded as type of extreme sport: according to Article 58 (RSFSR Penal Code), \"anti-Soviet propaganda\" was a potentially capital offense.\r\n",
         );
 
@@ -71,7 +77,12 @@ impl RichText {
             ..Default::default()
         });
 
-        rich.set_selection(411..423);
+        rich.set_selection(411..861);
+        rich.set_para_format(&nwg::ParaFormat {
+            numbering: Some(nwg::ParaNumbering::Bullet),
+        });
+
+        rich.set_selection(861..873);
         rich.set_char_format(&nwg::CharFormat {
             effects: Some(nwg::CharEffects::BOLD | nwg::CharEffects::ITALIC),
             height: Some(350),

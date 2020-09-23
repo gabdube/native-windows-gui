@@ -847,6 +847,7 @@ mod partial_controls_test_ui {
                     if &handle == &self.window {
                         init_tree(self);
                         init_list_view(self);
+                        init_rich_text_box(self);
                     },
                 E::OnWindowClose => 
                     if &handle == &self.window {
@@ -936,6 +937,18 @@ mod partial_controls_test_ui {
 
 fn item_hello(m: &'static str) {
     simple_message("Hello", &format!("Hello from {}!", m));
+}
+
+fn init_rich_text_box(app: &ControlsTest) {
+    let rich = &app.test_rich;
+
+    rich.set_selection(0..1000);
+    rich.set_char_format(&CharFormat {
+        effects: Some(CharEffects::BOLD),
+        height: Some(250),
+        text_color: Some([200, 0, 0]),
+        ..Default::default()
+    })
 }
 
 fn init_tree(app: &ControlsTest) {

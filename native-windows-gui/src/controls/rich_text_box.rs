@@ -70,7 +70,7 @@ pub enum UnderlineType {
     Wave,
 }
 
-/// Contains information about character formatting in a rich edit contro
+/// Contains information about character formatting in a rich edit control
 #[derive(Clone, Debug, Default)]
 pub struct CharFormat {
     /// Character effects (bold, italics, strikeout, etc)
@@ -93,6 +93,45 @@ pub struct CharFormat {
 
     /// Text underline type. Does not work with effects
     pub underline_type: Option<UnderlineType>,
+}
+
+
+#[derive(Copy, Clone, Debug)]
+/// Options used for bulleted or numbered paragraphs. 
+pub enum ParaNumbering {
+    /// No paragraph numbering or bullets. 
+    None,
+
+    /// Insert a bullet at the beginning of each selected paragraph. 
+    Bullet,
+
+    /// Use Arabic numbers (0, 1, 2, and so on). 
+    Arabic,
+
+    /// Use lowercase letters (a, b, c, and so on). 
+    LcLetter,
+
+    /// Use lowercase Roman letters (i, ii, iii, and so on). 
+    LcRoman,
+
+    /// Use uppercase letters (A, B, C, and so on). 
+    UcLetter,
+
+    /// Use uppercase Roman letters (I, II, III, and so on). 
+    UcRoman,
+
+    /// Uses a sequence of characters beginning with the Unicode character specified
+    Seq(char)
+}
+
+impl Default for ParaNumbering {
+    fn default() -> Self { ParaNumbering::None }
+}
+
+/// Contains information about paragraph formatting in a rich edit control
+#[derive(Clone, Debug, Default)]
+pub struct ParaFormat {
+    pub numbering: Option<ParaNumbering>,
 }
 
 /**
@@ -122,7 +161,7 @@ Note: Use `\r\n` to input a new line not just `\n`.
   * `MousePress(_)`: Generic mouse press events on the button
   * `OnKeyPress`:    Generic key press event
   * `OnKeyRelease`:  Generic key release event
-
+  * `OnChar`:        Generic key event. Returns a `char` instead of a virtual key code
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct RichTextBox {
@@ -155,6 +194,18 @@ impl RichTextBox {
     pub fn char_format(&self) -> CharFormat {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         rich::char_format(handle)
+    }
+
+    /// Sets the paragraph formatting for the current selection in a rich edit control
+    pub fn set_para_format(&self, fmt: &ParaFormat) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        rich::set_para_format(handle, fmt)
+    }
+
+    /// Returns the paragraph formatting for the current selection in a rich edit control
+    pub fn para_format(&self) -> ParaFormat {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        rich::para_format(handle)
     }
 
     /// Return the font of the control

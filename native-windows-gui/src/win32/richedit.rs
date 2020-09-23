@@ -9,12 +9,18 @@ use winapi::shared::{
 };
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
-use crate::controls::{CharFormat, CharEffects, UnderlineType::*};
+use crate::controls::{CharFormat, ParaFormat, CharEffects, UnderlineType, ParaNumbering};
 use std::{mem, ptr};
+use std::convert::TryFrom;
+
 
 const EM_GETCHARFORMAT: u32 = WM_USER + 58;
+const EM_GETPARAFORMAT: u32 = WM_USER + 61;
 const EM_SETCHARFORMAT: u32 = WM_USER + 68;
+const EM_SETPARAFORMAT: u32 = WM_USER + 71;
 const SCF_SELECTION: u32 = 1;
+
+const MAX_TAB_STOPS: usize = 32;
 
 const CFM_EFFECTS: u32 = 0x001 | 0x002 | 0x004 | 0x008 | 0x010 | 0x020 | 0x40000000;
 const CFM_SIZE: u32 = 0x80000000;
@@ -22,6 +28,16 @@ const CFM_OFFSET: u32 = 0x10000000;
 const CFM_COLOR: u32 = 0x40000000;
 const CFM_FACE: u32 = 0x20000000;
 const CFM_UNDERLINETYPE: u32 = 0x00800000;
+
+const PFM_NUMBERING: u32 = 32;
+
+const PFN_BULLET: u16 = 1;
+const PFN_ARABIC: u16 = 2;
+const PFN_LCLETTER: u16 = 3;
+const PFN_LCROMAN: u16 = 4;
+const PFN_UCLETTER: u16 = 5;
+const PFN_UCROMAN: u16 = 6;
+const PFN_CUSTOM: u16 = 7;
 
 #[repr(C)]
 #[allow(non_snake_case)]
@@ -48,6 +64,37 @@ struct CHARFORMATW {
     bRevAuthor: BYTE,
     bUnderlineColor: BYTE
 }
+
+#[repr(C)]
+#[allow(non_snake_case)]
+#[derive(Default)]
+struct PARAFORMAT {
+    cbSize: UINT,
+    dwMask: DWORD,
+    wNumbering: WORD,
+    wEffects: WORD,
+    dxStartIndent: LONG,
+    dxRightIndent: LONG,
+    dxOffset: LONG,
+    wAlignment: WORD,
+    cTabCount: SHORT,
+    rgxTabs: [LONG; MAX_TAB_STOPS],
+    dySpaceBefore: LONG,
+    dySpaceAfter: LONG,
+    dyLineSpacing: LONG,
+    sStyle: SHORT,
+    bLineSpacingRule: BYTE,
+    bOutlineLevel: BYTE,
+    wShadingWeight: WORD,
+    wShadingStyle: WORD,
+    wNumberingStart: WORD,
+    wNumberingStyle: WORD,
+    wNumberingTab: WORD,
+    wBorderSpace: WORD,
+    wBorderWidth: WORD,
+    wBorders: WORD
+}
+
 
 pub(crate) fn set_char_format(handle: HWND, fmt: &CharFormat) {
 
@@ -78,14 +125,14 @@ pub(crate) fn set_char_format(handle: HWND, fmt: &CharFormat) {
     let mut underline_type = 0;
     if let Some(under) = fmt.underline_type {
         underline_type = match under {
-            None => 0,
-            Solid => 1,
-            Dash => 5,
-            DashDot => 6,
-            DashDotDot => 7,
-            Dotted => 4,
-            DoubleSolid => 3,
-            Wave => 8,
+            UnderlineType::None => 0,
+            UnderlineType::Solid => 1,
+            UnderlineType::Dash => 5,
+            UnderlineType::DashDot => 6,
+            UnderlineType::DashDotDot => 7,
+            UnderlineType::Dotted => 4,
+            UnderlineType::DoubleSolid => 3,
+            UnderlineType::Wave => 8,
         };
     }
 
@@ -96,20 +143,8 @@ pub(crate) fn set_char_format(handle: HWND, fmt: &CharFormat) {
         yHeight: fmt.height.unwrap_or(0),
         yOffset: fmt.y_offset.unwrap_or(0),
         crTextColor: color,
-        bCharSet: 0,
-        bPitchAndFamily: 0,
-        szFaceName: face,
-        wWeight: 0,
-        sSpacing: 0,
-        crBackColor: 0,
-        lcid: 0,
-        reserved: 0,
-        sStyle: 0,
-        wKerning: 0,
         bUnderlineType: underline_type,
-        bAnimation: 0,
-        bRevAuthor: 0,
-        bUnderlineColor: 0
+        .. Default::default()
     };
 
     wh::send_message(handle, EM_SETCHARFORMAT, SCF_SELECTION as _, &mut fmt as *mut CHARFORMATW as _);
@@ -127,17 +162,17 @@ pub(crate) fn char_format(handle: HWND) -> CharFormat {
 
     let effects = Some(CharEffects::from_bits_truncate(fmt.dwEffects));
 
-    let mut height = Option::None;
+    let mut height = None;
     if fmt.yHeight != 0 {
         height = Some(fmt.yHeight);
     }
 
-    let mut y_offset = Option::None;
+    let mut y_offset = None;
     if fmt.yOffset != 0 {
         y_offset = Some(fmt.yOffset);
     }
 
-    let mut text_color = Option::None;
+    let mut text_color = None;
     if fmt.crTextColor != 0 {
         text_color = Some([
             GetRValue(fmt.crTextColor),
@@ -147,17 +182,17 @@ pub(crate) fn char_format(handle: HWND) -> CharFormat {
     }
 
     let underline_type = match fmt.bUnderlineType {
-        1 => Some(Solid),
-        5 => Some(Dash),
-        6 => Some(DashDot),
-        7 => Some(DashDotDot),
-        4 => Some(Dotted),
-        3 => Some(DoubleSolid),
-        8 => Some(Wave),
-        _ => Option::None,
+        1 => Some(UnderlineType::Solid),
+        5 => Some(UnderlineType::Dash),
+        6 => Some(UnderlineType::DashDot),
+        7 => Some(UnderlineType::DashDotDot),
+        4 => Some(UnderlineType::Dotted),
+        3 => Some(UnderlineType::DoubleSolid),
+        8 => Some(UnderlineType::Wave),
+        _ => None,
     };
 
-    let mut font_face_name = Option::None;
+    let mut font_face_name = None;
     if fmt.szFaceName[0] != 0 {
         font_face_name = Some(from_utf16(&fmt.szFaceName));
     }
@@ -171,3 +206,66 @@ pub(crate) fn char_format(handle: HWND) -> CharFormat {
         underline_type,
     }
 }
+
+pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
+
+    let mut mask = 0;
+    if fmt.numbering.is_some() { mask |= PFM_NUMBERING; }
+
+    let mut numbering_start = 0;
+    let mut numbering = 0;
+    if let Some(num) = fmt.numbering {
+        numbering = match num {
+            ParaNumbering::None => 0,
+            ParaNumbering::Bullet => PFN_BULLET,
+            ParaNumbering::Arabic => PFN_ARABIC,
+            ParaNumbering::LcLetter => PFN_LCLETTER,
+            ParaNumbering::LcRoman => PFN_LCROMAN,
+            ParaNumbering::UcLetter => PFN_UCLETTER,
+            ParaNumbering::UcRoman => PFN_UCROMAN,
+            ParaNumbering::Seq(c) => {
+                numbering_start = c as u16;
+                PFN_CUSTOM
+            }
+        }
+    }
+
+    let mut para = PARAFORMAT {
+        cbSize: mem::size_of::<PARAFORMAT>() as _,
+        dwMask: mask,
+        wNumbering: numbering,
+        wNumberingStart: numbering_start,
+        ..Default::default()
+    };
+
+    wh::send_message(handle, EM_SETPARAFORMAT, 0, &mut para as *mut PARAFORMAT as _);
+}
+
+pub(crate) fn para_format(handle: HWND) -> ParaFormat {
+    let mut para = PARAFORMAT {
+        cbSize: mem::size_of::<PARAFORMAT>() as _,
+        ..Default::default()
+    };
+
+    wh::send_message(handle, EM_GETPARAFORMAT, 0, &mut para as *mut PARAFORMAT as _);
+    
+
+    let mut numbering = None;
+    if para.dwMask & PFM_NUMBERING == PFM_NUMBERING && para.wNumbering != 0 {
+        numbering = Some(match para.wNumbering {
+            PFN_BULLET => ParaNumbering::Bullet,
+            PFN_ARABIC => ParaNumbering::Arabic,
+            PFN_LCLETTER => ParaNumbering::LcLetter,
+            PFN_LCROMAN => ParaNumbering::LcRoman,
+            PFN_UCLETTER => ParaNumbering::UcLetter,
+            PFN_UCROMAN => ParaNumbering::UcRoman,
+            PFN_CUSTOM => ParaNumbering::Seq(char::try_from(para.wNumberingStart as u32).unwrap_or('?')), 
+            _ => ParaNumbering::None
+        });
+    }
+
+    ParaFormat {
+        numbering,
+    }
+}
+
