@@ -8,10 +8,11 @@ use winapi::shared::{
     windef::{HWND, COLORREF}
 };
 use crate::win32::window_helper as wh;
-use crate::win32::base_helper::to_utf16;
-use crate::controls::{CharFormat, UnderlineType::*};
+use crate::win32::base_helper::{to_utf16, from_utf16};
+use crate::controls::{CharFormat, CharEffects, UnderlineType::*};
 use std::{mem, ptr};
 
+const EM_GETCHARFORMAT: u32 = WM_USER + 58;
 const EM_SETCHARFORMAT: u32 = WM_USER + 68;
 const SCF_SELECTION: u32 = 1;
 
@@ -24,10 +25,11 @@ const CFM_UNDERLINETYPE: u32 = 0x00800000;
 
 #[repr(C)]
 #[allow(non_snake_case)]
+#[derive(Default)]
 struct CHARFORMATW {
     cbSize: UINT,
     dwMask: DWORD,
-    dwEffets: DWORD,
+    dwEffects: DWORD,
     yHeight: LONG,
     yOffset: LONG,
     crTextColor: COLORREF,
@@ -50,7 +52,7 @@ struct CHARFORMATW {
 pub(crate) fn set_char_format(handle: HWND, fmt: &CharFormat) {
 
     let mut mask = 0;
-    if fmt.effets.is_some() { mask |= CFM_EFFECTS; }
+    if fmt.effects.is_some() { mask |= CFM_EFFECTS; }
     if fmt.height.is_some() { mask |= CFM_SIZE; }
     if fmt.y_offset.is_some() { mask |= CFM_OFFSET; }
     if fmt.text_color.is_some() { mask |= CFM_COLOR; }
@@ -90,7 +92,7 @@ pub(crate) fn set_char_format(handle: HWND, fmt: &CharFormat) {
     let mut fmt = CHARFORMATW {
         cbSize: mem::size_of::<CHARFORMATW>() as _,
         dwMask: mask,
-        dwEffets: fmt.effets.map(|e| e.bits()).unwrap_or(0),
+        dwEffects: fmt.effects.map(|e| e.bits()).unwrap_or(0),
         yHeight: fmt.height.unwrap_or(0),
         yOffset: fmt.y_offset.unwrap_or(0),
         crTextColor: color,
@@ -113,3 +115,59 @@ pub(crate) fn set_char_format(handle: HWND, fmt: &CharFormat) {
     wh::send_message(handle, EM_SETCHARFORMAT, SCF_SELECTION as _, &mut fmt as *mut CHARFORMATW as _);
 }
 
+pub(crate) fn char_format(handle: HWND) -> CharFormat {
+    use winapi::um::wingdi::{GetRValue, GetGValue, GetBValue};
+
+    let mut fmt: CHARFORMATW = CHARFORMATW {
+        cbSize: mem::size_of::<CHARFORMATW>() as _,
+        ..Default::default()
+    };
+
+    wh::send_message(handle, EM_GETCHARFORMAT, SCF_SELECTION as _, &mut fmt as *mut CHARFORMATW as _);
+
+    let effects = Some(CharEffects::from_bits_truncate(fmt.dwEffects));
+
+    let mut height = Option::None;
+    if fmt.yHeight != 0 {
+        height = Some(fmt.yHeight);
+    }
+
+    let mut y_offset = Option::None;
+    if fmt.yOffset != 0 {
+        y_offset = Some(fmt.yOffset);
+    }
+
+    let mut text_color = Option::None;
+    if fmt.crTextColor != 0 {
+        text_color = Some([
+            GetRValue(fmt.crTextColor),
+            GetGValue(fmt.crTextColor),
+            GetBValue(fmt.crTextColor),
+        ]);
+    }
+
+    let underline_type = match fmt.bUnderlineType {
+        1 => Some(Solid),
+        5 => Some(Dash),
+        6 => Some(DashDot),
+        7 => Some(DashDotDot),
+        4 => Some(Dotted),
+        3 => Some(DoubleSolid),
+        8 => Some(Wave),
+        _ => Option::None,
+    };
+
+    let mut font_face_name = Option::None;
+    if fmt.szFaceName[0] != 0 {
+        font_face_name = Some(from_utf16(&fmt.szFaceName));
+    }
+
+    CharFormat {
+        effects,
+        height,
+        y_offset,
+        text_color,
+        font_face_name,
+        underline_type,
+    }
+}

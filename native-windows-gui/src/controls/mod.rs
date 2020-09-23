@@ -90,7 +90,7 @@ pub use image_frame::{ImageFrame, ImageFrameBuilder, ImageFrameFlags};
 pub use text_box::{TextBox, TextBoxBuilder, TextBoxFlags};
 
 #[cfg(feature = "rich-textbox")]
-pub use rich_text_box::{RichTextBox, RichTextBoxBuilder, RichTextBoxFlags, CharFormat, UnderlineType, CharEffets};
+pub use rich_text_box::{RichTextBox, RichTextBoxBuilder, RichTextBoxFlags, CharFormat, UnderlineType, CharEffects};
 
 #[cfg(feature = "status-bar")]
 pub use status_bar::{StatusBar, StatusBarBuilder};

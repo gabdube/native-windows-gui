@@ -11,6 +11,8 @@ const NOT_BOUND: &'static str = "RichTextBox is not yet bound to a winapi object
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: RichTextBox handle is not HWND!";
 
 
+const ES_SAVESEL: u32 = 32768;
+
 bitflags! {
     /**
         The rich text box flags
@@ -22,6 +24,7 @@ bitflags! {
         * VISIBLE:  The rich text box is immediatly visible after creation
         * DISABLED: The rich text box cannot be interacted with by the user. It also has a grayed out look.
         * TAB_STOP: The rich text box can be selected using tab navigation
+        * SAVE_SELECTION: Keep the selected text when the control lose focus
     */
     pub struct RichTextBoxFlags: u32 {
         const VSCROLL = WS_VSCROLL;
@@ -31,6 +34,7 @@ bitflags! {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const TAB_STOP = WS_TABSTOP;
+        const SAVE_SELECTION = ES_SAVESEL;
     }
 }
 
@@ -44,7 +48,7 @@ bitflags! {
         * UNDERLINE: Characters are underlined. 
         * AUTOCOLOR: Characters use the default system color
     */
-    pub struct CharEffets: u32 {
+    pub struct CharEffects: u32 {
         const BOLD = 0x0001;
         const ITALIC = 0x0002;
         const UNDERLINE = 0x0004;
@@ -69,8 +73,11 @@ pub enum UnderlineType {
 /// Contains information about character formatting in a rich edit contro
 #[derive(Clone, Debug, Default)]
 pub struct CharFormat {
-    /// Character effects
-    pub effets: Option<CharEffets>,
+    /// Character effects (bold, italics, strikeout, etc)
+    ///
+    /// When returned by `char_format`, specifies which attributes are consistent throughout the entire selection. 
+    /// For example, if the entire selection is either in italics or not in italics.
+    pub effects: Option<CharEffects>,
 
     /// Character height, in twips (1/1440 of an inch or 1/20 of a printer's point).
     pub height: Option<i32>,
@@ -138,10 +145,16 @@ impl RichTextBox {
         }
     }
 
-    /// Sets the char format of the currently selected text
+    /// Sets the character format of the currently selected text
     pub fn set_char_format(&self, fmt: &CharFormat) {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         rich::set_char_format(handle, fmt);
+    }
+
+    /// Returns the character format of the current selected text
+    pub fn char_format(&self) -> CharFormat {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        rich::char_format(handle)
     }
 
     /// Return the font of the control
@@ -221,7 +234,7 @@ impl RichTextBox {
         wh::send_message(handle, EM_SETSEL as u32, r.start as usize, r.end as isize);
     }
 
-    /// Return the length of the user input in the control. This is better than test.len() as it
+    /// Return the length of the user input in the control. This is better than `test.len()` as it
     /// does not allocate a string in memory
     pub fn len(&self) -> u32 {
         use winapi::um::winuser::EM_LINELENGTH;
@@ -333,7 +346,7 @@ impl RichTextBox {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL
+        WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_TABSTOP | WS_VSCROLL | WS_HSCROLL | ES_SAVESEL
     }
 
     /// Winapi flags required by the control
