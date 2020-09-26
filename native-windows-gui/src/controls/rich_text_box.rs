@@ -157,6 +157,28 @@ pub enum ParaAlignment {
     FullInterword
 }
 
+/// Type of line spacing
+#[derive(Copy, Clone, Debug)]
+pub enum ParaLineSpacing {
+    /// Single spacing. 
+    Single,
+    
+    /// One-and-a-half spacing.
+    OneAndHalf,
+
+    /// Double spacing. 
+    Double,
+
+    /// Value in twips (twentieth of a point). If the value specifies a value that is less than single spacing, the control displays single-spaced text
+    SingleOr(i32),
+
+    /// Value in twips (twentieth of a point). The control uses the exact spacing specified, even if dyLineSpacing specifies a value that is less than single spacing. 
+    Exact(i32),
+
+    /// The value of `value` / 20 is the spacing, in lines, from one line to the next. 20 produces single-spaced text, 40 is double spaced, 60 is triple spaced, and so on. 
+    Exact20(i32)
+}
+
 /// Contains information about paragraph formatting in a rich edit control
 #[derive(Clone, Debug, Default)]
 pub struct ParaFormat {
@@ -171,6 +193,24 @@ pub struct ParaFormat {
 
     /// Paragraph alignment
     pub alignment: Option<ParaAlignment>,
+
+    /// Size of the spacing above the paragraph, in twips (twentieth of a point).
+    pub space_before: Option<i32>,
+
+    /// Specifies the size of the spacing below the paragraph, in twips (twentieth of a point).
+    pub space_after: Option<i32>,
+
+    /// Indentation of the paragraph's first line, in twips (twentieth of a point). The indentation of subsequent lines depends on the `offset` member
+    pub start_indent: Option<i32>,
+
+    /// Indentation of the right side of the paragraph, relative to the right margin, in twips (twentieth of a point).
+    pub right_indent: Option<i32>,
+
+    /// Indentation of the second and subsequent lines, **relative** to the indentation of the first line, in twips. The first line is indented if this member is negative or outdented if this member is positive.
+    pub offset: Option<i32>,
+
+    /// Line spacing. For a description of how this value is interpreted, see `ParaLineSpacing`
+    pub line_spacing: Option<ParaLineSpacing>
 }
 
 /**

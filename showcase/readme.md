@@ -45,5 +45,8 @@
 # Localization
 ![localize](localize.png)
 
+# Rich text box
+![rich text box](rich.png)
+
 # Splash
 ![localize](splash.png)

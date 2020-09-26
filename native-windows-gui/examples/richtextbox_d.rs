@@ -14,7 +14,7 @@ use nwg::NativeUi;
 
 #[derive(Default, NwgUi)]
 pub struct RichText {
-    #[nwg_control(size: (490, 430), position: (300, 300), title: "Rich TextBox")]
+    #[nwg_control(size: (590, 430), position: (300, 300), title: "Rich TextBox")]
     #[nwg_events( OnWindowClose: [nwg::stop_thread_dispatch()], OnInit: [RichText::init_text], OnMinMaxInfo: [RichText::set_resize(SELF, EVT_DATA)] )]
     window: nwg::Window,
 
@@ -35,7 +35,7 @@ impl RichText {
         let text = concat!(
             "Russian political jokes\r\n",  //0..24
 
-            // 25..188
+            // 25..187
             "Russian political jokes are a part of Russian humour and can be grouped into the major time periods: Imperial Russia, Soviet Union and finally post-Soviet Russia.\r\n",
             
             "Imperial Russia\r\n", // 187..203
@@ -52,6 +52,7 @@ impl RichText {
             // 861..873
             "Soviet Union\r\n", 
 
+            // 873..1106
             "Every nation enjoys political jokes, but in the Soviet Union telling political jokes could be regarded as type of extreme sport: according to Article 58 (RSFSR Penal Code), \"anti-Soviet propaganda\" was a potentially capital offense.\r\n",
         );
 
@@ -64,12 +65,18 @@ impl RichText {
             height: Some(500),
             text_color: Some([50, 50, 150]),
             font_face_name: Some("Comic Sans MS".to_string()),
-            y_offset: Some(150),
             ..Default::default()
         });
 
         rich.set_para_format(&nwg::ParaFormat {
             alignment: Some(nwg::ParaAlignment::Center),
+            ..Default::default()
+        });
+
+        rich.set_selection(25..187);
+        rich.set_para_format(&nwg::ParaFormat {
+            space_before: Some(200),
+            space_after: Some(200),
             ..Default::default()
         });
 
@@ -78,7 +85,6 @@ impl RichText {
             effects: Some(nwg::CharEffects::BOLD),
             height: Some(350),
             text_color: Some([50, 50, 50]),
-            y_offset: Some(100),
             ..Default::default()
         });
 
@@ -87,8 +93,24 @@ impl RichText {
             ..Default::default()
         });
 
+        rich.set_selection(203..411);
+        rich.set_para_format(&nwg::ParaFormat {
+            space_before: Some(200),
+            space_after: Some(200),
+            ..Default::default()
+        });
+
+        rich.set_selection(411..412);
+        rich.set_para_format(&nwg::ParaFormat {
+            space_after: Some(100),
+            ..Default::default()
+        });
+
         rich.set_selection(411..861);
         rich.set_para_format(&nwg::ParaFormat {
+            start_indent: Some(300),
+            right_indent: Some(300),
+            line_spacing: Some(nwg::ParaLineSpacing::Single),
             numbering: Some(nwg::ParaNumbering::Seq('1')),
             numbering_style: Some(nwg::ParaNumberingStyle::Period),
             numbering_tab: Some(300),
@@ -100,12 +122,18 @@ impl RichText {
             effects: Some(nwg::CharEffects::BOLD | nwg::CharEffects::ITALIC),
             height: Some(350),
             text_color: Some([150, 50, 50]),
-            y_offset: Some(100),
             ..Default::default()
         });
 
         rich.set_para_format(&nwg::ParaFormat {
             alignment: Some(nwg::ParaAlignment::Center),
+            ..Default::default()
+        });
+
+        rich.set_selection(873..1106);
+        rich.set_para_format(&nwg::ParaFormat {
+            space_before: Some(200),
+            space_after: Some(200),
             ..Default::default()
         });
 

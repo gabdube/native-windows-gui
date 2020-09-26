@@ -10,7 +10,7 @@ use winapi::shared::{
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
 use crate::controls::{CharFormat, ParaFormat, CharEffects, UnderlineType, ParaNumbering,
-ParaNumberingStyle, ParaAlignment};
+ParaNumberingStyle, ParaAlignment, ParaLineSpacing};
 use std::{mem, ptr};
 use std::convert::TryFrom;
 
@@ -30,8 +30,14 @@ const CFM_COLOR: u32 = 0x40000000;
 const CFM_FACE: u32 = 0x20000000;
 const CFM_UNDERLINETYPE: u32 = 0x00800000;
 
+const PFM_STARTINDENT: u32 = 0x00000001;
+const PFM_RIGHTINDENT: u32 = 0x00000002;
+const PFM_OFFSET: u32 = 0x00000004;
 const PFM_ALIGNMENT: u32 = 0x00000008;
 const PFM_NUMBERING: u32 = 0x00000020;
+const PFM_SPACEBEFORE: u32 = 0x00000040;
+const PFM_SPACEAFTER: u32 = 0x00000080;
+const PFM_LINESPACING: u32 = 0x00000100;
 const PFM_NUMBERINGSTYLE: u32 = 0x00002000;
 const PFM_NUMBERINGTAB: u32 = 0x00004000;
 const PFM_NUMBERINGSTART: u32 = 0x00008000;
@@ -232,6 +238,12 @@ pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
     if fmt.numbering_style.is_some() { mask |= PFM_NUMBERINGSTYLE; }
     if fmt.numbering_tab.is_some() { mask |= PFM_NUMBERINGTAB; }
     if fmt.alignment.is_some() { mask |= PFM_ALIGNMENT; }
+    if fmt.space_before.is_some() { mask |= PFM_SPACEBEFORE; }
+    if fmt.space_after.is_some() { mask |= PFM_SPACEAFTER; }
+    if fmt.start_indent.is_some() { mask |= PFM_STARTINDENT; }
+    if fmt.right_indent.is_some() { mask |= PFM_RIGHTINDENT; }
+    if fmt.offset.is_some() { mask |= PFM_OFFSET; }
+    if fmt.line_spacing.is_some() { mask |= PFM_LINESPACING; }
 
     let mut numbering_start = 0;
     let mut numbering = 0;
@@ -264,8 +276,6 @@ pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
         };
     }
 
-    let numbering_tab = fmt.numbering_tab.unwrap_or(0);
-    
     let mut aligment = 0;
     if let Some(align) = fmt.alignment {
         aligment = match align {
@@ -277,6 +287,34 @@ pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
         };
     }
 
+    let mut line_spacing = 0;
+    let mut line_spacing_rule = 0;
+    if let Some(spacing) = fmt.line_spacing {
+        line_spacing_rule = match spacing {
+            ParaLineSpacing::Single => 0,
+            ParaLineSpacing::OneAndHalf => 1,
+            ParaLineSpacing::Double => 2,
+            ParaLineSpacing::SingleOr(v) => {
+                line_spacing = v;
+                3
+            },
+            ParaLineSpacing::Exact(v) => {
+                line_spacing = v;
+                4
+            },
+            ParaLineSpacing::Exact20(v) => {
+                line_spacing = v;
+                5
+            },
+        };
+    }
+
+    let numbering_tab = fmt.numbering_tab.unwrap_or(0);
+    let space_before = fmt.space_before.unwrap_or(0);
+    let space_after = fmt.space_after.unwrap_or(0);
+    let start_indent = fmt.start_indent.unwrap_or(0);
+    let right_indent = fmt.right_indent.unwrap_or(0);
+    let offset = fmt.offset.unwrap_or(0);
 
     let mut para = PARAFORMAT {
         cbSize: mem::size_of::<PARAFORMAT>() as _,
@@ -285,7 +323,14 @@ pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
         wNumberingStart: numbering_start,
         wNumberingStyle: numbering_style,
         wNumberingTab: numbering_tab,
+        dxStartIndent: start_indent,
+        dxRightIndent: right_indent,
+        dxOffset: offset,
+        dyLineSpacing: line_spacing,
+        bLineSpacingRule: line_spacing_rule,
         wAlignment: aligment,
+        dySpaceBefore: space_before,
+        dySpaceAfter: space_after,
         ..Default::default()
     };
 
@@ -339,11 +384,54 @@ pub(crate) fn para_format(handle: HWND) -> ParaFormat {
         });
     }
 
+    let mut space_before = None;
+    if para.dwMask & PFM_SPACEBEFORE == PFM_SPACEBEFORE {
+        space_before = Some(para.dySpaceBefore);
+    }
+
+    let mut space_after = None;
+    if para.dwMask & PFM_SPACEAFTER == PFM_SPACEAFTER {
+        space_after = Some(para.dySpaceAfter);
+    }
+
+    let mut start_indent = None;
+    if para.dwMask & PFM_STARTINDENT == PFM_STARTINDENT {
+        start_indent = Some(para.dxStartIndent);
+    }
+
+    let mut right_indent = None;
+    if para.dwMask & PFM_RIGHTINDENT == PFM_RIGHTINDENT {
+        right_indent = Some(para.dxRightIndent);
+    }
+
+    let mut offset = None;
+    if para.dwMask & PFM_OFFSET == PFM_OFFSET {
+        offset = Some(para.dxOffset);
+    }
+
+    let mut line_spacing = None;
+    if para.dwMask & PFM_LINESPACING == PFM_LINESPACING {
+        line_spacing = Some(match para.bLineSpacingRule {
+            1 => ParaLineSpacing::OneAndHalf,
+            2 => ParaLineSpacing::Double,
+            3 => ParaLineSpacing::SingleOr(para.dyLineSpacing),
+            4 => ParaLineSpacing::Exact(para.dyLineSpacing),
+            5 => ParaLineSpacing::Exact20(para.dyLineSpacing),
+            _ => ParaLineSpacing::Single,
+        });
+    }
+
     ParaFormat {
         numbering,
         numbering_style,
         numbering_tab,
         alignment,
+        space_before,
+        space_after,
+        start_indent,
+        right_indent,
+        offset,
+        line_spacing,
     }
 }
 
