@@ -124,14 +124,53 @@ pub enum ParaNumbering {
     Seq(char)
 }
 
-impl Default for ParaNumbering {
-    fn default() -> Self { ParaNumbering::None }
+
+#[derive(Copy, Clone, Debug)]
+/// Numbering style used with the numbering paragraphs. Used with `ParamNumbering`
+pub enum ParaNumberingStyle {
+    /// Follows the number with a right parenthesis
+    Paren,
+    /// Encloses the number in parentheses
+    Parens,
+    /// Follows the number with a period
+    Period,
+    /// Display only the number
+    Plain,
+    /// Continues a numbered lsit without applying the next number of bullet
+    NoNumber,
+    /// Starts a new number using the value of `ParaNumbering::Seq(char)`
+    NewNumber
+}
+
+#[derive(Copy, Clone, Debug)]
+/// Paragraph alignment
+pub enum ParaAlignment {
+    /// Paragraphs are aligned with the left margin. 
+    Left,
+    /// Paragraphs are aligned with the right margin. 
+    Right,
+    /// Paragraphs are centered. 
+    Center,
+    /// Paragraphs are justified.
+    Justify,
+    /// Paragraphs are justified by expanding the blanks alone. 
+    FullInterword
 }
 
 /// Contains information about paragraph formatting in a rich edit control
 #[derive(Clone, Debug, Default)]
 pub struct ParaFormat {
+    /// Options used for bulleted or numbered paragraphs.
     pub numbering: Option<ParaNumbering>,
+
+    /// Numbering style used with numbered paragraphs. 
+    pub numbering_style: Option<ParaNumberingStyle>,
+
+    /// Minimum space between a paragraph number and the paragraph text, in twips (twentieth of a point). 
+    pub numbering_tab: Option<u16>,
+
+    /// Paragraph alignment
+    pub alignment: Option<ParaAlignment>,
 }
 
 /**
@@ -203,6 +242,7 @@ impl RichTextBox {
     }
 
     /// Returns the paragraph formatting for the current selection in a rich edit control
+    /// If more than one paragraph is selected, receive the attributes of the first paragraph
     pub fn para_format(&self) -> ParaFormat {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         rich::para_format(handle)

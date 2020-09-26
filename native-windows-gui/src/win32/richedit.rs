@@ -9,7 +9,8 @@ use winapi::shared::{
 };
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16};
-use crate::controls::{CharFormat, ParaFormat, CharEffects, UnderlineType, ParaNumbering};
+use crate::controls::{CharFormat, ParaFormat, CharEffects, UnderlineType, ParaNumbering,
+ParaNumberingStyle, ParaAlignment};
 use std::{mem, ptr};
 use std::convert::TryFrom;
 
@@ -29,7 +30,11 @@ const CFM_COLOR: u32 = 0x40000000;
 const CFM_FACE: u32 = 0x20000000;
 const CFM_UNDERLINETYPE: u32 = 0x00800000;
 
-const PFM_NUMBERING: u32 = 32;
+const PFM_ALIGNMENT: u32 = 0x00000008;
+const PFM_NUMBERING: u32 = 0x00000020;
+const PFM_NUMBERINGSTYLE: u32 = 0x00002000;
+const PFM_NUMBERINGTAB: u32 = 0x00004000;
+const PFM_NUMBERINGSTART: u32 = 0x00008000;
 
 const PFN_BULLET: u16 = 1;
 const PFN_ARABIC: u16 = 2;
@@ -38,6 +43,19 @@ const PFN_LCROMAN: u16 = 4;
 const PFN_UCLETTER: u16 = 5;
 const PFN_UCROMAN: u16 = 6;
 const PFN_CUSTOM: u16 = 7;
+
+const PFNS_PAREN: u16 = 0x000;
+const PFNS_PARENS: u16 = 0x100;
+const PFNS_PERIOD: u16 = 0x200;
+const PFNS_PLAIN: u16 = 0x300;
+const PFNS_NONUMBER: u16 = 0x400;
+const PFNS_NEWNUMBER: u16 = 0x8000;
+
+const PFA_LEFT: u16 = 1;
+const PFA_RIGHT: u16 = 2;
+const PFA_CENTER: u16 = 3;
+const PFA_JUSTIFY: u16 = 4;
+const PFA_FULL_INTERWORD: u16 = 4;
 
 #[repr(C)]
 #[allow(non_snake_case)]
@@ -211,6 +229,9 @@ pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
 
     let mut mask = 0;
     if fmt.numbering.is_some() { mask |= PFM_NUMBERING; }
+    if fmt.numbering_style.is_some() { mask |= PFM_NUMBERINGSTYLE; }
+    if fmt.numbering_tab.is_some() { mask |= PFM_NUMBERINGTAB; }
+    if fmt.alignment.is_some() { mask |= PFM_ALIGNMENT; }
 
     let mut numbering_start = 0;
     let mut numbering = 0;
@@ -225,16 +246,46 @@ pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
             ParaNumbering::UcRoman => PFN_UCROMAN,
             ParaNumbering::Seq(c) => {
                 numbering_start = c as u16;
+                mask |= PFM_NUMBERINGSTART;
                 PFN_CUSTOM
             }
         }
     }
+
+    let mut numbering_style = 0;
+    if let Some(style) = fmt.numbering_style {
+        numbering_style = match style {
+            ParaNumberingStyle::Paren => PFNS_PAREN,
+            ParaNumberingStyle::Parens => PFNS_PARENS,
+            ParaNumberingStyle::Period => PFNS_PERIOD,
+            ParaNumberingStyle::Plain => PFNS_PLAIN,
+            ParaNumberingStyle::NoNumber => PFNS_NONUMBER,
+            ParaNumberingStyle::NewNumber => PFNS_NEWNUMBER,
+        };
+    }
+
+    let numbering_tab = fmt.numbering_tab.unwrap_or(0);
+    
+    let mut aligment = 0;
+    if let Some(align) = fmt.alignment {
+        aligment = match align {
+            ParaAlignment::Left => PFA_LEFT,
+            ParaAlignment::Right => PFA_RIGHT,
+            ParaAlignment::Center => PFA_CENTER,
+            ParaAlignment::Justify => PFA_JUSTIFY,
+            ParaAlignment::FullInterword => PFA_FULL_INTERWORD,
+        };
+    }
+
 
     let mut para = PARAFORMAT {
         cbSize: mem::size_of::<PARAFORMAT>() as _,
         dwMask: mask,
         wNumbering: numbering,
         wNumberingStart: numbering_start,
+        wNumberingStyle: numbering_style,
+        wNumberingTab: numbering_tab,
+        wAlignment: aligment,
         ..Default::default()
     };
 
@@ -251,6 +302,9 @@ pub(crate) fn para_format(handle: HWND) -> ParaFormat {
     
 
     let mut numbering = None;
+    let mut numbering_style = None;
+    let mut numbering_tab = None;
+
     if para.dwMask & PFM_NUMBERING == PFM_NUMBERING && para.wNumbering != 0 {
         numbering = Some(match para.wNumbering {
             PFN_BULLET => ParaNumbering::Bullet,
@@ -262,10 +316,34 @@ pub(crate) fn para_format(handle: HWND) -> ParaFormat {
             PFN_CUSTOM => ParaNumbering::Seq(char::try_from(para.wNumberingStart as u32).unwrap_or('?')), 
             _ => ParaNumbering::None
         });
+
+        numbering_style = Some(match para.wNumberingStyle {
+            PFNS_PARENS => ParaNumberingStyle::Parens,
+            PFNS_PERIOD => ParaNumberingStyle::Period,
+            PFNS_PLAIN => ParaNumberingStyle::Plain,
+            PFNS_NONUMBER => ParaNumberingStyle::NoNumber,
+            PFNS_NEWNUMBER => ParaNumberingStyle::NewNumber,
+            _ => ParaNumberingStyle::Paren
+        });
+
+        numbering_tab = Some(para.wNumberingTab);
+    }
+
+    let mut alignment = None;
+    if para.dwMask & PFM_ALIGNMENT == PFM_ALIGNMENT {
+        alignment = Some(match para.wAlignment {
+            PFA_RIGHT => ParaAlignment::Right,
+            PFA_CENTER => ParaAlignment::Center,
+            PFA_JUSTIFY => ParaAlignment::Justify,
+            _ => ParaAlignment::Left
+        });
     }
 
     ParaFormat {
         numbering,
+        numbering_style,
+        numbering_tab,
+        alignment,
     }
 }
 

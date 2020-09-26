@@ -14,7 +14,7 @@ use nwg::NativeUi;
 
 #[derive(Default, NwgUi)]
 pub struct RichText {
-    #[nwg_control(size: (450, 430), position: (300, 300), title: "Rich TextBox")]
+    #[nwg_control(size: (490, 430), position: (300, 300), title: "Rich TextBox")]
     #[nwg_events( OnWindowClose: [nwg::stop_thread_dispatch()], OnInit: [RichText::init_text], OnMinMaxInfo: [RichText::set_resize(SELF, EVT_DATA)] )]
     window: nwg::Window,
 
@@ -68,6 +68,11 @@ impl RichText {
             ..Default::default()
         });
 
+        rich.set_para_format(&nwg::ParaFormat {
+            alignment: Some(nwg::ParaAlignment::Center),
+            ..Default::default()
+        });
+
         rich.set_selection(187..203);
         rich.set_char_format(&nwg::CharFormat {
             effects: Some(nwg::CharEffects::BOLD),
@@ -77,9 +82,17 @@ impl RichText {
             ..Default::default()
         });
 
+        rich.set_para_format(&nwg::ParaFormat {
+            alignment: Some(nwg::ParaAlignment::Center),
+            ..Default::default()
+        });
+
         rich.set_selection(411..861);
         rich.set_para_format(&nwg::ParaFormat {
-            numbering: Some(nwg::ParaNumbering::Bullet),
+            numbering: Some(nwg::ParaNumbering::Seq('1')),
+            numbering_style: Some(nwg::ParaNumberingStyle::Period),
+            numbering_tab: Some(300),
+            ..Default::default()
         });
 
         rich.set_selection(861..873);
@@ -91,7 +104,12 @@ impl RichText {
             ..Default::default()
         });
 
-        rich.set_selection(5000..5001);
+        rich.set_para_format(&nwg::ParaFormat {
+            alignment: Some(nwg::ParaAlignment::Center),
+            ..Default::default()
+        });
+
+        rich.set_selection(0..0);
     }
 
     fn set_resize(&self, data: &nwg::EventData) {
