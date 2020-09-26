@@ -210,7 +210,10 @@ pub struct ParaFormat {
     pub offset: Option<i32>,
 
     /// Line spacing. For a description of how this value is interpreted, see `ParaLineSpacing`
-    pub line_spacing: Option<ParaLineSpacing>
+    pub line_spacing: Option<ParaLineSpacing>,
+
+    /// Displays text using right-to-left (or left-to-right if set to false)
+    pub rtl: Option<bool>,
 }
 
 /**
@@ -261,6 +264,16 @@ impl RichTextBox {
             font: None,
             parent: None
         }
+    }
+
+    /// Sets the background color for a rich edit control.
+    /// You cannot get the background color of a rich text box
+    pub fn set_background_color(&self, color: [u8; 3]) {
+        use winapi::um::wingdi::RGB;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let color = RGB(color[0], color[1], color[2]);
+        wh::send_message(handle, rich::EM_SETBKGNDCOLOR, 0, color as _);
     }
 
     /// Sets the character format of the currently selected text

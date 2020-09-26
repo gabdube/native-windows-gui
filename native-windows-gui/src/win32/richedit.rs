@@ -14,6 +14,7 @@ ParaNumberingStyle, ParaAlignment, ParaLineSpacing};
 use std::{mem, ptr};
 use std::convert::TryFrom;
 
+pub const EM_SETBKGNDCOLOR: u32 = WM_USER + 67;
 
 const EM_GETCHARFORMAT: u32 = WM_USER + 58;
 const EM_GETPARAFORMAT: u32 = WM_USER + 61;
@@ -41,6 +42,7 @@ const PFM_LINESPACING: u32 = 0x00000100;
 const PFM_NUMBERINGSTYLE: u32 = 0x00002000;
 const PFM_NUMBERINGTAB: u32 = 0x00004000;
 const PFM_NUMBERINGSTART: u32 = 0x00008000;
+const PFM_RTLPARA: u32 = 0x00010000;
 
 const PFN_BULLET: u16 = 1;
 const PFN_ARABIC: u16 = 2;
@@ -62,6 +64,8 @@ const PFA_RIGHT: u16 = 2;
 const PFA_CENTER: u16 = 3;
 const PFA_JUSTIFY: u16 = 4;
 const PFA_FULL_INTERWORD: u16 = 4;
+
+const PFE_RTLPARA: u16 = (PFM_RTLPARA >> 16) as u16;
 
 #[repr(C)]
 #[allow(non_snake_case)]
@@ -168,6 +172,7 @@ pub(crate) fn set_char_format(handle: HWND, fmt: &CharFormat) {
         yOffset: fmt.y_offset.unwrap_or(0),
         crTextColor: color,
         bUnderlineType: underline_type,
+        szFaceName: face,
         .. Default::default()
     };
 
@@ -244,6 +249,7 @@ pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
     if fmt.right_indent.is_some() { mask |= PFM_RIGHTINDENT; }
     if fmt.offset.is_some() { mask |= PFM_OFFSET; }
     if fmt.line_spacing.is_some() { mask |= PFM_LINESPACING; }
+    if fmt.rtl.is_some() { mask |= PFM_RTLPARA; }
 
     let mut numbering_start = 0;
     let mut numbering = 0;
@@ -309,6 +315,11 @@ pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
         };
     }
 
+    let mut effects = 0;
+    if let Some(true) = fmt.rtl {
+        effects |= PFE_RTLPARA;
+    }
+
     let numbering_tab = fmt.numbering_tab.unwrap_or(0);
     let space_before = fmt.space_before.unwrap_or(0);
     let space_after = fmt.space_after.unwrap_or(0);
@@ -319,6 +330,7 @@ pub(crate) fn set_para_format(handle: HWND, fmt: &ParaFormat) {
     let mut para = PARAFORMAT {
         cbSize: mem::size_of::<PARAFORMAT>() as _,
         dwMask: mask,
+        wEffects: effects,
         wNumbering: numbering,
         wNumberingStart: numbering_start,
         wNumberingStyle: numbering_style,
@@ -421,6 +433,11 @@ pub(crate) fn para_format(handle: HWND) -> ParaFormat {
         });
     }
 
+    let mut rtl = None;
+    if para.dwMask & PFM_RTLPARA == PFM_RTLPARA {
+        rtl = Some(para.wEffects & PFE_RTLPARA == PFE_RTLPARA);
+    }
+
     ParaFormat {
         numbering,
         numbering_style,
@@ -432,6 +449,7 @@ pub(crate) fn para_format(handle: HWND) -> ParaFormat {
         right_indent,
         offset,
         line_spacing,
+        rtl,
     }
 }
 

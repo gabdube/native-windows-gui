@@ -16,7 +16,7 @@ keywords = ["gui", "ui", "windows"]
 
 [dependencies]
 winapi = { version = "0.3", features = [
-  "winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi",
+  "winuser", "wingdi", "winbase", "libloaderapi", "processthreadsapi", 
   "errhandlingapi", "winerror", "commctrl", "sysinfoapi", "shobjidl", "combaseapi",
   "commdlg", "d2d1", "objbase", "dwrite", "winnls", "shellapi", "wincodec", "stringapiset"] }
 

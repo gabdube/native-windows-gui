@@ -61,7 +61,6 @@ impl RichText {
 
         rich.set_selection(0..24);
         rich.set_char_format(&nwg::CharFormat {
-            effects: Some(nwg::CharEffects::BOLD),
             height: Some(500),
             text_color: Some([50, 50, 150]),
             font_face_name: Some("Comic Sans MS".to_string()),
