@@ -1,5 +1,6 @@
 use winapi::um::wincodec::{IWICImagingFactory, IWICBitmapDecoder};
-use winapi::ctypes::c_void;
+use winapi::um::objidlbase::IStream;
+use winapi::ctypes::{c_void, c_uint};
 use winapi::shared::winerror::S_OK;
 use winapi::Interface;
 use crate::{NwgError, Bitmap, ImageData};
@@ -50,36 +51,27 @@ pub unsafe fn create_decoder_from_file<'a>(fact: &IWICImagingFactory, path: &'a 
     Ok(decoder)
 }
 
-pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, stream_data: &[u8]) -> Result<*mut IWICBitmapDecoder, NwgError> {
+// This function is not declared by winapi yet. But winapi have import libraries
+// for shlwapi (when the shellapi feature is enabled), so we can use it if we
+// declare it ourselves.
+extern "system" {
+    fn SHCreateMemStream(p_init: *const u8, cb_init: c_uint) -> *mut IStream;
+}
+
+pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, data: &[u8]) -> Result<*mut IWICBitmapDecoder, NwgError> {
     use winapi::um::wincodec::WICDecodeMetadataCacheOnDemand;
-    use winapi::shared::minwindef::UINT;
-    use winapi::um::objidlbase::IStream;
     use std::convert::TryInto;
-    extern "system" {
-        fn SHCreateMemStream(p_init: *const u8, cb_init: UINT) -> *mut IStream;
-    }
 
-    let mut stream = ptr::null_mut();
-    let r = fact.CreateStream(&mut stream);
-    if r != S_OK {
-        return Err(NwgError::resource_create("Failed to create a stream for bitmap decoder"));
-    }
-
-    let length = stream_data.len().try_into()
-        .map_err(|_| NwgError::resource_create("Failed to create memory stream from stream data due to length overflow, which must fit in u32"))?;
-    let mem_stream = SHCreateMemStream(stream_data.as_ptr(), length);
-    if mem_stream.is_null() {
-        return Err(NwgError::resource_create("Failed to create memory stream"));
-    }
-
-    let r = (&*stream).InitializeFromIStream(mem_stream);
-    if r != S_OK {
-        return Err(NwgError::resource_create("Failed to initialize stream from memory"));
+    let stream = SHCreateMemStream(data.as_ptr(), data.len().try_into().map_err(|_| {
+        NwgError::resource_create("Failed to create memory stream, stream is too long")
+    })?);
+    if stream.is_null() {
+        return Err(NwgError::resource_create("Failed to create memory stream, allocation failure"));
     }
 
     let mut decoder: *mut IWICBitmapDecoder = ptr::null_mut();
     let r = fact.CreateDecoderFromStream(
-        stream as _, 
+        stream,
         ptr::null(),
         WICDecodeMetadataCacheOnDemand,
         (&mut decoder as *mut *mut IWICBitmapDecoder) as *mut *mut IWICBitmapDecoder
@@ -115,7 +107,7 @@ pub unsafe fn create_bitmap_from_wic(image: &ImageData) -> Result<Bitmap, NwgErr
     // Prepare the bitmap
     let header = BITMAPINFOHEADER {
         biSize: mem::size_of::<BITMAPINFOHEADER>() as DWORD,
-        biWidth: width as LONG, biHeight: -(height as LONG), 
+        biWidth: width as LONG, biHeight: -(height as LONG),
         biPlanes: 1, biBitCount: 32, biCompression: BI_RGB,
         biSizeImage: (width * height * 3) as u32,
         biXPelsPerMeter: 0, biYPelsPerMeter: 0,
@@ -173,6 +165,6 @@ pub unsafe fn resize_bitmap(fact: &IWICImagingFactory, image: &ImageData, new_si
     if result != S_OK {
         return Err(NwgError::image_decoder(result, "Could not initialize bitmap scaler"));
     }
-    
+
     Ok(ImageData { frame: scaler as *mut IWICBitmapSource })
 }
