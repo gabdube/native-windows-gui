@@ -144,7 +144,7 @@ impl<'a> ImageSource<'a> {
     /**
         Return the image data of the requested frame in a ImageData object.
     */
-    pub fn frame<'b>(&self, index: u32) -> Result<LifetimeRef<'b, ImageData>, NwgError> where 'a : 'b {
+    pub fn frame<'b>(&'a self, index: u32) -> Result<LifetimeRef<'b, ImageData>, NwgError> where 'a : 'b {
         let mut bitmap = ptr::null_mut();
         let hr = unsafe { (&*self.decoder).GetFrame(index, &mut bitmap) };
         match hr {

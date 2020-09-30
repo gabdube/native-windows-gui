@@ -126,9 +126,8 @@ pub unsafe fn build_image_decoder<'a>(
 
     let decoder = ImageDecoder::new()?;
 
-    let mut image_frame = decoder
-        .from_filename(source)?
-        .frame(0)?;
+    let image_source = decoder.from_filename(source)?;
+    let mut image_frame = image_source.frame(0)?;
 
     if let Some((width, height)) = size {
         image_frame = decoder.resize_image(&*image_frame, [width, height])?.into();
@@ -153,9 +152,8 @@ pub unsafe fn build_image_decoder_from_memory<'a>(
     let src = v.as_mut_slice();
     let decoder = ImageDecoder::new()?;
 
-    let mut image_frame = decoder
-        .from_stream(src)?
-        .frame(0)?;
+    let image_source = decoder.from_stream(src)?;
+    let mut image_frame = image_source.frame(0)?;
 
     if let Some((width, height)) = size {
         image_frame = decoder.resize_image(&*image_frame, [width, height])?.into();
