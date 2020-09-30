@@ -50,7 +50,7 @@ pub unsafe fn create_decoder_from_file<'a>(fact: &IWICImagingFactory, path: &'a 
     Ok(decoder)
 }
 
-pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, data: &[u8]) -> Result<*mut IWICBitmapDecoder, NwgError> {
+pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, stream_data: &mut [u8]) -> Result<*mut IWICBitmapDecoder, NwgError> {
     use winapi::um::wincodec::WICDecodeMetadataCacheOnDemand;
 
     let mut stream = ptr::null_mut();
@@ -59,11 +59,7 @@ pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, data: &[u8])
         return Err(NwgError::resource_create("Failed to create a stream for bitmap decoder"));
     }
 
-    // For some reason, `InitializeFromMemory` requires a mutable ptr, so we need to copy the data first.
-    let mut stream_data: Vec<u8> = Vec::with_capacity(data.len());
-    stream_data.set_len(data.len());
-    ptr::copy_nonoverlapping(data.as_ptr(), stream_data.as_mut_ptr(), data.len());
-
+    //Stream data must never be removed while stream is in use. See https://docs.microsoft.com/en-us/windows/win32/api/wincodec/nf-wincodec-iwicstream-initializefrommemory
     let r = (&*stream).InitializeFromMemory(stream_data.as_mut_ptr(), stream_data.len() as _);
     if r != S_OK {
         return Err(NwgError::resource_create("Failed to initialize stream from memory"));
