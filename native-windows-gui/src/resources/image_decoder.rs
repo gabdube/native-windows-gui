@@ -3,32 +3,7 @@ use winapi::shared::winerror::S_OK;
 use crate::win32::image_decoder as img;
 use crate::{NwgError, Bitmap};
 use std::{ptr, mem};
-use std::ops::Deref;
 
-static EMPTY_VEC: Vec<u8> = vec![];
-
-pub struct LifetimeRef<'a, T: 'a> {
-    owned_ref: &'a mut T,
-}
-
-impl<'a, T> Deref for LifetimeRef<'a, T> {
-    type Target = T;
-    fn deref(&self) -> &T { self.owned_ref }
-}
-
-impl<'a, T> From<T> for LifetimeRef<'a, T> {
-    fn from(value: T) -> Self {
-        let boxed = Box::new(value);
-        Self { owned_ref: Box::leak(boxed) }
-    }
-}
-
-impl<'a, T> Drop for LifetimeRef<'a, T> {
-    fn drop(&mut self) {
-        let boxed = unsafe { Box::from_raw(self.owned_ref as *mut T) };
-        drop(boxed);
-    }
-} 
 
 /**
     A image decoder. Can load an extended number of image file format from a filename, from a file handle, or from a stream.
@@ -81,14 +56,14 @@ impl ImageDecoder {
 
         This method returns a ImageSource object
     */
-    pub fn from_filename<'a, 'b>(&self, path: &'a str) -> Result<LifetimeRef<'b, ImageSource>, NwgError> {
+    pub fn from_filename<'a>(&self, path: &'a str) -> Result<ImageSource, NwgError> {
         if self.factory.is_null() {
             panic!("ImageDecoder is not yet bound to a winapi object");
         }
 
         let decoder = unsafe { img::create_decoder_from_file(&*self.factory, path) }?;
 
-        Ok(LifetimeRef::from(ImageSource { decoder, stream: EMPTY_VEC.as_slice() }))
+        Ok(ImageSource { decoder })
     }
 
     /**
@@ -100,14 +75,14 @@ impl ImageDecoder {
 
         This method copies the bytes and returns a ImageSource object
     */
-    pub fn from_stream<'a>(&self, stream: &'a mut [u8]) -> Result<LifetimeRef<'a, ImageSource<'a>>, NwgError> {
+    pub fn from_stream(&self, stream: &[u8]) -> Result<ImageSource, NwgError> {
         if self.factory.is_null() {
             panic!("ImageDecoder is not yet bound to a winapi object");
         }
 
         let decoder = unsafe { img::create_decoder_from_stream(&*self.factory, stream) }?;
 
-        Ok(LifetimeRef::from(ImageSource { decoder, stream }))
+        Ok(ImageSource { decoder })
     }
 
     /**
@@ -123,13 +98,11 @@ impl ImageDecoder {
 /**
     Represents a image data source in read only mode.
 */
-pub struct ImageSource<'a> {
+pub struct ImageSource {
     pub decoder: *mut IWICBitmapDecoder,
-    #[allow(dead_code)]
-    stream: &'a [u8],
 }
 
-impl<'a> ImageSource<'a> {
+impl ImageSource {
 
     /**
         Return the number of frame in the image. For most format (ex: PNG), this will be 1.
@@ -144,11 +117,11 @@ impl<'a> ImageSource<'a> {
     /**
         Return the image data of the requested frame in a ImageData object.
     */
-    pub fn frame<'b>(&'a self, index: u32) -> Result<LifetimeRef<'b, ImageData>, NwgError> where 'a : 'b {
+    pub fn frame(&self, index: u32) -> Result<ImageData, NwgError> {
         let mut bitmap = ptr::null_mut();
         let hr = unsafe { (&*self.decoder).GetFrame(index, &mut bitmap) };
         match hr {
-            S_OK => Ok(LifetimeRef::from(ImageData { frame: bitmap as *mut IWICBitmapSource })),
+            S_OK => Ok(ImageData { frame: bitmap as *mut IWICBitmapSource }),
             err => Err(NwgError::image_decoder(err, "Could not read image frame"))
         }
     }
@@ -316,7 +289,7 @@ impl Drop for ImageDecoder {
     }
 }
 
-impl<'a> Drop for ImageSource<'a> {
+impl Drop for ImageSource {
     fn drop(&mut self) {
         unsafe { (&*self.decoder).Release(); }
     }
