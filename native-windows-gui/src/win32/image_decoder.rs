@@ -50,8 +50,14 @@ pub unsafe fn create_decoder_from_file<'a>(fact: &IWICImagingFactory, path: &'a 
     Ok(decoder)
 }
 
-pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, stream_data: &mut [u8]) -> Result<*mut IWICBitmapDecoder, NwgError> {
+pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, stream_data: &[u8]) -> Result<*mut IWICBitmapDecoder, NwgError> {
     use winapi::um::wincodec::WICDecodeMetadataCacheOnDemand;
+    use winapi::shared::minwindef::UINT;
+    use winapi::um::objidlbase::IStream;
+    use std::convert::TryInto;
+    extern "system" {
+        fn SHCreateMemStream(p_init: *const u8, cb_init: UINT) -> *mut IStream;
+    }
 
     let mut stream = ptr::null_mut();
     let r = fact.CreateStream(&mut stream);
@@ -59,8 +65,14 @@ pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, stream_data:
         return Err(NwgError::resource_create("Failed to create a stream for bitmap decoder"));
     }
 
-    //Stream data must never be removed while stream is in use. See https://docs.microsoft.com/en-us/windows/win32/api/wincodec/nf-wincodec-iwicstream-initializefrommemory
-    let r = (&*stream).InitializeFromMemory(stream_data.as_mut_ptr(), stream_data.len() as _);
+    let length = stream_data.len().try_into()
+        .map_err(|_| NwgError::resource_create("Failed to create memory stream from stream data due to length overflow, which must fit in u32"))?;
+    let mem_stream = SHCreateMemStream(stream_data.as_ptr(), length);
+    if mem_stream.is_null() {
+        return Err(NwgError::resource_create("Failed to create memory stream"));
+    }
+
+    let r = (&*stream).InitializeFromIStream(mem_stream);
     if r != S_OK {
         return Err(NwgError::resource_create("Failed to initialize stream from memory"));
     }
