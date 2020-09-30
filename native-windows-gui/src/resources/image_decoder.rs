@@ -12,9 +12,9 @@ pub struct LifetimeRef<'a, T: 'a> {
 }
 
 impl<'a, T> Deref for LifetimeRef<'a, T> {
-    type Target = &'a T;
-    fn deref(&self) -> &&'a T {
-        let r: &&'a T = unsafe { mem::transmute(&self.owned_ref) };
+    type Target = T;
+    fn deref(&self) -> &T {
+        let r: &'a T = unsafe { mem::transmute_copy(&self.owned_ref) };
         r
     }
 }
