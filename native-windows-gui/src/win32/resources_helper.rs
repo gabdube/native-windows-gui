@@ -130,7 +130,7 @@ pub unsafe fn build_image_decoder<'a>(
     let mut image_frame = image_source.frame(0)?;
 
     if let Some((width, height)) = size {
-        image_frame = decoder.resize_image(&*image_frame, [width, height])?.into();
+        image_frame = decoder.resize_image(&image_frame, [width, height])?.into();
     }
     
     let mut bitmap = image_frame.as_bitmap()?;
@@ -156,7 +156,7 @@ pub unsafe fn build_image_decoder_from_memory<'a>(
     let mut image_frame = image_source.frame(0)?;
 
     if let Some((width, height)) = size {
-        image_frame = decoder.resize_image(&*image_frame, [width, height])?.into();
+        image_frame = decoder.resize_image(&image_frame, [width, height])?.into();
     }
     
     let mut bitmap = image_frame.as_bitmap()?;
