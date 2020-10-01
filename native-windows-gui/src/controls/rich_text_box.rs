@@ -222,6 +222,16 @@ This control allow multi line input. For a single line of text, use `TextInput`.
 
 A rich text box is almost a superset of the normal textbox. Unlike text box, rich text box has more features and can support Component Object Model (COM) objects.
 
+The rich text box control supports the following rich text features:
+
+* Colored text
+* Multiple fonts
+* Styled text such as bold, underscore, strikeout, etc
+* Bullet point list
+* Paragraph with custom indent/offset
+* Custom line spacing
+
+
 See: https://docs.microsoft.com/en-us/windows/win32/controls/about-rich-edit-controls#rich-edit-version-41
 
 Note: Use `\r\n` to input a new line not just `\n`.

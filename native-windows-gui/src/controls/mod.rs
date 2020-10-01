@@ -14,6 +14,9 @@ mod text_box;
 #[cfg(feature = "rich-textbox")]
 mod rich_text_box;
 
+#[cfg(feature = "rich-textbox")]
+mod rich_label;
+
 #[cfg(feature = "status-bar")]
 mod status_bar;
 
@@ -91,6 +94,9 @@ pub use text_box::{TextBox, TextBoxBuilder, TextBoxFlags};
 
 #[cfg(feature = "rich-textbox")]
 pub use rich_text_box::*;
+
+#[cfg(feature = "rich-textbox")]
+pub use rich_label::*;
 
 #[cfg(feature = "status-bar")]
 pub use status_bar::{StatusBar, StatusBarBuilder};
