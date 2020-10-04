@@ -334,7 +334,7 @@ fn map_callback_args(member: &syn::Ident, args: &Option<Punctuated<syn::Ident, T
         return p;
     }
 
-    let values = ["SELF", "CTRL", "HANDLE", "EVT", "EVT_DATA", "EVT_UI"];
+    let values = ["SELF", "CTRL", "HANDLE", "EVT", "EVT_DATA", "RC_SELF"];
     for a in args.as_ref().unwrap().iter() {
         let pos = values.iter().position(|v| &a == &v );
         match pos {

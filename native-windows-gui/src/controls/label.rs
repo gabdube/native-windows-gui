@@ -52,12 +52,12 @@ Label is not behind any features.
 
 ```rust
 use native_windows_gui as nwg;
-fn build_label(button: &mut nwg::Label, window: &nwg::Window, font: &nwg::Font) {
+fn build_label(label: &mut nwg::Label, window: &nwg::Window, font: &nwg::Font) {
     nwg::Label::builder()
         .text("Hello")
         .font(Some(font))
         .parent(window)
-        .build(button);
+        .build(label);
 }
 ```
 

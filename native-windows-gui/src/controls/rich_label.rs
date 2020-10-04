@@ -19,17 +19,13 @@ Unlike the basic `Label`, this version supports:
 
 ** Example **
 
-```rust
-use native_windows_gui as nwg;
-fn build_label(label: &mut nwg::RichLabel, window: &nwg::Window) {
-    nwg::RichLabel::builder()
-        .text("Hello")
-        .parent(window)
-        .build(label);
-}
-```
-
 */
 pub struct RichLabel {
+
+}
+
+impl RichLabel {
+
+
 
 }
