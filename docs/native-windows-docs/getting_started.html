@@ -102,8 +102,8 @@
     To use NWG in your project add it to <code>cargo.toml</code>:
 
 <pre class="rust rust-example-rendered">[<span class="kw">dependencies</span>]
-<span class="ident">native-windows-gui</span> = <span class="string"><span class="string">"</span>1.0.0<span class="string">"</span></span>
-<span class="ident">native-windows-derive</span> = <span class="string"><span class="string">"</span>1.0.0<span class="string">"</span></span>
+<span class="ident">native-windows-gui</span> = <span class="string"><span class="string">"</span>1.0.5<span class="string">"</span></span>
+<span class="ident">native-windows-derive</span> = <span class="string"><span class="string">"</span>1.0.2<span class="string">"</span></span>
 </pre>
 
     And then, in <code>main.rs</code> or <code>lib.rs</code> :
@@ -211,8 +211,8 @@
     let native-windows-derive do its magic.<br><br>
 
     Finally, the only thing left is to start listening for events on the thread. This is done by calling <code> nwg::dispatch_thread_events()</code>.
-    This function will block the thread until <code>nwg::stop_thread_dispatch()</code> is called. 99% of the time, <code>stop_thread_dispatch</code>
-    will be called a <code>OnWindowClose</code> event<br><br>
+    This function will block the thread until <code>nwg::stop_thread_dispatch()</code> is called. NWG does not provide a default handler on window close,
+    so you will have to manually bind the `OnWindowClose` event<br><br>
 
     Now lets looks a the inner workings of NWG in the next section...
         
