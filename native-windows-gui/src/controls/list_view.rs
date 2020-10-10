@@ -2,7 +2,8 @@ use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
     LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT, LVS_EX_GRIDLINES, LVS_EX_BORDERSELECT,
-    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT, LVIF_IMAGE, LVS_SHOWSELALWAYS
+    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT, LVIF_IMAGE, LVS_SHOWSELALWAYS,
+    LVS_EX_HEADERDRAGDROP, LVS_EX_HEADERINALLVIEWS
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
@@ -27,6 +28,7 @@ bitflags! {
         * TAB_STOP: The control can be selected using tab navigation
         * NO_HEADER: Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
         * SINGLE_SELECTION: Only one item can be selected
+        * ALWAYS_SHOW_SELECTION: Shows the selected list view item when the control is not in focus
     */
     pub struct ListViewFlags: u32 {
         const VISIBLE = WS_VISIBLE;
@@ -51,6 +53,8 @@ bitflags! {
         * BORDER_SELECT: Only highlight the border instead of the full item. COMMCTRL version 4.71 or later
         * AUTO_COLUMN_SIZE: Automatically resize to column
         * FULL_ROW_SELECT: When an item is selected, the item and all its subitems are highlighted. Only in detailed view 
+        * HEADER_DRAG_DROP: The user can drag and drop the headers to rearrage them 
+        * HEADER_IN_ALL_VIEW: Show the header in all view (not just report)
     */
     pub struct ListViewExFlags: u32 {
         const NONE = 0;
@@ -58,6 +62,9 @@ bitflags! {
         const BORDER_SELECT = LVS_EX_BORDERSELECT;
         const AUTO_COLUMN_SIZE = LVS_EX_AUTOSIZECOLUMNS;
         const FULL_ROW_SELECT = LVS_EX_FULLROWSELECT;
+        const HEADER_DRAG_DROP = LVS_EX_HEADERDRAGDROP;
+        const HEADER_IN_ALL_VIEW = LVS_EX_HEADERINALLVIEWS;
+
     }
 }
 
