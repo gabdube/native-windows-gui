@@ -49,13 +49,13 @@ mod basic_app_ui {
             // Controls
             nwg::Window::builder()
                 .flags(nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE)
-                .size((300, 115))
+                .size((300, 135))
                 .position((300, 300))
                 .title("Basic example")
                 .build(&mut data.window)?;
 
             nwg::TextInput::builder()
-                .size((280, 25))
+                .size((280, 35))
                 .position((10, 10))
                 .text("Heisenberg")
                 .parent(&data.window)
@@ -63,8 +63,8 @@ mod basic_app_ui {
                 .build(&mut data.name_edit)?;
 
             nwg::Button::builder()
-                .size((280, 60))
-                .position((10, 40))
+                .size((280, 70))
+                .position((10, 50))
                 .text("Say my name")
                 .parent(&data.window)
                 .build(&mut data.hello_button)?;

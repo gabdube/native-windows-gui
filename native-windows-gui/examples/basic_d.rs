@@ -13,14 +13,14 @@ use nwg::NativeUi;
 
 #[derive(Default, NwgUi)]
 pub struct BasicApp {
-    #[nwg_control(size: (300, 115), position: (300, 300), title: "Basic example", flags: "WINDOW|VISIBLE")]
+    #[nwg_control(size: (300, 135), position: (300, 300), title: "Basic example", flags: "WINDOW|VISIBLE")]
     #[nwg_events( OnWindowClose: [BasicApp::say_goodbye] )]
     window: nwg::Window,
 
-    #[nwg_control(text: "Heisenberg", size: (280, 25), position: (10, 10), focus: true)]
+    #[nwg_control(text: "Heisenberg", size: (280, 35), position: (10, 10), focus: true)]
     name_edit: nwg::TextInput,
 
-    #[nwg_control(text: "Say my name", size: (280, 60), position: (10, 40))]
+    #[nwg_control(text: "Say my name", size: (280, 70), position: (10, 50))]
     #[nwg_events( OnButtonClick: [BasicApp::say_hello] )]
     hello_button: nwg::Button
 }
