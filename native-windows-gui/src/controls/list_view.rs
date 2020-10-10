@@ -26,7 +26,7 @@ bitflags! {
         * VISIBLE:  The list view is immediatly visible after creation
         * DISABLED: The list view cannot be interacted with by the user. It also has a grayed out look. The user can drag the items to any location in the list-view window.
         * TAB_STOP: The control can be selected using tab navigation
-        * NO_HEADER: Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
+        * NO_HEADER: Remove the headers in Detailed view (always ON, see "Listview header problem" section in ListView docs as of why)
         * SINGLE_SELECTION: Only one item can be selected
         * ALWAYS_SHOW_SELECTION: Shows the selected list view item when the control is not in focus
     */
@@ -39,7 +39,7 @@ bitflags! {
 
         const ALWAYS_SHOW_SELECTION = LVS_SHOWSELALWAYS;
 
-        // Remove the headers in Detailed view (always ON, see "Windows is Shit" section in ListView docs as of why)
+        // Remove the headers in Detailed view (always ON, see "Listview header problem" section in ListView docs as of why)
         const NO_HEADER = LVS_NOCOLUMNHEADER;
     }
 }
@@ -248,8 +248,9 @@ Builder parameters:
   * `OnListViewFocus`: When the list view has received focus
   * `OnListViewFocusLost`: When the list view has lost focus
 
-Windows:
-- The win32 header controls leaks megabytes of memory per seconds because it is shit. As such, NO_HEADER is always ON.
+Listview header problem:
+- The win32 header controls leaks megabytes of memory per seconds because of some issues with the rendering. 
+As such, NO_HEADER is always ON.  
 
 */
 #[derive(Default)]
