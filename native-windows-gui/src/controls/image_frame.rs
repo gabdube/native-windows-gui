@@ -1,4 +1,5 @@
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED};
+use winapi::um::wingdi::DeleteObject;
 use crate::win32::{
     base_helper::check_hwnd,  
     window_helper as wh,
@@ -78,7 +79,10 @@ impl ImageFrame {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
-        wh::send_message(handle, STM_SETIMAGE, IMAGE_BITMAP as WPARAM, image_handle);
+        let prev_img = wh::send_message(handle, STM_SETIMAGE, IMAGE_BITMAP as WPARAM, image_handle);
+        if prev_img != 0 {
+            unsafe { DeleteObject(prev_img as _); }
+        }
     }
 
     /// Sets the bitmap image of the image frame. Replace the current bitmap or icon.
@@ -90,7 +94,10 @@ impl ImageFrame {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let image_handle = image.map(|i| i.handle as LPARAM).unwrap_or(0);
-        wh::send_message(handle, STM_SETIMAGE, IMAGE_ICON as WPARAM, image_handle);
+        let prev_img = wh::send_message(handle, STM_SETIMAGE, IMAGE_ICON as WPARAM, image_handle);
+        if prev_img != 0 {
+            unsafe { DeleteObject(prev_img as _); }
+        }
     }
 
     /// Returns the current image in the image frame.

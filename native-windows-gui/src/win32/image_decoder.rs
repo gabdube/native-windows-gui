@@ -77,6 +77,8 @@ pub unsafe fn create_decoder_from_stream(fact: &IWICImagingFactory, data: &[u8])
         (&mut decoder as *mut *mut IWICBitmapDecoder) as *mut *mut IWICBitmapDecoder
     );
 
+    (*stream).Release();
+
     if r != S_OK {
         return Err(NwgError::resource_create("Failed to create decoder from stream"));
     }
