@@ -375,7 +375,7 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
     parent: Option<HWND>
 ) -> Result<ControlHandle, NwgError> 
 {
-    use winapi::um::winuser::{WS_EX_COMPOSITED, WS_OVERLAPPEDWINDOW, WS_VISIBLE, WS_CLIPCHILDREN, /*WS_EX_LAYERED*/};
+    use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_VISIBLE, WS_CLIPCHILDREN, /*WS_EX_LAYERED*/};
     use winapi::um::winuser::{CreateWindowExW, AdjustWindowRectEx};
     use winapi::shared::windef::RECT;
     use winapi::um::libloaderapi::GetModuleHandleW;
@@ -385,7 +385,7 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
 
     let class_name = to_utf16(class_name);
     let window_title = to_utf16(window_title.unwrap_or("New Window"));
-    let ex_flags = ex_flags.unwrap_or(WS_EX_COMPOSITED);
+    let ex_flags = ex_flags.unwrap_or(0);
     let flags = flags.unwrap_or(WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_VISIBLE) | forced_flags;
 
     let pos = pos.unwrap_or((0, 0));

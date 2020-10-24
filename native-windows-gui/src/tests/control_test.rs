@@ -966,13 +966,13 @@ fn init_tree(app: &ControlsTest) {
 fn init_list_view(app: &ControlsTest) {
     let list = &app.test_list_view;
 
-    // Columns are invisible, but they still need to be defined.
     for &column in &["Name", "Price", "Quantity"] {
         list.insert_column(column);
     }
+    list.set_headers_enabled(true);
 
     let data: &[&[&str]] = &[
-        &["Name", "Price (USD $)", "Quantity"],
+        // &["Name", "Price (USD $)", "Quantity"],
         &["Banana", "10.0", "1000"],
         &["Apple", "2.0", "345"],
         &["Kiwi", "5.0", "194"],
