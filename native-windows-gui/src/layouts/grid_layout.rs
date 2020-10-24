@@ -449,6 +449,7 @@ impl GridLayout {
             }
         }
 
+        let mut last_handle = None;
         for item in inner.children.iter() {
             let x = m_left + (sp + (sp2 * item.col)) + &columns[0..(item.col as usize)].iter().sum();
             let y = m_top + (sp + (sp2 * item.row)) + &rows[0..(item.row as usize)].iter().sum();
@@ -459,7 +460,10 @@ impl GridLayout {
             unsafe {
                 wh::set_window_position(item.control, x as i32, y as i32);
                 wh::set_window_size(item.control, local_width, local_height, false);
+                wh::set_window_after(item.control, last_handle)
             }
+
+            last_handle = Some(item.control);
         }
     }
 }

@@ -168,10 +168,23 @@ pub unsafe fn set_window_text<'a>(handle: HWND, text: &'a str) {
 
 pub unsafe fn set_window_position(handle: HWND, x: i32, y: i32) {
     use winapi::um::winuser::SetWindowPos;
-    use winapi::um::winuser::{SWP_NOZORDER, SWP_NOSIZE, SWP_NOACTIVATE};
+    use winapi::um::winuser::{SWP_NOZORDER, SWP_NOSIZE, SWP_NOACTIVATE, SWP_NOOWNERZORDER};
 
     let (x, y) = high_dpi::logical_to_physical(x, y);
-    SetWindowPos(handle, ptr::null_mut(), x as c_int, y as c_int, 0, 0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
+    SetWindowPos(handle, ptr::null_mut(), x as c_int, y as c_int, 0, 0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOOWNERZORDER);
+}
+
+
+pub unsafe fn set_window_after(handle: HWND, after: Option<HWND>) {
+    use winapi::um::winuser::SetWindowPos;
+    use winapi::um::winuser::{HWND_TOP, SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE, SWP_NOOWNERZORDER};
+
+    let after_handle = match after {
+        None => HWND_TOP,
+        Some(w) => w
+    };
+
+    SetWindowPos(handle, after_handle, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOOWNERZORDER);
 }
 
 pub unsafe fn get_window_position(handle: HWND) -> (i32, i32) {
@@ -195,7 +208,7 @@ pub unsafe fn get_window_position(handle: HWND) -> (i32, i32) {
 
 pub unsafe fn set_window_size(handle: HWND, w: u32, h: u32, fix: bool) {
     use winapi::um::winuser::{SetWindowPos, AdjustWindowRectEx, GetWindowLongW};
-    use winapi::um::winuser::{SWP_NOZORDER, SWP_NOMOVE, SWP_NOACTIVATE, SWP_NOCOPYBITS, GWL_STYLE, GWL_EXSTYLE};
+    use winapi::um::winuser::{SWP_NOZORDER, SWP_NOMOVE, SWP_NOACTIVATE, SWP_NOCOPYBITS, GWL_STYLE, GWL_EXSTYLE, SWP_NOOWNERZORDER};
     use winapi::shared::windef::RECT;
 
     let (mut w, mut h) = high_dpi::logical_to_physical(w as i32, h as i32);
@@ -210,7 +223,7 @@ pub unsafe fn set_window_size(handle: HWND, w: u32, h: u32, fix: bool) {
         h = rect.bottom  - rect.top;
     }
 
-    SetWindowPos(handle, ptr::null_mut(), 0, 0, w, h, SWP_NOZORDER|SWP_NOMOVE|SWP_NOACTIVATE|SWP_NOCOPYBITS);
+    SetWindowPos(handle, ptr::null_mut(), 0, 0, w, h, SWP_NOZORDER|SWP_NOMOVE|SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_NOOWNERZORDER);
 }
 
 pub unsafe fn get_window_size(handle: HWND) -> (u32, u32) {

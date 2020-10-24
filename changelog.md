@@ -1,4 +1,5 @@
 1.0.6 (unreleased)
+
 * Added rich textbox feature
 * Added rich label control (a label using tich text box under the hood)
 * Fixed the headers of the list view and few other rendering bug (thanks to RicoRodriges)

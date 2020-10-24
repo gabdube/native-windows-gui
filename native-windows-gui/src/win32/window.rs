@@ -416,6 +416,7 @@ pub(crate) unsafe fn build_hwnd_control<'a>(
         lp_params
     );
 
+    
     if handle.is_null() {
         Err(NwgError::initialization("Window creation failed"))
     } else {

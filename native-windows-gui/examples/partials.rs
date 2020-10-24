@@ -208,7 +208,7 @@ mod partial_demo_ui {
             // Layout
             use nwg::stretch::{geometry::Size, style::Dimension as D};
 
-            nwg::FlexboxLayout::builder()
+           nwg::FlexboxLayout::builder()
                 .parent(&ui.window)
                 .child(&ui.menu)
                     .child_size(Size { width: D::Percent(0.3), height: D::Auto })
@@ -288,7 +288,7 @@ mod partial_people_ui {
                 .text("Save")
                 .parent(&parent)
                 .build(&mut data.save_btn)?;
-
+                
             nwg::GridLayout::builder()
                 .parent(&parent)
                 .max_size([1000, 150])
