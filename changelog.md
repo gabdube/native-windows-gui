@@ -1,3 +1,10 @@
+1.0.6 (unreleased)
+* Added rich textbox feature
+* Added rich label control (a label using tich text box under the hood)
+* Fixed the headers of the list view and few other rendering bug (thanks to RicoRodriges)
+* New list view events (thanks to RicoRodriges)
+* Fixed a severe memory leak in image creating (thanks to RicoRodriges)
+
 1.0.5
 
 * Added placeholder for textinput

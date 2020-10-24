@@ -65,6 +65,7 @@ impl DataViewApp {
 
         dv.insert_column("Name");
         dv.insert_column("Genus");
+        dv.set_headers_enabled(true);
 
         // Passing a str to this method will automatically push the item at the end of the list in the first column
         dv.insert_item("Cat");
