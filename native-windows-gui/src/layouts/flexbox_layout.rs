@@ -238,6 +238,7 @@ impl FlexboxLayout {
 
         stretch.compute_layout(node, Size::undefined())?;
 
+        let mut last_handle = None;
         for (node, child) in children.into_iter().zip(inner.children.iter()) {
             let layout = stretch.layout(node)?;
             let Point { x, y } = layout.location;
@@ -247,6 +248,8 @@ impl FlexboxLayout {
                 Child::Item(child) => unsafe {
                     wh::set_window_position(child.control, x as i32, y as i32);
                     wh::set_window_size(child.control, width as u32, height as u32, false);
+                    wh::set_window_after(child.control, last_handle);
+                    last_handle = Some(child.control);
                 },
                 Child::Flexbox(_child) => todo!()
             }
