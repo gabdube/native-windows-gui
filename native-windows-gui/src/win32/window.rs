@@ -818,9 +818,14 @@ fn tree_commands(m: u32) -> Event {
 
 fn list_view_commands(m: u32) -> Event {
     use winapi::um::commctrl::{NM_KILLFOCUS, NM_SETFOCUS, LVN_DELETEALLITEMS,
-        LVN_DELETEITEM, LVN_INSERTITEM, LVN_ITEMACTIVATE, LVN_ITEMCHANGED};
+        LVN_DELETEITEM, LVN_INSERTITEM, LVN_ITEMACTIVATE, LVN_ITEMCHANGED,
+        NM_CLICK, NM_DBLCLK, NM_RCLICK, LVN_COLUMNCLICK};
 
     match m {
+        NM_CLICK => Event::OnListViewClick,
+        NM_DBLCLK  => Event::OnListViewDoubleClick,
+        NM_RCLICK => Event::OnListViewRightClick,
+        LVN_COLUMNCLICK => Event::OnListViewColumnClick,
         LVN_DELETEALLITEMS => Event::OnListViewClear,
         LVN_DELETEITEM => Event::OnListViewItemRemoved,
         LVN_INSERTITEM => Event::OnListViewItemInsert,
@@ -884,26 +889,20 @@ fn tree_data(_m: u32, _notif_raw: *const NMHDR) -> EventData {
 
 #[cfg(feature="list-view")]
 fn list_view_data(m: u32, notif_raw: *const NMHDR) -> EventData {
-    use winapi::um::commctrl::{NMLISTVIEW, LVN_DELETEITEM, LVN_ITEMACTIVATE,
-        LVN_INSERTITEM, LVN_ITEMCHANGED, LVIS_SELECTED};
+    use winapi::um::commctrl::{NMLISTVIEW, NMITEMACTIVATE, LVN_DELETEITEM, LVN_ITEMACTIVATE,
+        LVN_INSERTITEM, LVN_ITEMCHANGED, LVIS_SELECTED, LVN_COLUMNCLICK,
+        NM_CLICK, NM_RCLICK, NM_DBLCLK};
 
     match m {
-        LVN_DELETEITEM => {
+        LVN_DELETEITEM | LVN_INSERTITEM | LVN_COLUMNCLICK => {
             let data: &NMLISTVIEW = unsafe { &*(notif_raw as *const NMLISTVIEW) };
             EventData::OnListViewItemIndex { 
                 row_index: data.iItem as _,
                 column_index: data.iSubItem as _
             }
         },
-        LVN_ITEMACTIVATE => {
-            let data: &NMLISTVIEW = unsafe { &*(notif_raw as *const NMLISTVIEW) };
-            EventData::OnListViewItemIndex { 
-                row_index: data.iItem as _,
-                column_index: data.iSubItem as _
-            }
-        },
-        LVN_INSERTITEM => {
-            let data: &NMLISTVIEW = unsafe { &*(notif_raw as *const NMLISTVIEW) };
+        LVN_ITEMACTIVATE | NM_CLICK | NM_DBLCLK | NM_RCLICK => {
+            let data: &NMITEMACTIVATE = unsafe { &*(notif_raw as *const NMITEMACTIVATE) };
             EventData::OnListViewItemIndex { 
                 row_index: data.iItem as _,
                 column_index: data.iSubItem as _

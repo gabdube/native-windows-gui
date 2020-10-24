@@ -199,6 +199,22 @@ pub enum Event {
     /// Generates a `EventData::ListViewItemIndex`
     OnListViewItemActivated,
 
+    /// When the user has clicked the left mouse button within the control
+    /// Generates a `EventData::ListViewItemIndex`
+    OnListViewClick,
+
+    /// When the user has clicked the right mouse button within the control
+    /// Generates a `EventData::ListViewItemIndex`
+    OnListViewRightClick,
+
+    /// When the user has clicked the left mouse button within the control twice rapidly
+    /// Generates a `EventData::ListViewItemIndex`
+    OnListViewDoubleClick,
+
+    /// When the user has clicked the left mouse button on ListView header column
+    /// Generates a `EventData::ListViewItemIndex`
+    OnListViewColumnClick,
+
     /// When an item is selected/unselected in the listview
     /// See `EventData::OnListViewItemChanged` to differentiate the two
     OnListViewItemChanged,
@@ -278,6 +294,7 @@ pub enum EventData {
     OnTreeItemSelectionChanged{ old: crate::TreeItem, new: crate::TreeItem },
 
     /// Row index and column index of the list view item that raised the event
+    /// `row_index` `0xFFF...` means an absence of item
     #[cfg(feature="list-view")]
     OnListViewItemIndex { row_index: usize, column_index: usize },
 

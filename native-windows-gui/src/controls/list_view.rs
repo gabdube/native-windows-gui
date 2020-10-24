@@ -244,6 +244,10 @@ Builder parameters:
   * `OnListViewItemRemoved`: When an item is about to be removed from the list view
   * `OnListViewItemInsert`: When a new item is inserted in the list view
   * `OnListViewItemActivated`: When an item in the list view is activated by the user
+  * `OnListViewClick`: When the user has clicked the left mouse button within the control
+  * `OnListViewRightClick`: When the user has clicked the right mouse button within the control
+  * `OnListViewDoubleClick`: When the user has clicked the left mouse button within the control twice rapidly
+  * `OnListViewColumnClick`: When the user has clicked the left mouse button on ListView header column
   * `OnListViewItemChanged`: When an item is selected/unselected in the listview
   * `OnListViewFocus`: When the list view has received focus
   * `OnListViewFocusLost`: When the list view has lost focus
