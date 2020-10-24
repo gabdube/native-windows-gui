@@ -3,7 +3,7 @@
 */
 
 use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_CLIPCHILDREN, WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION,
-WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_POPUP, WS_EX_TOPMOST, WS_EX_ACCEPTFILES, WS_EX_COMPOSITED};
+WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_POPUP, WS_EX_TOPMOST, WS_EX_ACCEPTFILES};
 
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::check_hwnd;
@@ -297,7 +297,7 @@ impl<'a> WindowBuilder<'a> {
     pub fn build(self, out: &mut Window) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
-        let mut ex_flags = WS_EX_COMPOSITED;
+        let mut ex_flags = 0;
         if self.topmost { ex_flags |= WS_EX_TOPMOST; }
         if self.accept_files { ex_flags |= WS_EX_ACCEPTFILES; }
 

@@ -1,7 +1,7 @@
 use winapi::shared::minwindef::{WPARAM, LPARAM, BOOL};
 use winapi::shared::windef::HWND;
 use winapi::um::winnt::LPWSTR;
-use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_COMPOSITED, WS_EX_CONTROLPARENT};
+use winapi::um::winuser::{EnumChildWindows, WS_VISIBLE, WS_DISABLED, WS_EX_CONTROLPARENT};
 use crate::win32::{base_helper::{to_utf16, check_hwnd}, window_helper as wh};
 use crate::{NwgError, Font, RawEventHandler, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle};
@@ -233,16 +233,9 @@ impl TabsContainer {
     fn hook_tabs(&self) {
         use crate::bind_raw_event_handler_inner;
         use winapi::shared::minwindef::{HIWORD, LOWORD};
-        use winapi::um::winuser::{NMHDR, WM_SIZE, WM_NOTIFY, WM_PAINT};
+        use winapi::um::winuser::{NMHDR, WM_SIZE, WM_NOTIFY};
         use winapi::um::commctrl::{TCM_GETCURSEL, TCN_SELCHANGE};
         use winapi::um::winuser::SendMessageW;
-        use std::rc::Rc;
-
-        #[derive(Copy, Clone)]
-        struct ManualPaint {
-            old_size: (u32, u32),
-            force_redraw: bool,
-        }
 
         if self.handle.blank() { panic!(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
@@ -250,10 +243,6 @@ impl TabsContainer {
         let parent_handle_raw = wh::get_window_parent(handle);
         let parent_handle = ControlHandle::Hwnd(parent_handle_raw);
        
-        let blank_paint = ManualPaint { old_size: (0, 0), force_redraw: true };
-        let size_check1 = Rc::new(RefCell::new(blank_paint));
-        let size_check2 = size_check1.clone();
-
         let handler0 = bind_raw_event_handler_inner(&parent_handle, handle as usize, move |_hwnd, msg, _w, l| { unsafe {
             match msg {
                 WM_NOTIFY => {
@@ -263,8 +252,6 @@ impl TabsContainer {
                         let data: (HWND, i32) = (handle, index);
                         let data_ptr = &data as *const (HWND, i32);
                         EnumChildWindows(handle, Some(toggle_children_tabs), data_ptr as LPARAM);
-
-                        size_check1.borrow_mut().force_redraw = true;
                     }
                 },
                 _ => {}
@@ -275,15 +262,6 @@ impl TabsContainer {
 
         let handler1 = bind_raw_event_handler_inner(&self.handle, handle as usize, move |hwnd, msg, _w, l| { unsafe {
             match msg {
-                WM_PAINT => {
-                    let size = wh::get_window_size(hwnd);
-                    let draw = *size_check2.borrow();
-                    if !draw.force_redraw && size == draw.old_size {
-                        return Some(0);
-                    }
-
-                    *size_check2.borrow_mut() = ManualPaint { old_size: size, force_redraw: false };
-                },
                 WM_SIZE => {
                     use winapi::shared::windef::{RECT, HGDIOBJ};
                     use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, DT_CALCRECT, DT_LEFT};
@@ -408,7 +386,7 @@ impl<'a> TabsContainerBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
-            .ex_flags(WS_EX_COMPOSITED | WS_EX_CONTROLPARENT)
+            .ex_flags(WS_EX_CONTROLPARENT)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

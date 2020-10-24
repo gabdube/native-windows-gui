@@ -507,6 +507,27 @@ impl ListView {
         wh::send_message(handle, LVM_DELETECOLUMN , column_index as _, 0);
     }
 
+    /// Returns true if list view headers are visible
+    pub fn headers_enabled(&self) -> bool {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let style = wh::get_style(handle);
+        (style & LVS_REPORT == LVS_REPORT) &&
+            (style & LVS_NOCOLUMNHEADER != LVS_NOCOLUMNHEADER)
+    }
+
+    /// Enable or disable list view headers
+    pub fn set_headers_enabled(&self, enable: bool) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let style = wh::get_style(handle);
+        if style & LVS_REPORT == LVS_REPORT {
+            if !enable {
+                wh::set_style(handle, style | LVS_NOCOLUMNHEADER);
+            } else {
+                wh::set_style(handle, style & !LVS_NOCOLUMNHEADER);
+            }
+        }
+    }
+
     /// Select or unselect an item at `row_index`. Does nothing if the index is out of bounds.
     pub fn select_item(&self, row_index: usize, selected: bool) {
         use winapi::um::commctrl::{LVM_SETITEMW, LVIF_STATE, LVIS_SELECTED};
