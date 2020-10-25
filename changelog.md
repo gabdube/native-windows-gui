@@ -5,6 +5,9 @@
 * Fixed the headers of the list view and few other rendering bug (thanks to RicoRodriges)
 * New list view events (thanks to RicoRodriges)
 * Fixed a severe memory leak in image creating (thanks to RicoRodriges)
+* Fix a z order bug with the tab naviguation
+* Added `selected_item_count` and `selected_items` to Treeview.
+* Fixed `selected_item` in TreeView to support item set programatically
 
 1.0.5
 

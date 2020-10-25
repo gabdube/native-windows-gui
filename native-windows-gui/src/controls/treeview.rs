@@ -107,7 +107,10 @@ impl TreeItem {
 }
 
 /**
-A tree-view control is a window that displays a hierarchical list of items
+A tree-view control is a window that displays a hierarchical list of items.
+
+While a treeview can support selected multiple item programatically (using `select_item`), this is not fully supported
+by the winapi implementation.
 
 Requires the `tree-view` feature
 
@@ -304,18 +307,51 @@ impl TreeView {
         next_treeview_item(&self.handle, TVGN_PARENT, item.handle)
     }
 
-    /// Return the currently selected item.
+    /// Return the currently selected item. If there are more than one selected item, returns the first one.
     /// If there is no selected item, returns `None`.
     pub fn selected_item(&self) -> Option<TreeItem> {
-        use winapi::um::commctrl::{TVM_GETNEXTITEM, TVGN_CARET};
+        use winapi::um::commctrl::{TVM_GETNEXTITEM, TVGN_NEXTSELECTED};
 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
-        let tree_handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_CARET, 0) as HTREEITEM;
+        let tree_handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_NEXTSELECTED, 0) as HTREEITEM;
         if tree_handle.is_null() {
             None
         } else {
             Some(TreeItem { handle: tree_handle })
         }
+    }
+
+    /// Returns the selected items in a Treeview
+    /// If there is no selected items, returns an empty `Vec`.
+    pub fn selected_items(&self) -> Vec<TreeItem> {
+        use winapi::um::commctrl::{TVM_GETNEXTITEM, TVGN_NEXTSELECTED};
+
+        let mut items = Vec::new();
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let mut last_handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_NEXTSELECTED, 0);
+        while last_handle != 0 {
+            items.push(TreeItem { handle: last_handle as _ } );
+            last_handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_NEXTSELECTED, last_handle as _);
+        }
+
+        items
+    }
+
+    /// Returns the number of selected item in the tree view
+    pub fn selected_item_count(&self) -> usize {
+        use winapi::um::commctrl::{TVM_GETNEXTITEM, TVGN_NEXTSELECTED};
+
+        let mut count = 0;
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        let mut last_handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_NEXTSELECTED, 0);
+        while last_handle != 0 {
+            count += 1;
+            last_handle = wh::send_message(handle, TVM_GETNEXTITEM, TVGN_NEXTSELECTED, last_handle as _);
+        }
+
+        count
     }
 
     /// Insert a new item into the TreeView and return a reference to new newly added item
