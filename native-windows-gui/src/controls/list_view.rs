@@ -185,8 +185,8 @@ pub struct ListViewColumn {
 /// Represents a column sort indicator in a detailed list view
 #[derive(Copy, Clone, Debug)]
 pub enum ListViewColumnSortArrow {
-    UP,
-    DOWN,
+    Up,
+    Down,
 }
 
 
@@ -550,8 +550,8 @@ impl ListView {
         wh::send_message(headers as *mut _, HDM_GETITEMW, column_index, l);
 
         match header.fmt & (HDF_SORTUP | HDF_SORTDOWN) {
-            HDF_SORTUP => Some(ListViewColumnSortArrow::UP),
-            HDF_SORTDOWN => Some(ListViewColumnSortArrow::DOWN),
+            HDF_SORTUP => Some(ListViewColumnSortArrow::Up),
+            HDF_SORTDOWN => Some(ListViewColumnSortArrow::Down),
             _ => None,
         }
     }
@@ -570,8 +570,8 @@ impl ListView {
 
             header.fmt &= !(HDF_SORTUP | HDF_SORTDOWN);
             match sort {
-                Some(ListViewColumnSortArrow::UP) => header.fmt |= HDF_SORTUP,
-                Some(ListViewColumnSortArrow::DOWN) => header.fmt |= HDF_SORTDOWN,
+                Some(ListViewColumnSortArrow::Up) => header.fmt |= HDF_SORTUP,
+                Some(ListViewColumnSortArrow::Down) => header.fmt |= HDF_SORTDOWN,
                 _ => {}
             };
 

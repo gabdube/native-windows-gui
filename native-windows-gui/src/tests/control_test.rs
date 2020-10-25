@@ -975,7 +975,7 @@ fn init_list_view(app: &ControlsTest) {
         list.insert_column(column);
     }
     list.set_headers_enabled(true);
-    list.set_column_sort_arrow(1, Some(ListViewColumnSortArrow::DOWN));
+    list.set_column_sort_arrow(1, Some(ListViewColumnSortArrow::Down));
 
     let data: &[&[&str]] = &[
         // &["Name", "Price (USD $)", "Quantity"],
@@ -1613,8 +1613,8 @@ fn set_lv_sort(lv: &ListView, data: &EventData) {
                     lv.set_column_sort_arrow(i, None);
                 } else {
                     match lv.column_sort_arrow(i) {
-                        Some(ListViewColumnSortArrow::UP) | None => lv.set_column_sort_arrow(i, Some(ListViewColumnSortArrow::DOWN)),
-                        Some(ListViewColumnSortArrow::DOWN) => lv.set_column_sort_arrow(i, Some(ListViewColumnSortArrow::UP)),
+                        Some(ListViewColumnSortArrow::Up) | None => lv.set_column_sort_arrow(i, Some(ListViewColumnSortArrow::Down)),
+                        Some(ListViewColumnSortArrow::Down) => lv.set_column_sort_arrow(i, Some(ListViewColumnSortArrow::Up)),
                     }
                 }
             }
