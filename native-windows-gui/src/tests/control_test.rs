@@ -924,6 +924,11 @@ mod partial_controls_test_ui {
                         print_char(_evt_data);
                     }
                 },
+                E::OnListViewColumnClick => {
+                    if &handle == &self.test_list_view {
+                        set_lv_sort(&self.test_list_view, _evt_data);
+                    }
+                },
                 _ => {}
             }
         }
@@ -970,6 +975,7 @@ fn init_list_view(app: &ControlsTest) {
         list.insert_column(column);
     }
     list.set_headers_enabled(true);
+    list.set_column_sort_arrow(1, Some(ListViewColumnSortArrow::DOWN));
 
     let data: &[&[&str]] = &[
         // &["Name", "Price (USD $)", "Quantity"],
@@ -1596,5 +1602,23 @@ fn print_char(data: &EventData) {
     match data {
         EventData::OnChar(c) => println!("{:?}", c),
         _=>{}
+    }
+}
+
+fn set_lv_sort(lv: &ListView, data: &EventData) {
+    match data {
+        EventData::OnListViewItemIndex { row_index: _, column_index } => {
+            for i in 0..lv.column_len() {
+                if *column_index != i {
+                    lv.set_column_sort_arrow(i, None);
+                } else {
+                    match lv.column_sort_arrow(i) {
+                        Some(ListViewColumnSortArrow::UP) | None => lv.set_column_sort_arrow(i, Some(ListViewColumnSortArrow::DOWN)),
+                        Some(ListViewColumnSortArrow::DOWN) => lv.set_column_sort_arrow(i, Some(ListViewColumnSortArrow::UP)),
+                    }
+                }
+            }
+        },
+        _ => {}
     }
 }

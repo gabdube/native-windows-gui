@@ -3,7 +3,7 @@ use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
     LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT, LVS_EX_GRIDLINES, LVS_EX_BORDERSELECT,
     LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT, LVIF_IMAGE, LVS_SHOWSELALWAYS,
-    LVS_EX_HEADERDRAGDROP, LVS_EX_HEADERINALLVIEWS
+    LVS_EX_HEADERDRAGDROP, LVS_EX_HEADERINALLVIEWS, LVM_GETHEADER, HDITEMW, HDI_FORMAT, HDM_GETITEMW, HDF_SORTUP, HDF_SORTDOWN, HDM_SETITEMW
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
@@ -180,6 +180,13 @@ pub struct ListViewColumn {
     pub fmt: i32,
     pub width: i32,
     pub text: String,
+}
+
+/// Represents a column sort indicator in a detailed list view
+#[derive(Copy, Clone, Debug)]
+pub enum ListViewColumnSortArrow {
+    UP,
+    DOWN,
 }
 
 
@@ -526,6 +533,50 @@ impl ListView {
             } else {
                 wh::set_style(handle, style & !LVS_NOCOLUMNHEADER);
             }
+        }
+    }
+
+    /// Returns column sort indicator
+    pub fn column_sort_arrow(&self, column_index: usize) -> Option<ListViewColumnSortArrow> {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        let headers = wh::send_message(handle, LVM_GETHEADER, 0, 0);
+        if headers == 0 { return None; }
+
+        let mut header: HDITEMW = unsafe { std::mem::zeroed() };
+        header.mask = HDI_FORMAT;
+
+        let l = unsafe { std::mem::transmute(&mut header) };
+        wh::send_message(headers as *mut _, HDM_GETITEMW, column_index, l);
+
+        match header.fmt & (HDF_SORTUP | HDF_SORTDOWN) {
+            HDF_SORTUP => Some(ListViewColumnSortArrow::UP),
+            HDF_SORTDOWN => Some(ListViewColumnSortArrow::DOWN),
+            _ => None,
+        }
+    }
+
+    /// Enable or disable column sort indicator. Draws a up-arrow / down-arrow.
+    pub fn set_column_sort_arrow(&self, column_index: usize, sort: Option<ListViewColumnSortArrow>) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        let headers = wh::send_message(handle, LVM_GETHEADER, 0, 0);
+        if headers != 0 {
+            let mut header: HDITEMW = unsafe { std::mem::zeroed() };
+            header.mask = HDI_FORMAT;
+
+            let l = unsafe { std::mem::transmute(&mut header) };
+            wh::send_message(headers as *mut _, HDM_GETITEMW, column_index, l);
+
+            header.fmt &= !(HDF_SORTUP | HDF_SORTDOWN);
+            match sort {
+                Some(ListViewColumnSortArrow::UP) => header.fmt |= HDF_SORTUP,
+                Some(ListViewColumnSortArrow::DOWN) => header.fmt |= HDF_SORTDOWN,
+                _ => {}
+            };
+
+            let l = unsafe { std::mem::transmute(&mut header) };
+            wh::send_message(headers as *mut _, HDM_SETITEMW, column_index, l);
         }
     }
 
