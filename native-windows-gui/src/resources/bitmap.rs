@@ -78,6 +78,18 @@ impl Bitmap {
         }
     }
 
+    pub fn from_system(cursor: OemBitmap) -> Bitmap {
+        let mut out = Self::default();
+
+        // Default cursor creation cannot fail
+        Self::builder()
+            .source_system(Some(cursor))
+            .build(&mut out)
+            .unwrap();
+
+        out
+    }
+
     /**
         Creates a new icon from the bitmap data. The bitmap must have been initialized
     */

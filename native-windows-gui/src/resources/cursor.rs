@@ -56,6 +56,18 @@ impl Cursor {
         }
     }
 
+    pub fn from_system(cursor: OemCursor) -> Cursor {
+        let mut out = Self::default();
+
+        // Default cursor creation cannot fail
+        Self::builder()
+            .source_system(Some(cursor))
+            .build(&mut out)
+            .unwrap();
+
+        out
+    }
+
 }
 
 pub struct CursorBuilder<'a> {

@@ -438,7 +438,7 @@ pub(crate) unsafe fn build_sysclass<'a>(
     use winapi::shared::winerror::ERROR_CLASS_ALREADY_EXISTS;
 
     let class_name = to_utf16(class_name);
-    let background: HBRUSH = background.unwrap_or(mem::transmute(COLOR_WINDOW as usize));
+    let background: HBRUSH = background.unwrap_or(COLOR_WINDOW as usize as HBRUSH);
     let style: UINT = style.unwrap_or(CS_HREDRAW | CS_VREDRAW);
 
     let class =
@@ -640,7 +640,7 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
             
             // Converting the class name into rust string might not be the most efficient way to do this
             // It might be a good idea to just compare the class_name_raw
-            let mut class_name_raw: Vec<WCHAR> = Vec::with_capacity(100);  class_name_raw.set_len(100);
+            let mut class_name_raw: [WCHAR; 100] = [0; 100];
             let count = GetClassNameW(child_handle, class_name_raw.as_mut_ptr(), 100) as usize;
             let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
 

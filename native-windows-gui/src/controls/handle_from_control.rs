@@ -228,6 +228,12 @@ use super::RichTextBox;
 #[cfg(feature = "rich-textbox")]
 handles!(RichTextBox);
 
+#[cfg(feature = "rich-textbox")]
+use super::RichLabel;
+
+#[cfg(feature = "rich-textbox")]
+handles!(RichLabel);
+
 #[cfg(feature = "scroll-bar")]
 use super::ScrollBar;
 

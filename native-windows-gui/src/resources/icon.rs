@@ -74,6 +74,18 @@ impl Icon {
         }
     }
 
+    pub fn from_system(cursor: OemIcon) -> Icon {
+        let mut out = Self::default();
+
+        // Default cursor creation cannot fail
+        Self::builder()
+            .source_system(Some(cursor))
+            .build(&mut out)
+            .unwrap();
+
+        out
+    }
+
 }
 
 pub struct IconBuilder<'a> {

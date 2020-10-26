@@ -50,6 +50,9 @@ Label is not behind any features.
   * `OnMouseMove`: Generic mouse mouse event
   * `OnMouseWheel`: Generic mouse wheel event
 
+
+** Example **
+
 ```rust
 use native_windows_gui as nwg;
 fn build_label(label: &mut nwg::Label, window: &nwg::Window, font: &nwg::Font) {
@@ -324,6 +327,12 @@ impl Label {
 
 }
 
+impl PartialEq for Label {
+    fn eq(&self, other: &Self) -> bool {
+        self.handle == other.handle
+    }
+}
+
 
 impl Drop for Label {
     fn drop(&mut self) {
@@ -434,8 +443,3 @@ impl<'a> LabelBuilder<'a> {
 
 }
 
-impl PartialEq for Label {
-    fn eq(&self, other: &Self) -> bool {
-        self.handle == other.handle
-    }
-}
