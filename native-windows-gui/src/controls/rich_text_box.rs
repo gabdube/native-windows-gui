@@ -388,7 +388,7 @@ impl RichTextBox {
         wh::send_message(handle, EM_SETSEL as u32, r.start as usize, r.end as isize);
     }
 
-    /// Return the length of the user input in the control. This is better than `test.len()` as it
+    /// Return the length of the user input in the control. This is better than `control.text().len()` as it
     /// does not allocate a string in memory
     pub fn len(&self) -> u32 {
         use winapi::um::winuser::EM_LINELENGTH;

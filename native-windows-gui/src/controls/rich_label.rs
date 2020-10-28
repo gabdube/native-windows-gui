@@ -1,12 +1,11 @@
-use winapi::um::winuser::{WS_VISIBLE};
+use winapi::um::winuser::{WS_VISIBLE, ES_MULTILINE, WS_DISABLED, EM_SETSEL};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::check_hwnd;
 use crate::win32::richedit as rich;
-use crate::{Font, Cursor, OemCursor, NwgError, RawEventHandler, unbind_raw_event_handler};
-use super::{ControlBase, ControlHandle, RichTextBox, CharFormat};
+use crate::{Font, Cursor, OemCursor, NwgError, RawEventHandler, HTextAlign, unbind_raw_event_handler};
+use super::{ControlBase, ControlHandle, CharFormat, ParaFormat};
 
-use std::mem;
-use std::cell::RefCell;
+use std::{ops::Range, cell::RefCell};
 
 
 const NOT_BOUND: &'static str = "RichLabel is not yet bound to a winapi object";
@@ -16,17 +15,21 @@ bitflags! {
     /**
         The rich label flags
 
-        * VISIBLE:  The rich text box is immediatly visible after creation
+        * VISIBLE:     The rich text box is immediatly visible after creation
+        * MULTI_LINE:  The label can be on multiple lines
     */
     pub struct RichLabelFlags: u32 {
+        const NONE = 0;
         const VISIBLE = WS_VISIBLE;
+        const DISABLED = WS_DISABLED;
+        const MULTI_LINE = ES_MULTILINE;
     }
 }
 
 
 /**
 A rich label is a label that supports rich text. This control is built on top of the rich text box control and as such
-require the `rich-textbox` feature.
+require the `rich-textbox` feature. Enable "MULTI_LINE" to support multi line labels.
 
 Unlike the basic `Label`, this version supports:
 
@@ -40,9 +43,15 @@ Unlike the basic `Label`, this version supports:
 **Builder parameters:**
   * `parent`:           **Required.** The label parent container.
   * `text`:             The label text.
+  * `size`:             The label size.
+  * `position`:         The label position.
+  * `enabled`:          If the label is enabled. A disabled label won't trigger events
+  * `flags`:            A combination of the LabelFlags values.
+  * `font`:             The font used for the label text
+  * `background_color`: The background color of the label
+  * `h_align`:          The horizontal aligment of the label
 
 **Control events:**
-
   * `MousePress(_)`: Generic mouse press events on the label
   * `OnMouseMove`: Generic mouse mouse event
   * `OnMouseWheel`: Generic mouse wheel event
@@ -75,6 +84,7 @@ impl RichLabel {
             position: (0, 0),
             flags: None,
             font: None,
+            h_align: HTextAlign::Left,
             parent: None,
         }
     }
@@ -87,6 +97,60 @@ impl RichLabel {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         let color = RGB(color[0], color[1], color[2]);
         wh::send_message(handle, rich::EM_SETBKGNDCOLOR, 0, color as _);
+    }
+
+    /// Sets the character format of the selected range of text
+    pub fn set_char_format(&self, r: Range<u32>, fmt: &CharFormat) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, EM_SETSEL as u32, r.start as usize, r.end as isize);
+        rich::set_char_format(handle, fmt);
+        wh::send_message(handle, EM_SETSEL as u32, 0, 0);
+    }
+
+    /// Returns the character format of the selected range of text
+    pub fn char_format(&self, r: Range<u32>) -> CharFormat {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        wh::send_message(handle, EM_SETSEL as u32, r.start as usize, r.end as isize);
+        let out = rich::char_format(handle);
+        wh::send_message(handle, EM_SETSEL as u32, 0, 0);
+
+        out
+    }
+
+    /// Sets the paragraph formatting for the selected range of text in a rich edit control
+    pub fn set_para_format(&self, r: Range<u32>, fmt: &ParaFormat) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        wh::send_message(handle, EM_SETSEL as u32, r.start as usize, r.end as isize);
+        rich::set_para_format(handle, fmt);
+        wh::send_message(handle, EM_SETSEL as u32, 0, 0);
+    }
+
+    /// Returns the paragraph formatting for the selected range of text in a rich edit control
+    /// If more than one paragraph is selected, receive the attributes of the first paragraph
+    pub fn para_format(&self, r: Range<u32>) -> ParaFormat {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        wh::send_message(handle, EM_SETSEL as u32, r.start as usize, r.end as isize);
+        let out = rich::para_format(handle);
+        wh::send_message(handle, EM_SETSEL as u32, 0, 0);
+
+        out
+    }
+
+    /// Return the length of the user input in the control. This is better than `control.text().len()` as it
+    /// does not allocate a string in memory
+    pub fn len(&self) -> u32 {
+        use winapi::um::winuser::EM_LINELENGTH;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, EM_LINELENGTH as u32, 0, 0) as u32
+    }
+
+    /// Remove all text from the textbox
+    pub fn clear(&self) {
+        self.set_text("");
     }
 
     /// Return the font of the control
@@ -216,7 +280,8 @@ pub struct RichLabelBuilder<'a> {
     position: (i32, i32),
     flags: Option<RichLabelFlags>,
     font: Option<&'a Font>,
-    parent: Option<ControlHandle>
+    h_align: HTextAlign,
+    parent: Option<ControlHandle>,
 }
 
 impl<'a> RichLabelBuilder<'a> {
@@ -246,17 +311,29 @@ impl<'a> RichLabelBuilder<'a> {
         self
     }
 
+    pub fn h_align(mut self, align: HTextAlign) -> RichLabelBuilder<'a> {
+        self.h_align = align;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> RichLabelBuilder<'a> {
         self.parent = Some(p.into());
         self
     }
 
     pub fn build(self, out: &mut RichLabel) -> Result<(), NwgError> {
-        let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        use winapi::um::winuser::{SS_LEFT, SS_RIGHT, SS_CENTER};
+
+        let mut flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
+        match self.h_align {
+            HTextAlign::Left => { flags |= SS_LEFT; },
+            HTextAlign::Right => { flags |= SS_RIGHT; },
+            HTextAlign::Center => { flags |= SS_CENTER; },
+        }
 
         let parent = match self.parent {
             Some(p) => Ok(p),
-            None => Err(NwgError::no_parent("RichTextBox"))
+            None => Err(NwgError::no_parent("RichLabel"))
         }?;
 
         out.handle = ControlBase::build_hwnd()

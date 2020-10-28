@@ -41,7 +41,6 @@ Label is not behind any features.
   * `font`:             The font used for the label text
   * `background_color`: The background color of the label
   * `h_align`:          The horizontal aligment of the label
-  * `v_align`:          The vertical aligment of the label
 
 **Control events:**
   * `OnLabelClick`: When the user click the label
