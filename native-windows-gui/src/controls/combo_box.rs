@@ -478,6 +478,9 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
             None => Err(NwgError::no_parent("ComboBox"))
         }?;
 
+        // Drop the old object
+        *out = ComboBox::default();
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())

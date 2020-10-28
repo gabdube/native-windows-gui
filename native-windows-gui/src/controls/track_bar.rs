@@ -376,6 +376,8 @@ impl TrackBarBuilder {
             None => Err(NwgError::no_parent("TrackBar"))
         }?;
 
+        *out = Default::default();
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())

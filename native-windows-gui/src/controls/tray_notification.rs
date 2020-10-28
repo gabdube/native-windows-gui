@@ -367,7 +367,7 @@ impl<'a> TrayNotificationBuilder<'a> {
 
         let icon = match self.icon {
             Some(i) => i.handle as HICON,
-            None => panic!("Tary notification requires an Icon at creation")
+            None => panic!("Tray notification requires an Icon at creation")
         };
 
         let balloon_icon = match (self.info.is_some(), self.balloon_icon) {
@@ -436,6 +436,7 @@ impl<'a> TrayNotificationBuilder<'a> {
 
 
         // Finish
+        *out = Default::default();
         out.handle = handle;
 
         Ok(())

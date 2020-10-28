@@ -336,6 +336,9 @@ impl<'a> ButtonBuilder<'a> {
             None => Err(NwgError::no_parent("Button"))
         }?;
 
+        // Drop the old object
+        *out = Button::default();
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())

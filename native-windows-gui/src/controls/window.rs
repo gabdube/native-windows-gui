@@ -301,6 +301,8 @@ impl<'a> WindowBuilder<'a> {
         if self.topmost { ex_flags |= WS_EX_TOPMOST; }
         if self.accept_files { ex_flags |= WS_EX_ACCEPTFILES; }
 
+        *out = Default::default();
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())

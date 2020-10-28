@@ -336,6 +336,9 @@ impl<'a> RichLabelBuilder<'a> {
             None => Err(NwgError::no_parent("RichLabel"))
         }?;
 
+        // Drop the old object
+        *out = Default::default();
+    
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
@@ -358,15 +361,6 @@ impl<'a> RichLabelBuilder<'a> {
 
         out.override_events();
 
-        /*{
-            let rich = RichTextBox { handle: out.handle };
-            let mut fmt = CharFormat::default();
-            fmt.text_color = Some([0,0,0]);
-            rich.set_char_format(&fmt);
-            mem::forget(rich);
-
-        }*/
-        
         Ok(())
     }
 

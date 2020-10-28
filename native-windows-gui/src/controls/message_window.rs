@@ -48,6 +48,7 @@ pub struct MessageWindowBuilder {
 impl MessageWindowBuilder {
 
     pub fn build(self, out: &mut MessageWindow) -> Result<(), NwgError> {
+        *out = Default::default();
         out.handle = create_message_window()?;
         Ok(())
     }

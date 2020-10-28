@@ -382,6 +382,8 @@ impl<'a> TabsContainerBuilder<'a> {
             None => Err(NwgError::no_parent("TabsContainer"))
         }?;
 
+        *out = Default::default();
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
@@ -649,6 +651,8 @@ impl<'a> TabBuilder<'a> {
             Some(p) => Ok(p),
             None => Err(NwgError::no_parent("Tab"))
         }?;
+
+        *out = Default::default();
 
         match &parent {
             &ControlHandle::Hwnd(h) => {

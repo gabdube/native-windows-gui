@@ -132,6 +132,8 @@ impl TimerBuilder {
             None => Err(NwgError::no_parent("Timer"))
         }?;
 
+        *out = Default::default();
+
         out.handle = unsafe { build_timer(parent, self.interval, self.stopped) };
         out.set_interval(self.interval);
         

@@ -381,6 +381,9 @@ impl<'a> CheckBoxBuilder<'a> {
             None => Err(NwgError::no_parent("CheckBox"))
         }?;
 
+        // Drop the old object
+        *out = CheckBox::default();
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())

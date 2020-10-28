@@ -265,6 +265,8 @@ impl<'a> ExternCanvasBuilder<'a> {
             flags |= WS_CHILD;
         }
 
+        *out = Default::default();
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())

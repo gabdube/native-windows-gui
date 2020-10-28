@@ -419,6 +419,9 @@ impl<'a> LabelBuilder<'a> {
             None => Err(NwgError::no_parent("Label"))
         }?;
 
+        // Drop the old object
+        *out = Label::default();
+
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())

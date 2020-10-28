@@ -373,6 +373,8 @@ impl<'a> NumberSelectBuilder<'a> {
             None => Err(NwgError::no_parent("NumberSelect"))
         }?;
 
+        *out = Default::default();
+
         let (w, h) = self.size;
 
         if out.handler.is_some() {

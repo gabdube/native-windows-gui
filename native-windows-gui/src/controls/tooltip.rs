@@ -388,6 +388,8 @@ impl<'a> TooltipBuilder<'a> {
     }
 
     pub fn build(self, tooltip: &mut Tooltip) -> Result<(), NwgError> {
+        *tooltip = Default::default();
+
         tooltip.handle = ControlBase::build_hwnd()
             .class_name(tooltip.class_name())
             .forced_flags(tooltip.forced_flags())
