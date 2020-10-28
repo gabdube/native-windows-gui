@@ -311,19 +311,8 @@ impl RichTextBox {
         rich::para_format(handle)
     }
 
-    /// Return the font of the control
-    pub fn font(&self) -> Option<Font> {
-        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
-
-        let font_handle = wh::get_window_font(handle);
-        if font_handle.is_null() {
-            None
-        } else {
-            Some(Font { handle: font_handle })
-        }
-    }
-
     /// Set the font of the control
+    /// It is not possible to get the base font handle of a rich label. Use `char_format` instead.
     pub fn set_font(&self, font: Option<&Font>) {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }

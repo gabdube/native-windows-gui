@@ -5,7 +5,7 @@ use crate::win32::richedit as rich;
 use crate::{Font, Cursor, OemCursor, NwgError, RawEventHandler, HTextAlign, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle, CharFormat, ParaFormat};
 
-use std::{ops::Range, cell::RefCell};
+use std::{rc::Rc, ops::Range, cell::RefCell};
 
 
 const NOT_BOUND: &'static str = "RichLabel is not yet bound to a winapi object";
@@ -49,7 +49,9 @@ Unlike the basic `Label`, this version supports:
   * `flags`:            A combination of the LabelFlags values.
   * `font`:             The font used for the label text
   * `background_color`: The background color of the label
-  * `h_align`:          The horizontal aligment of the label
+  * `h_align`:          The horizontal aligment of the label.
+  * `line_height`:      The line height in pixels for the vertical aligment. Can be None to disable vertical aligment.
+                        Real line height cannot be guessed by NWG due to the text formatting
 
 **Control events:**
   * `MousePress(_)`: Generic mouse press events on the label
@@ -72,6 +74,7 @@ fn build_label(label: &mut nwg::RichLabel, window: &nwg::Window, font: &nwg::Fon
 #[derive(Default)]
 pub struct RichLabel {
     pub handle: ControlHandle,
+    line_height: Rc<RefCell<Option<i32>>>,
     handler0: RefCell<Option<RawEventHandler>>,
 }
 
@@ -85,6 +88,8 @@ impl RichLabel {
             flags: None,
             font: None,
             h_align: HTextAlign::Left,
+            background_color: None,
+            line_height: None,
             parent: None,
         }
     }
@@ -153,19 +158,18 @@ impl RichLabel {
         self.set_text("");
     }
 
-    /// Return the font of the control
-    pub fn font(&self) -> Option<Font> {
-        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
-
-        let font_handle = wh::get_window_font(handle);
-        if font_handle.is_null() {
-            None
-        } else {
-            Some(Font { handle: font_handle })
-        }
+    /// Sets the line height for the vertical alignment
+    pub fn set_line_height(&self, height: Option<i32>) {
+        *self.line_height.borrow_mut() = height;
     }
 
-    /// Set the font of the control
+    /// Returns the line height for the vertical alignment
+    pub fn line_height(&self) -> Option<i32> {
+        *self.line_height.borrow()
+    }
+
+    /// Set base font of the control
+    /// It is not possible to get the base font handle of a rich label. Use `char_format` instead.
     pub fn set_font(&self, font: Option<&Font>) {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { wh::set_window_font(handle, font.map(|f| f.handle), true); }
@@ -237,17 +241,86 @@ impl RichLabel {
         ES_READONLY | WS_CHILD
     }
 
-    fn override_events(&self) {
+    unsafe fn override_events(&self) {
         use crate::bind_raw_event_handler_inner;
-        use winapi::um::winuser::{SetCursor, WM_MOUSEFIRST, WM_MOUSELAST, WM_MOUSEACTIVATE, WM_KEYUP, WM_KEYDOWN, WM_SETFOCUS};
-        use winapi::shared::windef::HCURSOR;
+        use winapi::shared::windef::{HCURSOR, RECT, HBRUSH, POINT};
+        use winapi::um::winuser::{WM_NCCALCSIZE, WM_MOUSEFIRST, WM_MOUSELAST, WM_MOUSEACTIVATE, WM_KEYUP, WM_KEYDOWN, WM_SETFOCUS, WM_SIZE, WM_NCPAINT};
+        use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED, COLOR_WINDOW, NCCALCSIZE_PARAMS};
+        use winapi::um::winuser::{SetCursor, GetDC, ReleaseDC, GetClientRect, GetWindowRect, ScreenToClient, FillRect, SetWindowPos};
+        use std::{mem, ptr};
+
+        let callback_line_height = self.line_height.clone();
 
         let cursor = Cursor::from_system(OemCursor::Normal);
-        let handler0 = bind_raw_event_handler_inner(&self.handle, 0, move |_hwnd, msg, _w, _l| {
-            unsafe { SetCursor(cursor.handle as HCURSOR); }
+        let handler0 = bind_raw_event_handler_inner(&self.handle, 0, move |hwnd, msg, w, l| {
+            SetCursor(cursor.handle as HCURSOR);
             match msg {
                 WM_MOUSEFIRST..=WM_MOUSELAST => Some(0),
                 WM_MOUSEACTIVATE | WM_KEYUP | WM_KEYDOWN | WM_SETFOCUS => Some(0),
+                WM_NCCALCSIZE => {
+                    let client_height = *callback_line_height.borrow();
+                    if w == 0 || client_height.is_none() { return None }
+
+                    let client_height = client_height.unwrap();
+
+                    // Calculate NC area to center text.
+                    let mut client: RECT = mem::zeroed();
+                    let mut window: RECT = mem::zeroed();
+                    GetClientRect(hwnd, &mut client);
+                    GetWindowRect(hwnd, &mut window);
+
+                    let window_height = window.bottom - window.top;
+                    let center = ((window_height - client_height) / 2) - 1;
+
+                    // Save the info
+                    let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
+                    let info = &mut *info_ptr;
+
+                    info.rgrc[0].top += center;
+                    info.rgrc[0].bottom -= center;
+
+                    None
+                },
+                WM_NCPAINT => {
+                    let client_height = *callback_line_height.borrow();
+                    if client_height.is_none() { return None }
+
+                    let mut window: RECT = mem::zeroed();
+                    let mut client: RECT = mem::zeroed();
+                    GetWindowRect(hwnd, &mut window);
+                    GetClientRect(hwnd, &mut client);
+
+                    let mut pt1 = POINT {x: window.left, y: window.top};
+                    ScreenToClient(hwnd, &mut pt1);
+
+                    let mut pt2 = POINT {x: window.right, y: window.bottom};
+                    ScreenToClient(hwnd, &mut pt2);
+
+                    let top = RECT {
+                        left: 0,
+                        top: pt1.y,
+                        right: client.right,
+                        bottom: client.top
+                    };
+
+                    let bottom = RECT {
+                        left: 0,
+                        top: client.bottom,
+                        right: client.right,
+                        bottom: pt2.y
+                    };
+
+                    let dc = GetDC(hwnd);
+                    let brush = COLOR_WINDOW as HBRUSH;
+                    FillRect(dc, &top, brush);
+                    FillRect(dc, &bottom, brush);
+                    ReleaseDC(hwnd, dc);
+                    None
+                },
+                WM_SIZE => {
+                    SetWindowPos(hwnd, ptr::null_mut(), 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
+                    None
+                },
                 _ => None
             }            
         });
@@ -281,6 +354,8 @@ pub struct RichLabelBuilder<'a> {
     flags: Option<RichLabelFlags>,
     font: Option<&'a Font>,
     h_align: HTextAlign,
+    background_color: Option<[u8; 3]>,
+    line_height: Option<i32>,
     parent: Option<ControlHandle>,
 }
 
@@ -316,6 +391,16 @@ impl<'a> RichLabelBuilder<'a> {
         self
     }
 
+    pub fn background_color(mut self, color: Option<[u8; 3]>) -> RichLabelBuilder<'a> {
+        self.background_color = color;
+        self
+    }
+
+    pub fn line_height(mut self, height: Option<i32>) -> RichLabelBuilder<'a> {
+        self.line_height = height;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> RichLabelBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -339,6 +424,7 @@ impl<'a> RichLabelBuilder<'a> {
         // Drop the old object
         *out = Default::default();
     
+        *out.line_height.borrow_mut() = self.line_height;
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
@@ -355,11 +441,15 @@ impl<'a> RichLabelBuilder<'a> {
             out.set_font(Font::global_default().as_ref());
         }
 
-        if let Ok(color) = wh::get_background_color(parent.hwnd().unwrap()) {
+        if let Some(color) = self.background_color {
             out.set_background_color(color);
+        } else {
+            if let Ok(color) = wh::get_background_color(parent.hwnd().unwrap()) {
+                out.set_background_color(color);
+            }
         }
 
-        out.override_events();
+        unsafe { out.override_events(); }
 
         Ok(())
     }
