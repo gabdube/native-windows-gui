@@ -147,7 +147,7 @@ pub use tray_notification::{TrayNotificationFlags, TrayNotification, TrayNotific
 pub use message_window::{MessageWindow, MessageWindowBuilder};
 
 #[cfg(feature = "list-view")]
-pub use list_view::{ListView, ListViewStyle, ListViewBuilder, ListViewFlags, ListViewExFlags, InsertListViewItem, ListViewItem, InsertListViewColumn, ListViewColumn};
+pub use list_view::{ListView, ListViewStyle, ListViewBuilder, ListViewFlags, ListViewExFlags, InsertListViewItem, ListViewItem, InsertListViewColumn, ListViewColumn, ListViewColumnSortArrow};
 
 #[cfg(all(feature="list-view", feature="image-list"))]
 pub use list_view::ListViewImageListType;
