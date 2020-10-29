@@ -1,10 +1,10 @@
-1.0.6 (unreleased)
+1.0.6
 
 * Added rich textbox feature
 * Added rich label control (a label using tich text box under the hood)
 * Fixed the headers of the list view and few other rendering bug (thanks to RicoRodriges)
 * New list view events (thanks to RicoRodriges)
-* Fixed a severe memory leak in image creating (thanks to RicoRodriges)
+* Fixed a severe memory leak in image creation (thanks to RicoRodriges)
 * Fix a z order bug with the tab naviguation
 * Added `selected_item_count` and `selected_items` to Treeview.
 * Fixed `selected_item` in TreeView to support item set programatically
