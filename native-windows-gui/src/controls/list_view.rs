@@ -543,10 +543,10 @@ impl ListView {
         let headers = wh::send_message(handle, LVM_GETHEADER, 0, 0);
         if headers == 0 { return None; }
 
-        let mut header: HDITEMW = unsafe { std::mem::zeroed() };
+        let mut header: HDITEMW = unsafe { mem::zeroed() };
         header.mask = HDI_FORMAT;
 
-        let l = unsafe { std::mem::transmute(&mut header) };
+        let l = &mut header as *mut HDITEMW as _;
         wh::send_message(headers as *mut _, HDM_GETITEMW, column_index, l);
 
         match header.fmt & (HDF_SORTUP | HDF_SORTDOWN) {
@@ -562,10 +562,10 @@ impl ListView {
 
         let headers = wh::send_message(handle, LVM_GETHEADER, 0, 0);
         if headers != 0 {
-            let mut header: HDITEMW = unsafe { std::mem::zeroed() };
+            let mut header: HDITEMW = unsafe { mem::zeroed() };
             header.mask = HDI_FORMAT;
 
-            let l = unsafe { std::mem::transmute(&mut header) };
+            let l = &mut header as *mut HDITEMW as _;
             wh::send_message(headers as *mut _, HDM_GETITEMW, column_index, l);
 
             header.fmt &= !(HDF_SORTUP | HDF_SORTDOWN);
@@ -575,7 +575,7 @@ impl ListView {
                 _ => {}
             };
 
-            let l = unsafe { std::mem::transmute(&mut header) };
+            let l = &mut header as *mut HDITEMW as _;
             wh::send_message(headers as *mut _, HDM_SETITEMW, column_index, l);
         }
     }
