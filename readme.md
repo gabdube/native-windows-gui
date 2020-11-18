@@ -28,7 +28,7 @@ To use NWG in your project add it to cargo.toml:
 
 ```toml
 [dependencies]
-native-windows-gui = "1.0.6"
+native-windows-gui = "1.0.7"
 native-windows-derive = "1.0.2" # Optional. Only if the derive macro is used.
 ```
 
@@ -46,7 +46,7 @@ Note that procedural macros still require a `extern crate` definition, so this w
 
 ```toml
 [dependencies]
-nwg = {version = "^1.0.6", package = "native-windows-gui"}
+nwg = {version = "^1.0.7", package = "native-windows-gui"}
 ```
 
 
