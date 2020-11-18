@@ -3,7 +3,7 @@ Native Windows GUI windowing base. Includes events dispatching and window creati
 
 Warning. Not for the faint of heart.
 */
-use winapi::shared::minwindef::{UINT, DWORD, HMODULE, WPARAM, LPARAM, LRESULT};
+use winapi::shared::minwindef::{BOOL, UINT, DWORD, HMODULE, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
 use winapi::um::winuser::{WNDPROC, NMHDR};
@@ -83,7 +83,6 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
 pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
-    use winapi::um::commctrl::{SetWindowSubclass};
     use winapi::um::winuser::EnumChildWindows;
 
     struct SetSubclassParam {
@@ -168,8 +167,6 @@ Returns a `EventHandler` that can be passed to `unbind_event_handler` to remove 
 pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHandle, f: F) -> EventHandler
     where F: Fn(Event, EventData, ControlHandle) -> () + 'static
 {
-    use winapi::um::commctrl::{SetWindowSubclass};
-
     let hwnd = handle.hwnd().expect("Cannot bind control with an handle of type");
     let parent_hwnd = parent_handle.hwnd().expect("Cannot bind control with an handle of type");
     
@@ -207,8 +204,6 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHand
 */
 pub fn unbind_event_handler(handler: &EventHandler)
 {
-    use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
-
     let id = handler.id;
     let subclass_id = handler.subclass_id;
     let mut callback_ptr: *mut *const Callback = ptr::null_mut();
@@ -238,8 +233,6 @@ pub fn unbind_event_handler(handler: &EventHandler)
 pub(crate) fn bind_raw_event_handler_inner<F>(handle: &ControlHandle, handler_id: UINT_PTR, f: F) -> Result<RawEventHandler, NwgError>
     where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
 {
-    use winapi::um::commctrl::{GetWindowSubclass, SetWindowSubclass};
-
     let handler_id = handler_id;
     let subclass_proc: SUBCLASSPROC = Some(process_raw_events);
     
@@ -319,8 +312,6 @@ where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
     This function will panic if the handle parameter is not a window control.
 */
 pub fn has_raw_handler(handle: &ControlHandle, handler_id: UINT_PTR) -> bool {
-    use winapi::um::commctrl::{GetWindowSubclass};
-
     let handle = handle.hwnd().expect("This type of control cannot have a raw handler.");
     let subclass_proc: SUBCLASSPROC = Some(process_raw_events);
     let mut tmp_value = 0;
@@ -333,8 +324,6 @@ pub fn has_raw_handler(handle: &ControlHandle, handler_id: UINT_PTR) -> bool {
 */
 pub fn unbind_raw_event_handler(handler: &RawEventHandler) -> Result<(), NwgError>
 {
-    use winapi::um::commctrl::{RemoveWindowSubclass, GetWindowSubclass};
-
     let subclass_proc = handler.subclass_proc;
     let handler_id = handler.handler_id;
     let handle = handler.handle;
@@ -991,3 +980,102 @@ unsafe fn handle_default_notify_callback<'a>(notif_raw: *const NMHDR, callback: 
         _ => {}
     }
 }
+
+//
+// Hack to make `GetWindowSubclass` work on GNU
+//
+
+#[cfg(target_env="gnu")] use std::{sync::Mutex, collections::HashMap};
+
+#[cfg(target_env="gnu")]
+type SubclassId = (usize, usize, UINT_PTR);
+
+#[cfg(target_env="gnu")]
+static mut SUBCLASS_COLLECTION: Option<Mutex<HashMap<SubclassId, DWORD_PTR>>> = None;
+
+
+#[cfg(target_env="gnu")]
+#[allow(non_snake_case)]
+unsafe fn GetWindowSubclass(hwnd: HWND, proc: SUBCLASSPROC, uid: UINT_PTR, data: *mut DWORD_PTR) -> BOOL {
+    if SUBCLASS_COLLECTION.is_none() {
+        SUBCLASS_COLLECTION = Some(Mutex::new(HashMap::new()));
+    }
+
+    let id = (hwnd as usize, mem::transmute(proc), uid);
+    match SUBCLASS_COLLECTION.as_ref() {
+        Some(collection_mutex) => {
+            let collection = collection_mutex.lock().unwrap();
+            match collection.get(&id) {
+                Some(v) => { *data = *v; 1 },
+                None => { 0 }
+            }
+        },
+        None => unreachable!()
+    }
+}
+
+#[cfg(target_env="gnu")]
+#[allow(non_snake_case)]
+unsafe fn SetWindowSubclass(hwnd: HWND, proc: SUBCLASSPROC, uid: UINT_PTR, data: DWORD_PTR) -> BOOL {
+    use winapi::um::commctrl::SetWindowSubclass;
+
+    if SUBCLASS_COLLECTION.is_none() {
+        SUBCLASS_COLLECTION = Some(Mutex::new(HashMap::new()));
+    }
+
+    let id = (hwnd as usize, mem::transmute(proc), uid);
+    match SUBCLASS_COLLECTION.as_ref() {
+        Some(collection_mutex) => {
+            let mut collection = collection_mutex.lock().unwrap();
+            collection.insert(id, data);
+        },
+        None => unreachable!()
+    }
+
+
+    SetWindowSubclass(hwnd, proc, uid, data)
+}
+
+
+#[cfg(target_env="gnu")]
+#[allow(non_snake_case)]
+unsafe fn RemoveWindowSubclass(hwnd: HWND, proc: SUBCLASSPROC, uid: UINT_PTR) -> BOOL {
+    use winapi::um::commctrl::RemoveWindowSubclass;
+
+    if SUBCLASS_COLLECTION.is_none() {
+        SUBCLASS_COLLECTION = Some(Mutex::new(HashMap::new()));
+    }
+
+    let id = (hwnd as usize, mem::transmute(proc), uid);
+    match SUBCLASS_COLLECTION.as_ref() {
+        Some(collection_mutex) => {
+            let mut collection = collection_mutex.lock().unwrap();
+            collection.remove(&id);
+        },
+        None => unreachable!()
+    }
+
+    RemoveWindowSubclass(hwnd, proc, uid)
+}
+
+#[cfg(not(target_env="gnu"))]
+#[allow(non_snake_case)]
+unsafe fn GetWindowSubclass(hwnd: HWND, proc: SUBCLASSPROC, uid: UINT_PTR, data: *mut DWORD_PTR) -> BOOL {
+    use winapi::um::commctrl::GetWindowSubclass;
+    GetWindowSubclass(hwnd, proc, uid, data)
+}
+
+#[cfg(not(target_env="gnu"))]
+#[allow(non_snake_case)]
+unsafe fn SetWindowSubclass(hwnd: HWND, proc: SUBCLASSPROC, uid: UINT_PTR, data: DWORD_PTR) -> BOOL {
+    use winapi::um::commctrl::SetWindowSubclass;
+    SetWindowSubclass(hwnd, proc, uid, data)
+}
+
+#[cfg(not(target_env="gnu"))]
+#[allow(non_snake_case)]
+unsafe fn RemoveWindowSubclass(hwnd: HWND, proc: SUBCLASSPROC, uid: UINT_PTR) -> BOOL {
+    use winapi::um::commctrl::RemoveWindowSubclass;
+    RemoveWindowSubclass(hwnd, proc, uid)
+}
+

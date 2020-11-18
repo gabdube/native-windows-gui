@@ -1,3 +1,7 @@
+1.0.7
+
+* Fixed support for the GNU toolchain
+
 1.0.6
 
 * Added rich textbox feature
