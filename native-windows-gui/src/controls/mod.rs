@@ -153,7 +153,7 @@ pub use list_view::{ListView, ListViewStyle, ListViewBuilder, ListViewFlags, Lis
 pub use list_view::ListViewImageListType;
 
 #[cfg(feature = "number-select")]
-pub use number_select::{NumberSelect, NumberSelectBuilder, NumberSelectFlags};
+pub use number_select::{NumberSelect, NumberSelectBuilder, NumberSelectFlags, NumberSelectData};
 
 #[cfg(feature = "extern-canvas")]
 pub use extern_canvas::{ExternCanvas, ExternCanvasBuilder, ExternCanvasFlags};

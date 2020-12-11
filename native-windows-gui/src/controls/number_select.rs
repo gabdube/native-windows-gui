@@ -28,8 +28,9 @@ bitflags! {
     }
 }
 
-#[derive(Copy, Clone)]
-enum NumberSelectData {
+/// The value inside a number select and the limits of that value
+#[derive(Copy, Clone, Debug)]
+pub enum NumberSelectData {
     Int { value: i64, step: i64, max: i64, min: i64 },
     Float { value: f64, step: f64, max: f64, min: f64, decimals: u8 },
 }
@@ -134,6 +135,19 @@ impl NumberSelect {
             font: None,
             parent: None
         }
+    }
+
+    /// Returns inner data specifying the possible input of a number select
+    /// See [NumberSelectData](enum.NumberSelectData.html) for the possible values
+    pub fn data(&self) -> NumberSelectData {
+        self.data.borrow().clone()
+    }
+
+    /// Sets the inner data specifying the possible input of a number select. Also update the value display.
+    /// See [NumberSelectData](enum.NumberSelectData.html) for the possible values
+    pub fn set_data(&self, v: NumberSelectData) {
+        *self.data.borrow_mut() = v;
+        self.edit.set_text(&v.formatted_value());
     }
 
     /// Returns the font of the control
