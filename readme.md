@@ -1,12 +1,12 @@
 # Native Windows GUI
 
-Welcome to Native Windows GUI (aka NWG). The BEST (and only) rust library to develop truly native GUI applications on desktop for Microsoft Windows.
+Welcome to Native Windows GUI (aka NWG). The BEST (and only) rust library to develop truly native GUI applications on the desktop for Microsoft Windows.
 
 NWG is a very light wrapper over WINAPI. It allows you, the developer, to handle
 the quirks and rough edges of the API by providing a simple, safe and rust-like interface.
 
-Native Windows GUI keeps things simple. This means small compile time, minimal resources usage
-and less time searching the documentation and more time for you to develop your application.
+Native Windows GUI keeps things simple. This means small compile times, minimal resource usage,
+less time searching the documentation and more time for you to develop your application.
 
 Of course, you don't have to take my word for it, check out the [showcase](showcase) and the 
 [examples](native-windows-gui/examples).
@@ -17,7 +17,7 @@ everything required to develop applications on Windows. Don't bother using the o
 have "irreconcilable design decisions" and cannot support some key features. Future development will be done
 in other libraries.
 
-If you've managed to read though this introduction, you should know that my twitter handle
+If you've managed to read through this introduction, you should know that my twitter handle
 is [#gdube_dev](https://twitter.com/gdube_dev) and you can support this project with [*GitHub Sponsors*](https://github.com/sponsors/gabdube).
 
 Any support is greatly appreciated.
@@ -42,7 +42,7 @@ extern crate native_windows_derive as nwd;  // Optional. Only if the derive macr
 ### Rust 2018 aliasing
 
 You can skip the `extern crate` define in your source code by adding the following code in `Cargo.toml`
-Note that procedural macros still require a `extern crate` definition, so this wont work with `native-windows-derive`
+Note that procedural macros still require an `extern crate` definition, so this wont work with `native-windows-derive`
 
 ```toml
 [dependencies]
@@ -52,12 +52,12 @@ nwg = {version = "^1.0.7", package = "native-windows-gui"}
 
 ## Trying it out
 
-See it for yourself. NWG has plenty of example and a fully interactive test suite. The only thing you need to do is:
+See it for yourself. NWG has plenty of examples and a fully interactive test suite. The only thing you need to do is:
 
 ```bash
 git clone git@github.com:gabdube/native-windows-gui.git
 
-cd native-windows-gui/native-windows-gui # Running the tests from the workspace screw up the features
+cd native-windows-gui/native-windows-gui # Running the tests from the workspace screws up the features
 
 cargo test everything --features "all"  # For the test suite
 cargo run --example basic
@@ -107,12 +107,12 @@ This is the main project git. It is separated in multiple sections
 - native-windows-gui
   - The base library. Includes an interactive test suite and plenty of examples
 - native-windows-derive
-  - A procedural macro that generates GUI application from rust structure (pretty cool stuff IMO)
+  - A procedural macro that generates the GUI application from rust structure (pretty cool stuff IMO)
 - docs/native-windows-docs [read it online](https://gabdube.github.io/native-windows-gui/native-windows-docs/index.html)
-  - A hefty documentation that goes over everything you need to know about NWG
+  - Hefty documentation that goes over everything you need to know about NWG
 - [showcase](showcase)
-  - Images of the examples. If you've made a NWG application and want
-  to share it here. Send me a message or open a PR. It's free real estate.
+  - Images of the examples. If you've made an NWG application and want
+  to share it here, send me a message or open a PR. It's free real estate.
 
 ## Supported features
 
@@ -142,7 +142,7 @@ This is the main project git. It is separated in multiple sections
   - Bind or unbind new events at runtime
 - Multithreaded application support
   - Communicate to the GUI thread from another thread
-  - Run multiple window on different threads
+  - Run multiple windows on different threads
 - Simple layout configurations
   - FlexboxLayout
   - GridLayout
@@ -152,10 +152,10 @@ This is the main project git. It is separated in multiple sections
   - File dialog (save, open, open folder)
   - Font dialog
   - Color dialog
-- An canvas that can be used by external rendering APIs
+- A canvas that can be used by external rendering APIs
 - High-DPI aware
 - Support for accessibility functions
-  - Tab naviguation
+  - Tab navigation
 - Support for low level system message capture (HWND, MSG, WPARAM, LPARAM)
 - Cross compiling and testing from Linux to Windows with Wine and mingw.
   - Not all features are supported (but the majority are, thanks WINE!)
@@ -165,22 +165,22 @@ This is the main project git. It is separated in multiple sections
 
 This was measured on a `Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz, 3401 Mhz, 4 Core(s), 8 Logical Processor(s)`
 
-In release mode, the `basic` example weight **163kb** on disk and take **900kb** in memory. Launch time is instantaneous.
+In release mode, the `basic` example weighs **163kb** on disk and takes **900kb** in memory. Launch time is instantaneous.
 
-The interactive test suite (with every features and 100's of tests) weight **931 kb** on disk and take **8MB** in memory. Launch time is still instantaneous.
+The interactive test suite (with every feature and 100s of tests) weighs **931 kb** on disk and takes **8MB** in memory. Launch time is still instantaneous.
 
 Initial build time takes around **22 seconds** for a basic application. This is mainly due to `winapi-rs` initial compile time. Subsequent compile time takes around **0.7 seconds**.
 
 ## Development
 
 The development of this library is considered "done". By that, I mean that
-there won't by any change to the API. Issues can be raised if a bug is found or
-if some area in the documentation are unclear. If I overlooked a very important feature,
+there won't be any change to the API. Issues can be raised if a bug is found or
+if some area in the documentation is unclear. If I overlooked a very important feature,
 it will most likely be added.
 
 ## License
 
-NWG use the MIT license
+NWG uses the MIT license
 
 ## Code example
 
@@ -189,8 +189,8 @@ NWG use the MIT license
 ```rust
 #![windows_subsystem = "windows"]
 /*!
-    A very simple application that show your name in a message box.
-    Unlike `basic_d`, this example use layout to position the controls in the window
+    A very simple application that shows your name in a message box.
+    Unlike `basic_d`, this example uses layout to position the controls in the window
 */
 
 
@@ -246,7 +246,7 @@ fn main() {
 ```rust
 #![windows_subsystem = "windows"]
 /*!
-    A very simple application that show your name in a message box.
+    A very simple application that shows your name in a message box.
     Uses layouts to position the controls in the window
 */
 
