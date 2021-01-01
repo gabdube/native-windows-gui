@@ -47,6 +47,7 @@ Requires the `list-box` feature.
   * `enabled`:         If the listbox can be used by the user. It also has a grayed out look if disabled.
   * `focus`:           The control receive focus after being created
   * `flags`:           A combination of the ListBoxFlags values.
+  * `ex_flags`:        A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `font`:            The font used for the listbox text
   * `collection`:      The default collections of the listbox
   * `selected_index`:  The default selected index in the listbox collection
@@ -88,6 +89,7 @@ impl<D: Display+Default> ListBox<D> {
             enabled: true,
             focus: false,
             flags: None,
+            ex_flags: 0,
             font: None,
             collection: None,
             selected_index: None,
@@ -501,6 +503,7 @@ pub struct ListBoxBuilder<'a, D: Display+Default> {
     enabled: bool,
     focus: bool,
     flags: Option<ListBoxFlags>,
+    ex_flags: u32,
     font: Option<&'a Font>,
     collection: Option<Vec<D>>,
     selected_index: Option<usize>,
@@ -512,6 +515,11 @@ impl<'a, D: Display+Default> ListBoxBuilder<'a, D> {
 
     pub fn flags(mut self, flags: ListBoxFlags) -> ListBoxBuilder<'a, D> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> ListBoxBuilder<'a, D> {
+        self.ex_flags = flags;
         self
     }
 
@@ -574,6 +582,7 @@ impl<'a, D: Display+Default> ListBoxBuilder<'a, D> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

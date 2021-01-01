@@ -1,6 +1,3 @@
-/*!
- 	An edit control is a rectangular control window to permit the user to enter and edit text by typing on the keyboard
-*/
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, WS_TABSTOP, ES_AUTOHSCROLL};
 use crate::win32::window_helper as wh; 
@@ -48,6 +45,7 @@ TextInput is not behind any features.
   * `size`:             The text input size.
   * `position`:         The text input position.
   * `flags`:            A combination of the TextInputFlags values.
+  * `ex_flags`:         A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `font`:             The font used for the text input text
   * `limit`:            The maximum number of character that can be inserted in the control
   * `readonly`:         If the text input should allow user input or not
@@ -88,6 +86,7 @@ impl TextInput {
             size: (100, 25),
             position: (0, 0),
             flags: None,
+            ex_flags: 0,
             limit: 0,
             password: None,
             align: HTextAlign::Left,
@@ -466,6 +465,7 @@ pub struct TextInputBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<TextInputFlags>,
+    ex_flags: u32,
     limit: usize,
     password: Option<char>,
     align: HTextAlign,
@@ -480,6 +480,11 @@ impl<'a> TextInputBuilder<'a> {
 
     pub fn flags(mut self, flags: TextInputFlags) -> TextInputBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> TextInputBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -569,6 +574,7 @@ impl<'a> TextInputBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .text(self.text)

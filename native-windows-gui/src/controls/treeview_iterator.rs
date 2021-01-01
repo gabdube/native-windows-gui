@@ -14,8 +14,8 @@ enum NextAction {
 }
 
 /** 
-    A structure to iterate over the items of a `TreeView`
-    Requires the feature `tree-view-iterator` and `tree-view`
+A structure to iterate over the items of a `TreeView`
+Requires the feature `tree-view-iterator` and `tree-view`
 
 ```rust
 use native_windows_gui as nwg;

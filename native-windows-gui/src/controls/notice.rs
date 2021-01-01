@@ -10,11 +10,10 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Notice handle is not Notice!";
 /**
 An invisible component that can be triggered by other thread.
 
-A notice object do not send data between threads. Rust has already plenty of way to do this.
+A notice object does not send data between threads. Rust has already plenty of way to do this.
 The notice object only serve to "wake up" the GUI thread.
 
 A notice must have a parent window. If the parent is destroyed before the notice, the notice becomes invalid.
-
 
 Requires the `notice` feature. 
 

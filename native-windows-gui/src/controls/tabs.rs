@@ -25,10 +25,28 @@ bitflags! {
 }
 
 /**
-A push button is a rectangle containing an application-defined text label, an icon, or a bitmap
-that indicates what the button does when the user selects it.
+A tabs container is a frame-like control that can contain `Tab` control.
+Tabs are added by specifying the `TabsContainer` as parent in the `Tab` builder.
+
+Do not add other control type as children to the TabsContainer
 
 Requires the `tabs` feature
+
+**Builder parameters:**
+  * `parent`:     **Required.** The button parent container.
+  * `position`:   The tab container position.
+  * `font`:       The font used for the tabs title
+  * `flags`:      A combination of the `TabsContainerFlags` values.
+  * `ex_flags`: A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
+  * `image_list`: The image list specifying the tabs icons
+
+
+**Control events:**
+  * `TabsContainerChanged`: The select tab of a TabsContainer changed
+  * `TabsContainerChanging`: The selected tab of a TabsContainer is about to be changed
+  * `MousePress(_)`: Generic mouse press events on the button
+  * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 
 */
 #[derive(Default)]
@@ -47,6 +65,7 @@ impl TabsContainer {
             parent: None,
             font: None,
             flags: None,
+            ex_flags: 0,
 
             #[cfg(feature = "image-list")]
             image_list: None
@@ -341,12 +360,23 @@ pub struct TabsContainerBuilder<'a> {
     parent: Option<ControlHandle>,
     font: Option<&'a Font>,
     flags: Option<TabsContainerFlags>,
+    ex_flags: u32,
 
     #[cfg(feature = "image-list")]
     image_list: Option<&'a ImageList>
 }
 
 impl<'a> TabsContainerBuilder<'a> {
+
+    pub fn flags(mut self, flags: TabsContainerFlags) -> TabsContainerBuilder<'a> {
+        self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> TabsContainerBuilder<'a> {
+        self.ex_flags = flags;
+        self
+    }
 
     pub fn size(mut self, size: (i32, i32)) -> TabsContainerBuilder<'a> {
         self.size = size;
@@ -388,7 +418,7 @@ impl<'a> TabsContainerBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
-            .ex_flags(WS_EX_CONTROLPARENT)
+            .ex_flags(WS_EX_CONTROLPARENT | self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))
@@ -421,7 +451,14 @@ impl<'a> TabsContainerBuilder<'a> {
 
 
 /**
-    A subwindow in a TabContainer widget
+A subwindow in a `TabContainer` widget. A Tab control can only be added as a child of a `TabContainer`. 
+
+A Tab controls doesn't do much on its own. See `TabContainer` for the tab specific events.
+
+**Builder parameters:**
+  * `parent`:      **Required.** The Tab parent container.
+  * `text`:        The tab text
+  * `image_index`: The tab icon index in the tab container image list
 */
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct Tab {
