@@ -208,40 +208,38 @@ impl DynLayout {
     }
 
     fn update_layout(&self, width: u32, height: u32) -> () {
+        use winapi::um::winuser::{BeginDeferWindowPos, DeferWindowPos, EndDeferWindowPos};
+        use winapi::um::winuser::{HWND_TOP, SWP_NOZORDER, SWP_NOREPOSITION, SWP_NOACTIVATE, SWP_NOCOPYBITS};
+        use winapi::ctypes::c_int;
+
         let inner = self.inner.borrow();
         if inner.base.is_null() || inner.children.len() == 0 {
             return;
         }
 
-        //println!("\nupdate_layout w={:?} h={:?}", width, height);
-
         let xdelta = 0.01 * width as f32;
         let ydelta = 0.01 * height as f32;
 
-        for item in inner.children.iter() {
-            //let (x, y) = item.pos_init;
-            //let (w, h) = item.size_init;
+        unsafe {
+            let hdwp = BeginDeferWindowPos(inner.children.len() as c_int);
 
-            //println!("pos_init x={:?} y={:?}", x, y);
+            for item in inner.children.iter() {
+                let mut x = item.pos_init.0;
+                if item.mv.0 > 0 { x += (xdelta * item.mv.0 as f32) as i32; }
 
-            let mut x = item.pos_init.0;
-            if item.mv.0 > 0 { x += (xdelta * item.mv.0 as f32) as i32; }
+                let mut y = item.pos_init.1;
+                if item.mv.1 > 0 { y += (ydelta * item.mv.1 as f32) as i32; }
 
-            let mut y = item.pos_init.1;
-            if item.mv.1 > 0 { y += (ydelta * item.mv.1 as f32) as i32; }
+                let mut w = item.size_init.0;
+                if item.sz.0 > 0 { w += (xdelta * item.sz.0 as f32) as i32; }
 
-            let mut w = item.size_init.0;
-            if item.sz.0 > 0 { w += (xdelta * item.sz.0 as f32) as i32; }
+                let mut h = item.size_init.1;
+                if item.sz.1 > 0 { h += (ydelta * item.sz.1 as f32) as i32; }
 
-            let mut h = item.size_init.1;
-            if item.sz.1 > 0 { h += (ydelta * item.sz.1 as f32) as i32; }
-
-            //println!("adjust pos x={:?} y={:?}", x, y);
-
-            unsafe {
-                wh::set_window_position(item.control, x as i32, y as i32);
-                wh::set_window_size(item.control, w as u32, h as u32, false);
+                DeferWindowPos(hdwp, item.control, HWND_TOP, x, y, w, h, SWP_NOZORDER | SWP_NOREPOSITION | SWP_NOACTIVATE | SWP_NOCOPYBITS);
             }
+
+            EndDeferWindowPos(hdwp);
         }
     }
 }
