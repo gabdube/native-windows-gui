@@ -47,6 +47,7 @@ Requires the `progress-bar` feature.
   * `range`:          The minimum and maximum value in the progress bar.
   * `enabled`:        If the progress bar is enabled. 
   * `flags`:          A combination of the ProgressBarFlags values.
+  * `ex_flags`:       A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `marquee`:        Enable of disable the marquee animation (only used with the MARQUEE flags)
   * `marquee_update`: The update interval of the marquee mode
 
@@ -80,6 +81,7 @@ impl ProgressBar {
             size: (100, 40),
             position: (0, 0),
             flags: None,
+            ex_flags: 0,
             state: ProgressBarState::Normal,
             step: 1,
             pos: 0,
@@ -312,6 +314,7 @@ pub struct ProgressBarBuilder {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<ProgressBarFlags>,
+    ex_flags: u32,
     state: ProgressBarState,
     step: u32,
     pos: u32,
@@ -325,6 +328,11 @@ impl ProgressBarBuilder {
 
     pub fn flags(mut self, flags: ProgressBarFlags) -> ProgressBarBuilder {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> ProgressBarBuilder {
+        self.ex_flags = flags;
         self
     }
 
@@ -387,6 +395,7 @@ impl ProgressBarBuilder {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

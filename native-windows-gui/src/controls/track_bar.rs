@@ -44,6 +44,7 @@ Requires the `trackbar` feature.
   * `position`:         The trackbar position.
   * `focus`:            The control receive focus after being created
   * `flags`:            A combination of the TrackBarFlags values.
+  * `ex_flags`:         A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `range`:            The value range of the trackbar
   * `selected_range`:   The selected value range of the trackbar. Used with `TrackBarFlags::RANGE`
   * `pos`:              The current value of the trackbar
@@ -86,6 +87,7 @@ impl TrackBar {
             selected_range: None,
             pos: None,
             flags: None,
+            ex_flags: 0,
             parent: None,
             background_color: None
         }
@@ -317,6 +319,7 @@ pub struct TrackBarBuilder {
     selected_range: Option<Range<usize>>,
     pos: Option<usize>,
     flags: Option<TrackBarFlags>,
+    ex_flags: u32,
     parent: Option<ControlHandle>,
     background_color: Option<[u8; 3]>,
 }
@@ -325,6 +328,11 @@ impl TrackBarBuilder {
 
     pub fn flags(mut self, flags: TrackBarFlags) -> TrackBarBuilder {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> TrackBarBuilder {
+        self.ex_flags = flags;
         self
     }
 
@@ -382,6 +390,7 @@ impl TrackBarBuilder {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

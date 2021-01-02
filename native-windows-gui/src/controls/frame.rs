@@ -36,6 +36,7 @@ Requires the `frame` feature.
   * `position`: The frame position.
   * `enabled`:  If the frame children can be used by the user.
   * `flags`:    A combination of the FrameFlags values.
+  * `ex_flags`: A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `OnMouseWheel`: Generic mouse wheel event
 
 **Control events:**
@@ -55,6 +56,7 @@ impl Frame {
             position: (0, 0),
             enabled: true,
             flags: None,
+            ex_flags: 0,
             parent: None,
         }
     }
@@ -147,6 +149,7 @@ pub struct FrameBuilder {
     position: (i32, i32),
     enabled: bool,
     flags: Option<FrameFlags>,
+    ex_flags: u32,
     parent: Option<ControlHandle>
 }
 
@@ -154,6 +157,11 @@ impl FrameBuilder {
 
     pub fn flags(mut self, flags: FrameFlags) -> FrameBuilder {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> FrameBuilder {
+        self.ex_flags = flags;
         self
     }
 
@@ -191,7 +199,7 @@ impl FrameBuilder {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
-            .ex_flags(WS_EX_CONTROLPARENT)
+            .ex_flags(WS_EX_CONTROLPARENT | self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

@@ -21,7 +21,7 @@ bitflags! {
 }
 
 /**
-An image frame is a control that displays a `Bitmap` or a `Icon` image resource. It can also triggers mouse clicks.
+An image frame is a control that displays a `Bitmap` or a `Icon` image resource.
 
 ImageFrame is not behind any features.
 
@@ -30,6 +30,7 @@ ImageFrame is not behind any features.
   * `size`:             The image frame size.
   * `position`:         The image frame position.
   * `flags`:            A combination of the ImageFrameFlags values.
+  * `ex_flags`: A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `background_color`: The background color of the image frame. Used if the image is smaller than the control
   * `bitmap`:           A bitmap to display. If this value is set, icon is ignored.
   * `icon`:             An icon to display
@@ -63,6 +64,7 @@ impl ImageFrame {
             size: (100, 100),
             position: (0, 0),
             flags: None,
+            ex_flags: 0,
             bitmap: None,
             icon: None,
             parent: None,
@@ -237,6 +239,7 @@ pub struct ImageFrameBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<ImageFrameFlags>,
+    ex_flags: u32,
     bitmap: Option<&'a Bitmap>,
     icon: Option<&'a Icon>,
     parent: Option<ControlHandle>,
@@ -247,6 +250,11 @@ impl<'a> ImageFrameBuilder<'a> {
 
     pub fn flags(mut self, flags: ImageFrameFlags) -> ImageFrameBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> ImageFrameBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -301,6 +309,7 @@ impl<'a> ImageFrameBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

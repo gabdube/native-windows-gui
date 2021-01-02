@@ -120,6 +120,7 @@ Requires the `tree-view` feature
   * `enabled`:    If the treeview can be used by the user. It also has a grayed out look if disabled.
   * `focus`:      The control receive focus after being created
   * `flags`:      A combination of the `TreeViewFlags` values.
+  * `ex_flags`:   A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `font`:       The font used for the treeview text
   * `parent`:     The treeview parent container.
   * `image_list`: Image list containing the icon to use in the tree-view
@@ -153,6 +154,7 @@ impl TreeView {
             enabled: true,
             focus: false,
             flags: None,
+            ex_flags: 0,
             font: None,
             parent: None,
             image_list: None,
@@ -683,6 +685,7 @@ pub struct TreeViewBuilder<'a> {
     enabled: bool,
     focus: bool,
     flags: Option<TreeViewFlags>,
+    ex_flags: u32,
     font: Option<&'a Font>,
     parent: Option<ControlHandle>,
 
@@ -695,6 +698,11 @@ impl<'a> TreeViewBuilder<'a> {
 
     pub fn flags(mut self, flags: TreeViewFlags) -> TreeViewBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> TreeViewBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -748,6 +756,7 @@ impl<'a> TreeViewBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

@@ -126,10 +126,10 @@ pub enum Event {
     /// When an item on a list box is selected
     OnListBoxSelect,
 
-    /// The select tab of a TabsContainer changed
+    /// The selected tab of a TabsContainer changed
     TabsContainerChanged,
 
-    /// The select tab of a TabsContainer is about to be changed
+    /// The selected tab of a TabsContainer is about to be changed
     TabsContainerChanging,
 
     /// When the trackbar thumb is released by the user

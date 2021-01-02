@@ -16,6 +16,8 @@ A timer still requires a top level window parent. If the top level window parent
 
 Note that timer SHOULD NOT be used when a consistent interval is needed. The timer event might be triggered much faster
 than the `interval` value. For example, when a user resize a window, Timer OnTimerTick gets triggered each time the window size changes.
+This is a Windows "feature", there's probably nothing I can do to fix that.
+
 
 Requires the `timer` feature. 
 

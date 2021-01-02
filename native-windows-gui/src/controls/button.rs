@@ -47,6 +47,7 @@ Button is not behind any features.
   * `position`: The button position.
   * `enabled`:  If the button can be used by the user. It also has a grayed out look if disabled.
   * `flags`:    A combination of the ButtonFlags values.
+  * `ex_flags`: A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `font`:     The font used for the button text
   * `bitmap`:   A bitmap to display next to the button text. If this value is set, icon is ignored.
   * `icon`:     An icon to display next to the button text
@@ -86,6 +87,7 @@ impl Button {
             position: (0, 0),
             enabled: true,
             flags: None,
+            ex_flags: 0,
             font: None,
             parent: None,
             bitmap: None,
@@ -269,6 +271,7 @@ pub struct ButtonBuilder<'a> {
     position: (i32, i32),
     enabled: bool,
     flags: Option<ButtonFlags>,
+    ex_flags: u32,
     font: Option<&'a Font>,
     bitmap: Option<&'a Bitmap>,
     icon: Option<&'a Icon>,
@@ -280,6 +283,11 @@ impl<'a> ButtonBuilder<'a> {
 
     pub fn flags(mut self, flags: ButtonFlags) -> ButtonBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> ButtonBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -343,6 +351,7 @@ impl<'a> ButtonBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .text(self.text)

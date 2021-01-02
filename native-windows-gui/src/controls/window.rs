@@ -1,7 +1,3 @@
-/*!
-    A basic top level window.
-*/
-
 use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_CLIPCHILDREN, WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION,
 WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_POPUP, WS_EX_TOPMOST, WS_EX_ACCEPTFILES};
 
@@ -55,14 +51,15 @@ bitflags! {
     (ex: a system tray app), use `MessageWindow` instead.
 
     **Builder parameters:**
-      * `flags`: The window flags. See `WindowFlags`
-      * `title`: The text in the window title bar
-      * `size`: The default size of the window
-      * `position`: The default position of the window in the desktop
-      * `icon`: The window icon
+      * `flags`:       The window flags. See `WindowFlags`
+      * `ex_flags`:    A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
+      * `title`:       The text in the window title bar
+      * `size`:        The default size of the window
+      * `position`:    The default position of the window in the desktop
+      * `icon`:        The window icon
       * `accept_file`: If the window should accept files by drag & drop
-      * `topmost`: If the window should always be on top of other system window
-      * `parent`: Logical parent of the window, unlike children controls, this is NOT required.
+      * `topmost`:     If the window should always be on top of other system window
+      * `parent`:      Logical parent of the window, unlike children controls, this is NOT required.
 
     **Control events:**
       * `OnInit`: The window was created
@@ -97,6 +94,7 @@ impl Window {
             accept_files: false,
             topmost: false,
             flags: None,
+            ex_flags: 0,
             icon: None,
             parent: None
         }
@@ -248,6 +246,7 @@ pub struct WindowBuilder<'a> {
     accept_files: bool,
     topmost: bool,
     flags: Option<WindowFlags>,
+    ex_flags: u32,
     icon: Option<&'a Icon>,
     parent: Option<ControlHandle>
 }
@@ -256,6 +255,11 @@ impl<'a> WindowBuilder<'a> {
 
     pub fn flags(mut self, flags: WindowFlags) -> WindowBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> WindowBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -297,7 +301,7 @@ impl<'a> WindowBuilder<'a> {
     pub fn build(self, out: &mut Window) -> Result<(), NwgError> {
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
-        let mut ex_flags = 0;
+        let mut ex_flags = self.ex_flags;
         if self.topmost { ex_flags |= WS_EX_TOPMOST; }
         if self.accept_files { ex_flags |= WS_EX_ACCEPTFILES; }
 
