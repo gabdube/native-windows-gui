@@ -223,6 +223,7 @@ impl DynLayout {
         unsafe {
             let hdwp = BeginDeferWindowPos(inner.children.len() as c_int);
 
+            let mut last_handle = None;
             for item in inner.children.iter() {
                 let mut x = item.pos_init.0;
                 if item.mv.0 > 0 { x += (xdelta * item.mv.0 as f32) as i32; }
@@ -237,6 +238,9 @@ impl DynLayout {
                 if item.sz.1 > 0 { h += (ydelta * item.sz.1 as f32) as i32; }
 
                 DeferWindowPos(hdwp, item.control, HWND_TOP, x, y, w, h, SWP_NOZORDER | SWP_NOREPOSITION | SWP_NOACTIVATE | SWP_NOCOPYBITS);
+
+                wh::set_window_after(item.control, last_handle);
+                last_handle = Some(item.control);
             }
 
             EndDeferWindowPos(hdwp);
