@@ -6,6 +6,52 @@ use std::ptr;
 const NOT_BOUND: &'static str = "Menu/MenuItem is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Menu/MenuItem handle is not HMENU!";
 
+bitflags! {
+    /**
+        Menu flags to use with the `Menu::popup_with_flags` function.
+        Using `PopupMenuFlags::empty` is the same as `ALIGN_LEFT|ALIGN_TOP|LEFT_BUTTON`
+
+        Aligment flags:
+
+        * ALIGN_LEFT:     Positions the shortcut menu so that its left side is aligned with the coordinate specified by the x parameter.
+        * ALIGN_H_CENTER: Centers the shortcut menu horizontally relative to the coordinate specified by the x parameter. 
+        * ALIGN_RIGHT:    Positions the shortcut menu so that its right side is aligned with the coordinate specified by the x parameter.
+        * ALIGN_BOTTOM:   Positions the shortcut menu so that its bottom side is aligned with the coordinate specified by the y parameter. 
+        * ALIGN_TOP:      Positions the shortcut menu so that its top side is aligned with the coordinate specified by the y parameter. 
+        * ALIGN_V_CENTER: Centers the shortcut menu vertically relative to the coordinate specified by the y parameter. 
+        
+        Button flags:
+
+        * LEFT_BUTTON:    The user can select menu items with only the left mouse button. 
+        * RIGHT_BUTTON:   The user can select menu items with both the left **AND** right mouse buttons. 
+        
+        Animations flags:
+
+        * ANIMATE_NONE:   Displays menu without animation. 
+        * ANIMATE_RIGHT_TO_LEFT:  Animates the menu from right to left. 
+        * ANIMATE_LEFT_TO_RIGHT:  Animates the menu from left to right. 
+        * ANIMATE_BOTTOM_TO_TOP:  Animates the menu from bottom to top. 
+        * ANIMATE_TOP_TO_BOTTOM: Animates the menu from top to bottom. 
+    */
+    pub struct PopupMenuFlags: u32 {
+        const ALIGN_LEFT = 0x0000;
+        const ALIGN_H_CENTER = 0x0004;
+        const ALIGN_RIGHT = 0x0008;
+
+        const ALIGN_BOTTOM = 0x0020;
+        const ALIGN_TOP = 0x0000;
+        const ALIGN_V_CENTER = 0x0010;
+
+        const LEFT_BUTTON = 0x0000;
+        const RIGHT_BUTTON = 0x0002;
+
+        const ANIMATE_NONE = 0x4000;
+        const ANIMATE_RIGHT_TO_LEFT = 0x8000;
+        const ANIMATE_LEFT_TO_RIGHT = 0x4000;
+        const ANIMATE_BOTTOM_TO_TOP = 0x2000;
+        const ANIMATE_TOP_TO_BOTTOM = 0x1000;
+    }
+}
 
 /** 
     A windows menu. Can represent a menu in a window menubar, a context menu, or a submenu in another menu
@@ -88,7 +134,7 @@ impl Menu {
     }
 
     /// Show a popup menu as the selected position. Do nothing for menubar menu.
-    pub fn popup(&self, x: i32, y: i32) {
+    pub fn popup_with_flags(&self, x: i32, y: i32, flags: PopupMenuFlags) {
         use winapi::um::winuser::{TrackPopupMenu, SetForegroundWindow};
         use winapi::ctypes::c_int;
 
@@ -102,7 +148,7 @@ impl Menu {
             SetForegroundWindow(parent_handle);
             TrackPopupMenu(
                 handle,
-                0,
+                flags.bits(),
                 x as c_int,
                 y as c_int,
                 0,
@@ -110,6 +156,11 @@ impl Menu {
                 ptr::null()
             );
         }
+    }
+
+    /// Show a popup menu as the selected position. Do nothing for menubar menu.
+    pub fn popup(&self, x: i32, y: i32) {
+        self.popup_with_flags(x, y, PopupMenuFlags::empty())
     }
 
 }
