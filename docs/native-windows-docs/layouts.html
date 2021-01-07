@@ -188,6 +188,51 @@ A flexbox layout example:
 
 <br><br>
 
+<h3>DynLayout</h3>  
+
+DynLayout layout works like Dynamic Layout in MFC.<br><br>
+
+It uses ratios for moving and sizing a control horizontally and vertically, when its parent Window is resized.<br><br>
+
+Application can define the ratios and call <code>fit</code> function to move and resize a control. An example is to add a control with preferred ration in <code>OnInit</code> and call the <code>fit</code> method in <code>OnResize</code> method to adjust the position and size of the control.<br><br>
+
+The ratios are in percents <code>(0, 100)</code>, <code>0</code> means not to move or resize a control, <code>100</code> means to move or resize a control a hundre percent accordingly to Window size.<br><br>
+
+A dynamic layout example:
+
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">use</span><span style="color: #bbbbbb"> </span>native_windows_gui<span style="color: #bbbbbb"> </span><span style="color: #008000; font-weight: bold">as</span><span style="color: #bbbbbb"> </span>nwg;<span style="color: #bbbbbb"></span>
+<span style="color: #008000; font-weight: bold">use</span><span style="color: #bbbbbb"> </span>native_windows_derive<span style="color: #bbbbbb"> </span><span style="color: #008000; font-weight: bold">as</span><span style="color: #bbbbbb"> </span>nwd;<span style="color: #bbbbbb"></span>
+
+<span style="color: #008000; font-weight: bold">use</span><span style="color: #bbbbbb"> </span>nwd::{NwgUi,<span style="color: #bbbbbb"> </span>NwgPartial};<span style="color: #bbbbbb"></span>
+<span style="color: #008000; font-weight: bold">use</span><span style="color: #bbbbbb"> </span>nwg::NativeUi;<span style="color: #bbbbbb"></span>
+
+<span style="color: #BC7A00">#[derive(Default, NwgUi)]</span><span style="color: #bbbbbb"></span>
+<span style="color: #008000; font-weight: bold">pub</span><span style="color: #bbbbbb"> </span><span style="color: #008000; font-weight: bold">struct</span> <span style="color: #0000FF; font-weight: bold">Application</span><span style="color: #bbbbbb"> </span>{<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span><span style="color: #BC7A00">#[nwg_control(size: (500, 400), position: (300, 300), title: </span><span style="color: #BA2121">"DynLayout"</span><span style="color: #BC7A00">)]</span><span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span><span style="color: #BC7A00">#[nwg_events(OnInit: [Application::init]</span>,<span style="color: #bbbbbb"> </span>OnResize: [Application::size])]<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>window: <span style="color: #0000FF; font-weight: bold">nwg</span>::Window,<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">	</span>
+<span style="color: #bbbbbb">    </span><span style="color: #BC7A00">#[nwg_layout(parent: window)]</span><span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>layout: <span style="color: #0000FF; font-weight: bold">nwg</span>::DynLayout,<span style="color: #bbbbbb"></span>
+
+<span style="color: #bbbbbb">    </span><span style="color: #BC7A00">#[nwg_control(text: </span><span style="color: #BA2121">"Ok"</span><span style="color: #BC7A00">, position: (120, 350), size: (100, 25))]</span><span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>ok_btn: <span style="color: #0000FF; font-weight: bold">nwg</span>::Button,<span style="color: #bbbbbb">	</span>
+}<span style="color: #bbbbbb"></span>
+
+mpl<span style="color: #bbbbbb"> </span>Application<span style="color: #bbbbbb"> </span>{<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span><span style="color: #008000; font-weight: bold">fn</span> <span style="color: #0000FF">init</span>(<span style="color: #666666">&amp;</span><span style="color: #008000">self</span>)<span style="color: #bbbbbb"> </span>{<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span><span style="color: #008000">self</span>.layout.add_child((<span style="color: #666666">0</span>,<span style="color: #bbbbbb"> </span><span style="color: #666666">100</span>),<span style="color: #bbbbbb"> </span>(<span style="color: #666666">0</span>,<span style="color: #bbbbbb"> </span><span style="color: #666666">0</span>),<span style="color: #bbbbbb"> </span><span style="color: #666666">&amp;</span><span style="color: #008000">self</span>.ok_btn);<span style="color: #bbbbbb"></span>
+
+<span style="color: #bbbbbb">        </span><span style="color: #008000">self</span>.layout.fit();<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>}<span style="color: #bbbbbb"></span>
+
+<span style="color: #bbbbbb">    </span><span style="color: #008000; font-weight: bold">fn</span> <span style="color: #0000FF">size</span>(<span style="color: #666666">&amp;</span><span style="color: #008000">self</span>)<span style="color: #bbbbbb"> </span>{<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span><span style="color: #008000">self</span>.layout.fit();<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>}<span style="color: #bbbbbb"></span>
+}<span style="color: #bbbbbb"></span>
+</pre></div>
+
+
 <h3>Examples</h3>
 
 <ul>

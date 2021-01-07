@@ -587,6 +587,22 @@ impl ListView {
         }
     }
 
+    /// Set the width of a column
+    pub fn set_column_width(&self, column_index: usize, width: isize) {
+        use winapi::um::commctrl::LVM_SETCOLUMNWIDTH;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, LVM_SETCOLUMNWIDTH , column_index as _, width);
+    }
+
+    /// Returns the width of a column
+    pub fn column_width(&self) -> usize {
+        use winapi::um::commctrl::LVM_GETCOLUMNWIDTH;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, LVM_GETCOLUMNWIDTH, 0, 0) as usize
+    }
+
     /// Select or unselect an item at `row_index`. Does nothing if the index is out of bounds.
     pub fn select_item(&self, row_index: usize, selected: bool) {
         use winapi::um::commctrl::{LVM_SETITEMW, LVIF_STATE, LVIS_SELECTED};
