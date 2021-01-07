@@ -1,6 +1,6 @@
 [package]
 name = "native-windows-derive"
-version = "1.0.2"
+version = "1.0.3"
 authors = ["gdube <gdube.475@gmail.com>"]
 edition = "2018"
 
@@ -17,6 +17,7 @@ keywords = ["gui", "ui", "windows"]
 proc-macro = true
 
 [dependencies]
+proc-macro-crate = "0.1.5"
 proc-macro2 = "1.0"
 syn = { version = "1.0", features = ["extra-traits", "full"]}
 quote = "1.0"
