@@ -218,12 +218,6 @@ impl Label {
             None => COLOR_WINDOW as HBRUSH
         };
 
-        match v_align {
-            VTextAlign::Top => {},
-            VTextAlign::Center => {},
-            VTextAlign::Bottom => {},
-        };
-
         unsafe {
 
         if bg.is_some() {
@@ -270,14 +264,26 @@ impl Label {
                     GetWindowRect(hwnd, &mut window);
 
                     let window_height = window.bottom - window.top;
-                    let center = ((window_height - client_height) / 2) - 1;
+                    match v_align {
+                        VTextAlign::Top => {
+                            // The winapi default, nothing to be done
+                        },
+                        VTextAlign::Center => {
+                            let center = ((window_height - client_height) / 2) - 1;
                     
-                    // Save the info
-                    let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
-                    let info = &mut *info_ptr;
+                            // Save the info
+                            let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
+                            let info = &mut *info_ptr;
 
-                    info.rgrc[0].top += center;
-                    info.rgrc[0].bottom -= center;
+                            info.rgrc[0].top += center;
+                            info.rgrc[0].bottom -= center;
+                        },
+                        VTextAlign::Bottom => {
+                            let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
+                            let info = &mut *info_ptr;
+                            info.rgrc[0].top += window_height - client_height;
+                        },
+                    }
                 },
                 WM_NCPAINT  => {
                     let mut window: RECT = mem::zeroed();
@@ -395,6 +401,11 @@ impl<'a> LabelBuilder<'a> {
 
     pub fn h_align(mut self, align: HTextAlign) -> LabelBuilder<'a> {
         self.h_align = align;
+        self
+    }
+
+    pub fn v_align(mut self, align: VTextAlign) -> LabelBuilder<'a> {
+        self.v_align = align;
         self
     }
 
