@@ -108,7 +108,7 @@ pub use tooltip::{Tooltip, TooltipBuilder, TooltipIcon};
 pub use track_bar::{TrackBar, TrackBarBuilder, TrackBarFlags};
 
 #[cfg(feature = "menu")]
-pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder};
+pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder, PopupMenuFlags};
 
 #[cfg(feature = "menu")]
 pub use control_base::HmenuBuilder;

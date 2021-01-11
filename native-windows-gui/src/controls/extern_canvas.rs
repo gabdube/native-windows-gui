@@ -46,14 +46,41 @@ bitflags! {
 }
 
 /**
-    An ExternCanvas is a window/children control that is painted to by an external API (such as OpenGL, Vulkan or DirectX).
+    An `ExternCanvas` is a window/children control that is painted to by an external API (such as OpenGL, Vulkan or DirectX).
     
-    When building a ExternCanvas, leaving the parent field empty will create a window-like canvas. If a parent is set, the canvas
-    will be a children control (like a button).
-
-    When used as a chidren, ExternCanvas can be used as a way to add highly dynamic controls to a NWG application (ex: a video player).
+    When building a `ExternCanvas`, leaving the parent field empty will create a window-like canvas. If a parent is set, the canvas will be a children control (like a button).
+    When used as a child, `ExternCanvas` can be used as a way to add highly dynamic controls to a NWG application (ex: a video player).
 
     Requires the `extern-canvas` feature. 
+
+    As a top level window, the extern canvas has the same features as the window control.
+    As a children control, resize and move events cannot be triggered and window parameters
+    are not visible.
+
+    **Builder parameters:**
+      * `flags`: The window flags. See `ExternCanvasFlags`
+      * `ex_flags`: A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
+      * `title`: The text in the window title bar
+      * `size`: The default size of the window
+      * `position`: The default position of the window in the desktop
+      * `icon`: The window icon
+      * `parent`: Logical parent of the window, unlike children controls, this is NOT required.
+
+    **Control events:**
+      * `OnInit`: The window was created
+      * `MousePress(_)`: Generic mouse press events on the button
+      * `OnMouseMove`: Generic mouse mouse event
+      * `OnMouseWheel`: Generic mouse wheel event
+      * `OnPaint`: Generic on paint event
+      * `OnKeyPress`: Generic key press
+      * `OnKeyRelease`: Generic ket release
+      * `OnResize`: When the window is resized
+      * `OnResizeBegin`: Just before the window begins being resized by the user
+      * `OnResizeEnd`: Just after the user stops resizing the window
+      * `OnWindowMaximize`: When the window is maximized
+      * `OnWindowMinimize`: When the window is minimized
+      * `OnMove`: When the window is moved by the user
+      * `OnMinMaxInfo`: When the size or position of the window is about to change and the size of the windows must be restricted
 
 */
 #[derive(Default)]
@@ -69,6 +96,7 @@ impl ExternCanvas {
             size: (500, 500),
             position: (300, 300),
             flags: None,
+            ex_flags: 0,
             icon: None,
             parent: None
         }
@@ -218,6 +246,7 @@ pub struct ExternCanvasBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<ExternCanvasFlags>,
+    ex_flags: u32,
     icon: Option<&'a Icon>,
     parent: Option<ControlHandle>
 }
@@ -226,6 +255,11 @@ impl<'a> ExternCanvasBuilder<'a> {
 
     pub fn flags(mut self, flags: ExternCanvasFlags) -> ExternCanvasBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> ExternCanvasBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -271,6 +305,7 @@ impl<'a> ExternCanvasBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .text(self.title)

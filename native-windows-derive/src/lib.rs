@@ -8,6 +8,8 @@ use syn::DeriveInput;
 #[macro_use]
 extern crate quote;
 
+use proc_macro_crate::crate_name;
+
 mod controls;
 mod events;
 mod layouts;
@@ -239,9 +241,18 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     let layouts = ui.layouts();
     let events = ui.events();
 
+    let nwg_name = crate_name("native-windows-gui");
+
+    // Returns an error in the examples, so we try a default value
+    let nwg = match nwg_name {
+        Ok(name) => syn::Ident::new(&name, proc_macro2::Span::call_site()),
+        Err(_) => syn::Ident::new("native_windows_gui", proc_macro2::Span::call_site()),   
+    };
+
     let derive_ui = quote! {
         mod #module_name {
-            use native_windows_gui::*;
+            extern crate #nwg as nwg;
+            use nwg::*;
             use super::*;
             use std::ops::Deref;
             use std::cell::RefCell;
@@ -348,9 +359,18 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
     let layouts = ui.layouts();
     let events = ui.events();
 
+    let nwg_name = crate_name("native-windows-gui");
+    
+    // Returns an error in the examples, so we try a default value
+    let nwg = match nwg_name {
+        Ok(name) => syn::Ident::new(&name, proc_macro2::Span::call_site()),
+        Err(_) => syn::Ident::new("native_windows_gui", proc_macro2::Span::call_site()),   
+    };
+
     let partial_ui = quote! {
         mod #partial_name {
-            use native_windows_gui::*;
+            extern crate #nwg as nwg;
+            use nwg::*;
             use super::*;
         
             impl PartialUi for #struct_name {

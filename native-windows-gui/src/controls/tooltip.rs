@@ -31,15 +31,58 @@ A tooltip can be applied to multiple controls, each with their own custom text.
 This is done/undone using the `register`/`unregister` functions. So do not think
 as Tooltip as a standalone toolip, but more like a manager.
 
+A tooltip can support static text using `register` and dynamic text using `register_callback`.
+
 Tooltip requires the `tooltip` features
 
 Example:
 
 ```rust
 use native_windows_gui as nwg;
-fn add_tooltip(button: &nwg::Button, tooltips: &nwg::Tooltip) {
-    tooltips.register(button, "This is a button!");
+
+/// Building a tooltip and add tooltips at the same time
+fn build_tooltip(tt: &mut nwg::Tooltip, btn1: &nwg::Button, btn2: &nwg::Button) {
+    nwg::Tooltip::builder()
+        .register(btn1, "A test button")
+        .register_callback(btn2)
+        .build(tt);
 }
+
+/// Adding/Updating a tooltip after the initial tooltip creation
+fn add_tooltip(btn: &nwg::Button, tt: &nwg::Tooltip) {
+    tt.register(btn, "This is a button!");
+}
+
+/// Dynamic tooltip callback setup
+fn add_dynamic_tooltip(tt: &nwg::Tooltip, btn: &nwg::Button) {
+    tt.register_callback(btn);
+}
+
+
+struct GuiStruct {
+    // Skipping other members
+    tt: nwg::Tooltip,
+    button: nwg::Button
+}
+
+impl GuiStruct {
+    /// The dynamic tooltip callback, triggered by the event loop
+    fn events_callback(&self, evt: nwg::Event, evt_data: &nwg::EventData, handle: nwg::ControlHandle) {
+        match evt {
+            nwg::Event::OnTooltipText => {
+                // Compare the handle to check which control will display the tooltip
+                if &handle == &self.button {
+                    let tooltip_data = evt_data.on_tooltip_text();
+                    tooltip_data.set_text(&format!("Button text: \"{}\"", self.button.text()));
+                }
+            },
+            _ => {}
+        }
+    }
+}
+
+
+
 ```
 
 */

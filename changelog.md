@@ -1,3 +1,12 @@
+1.0.8
+
+* Added `Menu::popup_with_flags` to customize the display of popup menus
+* Added a way to specify the extended window flags to all controls
+* Added a new layout type `Dynamic Layout` (thanks to RicoRodriges)
+* Added a way to directly set the column width in a data grid view (thanks to RicoRodriges)
+* Some grammar and spelling fix (thanks to bingen13 and celialewis3)
+* Fix the derive macro so that it works with the rust 2018 module aliasing (native-windows-derive v 1.0.3)
+
 1.0.7
 
 * Fixed support for the GNU toolchain

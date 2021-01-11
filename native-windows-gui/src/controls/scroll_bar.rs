@@ -36,13 +36,14 @@ A window can display a data object, such as a document or a bitmap, that is larg
 Requires the `scroll-bar` feature. 
 
 **Builder parameters:**
-  * `parent`:           **Required.** The scroll bar parent container.
-  * `size`:             The scroll bar size.
-  * `position`:         The scroll bar position.
-  * `focus`:            The control receive focus after being created
-  * `flags`:            A combination of the ScrollBarFlags values.
-  * `range`:            The value range of the scroll bar
-  * `pos`:              The current value of the scroll bar
+  * `parent`:    **Required.** The scroll bar parent container.
+  * `size`:      The scroll bar size.
+  * `position`:  The scroll bar position.
+  * `focus`:     The control receive focus after being created
+  * `flags`:     A combination of the ScrollBarFlags values.
+  * `ex_flags`:  A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
+  * `range`:     The value range of the scroll bar
+  * `pos`:       he current value of the scroll bar
 
 
 **Control events:**
@@ -79,6 +80,7 @@ impl ScrollBar {
             position: (0, 0),
             enabled: true,
             flags: None,
+            ex_flags: 0,
             parent: None,
             focus: false,
             range: None,
@@ -326,6 +328,7 @@ pub struct ScrollBarBuilder {
     position: (i32, i32),
     enabled: bool,
     flags: Option<ScrollBarFlags>,
+    ex_flags: u32,
     parent: Option<ControlHandle>,
     focus: bool,
     range: Option<Range<usize>>,
@@ -336,6 +339,11 @@ impl ScrollBarBuilder {
     
     pub fn flags(mut self, flags: ScrollBarFlags) -> ScrollBarBuilder {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> ScrollBarBuilder {
+        self.ex_flags = flags;
         self
     }
 
@@ -388,6 +396,7 @@ impl ScrollBarBuilder {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

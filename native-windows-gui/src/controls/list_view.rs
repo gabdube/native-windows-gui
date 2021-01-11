@@ -93,7 +93,9 @@ bitflags! {
     }
 }
 
-
+/**
+    The display style for the items in a list view
+*/
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
 pub enum ListViewStyle {
@@ -125,7 +127,10 @@ impl ListViewStyle {
     }
 }
 
-
+/**
+    Items in a list view can be associated with multiple image list.
+    This identify which image list to set/get using the ListView api.
+*/
 #[cfg(feature="image-list")]
 #[derive(Copy, Clone, Debug)]
 pub enum ListViewImageListType {
@@ -236,7 +241,8 @@ Builder parameters:
   * `background_color`: The list view background color in RGB format
   * `text_color`:       The list view text color in RGB format
   * `flags`:            A combination of the ListViewFlags values.
-  * `ex_flags`:         A combination of the ListViewExFlags values.
+  * `ex_flags`:         A combination of the ListViewExFlags values. Not to be confused with `ex_window_flags` 
+  * `ex_window_flags`:  A combination of win32 window extended flags. This is the equivalent to `ex_flags` in the other controls
   * `style`:            One of the value of `ListViewStyle`
   * `item_count`:       Number of item to preallocate
   * `list_style`:       The default style of the listview
@@ -278,6 +284,7 @@ impl ListView {
             focus: false,
             flags: None,
             ex_flags: None,
+            ex_window_flags: 0,
             style: ListViewStyle::Simple,
             parent: None,
             item_count: 0
@@ -578,6 +585,22 @@ impl ListView {
             let l = &mut header as *mut HDITEMW as _;
             wh::send_message(headers as *mut _, HDM_SETITEMW, column_index, l);
         }
+    }
+
+    /// Set the width of a column
+    pub fn set_column_width(&self, column_index: usize, width: isize) {
+        use winapi::um::commctrl::LVM_SETCOLUMNWIDTH;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, LVM_SETCOLUMNWIDTH , column_index as _, width);
+    }
+
+    /// Returns the width of a column
+    pub fn column_width(&self) -> usize {
+        use winapi::um::commctrl::LVM_GETCOLUMNWIDTH;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, LVM_GETCOLUMNWIDTH, 0, 0) as usize
     }
 
     /// Select or unselect an item at `row_index`. Does nothing if the index is out of bounds.
@@ -978,6 +1001,7 @@ pub struct ListViewBuilder {
     focus: bool,
     flags: Option<ListViewFlags>,
     ex_flags: Option<ListViewExFlags>,
+    ex_window_flags: u32,
     style: ListViewStyle,
     item_count: u32,
     parent: Option<ControlHandle>
@@ -999,6 +1023,12 @@ impl ListViewBuilder {
         self.ex_flags = Some(flags);
         self
     }
+
+    pub fn ex_window_flags(mut self, flags: u32) -> ListViewBuilder {
+        self.ex_window_flags = flags;
+        self
+    }
+
 
     pub fn size(mut self, size: (i32, i32)) -> ListViewBuilder {
         self.size = size;
@@ -1050,6 +1080,7 @@ impl ListViewBuilder {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_window_flags)
             .size(self.size)
             .position(self.position)
             .text("")

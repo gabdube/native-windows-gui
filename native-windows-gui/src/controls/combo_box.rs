@@ -42,6 +42,7 @@ Requires the `combobox` feature.
   * `position`:       The combobox position.
   * `enabled`:        If the combobox can be used by the user. It also has a grayed out look if disabled.
   * `flags`:          A combination of the ComboBoxFlags values.
+  * `ex_flags`:       A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `font`:           The font used for the combobox text
   * `collection`:     The default collection of the combobox
   * `selected_index`: The default selected index. None means no values are selected.  
@@ -85,6 +86,7 @@ impl<D: Display+Default> ComboBox<D> {
             enabled: true,
             focus: false,
             flags: None,
+            ex_flags: 0,
             font: None,
             collection: None,
             selected_index: None,
@@ -416,6 +418,7 @@ pub struct ComboBoxBuilder<'a, D: Display+Default> {
     enabled: bool,
     focus: bool,
     flags: Option<ComboBoxFlags>,
+    ex_flags: u32,
     font: Option<&'a Font>,
     collection: Option<Vec<D>>,
     selected_index: Option<usize>,
@@ -426,6 +429,11 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
 
     pub fn flags(mut self, flags: ComboBoxFlags) -> ComboBoxBuilder<'a, D> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> ComboBoxBuilder<'a, D> {
+        self.ex_flags = flags;
         self
     }
 
@@ -485,6 +493,7 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

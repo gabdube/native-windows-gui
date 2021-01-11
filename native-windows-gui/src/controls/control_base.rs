@@ -12,8 +12,8 @@ const TRAY: u32 = 2;
 
 
 /**
-    Control base is a low level interface to create base Windows handle (HWND, HMENU, TIMER, etc).
-    This is used internally by every controls.
+Control base is a low level interface to create base Windows handle (HWND, HMENU, TIMER, etc).
+This is used internally by every controls.
 
 
 ```rust

@@ -50,6 +50,7 @@ Requires the `datetime-picker` feature.
   * `position`: The dtp position.
   * `enabled`:  If the dtp can be used by the user. It also has a grayed out look if disabled.
   * `flags`:    A combination of the DatePickerFlags values.
+  * `ex_flags`: A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `font`:     The font used for the dtp text
   * `date`:     The default date as a `DatePickerValue` value
   * `format`:   The format of the date. See the `set_format` method.
@@ -95,6 +96,7 @@ impl DatePicker {
             position: (0, 0),
             focus: false,
             flags: None,
+            ex_flags: 0,
             font: None,
             parent: None,
             date: None,
@@ -374,6 +376,7 @@ pub struct DatePickerBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<DatePickerFlags>,
+    ex_flags: u32,
     font: Option<&'a Font>,
     focus: bool,
     parent: Option<ControlHandle>,
@@ -386,6 +389,11 @@ impl<'a> DatePickerBuilder<'a> {
 
     pub fn flags(mut self, flags: DatePickerFlags) -> DatePickerBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> DatePickerBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -443,6 +451,7 @@ impl<'a> DatePickerBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .parent(Some(parent))

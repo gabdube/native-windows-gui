@@ -48,6 +48,7 @@ Note: Use `\r\n` to input a new line not just `\n`.
   * `size`:     The text box size.
   * `position`: The text box position.
   * `flags`:    A combination of the TextBoxFlags values.
+  * `ex_flags`: A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `font`:     The font used for the text box text
   * `limit`:    The maximum number of character that can be inserted in the control
   * `readonly`: If the textbox should allow user input or not
@@ -85,6 +86,7 @@ impl TextBox {
             size: (100, 25),
             position: (0, 0),
             flags: None,
+            ex_flags: 0,
             limit: 0,
             readonly: false,
             focus: false,
@@ -334,6 +336,7 @@ pub struct TextBoxBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     flags: Option<TextBoxFlags>,
+    ex_flags: u32,
     limit: usize,
     readonly: bool,
     focus: bool,
@@ -345,6 +348,11 @@ impl<'a> TextBoxBuilder<'a> {
 
     pub fn flags(mut self, flags: TextBoxFlags) -> TextBoxBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> TextBoxBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -402,6 +410,7 @@ impl<'a> TextBoxBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .text(self.text)

@@ -52,6 +52,7 @@ CheckBox is not behind any features.
   * `position`:         The checkbox position.
   * `enabled`:          If the checkbox can be used by the user. It also has a grayed out look if disabled.
   * `flags`:            A combination of the CheckBoxFlags values.
+  * `ex_flags`:         A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `font`:             The font used for the checkbox text
   * `background_color`: The background color of the checkbox. Defaults to the default window background (light gray)
   * `check_state`:      The default check state
@@ -95,6 +96,7 @@ impl CheckBox {
             background_color: None,
             check_state: CheckBoxState::Unchecked,
             flags: None,
+            ex_flags: 0,
             font: None,
             parent: None,
         }
@@ -314,6 +316,7 @@ pub struct CheckBoxBuilder<'a> {
     background_color: Option<[u8; 3]>,
     check_state: CheckBoxState,
     flags: Option<CheckBoxFlags>,
+    ex_flags: u32,
     font: Option<&'a Font>,
     parent: Option<ControlHandle>
 }
@@ -322,6 +325,11 @@ impl<'a> CheckBoxBuilder<'a> {
 
     pub fn flags(mut self, flags: CheckBoxFlags) -> CheckBoxBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> CheckBoxBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -388,6 +396,7 @@ impl<'a> CheckBoxBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .text(self.text)

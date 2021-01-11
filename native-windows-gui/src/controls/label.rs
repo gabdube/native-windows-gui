@@ -38,6 +38,7 @@ Label is not behind any features.
   * `position`:         The label position.
   * `enabled`:          If the label is enabled. A disabled label won't trigger events
   * `flags`:            A combination of the LabelFlags values.
+  * `ex_flags`:         A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
   * `font`:             The font used for the label text
   * `background_color`: The background color of the label
   * `h_align`:          The horizontal aligment of the label
@@ -79,6 +80,7 @@ impl Label {
             size: (130, 25),
             position: (0, 0),
             flags: None,
+            ex_flags: 0,
             font: None,
             parent: None,
             h_align: HTextAlign::Left,
@@ -361,6 +363,7 @@ pub struct LabelBuilder<'a> {
     position: (i32, i32),
     background_color: Option<[u8; 3]>,
     flags: Option<LabelFlags>,
+    ex_flags: u32,
     font: Option<&'a Font>,
     h_align: HTextAlign,
     v_align: VTextAlign,
@@ -371,6 +374,11 @@ impl<'a> LabelBuilder<'a> {
 
     pub fn flags(mut self, flags: LabelFlags) -> LabelBuilder<'a> {
         self.flags = Some(flags);
+        self
+    }
+
+    pub fn ex_flags(mut self, flags: u32) -> LabelBuilder<'a> {
+        self.ex_flags = flags;
         self
     }
 
@@ -437,6 +445,7 @@ impl<'a> LabelBuilder<'a> {
             .class_name(out.class_name())
             .forced_flags(out.forced_flags())
             .flags(flags)
+            .ex_flags(self.ex_flags)
             .size(self.size)
             .position(self.position)
             .text(self.text)
