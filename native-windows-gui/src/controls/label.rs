@@ -206,7 +206,7 @@ impl Label {
         use winapi::shared::{basetsd::UINT_PTR, minwindef::LRESULT};
         use winapi::um::winuser::{WM_CTLCOLORSTATIC, WM_NCCALCSIZE, WM_NCPAINT, WM_SIZE, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW};
         use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
-        use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect, ScreenToClient, SetWindowPos};
+        use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect, ScreenToClient, SetWindowPos, GetWindowTextW, GetWindowTextLengthW};
         use winapi::um::wingdi::{SelectObject, CreateSolidBrush, RGB};
         use std::{mem, ptr};
 
@@ -251,10 +251,31 @@ impl Label {
                     let dc = GetDC(hwnd);
                     
                     let old = SelectObject(dc, font_handle as HGDIOBJ);
-                    let calc: [u16;2] = [75, 121];
-                    DrawTextW(dc, calc.as_ptr(), 2, &mut r, DT_CALCRECT | DT_LEFT);
 
-                    let client_height = r.bottom;
+                    let mut newline_count = 1;
+                    let buffer_size = GetWindowTextLengthW(handle) as usize;
+                    match buffer_size == 0 { 
+                        true => {
+                            let calc: [u16;2] = [75, 121];
+                            DrawTextW(dc, calc.as_ptr(), 2, &mut r, DT_CALCRECT | DT_LEFT);
+                        },
+                        false => {
+                            let mut buffer: Vec<u16> = vec![0; buffer_size + 1];
+                            if GetWindowTextW(handle, buffer.as_mut_ptr(), buffer_size as _) == 0 {
+                                let calc: [u16;2] = [75, 121];
+                                DrawTextW(dc, calc.as_ptr(), 2, &mut r, DT_CALCRECT | DT_LEFT);
+                            } else {
+                                for &c in buffer.iter() {
+                                    if c == b'\n' as u16 {
+                                        newline_count += 1;
+                                    }
+                                }
+                                DrawTextW(dc, buffer.as_ptr(), 2, &mut r, DT_CALCRECT | DT_LEFT);
+                            }
+                        }
+                    }
+
+                    let client_height = r.bottom * newline_count;
 
                     SelectObject(dc, old);
                     ReleaseDC(hwnd, dc);
@@ -266,23 +287,18 @@ impl Label {
                     GetWindowRect(hwnd, &mut window);
 
                     let window_height = window.bottom - window.top;
+                    let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
+                    let info = &mut *info_ptr;
                     match v_align {
                         VTextAlign::Top => {
-                            // The winapi default, nothing to be done
+                            info.rgrc[0].bottom -= window_height - client_height;
                         },
                         VTextAlign::Center => {
                             let center = ((window_height - client_height) / 2) - 1;
-                    
-                            // Save the info
-                            let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
-                            let info = &mut *info_ptr;
-
                             info.rgrc[0].top += center;
                             info.rgrc[0].bottom -= center;
                         },
                         VTextAlign::Bottom => {
-                            let info_ptr: *mut NCCALCSIZE_PARAMS = l as *mut NCCALCSIZE_PARAMS;
-                            let info = &mut *info_ptr;
                             info.rgrc[0].top += window_height - client_height;
                         },
                     }
