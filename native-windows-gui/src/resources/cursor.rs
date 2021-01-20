@@ -18,12 +18,17 @@ Example:
 use native_windows_gui as nwg;
 
 fn load_cursor() -> nwg::Cursor {
+    nwg::Cursor::from_file("Hello.cur", true).unwrap()
+}
+
+fn load_cursor_builder() -> nwg::Cursor {
     let mut cursor = nwg::Cursor::default();
 
     nwg::Cursor::builder()
         .source_file(Some("Hello.cur"))
         .strict(true)
-        .build(&mut cursor);
+        .build(&mut cursor)
+        .unwrap();
 
     cursor
 }
@@ -66,6 +71,42 @@ impl Cursor {
             .unwrap();
 
         out
+    }
+
+    /**
+        Single line helper function over the cursor builder api.
+
+        Use a file resource.
+    */
+    pub fn from_file(path: &str, strict: bool) -> Result<Cursor, NwgError> {
+        let mut cursor = Cursor::default();
+
+        Cursor::builder()
+            .source_file(Some(path))
+            .strict(strict)
+            .build(&mut cursor)?;
+
+        Ok(cursor)
+    }
+
+    /**
+        Single line helper function over the cursor builder api.
+
+        Use an embedded resource. Either `embed_id` or `embed_str` must be defined, not both.
+
+        Requires the `embed-resource` feature.
+    */
+    #[cfg(feature = "embed-resource")]
+    pub fn from_embed(embed: &EmbedResource, embed_id: Option<usize>, embed_str: Option<&str>) -> Result<Cursor, NwgError> {
+        let mut bitmap = Cursor::default();
+
+        Cursor::builder()
+            .source_embed(Some(embed))
+            .source_embed_id(embed_id.unwrap_or(0))
+            .source_embed_str(embed_str)
+            .build(&mut bitmap)?;
+
+        Ok(bitmap)
     }
 
 }

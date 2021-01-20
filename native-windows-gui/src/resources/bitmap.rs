@@ -16,7 +16,7 @@ If those features are needed, see the `image-decoder` feature.
 To display a bitmap in an application, see the `ImageFrame` control.
 
 By default, bitmap resources do not support transparency BUT if `image-decoder` is enabled, bitmaps can be loaded
-from any file type supported by NWG (JPEG, PNG, BMP, ICO, DDS, TIFF).
+from any file type supported natively by Windows: `JPEG, PNG, BMP, ICO, DDS, TIFF`.
 
 Bitmaps can be converted to icons using the "copy_as_icon" function.
 
@@ -37,12 +37,17 @@ Example:
 use native_windows_gui as nwg;
 
 fn load_bitmap() -> nwg::Bitmap {
+    nwg::Bitmap::from_file("Hello.bmp", true).unwrap()
+}
+
+fn load_bitmap_builder() -> nwg::Bitmap {
     let mut bitmap = nwg::Bitmap::default();
 
     nwg::Bitmap::builder()
         .source_file(Some("Hello.bmp"))
         .strict(true)
-        .build(&mut bitmap);
+        .build(&mut bitmap)
+        .unwrap();
 
     bitmap
 }

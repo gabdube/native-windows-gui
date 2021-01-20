@@ -35,6 +35,10 @@ Example:
 use native_windows_gui as nwg;
 
 fn load_icon() -> nwg::Icon {
+    nwg::Icon::from_file("hello.ico", true).unwrap()
+}
+
+fn load_icon_builder() -> nwg::Icon {
     let mut icon = nwg::Icon::default();
 
     nwg::Icon::builder()
@@ -75,7 +79,7 @@ impl Icon {
     }
 
     /**
-        Single line helper function over the bitmap builder api.
+        Single line helper function over the cursor builder api.
 
         Use system resources.
     */
@@ -92,7 +96,7 @@ impl Icon {
     }
 
     /**
-        Single line helper function over the bitmap builder api.
+        Single line helper function over the cursor builder api.
 
         Use a file resource.
     */
@@ -108,7 +112,7 @@ impl Icon {
     }
 
     /**
-        Single line helper function over the bitmap builder api.
+        Single line helper function over the cursor builder api.
 
         Use a binary resource.
     */
@@ -123,7 +127,7 @@ impl Icon {
     }
 
     /**
-        Single line helper function over the bitmap builder api.
+        Single line helper function over the cursor builder api.
 
         Use an embedded resource. Either `embed_id` or `embed_str` must be defined, not both.
 
