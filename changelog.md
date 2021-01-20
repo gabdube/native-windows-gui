@@ -1,3 +1,8 @@
+1.0.9
+* Added vertical alignment to label
+* Fixed multi-line label alignment 
+* Added helpers functions to Bitmap and Icons
+
 1.0.8
 
 * Added `Menu::popup_with_flags` to customize the display of popup menus

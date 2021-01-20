@@ -78,20 +78,78 @@ impl Bitmap {
         }
     }
 
-    pub fn from_system(cursor: OemBitmap) -> Bitmap {
-        let mut out = Self::default();
+    /**
+        Single line helper function over the bitmap builder api.
+
+        Use system resources.
+    */
+    pub fn from_system(sys_bitmap: OemBitmap) -> Bitmap {
+        let mut bitmap = Self::default();
 
         // Default cursor creation cannot fail
         Self::builder()
-            .source_system(Some(cursor))
-            .build(&mut out)
+            .source_system(Some(sys_bitmap))
+            .build(&mut bitmap)
             .unwrap();
 
-        out
+            bitmap
     }
 
     /**
-        Creates a new icon from the bitmap data. The bitmap must have been initialized
+        Single line helper function over the bitmap builder api.
+
+        Use a file resource.
+    */
+    pub fn from_file(path: &str, strict: bool) -> Result<Bitmap, NwgError> {
+        let mut bitmap = Bitmap::default();
+
+        Bitmap::builder()
+            .source_file(Some(path))
+            .strict(strict)
+            .build(&mut bitmap)?;
+
+        Ok(bitmap)
+    }
+
+    /**
+        Single line helper function over the bitmap builder api.
+
+        Use a binary resource.
+    */
+    pub fn from_bin(bin: &[u8]) -> Result<Bitmap, NwgError> {
+        let mut bitmap = Bitmap::default();
+
+        Bitmap::builder()
+            .source_bin(Some(bin))
+            .build(&mut bitmap)?;
+
+        Ok(bitmap)
+    }
+
+    /**
+        Single line helper function over the bitmap builder api.
+
+        Use an embedded resource. Either `embed_id` or `embed_str` must be defined, not both.
+
+        Requires the `embed-resource` feature.
+    */
+    #[cfg(feature = "embed-resource")]
+    pub fn from_embed(embed: &EmbedResource, embed_id: Option<usize>, embed_str: Option<&str>) -> Result<Bitmap, NwgError> {
+        let mut bitmap = Bitmap::default();
+
+        Bitmap::builder()
+            .source_embed(Some(embed))
+            .source_embed_id(embed_id.unwrap_or(0))
+            .source_embed_str(embed_str)
+            .build(&mut bitmap)?;
+
+        Ok(bitmap)
+    }
+
+    /**
+        Creates a new icon from the bitmap data.
+        
+        Panics if the bitmap is not initialized
     */
     pub fn copy_as_icon(&self) -> crate::Icon {
         use winapi::um::winuser::CreateIconIndirect;

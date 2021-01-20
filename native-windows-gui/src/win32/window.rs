@@ -334,8 +334,8 @@ pub fn unbind_raw_event_handler(handler: &RawEventHandler) -> Result<(), NwgErro
         if result == 0 {
             let err = format!(concat!(
                 "Could not fetch raw event handler #{:?}.",
-                "this can happen if the control ({:?}) was freed or",
-                "this raw event handler was already freed"
+                "This can happen if the control ({:?}) was freed or",
+                "if this raw event handler was already unbound"
             ), handler_id, handle);
             return Err(NwgError::EventsBinding(err));
         }

@@ -74,16 +74,72 @@ impl Icon {
         }
     }
 
-    pub fn from_system(cursor: OemIcon) -> Icon {
-        let mut out = Self::default();
+    /**
+        Single line helper function over the bitmap builder api.
+
+        Use system resources.
+    */
+    pub fn from_system(sys_icon: OemIcon) -> Icon {
+        let mut icon = Self::default();
 
         // Default cursor creation cannot fail
         Self::builder()
-            .source_system(Some(cursor))
-            .build(&mut out)
+            .source_system(Some(sys_icon))
+            .build(&mut icon)
             .unwrap();
 
-        out
+        icon
+    }
+
+    /**
+        Single line helper function over the bitmap builder api.
+
+        Use a file resource.
+    */
+    pub fn from_file(path: &str, strict: bool) -> Result<Icon, NwgError> {
+        let mut icon = Icon::default();
+
+        Icon::builder()
+            .source_file(Some(path))
+            .strict(strict)
+            .build(&mut icon)?;
+
+        Ok(icon)
+    }
+
+    /**
+        Single line helper function over the bitmap builder api.
+
+        Use a binary resource.
+    */
+    pub fn from_bin(bin: &[u8]) -> Result<Icon, NwgError> {
+        let mut icon = Icon::default();
+
+        Icon::builder()
+            .source_bin(Some(bin))
+            .build(&mut icon)?;
+
+        Ok(icon)
+    }
+
+    /**
+        Single line helper function over the bitmap builder api.
+
+        Use an embedded resource. Either `embed_id` or `embed_str` must be defined, not both.
+
+        Requires the `embed-resource` feature.
+    */
+    #[cfg(feature = "embed-resource")]
+    pub fn from_embed(embed: &EmbedResource, embed_id: Option<usize>, embed_str: Option<&str>) -> Result<Icon, NwgError> {
+        let mut icon = Icon::default();
+
+        Icon::builder()
+            .source_embed(Some(embed))
+            .source_embed_id(embed_id.unwrap_or(0))
+            .source_embed_str(embed_str)
+            .build(&mut icon)?;
+
+        Ok(icon)
     }
 
 }
