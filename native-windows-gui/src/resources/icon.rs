@@ -79,14 +79,14 @@ impl Icon {
     }
 
     /**
-        Single line helper function over the cursor builder api.
+        Single line helper function over the icon builder api.
 
         Use system resources.
     */
     pub fn from_system(sys_icon: OemIcon) -> Icon {
         let mut icon = Self::default();
 
-        // Default cursor creation cannot fail
+        // Default icon creation cannot fail
         Self::builder()
             .source_system(Some(sys_icon))
             .build(&mut icon)
@@ -96,7 +96,7 @@ impl Icon {
     }
 
     /**
-        Single line helper function over the cursor builder api.
+        Single line helper function over the icon builder api.
 
         Use a file resource.
     */
@@ -112,7 +112,7 @@ impl Icon {
     }
 
     /**
-        Single line helper function over the cursor builder api.
+        Single line helper function over the icon builder api.
 
         Use a binary resource.
     */
@@ -127,7 +127,7 @@ impl Icon {
     }
 
     /**
-        Single line helper function over the cursor builder api.
+        Single line helper function over the icon builder api.
 
         Use an embedded resource. Either `embed_id` or `embed_str` must be defined, not both.
 
