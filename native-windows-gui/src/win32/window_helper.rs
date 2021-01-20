@@ -2,10 +2,12 @@ use super::base_helper::{to_utf16, from_utf16};
 use super::high_dpi;
 use winapi::shared::windef::{HFONT, HWND};
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM, LRESULT};
-use winapi::um::winuser::{WM_USER, WNDCLASSEXW};
+use winapi::um::winuser::WM_USER;
 use winapi::ctypes::c_int;
 use std::{ptr, mem};
 
+#[cfg(feature = "rich-textbox")]
+use winapi::um::winuser::WNDCLASSEXW;
 
 pub const NOTICE_MESSAGE: UINT = WM_USER+100;
 pub const NWG_INIT: UINT = WM_USER + 101;
@@ -13,6 +15,7 @@ pub const NWG_TRAY: UINT = WM_USER + 102;
 
 
 /// Returns the class info of a hwnd handle
+#[cfg(feature = "rich-textbox")]
 pub fn get_class_info(hwnd: HWND) -> Result<WNDCLASSEXW, ()> {
     use winapi::um::winuser::{GetClassInfoExW, GetClassNameW};
     use winapi::um::libloaderapi::GetModuleHandleW;
@@ -38,6 +41,7 @@ pub fn get_class_info(hwnd: HWND) -> Result<WNDCLASSEXW, ()> {
 }
 
 /// Reeturn the background color of a window
+#[cfg(feature = "rich-textbox")]
 pub fn get_background_color(hwnd: HWND) -> Result<[u8; 3], ()> {
     use winapi::um::winuser::GetSysColorBrush;
     use winapi::um::wingdi::{GetRValue, GetGValue, GetBValue, LOGBRUSH, GetObjectW, GetStockObject};

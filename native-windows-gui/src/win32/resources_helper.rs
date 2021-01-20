@@ -316,7 +316,7 @@ pub unsafe fn icon_from_memory(src: &[u8], strict: bool, size: Option<(u32, u32)
 }
 
 #[cfg(not(feature="image-decoder"))]
-pub unsafe fn icon_from_memory(src: &[u8], strict: bool, size: Option<(u32, u32)>) -> Result<HANDLE, NwgError> {
+pub unsafe fn icon_from_memory(_src: &[u8], _strict: bool, _size: Option<(u32, u32)>) -> Result<HANDLE, NwgError> {
     unimplemented!("Loading icons from memory require the \"image-decoder\" feature");
 }
 

@@ -4,12 +4,15 @@ A tree-view control is a window that displays a hierarchical list of items
 
 use winapi::shared::minwindef::{WPARAM, LPARAM};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
-use winapi::um::commctrl::{HIMAGELIST, HTREEITEM, TVIS_EXPANDED, TVIS_SELECTED, TVS_SHOWSELALWAYS, TVITEMW};
+use winapi::um::commctrl::{HTREEITEM, TVIS_EXPANDED, TVIS_SELECTED, TVS_SHOWSELALWAYS, TVITEMW};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{check_hwnd, to_utf16, from_utf16};
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::{mem, ptr};
+
+#[cfg(feature="image-list")]
+use winapi::um::commctrl::HIMAGELIST;
 
 #[cfg(feature="image-list")]
 use crate::ImageList;
@@ -147,6 +150,7 @@ pub struct TreeView {
 
 impl TreeView {
 
+    #[cfg(feature="image-list")]
     pub fn builder<'a>() -> TreeViewBuilder<'a> {
         TreeViewBuilder {
             size: (100, 200),
@@ -157,6 +161,8 @@ impl TreeView {
             ex_flags: 0,
             font: None,
             parent: None,
+
+            #[cfg(feature="image-list")]
             image_list: None,
         }
     }
