@@ -9,7 +9,6 @@
 extern crate native_windows_gui as nwg;
 use std::rc::Rc;
 
-
 fn main() {
     nwg::init().expect("Failed to init Native Windows GUI");
     nwg::Font::set_global_family("Segoe UI").expect("Failed to set default font");
@@ -17,9 +16,9 @@ fn main() {
     let mut window = Default::default();
     let mut name_edit = Default::default();
     let mut hello_button = Default::default();
+    let layout = Default::default();
 
     nwg::Window::builder()
-        .flags(nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE)
         .size((300, 115))
         .position((300, 300))
         .title("Basic example")
@@ -27,8 +26,6 @@ fn main() {
         .unwrap();
 
     nwg::TextInput::builder()
-        .size((280, 25))
-        .position((10, 10))
         .text("Heisenberg")
         .focus(true)
         .parent(&window)
@@ -36,11 +33,17 @@ fn main() {
         .unwrap();
 
     nwg::Button::builder()
-        .size((280, 60))
-        .position((10, 40))
         .text("Say my name")
         .parent(&window)
         .build(&mut hello_button)
+        .unwrap();
+
+    nwg::GridLayout::builder()
+        .parent(&window)
+        .spacing(1)
+        .child(0, 0, &name_edit)
+        .child_item(nwg::GridLayoutItem::new(&hello_button, 0, 1, 1, 2))
+        .build(&layout)
         .unwrap();
 
     let window = Rc::new(window);
@@ -66,4 +69,3 @@ fn main() {
     nwg::dispatch_thread_events();
     nwg::unbind_event_handler(&handler);
 }
-
