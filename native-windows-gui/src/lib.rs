@@ -38,6 +38,8 @@ pub(crate) use win32::window::bind_raw_event_handler_inner;
 #[allow(deprecated)]
 pub use win32::high_dpi::{set_dpi_awareness, scale_factor, dpi};
 
+pub use win32::monitor::Monitor;
+
 #[cfg(feature="cursor")]
 pub use win32::cursor::GlobalCursor;
 

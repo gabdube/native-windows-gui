@@ -10,6 +10,10 @@ macro_rules! handles {
             fn from(control: &$control) -> Self { control.handle }
         }
 
+        impl From<&mut $control> for ControlHandle {
+            fn from(control: &mut $control) -> Self { control.handle }
+        }
+
         impl PartialEq<ControlHandle> for $control {
             fn eq(&self, other: &ControlHandle) -> bool {
                 self.handle == *other
@@ -51,6 +55,10 @@ macro_rules! subclass_control {
         }
         
         impl Into<$crate::ControlHandle> for &$ty {
+            fn into(self) -> $crate::ControlHandle { self.$field.handle.clone() }
+        }
+
+        impl Into<$crate::ControlHandle> for &mut $ty {
             fn into(self) -> $crate::ControlHandle { self.$field.handle.clone() }
         }
         

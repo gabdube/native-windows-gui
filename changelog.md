@@ -2,6 +2,8 @@
 * Added vertical alignment to label
 * Fixed multi-line label alignment 
 * Added helpers functions to Bitmap and Icons
+* Added the `Monitor` struct to query monitor and screen information
+* Added `center` to the window builder to center a window on screen
 
 1.0.8
 

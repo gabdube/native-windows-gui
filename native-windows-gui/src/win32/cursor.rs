@@ -3,9 +3,10 @@ use crate::controls::ControlHandle;
 
 /**
     A global object that wraps the system cursor.
-    This object must not be instanced. The methods should be used this way:
-
     Requires the `cursor` feature.
+
+
+    This object cannot be instanced. The methods should be used this way:
 
     ```rust
     use native_windows_gui as nwg;

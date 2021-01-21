@@ -58,6 +58,7 @@ bitflags! {
       * `position`:    The default position of the window in the desktop
       * `icon`:        The window icon
       * `accept_file`: If the window should accept files by drag & drop
+      * `center`:      Center the window in the current monitor based on its size. If `true`, this overrides `position`
       * `topmost`:     If the window should always be on top of other system window
       * `parent`:      Logical parent of the window, unlike children controls, this is NOT required.
 
@@ -93,6 +94,7 @@ impl Window {
             position: (300, 300),
             accept_files: false,
             topmost: false,
+            center: false,
             flags: None,
             ex_flags: 0,
             icon: None,
@@ -244,6 +246,7 @@ pub struct WindowBuilder<'a> {
     size: (i32, i32),
     position: (i32, i32),
     accept_files: bool,
+    center: bool,
     topmost: bool,
     flags: Option<WindowFlags>,
     ex_flags: u32,
@@ -283,13 +286,18 @@ impl<'a> WindowBuilder<'a> {
         self
     }
 
-    pub fn accept_files(mut self, accept_files: bool) ->  WindowBuilder<'a> {
+    pub fn accept_files(mut self, accept_files: bool) -> WindowBuilder<'a> {
         self.accept_files = accept_files;
         self
     }
 
-    pub fn topmost(mut self, topmost: bool) ->  WindowBuilder<'a> {
+    pub fn topmost(mut self, topmost: bool) -> WindowBuilder<'a> {
         self.topmost = topmost;
+        self
+    }
+
+    pub fn center(mut self, center: bool) -> WindowBuilder<'a> {
+        self.center = center;
         self
     }
 
@@ -320,6 +328,17 @@ impl<'a> WindowBuilder<'a> {
 
         if self.icon.is_some() {
             out.set_icon(self.icon);
+        }
+
+        if self.center {
+            let [left, top, right, bottom] = crate::Monitor::monitor_rect_from_window(out as &Window);
+            let [m_width, m_height] = [right-left, bottom-top];
+            let (width, height) = self.size;
+
+            let x = left + ((m_width-width)/2);
+            let y = top + ((m_height-height)/2);
+
+            out.set_position(x, y);
         }
 
         Ok(())
