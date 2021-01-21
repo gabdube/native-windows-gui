@@ -131,10 +131,13 @@ impl TextInput {
     /// Set or Remove the password character displayed by the text input.
     /// If the input is not a password all character are re-rendered with the new character
     pub fn set_password_char(&self, c: Option<char>) {
-        use winapi::um::winuser::EM_SETPASSWORDCHAR;
+        use winapi::um::winuser::{InvalidateRect, EM_SETPASSWORDCHAR};
 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         wh::send_message(handle, EM_SETPASSWORDCHAR as u32, c.map(|c| c as usize).unwrap_or(0), 0);
+
+        // The control needs to be manually refreshed
+        unsafe { InvalidateRect(handle, ::std::ptr::null(), 1); }
     }
 
     /// Return the number of maximum character allowed in this text input
@@ -559,9 +562,6 @@ impl<'a> TextInputBuilder<'a> {
                 flags &= !ES_AUTOHSCROLL;
             },
         }
-
-        // Control must be hidden before the hook_non_client_size path
-        // flags = flags & !WS_VISIBLE;
 
         let parent = match self.parent {
             Some(p) => Ok(p),
