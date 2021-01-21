@@ -1,6 +1,6 @@
 # Native Windows GUI
 
-Welcome to Native Windows GUI (aka NWG). The BEST (and only) rust library to develop truly native GUI applications on the desktop for Microsoft Windows.
+Welcome to Native Windows GUI (aka NWG). A rust library to develop native GUI applications on the desktop for Microsoft Windows.
 
 NWG is a very light wrapper over WINAPI. It allows you, the developer, to handle
 the quirks and rough edges of the API by providing a simple, safe and rust-like interface.
