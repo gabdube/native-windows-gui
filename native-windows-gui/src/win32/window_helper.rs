@@ -206,10 +206,10 @@ pub unsafe fn get_focus(handle: HWND) -> bool {
 pub unsafe fn get_window_text(handle: HWND) -> String {
     use winapi::um::winuser::{GetWindowTextW, GetWindowTextLengthW};
 
-    let buffer_size = GetWindowTextLengthW(handle) as usize;
+    let buffer_size = GetWindowTextLengthW(handle) as usize + 1;
     if buffer_size == 0 { return String::new(); }
 
-    let mut buffer: Vec<u16> = vec![0; buffer_size + 1];
+    let mut buffer: Vec<u16> = vec![0; buffer_size];
 
     if GetWindowTextW(handle, buffer.as_mut_ptr(), buffer_size as c_int) == 0 {
         String::new()

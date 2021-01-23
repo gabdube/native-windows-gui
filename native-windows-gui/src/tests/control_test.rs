@@ -1540,7 +1540,7 @@ fn open_file(app: &ControlsTest, _evt: Event) {
         if let Ok(file_names) = app.open_file_dialog.get_selected_items() {
             let mut names = String::new();
             for name in file_names {
-                names.push_str(&name);
+                names.push_str(&name.into_string().unwrap());
                 names.push_str("\r\n")
             }
 
@@ -1557,7 +1557,7 @@ fn open_directory(app: &ControlsTest, _evt: Event) {
     if app.open_directory_dialog.run(Some(&app.window)) {
         app.file_dialog_result.clear();
         if let Ok(directory) = app.open_directory_dialog.get_selected_item() {
-            app.file_dialog_result.set_text(&directory);
+            app.file_dialog_result.set_text(&directory.into_string().unwrap());
         }
     }
 }
@@ -1570,7 +1570,7 @@ fn save_file(app: &ControlsTest, _evt: Event) {
     if app.save_file_dialog.run(Some(&app.window)) {
         app.file_dialog_result.clear();
         if let Ok(file) = app.save_file_dialog.get_selected_item() {
-            app.file_dialog_result.set_text(&file);
+            app.file_dialog_result.set_text(&file.into_string().unwrap());
         }
     }
 }

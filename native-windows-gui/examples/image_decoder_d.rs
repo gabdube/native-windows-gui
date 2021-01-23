@@ -58,13 +58,15 @@ impl ImageDecoderApp {
         if self.dialog.run(Some(&self.window)) {
             self.file_name.set_text("");
             if let Ok(directory) = self.dialog.get_selected_item() {
-                self.file_name.set_text(&directory);
+                let dir = directory.into_string().unwrap();
+                self.file_name.set_text(&dir);
                 self.read_file();
             }
         }
     }
 
     fn read_file(&self) {
+        println!("{}", self.file_name.text());
         let image = match self.decoder.from_filename(&self.file_name.text()) {
             Ok(img) => img,
             Err(_) => { println!("Could not read image!"); return; }

@@ -638,7 +638,7 @@ impl<'a> NwgUi<'a> {
                     },
                 None => {}
             }
-        };
+        }
 
         for i in 0..(controls.len()) {
             let mut weight = controls[i].weight;

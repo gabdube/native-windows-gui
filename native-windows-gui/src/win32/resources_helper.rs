@@ -12,6 +12,7 @@ use super::base_helper::{get_system_error, to_utf16};
 #[cfg(feature = "file-dialog")] use winapi::um::shobjidl_core::IShellItem;
 #[cfg(feature = "file-dialog")] use crate::resources::FileDialogAction;
 #[cfg(feature = "file-dialog")] use winapi::um::shobjidl::{IFileDialog, IFileOpenDialog};
+#[cfg(feature = "file-dialog")] use std::ffi::OsString;
 
 
 pub fn is_bitmap(handle: HBITMAP) -> bool {
@@ -468,7 +469,7 @@ pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a
 }
 
 #[cfg(feature = "file-dialog")]
-pub unsafe fn filedialog_get_item(dialog: &mut IFileDialog) -> Result<String, NwgError> {
+pub unsafe fn filedialog_get_item(dialog: &mut IFileDialog) -> Result<OsString, NwgError> {
     use winapi::shared::winerror::S_OK;
     
     let mut _item: *mut IShellItem = ptr::null_mut();
@@ -484,7 +485,7 @@ pub unsafe fn filedialog_get_item(dialog: &mut IFileDialog) -> Result<String, Nw
 }
 
 #[cfg(feature = "file-dialog")]
-pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<String>, NwgError> {
+pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<OsString>, NwgError> {
     use winapi::um::shobjidl::IShellItemArray;
     use winapi::shared::{winerror::S_OK, minwindef::DWORD};
     
@@ -499,7 +500,7 @@ pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<S
     let mut count: DWORD = 0;
     items.GetCount(&mut count);
     
-    let mut item_names: Vec<String> = Vec::with_capacity(count as usize);
+    let mut item_names: Vec<OsString> = Vec::with_capacity(count as usize);
     for i in 0..count {
         items.GetItemAt(i, &mut _item);
         match get_ishellitem_path(&mut *_item) {
@@ -514,18 +515,18 @@ pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<S
 }
 
 #[cfg(feature = "file-dialog")]
-unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<String, NwgError> {
+unsafe fn get_ishellitem_path(item: &mut IShellItem) -> Result<OsString, NwgError> {
     use winapi::um::shobjidl_core::SIGDN_FILESYSPATH;
     use winapi::shared::{ntdef::PWSTR, winerror::S_OK};
     use winapi::um::combaseapi::CoTaskMemFree;
-    use super::base_helper::from_wide_ptr;
+    use super::base_helper::os_string_from_wide_ptr;
 
     let mut item_path: PWSTR = ptr::null_mut();
     if item.GetDisplayName(SIGDN_FILESYSPATH, &mut item_path) != S_OK {
         return Err(NwgError::file_dialog("Failed to get file name"));
     }
 
-    let text = from_wide_ptr(item_path, None);
+    let text = os_string_from_wide_ptr(item_path, None);
 
     CoTaskMemFree(mem::transmute(item_path));
 

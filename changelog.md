@@ -1,4 +1,5 @@
 1.0.9
+* BREAKING CHANGE: File dialog `get_selected_item` & `get_selected_items` now return `OsString` instead of String to handle some exotic Windows path
 * Added vertical alignment to label
 * Fixed multi-line label alignment 
 * Added helpers functions to Bitmap and Icons

@@ -3,7 +3,7 @@ use crate::win32::resources_helper as rh;
 
 use crate::win32::base_helper::to_utf16;
 use crate::{ControlHandle, NwgError};
-use std::{fmt, ptr, mem};
+use std::{fmt, ptr, mem, ffi::OsString};
 
 
 /**
@@ -90,7 +90,7 @@ impl FileDialog {
         • if there was a system error while reading the selected item  
         • if the dialog has the `multiselect` flag  
     */
-    pub fn get_selected_item(&self) -> Result<String, NwgError> { 
+    pub fn get_selected_item(&self) -> Result<OsString, NwgError> { 
         
         if self.multiselect() {
             return Err(NwgError::file_dialog("FileDialog have the multiselect flag"));
@@ -108,7 +108,7 @@ impl FileDialog {
         • if there was a system error while reading the selected items  
         • if the dialog has `Save` for action  
     */
-    pub fn get_selected_items(&self) -> Result<Vec<String>, NwgError> {
+    pub fn get_selected_items(&self) -> Result<Vec<OsString>, NwgError> {
         if self.action == FileDialogAction::Save {
             return Err(NwgError::file_dialog("Save dialog cannot have more than one item selected"));
         }

@@ -3,6 +3,9 @@ use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::DWORD;
 use crate::ControlHandle;
 
+#[cfg(feature="file-dialog")]
+use std::ffi::OsString;
+
 pub const CUSTOM_ID_BEGIN: u32 = 10000;
 
 
@@ -33,7 +36,6 @@ pub fn to_utf16<'a>(s: &'a str) -> Vec<u16> {
     Decode a raw utf16 string. Should be null terminated.
 */
 pub fn from_utf16(s: &[u16]) -> String {
-    use std::ffi::OsString;
     use std::os::windows::ffi::OsStringExt;
 
     let null_index = s.iter().position(|&i| i==0).unwrap_or(s.len());
@@ -45,7 +47,7 @@ pub fn from_utf16(s: &[u16]) -> String {
 /**
     Read a string from a wide char pointer. Undefined behaviour if [ptr] is not null terminated.
 */
-#[cfg(any(feature = "file-dialog", feature = "winnls"))]
+#[cfg(feature = "winnls")]
 pub unsafe fn from_wide_ptr(ptr: *mut u16, length: Option<usize>) -> String {
     use std::slice::from_raw_parts;
 
@@ -63,6 +65,27 @@ pub unsafe fn from_wide_ptr(ptr: *mut u16, length: Option<usize>) -> String {
 
     let array: &[u16] = from_raw_parts(ptr, length);
     from_utf16(array)
+}
+
+#[cfg(any(feature = "file-dialog", feature = "winnls"))]
+pub unsafe fn os_string_from_wide_ptr(ptr: *mut u16, length: Option<usize>) -> OsString {
+    use std::os::windows::ffi::OsStringExt;
+    use std::slice::from_raw_parts;
+
+    let length = match length {
+        Some(v) => v,
+        None => {
+            let mut length: isize = 0;
+            while *&*ptr.offset(length) != 0 {
+                length += 1;
+            }
+
+            length as usize
+        }
+    };
+
+    let array: &[u16] = from_raw_parts(ptr, length);
+    OsString::from_wide(array)
 }
 
 /**
