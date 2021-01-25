@@ -145,6 +145,27 @@ pub fn get_window_font(handle: HWND) -> HFONT {
     }
 }
 
+pub fn maximize_window(handle: HWND) {
+    use winapi::um::winuser::{ShowWindow, SW_MAXIMIZE};
+    unsafe {
+        ShowWindow(handle, SW_MAXIMIZE);
+    }
+}
+
+pub fn minimize_window(handle: HWND) {
+    use winapi::um::winuser::{ShowWindow, SW_MINIMIZE};
+    unsafe {
+        ShowWindow(handle, SW_MINIMIZE);
+    }
+}
+
+pub fn restore_window(handle: HWND) {
+    use winapi::um::winuser::{ShowWindow, SW_RESTORE};
+    unsafe {
+        ShowWindow(handle, SW_RESTORE);
+    }
+}
+
 /// Set the font of a window
 pub unsafe fn set_window_font(handle: HWND, font_handle: Option<HFONT>, redraw: bool) {
     use winapi::um::winuser::WM_SETFONT;

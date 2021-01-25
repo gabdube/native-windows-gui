@@ -58,6 +58,8 @@ bitflags! {
       * `position`:    The default position of the window in the desktop
       * `icon`:        The window icon
       * `accept_file`: If the window should accept files by drag & drop
+      * `maximized`:   If the window should be maximized at creation
+      * `minimized`:   If the window should be minimized at creation
       * `center`:      Center the window in the current monitor based on its size. If `true`, this overrides `position`
       * `topmost`:     If the window should always be on top of other system window
       * `parent`:      Logical parent of the window, unlike children controls, this is NOT required.
@@ -95,11 +97,31 @@ impl Window {
             accept_files: false,
             topmost: false,
             center: false,
+            maximized: false,
+            minimized: false,
             flags: None,
             ex_flags: 0,
             icon: None,
             parent: None
         }
+    }
+
+    /// Maximize the window
+    pub fn maximize(&self) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::maximize_window(handle);
+    }
+
+    /// Minimize the window
+    pub fn minimize(&self) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::minimize_window(handle);
+    }
+
+    /// Restore a minimized/maximized window
+    pub fn restore(&self) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::restore_window(handle);
     }
 
     /// Force the window to refraw iteself and all its children
@@ -248,6 +270,8 @@ pub struct WindowBuilder<'a> {
     accept_files: bool,
     center: bool,
     topmost: bool,
+    maximized: bool,
+    minimized: bool,
     flags: Option<WindowFlags>,
     ex_flags: u32,
     icon: Option<&'a Icon>,
@@ -301,6 +325,16 @@ impl<'a> WindowBuilder<'a> {
         self
     }
 
+    pub fn maximized(mut self, maximized: bool) -> WindowBuilder<'a> {
+        self.maximized = maximized;
+        self
+    }
+
+    pub fn minimized(mut self, minimized: bool) -> WindowBuilder<'a> {
+        self.minimized = minimized;
+        self
+    }
+
     pub fn parent<C: Into<ControlHandle>>(mut self, p: Option<C>) -> WindowBuilder<'a> {
         self.parent = p.map(|p2| p2.into());
         self
@@ -339,6 +373,10 @@ impl<'a> WindowBuilder<'a> {
             let y = top + ((m_height-height)/2);
 
             out.set_position(x, y);
+        } else if self.maximized {
+            out.maximize();
+        } else if self.minimized {
+            out.minimize();
         }
 
         Ok(())

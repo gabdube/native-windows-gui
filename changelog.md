@@ -6,6 +6,7 @@
 * Added the `Monitor` struct to query monitor and screen information
 * Added `center` to the window builder to center a window on screen
 * Fixed the text input refresh after calling `set_password_char`
+* `maximise`, `minimise`, `restore` for window control
 
 1.0.8
 

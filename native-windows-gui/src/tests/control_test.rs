@@ -99,6 +99,9 @@ pub struct ControlsTest {
     test_rich: RichTextBox,
     test_scroll_h: ScrollBar,
     test_scroll_v: ScrollBar,
+    test_maximize: Button,
+    test_minimize: Button,
+    test_restore: Button,
 
     // Third Tab
     test_open_file_button: Button,
@@ -517,11 +520,32 @@ mod partial_controls_test_ui {
 
             ScrollBar::builder()
                 .position((160, 110))
-                .size((100, 20))
+                .size((90, 20))
                 .range(Some(0..10))
                 .flags(ScrollBarFlags::VISIBLE | ScrollBarFlags::HORIZONTAL)
                 .parent(&data.basics_control_tab2)
                 .build(&mut data.test_scroll_h)?;
+
+            Button::builder()
+                .text("Maximize")
+                .position((260, 55))
+                .size((140, 40))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_maximize)?;
+
+            Button::builder()
+                .text("Minimize")
+                .position((260, 100))
+                .size((140, 40))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_minimize)?;
+
+            Button::builder()
+                .text("Restore")
+                .position((260, 145))
+                .size((140, 40))
+                .parent(&data.basics_control_tab2)
+                .build(&mut data.test_restore)?;
 
             //
             // Dialogs
@@ -898,6 +922,12 @@ mod partial_controls_test_ui {
                         font_select(self);
                     } else if &handle == &self.run_tray_test {
                         run_tray_tests(self);
+                    } else if &handle == &self.test_maximize {
+                        self.window.maximize();
+                    } else if &handle == &self.test_minimize {
+                        self.window.minimize();
+                    } else if &handle == &self.test_restore {
+                        self.window.restore();
                     },
                 E::OnContextMenu => 
                     if &handle == &self.window {
