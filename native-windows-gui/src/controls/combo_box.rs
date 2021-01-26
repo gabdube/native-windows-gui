@@ -411,13 +411,11 @@ impl<D: Display+Default> ComboBox<D> {
         use winapi::shared::windef::{HGDIOBJ, RECT, HBRUSH, POINT};
         use winapi::um::winuser::{WM_NCCALCSIZE, WM_NCPAINT, WM_SIZE, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW};
         use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
-        use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect, ScreenToClient, SetWindowPos, GetWindowTextW, GetWindowTextLengthW};
+        use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect, ScreenToClient, SetWindowPos};
         use winapi::um::wingdi::{SelectObject, CreateSolidBrush, RGB};
         use std::ptr;
 
         if self.handle.blank() { panic!(NOT_BOUND); }
-        let handle = self.handle.hwnd().expect(BAD_HANDLE);
-
         let brush = match bg {
             Some(c) => unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) },
             None => COLOR_WINDOW as HBRUSH
