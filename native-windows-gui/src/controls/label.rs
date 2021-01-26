@@ -84,7 +84,7 @@ impl Label {
             font: None,
             parent: None,
             h_align: HTextAlign::Left,
-            v_align: VTextAlign::Top,
+            v_align: VTextAlign::Center,
             background_color: None
         }
     }
