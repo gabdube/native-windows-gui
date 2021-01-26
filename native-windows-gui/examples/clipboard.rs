@@ -17,6 +17,7 @@ pub struct ClipboardCustom {
     #[nwg_events( OnWindowClose: [nwg::stop_thread_dispatch()] )]
     window: nwg::Window,
 
+    #[nwg_layout(parent: window)]
     grid: nwg::GridLayout,
 
     #[nwg_control(text:"Hello\r\nWorld\r\nClipboad\r\nExample", flags: "VISIBLE|AUTOVSCROLL|AUTOHSCROLL", focus: true,)]
