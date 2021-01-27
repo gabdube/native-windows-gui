@@ -4,9 +4,9 @@
 use nwd::NwgUi;
 use nwg::{NativeUi, NwgError};
 
-use std::{cell::{RefCell, RefMut, Ref}};
+use std::cell::{RefCell, RefMut, Ref};
 use crate::AppState;
-use super::gui_error::*;
+use super::{gui_error::*, widget_box::WidgetBox};
 
 
 #[derive(Default, NwgUi)]
@@ -19,7 +19,11 @@ pub struct GuiBuilder {
     debug_borrow: RefCell<Option<&'static str>>,
 
     #[nwg_control(size: (1200, 800), center: true, title: "Native Windows WYSIWYG", flags: "MAIN_WINDOW")]
-    #[nwg_events( OnInit: [GuiBuilder::init], OnWindowClose: [GuiBuilder::close] )]
+    #[nwg_events( 
+        OnInit: [GuiBuilder::init],
+        OnWindowClose: [GuiBuilder::close],
+        OnResize: [GuiBuilder::resize_components]
+    )]
     window: nwg::Window,
 
     //
@@ -27,7 +31,7 @@ pub struct GuiBuilder {
     //
 
     #[nwg_resource(action: nwg::FileDialogAction::OpenDirectory)]
-    folder_dialog: nwg::FileDialog,
+    directory_dialog: nwg::FileDialog,
 
     //
     // File menu
@@ -52,6 +56,12 @@ pub struct GuiBuilder {
     #[nwg_control(parent: file_menu, text: "E&xit")]
     #[nwg_events( OnMenuItemSelected: [GuiBuilder::close] )]
     exit_item: nwg::MenuItem,
+
+    //
+    // Editor components
+    //
+    #[nwg_partial(parent: window)]
+    widget_box: WidgetBox,
 }
 
 impl GuiBuilder {
@@ -67,6 +77,7 @@ impl GuiBuilder {
     }
 
     fn init(&self) {
+        self.widget_box.load_widgets();
         self.window.set_visible(true);
     }
 
@@ -131,18 +142,27 @@ impl GuiBuilder {
         } 
     }
 
-    
     fn open_project(&self) {
 
     }
 
+    /**
+        Widgets use a custom layout system, so we use absolute positions
+    */
+    fn resize_components(&self) {
+        let (_w, h) = self.window.size();
+        
+        let (widgets_w, _widgets_h) = self.widget_box.container_frame.size();
+        self.widget_box.container_frame.set_size(widgets_w, h-2);
+    }
+
     fn select_folder(&self, title: &str) -> Result<Option<String>, CreateProjectError>  {
-        self.folder_dialog.set_title(title);
-        if !self.folder_dialog.run(Some(&self.window)) {
+        self.directory_dialog.set_title(title);
+        if !self.directory_dialog.run(Some(&self.window)) {
             return Ok(None);
         }
 
-        match self.folder_dialog.get_selected_item() {
+        match self.directory_dialog.get_selected_item() {
             Ok(path) => match path.into_string() {
                 Ok(path) => Ok(Some(path)),
                 Err(path) => {

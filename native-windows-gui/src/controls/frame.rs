@@ -101,13 +101,14 @@ impl Frame {
     /// Returns the size of the button in the parent window
     pub fn size(&self) -> (u32, u32) {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        
         unsafe { wh::get_window_size(handle) }
     }
 
     /// Sets the size of the button in the parent window
     pub fn set_size(&self, x: u32, y: u32) {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
-        unsafe { wh::set_window_size(handle, x, y, false) }
+        unsafe { wh::set_window_size(handle, x, y, true) }
     }
 
     /// Returns the position of the button in the parent window
