@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 native-windows-gui = {path = "../native-windows-gui"}
 native-windows-derive = { version = "1.0.3" }
+winapi = { version = "0.3", features = ["winuser"] }

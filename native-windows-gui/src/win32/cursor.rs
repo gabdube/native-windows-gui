@@ -1,5 +1,26 @@
 use crate::Cursor;
 use crate::controls::ControlHandle;
+use std::mem;
+
+
+/**
+    Tracking information returned by [track_mouse_query](GlobalCursor::track_mouse_query).
+    Note that this returns the raw handle of the tracked control.
+*/
+pub struct TrackCursorInfo {
+    /// Raw handle of the tracked control
+    pub handle: ControlHandle,
+
+    /// If hover is being tracked
+    pub hover: bool,
+
+    /// If leaving is being tracked
+    pub leaving: bool,
+
+    /// Time in ms for the tracking
+    pub hover_time: u32
+}
+
 
 /**
     A global object that wraps the system cursor.
@@ -179,6 +200,109 @@ impl GlobalCursor {
         let c_point = POINT{x: x as LONG, y: y as LONG};
 
         unsafe { DragDetect(handle, c_point) == 1 }
+    }
+
+    /**
+        Tells winapi to track when the cursor will leave the control. 
+
+        Panics if control is not a window-like control
+    */
+    pub fn track_mouse_leaving<C: Into<ControlHandle>>(control: C) {
+        use winapi::um::winuser::{TrackMouseEvent, TRACKMOUSEEVENT, TME_LEAVE};
+
+        let hwnd = control.into().hwnd().expect("Control to be a window like");
+
+        unsafe {
+            let mut p = TRACKMOUSEEVENT {
+                cbSize: mem::size_of::<TRACKMOUSEEVENT>() as _,
+                dwFlags: TME_LEAVE,
+                hwndTrack: hwnd,
+                dwHoverTime: 0
+            };
+
+            TrackMouseEvent(&mut p);
+        }
+    }
+
+    /**
+        Tells winapi to notice the control when the cursor hovers it for a period of time.
+        If `hover_time_ms` is None, use the system default waiting time (should be 400 milliseconds).
+
+        Panics if control is not a window-like control
+    */
+    pub fn track_mouse_hover<C: Into<ControlHandle>>(control: C, hover_time_ms: Option<u32>) {
+        use winapi::um::winuser::{TrackMouseEvent, TRACKMOUSEEVENT, TME_HOVER, HOVER_DEFAULT};
+
+        let hwnd = control.into().hwnd().expect("Control to be a window like");
+        let hover = hover_time_ms.unwrap_or(HOVER_DEFAULT);
+
+        unsafe {
+            let mut p = TRACKMOUSEEVENT {
+                cbSize: mem::size_of::<TRACKMOUSEEVENT>() as _,
+                dwFlags: TME_HOVER,
+                hwndTrack: hwnd,
+                dwHoverTime: hover
+            };
+
+            TrackMouseEvent(&mut p);
+        }
+    }
+
+    /**
+        Cancel the tracking of the cursor previously set by `track_mouse`. 
+        Use `leaving` and `hover` parameters to specify which tracking to cancel
+        
+        Panics if control is not a window-like control
+    */
+    pub fn track_mouse_cancel<C: Into<ControlHandle>>(control: C, leaving: bool, hover: bool) {
+        use winapi::um::winuser::{TrackMouseEvent, TRACKMOUSEEVENT, TME_CANCEL, TME_LEAVE, TME_HOVER};
+
+        let hwnd = control.into().hwnd().expect("Control to be a window like");
+        let mut cancel = 0;
+
+        if !leaving && !hover {
+            return;
+        }
+
+        if leaving { cancel |= TME_LEAVE; }
+        if hover { cancel |= TME_HOVER; }
+        
+        unsafe {
+            let mut p = TRACKMOUSEEVENT {
+                cbSize: mem::size_of::<TRACKMOUSEEVENT>() as _,
+                dwFlags: TME_CANCEL | cancel,
+                hwndTrack: hwnd,
+                dwHoverTime: 0
+            };
+
+            TrackMouseEvent(&mut p);
+        }
+    }
+
+    /**
+        Returns the information about which control is currently being tracked by the `track_mouse_*` functions.
+    */
+    pub fn track_mouse_query(&self) -> TrackCursorInfo {
+        use winapi::um::winuser::{TrackMouseEvent, TRACKMOUSEEVENT, TME_QUERY, TME_LEAVE, TME_HOVER};
+        use std::ptr;
+
+        let mut p = TRACKMOUSEEVENT {
+            cbSize: mem::size_of::<TRACKMOUSEEVENT>() as _,
+            dwFlags: TME_QUERY,
+            hwndTrack: ptr::null_mut(),
+            dwHoverTime: 0
+        };
+
+        unsafe {
+            TrackMouseEvent(&mut p);
+        }
+
+        TrackCursorInfo {
+            handle: ControlHandle::Hwnd(p.hwndTrack),
+            leaving: p.dwFlags & TME_LEAVE == TME_LEAVE,
+            hover: p.dwFlags & TME_HOVER == TME_HOVER,
+            hover_time: p.dwHoverTime
+        }
     }
 
 }

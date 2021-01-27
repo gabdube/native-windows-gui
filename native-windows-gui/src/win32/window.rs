@@ -562,7 +562,7 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
       WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP, WM_MENUSELECT, WM_EXITSIZEMOVE,
       WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED, WM_KEYDOWN, WM_KEYUP, WM_CHAR, WM_MOUSEWHEEL, WM_DROPFILES, GET_WHEEL_DELTA_WPARAM,
-      WM_GETMINMAXINFO, WM_ENTERMENULOOP, WM_EXITMENULOOP};
+      WM_GETMINMAXINFO, WM_ENTERMENULOOP, WM_EXITMENULOOP, WM_MOUSELEAVE, WM_MOUSEHOVER};
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
@@ -694,6 +694,8 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_HSCROLL => callback(Event::OnHorizontalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
         WM_VSCROLL => callback(Event::OnVerticalScroll, NO_DATA, ControlHandle::Hwnd(l as HWND)),
         WM_MOUSEMOVE => callback(Event::OnMouseMove, NO_DATA, base_handle), 
+        WM_MOUSELEAVE  => callback(Event::OnMouseLeft, NO_DATA, base_handle), 
+        WM_MOUSEHOVER  => callback(Event::OnMouseHover, NO_DATA, base_handle), 
         WM_LBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressLeftUp), NO_DATA,  base_handle), 
         WM_LBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressLeftDown), NO_DATA, base_handle), 
         WM_RBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 

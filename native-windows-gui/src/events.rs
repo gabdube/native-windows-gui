@@ -28,6 +28,14 @@ pub enum Event {
     /// Read the delta value with `EventData::OnMouseWheel` to check which key.
     OnMouseWheel,
 
+    /// Generic mouse event when the cursor leaves the area of a control
+    /// `GlobalCursor::track_mouse_leaving` must be set for this event to be triggered
+    OnMouseLeft,
+
+    /// Generic mouse event when the cursor hovers a control for a set period of time
+    /// `GlobalCursor::track_mouse_hover` must be set for this event to be triggered
+    OnMouseHover,
+
     /// Generic window event when the user right clicks a window
     OnContextMenu,
 
@@ -240,7 +248,7 @@ pub enum Event {
     /// When a timer delay is elapsed
     OnTimerTick,
 
-    /// When a notice is... noticed
+    /// When a [notice](NoticeSender::notice) function is triggered
     OnNotice,
 
     /// When a user clicks on the X button of a window

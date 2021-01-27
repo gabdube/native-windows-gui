@@ -88,7 +88,6 @@ impl GuiBuilder {
 
     fn init(&self) {
         self.widget_box.init();
-        self.widget_box.load_widgets();
         self.object_inspector.init();
         self.window.set_visible(true);
     }
