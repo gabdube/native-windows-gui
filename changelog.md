@@ -1,3 +1,6 @@
+1.0.10
+* Fixed a compiling bug when using `no-default-features`
+
 1.0.9
 * BREAKING CHANGE: File dialog `get_selected_item` & `get_selected_items` now return `OsString` instead of String to handle some exotic Windows path
 * Added vertical alignment  `v_align` to label (defaults to center)

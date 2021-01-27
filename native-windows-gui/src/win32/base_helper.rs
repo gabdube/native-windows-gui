@@ -2,8 +2,6 @@ use std::ptr;
 use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::DWORD;
 use crate::ControlHandle;
-
-#[cfg(feature="file-dialog")]
 use std::ffi::OsString;
 
 pub const CUSTOM_ID_BEGIN: u32 = 10000;
