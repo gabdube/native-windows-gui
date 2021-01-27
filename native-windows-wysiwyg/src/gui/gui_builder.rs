@@ -6,7 +6,7 @@ use nwg::{NativeUi, NwgError};
 
 use std::cell::{RefCell, RefMut, Ref};
 use crate::AppState;
-use super::{gui_error::*, widget_box::WidgetBox};
+use super::{gui_error::*, widget_box::WidgetBox, object_inspector::ObjectInspector};
 
 
 #[derive(Default, NwgUi)]
@@ -62,6 +62,9 @@ pub struct GuiBuilder {
     //
     #[nwg_partial(parent: window)]
     widget_box: WidgetBox,
+
+    #[nwg_partial(parent: window)]
+    object_inspector: ObjectInspector,
 }
 
 impl GuiBuilder {
@@ -77,7 +80,9 @@ impl GuiBuilder {
     }
 
     fn init(&self) {
+        self.widget_box.init();
         self.widget_box.load_widgets();
+        self.object_inspector.init();
         self.window.set_visible(true);
     }
 
@@ -150,10 +155,56 @@ impl GuiBuilder {
         Widgets use a custom layout system, so we use absolute positions
     */
     fn resize_components(&self) {
-        let (_w, h) = self.window.size();
-        
-        let (widgets_w, _widgets_h) = self.widget_box.container_frame.size();
-        self.widget_box.container_frame.set_size(widgets_w, h-2);
+        let (w, h) = self.window.size();
+        if h < 2 {
+            // Nothing to display
+            return;
+        }
+
+        let widgets_frame = &self.widget_box.container_frame;
+        let inspect_frame = &self.object_inspector.container_frame;
+
+        let (mut widgets_w, _widgets_h) = widgets_frame.size();
+        let (mut inspect_w, _inspect_h) = inspect_frame.size();
+
+        let spacing = 20;
+        let half_spacing = spacing / 2;
+
+        // Try to restore the saved width
+        if w >= (widgets_w + inspect_w) + spacing {
+            let widget_user = self.widget_box.user_width.get();
+            if widgets_w < widget_user {
+                widgets_w = widget_user;
+            }
+
+            let inspect_user = self.object_inspector.user_width.get();
+            if inspect_w < inspect_user {
+                inspect_w = inspect_user;
+            }
+        }
+
+        // Update size
+        if w >= (widgets_w + inspect_w) + spacing {
+            let widget_user = self.widget_box.user_width.get();
+            if widgets_w < widget_user {
+                widgets_w = widget_user;
+            }
+
+            let inspect_user = self.object_inspector.user_width.get();
+            if inspect_w < inspect_user {
+                inspect_w = inspect_user;
+            }
+            widgets_frame.set_size(widgets_w, h-2);
+            inspect_frame.set_position((w-inspect_w) as i32, 0);
+            inspect_frame.set_size(inspect_w, h-2);
+        } else {
+            let half_width = w / 2;
+            if half_width > half_spacing {
+                widgets_frame.set_size(half_width - half_spacing, h-2);
+                inspect_frame.set_position((w - half_width + half_spacing) as i32, 0);
+                inspect_frame.set_size(half_width - half_spacing, h-2);
+            }
+        }
     }
 
     fn select_folder(&self, title: &str) -> Result<Option<String>, CreateProjectError>  {

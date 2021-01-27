@@ -1,8 +1,12 @@
 use nwd::NwgPartial;
+use std::cell::Cell;
 
 #[derive(Default)]
 #[derive(NwgPartial)]
 pub struct WidgetBox {
+    // Saved width to keep then restore when the main window is to small
+    pub(super) user_width: Cell<u32>,
+
     #[nwg_control(size: (275, 0))]
     pub(super) container_frame: nwg::Frame,
 
@@ -15,6 +19,10 @@ pub struct WidgetBox {
 }
 
 impl WidgetBox {
+
+    pub(super) fn init(&self) {
+        self.user_width.set(275);
+    }
 
     pub(super) fn load_widgets(&self) {
         let tree = &self.widgets_tree;
