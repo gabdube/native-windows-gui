@@ -22,7 +22,8 @@ pub struct GuiBuilder {
     #[nwg_events( 
         OnInit: [GuiBuilder::init],
         OnWindowClose: [GuiBuilder::close],
-        OnResize: [GuiBuilder::resize_components]
+        OnResize: [GuiBuilder::resize_components],
+        OnWindowMaximize: [GuiBuilder::resize_components],
     )]
     window: nwg::Window,
 
@@ -70,6 +71,12 @@ pub struct GuiBuilder {
 impl GuiBuilder {
 
     pub fn build(state: AppState) -> Result<self::gui_builder_ui::GuiBuilderUi, NwgError> {
+        let mut font = nwg::Font::default();
+        nwg::Font::builder()
+            .family("Segoe UI")
+            .build(&mut font)?;
+        nwg::Font::set_global_default(Some(font));
+
         let mut builder = Self::default();
         builder.state = Some(RefCell::new(state));
         GuiBuilder::build_ui(builder)

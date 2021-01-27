@@ -4,17 +4,17 @@ use std::cell::Cell;
 #[derive(Default)]
 #[derive(NwgPartial)]
 pub struct WidgetBox {
-    // Saved width to keep then restore when the main window is to small
+    // Saved width to keep then restore when the main window is too small
     pub(super) user_width: Cell<u32>,
 
     #[nwg_control(size: (275, 0))]
     pub(super) container_frame: nwg::Frame,
 
-    #[nwg_layout(spacing: 0, margin: [0,0,0,0])]
+    #[nwg_layout(parent: container_frame, spacing: 0, margin: [0,0,0,0])]
     layout: nwg::GridLayout,
 
     #[nwg_control(parent: container_frame)]
-    #[nwg_layout_item(layout: layout, x:0, y:0)]
+    #[nwg_layout_item(layout: layout, col:0, row:0)]
     pub(super) widgets_tree: nwg::TreeView,
 }
 
@@ -80,6 +80,7 @@ impl WidgetBox {
             tree.set_expand_state(&item, nwg::ExpandState::Expand);
         }
 
+        tree.ensure_visible(&controls);
         tree.set_enabled(false);
     }
 
