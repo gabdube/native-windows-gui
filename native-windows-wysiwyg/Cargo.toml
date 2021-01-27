@@ -1,0 +1,11 @@
+[package]
+name = "native-windows-wysiwyg"
+version = "0.1.0"
+authors = ["Gabriel D <gdube.475@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+native-windows-gui = {version = "1.0.10", default-features=false, features=["menu", "file-dialog"]}
+native-windows-derive = { version = "1.0.3" }
