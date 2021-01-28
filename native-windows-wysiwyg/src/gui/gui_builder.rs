@@ -9,24 +9,37 @@ use std::cell::{RefCell, RefMut, Ref};
 use crate::AppState;
 use super::{gui_error::*, widget_box::WidgetBox, object_inspector::ObjectInspector};
 
+use winapi::shared::windef::HBRUSH;
+
+/// Holds GDI objects for painting
+struct PaintData {
+    background: HBRUSH,
+}
 
 #[derive(Default, NwgUi)]
 pub struct GuiBuilder {
     /// Application state
     state: Option<RefCell<AppState>>,
 
+    /// GDI object for painting
+    paint_data: RefCell<Option<PaintData>>,
+
     /// Name of the gui process that currently borrow the state
     /// Used for debugging if the app gets borrowed twice
     debug_borrow: RefCell<Option<&'static str>>,
 
-    #[nwg_control(size: (1200, 800), center: true, title: "Native Windows WYSIWYG", flags: "MAIN_WINDOW")]
+    #[nwg_control(size: (700, 800), title: "Native Windows WYSIWYG", flags: "MAIN_WINDOW")]
     #[nwg_events( 
         OnInit: [GuiBuilder::init],
         OnWindowClose: [GuiBuilder::close],
     )]
-    window: nwg::Window,
+    main_window: nwg::Window,
 
-    #[nwg_layout(parent: window, flex_direction: FlexDirection::Row)]
+    #[nwg_control(size: (800, 800), title: "Demo", flags: "MAIN_WINDOW")]
+    #[nwg_events(OnPaint: [GuiBuilder::fill_demo_background(SELF, EVT_DATA)])]
+    demo_window: nwg::Window,
+
+    #[nwg_layout(parent: main_window, flex_direction: FlexDirection::Row)]
     layout: nwg::FlexboxLayout,
 
     //
@@ -39,7 +52,7 @@ pub struct GuiBuilder {
     //
     // File menu
     //
-    #[nwg_control(text: "&File")]
+    #[nwg_control(parent: main_window, text: "&File")]
     file_menu: nwg::Menu,
 
     #[nwg_control(parent: file_menu, text: "&New Project")]
@@ -63,8 +76,8 @@ pub struct GuiBuilder {
     //
     // Controls List
     //
-    #[nwg_control(parent: window, flags: "VISIBLE")]
-    #[nwg_layout_item(layout: layout, size: Size { width: Points(400.0) , height: Percent(1.0) } )]
+    #[nwg_control(parent: main_window, flags: "VISIBLE")]
+    #[nwg_layout_item(layout: layout, flex_shrink: 0.0, size: Size { width: Points(300.0) , height: Percent(1.0) } )]
     widget_box_frame: nwg::Frame,
 
     #[nwg_partial(parent: widget_box_frame)]
@@ -73,7 +86,7 @@ pub struct GuiBuilder {
     //
     // Control inspector
     //
-    #[nwg_control(parent: window, flags: "VISIBLE")]
+    #[nwg_control(parent: main_window, flags: "VISIBLE")]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0) , height: Percent(1.0) } )]
     object_inspector_frame: nwg::Frame,
 
@@ -102,7 +115,27 @@ impl GuiBuilder {
     fn init(&self) {
         self.widget_box.init();
         self.object_inspector.init();
-        self.window.set_visible(true);
+
+        // Setup paint data
+        *self.paint_data.borrow_mut() = unsafe {
+            use winapi::um::wingdi::{CreateSolidBrush, RGB};
+            
+            let data = PaintData {
+                background: CreateSolidBrush(RGB(80, 80, 80))
+            };
+
+            Some(data)
+        };
+
+        // Position and show the window
+        let (x, y) = self.main_window.position();
+        let (w, _h) = self.main_window.size();
+
+        self.demo_window.set_position(x + (w as i32) + 10, y);
+        self.demo_window.set_visible(true);
+
+        self.main_window.set_visible(true);
+        self.main_window.set_focus();
     }
 
     fn close(&self) {
@@ -111,7 +144,7 @@ impl GuiBuilder {
 
     fn create_new_project(&self) {
         let err_title = "Failed to create new project";
-        let window = &self.window;
+        let window = &self.main_window;
 
         // Check if project is already open
         if let Ok(mut state) = self.state_mut("create_new_project") {
@@ -172,12 +205,31 @@ impl GuiBuilder {
 
     }
 
+    fn fill_demo_background(&self, data: &nwg::EventData) {
+        use winapi::um::winuser::FillRect;
+
+        let paint = data.on_paint();
+        let ps = paint.begin_paint();
+
+        unsafe {
+            let paint = self.paint_data.borrow();
+            let p = paint.as_ref().unwrap();
+
+            let hdc = ps.hdc;
+            let rc = &ps.rcPaint;
+
+            FillRect(hdc, rc, p.background as _);
+        }
+
+        paint.end_paint(&ps);
+    }
+
     /**
         Gui helper that query and parse the output of the directory dialog
     */
     fn select_folder(&self, title: &str) -> Result<Option<String>, CreateProjectError>  {
         self.directory_dialog.set_title(title);
-        if !self.directory_dialog.run(Some(&self.window)) {
+        if !self.directory_dialog.run(Some(&self.main_window)) {
             return Ok(None);
         }
 
@@ -210,7 +262,7 @@ impl GuiBuilder {
                     let content = format!("Internal error! Application state is already borrowed by \"{}\". 
                     This is most likely the developer fault, trying again may fix the issue.\r\n
                     If you have 5 minutes to spare, please screenshot this message and open an issue of the githup repo.", borrower);
-                    nwg::modal_error_message(&self.window, "State borrow error", &content);
+                    nwg::modal_error_message(&self.main_window, "State borrow error", &content);
                     Err(())
                 }
             },
@@ -234,7 +286,7 @@ impl GuiBuilder {
                     let content = format!("Internal error! Application state is already borrowed by \"{}\". 
                     This is most likely the developer fault, trying again may fix the issue.\r\n
                     If you have 5 minutes to spare, please screenshot this message and open an issue of the githup repo.", borrower);
-                    nwg::modal_error_message(&self.window, "State borrow error", &content);
+                    nwg::modal_error_message(&self.main_window, "State borrow error", &content);
                     Err(())
                 }
             },
