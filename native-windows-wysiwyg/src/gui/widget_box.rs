@@ -11,11 +11,11 @@ pub struct WidgetBox {
     #[nwg_resource(source_system: Some(nwg::OemCursor::Normal))]
     cursor_default: nwg::Cursor,
 
-    #[nwg_layout(flex_direction: FlexDirection::Column)]
+    #[nwg_layout(auto_size: false, auto_spacing: None, flex_direction: FlexDirection::Column)]
     layout: nwg::FlexboxLayout,
 
-    #[nwg_control(text: "Control Library", v_align: nwg::VTextAlign::Top)]
-    #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(15.0) })]
+    #[nwg_control(text: "Library", v_align: nwg::VTextAlign::Top)]
+    #[nwg_layout_item(layout: layout, flex_shrink: 0.0, size: Size { width: Percent(1.0), height: Points(25.0) })]
     controls_label: nwg::Label,
 
     #[nwg_control]
@@ -27,7 +27,6 @@ impl WidgetBox {
 
     pub(super) fn init(&self) {
         self.load_widgets();
-        self.set_enabled(false);
     }
 
     pub(super) fn load_widgets(&self) {
@@ -89,7 +88,5 @@ impl WidgetBox {
         tree.ensure_visible(&controls);
     }
 
-    pub(super) fn set_enabled(&self, enabled: bool) {
-        self.widgets_tree.set_enabled(enabled);
-    }
+
 }

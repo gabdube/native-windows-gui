@@ -28,7 +28,7 @@ pub struct GuiBuilder {
     /// Used for debugging if the app gets borrowed twice
     debug_borrow: RefCell<Option<&'static str>>,
 
-    #[nwg_control(size: (700, 800), title: "Native Windows WYSIWYG", flags: "MAIN_WINDOW")]
+    #[nwg_control(size: (900, 800), title: "Native Windows WYSIWYG", flags: "MAIN_WINDOW")]
     #[nwg_events( 
         OnInit: [GuiBuilder::init],
         OnWindowClose: [GuiBuilder::close],
@@ -39,7 +39,11 @@ pub struct GuiBuilder {
     #[nwg_events(OnPaint: [GuiBuilder::fill_demo_background(SELF, EVT_DATA)])]
     demo_window: nwg::Window,
 
-    #[nwg_layout(parent: main_window, flex_direction: FlexDirection::Row)]
+    #[nwg_layout(
+        parent: main_window,
+        flex_direction: FlexDirection::Row,
+        padding: Rect { start: Points(10.0), end: Points(10.0), top: Points(10.0), bottom: Points(10.0), },
+    )]
     layout: nwg::FlexboxLayout,
 
     //
@@ -74,6 +78,16 @@ pub struct GuiBuilder {
     exit_item: nwg::MenuItem,
 
     //
+    // Window menu
+    //
+    #[nwg_control(parent: main_window, text: "&Window")]
+    window_menu: nwg::Menu,
+
+    #[nwg_control(parent: window_menu, text: "&Show demo window")]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::show_demo] )]
+    show_demo_item: nwg::MenuItem,
+
+    //
     // Controls List
     //
     #[nwg_control(parent: main_window, flags: "VISIBLE")]
@@ -84,14 +98,42 @@ pub struct GuiBuilder {
     widget_box: WidgetBox,
 
     //
+    // Main option container
+    //
+    #[nwg_control(parent: main_window)]
+    #[nwg_layout_item(
+        layout: layout,
+        size: Size { width: Percent(1.0) , height: Percent(1.0) },
+        margin: Rect { start: Points(10.0), ..Default::default() },
+    )]
+    options_container: nwg::TabsContainer,
+
+    //
+    // Project general settings
+    //
+    #[nwg_control(parent: options_container, text: "Project settings")]
+    project_settings_tab: nwg::Tab,
+
+    //
     // Control inspector
     //
-    #[nwg_control(parent: main_window, flags: "VISIBLE")]
-    #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0) , height: Percent(1.0) } )]
-    object_inspector_frame: nwg::Frame,
+    #[nwg_control(parent: options_container, text: "Control Data")]
+    object_inspector_tab: nwg::Tab,
 
-    #[nwg_partial(parent: object_inspector_frame)]
+    #[nwg_partial(parent: object_inspector_tab)]
     object_inspector: ObjectInspector,
+
+    //
+    // Resources Manager
+    //
+    #[nwg_control(parent: options_container, text: "Resources")]
+    resources_tab: nwg::Tab,
+
+    //
+    // Events Manager
+    //
+    #[nwg_control(parent: options_container, text: "Events")]
+    events_tab: nwg::Tab,
 }
 
 impl GuiBuilder {
@@ -115,6 +157,7 @@ impl GuiBuilder {
     fn init(&self) {
         self.widget_box.init();
         self.object_inspector.init();
+        self.options_container.set_enabled(false);
 
         // Setup paint data
         *self.paint_data.borrow_mut() = unsafe {
@@ -136,6 +179,9 @@ impl GuiBuilder {
 
         self.main_window.set_visible(true);
         self.main_window.set_focus();
+
+        // Disable ui until the user load a project
+        self.enable_ui(false);
     }
 
     fn close(&self) {
@@ -189,8 +235,7 @@ impl GuiBuilder {
         if let Ok(mut state) = self.state_mut("create_new_project") {
             match state.create_new_project(new_project_path.clone()) {
                 Ok(_) => {
-                    self.widget_box.set_enabled(true);
-                    self.object_inspector.set_enabled(true);
+                    self.enable_ui(true);
                     window.set_text(&format!("Native Windows WYSIWYG - {}", new_project_path));
                 },
                 Err(reason) => {
@@ -203,6 +248,15 @@ impl GuiBuilder {
 
     fn open_project(&self) {
 
+    }
+
+    fn enable_ui(&self, enable: bool) {
+        self.options_container.set_enabled(enable);
+        self.widget_box.widgets_tree.set_enabled(enable);
+    }
+
+    fn show_demo(&self) {
+        self.demo_window.set_visible(true);
     }
 
     fn fill_demo_background(&self, data: &nwg::EventData) {

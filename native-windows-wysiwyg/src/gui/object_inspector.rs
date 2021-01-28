@@ -12,8 +12,8 @@ pub struct ObjectInspector {
     //
     // Current controls tree
     //
-    #[nwg_control(text: "Control Tree", v_align: nwg::VTextAlign::Top)]
-    #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(30.0) })]
+    #[nwg_control(text: "Control Tree", background_color: Some([255,255,255]), v_align: nwg::VTextAlign::Top)]
+    #[nwg_layout_item(layout: layout, flex_shrink: 0.0, size: Size { width: Percent(1.0), height: Points(15.0) })]
     controls_label: nwg::Label,
 
     #[nwg_control(
@@ -26,8 +26,8 @@ pub struct ObjectInspector {
     //
     // Selected control properties
     //
-    #[nwg_control(text: "Properties", v_align: nwg::VTextAlign::Top)]
-    #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(30.0) })]
+    #[nwg_control(text: "Control Properties", background_color: Some([255,255,255]), v_align: nwg::VTextAlign::Top)]
+    #[nwg_layout_item(layout: layout, flex_shrink: 0.0, size: Size { width: Percent(1.0), height: Points(15.0) })]
     properties_label: nwg::Label,
 
     #[nwg_control(
@@ -51,11 +51,6 @@ impl ObjectInspector {
         prop.insert_column("Name");
         prop.insert_column("Value");
 
-        self.set_enabled(false);
     }
 
-    pub(super) fn set_enabled(&self, enabled: bool) {
-        self.properties_list.set_enabled(enabled);
-        self.control_list.set_enabled(enabled);
-    }
 }
