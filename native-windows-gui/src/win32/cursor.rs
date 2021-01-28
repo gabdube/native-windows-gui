@@ -179,9 +179,20 @@ impl GlobalCursor {
 
     ```rust
         use native_windows_gui as nwg;
-        fn dragging(c: &nwg::Window) {
-            if nwg::GlobalCursor::dragging(&c.handle, None) {
-                println!("DRAGGING!")
+        use nwg::{Event::*, MousePressEvent::*};
+
+        // Sample code that capture the cursor if the user tries to drag a control
+        fn on_mouse_press(frame: &nwg::Frame, event: nwg::Event) {
+            match event {
+                OnMousePress(MousePressLeftDown) => {
+                    if nwg::GlobalCursor::dragging(&frame.handle, None) {
+                        nwg::GlobalCursor::set_capture(&frame.handle);
+                    }
+                },
+                OnMousePress(MousePressLeftUp) => {
+                    nwg::GlobalCursor::release();
+                },
+                _ => unreachable!()
             }
         }
     ```

@@ -3,6 +3,7 @@
 */
 use nwd::NwgUi;
 use nwg::{NativeUi, NwgError};
+use nwg::stretch::{style::{*, Dimension::*}, geometry::*};
 
 use std::cell::{RefCell, RefMut, Ref};
 use crate::AppState;
@@ -22,10 +23,11 @@ pub struct GuiBuilder {
     #[nwg_events( 
         OnInit: [GuiBuilder::init],
         OnWindowClose: [GuiBuilder::close],
-        OnResize: [GuiBuilder::resize_components],
-        OnWindowMaximize: [GuiBuilder::resize_components],
     )]
     window: nwg::Window,
+
+    #[nwg_layout(parent: window, flex_direction: FlexDirection::Row)]
+    layout: nwg::FlexboxLayout,
 
     //
     // Resources & extra
@@ -59,12 +61,23 @@ pub struct GuiBuilder {
     exit_item: nwg::MenuItem,
 
     //
-    // Editor components
+    // Controls List
     //
-    #[nwg_partial(parent: window)]
+    #[nwg_control(parent: window, flags: "VISIBLE")]
+    #[nwg_layout_item(layout: layout, size: Size { width: Points(400.0) , height: Percent(1.0) } )]
+    widget_box_frame: nwg::Frame,
+
+    #[nwg_partial(parent: widget_box_frame)]
     widget_box: WidgetBox,
 
-    #[nwg_partial(parent: window)]
+    //
+    // Control inspector
+    //
+    #[nwg_control(parent: window, flags: "VISIBLE")]
+    #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0) , height: Percent(1.0) } )]
+    object_inspector_frame: nwg::Frame,
+
+    #[nwg_partial(parent: object_inspector_frame)]
     object_inspector: ObjectInspector,
 }
 
@@ -143,6 +156,8 @@ impl GuiBuilder {
         if let Ok(mut state) = self.state_mut("create_new_project") {
             match state.create_new_project(new_project_path.clone()) {
                 Ok(_) => {
+                    self.widget_box.set_enabled(true);
+                    self.object_inspector.set_enabled(true);
                     window.set_text(&format!("Native Windows WYSIWYG - {}", new_project_path));
                 },
                 Err(reason) => {
@@ -158,61 +173,8 @@ impl GuiBuilder {
     }
 
     /**
-        Widgets use a custom layout system, so we use absolute positions
+        Gui helper that query and parse the output of the directory dialog
     */
-    fn resize_components(&self) {
-        let (w, h) = self.window.size();
-        if h < 2 {
-            // Nothing to display
-            return;
-        }
-
-        let widgets_frame = &self.widget_box.container_frame;
-        let inspect_frame = &self.object_inspector.container_frame;
-
-        let (mut widgets_w, _widgets_h) = widgets_frame.size();
-        let (mut inspect_w, _inspect_h) = inspect_frame.size();
-
-        let spacing = 20;
-        let half_spacing = spacing / 2;
-
-        // Try to restore the saved width
-        if w >= (widgets_w + inspect_w) + spacing {
-            let widget_user = self.widget_box.user_width.get();
-            if widgets_w < widget_user {
-                widgets_w = widget_user;
-            }
-
-            let inspect_user = self.object_inspector.user_width.get();
-            if inspect_w < inspect_user {
-                inspect_w = inspect_user;
-            }
-        }
-
-        // Update size
-        if w >= (widgets_w + inspect_w) + spacing {
-            let widget_user = self.widget_box.user_width.get();
-            if widgets_w < widget_user {
-                widgets_w = widget_user;
-            }
-
-            let inspect_user = self.object_inspector.user_width.get();
-            if inspect_w < inspect_user {
-                inspect_w = inspect_user;
-            }
-            widgets_frame.set_size(widgets_w, h-2);
-            inspect_frame.set_position((w-inspect_w) as i32, 0);
-            inspect_frame.set_size(inspect_w, h-2);
-        } else {
-            let half_width = w / 2;
-            if half_width > half_spacing {
-                widgets_frame.set_size(half_width - half_spacing, h-2);
-                inspect_frame.set_position((w - half_width + half_spacing) as i32, 0);
-                inspect_frame.set_size(half_width - half_spacing, h-2);
-            }
-        }
-    }
-
     fn select_folder(&self, title: &str) -> Result<Option<String>, CreateProjectError>  {
         self.directory_dialog.set_title(title);
         if !self.directory_dialog.run(Some(&self.window)) {

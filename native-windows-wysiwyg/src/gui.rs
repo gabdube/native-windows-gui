@@ -1,4 +1,3 @@
-mod gui_shared;
 mod gui_error;
 mod widget_box;
 mod object_inspector;
