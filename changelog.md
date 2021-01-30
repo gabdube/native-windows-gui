@@ -1,6 +1,8 @@
 1.0.11
 * Fixed `Frame` control `set_size`
+* Added `background_color` to `Frame`
 * Added `track_mouse_leaving`, `track_mouse_hover`, `track_mouse_cancel`, and `track_mouse_query` to `GlobalCursor`
+
 
 1.0.10
 * Fixed a compiling bug when using `no-default-features`

@@ -117,6 +117,11 @@ fn main() {
         }
     };
 
+    {
+        app.create_new_project("F:\\projects\\tmp\\gui_test_project".to_owned());
+    }
+    
+
     nwg::dispatch_thread_events();
 
     app.destroy();

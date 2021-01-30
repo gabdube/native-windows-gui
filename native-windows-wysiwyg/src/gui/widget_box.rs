@@ -14,10 +14,6 @@ pub struct WidgetBox {
     #[nwg_layout(auto_size: false, auto_spacing: None, flex_direction: FlexDirection::Column)]
     layout: nwg::FlexboxLayout,
 
-    #[nwg_control(text: "Library", v_align: nwg::VTextAlign::Top)]
-    #[nwg_layout_item(layout: layout, flex_shrink: 0.0, size: Size { width: Percent(1.0), height: Points(25.0) })]
-    controls_label: nwg::Label,
-
     #[nwg_control]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Percent(1.0) })]
     pub(super) widgets_tree: nwg::TreeView,

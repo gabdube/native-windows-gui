@@ -7,7 +7,12 @@ use nwg::stretch::{style::{*, Dimension::*}, geometry::*};
 
 use std::cell::{RefCell, RefMut, Ref};
 use crate::AppState;
-use super::{gui_error::*, widget_box::WidgetBox, object_inspector::ObjectInspector};
+use super::{
+    gui_error::*,
+    widget_box::WidgetBox,
+    project_settings_ui::ProjectSettingsUi,
+    object_inspector::ObjectInspector
+};
 
 use winapi::shared::windef::HBRUSH;
 
@@ -60,7 +65,7 @@ pub struct GuiBuilder {
     file_menu: nwg::Menu,
 
     #[nwg_control(parent: file_menu, text: "&New Project")]
-    #[nwg_events( OnMenuItemSelected: [GuiBuilder::create_new_project] )]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_new_project] )]
     new_project_item: nwg::MenuItem,
 
     #[nwg_control(parent: file_menu)]
@@ -114,6 +119,9 @@ pub struct GuiBuilder {
     #[nwg_control(parent: options_container, text: "Project settings")]
     project_settings_tab: nwg::Tab,
 
+    #[nwg_partial(parent: project_settings_tab)]
+    project_settings: ProjectSettingsUi,
+
     //
     // Control inspector
     //
@@ -156,8 +164,8 @@ impl GuiBuilder {
 
     fn init(&self) {
         self.widget_box.init();
+        self.project_settings.init();
         self.object_inspector.init();
-        self.options_container.set_enabled(false);
 
         // Setup paint data
         *self.paint_data.borrow_mut() = unsafe {
@@ -181,14 +189,19 @@ impl GuiBuilder {
         self.main_window.set_focus();
 
         // Disable ui until the user load a project
-        self.enable_ui(false);
+        // A project might already been loaded by the main setup
+        if let Ok(state) = self.state("init") {
+            if !state.project_loaded() {
+                self.enable_ui(false);
+            }
+        }
     }
 
     fn close(&self) {
         nwg::stop_thread_dispatch();
     }
 
-    fn create_new_project(&self) {
+    fn prepare_new_project(&self) {
         let err_title = "Failed to create new project";
         let window = &self.main_window;
 
@@ -209,6 +222,8 @@ impl GuiBuilder {
                     _ => unreachable!()
                 }
             }
+        } else {
+            return;
         }
 
         // Fetch project path
@@ -231,7 +246,13 @@ impl GuiBuilder {
             }
         };
 
-        // Create new project
+        self.create_new_project(new_project_path);
+    }
+
+    pub fn create_new_project(&self, new_project_path: String) {
+        let window = &self.main_window;
+        let err_title = "Failed to create new project";
+
         if let Ok(mut state) = self.state_mut("create_new_project") {
             match state.create_new_project(new_project_path.clone()) {
                 Ok(_) => {
@@ -243,7 +264,7 @@ impl GuiBuilder {
                     nwg::modal_error_message(window, err_title, &content);
                 }
             }
-        } 
+        }
     }
 
     fn open_project(&self) {
@@ -313,9 +334,11 @@ impl GuiBuilder {
                 },
                 Err(_) => {
                     let borrower = self.debug_borrow.borrow().unwrap_or("No borrower set!");
-                    let content = format!("Internal error! Application state is already borrowed by \"{}\". 
-                    This is most likely the developer fault, trying again may fix the issue.\r\n
-                    If you have 5 minutes to spare, please screenshot this message and open an issue of the githup repo.", borrower);
+                    let content = format!(concat!(
+                        "Internal error! Application state is already borrowed by \"{}\".\r\n\r\n",
+                        "This is most likely my fault, trying again may fix the issue.\r\n\r\n",
+                        "If you have 5 minutes to spare, please screenshot this message and open an issue of the githup repo."
+                    ), borrower);
                     nwg::modal_error_message(&self.main_window, "State borrow error", &content);
                     Err(())
                 }
@@ -337,9 +360,12 @@ impl GuiBuilder {
                 },
                 Err(_) => {
                     let borrower = self.debug_borrow.borrow().unwrap_or("No borrower set!");
-                    let content = format!("Internal error! Application state is already borrowed by \"{}\". 
-                    This is most likely the developer fault, trying again may fix the issue.\r\n
-                    If you have 5 minutes to spare, please screenshot this message and open an issue of the githup repo.", borrower);
+                    let content = format!(concat!(
+                        "Internal error! Application state is already borrowed by \"{}\".\r\n\r\n",
+                        "This is most likely the developer fault, trying again may fix the issue.\r\n\r\n",
+                        "If you have 5 minutes to spare, please screenshot this message and open an issue of the githup repo."
+                    ), borrower);
+                    
                     nwg::modal_error_message(&self.main_window, "State borrow error", &content);
                     Err(())
                 }
