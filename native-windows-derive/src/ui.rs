@@ -4,7 +4,7 @@ use crate::events::ControlEvents;
 use crate::shared::Parameters;
 
 const TOP_LEVEL: &'static [&'static str] = &[
-    "Window", "MessageWindow", "ExternCanvas"
+    "Window", "MessageWindow", "ExternCanvas", "Tooltip"
 ];
 
 const AUTO_PARENT: &'static [&'static str] = &[

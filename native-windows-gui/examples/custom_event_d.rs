@@ -1,10 +1,8 @@
 /*!
     Shows how to use the `CustomEvent` control.
 
-    In this example, we have a list of buttons implemented as a partial. Instead on binding the same callback
-    on each control in the parent UI, the partial defines an event that is raised internally by the partial.
-
-    That event is then catched in the parent window.
+    In this example, we have a dynamic list of buttons implemented as a partial. This list use an
+    event to to propagate the event to the parent window.
 */
 
 

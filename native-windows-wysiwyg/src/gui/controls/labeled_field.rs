@@ -3,8 +3,8 @@
 pub struct LabeledField {
     layout: nwg::FlexboxLayout,
     pub frame: nwg::Frame,
-    label: nwg::Label,
-    field: nwg::TextInput,
+    pub label: nwg::Label,
+    pub input: nwg::TextInput,
 }
 
 // Implements default trait so that the control can be used by native windows derive
@@ -27,11 +27,11 @@ impl LabeledField {
     }
 
     pub fn set_text(&self, text: &str) {
-        self.field.set_text(text);
+        self.input.set_text(text);
     }
 
     pub fn text(&self) -> String {
-        self.field.text()
+        self.input.text()
     }
 
 }
@@ -96,7 +96,7 @@ impl<'a> LabeledFieldBuilder<'a> {
             .parent(&labeled.frame)
             .readonly(self.disabled)
             .text(self.value)
-            .build(&mut labeled.field)?;
+            .build(&mut labeled.input)?;
 
         use nwg::stretch::{geometry::Size, style::{Dimension as D, FlexDirection}};
 
@@ -106,7 +106,7 @@ impl<'a> LabeledFieldBuilder<'a> {
             .child(&labeled.label)
                 .child_flex_shrink(0.0)
                 .child_size(Size { width: D::Points(self.label_width), height: D::Auto })
-            .child(&labeled.field)
+            .child(&labeled.input)
                 .child_size(Size { width: D::Percent(1.0), height: D::Auto })
             .build(&labeled.layout)?;
 

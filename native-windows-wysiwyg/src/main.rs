@@ -14,7 +14,7 @@ mod gui;
 
 extern crate native_windows_gui as nwg;
 extern crate  native_windows_derive as nwd;
-use std::{fs, process::exit};
+use std::{fs, path::PathBuf, process::{exit, Command}};
 
 /**
     Main application state
@@ -37,12 +37,21 @@ impl AppState {
 
     /**
         Initialize a new rust project using cargo
-        Parse the cargo projec into the application state
 
         On failure, return a message that should be displayed by the GUI app
     */
     pub fn create_new_project(&mut self, path: String) -> Result<(), String> {
         self.validate_new_project_path(&path)?;
+        self.cargo_init(&path)?;
+        self.read_cargo_toml(&path)?;
+        self.current_project_path = Some(path);
+        Ok(())
+    }
+
+    /**
+        Open an existing rust project
+    */
+    pub fn open_project(&mut self, path: String) -> Result<(), String> {
         self.current_project_path = Some(path);
         Ok(())
     }
@@ -96,6 +105,39 @@ impl AppState {
         Ok(())
     }
 
+    fn cargo_init(&self, path: &str) -> Result<(), String> {
+        let cargo_output = Command::new("cargo")
+            .arg("init")
+            .current_dir(path)
+            .output()
+            .map_err(|e| format!("Failed to run `cargo init`: {:?}", e) )?;
+
+        if !cargo_output.status.success() {
+            let msg = match cargo_output.status.code() {
+                Some(code) => format!("`cargo init` terminated with exit code {}", code),
+                None => format!("`cargo init` process terminated by signal")
+            };
+            return Err(msg);
+        }
+
+        Ok(())
+    }
+
+    fn read_cargo_toml(&self, path: &str) -> Result<(), String> {
+        let mut cargo_path = PathBuf::from(path);
+        cargo_path.push("Cargo.toml");
+
+        let cargo_str = fs::read_to_string(&cargo_path)
+            .map_err(|e| format!("Failed to read `Cargo.toml`: {:?}", e))?;
+
+        let cargo_value = toml::from_str(&cargo_str)
+            .map_err(|e| format!("Failed to parse `Cargo.toml`: {:?}", e))?;
+
+        println!("{:#?}", cargo_value);
+
+        Ok(())
+    }
+
 }
 
 
@@ -118,7 +160,7 @@ fn main() {
     };
 
     {
-        app.create_new_project("F:\\projects\\tmp\\gui_test_project".to_owned());
+        //app.create_new_project("F:\\projects\\tmp\\gui_test_project".to_owned());
     }
     
 

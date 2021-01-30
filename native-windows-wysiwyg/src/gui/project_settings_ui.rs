@@ -2,6 +2,8 @@ use nwd::NwgPartial;
 use nwg::stretch::{style::{*, Dimension::*}, geometry::*};
 use super::controls::{LabeledField, LeftButton};
 
+const LABEL_WIDTH: f32 = 130.0;
+
 #[derive(Default)]
 #[derive(NwgPartial)]
 pub struct ProjectSettingsUi {
@@ -10,34 +12,66 @@ pub struct ProjectSettingsUi {
     layout: nwg::FlexboxLayout,
 
     #[nwg_control]
+    tt: nwg::Tooltip,
+    
+    #[nwg_control]
     pub on_settings_saved: nwg::CustomEvent,
 
-    #[nwg_control(text: "Crate Name:", disabled: true, label_width: 130.0, background_color: Some([255,255,255]))]
+    #[nwg_control(text: "Crate Name:", disabled: true, label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
     crate_name: LabeledField,
 
-    #[nwg_control(text: "Gui module:", label_width: 130.0, background_color: Some([255,255,255]))]
+    #[nwg_control(text: "NWG version:", label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
-    gui_module: LabeledField,
+    nwg_version: LabeledField,
 
-    #[nwg_control(text: "Resource file:", label_width: 130.0, background_color: Some([255,255,255]))]
+    #[nwg_control(text: "NWD version:", label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
+    #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
+    nwd_version: LabeledField,
+
+    #[nwg_control(text: "Resource file:", label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
     res_file: LabeledField,
 
-    #[nwg_control(text: "Resources path:", label_width: 130.0, background_color: Some([255,255,255]))]
+    #[nwg_control(text: "Resources path:", label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
     res_path: LabeledField,
 
-    #[nwg_control(text: "Save", width: 100.0, background_color: Some([255,255,255]))]
+    #[nwg_control(text: "Update", width: 100.0, background_color: Some([255,255,255]))]
+    #[nwg_events((button, OnButtonClick): [ProjectSettingsUi::save_settings])]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(55.0) })]
-    save_btn: LeftButton
+    pub save_btn: LeftButton
 
 }
 
 impl ProjectSettingsUi {
 
     pub(super) fn init(&self) {
-        
+        let tt = &self.tt;
+
+        let tt0 = "The crate name.";
+        tt.register(&self.crate_name.label, tt0);
+        tt.register(&self.crate_name.input, tt0);
+
+        let tt1 = "Relative path to the windows resource file (*.rc) for the project. Can be left empty.";
+        tt.register(&self.res_file.label, tt1);
+        tt.register(&self.res_file.input, tt1);
+
+        let tt2 = "Relative path to a folder containing the resources used by the GUI. Can be left empty.";
+        tt.register(&self.res_path.label, tt2);
+        tt.register(&self.res_path.input, tt2);
+
+        let tt3 = "Current native-windows-gui version defined in Cargo.toml.";
+        tt.register(&self.nwg_version.label, tt3);
+        tt.register(&self.nwg_version.input, tt3);
+
+        let tt4 = "Current native-windows-derive version defined in Cargo.toml.";
+        tt.register(&self.nwd_version.label, tt4);
+        tt.register(&self.nwd_version.input, tt4);
+    }
+
+    pub fn save_settings(&self) {
+        self.on_settings_saved.trigger();
     }
 
 }

@@ -72,7 +72,7 @@ pub struct GuiBuilder {
     sp1: nwg::MenuSeparator,
 
     #[nwg_control(parent: file_menu, text: "&Open project")]
-    #[nwg_events( OnMenuItemSelected: [GuiBuilder::open_project] )]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_open_project] )]
     open_project_item: nwg::MenuItem,
 
     #[nwg_control(parent: file_menu)]
@@ -120,6 +120,7 @@ pub struct GuiBuilder {
     project_settings_tab: nwg::Tab,
 
     #[nwg_partial(parent: project_settings_tab)]
+    #[nwg_events((on_settings_saved, OnCustomEvent): [GuiBuilder::save_project_settings])]
     project_settings: ProjectSettingsUi,
 
     //
@@ -162,6 +163,9 @@ impl GuiBuilder {
 
     }
 
+    pub fn save_project_settings(&self) {
+    }
+
     fn init(&self) {
         self.widget_box.init();
         self.project_settings.init();
@@ -202,27 +206,8 @@ impl GuiBuilder {
     }
 
     fn prepare_new_project(&self) {
-        let err_title = "Failed to create new project";
-        let window = &self.main_window;
-
         // Check if project is already open
-        if let Ok(mut state) = self.state_mut("create_new_project") {
-            if state.project_loaded() {
-                // Ask the user if he wishes to close the current project
-                let msg = nwg::MessageParams {
-                    title: "Project already loaded",
-                    content: "A project is already open. Do you wish to close it?",
-                    buttons: nwg::MessageButtons::YesNo,
-                    icons: nwg::MessageIcons::Warning
-                };
-
-                match nwg::modal_message(window, &msg) {
-                    nwg::MessageChoice::No => { return; },
-                    nwg::MessageChoice::Yes => state.close_project(),
-                    _ => unreachable!()
-                }
-            }
-        } else {
+        if !self.swap_project("prepare_new_project") {
             return;
         }
 
@@ -231,17 +216,9 @@ impl GuiBuilder {
             Ok(Some(path)) => path,
             Ok(None) => { return; },
             Err(e) => {
-                match e {
-                    CreateProjectError::BadPath(path) => {
-                        let content = format!("The selected path is not a valid utf-8 string: {:?}", path);
-                        nwg::modal_error_message(window, err_title, &content);
-                    },
-                    CreateProjectError::Internal(e) => {
-                        let content = format!("A system error ocurred while reading the path: {:?}", e);
-                        nwg::modal_error_message(window, err_title, &content);
-                    },
-                }
-
+                let err_title = "Failed to create new project";
+                let err = format!("{}", e);
+                nwg::modal_error_message(&self.main_window, err_title, &err);
                 return;
             }
         };
@@ -260,15 +237,50 @@ impl GuiBuilder {
                     window.set_text(&format!("Native Windows WYSIWYG - {}", new_project_path));
                 },
                 Err(reason) => {
-                    let content = format!("Impossible to create a new project at the selected location: {}", reason);
+                    let content = format!("Impossible to create a new project at the selected location:\r\n\r\n{}", reason);
                     nwg::modal_error_message(window, err_title, &content);
                 }
             }
         }
     }
 
-    fn open_project(&self) {
+    fn prepare_open_project(&self) {
+        // Check if project is already open
+        if !self.swap_project("prepare_open_project") {
+            return;
+        }
 
+        // Fetch project path
+        let project_path = match self.select_folder("Open project") {
+            Ok(Some(path)) => path,
+            Ok(None) => { return; },
+            Err(e) => {
+                let err_title = "Failed to open project";
+                let err = format!("{}", e);
+                nwg::modal_error_message(&self.main_window, err_title, &err);
+                return;
+            }
+        };
+     
+        self.open_project(project_path);
+    }
+
+    fn open_project(&self, project_path: String) {
+        let window = &self.main_window;
+        let err_title = "Failed to open project";
+
+        if let Ok(mut state) = self.state_mut("open_project") {
+            match state.open_project(project_path.clone()) {
+                Ok(_) => {
+                    self.enable_ui(true);
+                    window.set_text(&format!("Native Windows WYSIWYG - {}", project_path));
+                },
+                Err(reason) => {
+                    let content = format!("Failed to open project at the selected location:\r\n\r\n{}", reason);
+                    nwg::modal_error_message(window, err_title, &content);
+                }
+            }
+        }
     }
 
     fn enable_ui(&self, enable: bool) {
@@ -317,6 +329,38 @@ impl GuiBuilder {
             },
             Err(err) => Err(CreateProjectError::Internal(err))
         }
+    }
+
+    /**
+        Gui helper to close an existing project when a new project is loaded/created.
+
+        Returns true if the user replaced the project or false otherwise.
+    */
+    fn swap_project(&self, borrower: &'static str) -> bool {
+        let mut swap = true;
+        if let Ok(mut state) = self.state_mut(borrower) {
+            if state.project_loaded() {
+                // Ask the user if he wishes to close the current project
+                let msg = nwg::MessageParams {
+                    title: "Project already loaded",
+                    content: "A project is already open. Do you wish to close it?",
+                    buttons: nwg::MessageButtons::YesNo,
+                    icons: nwg::MessageIcons::Warning
+                };
+
+                match nwg::modal_message(&self.main_window, &msg) {
+                    nwg::MessageChoice::Yes => {
+                        state.close_project();
+                    },
+                    nwg::MessageChoice::No => {
+                        swap = false;
+                    },
+                    _ => unreachable!()
+                }
+            }
+        }
+
+        swap
     }
 
     /**
