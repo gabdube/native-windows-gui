@@ -150,7 +150,6 @@ pub struct TreeView {
 
 impl TreeView {
 
-    #[cfg(feature="image-list")]
     pub fn builder<'a>() -> TreeViewBuilder<'a> {
         TreeViewBuilder {
             size: (100, 200),
