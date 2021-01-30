@@ -9,7 +9,7 @@ use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
 use winapi::um::winuser::{WNDPROC, NMHDR};
 use winapi::um::commctrl::{NMTTDISPINFOW, SUBCLASSPROC};
 use super::base_helper::{CUSTOM_ID_BEGIN, to_utf16};
-use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY};
+use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY, NWG_CUSTOM_EVENT};
 use super::high_dpi;
 use crate::controls::ControlHandle;
 use crate::{Event, EventData, NwgError};
@@ -19,6 +19,7 @@ use std::rc::Rc;
 
 static mut TIMER_ID: u32 = 1; 
 static mut NOTICE_ID: u32 = 1; 
+static mut CUSTOM_EVENT_ID: u32 = 1;
 static mut EVENT_HANDLER_ID: UINT_PTR = 1;
 
 const NO_DATA: EventData = EventData::NoData;
@@ -57,6 +58,16 @@ pub fn build_notice(parent: HWND) -> ControlHandle {
         tmp
     };
     ControlHandle::Notice(parent, id)
+}
+
+
+pub fn build_custom_event(parent: HWND) -> ControlHandle {
+    let id = unsafe {
+        let tmp = CUSTOM_EVENT_ID;
+        CUSTOM_EVENT_ID += 1;
+        tmp
+    };
+    ControlHandle::CustomEvent(parent, id)
 }
 
 pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> ControlHandle {
@@ -701,6 +712,7 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_RBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
         WM_RBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
         NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Notice(hwnd, w as u32)),
+        NWG_CUSTOM_EVENT => callback(Event::OnCustomEvent, NO_DATA, ControlHandle::CustomEvent(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {
             let mut should_exit = true;

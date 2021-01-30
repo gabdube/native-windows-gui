@@ -12,6 +12,7 @@ use winapi::um::winuser::WNDCLASSEXW;
 pub const NOTICE_MESSAGE: UINT = WM_USER+100;
 pub const NWG_INIT: UINT = WM_USER + 101;
 pub const NWG_TRAY: UINT = WM_USER + 102;
+pub const NWG_CUSTOM_EVENT: UINT = WM_USER + 103;
 
 
 /// Returns the class info of a hwnd handle

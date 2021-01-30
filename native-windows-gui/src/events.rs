@@ -251,6 +251,9 @@ pub enum Event {
     /// When a [notice](NoticeSender::notice) function is triggered
     OnNotice,
 
+    /// When a [CustomEvent](CustomEvent::trigger) function is triggered
+    OnCustomEvent,
+
     /// When a user clicks on the X button of a window
     OnWindowClose,
 }

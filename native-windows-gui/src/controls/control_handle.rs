@@ -23,6 +23,9 @@ pub enum ControlHandle {
     /// Notice control
     Notice(HWND, u32),
 
+    /// Custom events control
+    CustomEvent(HWND, u32),
+
     /// Timer control
     Timer(HWND, u32),
 
@@ -92,6 +95,13 @@ impl ControlHandle {
         }
     }
 
+    pub fn custom_event(&self) -> Option<(HWND, u32)> {
+        match self {
+            &ControlHandle::CustomEvent(h, i) => Some((h, i)),
+            _ => None,
+        }
+    }
+
     pub fn tray(&self) -> Option<HWND> {
         match self {
             &ControlHandle::SystemTray(h) => Some(h),
@@ -146,6 +156,11 @@ impl PartialEq for ControlHandle {
             // Notice
             &ControlHandle::Notice(hwnd1, id1) => match other {
                 &ControlHandle::Notice(hwnd2, id2) => hwnd1 == hwnd2 && id1 == id2,
+                _ => false
+            },
+            // Custom events
+            &ControlHandle::CustomEvent(hwnd1, id1) => match other {
+                &ControlHandle::CustomEvent(hwnd2, id2) => hwnd1 == hwnd2 && id1 == id2,
                 _ => false
             },
             // System tray

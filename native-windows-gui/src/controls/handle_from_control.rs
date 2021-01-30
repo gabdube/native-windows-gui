@@ -210,6 +210,12 @@ use super::Notice;
 #[cfg(feature = "notice")]
 handles!(Notice);
 
+#[cfg(feature = "custom-event")]
+use super::CustomEvent;
+
+#[cfg(feature = "custom-event")]
+handles!(CustomEvent);
+
 #[cfg(feature = "list-view")]
 use super::ListView;
 

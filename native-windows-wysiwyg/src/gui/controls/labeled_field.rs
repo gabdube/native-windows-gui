@@ -1,6 +1,3 @@
-use native_windows_gui as nwg;
-
-
 /// Binds a label and a textinput field together
 #[derive(Default)]
 pub struct LabeledField {
@@ -107,6 +104,7 @@ impl<'a> LabeledFieldBuilder<'a> {
             .parent(&labeled.frame)
             .flex_direction(FlexDirection::Row)
             .child(&labeled.label)
+                .child_flex_shrink(0.0)
                 .child_size(Size { width: D::Points(self.label_width), height: D::Auto })
             .child(&labeled.field)
                 .child_size(Size { width: D::Percent(1.0), height: D::Auto })

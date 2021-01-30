@@ -35,6 +35,9 @@ mod timer;
 #[cfg(feature = "notice")]
 mod notice;
 
+#[cfg(feature = "custom-event")]
+mod custom_event;
+
 #[cfg(feature = "combobox")]
 mod combo_box;
 
@@ -118,6 +121,9 @@ pub use timer::{Timer, TimerBuilder};
 
 #[cfg(feature = "notice")]
 pub use notice::{Notice, NoticeSender, NoticeBuilder};
+
+#[cfg(feature = "custom-event")]
+pub use custom_event::{CustomEvent, CustomEventBuilder};
 
 #[cfg(feature = "combobox")]
 pub use combo_box::{ComboBox, ComboBoxFlags, ComboBoxBuilder};

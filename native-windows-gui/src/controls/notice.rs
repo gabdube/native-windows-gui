@@ -8,20 +8,35 @@ const UNUSABLE_NOTICE: &'static str = "Notice parent window was freed";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Notice handle is not Notice!";
 
 /**
-An invisible component that can be triggered by other thread.
+An invisible component that can be triggered by other thread. 
 
 A notice object does not send data between threads. Rust has already plenty of way to do this.
 The notice object only serve to "wake up" the GUI thread.
 
-A notice must have a parent window. If the parent is destroyed before the notice, the notice becomes invalid.
+A notice must have a parent window. That window will receive the notice event.
+If the parent is destroyed before the notice, the notice becomes invalid.
+
+Warning! Triggering a notice sender on the same thread as the notice will call the window procedure 
+for the window and it won't not return until the window procedure has processed the message. This can easily
+trigger double-borrow in your code. Use the [CustomEvent] if you want to safely trigger events on the same thread.
 
 Requires the `notice` feature. 
+
+**Builder parameters:**
+  * `parent`:   **Required.** The notice parent.
+
+**Control events:**
+  * `OnNotice`: When the notice is triggered off-thread
 
 ## Example
 
 ```rust
 use native_windows_gui as nwg;
 fn build_notice(notice: &mut nwg::Notice, window: &nwg::Window) {
+
+    // This shortcut can also be used
+    // *notice = nwg::Notice::create(window);
+
     nwg::Notice::builder()
         .parent(window)
         .build(notice);
