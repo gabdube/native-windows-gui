@@ -34,6 +34,10 @@ impl LabeledField {
         self.input.text()
     }
 
+    pub fn set_enabled(&self, enable: bool) {
+        self.input.set_readonly(!enable);
+    }
+
 }
 
 pub struct LabeledFieldBuilder<'a> {

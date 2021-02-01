@@ -65,14 +65,14 @@ pub struct GuiBuilder {
     file_menu: nwg::Menu,
 
     #[nwg_control(parent: file_menu, text: "&New Project")]
-    #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_new_project] )]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_new_project, GuiBuilder::tasks] )]
     new_project_item: nwg::MenuItem,
 
     #[nwg_control(parent: file_menu)]
     sp1: nwg::MenuSeparator,
 
     #[nwg_control(parent: file_menu, text: "&Open project")]
-    #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_open_project] )]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_open_project, GuiBuilder::tasks] )]
     open_project_item: nwg::MenuItem,
 
     #[nwg_control(parent: file_menu)]
@@ -89,7 +89,7 @@ pub struct GuiBuilder {
     window_menu: nwg::Menu,
 
     #[nwg_control(parent: window_menu, text: "&Show demo window")]
-    #[nwg_events( OnMenuItemSelected: [GuiBuilder::show_demo] )]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::show_demo_window] )]
     show_demo_item: nwg::MenuItem,
 
     //
@@ -163,9 +163,7 @@ impl GuiBuilder {
 
     }
 
-    pub fn save_project_settings(&self) {
-    }
-
+    /// Extra ui initialization (after the native-windows-derive boilerplate)
     fn init(&self) {
         self.widget_box.init();
         self.project_settings.init();
@@ -201,10 +199,39 @@ impl GuiBuilder {
         }
     }
 
+    /// Close the app
     fn close(&self) {
         nwg::stop_thread_dispatch();
     }
 
+    /// Update the UI based on the awaiting tasks in the application state
+    fn tasks(&self) {
+        use super::GuiTask::*;
+
+        let tasks = match self.state_mut("tasks") {
+            Ok(mut state) => {
+                // Lets not borrow the app state for longer than necessary
+                // Also, some task may require to borrow the app state again.
+                let tasks = state.tasks().clone();
+                state.tasks().clear();
+                tasks
+            },
+            Err(_) => {
+                return;
+            }
+        };
+        
+        for task in tasks {
+            match task {
+                EnableUi(enable) => self.enable_ui(enable),
+                UpdateWindowTitle(title) => {
+
+                }
+            }
+        }
+    }
+
+    /// GUI checks before creating a new project
     fn prepare_new_project(&self) {
         // Check if project is already open
         if !self.swap_project("prepare_new_project") {
@@ -226,24 +253,21 @@ impl GuiBuilder {
         self.create_new_project(new_project_path);
     }
 
+    /// Project creation & UI update
+    /// Public for testing purpose
     pub fn create_new_project(&self, new_project_path: String) {
         let window = &self.main_window;
         let err_title = "Failed to create new project";
 
         if let Ok(mut state) = self.state_mut("create_new_project") {
-            match state.create_new_project(new_project_path.clone()) {
-                Ok(_) => {
-                    self.enable_ui(true);
-                    window.set_text(&format!("Native Windows WYSIWYG - {}", new_project_path));
-                },
-                Err(reason) => {
-                    let content = format!("Impossible to create a new project at the selected location:\r\n\r\n{}", reason);
-                    nwg::modal_error_message(window, err_title, &content);
-                }
+            if let Err(reason) = state.create_new_project(new_project_path) {
+                let content = format!("Impossible to create a new project at the selected location:\r\n\r\n{}", reason);
+                nwg::modal_error_message(window, err_title, &content);
             }
         }
     }
 
+    /// GUI checks before opening a new project
     fn prepare_open_project(&self) {
         // Check if project is already open
         if !self.swap_project("prepare_open_project") {
@@ -265,33 +289,49 @@ impl GuiBuilder {
         self.open_project(project_path);
     }
 
-    fn open_project(&self, project_path: String) {
+    /// Project open & UI update
+    /// Public for testing purpose
+    pub fn open_project(&self, project_path: String) {
         let window = &self.main_window;
         let err_title = "Failed to open project";
 
         if let Ok(mut state) = self.state_mut("open_project") {
-            match state.open_project(project_path.clone()) {
-                Ok(_) => {
-                    self.enable_ui(true);
-                    window.set_text(&format!("Native Windows WYSIWYG - {}", project_path));
-                },
-                Err(reason) => {
-                    let content = format!("Failed to open project at the selected location:\r\n\r\n{}", reason);
-                    nwg::modal_error_message(window, err_title, &content);
-                }
+            if let Err(reason) = state.open_project(project_path) {
+                let content = format!("Failed to open project at the selected location:\r\n\r\n{}", reason);
+                nwg::modal_error_message(window, err_title, &content);
             }
         }
     }
 
+    /**
+        Saves the main project settings
+    */
+    pub fn save_project_settings(&self) {
+    }
+
+    /// Enable/Disable ui
     fn enable_ui(&self, enable: bool) {
-        self.options_container.set_enabled(enable);
+        let ps = &self.project_settings;
+        ps.nwg_version.set_enabled(enable);
+        ps.nwd_version.set_enabled(enable);
+        ps.res_file.set_enabled(enable);
+        ps.res_path.set_enabled(enable);
+        ps.save_btn.set_enabled(enable);
+        
+
+        //self.options_container.set_enabled(enable);
         self.widget_box.widgets_tree.set_enabled(enable);
     }
 
-    fn show_demo(&self) {
+    /// Duh, don't close the demo window
+    fn show_demo_window(&self) {
         self.demo_window.set_visible(true);
     }
 
+    /**
+        Fill the demo window background with a single color.
+        The render resources are initialized in `init`
+    */
     fn fill_demo_background(&self, data: &nwg::EventData) {
         use winapi::um::winuser::FillRect;
 
@@ -369,20 +409,20 @@ impl GuiBuilder {
         This function tries to borrow the state and if it succeed, it returns a borrowed mutable reference. As an added precaution,
         this function also store the name of the last borrower so that if a double borrow happens, we can easily find the troublemaker.
     */
-    fn state_mut(&self, borrower: &'static str) -> Result<RefMut<AppState>, ()> {
+    pub fn state_mut(&self, mew_borrower: &'static str) -> Result<RefMut<AppState>, ()> {
         match &self.state {
             Some(state) => match state.try_borrow_mut() {
                 Ok(state) => {
-                    *self.debug_borrow.borrow_mut() = Some(borrower);
+                    *self.debug_borrow.borrow_mut() = Some(mew_borrower);
                     Ok(state)
                 },
                 Err(_) => {
                     let borrower = self.debug_borrow.borrow().unwrap_or("No borrower set!");
                     let content = format!(concat!(
-                        "Internal error! Application state is already borrowed by \"{}\".\r\n\r\n",
+                        "Internal error! {:?} is trying to borrow the application state is already borrowed by {:?}.\r\n\r\n",
                         "This is most likely my fault, trying again may fix the issue.\r\n\r\n",
                         "If you have 5 minutes to spare, please screenshot this message and open an issue of the githup repo."
-                    ), borrower);
+                    ), mew_borrower, borrower);
                     nwg::modal_error_message(&self.main_window, "State borrow error", &content);
                     Err(())
                 }
@@ -395,20 +435,20 @@ impl GuiBuilder {
         See `Self::state_mut`
     */
     #[allow(unused)]
-    fn state(&self, borrower: &'static str) -> Result<Ref<AppState>, ()> {
+    pub fn state(&self, new_borrower: &'static str) -> Result<Ref<AppState>, ()> {
         match &self.state {
             Some(state) => match state.try_borrow() {
                 Ok(state) => {
-                    *self.debug_borrow.borrow_mut() = Some(borrower);
+                    *self.debug_borrow.borrow_mut() = Some(new_borrower);
                     Ok(state)
                 },
                 Err(_) => {
                     let borrower = self.debug_borrow.borrow().unwrap_or("No borrower set!");
                     let content = format!(concat!(
-                        "Internal error! Application state is already borrowed by \"{}\".\r\n\r\n",
+                        "Internal error! {:?} is trying to borrow the application state is already borrowed by {:?}.\r\n\r\n",
                         "This is most likely the developer fault, trying again may fix the issue.\r\n\r\n",
                         "If you have 5 minutes to spare, please screenshot this message and open an issue of the githup repo."
-                    ), borrower);
+                    ), new_borrower, borrower);
                     
                     nwg::modal_error_message(&self.main_window, "State borrow error", &content);
                     Err(())

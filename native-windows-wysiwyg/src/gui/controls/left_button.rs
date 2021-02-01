@@ -22,6 +22,10 @@ impl LeftButton {
             background_color: None
         }
     }
+
+    pub fn set_enabled(&self, enable: bool) {
+        self.button.set_enabled(enable);
+    }
 }
 
 pub struct LeftButtonBuilder<'a> {

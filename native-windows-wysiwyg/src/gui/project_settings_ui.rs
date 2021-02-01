@@ -8,7 +8,11 @@ const LABEL_WIDTH: f32 = 130.0;
 #[derive(NwgPartial)]
 pub struct ProjectSettingsUi {
 
-    #[nwg_layout(auto_spacing: Some(0), flex_direction: FlexDirection::Column)]
+    #[nwg_layout(
+        auto_spacing: Some(0),
+        flex_direction: FlexDirection::Column,
+        min_size: Size { width: Points(300.0), height: Points(300.0) },
+    )]
     layout: nwg::FlexboxLayout,
 
     #[nwg_control]
@@ -19,23 +23,23 @@ pub struct ProjectSettingsUi {
 
     #[nwg_control(text: "Crate Name:", disabled: true, label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
-    crate_name: LabeledField,
+    pub crate_name: LabeledField,
 
     #[nwg_control(text: "NWG version:", label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
-    nwg_version: LabeledField,
+    pub nwg_version: LabeledField,
 
     #[nwg_control(text: "NWD version:", label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
-    nwd_version: LabeledField,
+    pub nwd_version: LabeledField,
 
     #[nwg_control(text: "Resource file:", label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
-    res_file: LabeledField,
+    pub res_file: LabeledField,
 
     #[nwg_control(text: "Resources path:", label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
-    res_path: LabeledField,
+    pub res_path: LabeledField,
 
     #[nwg_control(text: "Update", width: 100.0, background_color: Some([255,255,255]))]
     #[nwg_events((button, OnButtonClick): [ProjectSettingsUi::save_settings])]
