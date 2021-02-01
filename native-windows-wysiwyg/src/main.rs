@@ -27,9 +27,75 @@ struct CargoToml {
     content: toml::Value
 }
 
-struct Project {
+pub struct Project {
     cargo_toml: CargoToml,
     path: String,
+}
+
+impl Project {
+
+    /// Name of the cargo project
+    pub fn name(&self) -> String {
+        let name = self.cargo_toml.content
+            .as_table()
+            .and_then(|t| t.get("package"))
+            .and_then(|v| v.as_table() )
+            .and_then(|v| v.get("name"))
+            .and_then(|v| v.as_str())
+            .map(|name| name.to_owned());
+
+        match name {
+            Some(n) => n,
+            None => {
+                println!("Failed to read project name from toml file: {:#?}", self.cargo_toml.content);
+                "Failed to read project name".to_owned()
+            }
+        }
+    }
+
+    /// Check if native-windows-gui & native-window-derive are in the dependencies table
+    pub fn dependencies_ok(&self) -> bool {
+        let dep = self.cargo_toml.content
+            .as_table()
+            .and_then(|t| t.get("dependencies"))
+            .and_then(|d| d.as_table());
+
+        match dep {
+            Some(dep) => {
+                dep.get("native-windows-gui").is_some() &&
+                dep.get("native-windows-derive").is_some()
+            },
+            None => {
+                false
+            }
+        }
+    }
+
+    /// Check the missing dependencies
+    /// Sets a value to `true` if the dependency is missing
+    pub fn missing_dependencies(&self, nwg: &mut bool, nwd: &mut bool) {
+        let dep = self.cargo_toml.content
+            .as_table()
+            .and_then(|t| t.get("dependencies"))
+            .and_then(|d| d.as_table());
+
+        match dep {
+            Some(dep) => {
+                *nwg = dep.get("native-windows-gui").is_none();
+                *nwd = dep.get("native-windows-derive").is_none();
+            },
+            None => {
+                println!("WARNING! Failed to fetch missing dependencies");
+            }
+        }
+    }
+
+    pub fn cargo_path(&self) -> PathBuf {
+        let mut cargo_path = PathBuf::from(&self.path);
+        cargo_path.push("Cargo.toml");
+        cargo_path
+    }
+
 }
 
 /**
@@ -56,6 +122,14 @@ impl AppState {
         self.project.is_some()
     }
 
+    pub fn project(&self) -> Option<&Project> {
+        self.project.as_ref()
+    }
+
+    pub fn project_mut(&mut self) -> Option<&mut Project> {
+        self.project.as_mut()
+    }
+
     pub fn tasks(&mut self) -> &mut Vec<GuiTask> {
         &mut self.gui_tasks
     }
@@ -68,11 +142,13 @@ impl AppState {
     pub fn create_new_project(&mut self, path: String) -> Result<(), String> {
         self.validate_new_project_path(&path)?;
         self.cargo_init(&path)?;
-        let cargo_toml = self.read_cargo_toml(&path)?;
 
-        self.init_project(path, cargo_toml);
+        let cargo_toml = self.read_cargo_toml(&path)?;
+        self.init_project(path.clone(), cargo_toml);
 
         self.gui_tasks.push(GuiTask::EnableUi(true));
+        self.gui_tasks.push(GuiTask::UpdateWindowTitle(format!("Native Windows WYSIWYG - {}", path)));
+        self.gui_tasks.push(GuiTask::ReloadProjectSettings);
 
         Ok(())
     }
@@ -84,10 +160,17 @@ impl AppState {
     */
     pub fn open_project(&mut self, path: String) -> Result<(), String> {
         let cargo_toml = self.read_cargo_toml(&path)?;
-
-        self.init_project(path, cargo_toml);
+        self.init_project(path.clone(), cargo_toml);
 
         self.gui_tasks.push(GuiTask::EnableUi(true));
+        self.gui_tasks.push(GuiTask::UpdateWindowTitle(format!("Native Windows WYSIWYG - {}", path)));
+        self.gui_tasks.push(GuiTask::ReloadProjectSettings);
+
+        // Check if the dependencies are OK
+        let project = self.project().unwrap();
+        if !project.dependencies_ok() {
+            self.gui_tasks.push(GuiTask::AskUserUpdateDependencies);
+        }
 
         Ok(())
     }
@@ -107,6 +190,66 @@ impl AppState {
         self.project = None;
 
         self.gui_tasks.push(GuiTask::EnableUi(false));
+        self.gui_tasks.push(GuiTask::UpdateWindowTitle("Native Windows WYSIWYG".to_owned()));
+    }
+
+    /**
+        Add `native-windows-gui` && `native-windows-derive` to the dependency of an already existing project
+
+        On failure, return a message that should be displayed by the GUI app.
+    */
+    pub fn fix_dependencies(&mut self) -> Result<(), String> {
+        use std::io::prelude::Write;
+
+        if !self.project_loaded() {
+            println!("fix_dependencies called without an active project");
+            return Ok(());
+        }
+
+        let project = self.project_mut().unwrap();
+
+        // Check missing
+        let (mut nwg, mut nwd) = (false, false);
+        project.missing_dependencies(&mut nwg, &mut nwd);
+        if !nwg && !nwd {
+            return Ok(());
+        }
+
+        // Read content
+        let cargo_path = project.cargo_path();
+        let cargo_str = fs::read_to_string(&cargo_path)
+            .map_err(|e| format!("Failed to read Cargo.toml: {:?}", e) )?;
+        
+        // Dep index
+        let dep_index: usize = {
+            let dep_str = "[dependencies]";
+            let mut i = cargo_str.match_indices(dep_str);
+            
+            match i.next().map(|(index, _)| index + dep_str.len()) {
+                Some(i) => i,
+                None => {
+                    return Err(format!("Cannot find \"[dependencies]\" in Cargo.toml"));
+                }
+            }
+        };
+
+        // Write dependencies
+        let (first, last) = cargo_str.split_at(dep_index);
+        let mut file = fs::OpenOptions::new()
+            .write(true)
+            .open(&cargo_path)
+            .map_err(|e| format!("Failed to open `Cargo.toml`:\r\n\r\n{:#?}", e) )?;
+        
+        file.write_all(first.as_bytes())
+            .and_then(|_| file.write_all("\nnative-windows-gui = \"~1.0\"\n".as_bytes()))
+            .and_then(|_| file.write_all("native-windows-derive = \"~1.0\"\n".as_bytes()))
+            .and_then(|_| file.write_all(last.as_bytes()))
+            .map_err(|e| format!("Failed to write dependencies to `Cargo.toml`:\r\n\r\n{:#?}", e) )?;
+
+        // Reload Cargo.toml
+        self.reload_cargo()?;
+
+        Ok(())
     }
 
     fn init_project(&mut self, path: String, cargo_toml: CargoToml) {
@@ -153,8 +296,12 @@ impl AppState {
     }
 
     fn cargo_init(&self, path: &str) -> Result<(), String> {
+        use std::io::prelude::Write;
+
+        // `cargo init --bin`
         let cargo_output = Command::new("cargo")
             .arg("init")
+            .arg("--bin")
             .current_dir(path)
             .output()
             .map_err(|e| format!("Failed to run `cargo init`: {:?}", e) )?;
@@ -166,6 +313,23 @@ impl AppState {
             };
             return Err(msg);
         }
+
+        // Add native-windows-gui dependencies
+        let mut cargo_path = PathBuf::from(path);
+        cargo_path.push("Cargo.toml");
+
+        let mut file = fs::OpenOptions::new()
+            .append(true)
+            .open(&cargo_path)
+            .map_err(|e| format!("Failed to read `Cargo.toml`:\r\n\r\n{:#?}", e) )?;
+
+        let dep = concat!(
+            "native-windows-gui = \"~1.0\"\n",
+            "native-windows-derive = \"~1.0\"\n",
+        );
+
+        file.write_all(dep.as_bytes())
+            .map_err(|e| format!("Failed to write dependencies to `Cargo.toml`:\r\n\r\n{:#?}", e) )?;
 
         Ok(())
     }
@@ -192,6 +356,33 @@ impl AppState {
         Ok(toml)
     }
 
+    /// Reload the cargo file if the file was modified
+    fn reload_cargo(&mut self) -> Result<(), String> {
+        let project = self.project_mut().unwrap();
+        let cargo_path = project.cargo_path();
+
+        let meta = fs::metadata(&cargo_path)
+            .map_err(|e| format!("Failed to read `Cargo.toml`:\r\n\r\n{:#?}", e) )?;
+
+        let modified = meta.modified().unwrap_or(SystemTime::now());
+        if modified == project.cargo_toml.modified {
+            return Ok(());
+        }
+
+        let cargo_str = fs::read_to_string(&cargo_path)
+            .map_err(|e| format!("Failed to read `Cargo.toml`:\r\n\r\n{:#?}", e))?;
+
+        let content: toml::Value = toml::from_str(&cargo_str)
+            .map_err(|e| format!("Failed to parse `Cargo.toml`:\r\n\r\n{:#?}", e))?;
+
+        project.cargo_toml = CargoToml {
+            modified,
+            content,
+        };
+
+        Ok(())
+    }
+
 }
 
 
@@ -214,10 +405,10 @@ fn main() {
     };
 
     {
-        //app.open_project("F:\\projects\\tmp\\gui_test_project".to_owned());
+        //let mut state = app.state_mut("main").unwrap();
+        //state.open_project("F:\\projects\\tmp\\gui_test_project".to_owned()).unwrap();
     }
     
-
     nwg::dispatch_thread_events();
 
     app.destroy();

@@ -21,7 +21,7 @@ pub struct ObjectInspector {
         ex_flags: nwg::ListViewExFlags::GRID | nwg::ListViewExFlags::AUTO_COLUMN_SIZE | nwg::ListViewExFlags::FULL_ROW_SELECT,
     )]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Percent(1.0) })]
-    control_list: nwg::ListView,
+    pub control_list: nwg::ListView,
 
     //
     // Selected control properties
@@ -35,7 +35,7 @@ pub struct ObjectInspector {
         ex_flags: nwg::ListViewExFlags::GRID | nwg::ListViewExFlags::AUTO_COLUMN_SIZE | nwg::ListViewExFlags::FULL_ROW_SELECT,
     )]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Percent(1.0) })]
-    properties_list: nwg::ListView,
+    pub properties_list: nwg::ListView,
 }
 
 impl ObjectInspector {
@@ -51,6 +51,24 @@ impl ObjectInspector {
         prop.insert_column("Name");
         prop.insert_column("Value");
 
+    }
+
+    pub fn enable_ui(&self, enable: bool) {
+        // Listview needs to be enabled in order for the background color to be changed
+        match enable {
+            false => {
+                self.control_list.set_background_color(220, 220, 220);
+                self.properties_list.set_background_color(220, 220, 220);
+                self.control_list.set_enabled(enable);
+                self.properties_list.set_enabled(enable);
+            },
+            true => {
+                self.control_list.set_enabled(enable);
+                self.properties_list.set_enabled(enable);
+                self.control_list.set_background_color(255, 255, 255);
+                self.properties_list.set_background_color(255, 255, 255);
+            }
+        }
     }
 
 }

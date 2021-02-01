@@ -10,4 +10,13 @@ pub enum GuiTask {
 
     /// A new window title should be set
     UpdateWindowTitle(String),
+
+    /// Reload the data displayed in the ObjectInspector
+    ReloadProjectSettings,
+
+    /// If the deps of the project do not include nwg, ask the user if the app can add them
+    AskUserUpdateDependencies,
+
+    /// Clear all data from the gui
+    ClearData,
 }

@@ -78,6 +78,13 @@ pub struct GuiBuilder {
     #[nwg_control(parent: file_menu)]
     sp2: nwg::MenuSeparator,
 
+    #[nwg_control(parent: file_menu, text: "&Close project")]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::close_project, GuiBuilder::tasks] )]
+    close_project_item: nwg::MenuItem,
+
+    #[nwg_control(parent: file_menu)]
+    sp3: nwg::MenuSeparator,
+
     #[nwg_control(parent: file_menu, text: "E&xit")]
     #[nwg_events( OnMenuItemSelected: [GuiBuilder::close] )]
     exit_item: nwg::MenuItem,
@@ -190,18 +197,23 @@ impl GuiBuilder {
         self.main_window.set_visible(true);
         self.main_window.set_focus();
 
-        // Disable ui until the user load a project
-        // A project might already been loaded by the main setup
-        if let Ok(state) = self.state("init") {
-            if !state.project_loaded() {
-                self.enable_ui(false);
-            }
-        }
+        // Disable ui until a project is loaded
+        self.enable_ui(false);
+
+        // Execute waiting tasks
+        self.tasks();
     }
 
     /// Close the app
     fn close(&self) {
         nwg::stop_thread_dispatch();
+    }
+
+    /// Close the current project in the app
+    fn close_project(&self) {
+        if let Ok(mut state) = self.state_mut("close_project") {
+            state.close_project();
+        }
     }
 
     /// Update the UI based on the awaiting tasks in the application state
@@ -224,8 +236,11 @@ impl GuiBuilder {
         for task in tasks {
             match task {
                 EnableUi(enable) => self.enable_ui(enable),
-                UpdateWindowTitle(title) => {
-
+                UpdateWindowTitle(title) => self.main_window.set_text(&title),
+                ReloadProjectSettings => self.reload_project_settings(),
+                AskUserUpdateDependencies => self.ask_user_update_dependencies(),
+                ClearData => {
+                    self.project_settings.clear();
                 }
             }
         }
@@ -255,7 +270,7 @@ impl GuiBuilder {
 
     /// Project creation & UI update
     /// Public for testing purpose
-    pub fn create_new_project(&self, new_project_path: String) {
+    fn create_new_project(&self, new_project_path: String) {
         let window = &self.main_window;
         let err_title = "Failed to create new project";
 
@@ -290,8 +305,7 @@ impl GuiBuilder {
     }
 
     /// Project open & UI update
-    /// Public for testing purpose
-    pub fn open_project(&self, project_path: String) {
+    fn open_project(&self, project_path: String) {
         let window = &self.main_window;
         let err_title = "Failed to open project";
 
@@ -309,17 +323,47 @@ impl GuiBuilder {
     pub fn save_project_settings(&self) {
     }
 
+    /**
+        Reload the project settings tab with the information from the project
+    */
+    fn reload_project_settings(&self) {
+        if let Ok(state) = self.state("reload_project_settings") {
+            if !state.project_loaded() {
+                return;
+            }
+
+            let project = state.project().unwrap();
+            self.project_settings.reload(project);
+        }
+    }
+
+    /**
+        If the deps of the project do not include nwg, ask the user if the app can add them
+    */
+    fn ask_user_update_dependencies(&self) {
+        let title = "Project missing dependencies";
+
+        let msg = nwg::MessageParams {
+            title,
+            content: "This project does not reference native-windows-gui in the dependencies. Do you want to app to add it for you?",
+            buttons: nwg::MessageButtons::YesNo,
+            icons: nwg::MessageIcons::Warning
+        };
+
+        if nwg::modal_message(&self.main_window, &msg) == nwg::MessageChoice::Yes {
+            if let Ok(mut state) = self.state_mut("ask_user_update_dependencies") {
+                if let Err(reason) = state.fix_dependencies() {
+                    let content = format!("Failed to add dependencies to the current project:\r\n\r\n{}", reason);
+                    nwg::modal_error_message(&self.main_window, title, &content);
+                }
+            }
+        }
+    }
+
     /// Enable/Disable ui
     fn enable_ui(&self, enable: bool) {
-        let ps = &self.project_settings;
-        ps.nwg_version.set_enabled(enable);
-        ps.nwd_version.set_enabled(enable);
-        ps.res_file.set_enabled(enable);
-        ps.res_path.set_enabled(enable);
-        ps.save_btn.set_enabled(enable);
-        
-
-        //self.options_container.set_enabled(enable);
+        self.project_settings.enable_ui(enable);
+        self.object_inspector.enable_ui(enable);
         self.widget_box.widgets_tree.set_enabled(enable);
     }
 
@@ -434,7 +478,6 @@ impl GuiBuilder {
     /**
         See `Self::state_mut`
     */
-    #[allow(unused)]
     pub fn state(&self, new_borrower: &'static str) -> Result<Ref<AppState>, ()> {
         match &self.state {
             Some(state) => match state.try_borrow() {
