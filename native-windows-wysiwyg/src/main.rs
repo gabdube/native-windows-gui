@@ -12,6 +12,8 @@
 mod gui;
 use gui::GuiTask;
 
+mod parser;
+
 extern crate native_windows_gui as nwg;
 extern crate  native_windows_derive as nwd;
 use std::{
@@ -252,6 +254,10 @@ impl AppState {
     pub fn open_file_project(&mut self, path: String) -> Result<(), String> {
         use toml::{map::Map, Value};
 
+        if !parser::has_gui_struct(&path) {
+            return Err("A valid file project must already have a GUI struct defined".to_owned());
+        }
+
         let meta = fs::metadata(&path)
             .map_err(|e| format!("Failed to read {:?}:\r\n\r\n{:#?}", path, e) )?;
 
@@ -357,7 +363,7 @@ impl AppState {
         // Reload Cargo.toml
         self.reload_cargo()?;
 
-        // Tell the gui to update it's into
+        // Tell the gui to update its info
         self.gui_tasks.push(GuiTask::ReloadProjectSettings);
 
         Ok(())
@@ -516,7 +522,7 @@ fn main() {
 
     {
         //let mut state = app.state_mut("main").unwrap();
-        //state.open_project("F:\\projects\\tmp\\gui_test_project".to_owned()).unwrap();
+        //state.open_file_project("F:\\projects\\tmp\\gui_test_project\\src\\main.rs".to_owned()).unwrap();
     }
     
     nwg::dispatch_thread_events();
