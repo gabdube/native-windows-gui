@@ -55,8 +55,11 @@ pub struct GuiBuilder {
     // Resources & extra
     //
 
-    #[nwg_resource(action: nwg::FileDialogAction::OpenDirectory)]
+    #[nwg_resource(action: FileDialogAction::OpenDirectory)]
     directory_dialog: nwg::FileDialog,
+
+    #[nwg_resource(action: FileDialogAction::Open)]
+    file_dialog: nwg::FileDialog,
 
     //
     // File menu
@@ -75,6 +78,10 @@ pub struct GuiBuilder {
     #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_open_project, GuiBuilder::tasks] )]
     open_project_item: nwg::MenuItem,
 
+    #[nwg_control(parent: file_menu, text: "&Open file")]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_open_file, GuiBuilder::tasks] )]
+    open_file_item: nwg::MenuItem,
+
     #[nwg_control(parent: file_menu)]
     sp2: nwg::MenuSeparator,
 
@@ -92,8 +99,27 @@ pub struct GuiBuilder {
     //
     // Window menu
     //
-    #[nwg_control(parent: main_window, text: "&Window")]
+    #[nwg_control(parent: main_window, text: "&View")]
     window_menu: nwg::Menu,
+
+    #[nwg_control(parent: window_menu, text: "&Project Settings")]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::swap_tabs(SELF, CTRL)] )]
+    tabs_settings_item: nwg::MenuItem,
+
+    #[nwg_control(parent: window_menu, text: "&Object Manager")]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::swap_tabs(SELF, CTRL)] )]
+    tabs_inspector_item: nwg::MenuItem,
+
+    #[nwg_control(parent: window_menu, text: "&Resources")]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::swap_tabs(SELF, CTRL)] )]
+    tabs_resources_item: nwg::MenuItem,
+
+    #[nwg_control(parent: window_menu, text: "&Events")]
+    #[nwg_events( OnMenuItemSelected: [GuiBuilder::swap_tabs(SELF, CTRL)] )]
+    tabs_events_item: nwg::MenuItem,
+
+    #[nwg_control(parent: window_menu)]
+    sp4: nwg::MenuSeparator,
 
     #[nwg_control(parent: window_menu, text: "&Show demo window")]
     #[nwg_events( OnMenuItemSelected: [GuiBuilder::show_demo_window] )]
@@ -136,7 +162,7 @@ pub struct GuiBuilder {
     //
     // Control inspector
     //
-    #[nwg_control(parent: options_container, text: "Control Data")]
+    #[nwg_control(parent: options_container, text: "Object Manager")]
     object_inspector_tab: nwg::Tab,
 
     #[nwg_partial(parent: object_inspector_tab)]
@@ -318,13 +344,41 @@ impl GuiBuilder {
 
     /// Project open & UI update
     fn open_project(&self, project_path: String) {
-        let window = &self.main_window;
-        let err_title = "Failed to open project";
-
         if let Ok(mut state) = self.state_mut("open_project") {
             if let Err(reason) = state.open_project(project_path) {
                 let content = format!("Failed to open project at the selected location:\r\n\r\n{}", reason);
-                nwg::modal_error_message(window, err_title, &content);
+                nwg::modal_error_message(&self.main_window, "Failed to open project", &content);
+            }
+        }
+    }
+
+    /// Open a single rust file as a project
+    fn prepare_open_file(&self) {
+        // Check if project is already open
+        if !self.swap_project("prepare_open_file") {
+            return;
+        }
+
+        // Fetch project path
+        let project_path = match self.select_file("Open project", "Rust Source(*.rs)") {
+            Ok(Some(path)) => path,
+            Ok(None) => { return; },
+            Err(e) => {
+                let err_title = "Failed to open project";
+                let err = format!("{}", e);
+                nwg::modal_error_message(&self.main_window, err_title, &err);
+                return;
+            }
+        };
+
+        self.open_file_project(project_path);
+    }
+
+    pub fn open_file_project(&self, project_path: String) {
+        if let Ok(mut state) = self.state_mut("open_file_project") {
+            if let Err(reason) = state.open_file_project(project_path) {
+                let content = format!("Failed to open project at the selected location:\r\n\r\n{}", reason);
+                nwg::modal_error_message(&self.main_window, "Failed to open project", &content);
             }
         }
     }
@@ -370,6 +424,27 @@ impl GuiBuilder {
                 }
             }
         }
+    }
+
+    /**
+        Swap the current active tab from the menu bar
+    */
+    fn swap_tabs(&self, item: &nwg::MenuItem) {
+        let op = &self.options_container;
+
+        let index = if item == &self.tabs_settings_item {
+            0
+        } else if item == &self.tabs_inspector_item {
+            1
+        } else if item == &self.tabs_resources_item {
+            2
+        } else if item == &self.tabs_events_item {
+            3
+        } else {
+            0
+        };
+
+        op.set_selected_tab(index);
     }
 
     /// Enable/Disable ui
@@ -428,6 +503,31 @@ impl GuiBuilder {
     }
 
     /**
+        Gui helper that query and parse the output of the file dialog
+    */
+    fn select_file(&self, title: &str, filters: &str) -> Result<Option<String>, CreateProjectError>  {
+        self.directory_dialog.set_title(title);
+        
+        if let Err(err) = self.file_dialog.set_filters(filters) {
+            return Err(CreateProjectError::Internal(err));
+        }
+
+        if !self.file_dialog.run(Some(&self.main_window)) {
+            return Ok(None);
+        }
+
+        match self.file_dialog.get_selected_item() {
+            Ok(path) => match path.into_string() {
+                Ok(path) => Ok(Some(path)),
+                Err(path) => {
+                    Err(CreateProjectError::BadPath(path))
+                }
+            },
+            Err(err) => Err(CreateProjectError::Internal(err))
+        }
+    }
+
+    /**
         Gui helper to close an existing project when a new project is loaded/created.
 
         Returns true if the user replaced the project or false otherwise.
@@ -460,7 +560,8 @@ impl GuiBuilder {
     }
 
     /**
-        Borrow the app state. In a NWG app, refcell double borrow may happen so it is not recommended to use `state.borrow_mut` directly (unless you want your app to randomly crash that is).
+        Borrow the app state. In a NWG app, refcell double borrow may happen if we're not careful with the events
+        so it is not recommended to use `state.borrow_mut` directly (unless you want your app to randomly crash that is).
 
         This function tries to borrow the state and if it succeed, it returns a borrowed mutable reference. As an added precaution,
         this function also store the name of the last borrower so that if a double borrow happens, we can easily find the troublemaker.

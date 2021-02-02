@@ -2,7 +2,7 @@ use nwd::NwgPartial;
 use nwg::stretch::{style::{*, Dimension::*}, geometry::*};
 use super::controls::{LabeledField, LeftButtonList};
 
-const LABEL_WIDTH: f32 = 130.0;
+const LABEL_WIDTH: f32 = 110.0;
 
 #[derive(Default)]
 #[derive(NwgPartial)]
@@ -24,7 +24,7 @@ pub struct ProjectSettingsUi {
     #[nwg_control]
     pub on_settings_refresh: nwg::CustomEvent,
 
-    #[nwg_control(text: "Crate Name:", disabled: true, label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
+    #[nwg_control(text: "Name:", disabled: true, label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
     pub crate_name: LabeledField,
 
@@ -59,7 +59,7 @@ impl ProjectSettingsUi {
     pub(super) fn init(&self) {
         let tt = &self.tt;
 
-        let tt0 = "The crate name";
+        let tt0 = "The crate name or the file name";
         tt.register(&self.crate_name.label, tt0);
         tt.register(&self.crate_name.input, tt0);
 

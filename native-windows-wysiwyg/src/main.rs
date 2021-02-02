@@ -16,8 +16,8 @@ extern crate native_windows_gui as nwg;
 extern crate  native_windows_derive as nwd;
 use std::{
     fs,
-    path::PathBuf,
     time::SystemTime,
+    path::{Path, PathBuf},
     process::{exit, Command}
 };
 
@@ -85,6 +85,10 @@ impl Project {
             .and_then(|v| v.as_table() )
             .and_then(|v| v.get("native-windows-derive"));
 
+        if version.is_none() {
+            return "Undefined".to_owned();
+        }
+
         let version = version.unwrap();
         if version.is_table() {
             let version = version.as_table().unwrap();
@@ -102,6 +106,11 @@ impl Project {
 
     /// Check if native-windows-gui & native-window-derive are in the dependencies table
     pub fn dependencies_ok(&self) -> bool {
+        if self.is_file_project() {
+            // File project do not have dependencies
+            return true;
+        }
+
         let dep = self.cargo_toml.content
             .as_table()
             .and_then(|t| t.get("dependencies"))
@@ -136,6 +145,14 @@ impl Project {
                 Err("Failed to fetch dependencies. Does cargo.toml have a [dependencies] table?".to_owned())
             }
         }
+    }
+
+    /// Returns true if the project is a single file
+    pub fn is_file_project(&self) -> bool {
+        Path::new(&self.path)
+            .extension()
+            .map(|name| name == "rs")
+            .unwrap_or(false)
     }
 
     pub fn cargo_path(&self) -> PathBuf {
@@ -227,6 +244,44 @@ impl AppState {
         Ok(())
     }
 
+    /**
+        Open a single rust file as a project.
+
+        On failure, return a message that should be displayed by the GUI app.
+    */
+    pub fn open_file_project(&mut self, path: String) -> Result<(), String> {
+        use toml::{map::Map, Value};
+
+        let meta = fs::metadata(&path)
+            .map_err(|e| format!("Failed to read {:?}:\r\n\r\n{:#?}", path, e) )?;
+
+        let file_name = Path::new(&path)
+            .file_stem()
+            .and_then(|name| name.to_str())
+            .map(|name| name.to_string())
+            .unwrap_or("Undefined".to_owned());
+
+        let cargo_toml = CargoToml {
+            modified: meta.modified().unwrap_or(SystemTime::now()),
+            content: {
+                let mut package: Map<String, Value> = Default::default();
+                package.insert("name".to_owned(), Value::String(file_name.clone()));
+
+                let mut base: Map<String, Value> = Default::default();
+                base.insert("package".to_owned(), Value::Table(package));
+
+                toml::Value::Table(base)
+            }
+        };
+
+        self.init_project(path, cargo_toml);
+
+        self.gui_tasks.push(GuiTask::EnableUi(true));
+        self.gui_tasks.push(GuiTask::UpdateWindowTitle(format!("Native Windows WYSIWYG - {}", file_name)));
+        self.gui_tasks.push(GuiTask::ReloadProjectSettings);
+
+        Ok(())
+    }
 
     /**
         Saves the current change in the project and clear it from the app state.
