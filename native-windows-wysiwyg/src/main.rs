@@ -46,10 +46,57 @@ impl Project {
 
         match name {
             Some(n) => n,
-            None => {
-                println!("Failed to read project name from toml file: {:#?}", self.cargo_toml.content);
-                "Failed to read project name".to_owned()
-            }
+            None => "Undefined".to_owned()
+        }
+    }
+
+    /// Version of native-windows-gui
+    pub fn nwg_version(&self) -> String {
+        let version = self.cargo_toml.content
+            .as_table()
+            .and_then(|t| t.get("dependencies"))
+            .and_then(|v| v.as_table() )
+            .and_then(|v| v.get("native-windows-gui"));
+
+        if version.is_none() {
+            return "Undefined".to_owned();
+        }
+
+        let version = version.unwrap();
+        if version.is_table() {
+            let version = version.as_table().unwrap();
+            version
+                .get("version")
+                .and_then(|v| v.as_str() )
+                .unwrap_or("Undefined")
+                .to_owned()
+        } else if version.is_str() {
+            version.as_str().unwrap().to_owned()
+        } else {
+            "Undefined".to_owned()
+        }
+    }
+
+    /// Version of native-windows-derive
+    pub fn nwd_version(&self) -> String {
+        let version = self.cargo_toml.content
+            .as_table()
+            .and_then(|t| t.get("dependencies"))
+            .and_then(|v| v.as_table() )
+            .and_then(|v| v.get("native-windows-derive"));
+
+        let version = version.unwrap();
+        if version.is_table() {
+            let version = version.as_table().unwrap();
+            version
+                .get("version")
+                .and_then(|v| v.as_str() )
+                .unwrap_or("Undefined")
+                .to_owned()
+        } else if version.is_str() {
+            version.as_str().unwrap().to_owned()
+        } else {
+            "Undefined".to_owned()
         }
     }
 
@@ -73,7 +120,7 @@ impl Project {
 
     /// Check the missing dependencies
     /// Sets a value to `true` if the dependency is missing
-    pub fn missing_dependencies(&self, nwg: &mut bool, nwd: &mut bool) {
+    pub fn missing_dependencies(&self, nwg: &mut bool, nwd: &mut bool) -> Result<(), String> {
         let dep = self.cargo_toml.content
             .as_table()
             .and_then(|t| t.get("dependencies"))
@@ -83,9 +130,10 @@ impl Project {
             Some(dep) => {
                 *nwg = dep.get("native-windows-gui").is_none();
                 *nwd = dep.get("native-windows-derive").is_none();
+                Ok(())
             },
             None => {
-                println!("WARNING! Failed to fetch missing dependencies");
+                Err("Failed to fetch dependencies. Does cargo.toml have a [dependencies] table?".to_owned())
             }
         }
     }
@@ -130,7 +178,11 @@ impl AppState {
         self.project.as_mut()
     }
 
-    pub fn tasks(&mut self) -> &mut Vec<GuiTask> {
+    pub fn tasks(&self) -> &Vec<GuiTask> {
+        &self.gui_tasks
+    }
+
+    pub fn tasks_mut(&mut self) -> &mut Vec<GuiTask> {
         &mut self.gui_tasks
     }
 
@@ -191,6 +243,7 @@ impl AppState {
 
         self.gui_tasks.push(GuiTask::EnableUi(false));
         self.gui_tasks.push(GuiTask::UpdateWindowTitle("Native Windows WYSIWYG".to_owned()));
+        self.gui_tasks.push(GuiTask::ClearData);
     }
 
     /**
@@ -202,7 +255,7 @@ impl AppState {
         use std::io::prelude::Write;
 
         if !self.project_loaded() {
-            println!("fix_dependencies called without an active project");
+            println!("WARNING! fix_dependencies called without an active project");
             return Ok(());
         }
 
@@ -210,7 +263,7 @@ impl AppState {
 
         // Check missing
         let (mut nwg, mut nwd) = (false, false);
-        project.missing_dependencies(&mut nwg, &mut nwd);
+        project.missing_dependencies(&mut nwg, &mut nwd)?;
         if !nwg && !nwd {
             return Ok(());
         }
@@ -225,8 +278,8 @@ impl AppState {
             let dep_str = "[dependencies]";
             let mut i = cargo_str.match_indices(dep_str);
             
-            match i.next().map(|(index, _)| index + dep_str.len()) {
-                Some(i) => i,
+            match i.next() {
+                Some((index, _)) => index + dep_str.len(),
                 None => {
                     return Err(format!("Cannot find \"[dependencies]\" in Cargo.toml"));
                 }
@@ -248,6 +301,9 @@ impl AppState {
 
         // Reload Cargo.toml
         self.reload_cargo()?;
+
+        // Tell the gui to update it's into
+        self.gui_tasks.push(GuiTask::ReloadProjectSettings);
 
         Ok(())
     }
@@ -351,7 +407,6 @@ impl AppState {
             modified: meta.modified().unwrap_or(SystemTime::now()),
             content,
         };
-
 
         Ok(toml)
     }

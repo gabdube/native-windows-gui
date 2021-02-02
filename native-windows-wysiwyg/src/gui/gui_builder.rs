@@ -127,7 +127,10 @@ pub struct GuiBuilder {
     project_settings_tab: nwg::Tab,
 
     #[nwg_partial(parent: project_settings_tab)]
-    #[nwg_events((on_settings_saved, OnCustomEvent): [GuiBuilder::save_project_settings])]
+    #[nwg_events(
+        (on_settings_saved, OnCustomEvent): [GuiBuilder::save_project_settings],
+        (on_settings_refresh, OnCustomEvent): [GuiBuilder::reload_project_settings],
+    )]
     project_settings: ProjectSettingsUi,
 
     //
@@ -225,7 +228,7 @@ impl GuiBuilder {
                 // Lets not borrow the app state for longer than necessary
                 // Also, some task may require to borrow the app state again.
                 let tasks = state.tasks().clone();
-                state.tasks().clear();
+                state.tasks_mut().clear();
                 tasks
             },
             Err(_) => {
@@ -243,6 +246,15 @@ impl GuiBuilder {
                     self.project_settings.clear();
                 }
             }
+        }
+
+        // Tasks may generate new tasks
+        let new_tasks = self.state("tasks")
+            .map(|state| state.tasks().len() > 0)
+            .unwrap_or(false);
+        
+        if new_tasks {
+            self.tasks();
         }
     }
 

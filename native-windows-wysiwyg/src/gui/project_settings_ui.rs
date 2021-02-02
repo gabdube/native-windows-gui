@@ -1,6 +1,6 @@
 use nwd::NwgPartial;
 use nwg::stretch::{style::{*, Dimension::*}, geometry::*};
-use super::controls::{LabeledField, LeftButton};
+use super::controls::{LabeledField, LeftButtonList};
 
 const LABEL_WIDTH: f32 = 130.0;
 
@@ -20,6 +20,9 @@ pub struct ProjectSettingsUi {
     
     #[nwg_control]
     pub on_settings_saved: nwg::CustomEvent,
+
+    #[nwg_control]
+    pub on_settings_refresh: nwg::CustomEvent,
 
     #[nwg_control(text: "Crate Name:", disabled: true, label_width: LABEL_WIDTH, background_color: Some([255,255,255]))]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
@@ -41,10 +44,13 @@ pub struct ProjectSettingsUi {
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(45.0) })]
     pub res_path: LabeledField,
 
-    #[nwg_control(text: "Update", width: 100.0, background_color: Some([255,255,255]))]
-    #[nwg_events((button, OnButtonClick): [ProjectSettingsUi::save_settings])]
+    #[nwg_control(buttons: vec!["Update", "Refresh"], width: 100.0, background_color: Some([255,255,255]))]
+    #[nwg_events(
+        (buttons[0], OnButtonClick): [ProjectSettingsUi::save_settings],
+        (buttons[1], OnButtonClick): [ProjectSettingsUi::refesh_settings]
+    )]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Points(55.0) })]
-    pub save_btn: LeftButton
+    pub save_btn: LeftButtonList
 
 }
 
@@ -78,6 +84,10 @@ impl ProjectSettingsUi {
         self.on_settings_saved.trigger();
     }
 
+    pub fn refesh_settings(&self) {
+        self.on_settings_refresh.trigger();
+    }
+
     pub fn enable_ui(&self, enable: bool) {
         self.nwg_version.set_enabled(enable);
         self.nwd_version.set_enabled(enable);
@@ -88,6 +98,8 @@ impl ProjectSettingsUi {
 
     pub fn reload(&self, project: &crate::Project) {
         self.crate_name.set_text(&project.name());
+        self.nwg_version.set_text(&project.nwg_version());
+        self.nwd_version.set_text(&project.nwd_version());
     }
 
     pub fn clear(&self) {
