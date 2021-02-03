@@ -11,3 +11,5 @@ native-windows-gui = {path = "../native-windows-gui"}
 native-windows-derive = { path = "../native-windows-derive" }
 winapi = { version = "0.3", features = ["winuser"] }
 toml = "0.5.8"
+syn = { version = "1.0.60", default-features=false, features = ["parsing", "derive"] }
+proc-macro2 = "1.0.24"

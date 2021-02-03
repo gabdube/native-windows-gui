@@ -20,8 +20,7 @@ pub fn parse<P: AsRef<Path>>(path: P) -> Result<Option<GuiStruct>, ParserError> 
     let mut finder = GuiStruct::find(path.as_ref())?;
     match finder.next() {
         None => Ok(None),
-        Some(Ok(gui)) => Ok(Some(gui)),
-        Some(Err(err)) => Err(err)
+        Some(gui) => Ok(Some(gui)),
     }
 }
 

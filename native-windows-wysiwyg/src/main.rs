@@ -8,14 +8,14 @@
     no gui logic should be in the state code. See `gui::GuiBuilder::create_new_project` for a good
     example on how the gui should communicate with the state.
 */
+extern crate native_windows_gui as nwg;
+extern crate  native_windows_derive as nwd;
 
 mod gui;
 use gui::GuiTask;
 
 mod parser;
 
-extern crate native_windows_gui as nwg;
-extern crate  native_windows_derive as nwd;
 use std::{
     fs,
     time::SystemTime,
@@ -509,6 +509,9 @@ fn main() {
         exit(1);
     }
 
+    //let mut state = AppState::init();
+    //state.open_file_project("F:\\projects\\tmp\\gui_test_project\\src\\main.rs".to_owned()).unwrap();
+
     let state = AppState::init();
 
     let app = match gui::GuiBuilder::build(state) {
@@ -519,11 +522,6 @@ fn main() {
             exit(1);
         }
     };
-
-    {
-        //let mut state = app.state_mut("main").unwrap();
-        //state.open_file_project("F:\\projects\\tmp\\gui_test_project\\src\\main.rs".to_owned()).unwrap();
-    }
     
     nwg::dispatch_thread_events();
 

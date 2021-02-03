@@ -78,7 +78,7 @@ pub struct GuiBuilder {
     #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_open_project, GuiBuilder::tasks] )]
     open_project_item: nwg::MenuItem,
 
-    #[nwg_control(parent: file_menu, text: "&Open file")]
+    #[nwg_control(parent: file_menu, text: "Open &file")]
     #[nwg_events( OnMenuItemSelected: [GuiBuilder::prepare_open_file, GuiBuilder::tasks] )]
     open_file_item: nwg::MenuItem,
 
