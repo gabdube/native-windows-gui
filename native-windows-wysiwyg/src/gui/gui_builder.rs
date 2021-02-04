@@ -144,7 +144,7 @@ pub struct GuiBuilder {
         size: Size { width: Percent(1.0) , height: Percent(1.0) },
         margin: Rect { start: Points(10.0), ..Default::default() },
     )]
-    options_container: nwg::TabsContainer,
+    pub options_container: nwg::TabsContainer,
 
     //
     // Project general settings
@@ -267,6 +267,7 @@ impl GuiBuilder {
                 EnableUi(enable) => self.enable_ui(enable),
                 UpdateWindowTitle(title) => self.main_window.set_text(&title),
                 ReloadProjectSettings => self.reload_project_settings(),
+                ReloadObjectInspector => self.reload_object_inspector(),
                 AskUserUpdateDependencies => self.ask_user_update_dependencies(),
                 ClearData => {
                     self.project_settings.clear();
@@ -393,6 +394,20 @@ impl GuiBuilder {
         Reload the project settings tab with the information from the project
     */
     fn reload_project_settings(&self) {
+        if let Ok(state) = self.state("reload_project_settings") {
+            if !state.project_loaded() {
+                return;
+            }
+
+            let project = state.project().unwrap();
+            self.project_settings.reload(project);
+        }
+    }
+
+    /**
+        Reload the project inspector tab
+    */
+    fn reload_object_inspector(&self) {
         if let Ok(state) = self.state("reload_project_settings") {
             if !state.project_loaded() {
                 return;

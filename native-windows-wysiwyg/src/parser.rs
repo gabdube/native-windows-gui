@@ -8,6 +8,9 @@ pub use parser_error::ParserError;
 mod gui_struct;
 pub use gui_struct::GuiStruct;
 
+mod gui_struct_finder;
+pub use gui_struct_finder::GuiStructFinder;
+
 use std::path::Path;
 
 /**

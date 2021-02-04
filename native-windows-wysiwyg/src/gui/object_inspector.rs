@@ -1,6 +1,8 @@
 use nwd::NwgPartial;
 use nwg::stretch::{style::{*, Dimension::*}, geometry::*};
 
+use crate::Project;
+
 
 #[derive(Default)]
 #[derive(NwgPartial)]
@@ -8,6 +10,13 @@ pub struct ObjectInspector {
 
     #[nwg_layout(flex_direction: FlexDirection::Column)]
     layout: nwg::FlexboxLayout,
+
+    //
+    // Gui structs
+    //
+    #[nwg_control]
+    #[nwg_layout_item(layout: layout, flex_shrink: 0.0, size: Size { width: Percent(1.0), height: Points(30.0) })]
+    gui_struct_cb: nwg::ComboBox<String>,
 
     //
     // Current controls tree
@@ -26,7 +35,7 @@ pub struct ObjectInspector {
     //
     // Selected control properties
     //
-    #[nwg_control(text: "Control Properties", background_color: Some([255,255,255]), v_align: nwg::VTextAlign::Top)]
+    #[nwg_control(text: "Active Control Properties", background_color: Some([255,255,255]), v_align: nwg::VTextAlign::Top)]
     #[nwg_layout_item(layout: layout, flex_shrink: 0.0, size: Size { width: Percent(1.0), height: Points(15.0) })]
     properties_label: nwg::Label,
 
@@ -53,7 +62,19 @@ impl ObjectInspector {
 
     }
 
+    pub fn reload(&self, project: &Project) {
+        self.gui_struct_cb.clear();
+        self.control_list.clear();
+        self.properties_list.clear();
+        
+        for gui_struct in project.gui_structs() {
+            self.gui_struct_cb.push(gui_struct.full_name());
+        }
+    }
+
     pub fn enable_ui(&self, enable: bool) {
+        self.gui_struct_cb.set_enabled(enable);
+
         // Listview needs to be enabled in order for the background color to be changed
         match enable {
             false => {

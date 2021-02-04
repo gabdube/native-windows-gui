@@ -11,6 +11,9 @@
 extern crate native_windows_gui as nwg;
 extern crate  native_windows_derive as nwd;
 
+mod project;
+use project::{Project, CargoToml};
+
 mod gui;
 use gui::GuiTask;
 
@@ -24,146 +27,6 @@ use std::{
 };
 
 
-struct CargoToml {
-    modified: SystemTime,
-    content: toml::Value
-}
-
-pub struct Project {
-    cargo_toml: CargoToml,
-    path: String,
-}
-
-impl Project {
-
-    /// Name of the cargo project
-    pub fn name(&self) -> String {
-        let name = self.cargo_toml.content
-            .as_table()
-            .and_then(|t| t.get("package"))
-            .and_then(|v| v.as_table() )
-            .and_then(|v| v.get("name"))
-            .and_then(|v| v.as_str())
-            .map(|name| name.to_owned());
-
-        match name {
-            Some(n) => n,
-            None => "Undefined".to_owned()
-        }
-    }
-
-    /// Version of native-windows-gui
-    pub fn nwg_version(&self) -> String {
-        let version = self.cargo_toml.content
-            .as_table()
-            .and_then(|t| t.get("dependencies"))
-            .and_then(|v| v.as_table() )
-            .and_then(|v| v.get("native-windows-gui"));
-
-        if version.is_none() {
-            return "Undefined".to_owned();
-        }
-
-        let version = version.unwrap();
-        if version.is_table() {
-            let version = version.as_table().unwrap();
-            version
-                .get("version")
-                .and_then(|v| v.as_str() )
-                .unwrap_or("Undefined")
-                .to_owned()
-        } else if version.is_str() {
-            version.as_str().unwrap().to_owned()
-        } else {
-            "Undefined".to_owned()
-        }
-    }
-
-    /// Version of native-windows-derive
-    pub fn nwd_version(&self) -> String {
-        let version = self.cargo_toml.content
-            .as_table()
-            .and_then(|t| t.get("dependencies"))
-            .and_then(|v| v.as_table() )
-            .and_then(|v| v.get("native-windows-derive"));
-
-        if version.is_none() {
-            return "Undefined".to_owned();
-        }
-
-        let version = version.unwrap();
-        if version.is_table() {
-            let version = version.as_table().unwrap();
-            version
-                .get("version")
-                .and_then(|v| v.as_str() )
-                .unwrap_or("Undefined")
-                .to_owned()
-        } else if version.is_str() {
-            version.as_str().unwrap().to_owned()
-        } else {
-            "Undefined".to_owned()
-        }
-    }
-
-    /// Check if native-windows-gui & native-window-derive are in the dependencies table
-    pub fn dependencies_ok(&self) -> bool {
-        if self.is_file_project() {
-            // File project do not have dependencies
-            return true;
-        }
-
-        let dep = self.cargo_toml.content
-            .as_table()
-            .and_then(|t| t.get("dependencies"))
-            .and_then(|d| d.as_table());
-
-        match dep {
-            Some(dep) => {
-                dep.get("native-windows-gui").is_some() &&
-                dep.get("native-windows-derive").is_some()
-            },
-            None => {
-                false
-            }
-        }
-    }
-
-    /// Check the missing dependencies
-    /// Sets a value to `true` if the dependency is missing
-    pub fn missing_dependencies(&self, nwg: &mut bool, nwd: &mut bool) -> Result<(), String> {
-        let dep = self.cargo_toml.content
-            .as_table()
-            .and_then(|t| t.get("dependencies"))
-            .and_then(|d| d.as_table());
-
-        match dep {
-            Some(dep) => {
-                *nwg = dep.get("native-windows-gui").is_none();
-                *nwd = dep.get("native-windows-derive").is_none();
-                Ok(())
-            },
-            None => {
-                Err("Failed to fetch dependencies. Does cargo.toml have a [dependencies] table?".to_owned())
-            }
-        }
-    }
-
-    /// Returns true if the project is a single file
-    pub fn is_file_project(&self) -> bool {
-        Path::new(&self.path)
-            .extension()
-            .map(|name| name == "rs")
-            .unwrap_or(false)
-    }
-
-    pub fn cargo_path(&self) -> PathBuf {
-        let mut cargo_path = PathBuf::from(&self.path);
-        cargo_path.push("Cargo.toml");
-        cargo_path
-    }
-
-}
 
 /**
     Main application state
@@ -232,10 +95,12 @@ impl AppState {
     pub fn open_project(&mut self, path: String) -> Result<(), String> {
         let cargo_toml = self.read_cargo_toml(&path)?;
         self.init_project(path.clone(), cargo_toml);
+        self.reload_gui_struct();
 
         self.gui_tasks.push(GuiTask::EnableUi(true));
         self.gui_tasks.push(GuiTask::UpdateWindowTitle(format!("Native Windows WYSIWYG - {}", path)));
         self.gui_tasks.push(GuiTask::ReloadProjectSettings);
+        self.gui_tasks.push(GuiTask::ReloadObjectInspector);
 
         // Check if the dependencies are OK
         let project = self.project().unwrap();
@@ -281,10 +146,12 @@ impl AppState {
         };
 
         self.init_project(path, cargo_toml);
+        self.reload_gui_struct();
 
         self.gui_tasks.push(GuiTask::EnableUi(true));
         self.gui_tasks.push(GuiTask::UpdateWindowTitle(format!("Native Windows WYSIWYG - {}", file_name)));
         self.gui_tasks.push(GuiTask::ReloadProjectSettings);
+        self.gui_tasks.push(GuiTask::ReloadObjectInspector);
 
         Ok(())
     }
@@ -370,12 +237,7 @@ impl AppState {
     }
 
     fn init_project(&mut self, path: String, cargo_toml: CargoToml) {
-        let project = Project {
-            cargo_toml,
-            path,
-        };
-
-        self.project = Some(project);
+        self.project = Some(Project::new(path, cargo_toml));
     }
 
     fn validate_new_project_path(&self, path: &str) -> Result<(), String> {
@@ -481,7 +343,7 @@ impl AppState {
             .map_err(|e| format!("Failed to read `Cargo.toml`:\r\n\r\n{:#?}", e) )?;
 
         let modified = meta.modified().unwrap_or(SystemTime::now());
-        if modified == project.cargo_toml.modified {
+        if modified == project.cargo_toml().modified {
             return Ok(());
         }
 
@@ -491,12 +353,26 @@ impl AppState {
         let content: toml::Value = toml::from_str(&cargo_str)
             .map_err(|e| format!("Failed to parse `Cargo.toml`:\r\n\r\n{:#?}", e))?;
 
-        project.cargo_toml = CargoToml {
+        *project.cargo_toml_mut() = CargoToml {
             modified,
             content,
         };
 
         Ok(())
+    }
+
+    /// Reload the project GUI struct if they changed on disk
+    /// Also try to find new gui struct if the project is not a single file
+    fn reload_gui_struct(&mut self) {
+        let proj = match self.project.as_mut() {
+            Some(p) => p,
+            None => {
+                println!("`reload_project_gui_struct` was called but no project is currently loaded!");
+                return;
+            }
+        };
+
+        proj.reload_gui_struct();
     }
 
 }
@@ -509,10 +385,10 @@ fn main() {
         exit(1);
     }
 
-    //let mut state = AppState::init();
-    //state.open_file_project("F:\\projects\\tmp\\gui_test_project\\src\\main.rs".to_owned()).unwrap();
+    let mut state = AppState::init();
+    state.open_file_project("F:\\projects\\tmp\\gui_test_project\\src\\main.rs".to_owned()).unwrap();
 
-    let state = AppState::init();
+    //let state = AppState::init();
 
     let app = match gui::GuiBuilder::build(state) {
         Ok(app) => app,
@@ -523,6 +399,8 @@ fn main() {
         }
     };
     
+    app.options_container.set_selected_tab(1);
+
     nwg::dispatch_thread_events();
 
     app.destroy();
