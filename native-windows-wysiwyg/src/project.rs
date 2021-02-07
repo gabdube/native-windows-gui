@@ -7,7 +7,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::parser::GuiStruct;
+use crate::parser::{parse, GuiStruct};
 
 
 pub struct CargoToml {
@@ -48,6 +48,7 @@ impl Project {
     }
 
     /// Version of native-windows-gui
+    /// `N/A` for single file project
     pub fn nwg_version(&self) -> String {
         let version = self.cargo_toml.content
             .as_table()
@@ -56,7 +57,7 @@ impl Project {
             .and_then(|v| v.get("native-windows-gui"));
 
         if version.is_none() {
-            return "Undefined".to_owned();
+            return "N/A".to_owned();
         }
 
         let version = version.unwrap();
@@ -65,16 +66,17 @@ impl Project {
             version
                 .get("version")
                 .and_then(|v| v.as_str() )
-                .unwrap_or("Undefined")
+                .unwrap_or("N/A")
                 .to_owned()
         } else if version.is_str() {
             version.as_str().unwrap().to_owned()
         } else {
-            "Undefined".to_owned()
+            "N/A".to_owned()
         }
     }
 
     /// Version of native-windows-derive
+    /// `N/A` for single file project
     pub fn nwd_version(&self) -> String {
         let version = self.cargo_toml.content
             .as_table()
@@ -83,7 +85,7 @@ impl Project {
             .and_then(|v| v.get("native-windows-derive"));
 
         if version.is_none() {
-            return "Undefined".to_owned();
+            return "N/A".to_owned();
         }
 
         let version = version.unwrap();
@@ -92,13 +94,33 @@ impl Project {
             version
                 .get("version")
                 .and_then(|v| v.as_str() )
-                .unwrap_or("Undefined")
+                .unwrap_or("N/A")
                 .to_owned()
         } else if version.is_str() {
             version.as_str().unwrap().to_owned()
         } else {
-            "Undefined".to_owned()
+            "N/A".to_owned()
         }
+    }
+
+    /// Return the location of the resource file
+    /// `N/A` for single file project
+    pub fn resource_file(&self) -> String {
+        if self.is_file_project() {
+            return "N/A".to_owned();
+        }
+
+        "".to_owned()
+    }
+
+    /// Return the folder for the gui resources
+    /// `N/A` for single file project
+    pub fn resources_path(&self) -> String {
+        if self.is_file_project() {
+            return "N/A".to_owned();
+        }
+
+        "".to_owned()
     }
 
     /// Check if native-windows-gui & native-window-derive are in the dependencies table
@@ -160,8 +182,23 @@ impl Project {
         If we have a full project, iterates over all the rust source code file to find any new gui structs.
         Gui struct in files that haven't changed since the last load won't be touched, just like in a single file project.
     */
-    pub fn reload_gui_struct(&mut self) {
+    pub fn reload_gui_struct(&mut self) -> Result<(), String> {
+        if !self.is_file_project() {
+            println!("TODO");
+        } else {
+            let gui_struct = match parse(&self.path) {
+                Ok(Some(s)) => s,
+                Ok(None) => { return Ok(()); },
+                Err(e) => {
+                    return Err(format!("Failed to parse {:?} for rust struct file: {:?}", self.path, e));
+                }
+            };
 
+            self.gui_structs.push(gui_struct);
+        }
+
+
+        Ok(())
     }
 
     //

@@ -95,7 +95,6 @@ impl AppState {
     pub fn open_project(&mut self, path: String) -> Result<(), String> {
         let cargo_toml = self.read_cargo_toml(&path)?;
         self.init_project(path.clone(), cargo_toml);
-        self.reload_gui_struct();
 
         self.gui_tasks.push(GuiTask::EnableUi(true));
         self.gui_tasks.push(GuiTask::UpdateWindowTitle(format!("Native Windows WYSIWYG - {}", path)));
@@ -107,6 +106,8 @@ impl AppState {
         if !project.dependencies_ok() {
             self.gui_tasks.push(GuiTask::AskUserUpdateDependencies);
         }
+
+        self.reload_gui_struct()?;
 
         Ok(())
     }
@@ -146,12 +147,13 @@ impl AppState {
         };
 
         self.init_project(path, cargo_toml);
-        self.reload_gui_struct();
 
         self.gui_tasks.push(GuiTask::EnableUi(true));
         self.gui_tasks.push(GuiTask::UpdateWindowTitle(format!("Native Windows WYSIWYG - {}", file_name)));
         self.gui_tasks.push(GuiTask::ReloadProjectSettings);
         self.gui_tasks.push(GuiTask::ReloadObjectInspector);
+
+        self.reload_gui_struct()?;
 
         Ok(())
     }
@@ -363,16 +365,16 @@ impl AppState {
 
     /// Reload the project GUI struct if they changed on disk
     /// Also try to find new gui struct if the project is not a single file
-    fn reload_gui_struct(&mut self) {
+    fn reload_gui_struct(&mut self) -> Result<(), String> {
         let proj = match self.project.as_mut() {
             Some(p) => p,
             None => {
                 println!("`reload_project_gui_struct` was called but no project is currently loaded!");
-                return;
+                return Ok(());
             }
         };
 
-        proj.reload_gui_struct();
+        proj.reload_gui_struct()
     }
 
 }

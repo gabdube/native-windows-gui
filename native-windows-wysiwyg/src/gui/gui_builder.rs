@@ -166,6 +166,9 @@ pub struct GuiBuilder {
     object_inspector_tab: nwg::Tab,
 
     #[nwg_partial(parent: object_inspector_tab)]
+    #[nwg_events(
+        (on_current_gui_changed, OnCustomEvent): [GuiBuilder::change_current_gui_struct]
+    )]
     object_inspector: ObjectInspector,
 
     //
@@ -271,6 +274,7 @@ impl GuiBuilder {
                 AskUserUpdateDependencies => self.ask_user_update_dependencies(),
                 ClearData => {
                     self.project_settings.clear();
+                    self.object_inspector.clear();
                 }
             }
         }
@@ -408,13 +412,13 @@ impl GuiBuilder {
         Reload the project inspector tab
     */
     fn reload_object_inspector(&self) {
-        if let Ok(state) = self.state("reload_project_settings") {
+        if let Ok(state) = self.state("reload_object_inspector") {
             if !state.project_loaded() {
                 return;
             }
 
             let project = state.project().unwrap();
-            self.project_settings.reload(project);
+            self.object_inspector.reload(project);
         }
     }
 
@@ -460,6 +464,23 @@ impl GuiBuilder {
         };
 
         op.set_selected_tab(index);
+    }
+
+    /**
+        Load a gui struct in the demo window
+    */
+    fn change_current_gui_struct(&self) {
+        let state = match self.state("change_current_gui_struct") {
+            Ok(state) => state,
+            Err(_) => { return; }
+        };
+
+        let project = match state.project() {
+            Some(p) => p,
+            None => { return; }
+        };
+        
+        self.object_inspector.select_ui_struct(project);
     }
 
     /// Enable/Disable ui

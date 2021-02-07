@@ -1,9 +1,11 @@
 use std::io::Error as IoError;
 use proc_macro2::LexError;
 
+#[derive(Debug)]
 pub enum ParserError {
     Io(IoError),
     Pm2(LexError),
+    StructParsing(String)
 }
 
 impl From<IoError> for ParserError {

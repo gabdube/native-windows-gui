@@ -100,6 +100,15 @@ impl ProjectSettingsUi {
         self.crate_name.set_text(&project.name());
         self.nwg_version.set_text(&project.nwg_version());
         self.nwd_version.set_text(&project.nwd_version());
+        self.res_file.set_text(&project.resource_file());
+        self.res_path.set_text(&project.resources_path());
+
+        if project.is_file_project() {
+            self.nwg_version.set_enabled(false);
+            self.nwd_version.set_enabled(false);
+            self.res_file.set_enabled(false);
+            self.res_path.set_enabled(false);
+        }
     }
 
     pub fn clear(&self) {
