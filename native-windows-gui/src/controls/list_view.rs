@@ -1,3 +1,4 @@
+use winapi::shared::windef::{HBITMAP, HBRUSH};
 use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
 use winapi::um::commctrl::{
     LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
@@ -9,7 +10,7 @@ use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::{to_utf16, from_utf16, check_hwnd};
 use crate::{NwgError, RawEventHandler, unbind_raw_event_handler};
-use std::{mem, cell::RefCell};
+use std::{mem, ptr, rc::Rc, cell::RefCell};
 
 #[cfg(feature="image-list")]
 use crate::ImageList;
@@ -228,6 +229,12 @@ pub struct ListViewItem {
     pub image: i32,
 }
 
+struct ListViewDoubleBuffer {
+    buffer: HBITMAP,
+    size: [i32; 2],
+    bg: HBRUSH,
+}
+
 /**
 A list-view control is a window that displays a collection of items.
 List-view controls provide several ways to arrange and display items and are much more flexible than simple ListBox.
@@ -239,6 +246,7 @@ Builder parameters:
   * `size`:             The list view size.
   * `position`:         The list view position.
   * `background_color`: The list view background color in RGB format
+  * `double_buffer`:    If the list view should be double buffered (defaults to true)
   * `text_color`:       The list view text color in RGB format
   * `flags`:            A combination of the ListViewFlags values.
   * `ex_flags`:         A combination of the ListViewExFlags values. Not to be confused with `ex_window_flags` 
@@ -270,7 +278,8 @@ Builder parameters:
 #[derive(Default)]
 pub struct ListView {
     pub handle: ControlHandle,
-    handler0: RefCell<Option<RawEventHandler>>,
+    double_buffer: Option<Rc<RefCell<ListViewDoubleBuffer>>>,
+    handler0: Option<RawEventHandler>,
 }
 
 impl ListView {
@@ -280,6 +289,7 @@ impl ListView {
             size: (300, 300),
             position: (0, 0),
             background_color: None,
+            double_buffer: true,
             text_color: None,
             focus: false,
             flags: None,
@@ -296,7 +306,6 @@ impl ListView {
     #[cfg(feature="image-list")]
     pub fn set_image_list(&self, list: Option<&ImageList>, list_type: ListViewImageListType) {
         use winapi::um::commctrl::LVM_SETIMAGELIST;
-        use std::ptr;
 
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
@@ -888,8 +897,6 @@ impl ListView {
     /// Invalidate the whole drawing region.
     pub fn invalidate(&self) {
         use winapi::um::winuser::InvalidateRect;
-        use std::ptr;
-
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
         unsafe { InvalidateRect(handle, ptr::null(), 1); }
     }
@@ -980,12 +987,104 @@ impl ListView {
         WS_CHILD | WS_BORDER | LVS_NOCOLUMNHEADER
     }
 
+    fn set_double_buffered(&mut self) {
+        use crate::bind_raw_event_handler_inner;
+        use winapi::um::wingdi::{CreateSolidBrush, RGB};
+        
+        let double_buffer = ListViewDoubleBuffer {
+            buffer: ptr::null_mut(),
+            size: [0, 0],
+            bg: unsafe { CreateSolidBrush(RGB(255, 255, 255)) },
+        };
+
+        let rc_double_buffer = Rc::new(RefCell::new(double_buffer));
+        let callback_double_buffer = rc_double_buffer.clone();
+
+        let handler = bind_raw_event_handler_inner(&self.handle, 0x020, move |hwnd, msg, _, _| {
+            use winapi::um::winuser::{GetClientRect, BeginPaint, EndPaint, FillRect, SendMessageW, RedrawWindow, RDW_ERASENOW, RDW_UPDATENOW, RDW_INVALIDATE};
+            use winapi::um::winuser::{WM_PAINT, WM_ERASEBKGND, WM_PRINTCLIENT, PAINTSTRUCT};
+            use winapi::um::wingdi::{CreateCompatibleDC, CreateCompatibleBitmap, SelectObject, BitBlt, DeleteDC, DeleteObject, SRCCOPY};
+     
+            match msg {
+                WM_PAINT => unsafe {
+                    let mut double_buffer = callback_double_buffer.borrow_mut();
+
+                    let mut r = mem::zeroed();
+                    GetClientRect(hwnd, &mut r);
+                    let client_width = r.right - r.left;
+                    let client_height = r.bottom - r.top;
+
+                    let mut paint: PAINTSTRUCT = mem::zeroed();
+                    BeginPaint(hwnd, &mut paint);
+
+                    if double_buffer.buffer.is_null() || double_buffer.size != [client_width, client_height] {
+                        if !double_buffer.buffer.is_null() {
+                            DeleteObject(double_buffer.buffer as _);
+                        }
+                        
+                        double_buffer.size = [client_width, client_height];
+                        double_buffer.buffer = CreateCompatibleBitmap(paint.hdc, client_width, client_height);   
+                    }
+
+                    let backbuffer = double_buffer.buffer;
+                    let backbuffer_dc = CreateCompatibleDC(paint.hdc);
+
+                    // Clear the backbuffer
+                    let old = SelectObject(backbuffer_dc, backbuffer as _);
+                    FillRect(backbuffer_dc, &r, double_buffer.bg as _);
+
+                    // Draw to the backbuffer and copy the result to the front buffer
+                    SendMessageW(hwnd, WM_PRINTCLIENT, backbuffer_dc as _, 0);
+                    BitBlt(
+                        paint.hdc as _,
+                        0, 0,
+                        client_width, client_height,
+                        backbuffer_dc,
+                        0, 0,
+                        SRCCOPY
+                    );
+
+                    // Cleanup
+                    SelectObject(backbuffer_dc, old);
+                    DeleteDC(backbuffer_dc);
+                    EndPaint(hwnd, &paint);
+
+                    // Redraw header
+                    let header = SendMessageW(hwnd, LVM_GETHEADER, 0, 0);
+                    if header != 0 {
+                        let mut r = mem::zeroed();
+                        GetClientRect(header as _, &mut r);
+                        RedrawWindow(header as _, ptr::null_mut(), ptr::null_mut(), RDW_ERASENOW|RDW_UPDATENOW|RDW_INVALIDATE);
+                    }
+
+                    Some(1)
+                },
+                WM_ERASEBKGND => {
+                    Some(1)
+                },
+                _ => None
+            }
+        }).unwrap();
+
+        self.handler0 = Some(handler);
+        self.double_buffer = Some(rc_double_buffer);
+    }
+
 }
 
 impl Drop for ListView {
     fn drop(&mut self) {
-        let handler = self.handler0.borrow();
-        if let Some(h) = handler.as_ref() {
+        use winapi::um::wingdi::DeleteObject;
+
+        if let Some(backbuffer) = self.double_buffer.take() {
+            let double_buffer = backbuffer.borrow();
+            unsafe {
+                DeleteObject(double_buffer.buffer as _);
+                DeleteObject(double_buffer.bg as _);
+            }
+        }
+
+        if let Some(h) = self.handler0.as_ref() {
             drop(unbind_raw_event_handler(h));
         }
 
@@ -998,6 +1097,7 @@ pub struct ListViewBuilder {
     position: (i32, i32),
     background_color: Option<[u8; 3]>,
     text_color: Option<[u8; 3]>,
+    double_buffer: bool,
     focus: bool,
     flags: Option<ListViewFlags>,
     ex_flags: Option<ListViewExFlags>,
@@ -1037,6 +1137,11 @@ impl ListViewBuilder {
 
     pub fn position(mut self, position: (i32, i32)) -> ListViewBuilder {
         self.position = position;
+        self
+    }
+
+    pub fn double_buffer(mut self, buffer: bool) -> ListViewBuilder {
+        self.double_buffer = buffer;
         self
     }
 
@@ -1086,6 +1191,10 @@ impl ListViewBuilder {
             .text("")
             .parent(Some(parent))
             .build()?;
+
+        if self.double_buffer {
+            out.set_double_buffered();
+        }
 
         if self.item_count > 0 {
             out.set_item_count(self.item_count);

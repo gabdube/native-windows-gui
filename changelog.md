@@ -1,8 +1,11 @@
-1.0.11
+1.0.11 (unreleased)
 * Fixed `Frame` control `set_size`
 * Added `background_color` to `Frame`
 * Added `track_mouse_leaving`, `track_mouse_hover`, `track_mouse_cancel`, and `track_mouse_query` to `GlobalCursor`
 * Added `CustomEvent` control to define custom events in a UI
+* Double buffer option for ListView
+* Fix a treeview issue when building without the image-list feature
+
 
 1.0.10
 * Fixed a compiling bug when using `no-default-features`
