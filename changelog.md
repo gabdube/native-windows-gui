@@ -1,3 +1,7 @@
+1.0.11 (unreleased)
+* Double buffer option for ListView
+* Fix a treeview issue when building without the image-list feature
+
 1.0.10
 * Fixed a compiling bug when using `no-default-features`
 
