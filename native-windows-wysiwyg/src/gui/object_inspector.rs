@@ -142,14 +142,14 @@ impl ObjectInspector {
             let item_name = nwg::InsertListViewItem {
                 index: Some(index as _),
                 column_index: 0,
-                text: Some(member.name()),
+                text: Some(member.name().to_owned()),
                 image: None,
             };
 
             let ty_name = nwg::InsertListViewItem {
                 index: Some(index as _),
                 column_index: 1,
-                text: Some(member.ty()),
+                text: Some(member.ty().to_owned()),
                 image: None,
             };
 

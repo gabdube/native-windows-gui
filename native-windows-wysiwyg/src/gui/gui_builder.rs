@@ -1,6 +1,9 @@
 /*!
     Main window gui components
 */
+mod gui_demo;
+use gui_demo::GuiDemo;
+
 use nwd::NwgUi;
 use nwg::{NativeUi, NwgError};
 use nwg::stretch::{style::{*, Dimension::*}, geometry::*};
@@ -21,10 +24,19 @@ struct PaintData {
     background: HBRUSH,
 }
 
+/**
+    GUI entry point. Holds the app state and all the top level GUI functionnalities.
+    Specific gui methods are in the partials.
+
+    See also `gui_demo.rs` for the implementation of the demo window methods.
+*/
 #[derive(Default, NwgUi)]
 pub struct GuiBuilder {
     /// Application state
     state: Option<RefCell<AppState>>,
+
+    /// Instance of the current demo gui in the demo window
+    demo: RefCell<Option<GuiDemo>>,
 
     /// GDI object for painting
     paint_data: RefCell<Option<PaintData>>,
@@ -448,18 +460,34 @@ impl GuiBuilder {
         Load a gui struct in the demo window and update the partials
     */
     fn change_current_gui_struct(&self) {
-        let state = match self.state("change_current_gui_struct") {
+        let mut state = match self.state_mut("change_current_gui_struct") {
             Ok(state) => state,
             Err(_) => { return; }
         };
-
-        let project = match state.project() {
-            Some(p) => p,
-            None => { return; }
-        };
         
+        // If the selected gui struct was cleared, we just clear the demo window
         let gui_struct_index = match self.object_inspector.selected_gui_struct() {
             Some(i) => i,
+            None => {
+                state.set_gui_struct_index(None);
+                self.clear_demo_window();
+                return;
+            }
+        };
+
+        // Return if the UI is already loaded
+        match state.gui_struct_index() {
+            Some(i) => if i == gui_struct_index {
+                return;
+            },
+            _ => {}
+        };
+
+        state.set_gui_struct_index(Some(gui_struct_index));
+
+        // Fetch the UI struct from the project and load it in the interface
+        let project = match state.project() {
+            Some(p) => p,
             None => { return; }
         };
 
@@ -470,6 +498,7 @@ impl GuiBuilder {
 
         let selected_gui_struct = &gui_structs[gui_struct_index];
         self.object_inspector.select_ui_struct(selected_gui_struct);
+        self.build_demo_window(selected_gui_struct);
     }
 
     /// Enable/Disable ui
@@ -477,11 +506,6 @@ impl GuiBuilder {
         self.project_settings.enable_ui(enable);
         self.object_inspector.enable_ui(enable);
         self.widget_box.widgets_tree.set_enabled(enable);
-    }
-
-    /// Duh, don't close the demo window
-    fn show_demo_window(&self) {
-        self.demo_window.set_visible(true);
     }
 
     /**

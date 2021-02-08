@@ -35,6 +35,9 @@ pub struct AppState {
     /// Current project data
     project: Option<Project>,
 
+    /// Index of the current GUI struct loaded in the UI (if there is one)
+    gui_struct_index: Option<usize>,
+
     /// List of tasks the GUI should do after the app state was updated
     gui_tasks: Vec<GuiTask>,
 }
@@ -44,6 +47,7 @@ impl AppState {
     pub fn init() -> AppState {
         AppState {
             project: None,
+            gui_struct_index: None,
             gui_tasks: Vec::new(),
         }
     }
@@ -66,6 +70,14 @@ impl AppState {
 
     pub fn tasks_mut(&mut self) -> &mut Vec<GuiTask> {
         &mut self.gui_tasks
+    }
+
+    pub fn set_gui_struct_index(&mut self, index: Option<usize>) {
+        self.gui_struct_index = index;
+    }
+
+    pub fn gui_struct_index(&self) -> Option<usize> {
+        self.gui_struct_index
     }
 
     /**

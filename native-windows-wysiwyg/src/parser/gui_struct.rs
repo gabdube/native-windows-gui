@@ -10,13 +10,13 @@ pub struct GuiMember {
 impl GuiMember {
 
     /// Returns the name of the member
-    pub fn name(&self) -> String {
-        self.name.clone()
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     /// Returns the type of the member
-    pub fn ty(&self) -> String {
-        self.ty.clone()
+    pub fn ty(&self) -> &str {
+        &self.ty
     }
 
 }
