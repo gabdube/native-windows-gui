@@ -3,13 +3,20 @@ use std::{fs, path::{Path, PathBuf}, time::SystemTime};
 
 
 pub struct GuiMember {
-    name: String
+    name: String,
+    ty: String,
 }
 
 impl GuiMember {
 
-    pub fn name(&self) -> &str {
-        &self.name
+    /// Returns the name of the member
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    /// Returns the type of the member
+    pub fn ty(&self) -> String {
+        self.ty.clone()
     }
 
 }
@@ -92,7 +99,7 @@ impl GuiStruct {
 
     /// Parse the gui fields of a gui struct and store them in `members`
     fn collect_fields(members: &mut Vec<GuiMember>, data: &syn::ItemStruct) -> Result<(), ParserError> {
-        use syn::Fields;
+        use syn::{Fields, Type};
 
         let named = match &data.fields {
             Fields::Named(f) => f.named.iter(),
@@ -105,8 +112,31 @@ impl GuiStruct {
                 None => { continue; }
             };
 
+            let type_name = match &field.ty {
+                Type::Path(p) => {
+                    let mut out = String::new();
+
+                    let mut segments = p.path.segments.iter();
+                    if let Some(i) = segments.next() {
+                        out.push_str(&i.ident.to_string());
+                    }
+
+                    for seg in segments {
+                        let item = seg.ident.to_string();
+                        out.push_str("::");
+                        out.push_str(&item);
+                    }
+
+                    out
+                },
+                _ => {
+                    "Failed to represent type".to_owned()
+                }
+            };
+
             let member = GuiMember {
                 name: field_name,
+                ty: type_name
             };
 
             members.push(member);
