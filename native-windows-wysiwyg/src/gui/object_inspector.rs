@@ -1,7 +1,7 @@
 use nwd::NwgPartial;
 use nwg::stretch::{style::{*, Dimension::*}, geometry::*};
 
-use crate::Project;
+use crate::{Project, parser::GuiStruct};
 
 
 #[derive(Default)]
@@ -61,7 +61,7 @@ pub struct ObjectInspector {
         ex_flags: nwg::ListViewExFlags::GRID | nwg::ListViewExFlags::AUTO_COLUMN_SIZE | nwg::ListViewExFlags::FULL_ROW_SELECT,
     )]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Percent(1.0) })]
-    pub control_list: nwg::ListView,
+    control_list: nwg::ListView,
 
     //
     // Selected control properties
@@ -78,7 +78,7 @@ pub struct ObjectInspector {
         ex_flags: nwg::ListViewExFlags::GRID | nwg::ListViewExFlags::AUTO_COLUMN_SIZE | nwg::ListViewExFlags::FULL_ROW_SELECT,
     )]
     #[nwg_layout_item(layout: layout, size: Size { width: Percent(1.0), height: Percent(1.0) })]
-    pub properties_list: nwg::ListView,
+    properties_list: nwg::ListView,
 }
 
 impl ObjectInspector {
@@ -92,7 +92,6 @@ impl ObjectInspector {
             width: Some(150),
             .. Default::default()
         });
-        ctrl.insert_column("Parent");
     
         let prop = &self.properties_list;
         prop.set_headers_enabled(true);
@@ -108,6 +107,14 @@ impl ObjectInspector {
         tt.register(&self.properties_list, "Properties of the selected control");
     }
 
+    /// Returns the selected gui struct index.
+    /// The index maps directly to the index of the gui struct in the current project
+    /// May return None if no gui struct is selected
+    pub fn selected_gui_struct(&self) -> Option<usize> {
+        self.gui_struct_cb.selection()
+    }
+
+    /// Clear all the controls in the UI
     pub fn clear(&self) {
         self.gui_struct_cb.clear();
         self.control_list.clear();
@@ -126,21 +133,10 @@ impl ObjectInspector {
         self.on_current_gui_changed.trigger();
     }
 
-    /// Load the current ui struct
-    pub fn select_ui_struct(&self, project: &Project) {
-        let index = match self.gui_struct_cb.selection() {
-            Some(i) => i,
-            None => {
-                println!("select_ui_struct was called but there is no selected gui struct"); 
-                return;
-            }
-        };
-
+    /// Load the current ui struct info in the list
+    pub fn select_ui_struct(&self, gui_struct: &GuiStruct) {
         self.control_list.clear();
         self.properties_list.clear();
-
-        let gui_structs = project.gui_structs();
-        let gui_struct = &gui_structs[index];
 
         for (index, member) in gui_struct.members().iter().enumerate() {
             let item_name = nwg::InsertListViewItem {
@@ -162,10 +158,12 @@ impl ObjectInspector {
         }
     }
 
+    /// Enable/Disable the controls in this UI
     pub fn enable_ui(&self, enable: bool) {
         self.gui_struct_cb.set_enabled(enable);
+        self.reload_btn.set_enabled(enable);
 
-        // Listview needs to be enabled before changing the background color
+        // For the change to take effect, the listview needs to be enabled before changing the background color
         match enable {
             false => {
                 self.control_list.set_background_color(220, 220, 220);
@@ -182,6 +180,7 @@ impl ObjectInspector {
         }
     }
 
+    /// Tells the main GUI that the user changed the current gui struct
     fn current_gui_changed(&self) {
         self.on_current_gui_changed.trigger();
     }

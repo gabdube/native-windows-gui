@@ -110,14 +110,6 @@ pub struct GuiBuilder {
     #[nwg_events( OnMenuItemSelected: [GuiBuilder::swap_tabs(SELF, CTRL)] )]
     tabs_inspector_item: nwg::MenuItem,
 
-    #[nwg_control(parent: window_menu, text: "&Resources")]
-    #[nwg_events( OnMenuItemSelected: [GuiBuilder::swap_tabs(SELF, CTRL)] )]
-    tabs_resources_item: nwg::MenuItem,
-
-    #[nwg_control(parent: window_menu, text: "&Events")]
-    #[nwg_events( OnMenuItemSelected: [GuiBuilder::swap_tabs(SELF, CTRL)] )]
-    tabs_events_item: nwg::MenuItem,
-
     #[nwg_control(parent: window_menu)]
     sp4: nwg::MenuSeparator,
 
@@ -171,17 +163,6 @@ pub struct GuiBuilder {
     )]
     object_inspector: ObjectInspector,
 
-    //
-    // Resources Manager
-    //
-    #[nwg_control(parent: options_container, text: "Resources")]
-    resources_tab: nwg::Tab,
-
-    //
-    // Events Manager
-    //
-    #[nwg_control(parent: options_container, text: "Events")]
-    events_tab: nwg::Tab,
 }
 
 impl GuiBuilder {
@@ -379,6 +360,7 @@ impl GuiBuilder {
         self.open_file_project(project_path);
     }
 
+    /// Open a single file project
     pub fn open_file_project(&self, project_path: String) {
         if let Ok(mut state) = self.state_mut("open_file_project") {
             if let Err(reason) = state.open_file_project(project_path) {
@@ -455,10 +437,6 @@ impl GuiBuilder {
             0
         } else if item == &self.tabs_inspector_item {
             1
-        } else if item == &self.tabs_resources_item {
-            2
-        } else if item == &self.tabs_events_item {
-            3
         } else {
             0
         };
@@ -467,7 +445,7 @@ impl GuiBuilder {
     }
 
     /**
-        Load a gui struct in the demo window
+        Load a gui struct in the demo window and update the partials
     */
     fn change_current_gui_struct(&self) {
         let state = match self.state("change_current_gui_struct") {
@@ -480,7 +458,18 @@ impl GuiBuilder {
             None => { return; }
         };
         
-        self.object_inspector.select_ui_struct(project);
+        let gui_struct_index = match self.object_inspector.selected_gui_struct() {
+            Some(i) => i,
+            None => { return; }
+        };
+
+        let gui_structs = project.gui_structs();
+        if gui_struct_index >= gui_structs.len() {
+            return;
+        }
+
+        let selected_gui_struct = &gui_structs[gui_struct_index];
+        self.object_inspector.select_ui_struct(selected_gui_struct);
     }
 
     /// Enable/Disable ui
@@ -544,8 +533,8 @@ impl GuiBuilder {
     fn select_file(&self, title: &str, filters: &str) -> Result<Option<String>, CreateProjectError>  {
         self.directory_dialog.set_title(title);
         
-        if let Err(err) = self.file_dialog.set_filters(filters) {
-            return Err(CreateProjectError::Internal(err));
+        if let Err(_err) = self.file_dialog.set_filters(filters) {
+            //return Err(CreateProjectError::Internal(err));
         }
 
         if !self.file_dialog.run(Some(&self.main_window)) {
