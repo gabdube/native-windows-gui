@@ -1,10 +1,12 @@
 use winapi::um::winuser::{WS_OVERLAPPEDWINDOW, WS_CLIPCHILDREN, WS_VISIBLE, WS_DISABLED, WS_MAXIMIZE, WS_MINIMIZE, WS_CAPTION,
-WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_POPUP, WS_EX_TOPMOST, WS_EX_ACCEPTFILES};
+WS_MINIMIZEBOX, WS_MAXIMIZEBOX, WS_SYSMENU, WS_THICKFRAME, WS_POPUP, WS_EX_TOPMOST, WS_EX_ACCEPTFILES, GetWindowLongA, GWL_HINSTANCE};
 
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::check_hwnd;
 use crate::{NwgError, Icon};
 use super::{ControlBase, ControlHandle};
+#[cfg(feature = "raw-win-handle")]
+use raw_window_handle::{HasRawWindowHandle, RawWindowHandle, windows::WindowsHandle};
 
 const NOT_BOUND: &'static str = "Window is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: Window handle is not HWND!";
@@ -260,6 +262,24 @@ impl Window {
 impl Drop for Window {
     fn drop(&mut self) {
         self.handle.destroy();
+    }
+}
+
+#[cfg(feature = "raw-win-handle")]
+unsafe impl HasRawWindowHandle for Window {
+    fn raw_window_handle(&self) -> RawWindowHandle {
+        match self.handle {
+            ControlHandle::Hwnd(hwnd) => {
+                RawWindowHandle::Windows(WindowsHandle {
+                    hwnd: hwnd as *_,
+                    // Get hInstance from hWnd
+                    hinstance: unsafe { GetWindowLongA(hwnd, GWL_HINSTANCE) } as *_
+                    ..WindowsHandle::empty()
+                })
+            }
+            // Not a valid window handle, so return an empty handle
+            _ => RawWindowHandle::Windows(WindowsHandle::empty())
+        }
     }
 }
 
