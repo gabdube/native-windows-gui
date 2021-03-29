@@ -276,7 +276,7 @@ unsafe impl HasRawWindowHandle for Window {
 
                 RawWindowHandle::Windows(WindowsHandle {
                     hwnd: hwnd as _,
-                    hinstance: hinstance as _
+                    hinstance: hinstance as _,
                     ..WindowsHandle::empty()
                 })
             }

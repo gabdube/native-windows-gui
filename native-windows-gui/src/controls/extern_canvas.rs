@@ -248,14 +248,14 @@ use raw_window_handle::{HasRawWindowHandle, RawWindowHandle, windows::WindowsHan
 unsafe impl HasRawWindowHandle for ExternCanvas {
     fn raw_window_handle(&self) -> RawWindowHandle {
         use winapi::um::winuser::GWL_HINSTANCE;
-        
+
         match self.handle {
             ControlHandle::Hwnd(hwnd) => {
                 let hinstance = wh::get_window_long(hwnd, GWL_HINSTANCE);
 
                 RawWindowHandle::Windows(WindowsHandle {
                     hwnd: hwnd as _,
-                    hinstance: hinstance as _
+                    hinstance: hinstance as _,
                     ..WindowsHandle::empty()
                 })
             }
