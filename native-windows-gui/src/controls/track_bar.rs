@@ -405,6 +405,20 @@ impl TrackBarBuilder {
             out.set_focus();
         }
 
+        if let Some(range) = self.range {
+            out.set_range_min(range.start);
+            out.set_range_max(range.end);
+        }
+
+        if let Some(range) = self.selected_range {
+            out.set_selection_range_pos(range);
+        }
+
+        if let Some(pos) = self.pos {
+            out.set_pos(pos);
+        }
+        
+
         Ok(())
     }
 

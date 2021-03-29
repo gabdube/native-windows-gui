@@ -91,7 +91,6 @@ impl<D: Display+Default> ComboBox<D> {
             font: None,
             collection: None,
             selected_index: None,
-            v_align: VTextAlign::Center,
             parent: None
         }
     }
@@ -406,6 +405,8 @@ impl<D: Display+Default> ComboBox<D> {
         wh::send_message(handle, CB_RESETCONTENT, 0, 0);
     }
 
+    /// TODO: FIX VERTICAL CENTERING
+    #[allow(unused)]
     fn hook_non_client_size(&self, bg: Option<[u8; 3]>, v_align: VTextAlign) {
         use crate::bind_raw_event_handler_inner;
         use winapi::shared::windef::{HGDIOBJ, RECT, HBRUSH, POINT};
@@ -534,7 +535,6 @@ pub struct ComboBoxBuilder<'a, D: Display+Default> {
     font: Option<&'a Font>,
     collection: Option<Vec<D>>,
     selected_index: Option<usize>,
-    v_align: VTextAlign,
     parent: Option<ControlHandle>
 }
 
@@ -590,8 +590,8 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
         self
     }
 
-    pub fn v_align(mut self, align: VTextAlign) -> ComboBoxBuilder<'a, D> {
-        self.v_align = align;
+    pub fn v_align(self, _align: VTextAlign) -> ComboBoxBuilder<'a, D> {
+        // Disabled for now because of a bug. Keep the method for backward compatibility
         self
     }
 
@@ -635,8 +635,6 @@ impl<'a, D: Display+Default> ComboBoxBuilder<'a, D> {
         if self.focus {
             out.set_focus();
         }
-
-        out.hook_non_client_size(None, self.v_align);
 
         Ok(())
     }

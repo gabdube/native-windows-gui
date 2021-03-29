@@ -481,6 +481,10 @@ impl<'a> NumberSelectBuilder<'a> {
 
         out.handler = Some(handler.unwrap());
 
+        if !self.enabled {
+            out.set_enabled(self.enabled);
+        }
+
         Ok(())
     }
 
