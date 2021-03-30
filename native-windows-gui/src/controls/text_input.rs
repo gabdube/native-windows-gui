@@ -1,5 +1,11 @@
-use winapi::shared::minwindef::{UINT, WPARAM, LPARAM};
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, WS_TABSTOP, ES_AUTOHSCROLL};
+use winapi::shared::{
+    windef::HBRUSH,
+    minwindef::{UINT, WPARAM, LPARAM}
+};
+use winapi::um::{
+    winuser::{WS_VISIBLE, WS_DISABLED, ES_NUMBER, ES_LEFT, ES_CENTER, ES_RIGHT, WS_TABSTOP, ES_AUTOHSCROLL},
+    wingdi::DeleteObject,
+};
 use crate::win32::window_helper as wh; 
 use crate::win32::base_helper::{check_hwnd, to_utf16};
 use crate::{Font, NwgError, HTextAlign, RawEventHandler};
@@ -74,6 +80,7 @@ fn build_box(tbox: &mut nwg::TextInput, window: &nwg::Window, font: &nwg::Font) 
 #[derive(Default)]
 pub struct TextInput {
     pub handle: ControlHandle,
+    background_brush: Option<HBRUSH>,
     handler0: RefCell<Option<RawEventHandler>>,
 }
 
@@ -348,9 +355,9 @@ impl TextInput {
     }
 
     /// Center the text vertically. Can't believe that must be manually hacked in.
-    fn hook_non_client_size(&self, bg: Option<[u8; 3]>) {
+    fn hook_non_client_size(&mut self, bg: Option<[u8; 3]>) {
         use crate::bind_raw_event_handler_inner;
-        use winapi::shared::windef::{HGDIOBJ, RECT, HBRUSH, POINT};
+        use winapi::shared::windef::{HGDIOBJ, RECT, POINT};
         use winapi::um::winuser::{WM_NCCALCSIZE, WM_NCPAINT, WM_SIZE, DT_CALCRECT, DT_LEFT, NCCALCSIZE_PARAMS, COLOR_WINDOW,};
         use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED};
         use winapi::um::winuser::{GetDC, DrawTextW, ReleaseDC, GetClientRect, GetWindowRect, FillRect, ScreenToClient, SetWindowPos};
@@ -361,7 +368,11 @@ impl TextInput {
         self.handle.hwnd().expect(BAD_HANDLE);
 
         let brush = match bg {
-            Some(c) => unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) },
+            Some(c) => {
+                let b = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
+                self.background_brush = Some(b);
+                b
+            },
             None => COLOR_WINDOW as HBRUSH
         };
 
@@ -456,6 +467,10 @@ impl Drop for TextInput {
         let handler = self.handler0.borrow();
         if let Some(h) = handler.as_ref() {
             drop(unbind_raw_event_handler(h));
+        }
+        
+        if let Some(bg) = self.background_brush {
+            unsafe { DeleteObject(bg as _); }
         }
         
         self.handle.destroy();
