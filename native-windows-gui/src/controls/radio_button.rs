@@ -1,4 +1,8 @@
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_GROUP, WS_TABSTOP};
+use winapi::um::{
+    winuser::{WS_VISIBLE, WS_DISABLED, WS_GROUP, WS_TABSTOP},
+    wingdi::DeleteObject
+};
+use winapi::shared::windef::HBRUSH;
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::check_hwnd;
 use crate::{Font, NwgError, RawEventHandler, unbind_raw_event_handler};
@@ -107,6 +111,7 @@ fn build_radio(radio: &mut nwg::RadioButton, window: &nwg::Window, font: &nwg::F
 #[derive(Default)]
 pub struct RadioButton {
     pub handle: ControlHandle,
+    background_brush: Option<HBRUSH>,
     handler0: RefCell<Option<RawEventHandler>>,
 }
 
@@ -264,7 +269,7 @@ impl RadioButton {
     }
 
     /// Change the radio button background color.
-    fn hook_background_color(&self, c: [u8; 3]) {
+    fn hook_background_color(&mut self, c: [u8; 3]) {
         use crate::bind_raw_event_handler_inner;
         use winapi::um::winuser::{WM_CTLCOLORSTATIC};
         use winapi::shared::{basetsd::UINT_PTR, windef::{HWND}, minwindef::LRESULT};
@@ -275,6 +280,7 @@ impl RadioButton {
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));
         let brush = unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) };
+        self.background_brush = Some(brush);
         
         let handler = bind_raw_event_handler_inner(&parent_handle, handle as UINT_PTR, move |_hwnd, msg, _w, l| {
             match msg {
@@ -300,6 +306,10 @@ impl Drop for RadioButton {
         let handler = self.handler0.borrow();
         if let Some(h) = handler.as_ref() {
             drop(unbind_raw_event_handler(h));
+        }
+
+        if let Some(bg) = self.background_brush {
+            unsafe { DeleteObject(bg as _); }
         }
 
         self.handle.destroy();

@@ -610,7 +610,9 @@ impl<'a, D: Display+Default> ListBoxBuilder<'a, D> {
             out.set_focus();
         }
 
-        out.set_enabled(self.enabled);
+        if !self.enabled {
+            out.set_enabled(self.enabled);
+        }
 
         Ok(())
     }

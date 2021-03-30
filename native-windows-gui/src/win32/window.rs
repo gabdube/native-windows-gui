@@ -310,7 +310,7 @@ fn bind_raw_handler(window: &nwg::Window) -> nwg::RawEventHandler {
 pub fn bind_raw_event_handler<F>(handle: &ControlHandle, handler_id: UINT_PTR, f: F) -> Result<RawEventHandler, NwgError>
 where F: Fn(HWND, UINT, WPARAM, LPARAM) -> Option<LRESULT> + 'static
 {
-    if handler_id < 0xFFFF {
+    if handler_id <= 0xFFFF {
         panic!("handler_id <= 0xFFFF are reserved by NWG");
     }
 

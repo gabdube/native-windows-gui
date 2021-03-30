@@ -263,6 +263,29 @@ impl Drop for Window {
     }
 }
 
+#[cfg(feature = "raw-win-handle")]
+use raw_window_handle::{HasRawWindowHandle, RawWindowHandle, windows::WindowsHandle};
+
+#[cfg(feature = "raw-win-handle")]
+unsafe impl HasRawWindowHandle for Window {
+    fn raw_window_handle(&self) -> RawWindowHandle {
+        use winapi::um::winuser::GWL_HINSTANCE;
+        match self.handle {
+            ControlHandle::Hwnd(hwnd) => {
+                let hinstance = wh::get_window_long(hwnd, GWL_HINSTANCE);
+
+                RawWindowHandle::Windows(WindowsHandle {
+                    hwnd: hwnd as _,
+                    hinstance: hinstance as _,
+                    ..WindowsHandle::empty()
+                })
+            }
+            // Not a valid window handle, so return an empty handle
+            _ => RawWindowHandle::Windows(WindowsHandle::empty())
+        }
+    }
+}
+
 pub struct WindowBuilder<'a> {
     title: &'a str,
     size: (i32, i32),

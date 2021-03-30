@@ -613,49 +613,58 @@ impl MinMaxInfo {
     /// The maximized width and the maximized height of the window. For top-level windows, this value is based on the width of the primary monitor.
     pub fn set_maximized_size(&self, width: i32, height: i32) {
         let info = unsafe { &mut *self.inner };
-        info.ptMaxSize = POINT { x: width as _, y: height as _ };
+        let (x, y) = unsafe { crate::win32::high_dpi::logical_to_physical(width as i32, height as i32) };
+        info.ptMaxSize = POINT { x, y };
     }
 
     /// Returns the maximized width and the maximized height of the window. For top-level windows, this value is based on the width of the primary monitor.
     pub fn maximized_size(&self) -> [i32; 2] {
         let info = unsafe { &mut *self.inner };
-        [info.ptMaxSize.x, info.ptMaxSize.y]
+        let (w, h) = unsafe { crate::win32::high_dpi::physical_to_logical(info.ptMaxSize.x, info.ptMaxSize.y) };
+        [w, h]
     }
 
     /// Sets the position of the left side of the maximized window and the position of the top of the maximized window. For top-level windows, this value is based on the position of the primary monitor.
     pub fn set_maximized_pos(&self, x: i32, y: i32) {
         let info = unsafe { &mut *self.inner };
-        info.ptMaxPosition = POINT { x: x as _, y: y as _ };
+        let (x, y) = unsafe { crate::win32::high_dpi::logical_to_physical(x, y) };
+        info.ptMaxPosition = POINT { x, y };
     }
 
     /// Returns the position of the left side of the maximized window and the position of the top of the maximized window. For top-level windows, this value is based on the position of the primary monitor.
     pub fn maximized_pos(&self) -> [i32; 2] {
         let info = unsafe { &mut *self.inner };
-        [info.ptMaxPosition.x, info.ptMaxPosition.y]
+        let (x, y) = unsafe { crate::win32::high_dpi::physical_to_logical(info.ptMaxPosition.x, info.ptMaxPosition.y) };
+        
+        [x, y]
     }
 
     /// Sets the maximum size of the window
     pub fn set_max_size(&self, width: i32, height: i32) {
         let info = unsafe { &mut *self.inner };
-        info.ptMaxTrackSize = POINT { x: width as _, y: height as _ };
+        let (x, y) = unsafe { crate::win32::high_dpi::logical_to_physical(width, height) };
+        info.ptMaxTrackSize = POINT { x, y };
     }
 
     /// Returns the maximum size of the window
     pub fn max_size(&self) -> [i32; 2] {
         let info = unsafe { &mut *self.inner };
-        [info.ptMaxTrackSize.x, info.ptMaxTrackSize.y]
+        let (w, h) = unsafe { crate::win32::high_dpi::physical_to_logical(info.ptMaxTrackSize.x, info.ptMaxTrackSize.y) };
+        [w, h]
     }
 
     /// Sets the maximum size of the window
     pub fn set_min_size(&self, width: i32, height: i32) {
         let info = unsafe { &mut *self.inner };
-        info.ptMinTrackSize = POINT { x: width as _, y: height as _ };
+        let (x, y) = unsafe { crate::win32::high_dpi::logical_to_physical(width as i32, height as i32) };
+        info.ptMinTrackSize = POINT { x, y };
     }
 
     /// Returns the minimum size of the window
     pub fn min_size(&self) -> [i32; 2] {
         let info = unsafe { &mut *self.inner };
-        [info.ptMinTrackSize.x, info.ptMinTrackSize.y]
+        let (w, h) = unsafe { crate::win32::high_dpi::physical_to_logical(info.ptMinTrackSize.x, info.ptMinTrackSize.y) };
+        [w, h]
     }
 }
 
