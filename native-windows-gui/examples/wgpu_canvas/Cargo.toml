@@ -1,0 +1,16 @@
+[package]
+name = "wgpu_canvas"
+description = "A gltf model loader using native-windows-gui and wgpu-rs"
+version = "0.1.0"
+authors = ["Gabriel D <gdube.475@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+native-windows-gui = { path = "../../", default-features=false, features = ["extern-canvas", "frame", "raw-win-handle", "listbox", "flexbox", "cursor"] }
+native-windows-derive = { path = "../../../native-windows-derive" }
+pollster = "0.2.2"
+wgpu = "0.7.0"
+serde_json = "1.0"
+nalgebra-glm = "0.10"

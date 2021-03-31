@@ -29,6 +29,7 @@ pub enum FileDialogAction {
     * multiselect: Whether the user can select more than one file. Only supported with the Open action
     * default_folder: Default folder to show in the dialog.
     * filters: If defined, filter the files that the user can select (In a Open dialog) or which extension to add to the saved file (in a Save dialog)
+    The `filters` value must be a '|' separated string having this format: "Test(*.txt;*.rs)|Any(*.*)"  
 
     ```rust
         use native_windows_gui as nwg;
