@@ -1,6 +1,11 @@
 1.0.11 (unreleased)
 * Double buffer option for ListView
 * Fix a treeview issue when building without the image-list feature
+* FIx dpi awareness with min/max functions
+* Deprecate `Timer`
+* Added `AnimationTimer`, a all around better timer component
+* Fix some resource leak
+* Added support for `raw-window-handle` ini Window and ExternCanvas
 
 1.0.10
 * Fixed a compiling bug when using `no-default-features`

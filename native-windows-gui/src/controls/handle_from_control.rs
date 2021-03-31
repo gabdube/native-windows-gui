@@ -6,20 +6,24 @@ use std::fmt::Display;
 
 macro_rules! handles {
     ($control:ty) => {
+        #[allow(deprecated)]
         impl From<&$control> for ControlHandle {
             fn from(control: &$control) -> Self { control.handle }
         }
 
+        #[allow(deprecated)]
         impl From<&mut $control> for ControlHandle {
             fn from(control: &mut $control) -> Self { control.handle }
         }
 
+        #[allow(deprecated)]
         impl PartialEq<ControlHandle> for $control {
             fn eq(&self, other: &ControlHandle) -> bool {
                 self.handle == *other
             }
         }
 
+        #[allow(deprecated)]
         impl PartialEq<$control> for ControlHandle {
             fn eq(&self, other: &$control) -> bool {
                 *self == other.handle
@@ -199,10 +203,17 @@ use super::MessageWindow;
 handles!(MessageWindow);
 
 #[cfg(feature = "timer")]
+#[allow(deprecated)]
 use super::Timer;
 
 #[cfg(feature = "timer")]
 handles!(Timer);
+
+#[cfg(feature = "animation-timer")]
+use super::AnimationTimer;
+
+#[cfg(feature = "animation-timer")]
+handles!(AnimationTimer);
 
 #[cfg(feature = "notice")]
 use super::Notice;

@@ -32,6 +32,9 @@ mod menu;
 #[cfg(feature = "timer")]
 mod timer;
 
+#[cfg(feature = "animation-timer")]
+mod animation_timer;
+
 #[cfg(feature = "notice")]
 mod notice;
 
@@ -114,7 +117,12 @@ pub use menu::{Menu, MenuBuilder, MenuItem, MenuSeparator, MenuItemBuilder, Popu
 pub use control_base::HmenuBuilder;
 
 #[cfg(feature = "timer")]
+#[allow(deprecated)]
 pub use timer::{Timer, TimerBuilder};
+
+#[cfg(feature = "animation-timer")]
+#[allow(deprecated)]
+pub use animation_timer::{AnimationTimer, AnimationTimerBuilder};
 
 #[cfg(feature = "notice")]
 pub use notice::{Notice, NoticeSender, NoticeBuilder};

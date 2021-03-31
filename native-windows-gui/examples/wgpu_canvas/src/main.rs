@@ -5,7 +5,7 @@ extern crate nalgebra_glm as glm;
 use nwd::NwgUi;
 use nwg::NativeUi;
 use nwg::stretch::{style::{*, Dimension::*}, geometry::*};
-use std::{slice, mem, cell::RefCell, borrow::Cow, ops::Range};
+use std::{slice, mem, time::Duration, cell::RefCell, borrow::Cow, ops::Range};
 use core::num::NonZeroU64;
 
 mod glb;
@@ -157,6 +157,10 @@ pub struct CanvasTest {
     #[nwg_layout_item(layout: layout, col: 0, row: 0, col_span: 3)]
     canvas: nwg::ExternCanvas,
 
+    #[nwg_control(parent: window, interval: Duration::from_millis(1000/60))]
+    #[nwg_events(OnTimerTick: [CanvasTest::animate])]
+    timer: nwg::AnimationTimer,
+
     #[nwg_control(parent: window)]
     #[nwg_layout_item(layout: layout, col: 0, col: 3)]
     options_frame: nwg::Frame,
@@ -170,8 +174,9 @@ pub struct CanvasTest {
     options_layout: nwg::FlexboxLayout,
 
     #[nwg_control(parent: options_frame, text: "Animate")]
+    #[nwg_events(OnButtonClick: [CanvasTest::update_anim])]
     #[nwg_layout_item(layout: options_layout, size: Size { width: Auto, height: Points(30.0) })]
-    animate: nwg::CheckBox,
+    animate_check: nwg::CheckBox,
 
     #[nwg_control(parent: options_frame, text: "Models:")]
     #[nwg_layout_item(layout: options_layout, size: Size { width: Auto, height: Points(30.0) })]
@@ -734,6 +739,30 @@ impl CanvasTest {
         data.swapchain = data.device.create_swap_chain(&data.surface, &data.swapchain_description);
 
         data.render.depth_attachment = self.init_depth_texture(&data.device, &data.swapchain_description);
+
+        drop(canvas_data_op);
+
+        self.update_uniforms();
+        self.render();
+    }
+
+    fn update_anim(&self) {
+        let checked = self.animate_check.check_state();
+        match checked {
+            nwg::CheckBoxState::Checked => { self.timer.start(); },
+            nwg::CheckBoxState::Unchecked => { self.timer.stop(); },
+            _ => {  },
+        }
+    }
+
+    fn animate(&self) {
+        let mut canvas_data_op = self.canvas_data.borrow_mut();
+        let data = match canvas_data_op.as_mut() {
+            Some(data) => data,
+            None => { return; }
+        };
+
+        data.model_rotation[1] -= 0.008;
 
         drop(canvas_data_op);
 

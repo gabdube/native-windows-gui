@@ -9,7 +9,7 @@ use std::sync::Mutex;
 
 
 lazy_static! {
-/// Default font to use when creating controls. Set using `Font::set_default` && get using `Dont::default()`
+    /// Default font to use when creating controls. Set using `Font::set_global_default` && get using `Font::global_default()`
     static ref DEFAULT_FONT: Mutex<Option<Font>> = {
         Mutex::new(None)
     };

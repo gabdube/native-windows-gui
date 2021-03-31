@@ -240,6 +240,9 @@ pub enum Event {
     /// When a timer delay is elapsed
     OnTimerTick,
 
+    /// When a timer end condition is reached
+    OnTimerStop,
+
     /// When a notice is... noticed
     OnNotice,
 

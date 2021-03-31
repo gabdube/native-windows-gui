@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use crate::controls::ControlHandle;
 use crate::win32::{window_helper as wh, window::build_timer};
 use crate::NwgError;
@@ -9,6 +11,8 @@ const BAD_HANDLE: &'static str = "INTERNAL ERROR: Timer handle is not Timer!";
 
 
 /**
+WARNING: Use AnimationTimer instead. The winapi timer does not have a constant tick and will call your single threaded from another thread.
+
 A timer is an invisible UI component that trigger the `OnTimerTick` event at the specified interval.
 Timers are mosty used to handle animations OR to create a timeout. To sync multithreaded action see the `Notice` object.
 
@@ -22,7 +26,7 @@ This is a Windows "feature", there's probably nothing I can do to fix that.
 Requires the `timer` feature. 
 
 **Builder parameters:**
-  * `parent`:   **Required.** The button parent container. Should be a top level window
+  * `parent`:   **Required.** The timer parent container. Should be a top level window
   * `interval`:  The timer tick interval in millisecond
   * `stopped`:   If the timer should start right away. By default timers starts "stopped(true)". Be sure to include `stopped(false)` in your builder if you want the timer to start instantly.
 
@@ -42,6 +46,10 @@ fn build_timer(parent: &nwg::Window)  {
 }
 ```
 */
+#[deprecated(
+    since = "1.0.11",
+    note = "Use AnimationTimer instead. The winapi timer does not have a constant tick and will call your single threaded from another thread."
+)]
 #[derive(Default)]
 pub struct Timer {
     pub handle: ControlHandle,

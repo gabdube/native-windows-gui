@@ -9,7 +9,7 @@ use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
 use winapi::um::winuser::{WNDPROC, NMHDR};
 use winapi::um::commctrl::{NMTTDISPINFOW, SUBCLASSPROC};
 use super::base_helper::{CUSTOM_ID_BEGIN, to_utf16};
-use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY};
+use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY, NWG_TIMER_TICK, NWG_TIMER_STOP};
 use super::high_dpi;
 use crate::controls::ControlHandle;
 use crate::{Event, EventData, NwgError};
@@ -699,6 +699,8 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         WM_RBUTTONUP => callback(Event::OnMousePress(MousePressEvent::MousePressRightUp), NO_DATA, base_handle), 
         WM_RBUTTONDOWN => callback(Event::OnMousePress(MousePressEvent::MousePressRightDown), NO_DATA, base_handle),
         NOTICE_MESSAGE => callback(Event::OnNotice, NO_DATA, ControlHandle::Notice(hwnd, w as u32)),
+        NWG_TIMER_STOP => callback(Event::OnTimerStop, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),
+        NWG_TIMER_TICK => callback(Event::OnTimerTick, NO_DATA, ControlHandle::Timer(hwnd, w as u32)),
         NWG_INIT => callback(Event::OnInit, NO_DATA, base_handle),
         WM_CLOSE => {
             let mut should_exit = true;

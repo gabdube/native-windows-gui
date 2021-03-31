@@ -12,6 +12,8 @@ use winapi::um::winuser::WNDCLASSEXW;
 pub const NOTICE_MESSAGE: UINT = WM_USER+100;
 pub const NWG_INIT: UINT = WM_USER + 101;
 pub const NWG_TRAY: UINT = WM_USER + 102;
+pub const NWG_TIMER_TICK: UINT = WM_USER + 103;
+pub const NWG_TIMER_STOP: UINT = WM_USER + 104;
 
 
 /// Returns the class info of a hwnd handle
@@ -123,7 +125,7 @@ pub fn iterate_window_children<F>(hwnd_parent: HWND, cb: F)
     }
 }
 
-#[cfg(any(feature="timer", feature="notice"))]
+#[cfg(any(feature="timer", feature="animation-timer", feature="notice"))]
 pub fn window_valid(hwnd: HWND) -> bool {
     use winapi::um::winuser::IsWindow;
 

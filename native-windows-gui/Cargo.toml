@@ -24,6 +24,7 @@ lazy_static = "1.4.0"
 bitflags = { version = "1.1.0" }
 stretch = { version = "0.3.2", optional = true }
 muldiv = { version = "0.2", optional = true }
+
 # Integration for raw-window-handle
 raw-window-handle = { version = "0.3.3", optional = true }
 
@@ -48,6 +49,7 @@ combobox = []
 tray-notification = []
 message-window = []
 timer = []
+animation-timer = []
 notice = []
 list-view = []
 image-decoder = []
