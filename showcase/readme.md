@@ -3,6 +3,9 @@
 # Basic
 ![basic example windows](windows-basic.png)
 
+# WGPU canvas
+![WGPU canvas](wgpu_canvas.PNG)
+
 # Interactive tests
 ![demo1](demo1.png)
 ![demo2](demo2.png)
