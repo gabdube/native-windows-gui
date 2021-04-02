@@ -110,7 +110,7 @@ impl Tooltip {
         use winapi::um::commctrl::{TTGETTITLE, TTM_GETTITLE};
         use winapi::um::commctrl::{TTI_NONE, TTI_INFO, TTI_WARNING, TTI_ERROR, TTI_INFO_LARGE, TTI_WARNING_LARGE, TTI_ERROR_LARGE};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let mut tt = TTGETTITLE {

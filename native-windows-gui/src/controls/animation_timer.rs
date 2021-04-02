@@ -224,7 +224,7 @@ impl AnimationTimer {
         This resets the life time and tick count if relevant.
     */
     pub fn start(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let (_, id) = self.handle.timer().expect(BAD_HANDLE);
         AnimationThread::reset_timer(id);
     }
@@ -233,28 +233,28 @@ impl AnimationTimer {
         Stop the selected timer. If the timer is already stopped, this does nothing.
     */
     pub fn stop(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let (_, id) = self.handle.timer().expect(BAD_HANDLE);
         AnimationThread::stop_timer(id);
     }
 
     /// Sets the interval on the this timer
     pub fn set_interval(&self, i: Duration) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let (_, id) = self.handle.timer().expect(BAD_HANDLE);
         AnimationThread::update_timer(id, Some(i), None, None);
     }
 
     /// Sets the life time on the this timer
     pub fn set_lifetime(&self, life: Option<Duration>) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let (_, id) = self.handle.timer().expect(BAD_HANDLE);
         AnimationThread::update_timer(id, None, Some(life), None);
     }
 
     /// Sets the max tick count on the this timer
     pub fn set_max_tick(&self, max_tick: Option<u64>) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let (_, id) = self.handle.timer().expect(BAD_HANDLE);
         AnimationThread::update_timer(id, None, None, Some(max_tick));
     }
