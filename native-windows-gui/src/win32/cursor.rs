@@ -42,7 +42,7 @@ impl GlobalCursor {
         const MSG: &'static str = "local_position can only be used for window control";
 
         let control = control.into();
-        if control.blank() { panic!(MSG); }
+        if control.blank() { std::panic::panic_any(MSG); }
         let handle = control.hwnd().expect(MSG);
 
         let (x, y) = point.unwrap_or(GlobalCursor::position());
@@ -114,7 +114,7 @@ impl GlobalCursor {
         use winapi::um::winuser::SetCapture;
         const MSG: &'static str = "Mouse capture can only be set for window control";
 
-        if control.blank() { panic!(MSG); }
+        if control.blank() { std::panic::panic_any(MSG); }
         let handle = control.hwnd().expect(MSG);
 
         unsafe { SetCapture(handle); }
@@ -172,7 +172,7 @@ impl GlobalCursor {
 
         const MSG: &'static str = "Dragging can only be set for window control";
 
-        if control.blank() { panic!(MSG); }
+        if control.blank() { std::panic::panic_any(MSG); }
         let handle = control.hwnd().expect(MSG);
 
         let (x, y) = point.unwrap_or(GlobalCursor::position());

@@ -147,7 +147,7 @@ impl Tooltip {
         let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
 
         let owner_handle = {
-            if owner.blank() { panic!(NOT_BOUND); }
+            if owner.blank() { std::panic::panic_any(NOT_BOUND); }
             owner.hwnd().expect(BAD_HANDLE)
         };
 
@@ -183,7 +183,7 @@ impl Tooltip {
 
         let mut text = to_utf16(text);
         let owner_handle = {
-            if owner.blank() { panic!(NOT_BOUND); }
+            if owner.blank() { std::panic::panic_any(NOT_BOUND); }
             owner.hwnd().expect(BAD_HANDLE)
         };
 
@@ -293,7 +293,7 @@ impl Tooltip {
 
         let mut text = to_utf16(text);
         let owner_handle = {
-            if owner.blank() { panic!(NOT_BOUND); }
+            if owner.blank() { std::panic::panic_any(NOT_BOUND); }
             owner.hwnd().expect(BAD_HANDLE)
         };
 
@@ -324,7 +324,7 @@ impl Tooltip {
 
         let owner = owner.into();
         let owner_handle = {
-            if owner.blank() { panic!(NOT_BOUND); }
+            if owner.blank() { std::panic::panic_any(NOT_BOUND); }
             owner.hwnd().expect(BAD_HANDLE)
         };
 
@@ -353,7 +353,7 @@ impl Tooltip {
         let owner = owner.into();
 
         let owner_handle = {
-            if owner.blank() { panic!(NOT_BOUND); }
+            if owner.blank() { std::panic::panic_any(NOT_BOUND); }
             owner.hwnd().expect(BAD_HANDLE)
         };
 

@@ -131,7 +131,7 @@ impl StatusBar {
         use winapi::um::winuser::WM_SIZE;
         use crate::bind_raw_event_handler_inner;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));

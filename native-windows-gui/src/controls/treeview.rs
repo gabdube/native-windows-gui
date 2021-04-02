@@ -799,7 +799,7 @@ impl Eq for TreeItem {}
 fn next_treeview_item(handle: &ControlHandle, action: usize, item: HTREEITEM) -> Option<TreeItem> {
     use winapi::um::commctrl::TVM_GETNEXTITEM;
 
-    if handle.blank() { panic!(NOT_BOUND); }
+    if handle.blank() { std::panic::panic_any(NOT_BOUND); }
     let handle = handle.hwnd().expect(BAD_HANDLE);
 
     let handle = wh::send_message(handle, TVM_GETNEXTITEM, action as _, item as _) as HTREEITEM;

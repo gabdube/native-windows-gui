@@ -256,7 +256,7 @@ impl TabsContainer {
         use winapi::um::commctrl::{TCM_GETCURSEL, TCN_SELCHANGE};
         use winapi::um::winuser::SendMessageW;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let parent_handle_raw = wh::get_window_parent(handle);
@@ -482,7 +482,7 @@ impl Tab {
         use winapi::um::commctrl::{TCM_SETITEMW, TCIF_TEXT, TCITEMW};
         use winapi::um::winuser::GWL_USERDATA;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let tab_index = (wh::get_window_long(handle, GWL_USERDATA) - 1) as WPARAM;
@@ -514,7 +514,7 @@ impl Tab {
         use winapi::um::commctrl::{TCM_SETITEMW, TCIF_IMAGE, TCITEMW};
         use winapi::um::winuser::GWL_USERDATA;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let tab_index = (wh::get_window_long(handle, GWL_USERDATA) - 1) as WPARAM;
@@ -548,14 +548,14 @@ impl Tab {
     /// Returns true if the control is visible to the user. Will return true even if the 
     /// control is outside of the parent client view (ex: at the position (10000, 10000))
     pub fn visible(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::get_window_visibility(handle) }
     }
 
     /// Show or hide the control to the user
     pub fn set_visible(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
         unsafe { wh::set_window_visibility(handle, v) }
     }
@@ -622,7 +622,7 @@ impl Tab {
     fn bind_container<'a>(&self, text: &'a str) {
         use winapi::um::commctrl::{TCITEMW, TCM_INSERTITEMW, TCIF_TEXT};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { std::panic::panic_any(NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let tab_view_handle = wh::get_window_parent(handle);
