@@ -110,11 +110,11 @@ impl Menu {
 
     /// Return true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         let (parent_handle, handle) = match self.handle {
             ControlHandle::Menu(parent, menu) => (parent, menu),
             ControlHandle::PopMenu(_, _) => { return true; },
-            _ => panic!(BAD_HANDLE)
+            _ => panic!("{}", BAD_HANDLE)
         };
 
         unsafe { mh::is_menu_enabled(parent_handle, handle) }
@@ -123,11 +123,11 @@ impl Menu {
     /// Enable or disable the control
     /// A popup menu cannot be disabled
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         let (parent_handle, handle) = match self.handle {
             ControlHandle::Menu(parent, menu) => (parent, menu),
             ControlHandle::PopMenu(_, _) => { return; },
-            _ => panic!(BAD_HANDLE)
+            _ => panic!("{}", BAD_HANDLE)
         };
 
         unsafe { mh::enable_menu(parent_handle, handle, v); }
@@ -271,7 +271,7 @@ impl MenuItem {
 
     /// Return true if the control user can interact with the control, return false otherwise
     pub fn enabled(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         let (parent_handle, id) = self.handle.hmenu_item().expect(BAD_HANDLE);
         
         unsafe { mh::is_menuitem_enabled(parent_handle, None, Some(id)) }
@@ -279,7 +279,7 @@ impl MenuItem {
 
     /// Enable or disable the control
     pub fn set_enabled(&self, v: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         let (parent_handle, id) = self.handle.hmenu_item().expect(BAD_HANDLE);
 
         unsafe { mh::enable_menuitem(parent_handle, None, Some(id), v); }
@@ -287,7 +287,7 @@ impl MenuItem {
 
     /// Sets the check state of a menu item
     pub fn set_checked(&self, check: bool) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         let (parent_handle, id) = self.handle.hmenu_item().expect(BAD_HANDLE);
 
         unsafe { mh::check_menu_item(parent_handle, id, check); }
@@ -295,7 +295,7 @@ impl MenuItem {
 
     /// Returns the check state of a menu item
     pub fn checked(&self) -> bool {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         let (parent_handle, id) = self.handle.hmenu_item().expect(BAD_HANDLE);
 
         unsafe { mh::menu_item_checked(parent_handle, id) }

@@ -216,7 +216,7 @@ impl Label {
         use winapi::um::wingdi::{SelectObject, CreateSolidBrush, RGB};
         use std::{mem, ptr};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));

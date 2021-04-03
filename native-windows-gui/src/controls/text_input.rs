@@ -364,7 +364,7 @@ impl TextInput {
         use winapi::um::wingdi::{SelectObject, CreateSolidBrush, RGB};
         use std::{mem, ptr};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         self.handle.hwnd().expect(BAD_HANDLE);
 
         let brush = match bg {

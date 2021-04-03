@@ -86,8 +86,8 @@ impl Timer {
 
     /// Stops the timer.
     pub fn stop(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        if !self.valid() { panic!(UNUSABLE_TIMER); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
+        if !self.valid() { panic!("{}", UNUSABLE_TIMER); }
         let (hwnd, id) = self.handle.timer().expect(BAD_HANDLE);
 
         wh::kill_timer(hwnd, id);
@@ -95,8 +95,8 @@ impl Timer {
 
     /// Starts the timer. If the timer is already running, this restarts it.
     pub fn start(&self) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        if !self.valid() { panic!(UNUSABLE_TIMER); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
+        if !self.valid() { panic!("{}", UNUSABLE_TIMER); }
         let (hwnd, id) = self.handle.timer().expect(BAD_HANDLE);
 
         wh::start_timer(hwnd, id, self.interval());

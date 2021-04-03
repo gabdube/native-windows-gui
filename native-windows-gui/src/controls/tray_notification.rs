@@ -106,7 +106,7 @@ impl TrayNotification {
     pub fn set_visibility(&self, v: bool) {
         use winapi::um::shellapi::{NIF_STATE, NIM_MODIFY, NIS_HIDDEN};  
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         self.handle.tray().expect(BAD_HANDLE);
 
         unsafe {
@@ -123,7 +123,7 @@ impl TrayNotification {
     pub fn set_tip<'a>(&self, tip: &'a str) {
         use winapi::um::shellapi::{NIM_MODIFY, NIF_TIP, NIF_SHOWTIP};  
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         self.handle.tray().expect(BAD_HANDLE);
 
         unsafe {
@@ -145,7 +145,7 @@ impl TrayNotification {
     pub fn set_focus(&self) {
         use winapi::um::shellapi::{NIM_SETFOCUS};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         self.handle.tray().expect(BAD_HANDLE);
 
         unsafe {
@@ -159,7 +159,7 @@ impl TrayNotification {
         use winapi::um::shellapi::{NIF_ICON, NIM_MODIFY};
         use winapi::shared::windef::HICON;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         self.handle.tray().expect(BAD_HANDLE);
 
         unsafe {
@@ -185,7 +185,7 @@ impl TrayNotification {
         use winapi::um::shellapi::{NIF_INFO, NIM_MODIFY};
         use winapi::shared::windef::HICON;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         self.handle.tray().expect(BAD_HANDLE);
 
         let default_flags = TrayNotificationFlags::NO_ICON | TrayNotificationFlags::SILENT;

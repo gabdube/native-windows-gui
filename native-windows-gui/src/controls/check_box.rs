@@ -274,7 +274,7 @@ impl CheckBox {
         use winapi::shared::{basetsd::UINT_PTR, windef::HWND, minwindef::LRESULT};
         use winapi::um::wingdi::{CreateSolidBrush, RGB};
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         let handle = self.handle.hwnd().expect(BAD_HANDLE);
 
         let parent_handle = ControlHandle::Hwnd(wh::get_window_parent(handle));

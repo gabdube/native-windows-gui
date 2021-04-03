@@ -87,7 +87,7 @@ impl Notice {
     /// Change the parent window of the notice. This won't update the NoticeSender already created.
     /// Panics if the control is not a window-like control or if the notice was not initialized
     pub fn set_window_handle<C: Into<ControlHandle>>(&mut self, window: C) {
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
 
         let hwnd = window.into().hwnd().expect("New notice parent is not a window control");
         let (_, id) = self.handle.notice().expect(BAD_HANDLE);
@@ -97,8 +97,8 @@ impl Notice {
 
     /// Create a new `NoticeSender` bound to this Notice
     pub fn sender(&self) -> NoticeSender {
-        if self.handle.blank() { panic!(NOT_BOUND); }
-        if !self.valid() { panic!(UNUSABLE_NOTICE); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
+        if !self.valid() { panic!("{}", UNUSABLE_NOTICE); }
         let (hwnd, id) = self.handle.notice().expect(BAD_HANDLE);
 
         NoticeSender { 

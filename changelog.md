@@ -1,4 +1,4 @@
-1.0.11 (unreleased)
+1.0.11
 * Double buffer option for ListView
 * Fix a treeview issue when building without the image-list feature
 * FIx dpi awareness with min/max functions
@@ -6,6 +6,7 @@
 * Added `AnimationTimer`, a all around better timer component
 * Fix some resource leak
 * Added support for `raw-window-handle` ini Window and ExternCanvas
+* Fixed to panics warnings on rust 1.51.0
 
 1.0.10
 * Fixed a compiling bug when using `no-default-features`

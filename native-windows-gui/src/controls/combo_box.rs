@@ -416,7 +416,7 @@ impl<D: Display+Default> ComboBox<D> {
         use winapi::um::wingdi::{SelectObject, CreateSolidBrush, RGB};
         use std::ptr;
 
-        if self.handle.blank() { panic!(NOT_BOUND); }
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
         let brush = match bg {
             Some(c) => unsafe { CreateSolidBrush(RGB(c[0], c[1], c[2])) },
             None => COLOR_WINDOW as HBRUSH
