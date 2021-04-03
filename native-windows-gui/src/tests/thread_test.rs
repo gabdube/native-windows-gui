@@ -24,7 +24,7 @@ pub struct ThreadTest {
     sleep_btn: Button,
     thread_sleep_btn: Button,
 
-    timer: Timer,
+    timer: AnimationTimer,
     notice: Notice
 }
 
@@ -107,9 +107,9 @@ mod partial_canvas_test_ui {
                 .parent(&data.window)
                 .build(&mut data.thread_sleep_btn)?;
 
-            Timer::builder()
+            AnimationTimer::builder()
                 .parent(&data.window)
-                .interval(25)
+                .interval(Duration::from_millis(25))
                 .build(&mut data.timer)?;
 
             Notice::builder()

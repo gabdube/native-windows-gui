@@ -182,14 +182,15 @@ AnimationTimer replaces the default winapi timer. Please, for the love of god, d
 
 ```
 use native_windows_gui as nwg;
+use std::time::Duration;
 
 /// Builds a timer that will animation something at 60fps for 3 sec
 fn build_timer(parent: &nwg::Window)  {
     let mut timer = Default::default();
     nwg::AnimationTimer::builder()
         .parent(parent)
-        .interval(1000/60)
-        .lifetime(Some(3000))
+        .interval(Duration::from_millis(1000/60))
+        .lifetime(Some(Duration::from_millis(3000)))
         .build(&mut timer);
 }
 ```

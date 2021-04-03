@@ -28,6 +28,7 @@ use nwd::NwgUi;
 use nwg::NativeUi;
 
 use std::cell::RefCell;
+use std::time::Duration;
 
 
 /**
@@ -66,9 +67,9 @@ pub struct SyncDraw {
     font: nwg::Font,
 
     // Refresh timer (30 FPS)
-    #[nwg_control(parent: window, interval: 33, stopped: false)]
+    #[nwg_control(parent: window, interval: Duration::from_millis(1000/30))]
     #[nwg_events(OnTimerTick: [SyncDraw::render])]
-    refresh_timer: nwg::Timer,
+    refresh_timer: nwg::AnimationTimer,
 
     // Static Buttons
     #[nwg_control(text: "Mode:", position: (10, 10), size: (50, 10), font: Some(&data.font) )]
