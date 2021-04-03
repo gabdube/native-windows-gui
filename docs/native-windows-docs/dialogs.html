@@ -45,6 +45,7 @@
     <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
     <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
     <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+    <li><a href="features.html"><b>3.7.</b> Features </a></li>
 </ul>
 </li>
 
@@ -184,6 +185,11 @@
 
         The font info can then be used to create font resources. Note that the default font resource provided by NWG is very simple and only supports
         a size, a family and a weight.
+
+        <h3>Custom dialog</h3>
+
+        Native windows gui does not use the default win32 way to handle custom dialogs because it involves use resource files, and worse, dialogs runs in another message loop in the same thread.
+        Instead, user dialogs should be implemented as normal GUI object running in another thread. For an example see: <a href="https://github.com/gabdube/native-windows-gui/blob/master/native-windows-gui/examples/dialog_multithreading_d.rs">the dialog example</a>
 
         <br><br>
         <br><br>

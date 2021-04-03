@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Native Windows GUI guide - Dialogs</title>
+
+    <link rel="stylesheet" type="text/css" href="style/rustbook.css">
+    <link rel="stylesheet" type="text/css" href="style/pygments.css">
+    <link rel="stylesheet" type="text/css" href="style/nwg.css">
+
+</head>
+<body class="rustdoc">
+<!--[if lte IE 8]>
+<div class="warning">
+    This old browser is unsupported and will most likely display funky
+    things.
+</div>
+<![endif]-->
+
+<!-- NAV BEGIN -->
+<div id="nav">
+    <button id="toggle-nav">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+</div>
+
+    
+<div id='toc' class='mobile-hidden'>
+<ul class='chapter'>
+<li><a href='index.html'><b>1.</b> Introduction</a>
+</li>
+<li><a href='getting_started.html'><b>2.</b> Getting Started</a>
+</li>
+
+<li><a href="basics.html"><b>3.</b> Basics </a>
+<ul class="section">
+    <li><a href="controls.html"><b>3.1.</b> Controls </a></li>
+    <li><a href="events.html"><b>3.2.</b> Events </a></li>
+    <li><a href="helper.html"><b>3.3.</b> Helpers </a></li>
+    <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
+    <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
+    <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+    <li><a href="features.html"><b>3.7.</b> Features </a></li>
+</ul>
+</li>
+
+<li><a href="intermediate.html"><b>4.</b> Intermediate </a>
+<ul class="section">
+    <li><a href="layouts.html"><b>4.1.</b> Layouts </a></li>
+    <li><a href="resources.html"><b>4.2.</b> Resources </a></li>
+    <li><a href="dialogs.html"><b>4.3.</b> Dialogs </a></li>
+    <li><a href="localization.html"><b>4.4.</b> Internationalization </a></li>
+</ul>
+</li>
+
+<li><a href="advanced.html"><b>5.</b> Advanced </a>
+<ul class="section">
+    <li><a href="partial.html"><b>5.1.</b> Partials ui </a></li>
+    <li><a href="dynamic_control.html"><b>5.2.</b> Dynamic control </a></li>
+    <li><a href="dynamic_event.html"><b>5.3.</b> Dynamic events </a></li>
+    <li><a href="multithreading.html"><b>5.4.</b> Multithreading </a></li>
+</ul>
+</li>
+
+<li><a href="derive.html"><b>6.</b> Native-windows-derive </a>
+<ul class="section">
+    <li><a href="nwd_basics.html"><b>6.1.</b> Basics </a></li>
+    <li><a href="nwd_controls.html"><b>6.1.</b> Controls </a></li>
+    <li><a href="nwd_resources.html"><b>6.2.</b> Resources </a></li>
+    <li><a href="nwd_events.html"><b>6.3.</b> Events </a></li>
+    <li><a href="nwd_layouts.html"><b>6.4.</b> Layouts </a></li>
+    <li><a href="nwd_partial.html"><b>6.5.</b> Partials </a></li>
+</ul>
+</li>
+
+<li><a href="low.html"><b>7.</b> Low level stuff </a>
+    <ul class="section">
+        <li><a href="low_events.html"><b>7.1.</b> Raw event handling </a></li>
+        <li><a href="extern_wrapping.html"><b>7.2.</b> Raw control handle </a></li>
+    </ul>
+</li>
+
+</ul>
+</div>
+<!-- NAV END -->
+
+<div id='page-wrapper'>
+    <div id='page'>
+
+        <h1 class="title">Native Windows GUI: Features</h1>
+
+        Almost all of the features of native-windows-gui are behimd feature flags, but by default it includes everything.<br><br>
+
+        In order to cut the compile time, specify <code>default-features=false</code> in Cargo.toml. Ex: <br> <br>
+
+        <div style="background-color: #E5E5E5;">
+          <code style="white-space: nowrap;">native-windows-gui = {<br>
+            &nbsp;&nbsp;version="1",<br>
+            &nbsp;&nbsp;default-features=false,<br>
+            &nbsp;&nbsp;features = [<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;"extern-canvas", "frame", "raw-win-handle",<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;"listbox", "flexbox", "cursor",<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;"animation-timer"<br>
+            &nbsp;&nbsp;]<br>
+        }</code>
+        </div>
+
+        <h3>Feature list</h3>
+
+        Here is a list of all the features in NWG
+        
+        <ul>
+          <li><b>animation-timer</b>: A custom timer to handle animations and timeout</li>
+          <li><b>clipboard</b>: Enable the clipboard features</li>
+          <li><b>color-dialog</b>: Enable the color dialog</li>
+          <li><b>combobox</b>: The combobox control</li>
+          <li><b>cursor</b>: The GlobalCursor utility to handle the windows mouse cursor</li>
+          <li><b>datetime-picker</b>: The datetime picker control</li>
+          <li><b>dynamic_layout</b>: Enable dynamic layout</li>
+          <li><b>embed-resource</b>: Enable the EmbedResource resource</li>
+          <li><b>extern-canvas</b>: The extern canvas control. It can be used as a target to render from external API (like opengl or Vulkan)</li>
+          <li><b>file-dialog</b>: The file dialog resource</li>
+          <li><b>flexbox</b>: The flexbox layout</li>
+          <li><b>font-dialog</b>: The font dialog resource</li>
+          <li><b>frame</b>: The frame control. A optionally bordered rect that can contain children.</li>
+          <li><b>high-dpi</b>: Enable high-dpi functions</li>
+          <li><b>image-decoder</b>: Add lots of supported image format to Bitmap and the ImageDecoder resource</li>
+          <li><b>image-list</b>: Adds icons to controls that implement them (listview, tabs, etc)</li>
+          <li><b>list-view</b>: The list view control</li>
+          <li><b>listbox</b>: The list box control</li>
+          <li><b>menu</b>: Menu bar & menu item for top level window. Also includes popup menus</li>
+          <li><b>message-window</b>: An invisible window that processes messages in the background</li>
+          <li><b>no-styling</b>: Disable automatic style (ex: if you specify stylling in the manifest)</li>
+          <li><b>notice</b>: An obejct to wake up a gui thread from another thread</li>
+          <li><b>number-select</b>: A custom control to select numbers</li>
+          <li><b>progress-bar</b>: The progress bar control</li>
+          <li><b>raw-win-handle</b>: Implement the <a href="https://crates.io/crates/raw-window-handle">raw-window-handle</a> for extern canvas and window</li>
+          <li><b>rich-textbox</b>: A rich text box control</li>
+          <li><b>scroll-bar</b>: A scrollbar control</li>
+          <li><b>status-bar</b>: A satus bar control</li>
+          <li><b>tabs</b>: The tabs container control</li>
+          <li><b>textbox</b>: A simple text box</li>
+          <li><b>timer</b>: DEPRECATED. Use animation-timer instead. </li>
+          <li><b>tooltip</b>: The Tooltip control. It manages tooltip for 1 or more gui controls</li>
+          <li><b>trackbar</b>: The trakcbar control</li>
+          <li><b>tray-notification</b>: Windows tray notification</li>
+          <li><b>tree-view</b>: The treeview control</li>
+          <li><b>tree-view-iterator</b>: An iterator for the tree view control</li>
+          <li><b>winnls</b>: Internationalization windows service ex: <a href="https://github.com/gabdube/native-windows-gui/blob/master/native-windows-gui/examples/month_name_d.rs">The month name locale example</a></li>
+        </ul>
+
+        <br>
+
+
+    </div>
+</div>
+
+<script src="style/rustbook.js"></script>
+</body>
+</html>

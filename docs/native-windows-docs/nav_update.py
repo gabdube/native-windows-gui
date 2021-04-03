@@ -30,6 +30,7 @@ NAV = r"""<!-- NAV BEGIN -->
     <li><a href="small.html"><b>3.4.</b> Small application layout </a></li>
     <li><a href="limitations.html"><b>3.5.</b> Limitations </a></li>
     <li><a href="distribute.html"><b>3.6.</b> Distributing </a></li>
+    <li><a href="features.html"><b>3.7.</b> Features </a></li>
 </ul>
 </li>
 
