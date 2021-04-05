@@ -27,6 +27,9 @@ pub(crate) mod image_decoder;
 #[cfg(feature = "rich-textbox")]
 pub(crate) mod richedit;
 
+#[cfg(feature = "plotting")]
+pub(crate) mod plotters_d2d;
+
 use std::{mem, ptr};
 use crate::errors::NwgError;
 

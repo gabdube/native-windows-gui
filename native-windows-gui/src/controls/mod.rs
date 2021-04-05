@@ -80,6 +80,9 @@ mod frame;
 #[cfg(feature = "scroll-bar")]
 mod scroll_bar;
 
+#[cfg(feature = "plotting")]
+mod plotters;
+
 mod handle_from_control;
 
 pub use control_handle::ControlHandle;
@@ -171,5 +174,8 @@ pub use frame::{Frame, FrameBuilder, FrameFlags};
 
 #[cfg(feature = "scroll-bar")]
 pub use scroll_bar::{ScrollBar, ScrollBarBuilder, ScrollBarFlags};
+
+#[cfg(feature = "plotting")]
+pub use self::plotters::{Plotters, PlottersBuilder, PlottersDrawingArea, PlottersBackend, PlottersError};
 
 pub use handle_from_control::*;

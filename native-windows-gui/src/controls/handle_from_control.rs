@@ -259,4 +259,8 @@ use super::ScrollBar;
 #[cfg(feature = "scroll-bar")]
 handles!(ScrollBar);
 
+#[cfg(feature = "plotting")]
+use super::Plotters;
 
+#[cfg(feature = "plotting")]
+handles!(Plotters);

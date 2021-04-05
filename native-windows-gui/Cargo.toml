@@ -21,9 +21,11 @@ winapi = { version = "0.3", features = [
   "commdlg", "d2d1", "objbase", "dwrite", "winnls", "shellapi", "wincodec", "stringapiset"] }
 
 lazy_static = "1.4.0"
-bitflags = { version = "1.1.0" }
+bitflags = "1.1.0"
 stretch = { version = "0.3.2", optional = true }
 muldiv = { version = "0.2", optional = true }
+plotters = { version = "0.3", optional = true, default-features=false, features=["all_series", "all_elements"] }
+plotters-backend = { version = "0.3", optional = true }
 
 # Integration for raw-window-handle
 raw-window-handle = { version = "0.3.3", optional = true }
@@ -71,13 +73,14 @@ embed-resource = []
 scroll-bar = []
 tree-view-iterator = []
 dynamic_layout = []
+plotting = ["plotters", "plotters-backend"]
 flexbox = ["stretch"]
 high-dpi = ["muldiv"]
 raw-win-handle = ["raw-window-handle"]
 all = ["file-dialog", "color-dialog", "font-dialog", "datetime-picker", "progress-bar", "timer", "notice", "list-view", "cursor", "image-decoder",
        "tabs", "tree-view", "fancy-window", "listbox", "combobox", "tray-notification", "message-window", "number-select", "clipboard", "menu",
        "trackbar", "extern-canvas", "frame", "tooltip", "status-bar", "winnls", "textbox", "rich-textbox", "image-list", "embed-resource", "scroll-bar",
-       "tree-view-iterator", "flexbox", "dynamic_layout", "animation-timer"]
+       "tree-view-iterator", "flexbox", "dynamic_layout", "animation-timer", "plotting"]
 
 [package.metadata.docs.rs]
 # This also sets the default target to `x86_64-pc-windows-msvc`

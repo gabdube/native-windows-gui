@@ -1,6 +1,9 @@
 use std::fmt;
 use std::error::Error;
 
+#[cfg(feature = "plotting")]
+use crate::win32::plotters_d2d::PlottersError;
+
 /**
     Error enums used in the native window gui crate
 */
@@ -37,6 +40,10 @@ pub enum NwgError {
     /// Error raised by one of the locale functions
     #[cfg(feature = "winnls")]
     BadLocale(String),
+
+    /// Error raised by one of the locale functions
+    #[cfg(feature = "plotting")]
+    Plotters(PlottersError),
 }
 
 impl NwgError {
@@ -111,8 +118,18 @@ impl fmt::Display for NwgError {
 
             #[cfg(feature = "winnls")]
             BadLocale(reason) => write!(f, "Windows locale functions failed: {:?}", reason),
+
+            #[cfg(feature = "plotting")]
+            Plotters(reason) => write!(f, "Plotting canvas function failed: {}", reason),
         }
         
+    }
+}
+
+#[cfg(feature = "plotting")]
+impl From<PlottersError> for NwgError {
+    fn from(e: PlottersError) -> Self {
+        NwgError::Plotters(e)
     }
 }
 
