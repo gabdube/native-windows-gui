@@ -321,7 +321,7 @@ impl PlottersBackend {
         let text_format = formats.entry(fmt.clone())
             .or_insert_with(move || {
                 let mut text_format = ptr::null_mut();
-                
+
                 let font_size = (fmt.size as f32) / 100.0;
                 let family_name = to_utf16(&fmt.family);
                 let locale = unsafe { locale_name() };
@@ -467,8 +467,8 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
             let rect = D2D1_RECT_F {
                 left,
                 top,
-                right: right.min(left),
-                bottom: bottom.min(top),
+                right: right.max(left),
+                bottom: bottom.max(top),
             };
 
             match fill {
