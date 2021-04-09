@@ -21,12 +21,11 @@ const EXAMPLES: &[&str] = &[
     "Animated",
     "Interactive",
     "Koch Snowflake",
-    "Bitmap",
 ];
 
 #[derive(Default)]
 pub struct PlottingData {
-    animation_start: Option<Instant>
+    animation_start: Option<Instant>,
 }
 
 #[derive(Default, NwgUi)]
@@ -204,6 +203,60 @@ impl PlottingExample {
 
     fn multiple_plot(&self) -> Result<(), Box<dyn std::error::Error>> {
         let root = self.graph.draw().unwrap();
+
+
+        let root_area = root.titled("Multiplot", ("sans-serif", 60))?;
+        let (upper, lower) = root_area.split_vertically(256);
+
+        let x_axis = (-3.4f32..3.4).step(0.1);
+        let mut cc = ChartBuilder::on(&upper)
+            .margin(5)
+            .set_all_label_area_size(50)
+            .caption("Sine and Cosine", ("sans-serif", 40))
+            .build_cartesian_2d(-3.4f32..3.4, -1.2f32..1.2f32)?;
+
+        cc.configure_mesh()
+            .x_labels(20)
+            .y_labels(10)
+            .disable_mesh()
+            .x_label_formatter(&|v| format!("{:.1}", v))
+            .y_label_formatter(&|v| format!("{:.1}", v))
+            .draw()?;
+
+        cc.draw_series(LineSeries::new(x_axis.values().map(|x| (x, x.sin())), &RED))?
+            .label("Sine")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
+
+        cc.draw_series(LineSeries::new(
+            x_axis.values().map(|x| (x, x.cos())),
+            &BLUE,
+        ))?
+        .label("Cosine")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
+
+        cc.configure_series_labels().border_style(&BLACK).draw()?;
+
+
+        let drawing_areas = lower.split_evenly((1, 2));
+
+        for (drawing_area, idx) in drawing_areas.iter().zip(1..) {
+            let mut cc = ChartBuilder::on(&drawing_area)
+                .x_label_area_size(30)
+                .y_label_area_size(30)
+                .margin_right(20)
+                .caption(format!("y = x^{}", 1 + 2 * idx), ("sans-serif", 40))
+                .build_cartesian_2d(-1f32..1f32, -1f32..1f32)?;
+            cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
+
+            cc.draw_series(LineSeries::new(
+                (-1f32..1f32)
+                    .step(0.01)
+                    .values()
+                    .map(|x| (x, x.powf(idx as f32 * 2.0 + 1.0))),
+                &BLUE,
+            ))?;
+        }
+
         Ok(())
     }
 
@@ -362,11 +415,6 @@ impl PlottingExample {
         Ok(())
     }
 
-    fn bitmap(&self) ->  Result<(), Box<dyn std::error::Error>> {
-
-        Ok(())
-    }
-
     fn draw_graph(&self) {
         let index = self.example_list.selection().unwrap_or(0);
 
@@ -378,7 +426,6 @@ impl PlottingExample {
             4 => self.animated_chart(),
             5 => self.interactive_chart(),
             6 => self.kotch_snowflake(),
-            7 => self.bitmap(),
             _ => unreachable!(),
         };
 

@@ -309,15 +309,19 @@ impl PlottersBackend {
         self.target.borrow()
     }
 
-    fn fetch_text_format(&self, fmt: FontFormat) -> *mut IDWriteTextFormat {
+    fn fetch_text_format(&self, mut fmt: FontFormat) -> *mut IDWriteTextFormat {
         use winapi::um::dwrite::{DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STRETCH_NORMAL};
 
         let write_factory = unsafe { &*self.write_factory };
+
+        // Setting a font with a size lesser than 100 will segfault direct2D
+        fmt.size = fmt.size.max(100);
+
         let mut formats = self.text_formats.borrow_mut();
         let text_format = formats.entry(fmt.clone())
             .or_insert_with(move || {
                 let mut text_format = ptr::null_mut();
-    
+                
                 let font_size = (fmt.size as f32) / 100.0;
                 let family_name = to_utf16(&fmt.family);
                 let locale = unsafe { locale_name() };
@@ -454,12 +458,17 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
         let stroke_width = style.stroke_width() as f32;
         let brush = target.fetch_brush(Color::from(&style.color()));
 
+        let left = upper_left.0 as f32;
+        let right = bottom_right.0 as f32;
+        let bottom = bottom_right.1 as f32;
+        let top = upper_left.1 as f32;
+
         unsafe {
             let rect = D2D1_RECT_F {
-                left: upper_left.0 as f32,
-                right: bottom_right.0 as f32,
-                bottom: bottom_right.1 as f32,
-                top: upper_left.1 as f32,
+                left,
+                top,
+                right: right.min(left),
+                bottom: bottom.min(top),
             };
 
             match fill {
@@ -611,8 +620,8 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
 
         let mut target = self.target_mut();
         let brush = target.fetch_brush(Color::from(&style.color()));
+        
         let text_format = self.fetch_text_format(FontFormat::from(style));
-
         let raw_text = to_utf16(text);
         let (width, height) = target.size;
 
@@ -645,7 +654,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
             bottom: height as f32,   
         };
 
-        unsafe {
+        unsafe { 
             (&*target.render_target).DrawText(
                 raw_text.as_ptr(),
                 text.len() as _,
