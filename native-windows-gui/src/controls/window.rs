@@ -364,6 +364,8 @@ impl<'a> WindowBuilder<'a> {
     }
 
     pub fn build(self, out: &mut Window) -> Result<(), NwgError> {
+        use crate::win32::high_dpi::physical_to_logical;
+
         let flags = self.flags.map(|f| f.bits()).unwrap_or(out.flags());
 
         let mut ex_flags = self.ex_flags;
@@ -389,7 +391,7 @@ impl<'a> WindowBuilder<'a> {
 
         if self.center {
             let [left, top, right, bottom] = crate::Monitor::monitor_rect_from_window(out as &Window);
-            let [m_width, m_height] = [right-left, bottom-top];
+            let (m_width, m_height) = unsafe { physical_to_logical(right-left, bottom-top) };
             let (width, height) = self.size;
 
             let x = left + ((m_width-width)/2);
