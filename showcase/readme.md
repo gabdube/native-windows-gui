@@ -1,10 +1,23 @@
 # Showtime!
 
+# User applications
+
+# Cricket 2004 Stroke Preview ( https://github.com/robeady/cricket-2004-stroke-preview )
+![Cricket 2004](cricket_2004.png)
+
+# Native-windows-gui Examples
+
 # Basic
 ![basic example windows](windows-basic.png)
 
 # WGPU canvas
 ![WGPU canvas](wgpu_canvas.PNG)
+
+# Plotters canvas
+![plotting1](plotting1.png)
+![plotting2](plotting2.png)
+![plotting3](plotting3.png)
+![plotting4](plotting4.png)
 
 # Interactive tests
 ![demo1](demo1.png)

@@ -432,12 +432,14 @@ impl ListView {
         let text = insert.text.unwrap_or("".to_string());
         let mut text = to_utf16(&text);
 
+        let col_width = insert.width.unwrap_or(100) as f64 * crate::win32::high_dpi::scale_factor();
+
         if insert.fmt.is_some() { mask |= LVCF_FMT; }
 
         let mut item: LVCOLUMNW = unsafe { mem::zeroed() };
         item.mask = mask;
         item.fmt = insert.fmt.unwrap_or(0);
-        item.cx = insert.width.unwrap_or(100);
+        item.cx = col_width as i32;
         item.pszText = text.as_mut_ptr();
         item.cchTextMax = text.len() as i32;
 
