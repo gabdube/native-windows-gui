@@ -3,7 +3,8 @@ extern crate proc_macro2 as pm2;
 
 #[macro_use]
 extern crate syn;
-use syn::DeriveInput;
+use syn::{DeriveInput, GenericParam, TypeParam, LifetimeDef};
+use syn::punctuated::Punctuated;
 
 #[macro_use]
 extern crate quote;
@@ -62,7 +63,24 @@ fn parse_ui_data(d: &DeriveInput) -> Option<&syn::DataStruct> {
         syn::Data::Struct(ds) => Some(ds),
         _ => None
     }
-} 
+}
+
+/// Extract generic names from definition.
+/// It is useful to erase definition and generate `impl<T: Trait1> Struct<T> {...}` tokens.
+///
+/// For example `<'a: 'b, T: Trait1, const C: usize = 10>` becomes `<'a, T, C>`
+fn extract_generic_names(generics: &Punctuated<GenericParam, Token![,]>) -> Punctuated<GenericParam, Token![,]> {
+    let mut generic_names: Punctuated<GenericParam, Token![,]> = Punctuated::new();
+    for generic_param in generics {
+        let ident = match generic_param {
+            GenericParam::Type(t) => GenericParam::Type(TypeParam::from(t.ident.clone())),
+            GenericParam::Lifetime(l) => GenericParam::Lifetime(LifetimeDef::new(l.lifetime.clone())),
+            GenericParam::Const(c) => GenericParam::Type(TypeParam::from(c.ident.clone())), // a little hack
+        };
+        generic_names.push(ident);
+    }
+    generic_names
+}
 
 /**
 
@@ -234,6 +252,15 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
     let struct_name = &names.n_struct;
     let ui_struct_name = &names.n_struct_ui;
 
+    let lt = &base.generics.lt_token;
+    let generic_params = &base.generics.params;
+    let generic_names = extract_generic_names(generic_params);
+    let gt = &base.generics.gt_token;
+    let where_clause = &base.generics.where_clause;
+
+    let generics = quote! { #lt #generic_params #gt }; // <'a: 'b, T: Trait1, const C>
+    let generic_names = quote! { #lt #generic_names #gt }; // <'a, T, C>
+
     let ui = NwgUi::build(&ui_data, false);
     let controls = ui.controls();
     let resources = ui.resources();
@@ -259,13 +286,13 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
             use std::rc::Rc;
             use std::fmt;
 
-            pub struct #ui_struct_name {
-                inner: Rc<#struct_name>,
+            pub struct #ui_struct_name #generics #where_clause {
+                inner: Rc<#struct_name #generic_names>,
                 default_handlers: RefCell<Vec<EventHandler>>
             }
 
-            impl NativeUi<#ui_struct_name> for #struct_name {
-                fn build_ui(mut data: Self) -> Result<#ui_struct_name, NwgError> {
+            impl #generics NativeUi<#ui_struct_name #generic_names> for #struct_name #generic_names #where_clause {
+                fn build_ui(mut data: Self) -> Result<#ui_struct_name #generic_names, NwgError> {
                     #resources
                     #controls
                     #partials
@@ -280,7 +307,7 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
                 }
             }
 
-            impl Drop for #ui_struct_name {
+            impl #generics Drop for #ui_struct_name #generic_names #where_clause {
                 /// To make sure that everything is freed without issues, the default handler must be unbound.
                 fn drop(&mut self) {
                     let mut handlers = self.default_handlers.borrow_mut();
@@ -290,15 +317,15 @@ pub fn derive_ui(input: pm::TokenStream) -> pm::TokenStream {
                 }
             }
 
-            impl Deref for #ui_struct_name {
-                type Target = #struct_name;
-        
-                fn deref(&self) -> &#struct_name {
+            impl #generics Deref for #ui_struct_name #generic_names #where_clause {
+                type Target = #struct_name #generic_names;
+
+                fn deref(&self) -> &Self::Target {
                     &self.inner
                 }
             }
 
-            impl fmt::Debug for #ui_struct_name {
+            impl #generics fmt::Debug for #ui_struct_name #generic_names #where_clause {
                 fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                     write!(f, "[#ui_struct_name Ui]")
                 }
@@ -352,6 +379,15 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
     let partial_name = &names.n_partial_module;
     let struct_name = &names.n_struct;
 
+    let lt = &base.generics.lt_token;
+    let generic_params = &base.generics.params;
+    let generic_names = extract_generic_names(generic_params);
+    let gt = &base.generics.gt_token;
+    let where_clause = &base.generics.where_clause;
+
+    let generics = quote! { #lt #generic_params #gt }; // <'a: 'b, T: Trait1, const C>
+    let generic_names = quote! { #lt #generic_names #gt }; // <'a, T, C>
+
     let ui_data = parse_ui_data(&base).expect("NWG derive can only be implemented on structs");
     let ui = NwgUi::build(&ui_data, true);
     let controls = ui.controls();
@@ -373,7 +409,7 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
             use nwg::*;
             use super::*;
         
-            impl PartialUi for #struct_name {
+            impl #generics PartialUi for #struct_name #generic_names #where_clause {
 
                 #[allow(unused)]
                 fn build_partial<W: Into<ControlHandle>>(data: &mut Self, _parent: Option<W>) -> Result<(), NwgError> {
