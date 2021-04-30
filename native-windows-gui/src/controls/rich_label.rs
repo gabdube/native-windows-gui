@@ -2,7 +2,7 @@ use winapi::um::winuser::{WS_VISIBLE, ES_MULTILINE, WS_DISABLED, EM_SETSEL};
 use crate::win32::window_helper as wh;
 use crate::win32::base_helper::check_hwnd;
 use crate::win32::richedit as rich;
-use crate::{Font, Cursor, OemCursor, NwgError, RawEventHandler, HTextAlign, unbind_raw_event_handler};
+use crate::{Font, NwgError, RawEventHandler, HTextAlign, unbind_raw_event_handler};
 use super::{ControlBase, ControlHandle, CharFormat, ParaFormat};
 
 use std::{rc::Rc, ops::Range, cell::RefCell};
@@ -15,8 +15,10 @@ bitflags! {
     /**
         The rich label flags
 
-        * VISIBLE:     The rich text box is immediatly visible after creation
-        * MULTI_LINE:  The label can be on multiple lines
+        * VISIBLE:        The rich text box is immediatly visible after creation
+        * MULTI_LINE:     The label can be on multiple lines
+        * SAVE_SELECTION: Show the text selection even if the control is not active
+        * DISABLED:       Disable all events and prevent text selection
     */
     pub struct RichLabelFlags: u32 {
         const NONE = 0;
@@ -245,20 +247,17 @@ impl RichLabel {
 
     unsafe fn override_events(&self) {
         use crate::bind_raw_event_handler_inner;
-        use winapi::shared::windef::{HCURSOR, RECT, HBRUSH, POINT};
-        use winapi::um::winuser::{WM_NCCALCSIZE, WM_MOUSEFIRST, WM_MOUSELAST, WM_MOUSEACTIVATE, WM_KEYUP, WM_KEYDOWN, WM_SETFOCUS, WM_SIZE, WM_NCPAINT};
+        use winapi::shared::windef::{RECT, HBRUSH, POINT};
+        use winapi::um::winuser::{WM_NCCALCSIZE, WM_SIZE, WM_NCPAINT};
         use winapi::um::winuser::{SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED, COLOR_WINDOW, NCCALCSIZE_PARAMS};
-        use winapi::um::winuser::{SetCursor, GetDC, ReleaseDC, GetClientRect, GetWindowRect, ScreenToClient, FillRect, SetWindowPos};
+        use winapi::um::winuser::{GetDC, ReleaseDC, GetClientRect, GetWindowRect, ScreenToClient, FillRect, SetWindowPos};
         use std::{mem, ptr};
 
         let callback_line_height = self.line_height.clone();
 
-        let cursor = Cursor::from_system(OemCursor::Normal);
+        //let cursor = Cursor::from_system(OemCursor::Normal);
         let handler0 = bind_raw_event_handler_inner(&self.handle, 0, move |hwnd, msg, w, l| {
-            SetCursor(cursor.handle as HCURSOR);
             match msg {
-                WM_MOUSEFIRST..=WM_MOUSELAST => Some(0),
-                WM_MOUSEACTIVATE | WM_KEYUP | WM_KEYDOWN | WM_SETFOCUS => Some(0),
                 WM_NCCALCSIZE => {
                     let client_height = *callback_line_height.borrow();
                     if w == 0 || client_height.is_none() { return None }
