@@ -148,6 +148,25 @@ impl RichLabel {
         out
     }
 
+    /// Return the selected range of characters by the user in the text input
+    pub fn selection(&self) -> Range<usize> {
+        use winapi::um::winuser::EM_GETSEL;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        let (mut out1, mut out2) = (0u32, 0u32);
+        let (ptr1, ptr2) = (&mut out1 as *mut u32, &mut out2 as *mut u32);
+        wh::send_message(handle, EM_GETSEL as u32, ptr1 as _, ptr2 as _);
+
+        Range { start: out1 as usize, end: out2 as usize }
+    }
+
+    /// Return the selected range of characters by the user in the text input
+    pub fn set_selection(&self, r: Range<u32>) {
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        wh::send_message(handle, EM_SETSEL as u32, r.start as usize, r.end as isize);
+    }
+
     /// Return the length of the user input in the control. This is better than `control.text().len()` as it
     /// does not allocate a string in memory
     pub fn len(&self) -> u32 {

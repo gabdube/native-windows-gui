@@ -24,7 +24,15 @@ pub struct RichText {
     #[nwg_resource(family: "Segoe UI", size: 18)]
     font: nwg::Font,
 
+    #[nwg_control(parent: window, popup: true)]
+    text_menu: nwg::Menu,
+
+    #[nwg_control(parent: text_menu, text: "Copy")]
+    #[nwg_events(OnMenuItemSelected: [RichText::copy_text])]
+    copy_text_item: nwg::MenuItem,
+
     #[nwg_control(font: Some(&data.font), flags: "VISIBLE|MULTI_LINE")]
+    #[nwg_events(MousePressRightUp: [RichText::show_menu])]
     #[nwg_layout_item(layout: grid, row: 0, col: 0)]
     rich_text_box: nwg::RichLabel
 }
@@ -127,12 +135,23 @@ impl RichText {
             space_after: Some(200),
             ..Default::default()
         });
-
     }
 
     fn set_resize(&self, data: &nwg::EventData) {
         let data = data.on_min_max();
         data.set_min_size(200, 200);
+    }
+
+    fn show_menu(&self) {
+        let (x, y) = nwg::GlobalCursor::position();
+        self.text_menu.popup(x, y);
+    }
+
+    fn copy_text(&self) {
+        let current_selection = self.rich_text_box.selection();
+        let current_text = self.rich_text_box.text();
+        let selected_text = &current_text[current_selection];
+        nwg::Clipboard::set_data_text(&self.window, &selected_text);
     }
 
 }
