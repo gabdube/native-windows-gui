@@ -4,7 +4,7 @@ version = "1.0.11"
 authors = ["gdube <gdube.475@gmail.com>"]
 edition = "2018"
 
-description = "A very light and simple rust GUI library"
+description = "A rust library to develop native GUI applications on the desktop for Microsoft Windows. Native-windows-gui wraps the native win32 window controls in a rustic API"
 
 repository = "https://github.com/gabdube/native-windows-gui"
 documentation = "https://gabdube.github.io/native-windows-gui/native-windows-docs/index.html"
