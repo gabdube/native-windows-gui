@@ -384,29 +384,29 @@ pub unsafe fn get_window_class_name(handle: HWND) -> String {
     OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string())
 }
 
-#[cfg(target_arch = "x86")] use winapi::shared::ntdef::LONG;
-#[cfg(target_arch = "x86_64")] use winapi::shared::basetsd::LONG_PTR;
+#[cfg(target_pointer_width = "32")] use winapi::shared::ntdef::LONG;
+#[cfg(target_pointer_width = "64")] use winapi::shared::basetsd::LONG_PTR;
 
 #[inline(always)]
-#[cfg(target_arch = "x86_64")]
+#[cfg(target_pointer_width = "64")]
 pub fn get_window_long(handle: HWND, index: c_int) -> LONG_PTR {
     unsafe{ ::winapi::um::winuser::GetWindowLongPtrW(handle, index) }
 }
 
 #[inline(always)]
-#[cfg(target_arch = "x86")]
+#[cfg(target_pointer_width = "32")]
 pub fn get_window_long(handle: HWND, index: c_int) -> LONG {
     unsafe { ::winapi::um::winuser::GetWindowLongW(handle, index) }
 }
 
 #[inline(always)]
-#[cfg(target_arch = "x86_64")]
+#[cfg(target_pointer_width = "64")]
 pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
     unsafe{ ::winapi::um::winuser::SetWindowLongPtrW(handle, index, v as LONG_PTR); }
 }
 
 #[inline(always)]
-#[cfg(target_arch = "x86")]
+#[cfg(target_pointer_width = "32")]
 pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
     unsafe { ::winapi::um::winuser::SetWindowLongW(handle, index, v as LONG); }
 }
