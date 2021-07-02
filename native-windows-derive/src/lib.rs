@@ -392,6 +392,7 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
     let ui = NwgUi::build(&ui_data, true);
     let controls = ui.controls();
     let resources = ui.resources();
+    let partials = ui.partials();
     let layouts = ui.layouts();
     let events = ui.events();
 
@@ -418,6 +419,7 @@ pub fn derive_partial(input: pm::TokenStream) -> pm::TokenStream {
                     
                     #resources
                     #controls
+                    #partials
 
                     let ui = data;
                     #layouts
