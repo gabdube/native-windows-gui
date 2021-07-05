@@ -1,3 +1,13 @@
+1.0.12
+* A new plotting control
+* Support for generics in native-windows-derive (thanks to RicoRodriges)
+* Added support for system key events  (thanks to dnlmlr)
+* Fix deriving partial into into other partials (thanks to yakov-bakhmatov)
+* Replace target_arch with target_pointer_width (thanks to skyfloogle)
+* Minor improvements in the rich label control
+* Fix window centering with high dpi enabled
+
+
 1.0.11
 * Double buffer option for ListView
 * Fix a treeview issue when building without the image-list feature
