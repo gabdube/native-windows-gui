@@ -562,7 +562,7 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
     use winapi::um::winuser::{WM_CLOSE, WM_COMMAND, WM_MENUCOMMAND, WM_TIMER, WM_NOTIFY, WM_HSCROLL, WM_VSCROLL, WM_LBUTTONDOWN, WM_LBUTTONUP,
       WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SIZE, WM_MOVE, WM_PAINT, WM_MOUSEMOVE, WM_CONTEXTMENU, WM_INITMENUPOPUP, WM_MENUSELECT, WM_EXITSIZEMOVE,
       WM_ENTERSIZEMOVE, SIZE_MAXIMIZED, SIZE_MINIMIZED, WM_KEYDOWN, WM_KEYUP, WM_CHAR, WM_MOUSEWHEEL, WM_DROPFILES, GET_WHEEL_DELTA_WPARAM,
-      WM_GETMINMAXINFO, WM_ENTERMENULOOP, WM_EXITMENULOOP};
+      WM_GETMINMAXINFO, WM_ENTERMENULOOP, WM_EXITMENULOOP, WM_SYSKEYDOWN, WM_SYSKEYUP};
     use winapi::um::shellapi::{NIN_BALLOONSHOW, NIN_BALLOONHIDE, NIN_BALLOONTIMEOUT, NIN_BALLOONUSERCLICK};
     use winapi::um::winnt::WCHAR;
     use winapi::shared::minwindef::{HIWORD, LOWORD};
@@ -572,10 +572,12 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
     let base_handle = ControlHandle::Hwnd(hwnd);
 
     match msg {
-        WM_KEYDOWN | WM_KEYUP => {
-            let evt = match msg == WM_KEYDOWN { 
-                true => Event::OnKeyPress,
-                false => Event::OnKeyRelease
+        WM_KEYDOWN | WM_KEYUP | WM_SYSKEYDOWN | WM_SYSKEYUP => {
+            let evt = match msg {
+                WM_SYSKEYDOWN => Event::OnSysKeyPress,
+                WM_SYSKEYUP=> Event::OnSysKeyRelease,
+                WM_KEYDOWN => Event::OnKeyPress,
+                _ /* WM_KEYUP */ => Event::OnKeyRelease,
             };
 
             let keycode = w as u32;
