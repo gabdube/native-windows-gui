@@ -43,8 +43,14 @@ pub enum Event {
     /// When a key is pressed on a keyboard. Use `EventData::OnKey` to check which key.
     OnKeyPress,
 
-    /// When a key is pressed on a keyboard.Use EventData::OnKey to check which key.
+    /// When a key is released on a keyboard. Use EventData::OnKey to check which key.
     OnKeyRelease,
+
+    /// When a system key is pressed on a keyboard. Use `EventData::OnKey` to check which key.
+    OnSysKeyPress,
+
+    /// When a system key is released on a keyboard. Use EventData::OnKey to check which key.
+    OnSysKeyRelease,
 
     /// Sent to a window when the size or position of the window is about to change. 
     /// An application can use the event data `EventData::OnMinMaxInfo` to override the minimum or maximum size.
