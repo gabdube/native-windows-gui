@@ -124,7 +124,7 @@ impl Font {
     }
 
     /** 
-        Add a font to the system font table. Don't forget to call `Font::remove_font(path)` once your done.
+        Add a font to the system font table. Don't forget to call `Font::remove_font(path)` once you're done.
         Returns `false` if the font could not be added. Windows won't tell you why though. 
 
         Other info:

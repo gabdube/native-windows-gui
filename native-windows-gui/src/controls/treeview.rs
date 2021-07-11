@@ -401,6 +401,47 @@ impl TreeView {
         TreeItem { handle }
     }
 
+    /// Insert a new item into the TreeView with associated lParam and return a reference to new newly added item
+    pub fn insert_item_with_param<'a>(&self, new: &'a str, parent: Option<&TreeItem>, position: TreeInsert, data: isize) -> TreeItem {
+        use winapi::um::commctrl::{TVM_INSERTITEMW, TVINSERTSTRUCTW, TVI_FIRST, TVI_LAST, TVI_ROOT, TVI_SORT, TVIF_TEXT, TVIF_PARAM};
+        use winapi::um::commctrl::TVINSERTSTRUCTW_u;
+        use winapi::um::winnt::LPWSTR;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        let insert = match position {
+            TreeInsert::First => TVI_FIRST,
+            TreeInsert::Last => TVI_LAST,
+            TreeInsert::Root => TVI_ROOT,
+            TreeInsert::Sort => TVI_SORT,
+            TreeInsert::After(i) => i
+        };
+
+        let text = to_utf16(new);
+
+        let item = {
+            let mut item: TVINSERTSTRUCTW_u = unsafe { mem::zeroed() };
+            let i = unsafe { item.item_mut() };
+            i.mask = TVIF_TEXT | TVIF_PARAM;            
+            i.pszText = text.as_ptr() as LPWSTR;
+            i.lParam = data;
+            item
+        };
+
+        let new_item = TVINSERTSTRUCTW {
+            hParent: parent.map(|p| p.handle ).unwrap_or(ptr::null_mut()),
+            hInsertAfter: insert,
+            u: item
+        };
+
+        let ptr = &new_item as *const TVINSERTSTRUCTW;
+        let handle = wh::send_message(handle, TVM_INSERTITEMW, 0, ptr as LPARAM) as HTREEITEM;
+
+        self.invalidate();
+
+        TreeItem { handle }
+    }
+
     /// Remove an item and its children from the tree view
     pub fn remove_item(&self, item: &TreeItem) {
         use winapi::um::commctrl::{TVM_DELETEITEM};
@@ -474,6 +515,24 @@ impl TreeView {
         }
 
         Some(from_utf16(&text_buffer))
+    }
+
+    /// Returns the lParam of the selected item. Return None if the item is not in the tree view.
+    pub fn item_param(&self, tree_item: &TreeItem) -> Option<isize> {
+        use winapi::um::commctrl::{TVM_GETITEMW, TVIF_PARAM, TVIF_HANDLE};
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        let mut item: TVITEMW = blank_item();
+        item.mask = TVIF_HANDLE | TVIF_PARAM;
+        item.hItem = tree_item.handle;
+        
+        let result = wh::send_message(handle, TVM_GETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
+        if result == 0 {
+            return None;
+        }
+
+        Some(item.lParam)
     }
 
     /// Returns `true` if the tree view item has children. Returns `None` if the item is not in the tree view.
