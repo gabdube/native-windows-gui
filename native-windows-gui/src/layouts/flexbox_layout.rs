@@ -488,10 +488,7 @@ impl FlexboxLayoutBuilder {
 
         let index = self.current_index.unwrap();
 
-        match &mut self.layout.children[index] {
-            FlexboxLayoutChild::Item(item) => fnc(&mut item.style),
-            FlexboxLayoutChild::Flexbox(flex) => fnc(&mut flex.inner.borrow_mut().style),
-        }
+        self.layout.children[index].modify_style(|s| fnc(s));
     }
 
     /// Build the layout object and bind the callback.
