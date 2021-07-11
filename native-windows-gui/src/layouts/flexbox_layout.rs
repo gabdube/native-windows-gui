@@ -242,25 +242,10 @@ impl FlexboxLayout {
         Ok(nodes)
     }
 
-    fn update_layout(&self, width: u32, height: u32, offset: (i32, i32)) -> Result<(), stretch::Error> {
+    fn apply_layout(stretch: &mut Stretch, nodes: Vec<Node>, children: &Vec<FlexboxLayoutChild>, last_handle: &mut Option<*mut winapi::shared::windef::HWND__>, offset: (i32, i32)) -> Result<(), stretch::Error> {
         use FlexboxLayoutChild as Child;
 
-        let inner = self.inner.borrow();
-        if inner.base.is_null() || inner.children.len() == 0 {
-            return Ok(());
-        }
-
-        let mut stretch = Stretch::new();
-        let children: Vec<Node> = FlexboxLayout::build_child_nodes(&inner.children, &mut stretch)?;
-
-        let mut style = inner.style.clone();
-        style.size = Size { width: Dimension::Points(width as f32), height: Dimension::Points(height as f32) };
-        let node = stretch.new_node(style, children.clone())?;
-
-        stretch.compute_layout(node, Size::undefined())?;
-
-        let mut last_handle = None;
-        for (node, child) in children.into_iter().zip(inner.children.iter()) {
+        for (node, child) in nodes.into_iter().zip(children.iter()) {
             let layout = stretch.layout(node)?;
             let Point { x, y } = layout.location;
             let Size { width, height } = layout.size;
@@ -269,17 +254,37 @@ impl FlexboxLayout {
                 Child::Item(child) => unsafe {
                     wh::set_window_position(child.control, x as i32 + offset.0, y as i32 + offset.1);
                     wh::set_window_size(child.control, width as u32, height as u32, false);
-                    wh::set_window_after(child.control, last_handle);
-                    last_handle = Some(child.control);
+                    wh::set_window_after(child.control, *last_handle);
+                    last_handle.replace(child.control);                    
                 },
                 Child::Flexbox(child) => {
-                    child.update_layout(width as u32, height as u32, (x as i32, y as i32))?;
+                    let children_nodes = stretch.children(node)?;
+
+                    FlexboxLayout::apply_layout(stretch, children_nodes, child.children().children(), last_handle, (x as i32, y as i32))?;
                 }
             }
             
         }
 
         Ok(())
+    }
+
+    fn update_layout(&self, width: u32, height: u32, offset: (i32, i32)) -> Result<(), stretch::Error> {
+        let inner = self.inner.borrow();
+        if inner.base.is_null() || inner.children.len() == 0 {
+            return Ok(());
+        }
+
+        let mut stretch = Stretch::new();
+        let nodes: Vec<Node> = FlexboxLayout::build_child_nodes(&inner.children, &mut stretch)?;
+
+        let mut style = inner.style.clone();
+        style.size = Size { width: Dimension::Points(width as f32), height: Dimension::Points(height as f32) };
+        let node = stretch.new_node(style, nodes.clone())?;
+
+        stretch.compute_layout(node, Size::undefined())?;
+
+        FlexboxLayout::apply_layout(&mut stretch, nodes, self.children().children(), &mut None, offset)
     }
 
 }
