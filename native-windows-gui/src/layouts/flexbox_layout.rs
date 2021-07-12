@@ -226,25 +226,57 @@ impl FlexboxLayout {
     }
 
     // Utility function to compile tree of children nodes for layout purposes
-    fn build_child_nodes(children: &Vec<FlexboxLayoutChild>, stretch: &mut Stretch) -> Result<Vec<Node>, stretch::Error> {
+    // Also returns the total number of children items to allow cleaner deferred positioning
+    fn build_child_nodes(children: &Vec<FlexboxLayoutChild>, stretch: &mut Stretch) -> Result<(usize, Vec<Node>), stretch::Error> {
         let mut nodes = Vec::new();
+        let mut item_count = 0;
 
         for child in children.iter() {
             match child {
                 FlexboxLayoutChild::Item(child) =>{
                     nodes.push(stretch.new_node(child.style, Vec::new())?);
+                    item_count += 1;
                 },
                 FlexboxLayoutChild::Flexbox(child) => {
-                    let child_nodes = FlexboxLayout::build_child_nodes(child.children().children(), stretch)?;
+                    let (child_count, child_nodes) = FlexboxLayout::build_child_nodes(child.children().children(), stretch)?;
                     nodes.push(stretch.new_node(child.style(), child_nodes)?);
+                    item_count += child_count;
                 },
             };
         }
 
-        Ok(nodes)
+        Ok((item_count, nodes))
     }
 
-    fn apply_layout(stretch: &mut Stretch, nodes: Vec<Node>, children: &Vec<FlexboxLayoutChild>, last_handle: &mut Option<HWND>, offset: (i32, i32)) -> Result<(), stretch::Error> {
+    // Applies the calculated item positions for this layout
+    // Uses deferred window positioning to prevent rendering artefacts
+    fn apply_layout_deferred(positioner: &mut wh::DeferredWindowPositioner, stretch: &mut Stretch, nodes: Vec<Node>, children: &Vec<FlexboxLayoutChild>, last_handle: &mut Option<HWND>, offset: (i32, i32)) -> Result<(), stretch::Error> {
+        use FlexboxLayoutChild as Child;
+
+        for (node, child) in nodes.into_iter().zip(children.iter()) {
+            let layout = stretch.layout(node)?;
+            let Point { x, y } = layout.location;
+            let Size { width, height } = layout.size;
+
+            match child {
+                Child::Item(child) => {
+                    positioner.defer_pos(child.control, last_handle.unwrap_or(std::ptr::null_mut()), x as i32 + offset.0, y as i32 + offset.1, width as i32, height as i32).ok();
+                    last_handle.replace(child.control);                    
+                },
+                Child::Flexbox(child) => {
+                    let children_nodes = stretch.children(node)?;
+                    FlexboxLayout::apply_layout_deferred(positioner, stretch, children_nodes, child.children().children(), last_handle, (x as i32, y as i32))?;
+                }
+            }
+            
+        }
+
+        Ok(())
+    }
+
+    // Applies the calculated item positions for this layout
+    // Uses immediate window positioning, which might cause visual artefacts in some cases
+    fn apply_layout_immediate(stretch: &mut Stretch, nodes: Vec<Node>, children: &Vec<FlexboxLayoutChild>, last_handle: &mut Option<HWND>, offset: (i32, i32)) -> Result<(), stretch::Error> {
         use FlexboxLayoutChild as Child;
 
         for (node, child) in nodes.into_iter().zip(children.iter()) {
@@ -261,7 +293,7 @@ impl FlexboxLayout {
                 },
                 Child::Flexbox(child) => {
                     let children_nodes = stretch.children(node)?;
-                    FlexboxLayout::apply_layout(stretch, children_nodes, child.children().children(), &mut None, (x as i32, y as i32))?;
+                    FlexboxLayout::apply_layout_immediate(stretch, children_nodes, child.children().children(), last_handle, (x as i32, y as i32))?;
                 }
             }
             
@@ -277,7 +309,7 @@ impl FlexboxLayout {
         }
 
         let mut stretch = Stretch::new();
-        let nodes: Vec<Node> = FlexboxLayout::build_child_nodes(&inner.children, &mut stretch)?;
+        let (item_count, nodes) = FlexboxLayout::build_child_nodes(&inner.children, &mut stretch)?;
 
         let mut style = inner.style.clone();
         style.size = Size { width: Dimension::Points(width as f32), height: Dimension::Points(height as f32) };
@@ -285,9 +317,17 @@ impl FlexboxLayout {
 
         stretch.compute_layout(node, Size::undefined())?;
 
-        FlexboxLayout::apply_layout(&mut stretch, nodes, self.children().children(), &mut None, offset)
+        // Keep a fallback case to prevent panics if the layout is too large to be deferred
+        if let Ok(mut positioner) = wh::DeferredWindowPositioner::new(item_count as i32) {
+            let layout_result = FlexboxLayout::apply_layout_deferred(&mut positioner, &mut stretch, nodes, self.children().children(), &mut None, offset);
+            positioner.end();
+    
+            layout_result
+        }
+        else {
+            FlexboxLayout::apply_layout_immediate(&mut stretch, nodes, self.children().children(), &mut None, offset)
+        }
     }
-
 }
 
 pub struct FlexboxLayoutBuilder {

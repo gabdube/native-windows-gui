@@ -410,3 +410,70 @@ pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
 pub fn set_window_long(handle: HWND, index: c_int, v: usize) {
     unsafe { ::winapi::um::winuser::SetWindowLongW(handle, index, v as LONG); }
 }
+
+// Helper to wrap DeferWindowPos somewhat safely
+// Mostly to streamline the usage of the returned HWDP from DeferWindowPos
+pub struct DeferredWindowPositioner {
+    handle: winapi::um::winuser::HDWP,
+}
+
+impl DeferredWindowPositioner {
+    const MEM_FAIL: &'static str = "Insufficient system resources";
+    
+    /// Initialises a new DeferredWindowPositioner with memory for `item_count` windows
+    pub fn new(item_count: i32) -> Result<DeferredWindowPositioner, &'static str> {
+        use ::winapi::um::winuser::BeginDeferWindowPos;
+
+        let handle = unsafe { BeginDeferWindowPos(item_count) };
+
+        if handle.is_null() {
+            Err(DeferredWindowPositioner::MEM_FAIL)
+        }
+        else {
+            Ok(DeferredWindowPositioner {
+                handle
+            })
+        }
+    }
+
+    /// Defers a window positioning
+    pub fn defer_pos(
+        &mut self, 
+        hwnd: HWND,
+        hwnd_insertafter: HWND,
+        x: i32,
+        y: i32,
+        cx: i32,
+        cy: i32,
+    ) -> Result<(), &'static str> {
+        use ::winapi::um::winuser::DeferWindowPos;
+
+        let handle = unsafe {
+            DeferWindowPos(self.handle, hwnd, hwnd_insertafter, x, y, cx, cy, 0)
+        };
+
+        self.handle = handle;
+
+        if handle.is_null() {
+            Err(DeferredWindowPositioner::MEM_FAIL)
+        }
+        else {
+            Ok(())
+        }
+    }
+
+    /// Ends the deferred operation list
+    /// This will apply the batched changes, unless an internal error occured in a defer_pos call
+    pub fn end(self) {} // Handled by drop impl
+}
+
+impl std::ops::Drop for DeferredWindowPositioner {
+    fn drop(&mut self) {
+        use ::winapi::um::winuser::EndDeferWindowPos;
+
+        // In case of previous error, no-op
+        if !self.handle.is_null() {
+            unsafe { EndDeferWindowPos(self.handle) };
+        }
+    }
+}
