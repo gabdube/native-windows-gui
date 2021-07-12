@@ -40,6 +40,7 @@ struct FlexboxLayoutInner {
     handler: Option<RawEventHandler>,
     style: Style,
     children: Vec<FlexboxLayoutChild>,
+    parent_layout: Option<FlexboxLayout>,
 }
 
 
@@ -61,7 +62,8 @@ impl FlexboxLayout {
             base: ptr::null_mut(),
             handler: None,
             style: Default::default(),
-            children: Vec::new()
+            children: Vec::new(),
+            parent_layout: None,
         };
 
         FlexboxLayoutBuilder { layout, current_index: None, auto_size: true, auto_spacing: Some(5) }
@@ -105,24 +107,21 @@ impl FlexboxLayout {
         * If the layout was not initialized
     */
     pub fn add_child<W: Into<ControlHandle>>(&self, c: W, style: Style) -> Result<(), stretch::Error> {
-        let base = {
+        {
             let mut inner = self.inner.borrow_mut();
             if inner.base.is_null() {
                 panic!("Flexbox layout is not yet initialized!");
             }
-
+    
             let item = FlexboxLayoutItem {
                 control: c.into().hwnd().expect("Control must be window like (HWND handle)"),
                 style
             };
-
+    
             inner.children.push(FlexboxLayoutChild::Item(item));
+        }
 
-            inner.base
-        };
-
-        let (w, h) = unsafe { wh::get_window_size(base) };
-        self.update_layout(w, h, (0, 0))
+        self.fit()
     }
 
     /**
@@ -217,13 +216,16 @@ impl FlexboxLayout {
             panic!("FlexboxLayout is not bound to a parent control.")
         }
 
-        let (w, h) = unsafe { wh::get_window_size(inner.base) };
-        self.update_layout(w, h, (0, 0))
+        if let Some(parent_layout) = &inner.parent_layout {
+            parent_layout.fit()
+        } 
+        else {
+            let (w, h) = unsafe { wh::get_window_size(inner.base) };
+            self.update_layout(w, h, (0, 0))
+        }
     }
 
     // Utility function to compile tree of children nodes for layout purposes
-    // This is inneficient since it recalculates every child when going to the 
-    // sublayout - a better method might exist
     fn build_child_nodes(children: &Vec<FlexboxLayoutChild>, stretch: &mut Stretch) -> Result<Vec<Node>, stretch::Error> {
         let mut nodes = Vec::new();
 
@@ -242,7 +244,7 @@ impl FlexboxLayout {
         Ok(nodes)
     }
 
-    fn apply_layout(stretch: &mut Stretch, nodes: Vec<Node>, children: &Vec<FlexboxLayoutChild>, last_handle: &mut Option<*mut winapi::shared::windef::HWND__>, offset: (i32, i32)) -> Result<(), stretch::Error> {
+    fn apply_layout(stretch: &mut Stretch, nodes: Vec<Node>, children: &Vec<FlexboxLayoutChild>, last_handle: &mut Option<HWND>, offset: (i32, i32)) -> Result<(), stretch::Error> {
         use FlexboxLayoutChild as Child;
 
         for (node, child) in nodes.into_iter().zip(children.iter()) {
@@ -259,8 +261,7 @@ impl FlexboxLayout {
                 },
                 Child::Flexbox(child) => {
                     let children_nodes = stretch.children(node)?;
-
-                    FlexboxLayout::apply_layout(stretch, children_nodes, child.children().children(), last_handle, (x as i32, y as i32))?;
+                    FlexboxLayout::apply_layout(stretch, children_nodes, child.children().children(), &mut None, (x as i32, y as i32))?;
                 }
             }
             
@@ -546,6 +547,16 @@ impl FlexboxLayoutBuilder {
             *layout_inner = self.layout;        
         }
 
+        // Sets the parent_layout of any child layout to this layout
+        for child in layout.inner.borrow_mut().children.iter_mut() {
+            match child {
+                FlexboxLayoutChild::Item(_) => {},
+                FlexboxLayoutChild::Flexbox(child_layout) => { 
+                    child_layout.inner.borrow_mut().parent_layout.replace(layout.clone()); 
+                },
+            }
+        }
+
         // Initial layout update
         layout.update_layout(w, h, (0, 0)).expect("Failed to compute layout");
 
@@ -630,6 +641,7 @@ impl Default for FlexboxLayout {
             handler: None,
             children: Vec::new(),
             style: Default::default(),
+            parent_layout: None,
         };
 
         FlexboxLayout {
