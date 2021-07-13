@@ -259,6 +259,12 @@ use super::ScrollBar;
 #[cfg(feature = "scroll-bar")]
 handles!(ScrollBar);
 
+#[cfg(feature = "number-select")]
+use super::NumberSelect;
+
+#[cfg(feature = "number-select")]
+handles!(NumberSelect);
+
 #[cfg(feature = "plotting")]
 use super::Plotters;
 
