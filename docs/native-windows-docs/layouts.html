@@ -190,6 +190,76 @@ A flexbox layout example:
 <span class="w">    </span><span class="n">layout</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
+<br>    
+
+Flexbox with sub layouts:
+
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><span style="color: #008000; font-weight: bold">use</span><span style="color: #bbbbbb"> </span>native_windows_gui<span style="color: #bbbbbb"> </span><span style="color: #008000; font-weight: bold">as</span><span style="color: #bbbbbb"> </span>nwg;<span style="color: #bbbbbb"></span>
+
+<span style="color: #408080; font-style: italic">// native_windows_gui exports stretch</span>
+<span style="color: #008000; font-weight: bold">use</span><span style="color: #bbbbbb"> </span>nwg::stretch::{<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>geometry::Size,<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>style::{Dimension<span style="color: #bbbbbb"> </span><span style="color: #008000; font-weight: bold">as</span><span style="color: #bbbbbb"> </span>D,<span style="color: #bbbbbb"> </span>FlexDirection,<span style="color: #bbbbbb"> </span>JustifyContent},<span style="color: #bbbbbb"></span>
+};<span style="color: #bbbbbb"></span>
+
+<span style="color: #008000; font-weight: bold">const</span><span style="color: #bbbbbb"> </span>PC_50: <span style="color: #0000FF; font-weight: bold">D</span><span style="color: #bbbbbb"> </span><span style="color: #666666">=</span><span style="color: #bbbbbb"> </span>D::Percent(<span style="color: #666666">0.5</span>);<span style="color: #bbbbbb"></span>
+<span style="color: #008000; font-weight: bold">const</span><span style="color: #bbbbbb"> </span>PT_50: <span style="color: #0000FF; font-weight: bold">D</span><span style="color: #bbbbbb"> </span><span style="color: #666666">=</span><span style="color: #bbbbbb"> </span>D::Points(<span style="color: #666666">50.0</span>);<span style="color: #bbbbbb"></span>
+
+<span style="color: #008000; font-weight: bold">fn</span> <span style="color: #0000FF">build_complex_layout</span>(<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>window: <span style="color: #008000">&amp;</span><span style="color: #0000FF; font-weight: bold">nwg</span>::Window,<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>label_a: <span style="color: #008000">&amp;</span><span style="color: #0000FF; font-weight: bold">nwg</span>::Label,<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>label_b: <span style="color: #008000">&amp;</span><span style="color: #0000FF; font-weight: bold">nwg</span>::Label,<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>textbox_a: <span style="color: #008000">&amp;</span><span style="color: #0000FF; font-weight: bold">nwg</span>::TextBox,<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>box_a: <span style="color: #008000">&amp;</span><span style="color: #0000FF; font-weight: bold">nwg</span>::Button,<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span>box_b: <span style="color: #008000">&amp;</span><span style="color: #0000FF; font-weight: bold">nwg</span>::Button,<span style="color: #bbbbbb"></span>
+)<span style="color: #bbbbbb"> </span>{<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span><span style="color: #008000; font-weight: bold">let</span><span style="color: #bbbbbb"> </span>top_layout<span style="color: #bbbbbb"> </span><span style="color: #666666">=</span><span style="color: #bbbbbb"> </span><span style="color: #008000">Default</span>::default();<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span><span style="color: #008000; font-weight: bold">let</span><span style="color: #bbbbbb"> </span>middle_layout<span style="color: #bbbbbb"> </span><span style="color: #666666">=</span><span style="color: #bbbbbb"> </span><span style="color: #008000">Default</span>::default();<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">    </span><span style="color: #008000; font-weight: bold">let</span><span style="color: #bbbbbb"> </span>bottom_layout<span style="color: #bbbbbb"> </span><span style="color: #666666">=</span><span style="color: #bbbbbb"> </span><span style="color: #008000">Default</span>::default();<span style="color: #bbbbbb"></span>
+
+<span style="color: #bbbbbb">    </span><span style="color: #008000; font-weight: bold">let</span><span style="color: #bbbbbb"> </span>full_layout<span style="color: #bbbbbb"> </span><span style="color: #666666">=</span><span style="color: #bbbbbb"> </span><span style="color: #008000">Default</span>::default();<span style="color: #bbbbbb"></span>
+
+<span style="color: #bbbbbb">    </span>nwg::FlexboxLayout::builder()<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.parent(window)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.flex_direction(FlexDirection::Column)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.justify_content(JustifyContent::Center)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.child(label_a)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">            </span>.child_size(Size<span style="color: #bbbbbb"> </span>{<span style="color: #bbbbbb"> </span>width: <span style="color: #0000FF; font-weight: bold">PC_50</span>,<span style="color: #bbbbbb"> </span>height: <span style="color: #0000FF; font-weight: bold">PT_50</span><span style="color: #bbbbbb"> </span>})<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.child(textbox_a)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">            </span>.child_flex_grow(<span style="color: #666666">1.0</span>)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.build_partial(<span style="color: #666666">&amp;</span>top_layout)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.unwrap();<span style="color: #bbbbbb"></span>
+
+<span style="color: #bbbbbb">    </span>nwg::FlexboxLayout::builder()<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.parent(window)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.flex_direction(FlexDirection::Row)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.child(box_a)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">            </span>.child_size(Size<span style="color: #bbbbbb"> </span>{<span style="color: #bbbbbb"> </span>width: <span style="color: #0000FF; font-weight: bold">PT_50</span>,<span style="color: #bbbbbb"> </span>height: <span style="color: #0000FF; font-weight: bold">PT_50</span><span style="color: #bbbbbb"> </span>})<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.child(box_b)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">            </span>.child_size(Size<span style="color: #bbbbbb"> </span>{<span style="color: #bbbbbb"> </span>width: <span style="color: #0000FF; font-weight: bold">PT_50</span>,<span style="color: #bbbbbb"> </span>height: <span style="color: #0000FF; font-weight: bold">PT_50</span><span style="color: #bbbbbb"> </span>})<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.build_partial(<span style="color: #666666">&amp;</span>middle_layout)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.unwrap();<span style="color: #bbbbbb"></span>
+
+<span style="color: #bbbbbb">    </span>nwg::FlexboxLayout::builder()<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.parent(window)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.child(label_b)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">            </span>.child_size(Size<span style="color: #bbbbbb"> </span>{<span style="color: #bbbbbb"> </span>width: <span style="color: #0000FF; font-weight: bold">D</span>::Percent(<span style="color: #666666">1.0</span>),<span style="color: #bbbbbb"> </span>height: <span style="color: #0000FF; font-weight: bold">PT_50</span><span style="color: #bbbbbb"> </span>})<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.build_partial(<span style="color: #666666">&amp;</span>bottom_layout)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.unwrap();<span style="color: #bbbbbb"></span>
+
+<span style="color: #bbbbbb">    </span>nwg::FlexboxLayout::builder()<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.parent(window)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.flex_direction(FlexDirection::Column)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.child_layout(<span style="color: #666666">&amp;</span>top_layout)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.child_layout(<span style="color: #666666">&amp;</span>middle_layout)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">            </span>.child_flex_grow(<span style="color: #666666">1.0</span>)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.child_layout(<span style="color: #666666">&amp;</span>bottom_layout)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.build(<span style="color: #666666">&amp;</span>full_layout)<span style="color: #bbbbbb"></span>
+<span style="color: #bbbbbb">        </span>.unwrap();<span style="color: #bbbbbb"></span>
+}<span style="color: #bbbbbb"></span>
+</pre></div>
+    
+    
     
     
 
@@ -201,7 +271,7 @@ DynLayout layout works like Dynamic Layout in MFC.<br><br>
 
 It uses ratios for moving and sizing a control horizontally and vertically, when its parent Window is resized.<br><br>
 
-Application can define the ratios and call <code>fit</code> function to move and resize a control. An example is to add a control with preferred ration in <code>OnInit</code> and call the <code>fit</code> method in <code>OnResize</code> method to adjust the position and size of the control.<br><br>
+Application can define the ratios and call <code>fit</code> function to move and resize a control. An example is to add a control with preferred ratio in <code>OnInit</code> and call the <code>fit</code> method in <code>OnResize</code> method to adjust the position and size of the control.<br><br>
 
 The ratios are in percents <code>(0, 100)</code>, <code>0</code> means not to move or resize a control, <code>100</code> means to move or resize a control a hundre percent accordingly to Window size.<br><br>
 
