@@ -37,6 +37,9 @@ impl ControlHandle {
     pub fn destroy(&mut self) {
         match self {
             &mut ControlHandle::Hwnd(h) => wh::destroy_window(h),
+            &mut ControlHandle::Menu(_parent, m) => wh::destroy_menu(m),
+            &mut ControlHandle::MenuItem(parent, id) => wh::destroy_menu_item(parent, id),
+            &mut ControlHandle::PopMenu(_parent, m) => wh::destroy_menu(m),
             _ => {}
         }
 

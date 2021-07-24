@@ -165,6 +165,12 @@ impl Menu {
 
 }
 
+impl Drop for Menu {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
+
 pub struct MenuBuilder<'a> {
     text: &'a str,
     disabled: bool,
@@ -303,6 +309,12 @@ impl MenuItem {
 
 }
 
+impl Drop for MenuItem {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}
+
 pub struct MenuItemBuilder<'a> {
     text: &'a str,
     disabled: bool,
@@ -416,3 +428,8 @@ impl MenuSeparatorBuilder {
     }
 }
 
+impl Drop for MenuSeparator {
+    fn drop(&mut self) {
+        self.handle.destroy();
+    }
+}

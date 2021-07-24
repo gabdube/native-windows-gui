@@ -1,6 +1,6 @@
 use super::base_helper::{to_utf16, from_utf16};
 use super::high_dpi;
-use winapi::shared::windef::{HFONT, HWND};
+use winapi::shared::windef::{HFONT, HWND, HMENU};
 use winapi::shared::minwindef::{UINT, WPARAM, LPARAM, LRESULT};
 use winapi::um::winuser::WM_USER;
 use winapi::ctypes::c_int;
@@ -89,6 +89,34 @@ pub fn destroy_window(hwnd: HWND) {
     });
 
     unsafe { DestroyWindow(hwnd); }
+}
+
+pub fn destroy_menu_item(parent: HMENU, item_id: u32) { 
+    use winapi::um::winuser::{DeleteMenu, GetMenuItemCount, GetMenuItemID, MF_BYPOSITION};
+
+    unsafe {
+        let count = GetMenuItemCount(parent);
+        let mut index = 0;
+
+        while index < count {
+            let id = GetMenuItemID(parent, index);
+            match id == item_id {
+                true => {
+                    DeleteMenu(parent, index as u32, MF_BYPOSITION);
+                    index = count;
+                },
+                false => {
+                    index += 1;
+                }
+            }
+        }
+    }
+}
+
+pub fn destroy_menu(menu: HMENU) { 
+    use winapi::um::winuser::DestroyMenu;
+
+    unsafe { DestroyMenu(menu); }
 }
 
 /// Execute the callback for each first level children of the window 

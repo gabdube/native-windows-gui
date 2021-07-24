@@ -23,6 +23,18 @@ pub fn is_bitmap(handle: HBITMAP) -> bool {
     unsafe { GetBitmapBits(handle, 1, &mut bits as *mut [u8; 1] as LPVOID) != 0 }
 }
 
+pub fn destroy_icon(icon: HANDLE) {
+    unsafe { winapi::um::winuser::DestroyIcon(icon as _); }
+} 
+
+pub fn destroy_cursor(cursor: HANDLE) {
+    unsafe { winapi::um::winuser::DestroyCursor(cursor as _); }
+} 
+
+pub fn destroy_obj(obj: HANDLE) {
+    unsafe { winapi::um::wingdi::DeleteObject(obj as _); }
+} 
+
 pub unsafe fn build_font(
     size: i32,
     weight: u32,

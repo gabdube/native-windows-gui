@@ -223,3 +223,13 @@ impl PartialEq for Cursor {
     }
 
 }
+
+impl Drop for Cursor {
+
+    fn drop(&mut self) {
+        if self.owned && !self.handle.is_null() {
+            rh::destroy_cursor(self.handle);
+        }
+    }
+
+}

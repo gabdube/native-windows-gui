@@ -262,6 +262,16 @@ impl Default for Icon {
 
 }
 
+impl Drop for Icon {
+
+    fn drop(&mut self) {
+        if self.owned && !self.handle.is_null() {
+            rh::destroy_icon(self.handle);
+        }
+    }
+
+}
+
 impl PartialEq for Icon {
 
     fn eq(&self, other: &Self) -> bool {

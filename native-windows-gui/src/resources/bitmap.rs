@@ -333,9 +333,8 @@ impl PartialEq for Bitmap {
 impl Drop for Bitmap {
 
     fn drop(&mut self) {
-        use winapi::um::wingdi::DeleteObject;
-        if self.owned {
-            unsafe { DeleteObject(self.handle); }
+        if self.owned && !self.handle.is_null() {
+            rh::destroy_obj(self.handle);
         }
     }
 
