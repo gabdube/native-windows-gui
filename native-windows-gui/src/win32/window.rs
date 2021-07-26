@@ -6,7 +6,7 @@ Warning. Not for the faint of heart.
 use winapi::shared::minwindef::{BOOL, UINT, DWORD, HMODULE, WPARAM, LPARAM, LRESULT};
 use winapi::shared::windef::{HWND, HMENU, HBRUSH};
 use winapi::shared::basetsd::{DWORD_PTR, UINT_PTR};
-use winapi::um::winuser::{WNDPROC, NMHDR};
+use winapi::um::winuser::{WNDPROC, NMHDR, IDCANCEL, IDOK};
 use winapi::um::commctrl::{NMTTDISPINFOW, SUBCLASSPROC};
 use super::base_helper::{CUSTOM_ID_BEGIN, to_utf16};
 use super::window_helper::{NOTICE_MESSAGE, NWG_INIT, NWG_TRAY, NWG_TIMER_TICK, NWG_TIMER_STOP};
@@ -15,6 +15,8 @@ use crate::controls::ControlHandle;
 use crate::{Event, EventData, NwgError};
 use std::{ptr, mem};
 use std::rc::Rc;
+use std::ffi::OsString;
+use std::os::windows::prelude::OsStringExt;
 
 
 static mut TIMER_ID: u32 = 1; 
@@ -552,8 +554,6 @@ unsafe extern "system" fn blank_window_proc(hwnd: HWND, msg: UINT, w: WPARAM, l:
 */
 #[allow(unused_variables)]
 unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LPARAM, id: UINT_PTR, data: DWORD_PTR) -> LRESULT {
-    use std::os::windows::ffi::OsStringExt;
-    use std::ffi::OsString;
     use std::char;
     use crate::events::*;
 
@@ -641,7 +641,10 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
                 "ComboBox" => callback(combo_commands(message), NO_DATA, handle),
                 "Static" => callback(static_commands(child_handle, message), NO_DATA, handle),
                 "ListBox" => callback(listbox_commands(message), NO_DATA, handle),
-                _ => {}
+                _ => match w as i32 {
+                    IDOK | IDCANCEL => callback(no_class_name_commands(w), NO_DATA, base_handle),
+                    _ => {}
+                },
             }
         },
         WM_CONTEXTMENU => {
@@ -793,8 +796,10 @@ fn track_commands(m: u32) -> Event {
 }
 
 fn tree_commands(m: u32) -> Event {
-    use winapi::um::commctrl::{NM_CLICK, NM_DBLCLK, NM_KILLFOCUS, NM_RCLICK, NM_SETFOCUS,
-        TVN_DELETEITEMW, TVN_ITEMEXPANDEDW, TVN_SELCHANGEDW, TVN_ITEMCHANGEDW };
+    use winapi::um::commctrl::{
+        NM_CLICK, NM_DBLCLK, NM_KILLFOCUS, NM_RCLICK, NM_SETFOCUS, TVN_BEGINLABELEDITW,
+        TVN_DELETEITEMW, TVN_ENDLABELEDITW, TVN_ITEMCHANGEDW, TVN_ITEMEXPANDEDW, TVN_SELCHANGEDW,
+    };
 
     match m {
         NM_CLICK => Event::OnTreeViewClick,
@@ -806,7 +811,9 @@ fn tree_commands(m: u32) -> Event {
         TVN_ITEMEXPANDEDW => Event::OnTreeItemExpanded,
         TVN_SELCHANGEDW => Event::OnTreeItemSelectionChanged,
         TVN_ITEMCHANGEDW => Event::OnTreeItemChanged,
-        _ => Event::Unknown
+        TVN_BEGINLABELEDITW => Event::OnTreeViewBeginItemEdit,
+        TVN_ENDLABELEDITW => Event::OnTreeViewEndItemEdit,
+        _ => Event::Unknown,
     }
 }
 
@@ -831,12 +838,21 @@ fn list_view_commands(m: u32) -> Event {
     }
 }
 
-#[cfg(feature="tree-view")]
+fn no_class_name_commands(m: usize) -> Event {
+    match m as i32 {
+        IDOK => Event::OnKeyEnter,
+        IDCANCEL => Event::OnKeyEsc,
+        _ => Event::Unknown,
+    }
+}
+
+#[cfg(feature = "tree-view")]
 fn tree_data(m: u32, notif_raw: *const NMHDR) -> EventData {
-    use crate::{TreeItem, TreeItemAction, ExpandState, TreeItemState};
-    use winapi::um::commctrl::{TVN_DELETEITEMW, TVN_ITEMEXPANDEDW, NMTREEVIEWW, 
-        TVE_COLLAPSE, TVE_EXPAND, TVN_SELCHANGEDW, TVN_ITEMCHANGEDW, NMTVITEMCHANGE};
-        
+    use crate::{ExpandState, TreeItem, TreeItemAction, TreeItemState};
+    use winapi::um::commctrl::{
+        NMTREEVIEWW, NMTVDISPINFOW, NMTVITEMCHANGE, TVE_COLLAPSE, TVE_EXPAND, TVN_DELETEITEMW,
+        TVN_ENDLABELEDITW, TVN_ITEMCHANGEDW, TVN_ITEMEXPANDEDW, TVN_SELCHANGEDW,
+    };
 
     match m {
         TVN_DELETEITEMW => {
@@ -870,9 +886,39 @@ fn tree_data(m: u32, notif_raw: *const NMHDR) -> EventData {
                 old: TreeItemState::from_bits_truncate(data.uStateOld)
             };
             EventData::OnTreeItemUpdate { item, action }
-        },
-        _ => NO_DATA
+        }
+        TVN_ENDLABELEDITW => {
+            let data = unsafe { &*(notif_raw as *const NMTVDISPINFOW) };
+            let new_psztext = data.item.pszText;
+            if !new_psztext.is_null() {
+                let new_text_osstr = unsafe { u16_ptr_to_string(new_psztext) };
+                if let Ok(new_text) = new_text_osstr.into_string() {
+                    EventData::OnTreeViewEndItemEdit {
+                        f_cancel: false,
+                        new_text,
+                    }
+                } else {
+                    EventData::OnTreeViewEndItemEdit {
+                        f_cancel: false,
+                        new_text: String::from(""),
+                    }
+                }
+            } else {
+                EventData::OnTreeViewEndItemEdit {
+                    f_cancel: true,
+                    new_text: String::from(""),
+                }
+            }
+        }
+        _ => NO_DATA,
     }
+}
+
+unsafe fn u16_ptr_to_string(ptr: *const u16) -> OsString {
+    let len = (0..).take_while(|&i| *ptr.offset(i) != 0).count();
+    let slice = std::slice::from_raw_parts(ptr, len);
+
+    OsString::from_wide(slice)
 }
 
 #[cfg(not(feature="tree-view"))]
@@ -961,8 +1007,6 @@ unsafe fn handle_tooltip_callback<'a>(notif: *mut NMTTDISPINFOW, callback: &Call
 }
 
 unsafe fn handle_default_notify_callback<'a>(notif_raw: *const NMHDR, callback: &Callback){
-    use std::os::windows::ffi::OsStringExt;
-    use std::ffi::OsString;
     use winapi::um::winnt::WCHAR;
     use winapi::um::winuser::GetClassNameW;
 
