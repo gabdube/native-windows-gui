@@ -516,6 +516,22 @@ impl TreeView {
 
         Some(from_utf16(&text_buffer))
     }
+    
+    /// Set the text for specified item in the treeview.
+    pub fn set_item_text(&self, tree_item: &TreeItem, new_text: &str) {
+        use winapi::um::commctrl::{TVM_SETITEMW, TVIF_TEXT};
+        use winapi::um::winnt::LPWSTR;
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let text = to_utf16(new_text);
+
+        let mut item: TVITEMW = blank_item();
+        item.mask = TVIF_TEXT;
+        item.hItem = tree_item.handle;
+        item.pszText = text.as_ptr() as LPWSTR;
+
+        wh::send_message(handle, TVM_SETITEMW, 0, &mut item as *mut TVITEMW as LPARAM);
+    }
 
     /// Returns the lParam of the selected item. Return None if the item is not in the tree view.
     pub fn item_param(&self, tree_item: &TreeItem) -> Option<isize> {
@@ -721,9 +737,9 @@ impl TreeView {
 
     /// Winapi base flags used during window creation
     pub fn flags(&self) -> u32 {
-        use winapi::um::commctrl::{TVS_HASBUTTONS, TVS_LINESATROOT, TVS_HASLINES};
+        use winapi::um::commctrl::{TVS_HASBUTTONS, TVS_LINESATROOT, TVS_HASLINES, TVS_EDITLABELS};
 
-        WS_VISIBLE | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES | WS_TABSTOP | TVS_SHOWSELALWAYS
+        WS_VISIBLE | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_EDITLABELS
     }
 
     /// Winapi flags required by the control
@@ -732,6 +748,33 @@ impl TreeView {
         use winapi::um::commctrl::TVS_NOTOOLTIPS;
 
         WS_CHILD | WS_BORDER | TVS_NOTOOLTIPS
+    }
+
+    /// Begins to in-place edit the specified item's text.
+    /// Return None if Failed.
+    /// Return the treeview's handle if successful.
+    pub fn edit_label(&self, item: &TreeItem) -> Option<ControlHandle> {
+        use winapi::um::commctrl::TVM_EDITLABELW;
+        use winapi::shared::windef::HWND;
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+    
+        let result = wh::send_message(handle,  TVM_EDITLABELW, 0, item.handle as HTREEITEM as LPARAM); 
+        
+        if result == 0 {
+            return None;
+        }
+        Some(ControlHandle::Hwnd(result as HWND))
+    } 
+
+    /// End the in-place editing of the tree item's label.
+    /// The parameter f_cancel indicates whether the editing is canceled without being saved to the label. 
+    /// If this parameter is TRUE, the system cancels editing without saving the changes. Otherwise, the system saves the changes to the label.
+    /// Return true if successful, otherwise return false.
+    pub fn end_edit_label_now(&self, f_cancel: bool) -> bool {
+        use winapi::um::commctrl::TVM_ENDEDITLABELNOW;
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+    
+        wh::send_message(handle,  TVM_ENDEDITLABELNOW, f_cancel as WPARAM, 0) != 0
     }
 }
 
