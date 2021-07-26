@@ -51,6 +51,12 @@ pub enum Event {
 
     /// When a system key is released on a keyboard. Use EventData::OnKey to check which key.
     OnSysKeyRelease,
+    
+    /// When Enter is pressed.
+    OnKeyEnter,
+
+    /// When Esc key is pressed.
+    OnKeyEsc,
 
     /// Sent to a window when the size or position of the window is about to change. 
     /// An application can use the event data `EventData::OnMinMaxInfo` to override the minimum or maximum size.
@@ -168,6 +174,12 @@ pub enum Event {
 
     /// When the user has clicked the right mouse button within the control.
     OnTreeViewRightClick,
+
+    /// When begins in-place editing of the specified item's text.
+    OnTreeViewBeginItemEdit,
+
+    /// When ends the editing of a treeview item's label.
+    OnTreeViewEndItemEdit,
 
     /// When the control has lost the input focus
     OnTreeFocusLost,
@@ -297,6 +309,10 @@ pub enum EventData {
     /// The handle to the item being changed.
     #[cfg(feature="tree-view")]
     OnTreeItemUpdate{ item: crate::TreeItem, action: crate::TreeItemAction },
+    
+    /// When ends the editing of a treeview item's label.
+    #[cfg(feature="tree-view")]
+    OnTreeViewEndItemEdit{ f_cancel: bool, new_text: String },
 
     /// The handles the the old item and the new item.
     #[cfg(feature="tree-view")]
@@ -388,7 +404,18 @@ impl EventData {
             d => panic!("Wrong data type: {:?}", d)
         }
     }
-
+    
+    /// unwraps event data into f_cancel, new_text.
+    /// f_cancel indicates the editing is cancel or not.
+    /// new_text is the new input text when editing is not cancel.
+    #[cfg(feature="tree-view")]
+    pub fn on_tree_view_end_item_edit(&self) -> (bool, String) {
+        match self {
+            EventData::OnTreeViewEndItemEdit { f_cancel, new_text} => (*f_cancel, new_text.to_string()),
+            d => panic!("Wrong data type: {:?}", d)
+        }
+    }
+    
     /// unwraps event data into the indices of a list view index (row_index, column_index)
     #[cfg(feature="list-view")]
     pub fn on_list_view_item_index(&self) -> (usize, usize) {
