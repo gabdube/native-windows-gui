@@ -64,7 +64,12 @@ impl DataViewApp {
         dv.set_image_list(Some(icons_small), nwg::ListViewImageListType::Small);
 
         dv.insert_column("Name");
-        dv.insert_column("Genus");
+        dv.insert_column(nwg::InsertListViewColumn{
+            index: Some(1),
+            fmt: Some(nwg::ListViewColumnFlags::RIGHT),
+            width: Some(20),
+            text: Some("test".into())
+        });
         dv.set_headers_enabled(true);
 
         // Passing a str to this method will automatically push the item at the end of the list in the first column

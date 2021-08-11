@@ -171,7 +171,7 @@ pub struct InsertListViewColumn {
     pub index: Option<i32>,
 
     /// Format of the column
-    pub fmt: Option<i32>,
+    pub fmt: Option<ListViewColumnFlags>,
 
     /// Width of the column in pixels
     pub width: Option<i32>,
@@ -438,7 +438,7 @@ impl ListView {
 
         let mut item: LVCOLUMNW = unsafe { mem::zeroed() };
         item.mask = mask;
-        item.fmt = insert.fmt.unwrap_or(0);
+        item.fmt = insert.fmt.unwrap_or(ListViewColumnFlags::empty()).bits() as _;
         item.cx = col_width as i32;
         item.pszText = text.as_mut_ptr();
         item.cchTextMax = text.len() as i32;
@@ -514,7 +514,7 @@ impl ListView {
 
         let mut item: LVCOLUMNW = unsafe { mem::zeroed() };
         item.mask = mask;
-        item.fmt = insert.fmt.unwrap_or(0);
+        item.fmt = insert.fmt.unwrap_or(ListViewColumnFlags::empty()).bits() as _;
         item.cx = insert.width.unwrap_or(0);
 
         if use_text {
