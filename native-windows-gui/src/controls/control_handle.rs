@@ -133,7 +133,7 @@ impl PartialEq for ControlHandle {
             },
             // HMENU
             &ControlHandle::PopMenu(_, h1) => match other {
-                &ControlHandle::Menu(_, h2) => h1 == h2,
+                &ControlHandle::PopMenu(_, h2) => h1 == h2,
                 _ => false
             },
             // HMENU / ITEM
