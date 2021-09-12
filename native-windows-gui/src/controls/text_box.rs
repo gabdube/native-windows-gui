@@ -4,6 +4,7 @@ use crate::win32::window_helper as wh;
 use crate::{Font, NwgError};
 use super::{ControlBase, ControlHandle};
 use std::ops::Range;
+use newline_converter::unix2dos;
 
 const NOT_BOUND: &'static str = "TextBox is not yet bound to a winapi object";
 const BAD_HANDLE: &'static str = "INTERNAL ERROR: TextBox handle is not HWND!";
@@ -197,6 +198,25 @@ impl TextBox {
         wh::send_message(handle, EM_LINELENGTH as u32, 0, 0) as u32
     }
 
+    /// Return the number of lines in the multiline edit control.
+    /// If the control has no text, the return value is 1.
+    pub fn linecount(&self) -> i32 {
+        use winapi::um::winuser::EM_GETLINECOUNT;
+
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        wh::send_message(handle, EM_GETLINECOUNT as u32, 0, 0) as i32
+    }  
+    
+    /// Scroll `v` lines in the multiline edit control.
+    pub fn scroll(&self, v: i32) {
+        use winapi::um::winuser::EM_LINESCROLL;
+
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        wh::send_message(handle, EM_LINESCROLL as u32, 0, v as LPARAM);
+    }
+
     /// Return true if the TextInput value cannot be edited. Retrurn false otherwise.
     /// A user can still copy text from a readonly TextEdit (unlike disabled)
     pub fn readonly(&self) -> bool {
@@ -307,6 +327,27 @@ impl TextBox {
         unsafe { wh::set_window_text(handle, v) }
     }
 
+    /// Set the text in the current control, converting unix-style newlines in the input to "\r\n"
+    pub fn set_text_unix2dos<'a>(&self, v: &'a str) {
+        if self.handle.blank() { panic!("{}", NOT_BOUND); }
+        let handle = self.handle.hwnd().expect(BAD_HANDLE);
+        unsafe { wh::set_window_text(handle,  &unix2dos(&v).to_string()) }
+    }
+
+    /// Append text to the current control
+    pub fn append<'a>(&self, v: &'a str) {
+        let text = self.text() + &unix2dos(&v).to_string();
+        self.set_text(&text);
+        self.scroll(self.linecount());
+    }
+
+    /// Append text to the current control followed by "\r\n"
+    pub fn appendln<'a>(&self, v: &'a str) {
+        let text = self.text() + &unix2dos(&v).to_string() + "\r\n";
+        self.set_text(&text);
+        self.scroll(self.linecount());
+    }
+    
     /// Winapi class name used during control creation
     pub fn class_name(&self) -> &'static str {
         "EDIT"
