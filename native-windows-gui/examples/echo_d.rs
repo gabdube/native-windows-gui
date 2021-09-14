@@ -89,7 +89,7 @@ impl EchoApp {
     }
 
     pub fn scroll_to_bot(&self) {
-        self.text.scroll(self.text.linecount());
+        self.text.scroll_lastline();
     }
 
     pub fn submit(&self) {
