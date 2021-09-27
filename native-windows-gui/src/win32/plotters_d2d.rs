@@ -133,10 +133,10 @@ impl Target {
                 };
             
                 let [r, g, b, a] = [
-                    color.r as f32 * 255.0,
-                    color.g as f32 * 255.0,
-                    color.b as f32 * 255.0,
-                    color.a as f32 * 255.0,
+                    color.r as f32 / 255.0,
+                    color.g as f32 / 255.0,
+                    color.b as f32 / 255.0,
+                    color.a as f32 / 255.0,
                 ];
     
                 unsafe {
