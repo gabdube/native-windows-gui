@@ -1,5 +1,6 @@
 use crate::Cursor;
 use crate::controls::ControlHandle;
+use crate::win32::high_dpi;
 
 /**
     A global object that wraps the system cursor.
@@ -51,6 +52,31 @@ impl GlobalCursor {
         unsafe { ScreenToClient(handle, &mut p); }
 
         (p.x as i32, p.y as i32)
+    }
+
+    /**
+        Return or map the cursor position relatively to a control and convert to logical.
+        If point is `None`, `Cursor::position` is used.
+    */
+    pub fn local_logical_position<C: Into<ControlHandle>>(control: C, point: Option<(i32, i32)>) -> (i32, i32) {
+        use winapi::shared::ntdef::LONG;
+        use winapi::shared::windef::POINT;
+        use winapi::um::winuser::ScreenToClient;
+
+        const MSG: &'static str = "local_position can only be used for window control";
+
+        let control = control.into();
+        if control.blank() { panic!("{}", MSG); }
+        let handle = control.hwnd().expect(MSG);
+
+        let (x, y) = point.unwrap_or(GlobalCursor::position());
+        let mut p = POINT{x: x as LONG, y: y as LONG};
+
+        unsafe {
+            ScreenToClient(handle, &mut p);
+
+            high_dpi::physical_to_logical(p.x as i32, p.y as i32)
+        }
     }
 
     /**
@@ -146,7 +172,7 @@ impl GlobalCursor {
 
     /**
     Captures the mouse and tracks its movement until the user releases the left button, presses the ESC key, or moves
-    the mouse outside the drag rectangle around the specified point. 
+    the mouse outside the drag rectangle around the specified point.
 
     Return `Ok(true)` if the user did not execute the actions mentioned above or `Ok(false)` if it did.
 
