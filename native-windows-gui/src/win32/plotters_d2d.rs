@@ -660,7 +660,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
         unsafe {
             (&*target.render_target).DrawText(
                 raw_text.as_ptr(),
-                text.len() as _,
+                (raw_text.len() - 1) as _,
                 text_format,
                 &layout_rect,
                 brush as _,
