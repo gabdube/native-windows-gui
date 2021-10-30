@@ -30,7 +30,7 @@ pub(crate) mod richedit;
 #[cfg(feature = "plotting")]
 pub(crate) mod plotters_d2d;
 
-use std::{mem, ptr};
+use std::{fs, mem, ptr};
 use crate::errors::NwgError;
 
 
@@ -98,30 +98,45 @@ pub fn stop_thread_dispatch() {
 pub fn enable_visual_styles() {
     use winapi::shared::minwindef::{ULONG, DWORD, MAX_PATH};
     use winapi::shared::basetsd::ULONG_PTR;
+    use winapi::um::fileapi::{GetTempFileNameW, GetTempPathW};
     use winapi::um::winbase::{ACTCTXW, CreateActCtxW, ActivateActCtx};
-    use winapi::um::sysinfoapi::GetSystemDirectoryW;
 
-    const ACTCTX_FLAG_RESOURCE_NAME_VALID: DWORD = 0x008;
+    const MANIFEST_CONTENT: &str = r#"
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <description>native-windows-gui comctl32 manifest</description> 
+    <dependency>
+        <dependentAssembly>
+            <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*" /> 
+        </dependentAssembly>
+    </dependency>
+</assembly>
+"#;
     const ACTCTX_FLAG_SET_PROCESS_DEFAULT: DWORD = 0x010;
-    const ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID: DWORD = 0x004;
 
-    let mut sys_dir: Vec<u16> = Vec::with_capacity(MAX_PATH);
-    unsafe {
-        sys_dir.set_len(MAX_PATH);
-        GetSystemDirectoryW(sys_dir.as_mut_ptr(), MAX_PATH as u32);
+    let mut tmp_dir = [0u16; MAX_PATH + 1];
+    if unsafe { GetTempPathW(tmp_dir.len() as u32, tmp_dir.as_mut_ptr()) } == 0 {
+        return;
     }
-   
-    let mut source = base_helper::to_utf16("shell32.dll");
+    let mut tmp_path = [0u16; MAX_PATH]; // Smaller than above, but these are the respective maximums for each function.
+    let prefix = ['n' as u16, 'w' as u16, 'g' as u16];
+    if unsafe { GetTempFileNameW(tmp_dir.as_ptr(), prefix.as_ptr(), 0, tmp_path.as_mut_ptr())} == 0 {
+        return;
+    }
+
+    let manifest_path_raw = tmp_path;
+    let manifest_path = base_helper::from_utf16(&tmp_path);
+    let _ = fs::write(&manifest_path, MANIFEST_CONTENT);
 
     let mut activation_cookie: ULONG_PTR = 0;
     let mut act_ctx = ACTCTXW {
         cbSize: mem::size_of::<ACTCTXW> as ULONG,
-        dwFlags: ACTCTX_FLAG_RESOURCE_NAME_VALID | ACTCTX_FLAG_SET_PROCESS_DEFAULT | ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID,
-        lpSource: source.as_mut_ptr(),
+        dwFlags: ACTCTX_FLAG_SET_PROCESS_DEFAULT,
+        lpSource: manifest_path_raw.as_ptr(),
         wProcessorArchitecture: 0,
         wLangId: 0,
-        lpAssemblyDirectory: sys_dir.as_mut_ptr(),
-        lpResourceName: unsafe { mem::transmute(124usize) }, // ID_MANIFEST
+        lpAssemblyDirectory: ptr::null_mut(),
+        lpResourceName: ptr::null_mut(),
         lpApplicationName: ptr::null_mut(),
         hModule: ptr::null_mut()
     };
@@ -130,6 +145,8 @@ pub fn enable_visual_styles() {
         let handle = CreateActCtxW(&mut act_ctx);
         ActivateActCtx(handle, &mut activation_cookie);
     }
+
+    let _ = fs::remove_file(&manifest_path);
 }
 
 /**
