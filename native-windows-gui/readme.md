@@ -8,8 +8,8 @@ the quirks and rough edges of the API by providing a simple, safe and rust-like 
 Native Windows GUI keeps things simple. This means small compile times, minimal resource usage,
 less time searching the documentation and more time for you to develop your application.
 
-Of course, you don't have to take my word for it, check out the [showcase](showcase) and the 
-[examples](native-windows-gui/examples).
+Of course, you don't have to take my word for it, check out the [showcase](../showcase) and the 
+[examples](examples).
 
 This is the 3rd and final version of NWG. It is considered "mature" or, as I would say
 "the backlog is empty, and it will most likely stay that way". This version implements pretty much

@@ -7,6 +7,7 @@ use winapi::um::dwrite::{IDWriteFactory, IDWriteTextFormat, DWriteCreateFactory,
 use winapi::shared::winerror::{S_OK, D2DERR_RECREATE_TARGET};
 
 use super::base_helper::to_utf16;
+use super::{high_dpi, window_helper};
 use std::{cell::{Ref, RefCell, RefMut}, collections::HashMap, mem, ptr};
 
 use plotters::prelude::DrawingBackend;
@@ -39,7 +40,7 @@ struct FontFormat {
 }
 
 impl<T: BackendTextStyle> From<&T> for FontFormat {
-    
+
     fn from(text: &T) -> Self {
         use plotters_backend::{FontFamily::*, FontStyle::*};
         use winapi::um::dwrite::{DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STYLE_ITALIC};
@@ -131,14 +132,14 @@ impl Target {
                         matrix: [[1.0, 0.0], [0.0, 1.0], [0.0, 0.0]]
                     }
                 };
-            
+
                 let [r, g, b, a] = [
-                    color.r as f32 * 255.0,
-                    color.g as f32 * 255.0,
-                    color.b as f32 * 255.0,
-                    color.a as f32 * 255.0,
+                    color.r as f32 / 255.0,
+                    color.g as f32 / 255.0,
+                    color.b as f32 / 255.0,
+                    color.a as f32 / 255.0,
                 ];
-    
+
                 unsafe {
                     render_target.CreateSolidColorBrush(
                         &D2D1_COLOR_F { r, g, b, a },
@@ -235,14 +236,14 @@ impl PlottersBackend {
     }
 
     pub(crate) fn begin_draw(&self) {
-        unsafe { 
+        unsafe {
             let target = self.target();
             (&*target.render_target).BeginDraw();
         }
     }
 
     pub(crate) fn end_draw(&self) {
-        let result = unsafe { 
+        let result = unsafe {
             let mut target = self.target_mut();
 
             // Writes the pixel bitmap if needed
@@ -285,7 +286,7 @@ impl PlottersBackend {
     }
 
     pub(crate) fn clear(&self) {
-        unsafe { 
+        unsafe {
             let target = self.target();
             (&*target.render_target).Clear(&D2D1_COLOR_F { r: 1.0, g: 1.0, b: 1.0, a: 1.0 });
         }
@@ -364,7 +365,7 @@ impl Drop for PlottersBackend {
             for &fmt in formats.values() {
                 (&*fmt).Release();
             }
-            
+
             if !self.simple_stroke_style.is_null() {
                 (&*self.simple_stroke_style).Release();
             }
@@ -385,7 +386,9 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
     type ErrorType = PlottersError;
 
     fn get_size(&self) -> (u32, u32) {
-        self.target().size
+        let (width, height) = self.target().size;
+        let (width, height) = unsafe { high_dpi::physical_to_logical(width as i32, height as i32) };
+        (width as u32, height as u32)
     }
 
     fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
@@ -436,7 +439,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
             let p0 = D2D1_POINT_2F { x: from.0 as f32, y: from.1 as f32 };
             let p1 = D2D1_POINT_2F { x: to.0 as f32, y: to.1 as f32 };
             (&*target.render_target).DrawLine(
-                p0, 
+                p0,
                 p1,
                 brush as _,
                 stroke_width,
@@ -474,7 +477,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
             match fill {
                 true => {
                     (&*target.render_target).FillRectangle(
-                        &rect, 
+                        &rect,
                         brush as _
                     );
                 },
@@ -487,7 +490,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
                     )
                 }
             }
-            
+
         }
 
         Ok(())
@@ -507,10 +510,10 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
         for (x, y) in iter_path {
             let p0 = D2D1_POINT_2F { x: last_x as f32, y: last_y as f32 };
             let p1 = D2D1_POINT_2F { x: x as f32, y: y as f32 };
-            
+
             unsafe {
                 (&*target.render_target).DrawLine(
-                    p0, 
+                    p0,
                     p1,
                     brush as _,
                     stroke_width,
@@ -546,7 +549,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
             match fill {
                 true => {
                     (&*target.render_target).FillEllipse(
-                        &ellipse, 
+                        &ellipse,
                         brush as _
                     );
                 },
@@ -559,7 +562,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
                     )
                 }
             }
-            
+
         }
 
         Ok(())
@@ -578,8 +581,8 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
             let fact = &*self.renderer;
             let mut path = ptr::null_mut();
             let mut sink = ptr::null_mut();
-            
-            
+
+
             fact.CreatePathGeometry(&mut path);
             (&*path).Open(&mut sink);
 
@@ -596,7 +599,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
 
 
             (&*target.render_target).FillGeometry(
-                path as _, 
+                path as _,
                 brush as _,
                 ptr::null_mut(),
             );
@@ -605,7 +608,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
             (&*sink).Release();
             (&*path).Release();
         }
-        
+
         Ok(())
     }
 
@@ -620,7 +623,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
 
         let mut target = self.target_mut();
         let brush = target.fetch_brush(Color::from(&style.color()));
-        
+
         let text_format = self.fetch_text_format(FontFormat::from(style));
         let raw_text = to_utf16(text);
         let (width, height) = target.size;
@@ -651,13 +654,13 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
             left: x as f32,
             top: y as f32,
             right: width as f32,
-            bottom: height as f32,   
+            bottom: height as f32,
         };
 
-        unsafe { 
+        unsafe {
             (&*target.render_target).DrawText(
                 raw_text.as_ptr(),
-                text.len() as _,
+                (raw_text.len() - 1) as _,
                 text_format,
                 &layout_rect,
                 brush as _,
@@ -693,7 +696,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
                 1000.0,
                 &mut layout,
             );
-            
+
             let layout = &*layout;
             let mut metrics: DWRITE_TEXT_METRICS = mem::zeroed();
             layout.GetMetrics(&mut metrics);
@@ -722,7 +725,7 @@ impl<'a> DrawingBackend for &'a PlottersBackend {
 unsafe fn build_render_target(hwnd: HWND, factory: &mut ID2D1Factory) -> Result<Target, PlottersError> {
     use winapi::shared::dxgiformat::{DXGI_FORMAT_B8G8R8A8_UNORM};
     use winapi::um::dcommon::{D2D_SIZE_U, D2D1_PIXEL_FORMAT, D2D1_ALPHA_MODE_PREMULTIPLIED};
-   
+
     let (width, height) = client_size(hwnd);
     let size = D2D_SIZE_U { width, height };
 
@@ -775,9 +778,9 @@ unsafe fn build_static_resources(backend: &mut PlottersBackend) -> Result<(), Pl
     };
 
     f.CreateStrokeStyle(
-        &props, 
-        ptr::null(), 
-        0, 
+        &props,
+        ptr::null(),
+        0,
         &mut backend.simple_stroke_style
     );
 
@@ -785,15 +788,7 @@ unsafe fn build_static_resources(backend: &mut PlottersBackend) -> Result<(), Pl
 }
 
 unsafe fn client_size(hwnd: HWND) -> (u32, u32) {
-    use winapi::um::winuser::GetClientRect;
-    use winapi::shared::windef::RECT;
-
-    let mut rc: RECT = mem::zeroed();
-    GetClientRect(hwnd, &mut rc);
-    let width =  (rc.right-rc.left) as u32;
-    let height = (rc.bottom-rc.top) as u32;
-
-    (width, height)
+    window_helper::get_window_physical_size(hwnd)
 }
 
 unsafe fn locale_name() -> Vec<u16> {

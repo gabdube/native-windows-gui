@@ -8,6 +8,7 @@ members = [
     "native-windows-gui/examples/embed_resources",
     "native-windows-gui/examples/sync-draw",
     "native-windows-gui/examples/wgpu_canvas",
+    "native-windows-gui/examples/hdpi_plotting",
 ]
 
 [profile.dev]
