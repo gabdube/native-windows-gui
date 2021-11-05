@@ -968,11 +968,14 @@ fn list_view_data(_m: u32, _notif_raw: *const NMHDR) -> EventData {
 
 
 unsafe fn static_commands(handle: HWND, m: u16) -> Event {
-    use winapi::um::winuser::{STN_CLICKED, STN_DBLCLK, STM_GETIMAGE, IMAGE_BITMAP};
+    use winapi::um::winuser::{STN_CLICKED, STN_DBLCLK, STM_GETIMAGE, IMAGE_BITMAP, IMAGE_ICON, IMAGE_CURSOR};
     use winapi::um::winuser::SendMessageW;
 
     let has_image = SendMessageW(handle, STM_GETIMAGE, IMAGE_BITMAP as usize, 0) != 0;
-    if has_image {
+    let has_icon = SendMessageW(handle, STM_GETIMAGE, IMAGE_ICON as usize, 0) != 0;
+    let has_cursor = SendMessageW(handle, STM_GETIMAGE, IMAGE_CURSOR as usize, 0) != 0;
+
+    if has_image | has_icon | has_cursor {
         match m {
             STN_CLICKED => Event::OnImageFrameClick,
             STN_DBLCLK => Event::OnImageFrameDoubleClick,
