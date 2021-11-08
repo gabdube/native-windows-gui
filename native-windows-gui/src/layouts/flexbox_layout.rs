@@ -601,8 +601,9 @@ impl FlexboxLayoutBuilder {
         layout.update_layout(w, h, (0, 0)).expect("Failed to compute layout");
 
         // Fetch a new ID for the layout handler
-        static mut FLEX_LAYOUT_ID: usize = 0x9FFF; 
-        let handler_id = unsafe { FLEX_LAYOUT_ID += 1; FLEX_LAYOUT_ID };
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static FLEX_LAYOUT_ID: AtomicUsize = AtomicUsize::new(0x9FFF); 
+        let handler_id = FLEX_LAYOUT_ID.fetch_add(1, Ordering::SeqCst);
  
         // Bind the event handler
         let event_layout = layout.clone();

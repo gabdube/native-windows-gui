@@ -17,11 +17,12 @@ use std::{ptr, mem};
 use std::rc::Rc;
 use std::ffi::OsString;
 use std::os::windows::prelude::OsStringExt;
+use std::sync::atomic::{AtomicU32, AtomicUsize, Ordering};
 
 
-static mut TIMER_ID: u32 = 1; 
-static mut NOTICE_ID: u32 = 1; 
-static mut EVENT_HANDLER_ID: UINT_PTR = 1;
+static TIMER_ID: AtomicU32 = AtomicU32::new(1); 
+static NOTICE_ID: AtomicU32 = AtomicU32::new(1); 
+static EVENT_HANDLER_ID: AtomicUsize = AtomicUsize::new(1);
 
 const NO_DATA: EventData = EventData::NoData;
 
@@ -53,19 +54,14 @@ pub struct RawEventHandler {
     The same apply to timers
 */
 pub fn build_notice(parent: HWND) -> ControlHandle {
-    let id = unsafe {
-        let tmp = NOTICE_ID;
-        NOTICE_ID += 1;
-        tmp
-    };
+    let id = NOTICE_ID.fetch_add(1, Ordering::SeqCst);
     ControlHandle::Notice(parent, id)
 }
 
 pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> ControlHandle {
     use winapi::um::winuser::SetTimer;
     
-    let id = TIMER_ID;
-    TIMER_ID += 1;
+    let id = TIMER_ID.fetch_add(1, Ordering::SeqCst);
 
     if !stopped {
         SetTimer(parent, id as UINT_PTR, interval as UINT, None);
@@ -131,7 +127,7 @@ pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
     let callback_ptr: *mut *const Callback = Box::into_raw(callback_box);
     
     let callback_fn: SUBCLASSPROC = Some(process_events);
-    let subclass_id = unsafe { EVENT_HANDLER_ID };
+    let subclass_id = EVENT_HANDLER_ID.fetch_add(1, Ordering::SeqCst);
     let mut handler = EventHandler {
         handles: vec![hwnd],
         id: callback_fn,
@@ -146,7 +142,6 @@ pub fn full_bind_event_handler<F>(handle: &ControlHandle, f: F) -> EventHandler
         EnumChildWindows(hwnd, Some(handler_children), (&mut handler.handles as *mut Vec<HWND>) as LPARAM);
         EnumChildWindows(hwnd, Some(set_children_subclass), params_ptr as LPARAM);
         SetWindowSubclass(hwnd, callback_fn, subclass_id, callback_ptr as UINT_PTR);
-        EVENT_HANDLER_ID += 1;
         Box::from_raw(params_ptr);
     }
 
@@ -182,7 +177,7 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHand
     let callback_ptr_parent: *mut *const Callback = Box::into_raw(callback_box_parent);
 
     let callback_fn: SUBCLASSPROC = Some(process_events);
-    let subclass_id = unsafe { EVENT_HANDLER_ID };
+    let subclass_id = EVENT_HANDLER_ID.fetch_add(1, Ordering::SeqCst);
     let handler = EventHandler {
         handles: vec![hwnd, parent_hwnd],
         id: callback_fn,
@@ -192,7 +187,6 @@ pub fn bind_event_handler<F>(handle: &ControlHandle, parent_handle: &ControlHand
     unsafe {
         SetWindowSubclass(hwnd, callback_fn, subclass_id, callback_ptr as UINT_PTR);
         SetWindowSubclass(parent_hwnd, callback_fn, subclass_id, callback_ptr_parent as UINT_PTR);
-        EVENT_HANDLER_ID += 1;
     }
 
     handler

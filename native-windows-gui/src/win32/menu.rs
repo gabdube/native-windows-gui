@@ -7,9 +7,10 @@ use super::base_helper::{CUSTOM_ID_BEGIN, to_utf16};
 use crate::controls::ControlHandle;
 use crate::{NwgError};
 use std::{mem, ptr};
+use std::sync::atomic::{AtomicU32, Ordering};
 
 
-static mut MENU_ITEMS_ID: u32 = CUSTOM_ID_BEGIN; 
+static MENU_ITEMS_ID: AtomicU32 = AtomicU32::new(CUSTOM_ID_BEGIN); 
 
 
 /// Build a system menu
@@ -41,7 +42,7 @@ pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: b
 
     let mut parent_menu: HMENU = ptr::null_mut();
     let mut menu: HMENU = ptr::null_mut();
-    let item_id = MENU_ITEMS_ID;
+    let mut item_id = 0;
 
     let mut flags = MF_STRING;
     if !item { flags |= MF_POPUP; }
@@ -60,8 +61,8 @@ pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: b
 
         if item {
             menu = menubar;
+            item_id = MENU_ITEMS_ID.fetch_add(1, Ordering::SeqCst);
             AppendMenuW(menubar, flags, item_id as usize, text.as_ptr());
-            MENU_ITEMS_ID += 1;
         } else {
             parent_menu = menubar;
             menu = CreateMenu();
@@ -79,8 +80,8 @@ pub unsafe fn build_hmenu_control(text: Option<String>, item: bool, separator: b
 
         if item {
             menu = parent;
+            item_id = MENU_ITEMS_ID.fetch_add(1, Ordering::SeqCst);
             AppendMenuW(parent, flags, item_id as usize, text.as_ptr());
-            MENU_ITEMS_ID += 1;
         } else {
             parent_menu = parent;
             menu = CreateMenu();
@@ -195,7 +196,7 @@ unsafe fn build_hmenu_separator(menu: HMENU) -> ControlHandle {
     use winapi::um::winuser::{MENUITEMINFOW, MF_SEPARATOR, MIIM_ID};
     use winapi::shared::minwindef::{BOOL};
 
-    let item_id = MENU_ITEMS_ID as UINT;
+    let item_id = MENU_ITEMS_ID.fetch_add(1, Ordering::SeqCst);
 
     // MF_SEPARATOR ignore the lpNewItem and uIDNewItem parameters, so they must be set using SetMenuItemInfo
     AppendMenuW(menu, MF_SEPARATOR, 0, ptr::null());
@@ -212,7 +213,6 @@ unsafe fn build_hmenu_separator(menu: HMENU) -> ControlHandle {
     };
 
     SetMenuItemInfoW(menu, pos as UINT, true as BOOL, &mut info);
-    MENU_ITEMS_ID += 1;
 
     ControlHandle::MenuItem(menu, item_id)
 }
