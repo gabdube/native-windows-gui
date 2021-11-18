@@ -451,11 +451,11 @@ impl GridLayout {
 
         let mut last_handle = None;
         for item in inner.children.iter() {
-            let x = m_left + (sp + (sp2 * item.col)) + &columns[0..(item.col as usize)].iter().sum();
-            let y = m_top + (sp + (sp2 * item.row)) + &rows[0..(item.row as usize)].iter().sum();
+            let x: u32 = m_left + (sp + (sp2 * item.col)) + columns[0..(item.col as usize)].iter().sum::<u32>();
+            let y: u32 = m_top + (sp + (sp2 * item.row)) + rows[0..(item.row as usize)].iter().sum::<u32>();
 
-            let local_width = &columns[(item.col as usize)..((item.col + item.col_span) as usize)].iter().sum() + (sp2 * (item.col_span - 1));
-            let local_height = &rows[(item.row as usize)..((item.row + item.row_span) as usize)].iter().sum() + (sp2 * (item.row_span - 1));
+            let local_width: u32 = &columns[(item.col as usize)..((item.col + item.col_span) as usize)].iter().sum::<u32>() + (sp2 * (item.col_span - 1));
+            let local_height: u32 = &rows[(item.row as usize)..((item.row + item.row_span) as usize)].iter().sum::<u32>() + (sp2 * (item.row_span - 1));
 
             unsafe {
                 wh::set_window_position(item.control, x as i32, y as i32);
