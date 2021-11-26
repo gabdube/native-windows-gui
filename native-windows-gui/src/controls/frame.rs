@@ -37,11 +37,11 @@ Requires the `frame` feature.
   * `enabled`:  If the frame children can be used by the user.
   * `flags`:    A combination of the FrameFlags values.
   * `ex_flags`: A combination of win32 window extended flags. Unlike `flags`, ex_flags must be used straight from winapi
-  * `OnMouseWheel`: Generic mouse wheel event
 
 **Control events:**
   * `MousePress(_)`: Generic mouse press events on the button
   * `OnMouseMove`: Generic mouse mouse event
+  * `OnMouseWheel`: Generic mouse wheel event
 */
 #[derive(Default, PartialEq, Eq)]
 pub struct Frame {
