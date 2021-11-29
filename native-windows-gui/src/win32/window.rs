@@ -574,6 +574,13 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
                 _ /* WM_KEYUP */ => Event::OnKeyRelease,
             };
 
+            // Block the textbox ESC key from closing the whole application
+            if w == 27 {
+                if is_textbox_control(hwnd) {
+                    return 0;
+                }
+            }
+
             let keycode = w as u32;
             let data = EventData::OnKey(keycode);
             callback(evt, data, base_handle);
@@ -1024,6 +1031,17 @@ unsafe fn handle_default_notify_callback<'a>(notif_raw: *const NMHDR, callback: 
         winapi::um::commctrl::WC_LISTVIEW => callback(list_view_commands(code), list_view_data(code, notif_raw), handle),
         _ => {}
     }
+}
+
+unsafe fn is_textbox_control(hwnd: HWND) -> bool {
+    use winapi::um::winnt::WCHAR;
+    use winapi::um::winuser::GetClassNameW;
+
+    let mut class_name_raw: [WCHAR; 100] = [0; 100];
+    let count = GetClassNameW(hwnd, class_name_raw.as_mut_ptr(), 100) as usize;
+    let class_name = OsString::from_wide(&class_name_raw[..count]).into_string().unwrap_or("".to_string());
+    
+    class_name == "Edit" || class_name == "RICHEDIT50W"
 }
 
 //
