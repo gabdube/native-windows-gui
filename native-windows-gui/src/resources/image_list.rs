@@ -1,7 +1,10 @@
+use std::ptr;
+
 use winapi::um::commctrl::{HIMAGELIST, ImageList_AddMasked};
 use winapi::shared::windef::{HICON, HBITMAP};
+
 use crate::{Bitmap, Icon, NwgError};
-use std::ptr;
+use crate::win32::high_dpi;
 
 
 const NOT_BOUND: &'static str = "ImageList is not yet bound to a winapi object";
@@ -12,7 +15,7 @@ Image lists are used in controls such as tabs container and tree view in order t
 
 There are two kinds of image list in Winapi: masked. This is a wrapper over the masked type.
 
-Image list and the method that use them in controls are behind the "image-list" feature. 
+Image list and the method that use them in controls are behind the "image-list" feature.
 
 **Builder parameters:**
   * `size`:    The size size of the images in the image list. Default `(32, 32)`
@@ -55,7 +58,7 @@ impl ImageList {
         let mut size = (0, 0);
         unsafe { ImageList_GetIconSize(self.handle, &mut size.0, &mut size.1); }
 
-        size
+        unsafe { high_dpi::physical_to_logical(size.0, size.1) }
     }
 
     /// Sets the size of the image list. This clears all current image data.
@@ -64,7 +67,7 @@ impl ImageList {
 
         if self.handle.is_null() { panic!("{}", NOT_BOUND); }
 
-        let (w, h) = size;
+        let (w, h) = unsafe { high_dpi::logical_to_physical(size.0, size.1) };
         unsafe { ImageList_SetIconSize(self.handle, w, h); }
     }
 
@@ -116,7 +119,7 @@ impl ImageList {
         unsafe {
             let mut info: ICONINFO = ::std::mem::zeroed();
             GetIconInfo(icon.handle as _, &mut info);
-            
+
             let i = ImageList_AddMasked(self.handle, info.hbmColor, 0);
 
             DeleteObject(info.hbmMask as _);
@@ -165,7 +168,7 @@ impl ImageList {
 
         if self.handle.is_null() { panic!("{}", NOT_BOUND); }
         if bitmap.handle.is_null() { panic!("Bitmap was not initialized"); }
-        
+
         unsafe { ImageList_Replace(self.handle, index, bitmap.handle as HBITMAP, ptr::null_mut()); }
     }
 
@@ -236,7 +239,7 @@ impl ImageListBuilder {
         use winapi::um::commctrl::{ImageList_Create, ILC_COLOR32, ILC_MASK};
 
         unsafe {
-            let (w, h) = self.size;
+            let (w, h) = high_dpi::logical_to_physical(self.size.0, self.size.1);
             let handle = ImageList_Create(w, h, ILC_COLOR32 | ILC_MASK, self.initial, self.grow);
             if handle.is_null() {
                 return Err(NwgError::resource_create("Failed to create image list"));
@@ -245,7 +248,7 @@ impl ImageListBuilder {
             list.handle = handle;
             list.owned = true;
         }
-        
+
         Ok(())
     }
 
