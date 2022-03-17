@@ -56,7 +56,7 @@ pub fn dispatch_thread_events() {
 
 
 /**
-    Dispatch system evetns in the current thread AND execute a callback after each peeking attempt.
+    Dispatch system events in the current thread AND execute a callback after each peeking attempt.
     Unlike `dispath_thread_events`, this method will not pause the thread while waiting for events.
 */
 pub fn dispatch_thread_events_with_callback<F>(mut cb: F) 
