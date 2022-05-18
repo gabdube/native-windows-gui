@@ -94,15 +94,15 @@ pub fn destroy_window(hwnd: HWND) {
 pub fn destroy_menu_item(parent: HMENU, item_id: u32) { 
     use winapi::um::winuser::{DeleteMenu, GetMenuItemCount, GetMenuItemID, MF_BYPOSITION};
 
-    unsafe {
-        let count = GetMenuItemCount(parent);
+    
+        let count = unsafe { GetMenuItemCount(parent) };
         let mut index = 0;
 
         while index < count {
-            let id = GetMenuItemID(parent, index);
+            let id = unsafe { GetMenuItemID(parent, index) };
             match id == item_id {
                 true => {
-                    DeleteMenu(parent, index as u32, MF_BYPOSITION);
+                    unsafe { DeleteMenu(parent, index as u32, MF_BYPOSITION) };
                     index = count;
                 },
                 false => {
@@ -110,7 +110,7 @@ pub fn destroy_menu_item(parent: HMENU, item_id: u32) {
                 }
             }
         }
-    }
+    
 }
 
 pub fn destroy_menu(menu: HMENU) { 

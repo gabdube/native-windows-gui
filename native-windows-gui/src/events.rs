@@ -478,9 +478,9 @@ impl ToolTipTextData {
         }
 
         self.clear();
+        let data = unsafe { &mut *self.data };
+        let local_text = to_utf16(text);
         unsafe {
-            let data = &mut *self.data;
-            let local_text = to_utf16(text);
             ptr::copy_nonoverlapping(local_text.as_ptr(), data.szText.as_mut_ptr(), text_len);
         }
     }
@@ -539,11 +539,11 @@ impl PaintData {
 
     /// Wrapper over BeginPaint
     pub fn begin_paint(&self) -> PAINTSTRUCT {
-        unsafe {
-            let mut paint: PAINTSTRUCT = ::std::mem::zeroed();
-            BeginPaint(self.hwnd, &mut paint);
+        
+            let mut paint: PAINTSTRUCT = unsafe { ::std::mem::zeroed() };
+            unsafe { BeginPaint(self.hwnd, &mut paint) };
             paint
-        }
+        
     }
 
     /// Wrapper over EndPaint
@@ -568,11 +568,11 @@ impl DropFiles {
     pub fn point(&self) -> [i32; 2] {
         use winapi::um::shellapi::DragQueryPoint;
 
-        unsafe {
+        
             let mut pt = POINT { x: 0, y: 0 };
-            DragQueryPoint(self.drop, &mut pt);
+            unsafe { DragQueryPoint(self.drop, &mut pt) };
             [pt.x, pt.y]
-        }
+        
     }
 
     /// Return the number of files dropped 
@@ -593,19 +593,19 @@ impl DropFiles {
 
         let len = self.len();
         let mut files = Vec::with_capacity(len);
-        unsafe {
+        
             for i in 0..len {
                 // Need to add a +1 here for some reason
-                let buffer_size = (DragQueryFileW(self.drop, i as _, ptr::null_mut(), 0) + 1) as usize;
+                let buffer_size = unsafe { (DragQueryFileW(self.drop, i as _, ptr::null_mut(), 0) + 1) as usize };
 
                 let mut buffer: Vec<u16> = Vec::with_capacity(buffer_size);
-                buffer.set_len(buffer_size);
+                unsafe { buffer.set_len(buffer_size) };
 
-                DragQueryFileW(self.drop, i as _, buffer.as_mut_ptr(), buffer_size as _);
+                unsafe { DragQueryFileW(self.drop, i as _, buffer.as_mut_ptr(), buffer_size as _) };
 
                 files.push(from_utf16(&buffer));
             }
-        }
+        
 
         files
     }

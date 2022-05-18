@@ -128,8 +128,8 @@ impl SharedMemory {
     /// Fetch the next instance id in the shared memory.
     pub fn next_instance_id(&self) -> u32 {
         let header_ptr = SharedMemory::map_view(self.handle, 0, HEADER_SIZE) as *mut SharedHeader;
-        let next_id = unsafe {
-            let header = &mut *header_ptr;
+        let next_id = {
+            let header = unsafe { &mut *header_ptr };
             header.next_instance_id += 1;
             header.next_instance_id
         };
@@ -234,14 +234,14 @@ impl SharedMemory {
 
     /// Safe wrapper over MapViewOfFile
     fn map_view(handle: HANDLE, offset: DWORD, size: SIZE_T) -> *mut u8 {
-        unsafe {
-            let handle = MapViewOfFile(handle, FILE_MAP_ALL_ACCESS, 0, offset, size) as *mut u8;
+        
+            let handle = unsafe { MapViewOfFile(handle, FILE_MAP_ALL_ACCESS, 0, offset, size) as *mut u8 };
             if handle.is_null() {
                 panic!("Could not map memory region");
             }
 
             handle
-        }
+        
     }
 
     /// Safe wrapper over UnmapViewOfFile
