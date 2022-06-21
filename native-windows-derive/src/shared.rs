@@ -1,4 +1,4 @@
-use syn::parse::{Parse, ParseStream};
+use syn::parse::{Parse, ParseStream, ParseBuffer};
 use syn::punctuated::Punctuated;
 
 
@@ -26,15 +26,23 @@ pub struct Parameters {
 
 impl Parse for Parameters {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        use syn::group::parse_parens;
-        let mut params = None;
-
-        if let Ok(parens) = parse_parens(input) {
-            params = Some(parens.content.parse_terminated(Param::parse)?);
+        fn maybe_parse_parens<'a>(input: &ParseBuffer<'a>) -> Result<ParseBuffer<'a>, syn::Error> {
+            let content;
+            parenthesized!(content in input);
+            Ok(content)
         }
 
-        Ok(Parameters {
-            params: params.unwrap_or(Punctuated::new())
-        })
+        let parameters = match maybe_parse_parens(input) {
+            Ok(parse_buffer) => {
+                Parameters { 
+                    params: parse_buffer.parse_terminated(Param::parse)?
+                }
+            },
+            Err(_) => Parameters {
+                params: Punctuated::new()
+            },
+        };
+
+        Ok(parameters)
     }
 }

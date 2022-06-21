@@ -1,7 +1,7 @@
 use proc_macro2 as pm2;
 use syn;
 use syn::punctuated::Punctuated;
-use syn::parse::{Parse, ParseStream};
+use syn::parse::{Parse, ParseStream, ParseBuffer};
 use quote::{ToTokens};
 use std::collections::HashMap;
 
@@ -14,14 +14,17 @@ struct CallbackFunction {
 
 impl Parse for CallbackFunction {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        use syn::group::parse_parens;
+        fn maybe_parse_parens<'a>(input: &ParseBuffer<'a>) -> Result<ParseBuffer<'a>, syn::Error> {
+            let content;
+            parenthesized!(content in input);
+            Ok(content)
+        }
 
         let path = input.parse()?;
-        let mut args = None;
-
-        if let Ok(parens) = parse_parens(input) {
-            args = Some(parens.content.parse_terminated(syn::Ident::parse)?);
-        }
+        let args = match maybe_parse_parens(input) {
+            Ok(parse_buffer) => Some(parse_buffer.parse_terminated(syn::Ident::parse)?),
+            Err(_) => None,
+        };
 
         Ok(CallbackFunction {
             path,

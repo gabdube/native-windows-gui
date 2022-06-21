@@ -71,7 +71,7 @@ mod flexbox_app_ui {
                 .build(&mut data.button3)?;
 
             // Wrap-up
-            let ui =FlexBoxAppUi {
+            let ui = FlexBoxAppUi {
                 inner:  Rc::new(data),
                 default_handler: Default::default(),
             };
