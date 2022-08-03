@@ -562,7 +562,10 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
     use winapi::shared::minwindef::{HIWORD, LOWORD};
 
     let callback_ptr = data as *mut *const Callback;
-    let callback: &Callback = &**callback_ptr;
+    Rc::increment_strong_count(*callback_ptr);
+    let callback = Rc::from_raw(*callback_ptr);
+    let callback = &*callback;
+
     let base_handle = ControlHandle::Hwnd(hwnd);
 
     match msg {
