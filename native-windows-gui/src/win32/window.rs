@@ -214,9 +214,12 @@ pub fn unbind_event_handler(handler: &EventHandler)
 
             callback_ptr = callback_value as *mut *const Callback;
             let callback: Rc<Callback> = Rc::from_raw(*callback_ptr);
-            mem::drop(callback);
 
+            // Remove the window subclass before dropping the callback to prevent the
+            // subclass window procedure from being called during the drop.
             RemoveWindowSubclass(handle, id, subclass_id);
+
+            mem::drop(callback);
         };
     }
 
@@ -339,9 +342,13 @@ pub fn unbind_raw_event_handler(handler: &RawEventHandler) -> Result<(), NwgErro
         let callback_wrapper_ptr = callback_value as *mut *mut RawCallback;
         let callback_wrapper: Box<*mut RawCallback> = Box::from_raw(callback_wrapper_ptr);
         let callback: Box<RawCallback> = Box::from_raw(*callback_wrapper);
+        
+        // Remove the window subclass before dropping the callback to prevent the
+        // subclass window procedure from being called during the drop.
+        RemoveWindowSubclass(handle, subclass_proc, handler_id);
+
         mem::drop(callback);
 
-        RemoveWindowSubclass(handle, subclass_proc, handler_id);
         Ok(())
     }
 }
