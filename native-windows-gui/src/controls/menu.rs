@@ -53,19 +53,19 @@ bitflags! {
     }
 }
 
-/** 
+/**
     A windows menu. Can represent a menu in a window menubar, a context menu, or a submenu in another menu
 
-    Requires the `menu` feature. 
+    Requires the `menu` feature.
 
     **Builder parameters:**
       - text: The text of the menu
       - disabled: If the menu can be selected by the user
       - popup: The menu is a context menu
       - parent: A top level window, a menu or None. With a top level window, the menu is added to the menu bar if popup is set to false.
-    
+
     **Control events:**
-      - OnMenuOpen: Sent when a drop-down menu or submenu is about to become active. 
+      - OnMenuOpen: Sent when a drop-down menu or submenu is about to become active.
       - OnMenuHover: When the user hovers the menu
       - OnMenuEnter: When the user enters the menu. Technically, when the user enters the menu modal loop.
       - OnMenuExit: When the menu is closed. Technically, when the user exits the menu modal loop.
@@ -79,7 +79,7 @@ bitflags! {
 
     To create an access key for a menu item, precede any character in the item's text string with an ampersand.
     For example, the text string "&Move" causes the system to underline the letter "M".
-    
+
     ```rust
     use native_windows_gui as nwg;
 
@@ -227,7 +227,7 @@ impl<'a> MenuBuilder<'a> {
     Requires the `menu` feature. 
 
    **Builder parameters:**
-      - text: The text of the menu item
+      - text: The text of the menu, including access key and shortcut label
       - disabled: If the item can be selected by the user
       - check: If the item should have a check mark next to it.
       - parent: A top level window or a menu. With a top level window, the menu item is added to the menu bar.
@@ -256,6 +256,27 @@ impl<'a> MenuBuilder<'a> {
             .disabled(true)
             .parent(menu)
             .build(item)
+    }
+    ```
+
+    **Shortcut Label**
+
+    A shortcut label like "Ctrl+O" can be added with the `text` field. By prefixing the shortcut with a tab character `\t` and
+    adding it as a suffix to the text label, it will be rendered right-aligned in the menu item.
+
+    For example, an "Exit" menu item could have both an access key "E" and a shortcut label "Alt+F4" with `text: "&Exit\tAlt+F4"`.
+
+    **note:** This will only add a text label to the menu item, the keyboard handling must be done through other means.
+
+    ```rust
+    use native_windows_gui as nwg;
+
+    fn menu(menu: &mut nwg::Menu, window: &nwg::Window) -> Result<(), nwg::NwgError> {
+        nwg::Menu::builder()
+            .text("&Exit\tAlt+F4")
+            .disabled(false)
+            .parent(window)
+            .build(menu)
     }
     ```
 */
