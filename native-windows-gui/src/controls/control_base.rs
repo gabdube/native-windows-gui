@@ -1,7 +1,7 @@
 use winapi::shared::minwindef::DWORD;
 use winapi::shared::windef::{HWND};
 use super::ControlHandle;
-use crate::win32::window::{build_hwnd_control, build_timer, build_notice};
+use crate::win32::window::{build_hwnd_control, build_timer, build_notice, build_tray};
 use crate::{NwgError};
 
 #[cfg(feature = "menu")] use crate::win32::menu::build_hmenu_control;
@@ -277,7 +277,7 @@ impl OtherBuilder {
         let handle = self.parent.expect("Internal error. Control without window parent");
         let base = match self.ty {
             NOTICE => build_notice(handle),
-            TRAY => ControlHandle::SystemTray(handle),
+            TRAY => build_tray(handle),
             _ => unreachable!()
         };
 

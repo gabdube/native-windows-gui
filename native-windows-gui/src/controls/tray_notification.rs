@@ -218,11 +218,11 @@ impl TrayNotification {
 
     fn notify_default(&self) -> NOTIFYICONDATAW {
         unsafe {
-            let parent = self.handle.tray().unwrap();
+            let (parent, id) = self.handle.tray().unwrap();
             NOTIFYICONDATAW {
                 cbSize: mem::size_of::<NOTIFYICONDATAW>() as u32,
                 hWnd: parent,
-                uID: 0,
+                uID: id,
                 uFlags: 0,
                 uCallbackMessage: 0,
                 hIcon: ptr::null_mut(),
@@ -332,7 +332,7 @@ impl<'a> TrayNotificationBuilder<'a> {
 
     pub fn build(self, out: &mut TrayNotification) -> Result<(), NwgError> {
         use winapi::um::shellapi::{NIM_ADD, NIF_ICON, NIF_TIP, NIF_SHOWTIP, NIF_INFO, NOTIFYICONDATAW_u, NOTIFYICON_VERSION_4,
-         NIF_REALTIME, NIF_MESSAGE, NIS_HIDDEN, NIF_STATE};
+         NIF_REALTIME, NIF_MESSAGE, NIS_HIDDEN, NIF_STATE, NIM_SETVERSION};
         use winapi::shared::windef::HICON;
         use winapi::um::winnt::WCHAR;
 
@@ -379,6 +379,7 @@ impl<'a> TrayNotificationBuilder<'a> {
         let handle = ControlBase::build_tray_notification()
             .parent(parent)
             .build()?;
+        let id = handle.tray().unwrap().1;
         
         // Tips or infos
         let mut tip: [WCHAR; 128] = [0; 128];
@@ -411,12 +412,12 @@ impl<'a> TrayNotificationBuilder<'a> {
         // Creation
         unsafe {
             let mut u: NOTIFYICONDATAW_u = mem::zeroed();
-            *u.uVersion_mut() = version;
+            *u.uTimeout_mut() = 0;
 
             let mut data = NOTIFYICONDATAW {
                 cbSize: mem::size_of::<NOTIFYICONDATAW>() as u32,
                 hWnd: parent,
-                uID: 0,
+                uID: id,
                 uFlags: flags,
                 uCallbackMessage: wh::NWG_TRAY,
                 hIcon: icon,
@@ -432,6 +433,10 @@ impl<'a> TrayNotificationBuilder<'a> {
             };
 
             Shell_NotifyIconW(NIM_ADD, &mut data);
+
+            // ensure that incoming messages follow the v4 format
+            *data.u.uVersion_mut() = version;
+            Shell_NotifyIconW(NIM_SETVERSION, &mut data);
         }
 
 

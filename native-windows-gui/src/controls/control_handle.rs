@@ -27,7 +27,7 @@ pub enum ControlHandle {
     Timer(HWND, u32),
 
     /// System tray control
-    SystemTray(HWND)
+    SystemTray(HWND, u32),
 }
 
 impl ControlHandle {
@@ -95,9 +95,9 @@ impl ControlHandle {
         }
     }
 
-    pub fn tray(&self) -> Option<HWND> {
+    pub fn tray(&self) -> Option<(HWND, u32)> {
         match self {
-            &ControlHandle::SystemTray(h) => Some(h),
+            &ControlHandle::SystemTray(h, i) => Some((h, i)),
             _ => None,
         }
     }
@@ -152,8 +152,8 @@ impl PartialEq for ControlHandle {
                 _ => false
             },
             // System tray
-            &ControlHandle::SystemTray(hwnd1) => match other {
-                &ControlHandle::SystemTray(hwnd2) => hwnd1 == hwnd2,
+            &ControlHandle::SystemTray(hwnd1, id1) => match other {
+                &ControlHandle::SystemTray(hwnd2, id2) => hwnd1 == hwnd2 && id1 == id2,
                 _ => false
             }
         }
