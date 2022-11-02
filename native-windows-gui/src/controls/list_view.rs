@@ -25,6 +25,7 @@ use winapi::um::commctrl::{
     LVM_SETEXTENDEDLISTVIEWSTYLE,
     LVS_EX_AUTOSIZECOLUMNS,
     LVS_EX_BORDERSELECT,
+    LVS_EX_CHECKBOXES,
     LVS_EX_FULLROWSELECT,
     LVS_EX_GRIDLINES,
     LVS_EX_HEADERDRAGDROP,
@@ -97,7 +98,7 @@ bitflags! {
         const FULL_ROW_SELECT = LVS_EX_FULLROWSELECT;
         const HEADER_DRAG_DROP = LVS_EX_HEADERDRAGDROP;
         const HEADER_IN_ALL_VIEW = LVS_EX_HEADERINALLVIEWS;
-
+        const CHECKBOXES = LVS_EX_CHECKBOXES;
     }
 }
 
@@ -689,12 +690,70 @@ impl ListView {
         let mut indices = Vec::with_capacity(self.len());
 
         let mut i_data = LVITEMINDEX { iItem: -1, iGroup: -1 };
-        
+
         while wh::send_message(handle, LVM_GETNEXTITEMINDEX, &mut i_data as *mut LVITEMINDEX as _, LVNI_SELECTED) != 0 {
             indices.push(i_data.iItem as usize);
         }
 
         indices
+    }
+
+    /// Returns the indices of every checked item. Note that this is different from
+    /// selected items.
+    pub fn checked_items(&self) -> Vec<usize> {
+        use winapi::um::commctrl::{LVIS_STATEIMAGEMASK, LVM_GETITEMSTATE};
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let mut indices = Vec::with_capacity(self.len());
+
+        for i in 0..self.len() {
+            let res = (wh::send_message(handle, LVM_GETITEMSTATE, i, LVIS_STATEIMAGEMASK as isize) >> 12) - 1;
+
+            if res & 1 == 1 {
+                indices.push(i)
+            }
+        }
+
+        indices
+    }
+
+    /// Whether the item is checked
+    ///
+    /// Returns `false` if the index is out of bounds
+    pub fn get_checked(&self, row_index: usize) -> bool {
+        use winapi::um::commctrl::{LVIS_STATEIMAGEMASK, LVM_GETITEMSTATE};
+
+        if !self.has_item(row_index, 0) {
+            return false;
+        }
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        // See ListView_GetCheckState in CommCtrl.h
+        let res = (wh::send_message(handle, LVM_GETITEMSTATE, row_index, LVIS_STATEIMAGEMASK as isize) >> 12) - 1;
+
+        res != 0
+    }
+
+    /// Check or uncheck an item
+    ///
+    /// Does nothing if the index is out of bounds
+    pub fn set_checked(&self, row_index: usize, checked: bool) {
+        use winapi::um::commctrl::{LVIS_STATEIMAGEMASK, LVITEMA, LVM_SETITEMSTATE};
+
+        if !self.has_item(row_index, 0) {
+            return;
+        }
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        // See ListView_SetCheckState in CommCtrl.h
+        let mut macro_lvi: LVITEMA = unsafe { mem::zeroed() };
+
+        macro_lvi.stateMask = LVIS_STATEIMAGEMASK;
+        macro_lvi.state = if checked { 2 << 12 } else { 1 << 12 };
+
+        wh::send_message(handle, LVM_SETITEMSTATE, row_index, &mut macro_lvi as *mut _ as isize);
     }
 
     /// Inserts a new item into the list view
