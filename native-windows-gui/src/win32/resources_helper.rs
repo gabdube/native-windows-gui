@@ -391,7 +391,7 @@ pub unsafe fn create_file_dialog<'a, 'b>(
     match &filters {
         &Some(ref f) => match file_dialog_set_filters(file_dialog, f) {
             Ok(_) => (),
-            Err(e) => { println!("set filters"); file_dialog.Release(); return Err(e); }
+            Err(e) => { file_dialog.Release(); return Err(e); }
         },
         &None => ()
     }
