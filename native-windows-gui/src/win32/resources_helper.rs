@@ -456,8 +456,16 @@ pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a
 
     let mut raw_filters: Vec<COMDLG_FILTERSPEC> = Vec::with_capacity(3);
     let mut keep_alive: Vec<(Vec<u16>, Vec<u16>)> = Vec::with_capacity(3);
+    let mut default_filter = None;
 
     for f in filters.split('|') {
+        let f = if f.starts_with('>') {
+            default_filter = Some(raw_filters.len());
+            f.split_at(1).1
+        } else {
+            f
+        };
+
         let end = f.rfind('(');
         if end.is_none() {
             let err = format!("Bad extension filter format: {:?}", filters);
@@ -473,7 +481,16 @@ pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a
 
     let filters_count = raw_filters.len() as UINT;
     if dialog.SetFileTypes(filters_count, raw_filters.as_ptr()) == S_OK {
-        Ok(())
+        if let Some(i) = default_filter {
+            if dialog.SetFileTypeIndex((i + 1) as u32) == S_OK {
+                Ok(())
+            } else {
+                let err = format!("Failed to set the default filter using {:?}", filters);
+                return Err(NwgError::file_dialog(&err))
+            }
+        } else {
+            Ok(())
+        }
     } else {
         let err = format!("Failed to set the filters using {:?}", filters);
         return Err(NwgError::file_dialog(&err));

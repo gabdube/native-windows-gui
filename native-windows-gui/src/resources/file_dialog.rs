@@ -29,7 +29,8 @@ pub enum FileDialogAction {
     * multiselect: Whether the user can select more than one file. Only supported with the Open action
     * default_folder: Default folder to show in the dialog.
     * filters: If defined, filter the files that the user can select (In a Open dialog) or which extension to add to the saved file (in a Save dialog)
-    The `filters` value must be a '|' separated string having this format: "Test(*.txt;*.rs)|Any(*.*)"  
+    The `filters` value must be a '|' separated string having this format: "Test(*.txt;*.rs)|Any(*.*)".  
+    If one of the filters has its name prefixed with '>' (like ">Test"), it will become the default filter. 
 
     ```rust
         use native_windows_gui as nwg;
@@ -168,7 +169,8 @@ impl FileDialog {
         This can only be set ONCE (the initialization counts) and won't work if the dialog is `OpenDirectory`.  
        
         The `filters` value must be a '|' separated string having this format: "Test(*.txt;*.rs)|Any(*.*)"  
-        Where the fist part is the "human name" and the second part is a filter for the system.
+        Where the first part is the "human name" and the second part is a filter for the system. If the
+        human name starts with a '>', the '>' is removed and the filter associated with it becomes the default.  
     */
     pub fn set_filters<'a>(&self, filters: &'a str) -> Result<(), NwgError> {
         unsafe{ 
