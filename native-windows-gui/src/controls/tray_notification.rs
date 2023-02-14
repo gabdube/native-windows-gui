@@ -38,6 +38,7 @@ bitflags! {
     You can't get information on the state of a tray notification (such as visibility) because Windows don't want you to.
 
     **Builder parameters:**
+
         * `parent`:       **Required.** The tray notification parent container.
         * `icon`:         **Required.** The icon to display in the system tray
         * `tips`:         Display a simple tooltip when hovering the icon in the system tray
@@ -49,6 +50,7 @@ bitflags! {
         * `info_title`:   The title of the fancy tooltip  
 
     **Control events:**
+
         * `OnContextMenu`: When the user right clicks on the system tray icon
         * `MousePressLeftUp`: When the user left click the system tray icon
         * `OnTrayNotificationShow`: When a TrayNotification info popup (not the tooltip) is shown 
