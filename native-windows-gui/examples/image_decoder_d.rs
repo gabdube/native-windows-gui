@@ -29,7 +29,7 @@ pub struct ImageDecoderApp {
     #[nwg_resource]
     decoder: nwg::ImageDecoder,
 
-    #[nwg_resource(title: "Open File", action: nwg::FileDialogAction::Open, filters: "Png(*.png)|Jpeg(*.jpg;*.jpeg)|DDS(*.dds)|TIFF(*.tiff)|BMP(*.bmp)|Any (*.*)")]
+    #[nwg_resource(title: "Open File", action: nwg::FileDialogAction::Open, filters: "Png(*.png)|Jpeg(*.jpg;*.jpeg)|DDS(*.dds)|TIFF(*.tiff)|BMP(*.bmp)|>Any (*.*)")]
     dialog: nwg::FileDialog,
 
     #[nwg_control(text: "Open", focus: true)]
