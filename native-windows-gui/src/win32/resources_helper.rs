@@ -3,6 +3,7 @@ use winapi::ctypes::c_int;
 use winapi::um::winnt::HANDLE;
 
 use crate::resources::OemImage;
+use crate::win32::high_dpi;
 use super::base_helper::{get_system_error, to_utf16};
 
 #[allow(unused_imports)] use std::{ptr, mem};
@@ -25,23 +26,23 @@ pub fn is_bitmap(handle: HBITMAP) -> bool {
 
 pub fn destroy_icon(icon: HANDLE) {
     unsafe { winapi::um::winuser::DestroyIcon(icon as _); }
-} 
+}
 
 pub fn destroy_cursor(cursor: HANDLE) {
     unsafe { winapi::um::winuser::DestroyCursor(cursor as _); }
-} 
+}
 
 pub fn destroy_obj(obj: HANDLE) {
     unsafe { winapi::um::wingdi::DeleteObject(obj as _); }
-} 
+}
 
 pub unsafe fn build_font(
     size: i32,
     weight: u32,
     style: [bool; 3],
     family_name: Option<&str>,
-) -> Result<HFONT, NwgError> 
-{  
+) -> Result<HFONT, NwgError>
+{
     use winapi::um::wingdi::{DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH};
     use winapi::um::wingdi::CreateFontW;
     let [use_italic, use_underline, use_strikeout] = style;
@@ -56,7 +57,7 @@ pub unsafe fn build_font(
         family_name_ptr = ptr::null();
     }
 
-    let (size, _) = super::high_dpi::logical_to_physical(size as i32, 0);
+    let (size, _) = high_dpi::logical_to_physical(size as i32, 0);
 
     let handle = CreateFontW(
         size as c_int,            // nHeight
@@ -95,8 +96,9 @@ pub unsafe fn build_image<'a>(
 
     let filepath = to_utf16(source);
     let (width, height) = size.unwrap_or((0,0));
+    let (width, height) = high_dpi::logical_to_physical(width as i32, height as i32);
 
-    let mut handle = LoadImageW(ptr::null_mut(), filepath.as_ptr(), image_type, width as i32, height as i32, LR_LOADFROMFILE);
+    let mut handle = LoadImageW(ptr::null_mut(), filepath.as_ptr(), image_type, width, height, LR_LOADFROMFILE);
     if handle.is_null() {
         let (code, _) = get_system_error();
         if code == 2 && !strict {
@@ -116,7 +118,7 @@ pub unsafe fn build_image<'a>(
                 },
                 _ => { unreachable!() }
             };
-            
+
         }
     }
 
@@ -138,15 +140,16 @@ pub unsafe fn build_image_decoder<'a>(
     use crate::ImageDecoder;
 
     let decoder = ImageDecoder::new()?;
-    
+
     let mut image_frame = decoder
         .from_filename(source)?
         .frame(0)?;
 
     if let Some((width, height)) = size {
-        image_frame = decoder.resize_image(&image_frame, [width, height])?;
+        let (width, height) = high_dpi::logical_to_physical(width as i32, height as i32);
+        image_frame = decoder.resize_image(&image_frame, [width as u32, height as u32])?;
     }
-    
+
     let mut bitmap = image_frame.as_bitmap()?;
 
     bitmap.owned = false;
@@ -163,15 +166,16 @@ pub unsafe fn build_image_decoder_from_memory<'a>(
     use crate::ImageDecoder;
 
     let decoder = ImageDecoder::new()?;
-    
+
     let mut image_frame = decoder
         .from_stream(src)?
         .frame(0)?;
 
     if let Some((width, height)) = size {
-        image_frame = decoder.resize_image(&image_frame, [width, height])?;
+        let (width, height) = high_dpi::logical_to_physical(width as i32, height as i32);
+        image_frame = decoder.resize_image(&image_frame, [width as u32, height as u32])?;
     }
-    
+
     let mut bitmap = image_frame.as_bitmap()?;
 
     bitmap.owned = false;
@@ -182,13 +186,14 @@ pub unsafe fn build_image_decoder_from_memory<'a>(
 pub unsafe fn build_oem_image(
     source: OemImage,
     size: Option<(u32, u32)>,
-) -> Result<HANDLE, NwgError> 
+) -> Result<HANDLE, NwgError>
 {
     use winapi::um::winuser::{LR_DEFAULTSIZE, LR_SHARED, IMAGE_ICON, IMAGE_CURSOR, IMAGE_BITMAP};
     use winapi::um::winuser::LoadImageW;
     use winapi::shared::ntdef::LPCWSTR;
 
     let (width, height) = size.unwrap_or((0,0));
+    let (width, height) = high_dpi::logical_to_physical(width as i32, height as i32);
 
     let (c_res_type, res_identifier) = match source {
         OemImage::Bitmap(b) => {
@@ -208,7 +213,7 @@ pub unsafe fn build_oem_image(
         LR_SHARED
     };
 
-    let handle = LoadImageW(ptr::null_mut(), res_identifier, c_res_type, width as i32, height as i32, flags);
+    let handle = LoadImageW(ptr::null_mut(), res_identifier, c_res_type, width, height, flags);
 
     if handle.is_null() {
         Err( NwgError::resource_create("Failed to create image from system resource") )
@@ -218,7 +223,7 @@ pub unsafe fn build_oem_image(
 }
 
 
-/** 
+/**
     Create a bitmap from memory. Only supports bitmap. Enable the `image-decoder` to load more image type from memory
     The memory must contain the whole file (including the bitmap header).
 */
@@ -256,7 +261,7 @@ pub unsafe fn bitmap_from_memory(source: &[u8]) -> Result<HANDLE, NwgError> {
 
     let header = BITMAPINFOHEADER {
         biSize: mem::size_of::<BITMAPINFOHEADER>() as DWORD,
-        biWidth: w as LONG, biHeight: h as LONG, 
+        biWidth: w as LONG, biHeight: h as LONG,
         biPlanes: 1, biBitCount: 24, biCompression: BI_RGB,
         biSizeImage: (w * h * 3) as u32,
         biXPelsPerMeter: 0, biYPelsPerMeter: 0,
@@ -278,7 +283,7 @@ pub unsafe fn bitmap_from_memory(source: &[u8]) -> Result<HANDLE, NwgError> {
     return Ok(bitmap as HANDLE);
 }
 
-/** 
+/**
     Create a bitmap from memory. The source can be any image type supported by the windows imaging component.
     The memory must contain the whole file (including the file header).
 */
@@ -343,7 +348,7 @@ pub unsafe fn create_file_dialog<'a, 'b>(
     multiselect: bool,
     default_folder: Option<String>,
     filters: Option<String>
-) -> Result<*mut IFileDialog, NwgError> 
+) -> Result<*mut IFileDialog, NwgError>
 {
     use winapi::um::shobjidl_core::{CLSID_FileSaveDialog, CLSID_FileOpenDialog};
     use winapi::um::shobjidl::{FOS_PICKFOLDERS, FOS_ALLOWMULTISELECT, FOS_FORCEFILESYSTEM};
@@ -366,10 +371,10 @@ pub unsafe fn create_file_dialog<'a, 'b>(
 
     // Set dialog options
     if file_dialog.GetOptions(&mut flags) != S_OK {
-        file_dialog.Release(); 
+        file_dialog.Release();
         return Err(NwgError::file_dialog("Filedialog creation failed"));
     }
- 
+
     let use_dir = if action == FileDialogAction::OpenDirectory { FOS_PICKFOLDERS } else { 0 };
     let multiselect = if multiselect { FOS_ALLOWMULTISELECT } else { 0 };
     if file_dialog.SetOptions(flags | FOS_FORCEFILESYSTEM | use_dir | multiselect) != S_OK {
@@ -377,7 +382,7 @@ pub unsafe fn create_file_dialog<'a, 'b>(
         return Err(NwgError::file_dialog("Filedialog creation failed"));
     }
 
-    
+
     // Set the default folder
     match &default_folder {
         &Some(ref f) => match file_dialog_set_default_folder(file_dialog, f) {
@@ -424,7 +429,7 @@ pub unsafe fn file_dialog_set_default_folder<'a>(dialog: &mut IFileDialog, folde
 
     let shellitem = &mut *shellitem;
     let mut file_properties: SFGAOF = 0;
-    
+
     let results = shellitem.GetAttributes(SFGAO_FOLDER, &mut file_properties);
 
     if results != S_OK && results != S_FALSE {
@@ -466,7 +471,7 @@ pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a
 
         let (_name, _filter) = f.split_at(end.unwrap());
         let (name, filter) = (to_utf16(_name), to_utf16(&_filter[1.._filter.len()-1]));
-        
+
         raw_filters.push(COMDLG_FILTERSPEC{ pszName: name.as_ptr(), pszSpec: filter.as_ptr() });
         keep_alive.push( (name, filter) );
     }
@@ -483,7 +488,7 @@ pub unsafe fn file_dialog_set_filters<'a>(dialog: &mut IFileDialog, filters: &'a
 #[cfg(feature = "file-dialog")]
 pub unsafe fn filedialog_get_item(dialog: &mut IFileDialog) -> Result<OsString, NwgError> {
     use winapi::shared::winerror::S_OK;
-    
+
     let mut _item: *mut IShellItem = ptr::null_mut();
 
     if dialog.GetResult(&mut _item) != S_OK {
@@ -500,7 +505,7 @@ pub unsafe fn filedialog_get_item(dialog: &mut IFileDialog) -> Result<OsString, 
 pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<OsString>, NwgError> {
     use winapi::um::shobjidl::IShellItemArray;
     use winapi::shared::{winerror::S_OK, minwindef::DWORD};
-    
+
     let mut _item: *mut IShellItem = ptr::null_mut();
     let mut _items: *mut IShellItemArray = ptr::null_mut();
 
@@ -511,7 +516,7 @@ pub unsafe fn filedialog_get_items(dialog: &mut IFileOpenDialog) -> Result<Vec<O
     let items = &mut *_items;
     let mut count: DWORD = 0;
     items.GetCount(&mut count);
-    
+
     let mut item_names: Vec<OsString> = Vec::with_capacity(count as usize);
     for i in 0..count {
         items.GetItemAt(i, &mut _item);
@@ -560,7 +565,7 @@ pub unsafe fn file_dialog_options(dialog: &mut IFileDialog) -> Result<u32, NwgEr
 #[cfg(feature = "file-dialog")]
 pub unsafe fn toggle_dialog_flags(dialog: &mut IFileDialog, flag: u32, enabled: bool) -> Result<(), NwgError> {
     use winapi::shared::winerror::S_OK;
-    
+
     let mut flags = file_dialog_options(dialog)?;
     flags = match enabled {
         true => flags | flag,
