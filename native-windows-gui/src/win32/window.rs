@@ -22,6 +22,7 @@ use std::sync::atomic::{AtomicU32, AtomicUsize, Ordering};
 
 static TIMER_ID: AtomicU32 = AtomicU32::new(1); 
 static NOTICE_ID: AtomicU32 = AtomicU32::new(1); 
+static TRAY_ID: AtomicU32 = AtomicU32::new(1);
 static EVENT_HANDLER_ID: AtomicUsize = AtomicUsize::new(1);
 
 const NO_DATA: EventData = EventData::NoData;
@@ -68,6 +69,12 @@ pub unsafe fn build_timer(parent: HWND, interval: u32, stopped: bool) -> Control
     }
     
     ControlHandle::Timer(parent, id)
+}
+
+
+pub fn build_tray(parent: HWND) -> ControlHandle {
+    let id = TRAY_ID.fetch_add(1, Ordering::SeqCst);
+    ControlHandle::SystemTray(parent, id)
 }
 
 /**
@@ -665,7 +672,8 @@ unsafe extern "system" fn process_events(hwnd: HWND, msg: UINT, w: WPARAM, l: LP
         },
         NWG_TRAY => {
             let msg = LOWORD(l as u32) as u32;
-            let handle = ControlHandle::SystemTray(hwnd);
+            let icon_id = HIWORD(l as u32) as u32;
+            let handle = ControlHandle::SystemTray(hwnd, icon_id);
 
             match msg {
                 NIN_BALLOONSHOW => callback(Event::OnTrayNotificationShow, NO_DATA, handle),
