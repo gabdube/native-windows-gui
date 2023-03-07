@@ -1,16 +1,48 @@
 use winapi::shared::windef::{HBITMAP, HBRUSH};
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
+use winapi::um::winuser::{WS_DISABLED, WS_TABSTOP, WS_VISIBLE};
 use winapi::um::commctrl::{
-    LVS_ICON, LVS_SMALLICON, LVS_LIST, LVS_REPORT, LVS_NOCOLUMNHEADER, LVCOLUMNW, LVCFMT_LEFT, LVCFMT_RIGHT, LVCFMT_CENTER, LVCFMT_JUSTIFYMASK,
-    LVCFMT_IMAGE, LVCFMT_BITMAP_ON_RIGHT, LVCFMT_COL_HAS_IMAGES, LVITEMW, LVIF_TEXT, LVCF_WIDTH, LVCF_TEXT, LVS_EX_GRIDLINES, LVS_EX_BORDERSELECT,
-    LVS_EX_AUTOSIZECOLUMNS, LVM_SETEXTENDEDLISTVIEWSTYLE, LVS_EX_FULLROWSELECT, LVS_SINGLESEL, LVCF_FMT, LVIF_IMAGE, LVS_SHOWSELALWAYS,
-    LVS_EX_HEADERDRAGDROP, LVS_EX_HEADERINALLVIEWS, LVM_GETHEADER, HDITEMW, HDI_FORMAT, HDM_GETITEMW, HDF_SORTUP, HDF_SORTDOWN, HDM_SETITEMW
+    HDF_SORTDOWN,
+    HDF_SORTUP,
+    HDI_FORMAT,
+    HDITEMW,
+    HDM_GETITEMW,
+    HDM_SETITEMW,
+    LVCF_FMT,
+    LVCF_TEXT,
+    LVCF_WIDTH,
+    LVCFMT_BITMAP_ON_RIGHT,
+    LVCFMT_CENTER,
+    LVCFMT_COL_HAS_IMAGES,
+    LVCFMT_IMAGE,
+    LVCFMT_JUSTIFYMASK,
+    LVCFMT_LEFT,
+    LVCFMT_RIGHT,
+    LVCOLUMNW,
+    LVIF_IMAGE,
+    LVIF_TEXT,
+    LVITEMW,
+    LVM_GETHEADER,
+    LVM_SETEXTENDEDLISTVIEWSTYLE,
+    LVS_EX_AUTOSIZECOLUMNS,
+    LVS_EX_BORDERSELECT,
+    LVS_EX_CHECKBOXES,
+    LVS_EX_FULLROWSELECT,
+    LVS_EX_GRIDLINES,
+    LVS_EX_HEADERDRAGDROP,
+    LVS_EX_HEADERINALLVIEWS,
+    LVS_ICON,
+    LVS_LIST,
+    LVS_NOCOLUMNHEADER,
+    LVS_REPORT,
+    LVS_SHOWSELALWAYS,
+    LVS_SINGLESEL,
+    LVS_SMALLICON,
 };
 use super::{ControlBase, ControlHandle};
 use crate::win32::window_helper as wh;
-use crate::win32::base_helper::{to_utf16, from_utf16, check_hwnd};
+use crate::win32::base_helper::{check_hwnd, from_utf16, to_utf16};
 use crate::{NwgError, RawEventHandler, unbind_raw_event_handler};
-use std::{mem, ptr, rc::Rc, cell::RefCell};
+use std::{cell::RefCell, mem, ptr, rc::Rc};
 
 #[cfg(feature="image-list")]
 use crate::ImageList;
@@ -66,7 +98,7 @@ bitflags! {
         const FULL_ROW_SELECT = LVS_EX_FULLROWSELECT;
         const HEADER_DRAG_DROP = LVS_EX_HEADERDRAGDROP;
         const HEADER_IN_ALL_VIEW = LVS_EX_HEADERINALLVIEWS;
-
+        const CHECKBOXES = LVS_EX_CHECKBOXES;
     }
 }
 
@@ -658,12 +690,70 @@ impl ListView {
         let mut indices = Vec::with_capacity(self.len());
 
         let mut i_data = LVITEMINDEX { iItem: -1, iGroup: -1 };
-        
+
         while wh::send_message(handle, LVM_GETNEXTITEMINDEX, &mut i_data as *mut LVITEMINDEX as _, LVNI_SELECTED) != 0 {
             indices.push(i_data.iItem as usize);
         }
 
         indices
+    }
+
+    /// Returns the indices of every checked item. Note that this is different from
+    /// selected items.
+    pub fn checked_items(&self) -> Vec<usize> {
+        use winapi::um::commctrl::{LVIS_STATEIMAGEMASK, LVM_GETITEMSTATE};
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+        let mut indices = Vec::with_capacity(self.len());
+
+        for i in 0..self.len() {
+            let res = (wh::send_message(handle, LVM_GETITEMSTATE, i, LVIS_STATEIMAGEMASK as isize) >> 12) - 1;
+
+            if res & 1 == 1 {
+                indices.push(i)
+            }
+        }
+
+        indices
+    }
+
+    /// Whether the item is checked
+    ///
+    /// Returns `false` if the index is out of bounds
+    pub fn get_checked(&self, row_index: usize) -> bool {
+        use winapi::um::commctrl::{LVIS_STATEIMAGEMASK, LVM_GETITEMSTATE};
+
+        if !self.has_item(row_index, 0) {
+            return false;
+        }
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        // See ListView_GetCheckState in CommCtrl.h
+        let res = (wh::send_message(handle, LVM_GETITEMSTATE, row_index, LVIS_STATEIMAGEMASK as isize) >> 12) - 1;
+
+        res != 0
+    }
+
+    /// Check or uncheck an item
+    ///
+    /// Does nothing if the index is out of bounds
+    pub fn set_checked(&self, row_index: usize, checked: bool) {
+        use winapi::um::commctrl::{LVIS_STATEIMAGEMASK, LVITEMA, LVM_SETITEMSTATE};
+
+        if !self.has_item(row_index, 0) {
+            return;
+        }
+
+        let handle = check_hwnd(&self.handle, NOT_BOUND, BAD_HANDLE);
+
+        // See ListView_SetCheckState in CommCtrl.h
+        let mut macro_lvi: LVITEMA = unsafe { mem::zeroed() };
+
+        macro_lvi.stateMask = LVIS_STATEIMAGEMASK;
+        macro_lvi.state = if checked { 2 << 12 } else { 1 << 12 };
+
+        wh::send_message(handle, LVM_SETITEMSTATE, row_index, &mut macro_lvi as *mut _ as isize);
     }
 
     /// Inserts a new item into the list view
