@@ -1,6 +1,6 @@
 use winapi::shared::windef::HWND;
 use winapi::shared::minwindef::{LPARAM, WPARAM};
-use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP};
+use winapi::um::winuser::{WS_VISIBLE, WS_DISABLED, WS_TABSTOP, WS_VSCROLL};
 use crate::win32::base_helper::{check_hwnd, to_utf16, from_utf16};
 use crate::win32::window_helper as wh;
 use crate::{Font, NwgError, VTextAlign, RawEventHandler, unbind_raw_event_handler};
@@ -27,6 +27,7 @@ bitflags! {
         const VISIBLE = WS_VISIBLE;
         const DISABLED = WS_DISABLED;
         const TAB_STOP = WS_TABSTOP;
+        const VSCROLL = WS_VSCROLL;
     }
 }
 
