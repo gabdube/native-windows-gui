@@ -120,7 +120,8 @@ pub struct NumberSelect {
     edit: TextInput,
     btn_up: Button,
     btn_down: Button,
-    handler: Option<RawEventHandler>
+    handler: Option<RawEventHandler>,
+    keyboard_editable: Rc<RefCell<bool>>,
 }
 
 impl NumberSelect {
@@ -133,7 +134,8 @@ impl NumberSelect {
             enabled: true,
             flags: None,
             font: None,
-            parent: None
+            parent: None,
+            keyboard_editable: false,
         }
     }
 
@@ -244,6 +246,11 @@ impl NumberSelect {
         WS_CHILD | WS_BORDER | WS_CLIPCHILDREN
     }
 
+    pub fn set_keyboard_editable(&self, editable: bool){
+        *self.keyboard_editable.borrow_mut() = editable;   
+        self.edit.set_readonly(!editable);
+    }
+
 }
 
 impl Drop for NumberSelect {
@@ -265,7 +272,8 @@ pub struct NumberSelectBuilder<'a> {
     enabled: bool,
     flags: Option<NumberSelectFlags>,
     font: Option<&'a Font>,
-    parent: Option<ControlHandle>
+    parent: Option<ControlHandle>,
+    keyboard_editable: bool,
 }
 
 impl<'a> NumberSelectBuilder<'a> {
@@ -369,6 +377,11 @@ impl<'a> NumberSelectBuilder<'a> {
         self
     }
 
+    pub fn keyboard_editable(mut self, editable: bool) -> NumberSelectBuilder<'a> {
+        self.keyboard_editable = editable;
+        self
+    }
+    
     pub fn parent<C: Into<ControlHandle>>(mut self, p: C) -> NumberSelectBuilder<'a> {
         self.parent = Some(p.into());
         self
@@ -397,6 +410,7 @@ impl<'a> NumberSelectBuilder<'a> {
 
         *out = NumberSelect::default();
         *out.data.borrow_mut() = self.data;
+        *out.keyboard_editable.borrow_mut() = self.keyboard_editable;
         
         out.handle = ControlBase::build_hwnd()
             .class_name(out.class_name())
@@ -413,6 +427,7 @@ impl<'a> NumberSelectBuilder<'a> {
             .size((w-19, h))
             .parent(&out.handle)
             .flags(text_flags)
+            .readonly(!self.keyboard_editable)
             .build(&mut out.edit)?;
 
         Button::builder()
