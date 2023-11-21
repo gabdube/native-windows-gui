@@ -283,8 +283,8 @@ pub unsafe fn bitmap_from_memory(source: &[u8]) -> Result<HANDLE, NwgError> {
     The memory must contain the whole file (including the file header).
 */
 #[cfg(feature="image-decoder")]
-pub unsafe fn bitmap_from_memory(src: &[u8]) -> Result<HANDLE, NwgError> {
-    build_image_decoder_from_memory(src, None)
+pub unsafe fn bitmap_from_memory(src: &[u8], size: Option<(u32, u32)>) -> Result<HANDLE, NwgError> {
+    build_image_decoder_from_memory(src, size)
 }
 
 #[cfg(feature="image-decoder")]
