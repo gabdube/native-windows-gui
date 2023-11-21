@@ -262,7 +262,7 @@ impl<'a> BitmapBuilder<'a> {
             let handle = unsafe { rh::build_oem_image(OemImage::Bitmap(src), self.size)? };
             *b = Bitmap { handle, owned: true };
         } else if let Some(src) = self.source_bin { 
-            let handle = unsafe { rh::bitmap_from_memory(src)? };
+            let handle = unsafe { rh::bitmap_from_memory(src, self.size)? };
 
             *b = Bitmap { handle, owned: true };
         } else {
